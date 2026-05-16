@@ -957,11 +957,13 @@ document.getElementById('modal-ov').addEventListener('click',function(e){if(e.ta
 function validateForm(){
   var v1=document.getElementById('f1').value.trim();
   var v2=document.getElementById('f2').value.trim();
-  var em=document.getElementById('f3').value.trim();
+  var nombre=document.getElementById('f3')?document.getElementById('f3').value.trim():'';
+  var wa=document.getElementById('f4')?document.getElementById('f4').value.trim():'';
   if(!v1){showToast('Completa el primer campo');return null;}
   if(!v2){showToast('Completa el segundo campo');return null;}
-  if(!em||em.indexOf('@')<0){showToast('Ingresa un correo valido');return null;}
-  return{v1:v1,v2:v2,em:em};
+  if(!nombre){showToast('Ingresa tu nombre');return null;}
+  if(!wa||wa.length<8){showToast('Ingresa tu numero de WhatsApp');return null;}
+  return {v1:v1,v2:v2,nombre:nombre,wa:wa};
 }
 
 function addToHistory(item){var h=getHistory();h.push(item);saveHistory(h);}
@@ -984,41 +986,39 @@ function getDateStr(){return new Date().toLocaleDateString('es-MX',{day:'2-digit
 
 function submitProd(){
   var v=validateForm();if(!v) return;
-  var p=null;for(var i=0;i<PRODUCTS.length;i++){if(PRODUCTS[i].id===curId){p=PRODUCTS[i];break;}}if(!p) return;
+  var p=null;for(var i=0;i<PRODUCTS.length;i++){if(PRODUCTS[i].id===curId){p=PRODUCTS[i];break;}}
+  if(!p) return;
   var spent=getSpent(),tIdx=getTIdx(spent),tier=TIERS[tIdx];
   var now=p.prices[tIdx],base=p.prices[0],saved=base-now;
-  var ord=getNextOrder();
-  addToHistory({name:p.name,price:now,icon:p.isPase?'P':'D',date:getDateStr(),order:ord});
-  var lu=addSpend(now);
-  var msg='*NUEVO PEDIDO #'+ord+' - CiberStore*\n\nProducto: '+p.name+'\nPrecio: '+fmt(now)+(saved>0?'\nAhorro: $'+saved+' MX':'')+'\n\nID Free Fire: '+v.v1+'\nCorreo: '+v.em+'\nMembresia: '+tier.name+'\n\n--- PAGO ---\nBanco: STORI\nTitular: MATINA RUBI HDZ\nCuenta: 646180402332964686\nMonto: '+fmt(now)+'\n\nManda comprobante con el pedido #'+ord;
+  var ord=getNextOrder(),lu=addSpend(now);
+  addToHistory({name:p.name,price:now,icon:p.isPase?'\u26D3':'\uD83D\uDC8E',date:new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),order:ord});
+  var msg='*NUEVO PEDIDO #'+ord+' - CiberStore*\n\nProducto: '+p.name+'\nPrecio: '+fmt(now)+(saved>0?'\nAhorro: $'+saved+' MX':'')+'\nMetodo de pago: Transferencia Bancaria\n\nNombre: '+v.nombre+'\nID Free Fire: '+v.v1+'\nWhatsApp: '+v.wa+'\n\nManda tu comprobante con el numero #'+ord;
   sendWA(msg,lu);
 }
 
 function submitLikes(){
   var v=validateForm();if(!v) return;
-  var plan=null;for(var i=0;i<LIKES.length;i++){if(LIKES[i].id===curId){plan=LIKES[i];break;}}if(!plan) return;
-  var ord=getNextOrder();
-  addToHistory({name:'Likes '+plan.label,price:plan.priceMX,icon:'L',date:getDateStr(),order:ord});
-  var lu=addSpend(plan.priceMX);
-  var msg='*NUEVO PEDIDO #'+ord+' - CiberStore*\n\nServicio: Likes\nPlan: '+plan.label+'\nPrecio: $'+plan.priceMX+' MX\nLikes: '+plan.total.toLocaleString()+'/'+plan.days+' dias\n\nID Free Fire: '+v.v1+'\nCorreo: '+v.em+'\n\n--- PAGO ---\nBanco: STORI\nTitular: MATINA RUBI HDZ\nCuenta: 646180402332964686\nMonto: $'+plan.priceMX+' MX\n\nManda comprobante con el pedido #'+ord;
+  var plan=null;for(var i=0;i<LIKES.length;i++){if(LIKES[i].id===curId){plan=LIKES[i];break;}}
+  if(!plan) return;
+  var ord=getNextOrder(),lu=addSpend(plan.priceMX);
+  addToHistory({name:'Likes '+plan.label,price:plan.priceMX,icon:'\uD83D\uDC4D',date:new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),order:ord});
+  var msg='*NUEVO PEDIDO #'+ord+' - CiberStore*\n\nServicio: Likes para Perfil\nPlan: '+plan.label+'\nPrecio: $'+plan.priceMX+' MX / $'+plan.priceUSD+' USD\nLikes totales: '+plan.total.toLocaleString()+'\nPor dia: '+plan.perDay+'\nDuracion: '+plan.days+' dias\nMetodo de pago: Transferencia Bancaria\n\nNombre: '+v.nombre+'\nID Free Fire: '+v.v1+'\nWhatsApp: '+v.wa+'\n\nManda tu comprobante con el numero #'+ord;
   sendWA(msg,lu);
 }
 
 function submitHonor(){
   var clanId=document.getElementById('f1').value.trim();
   var clanName=document.getElementById('f2').value.trim();
-  var em=document.getElementById('f3').value.trim();
-  var nombre2h=document.getElementById('f3').value.trim();
-  var wa2h=document.getElementById('f4')?document.getElementById('f4').value.trim():'';
+  var nombre=document.getElementById('f3')?document.getElementById('f3').value.trim():'';
+  var wa=document.getElementById('f4')?document.getElementById('f4').value.trim():'';
   if(!clanId){showToast('Ingresa el ID del Clan');return;}
   if(!clanName){showToast('Ingresa el nombre del Clan');return;}
-  if(!nombre2h){showToast('Ingresa tu nombre');return;}
-  if(!wa2h||wa2h.length<8){showToast('Ingresa tu numero de WhatsApp');return;}
+  if(!nombre){showToast('Ingresa tu nombre');return;}
+  if(!wa||wa.length<8){showToast('Ingresa tu numero de WhatsApp');return;}
   var h=HONOR[curId];
-  var ord=getNextOrder();
-  addToHistory({name:'Honor - '+h.region,price:h.price,icon:'H',date:getDateStr(),order:ord});
-  var lu=addSpend(h.price);
-  var msg='*NUEVO PEDIDO #'+ord+' - CiberStore*\n\nServicio: Honor de Clan\nRegion: '+h.region+'\nPrecio: '+fmt(h.price)+'\n\nID Clan: '+clanId+'\nNombre Clan: '+clanName+'\nCorreo: '+em+'\n\n--- PAGO ---\nBanco: STORI\nTitular: MATINA RUBI HDZ\nCuenta: 646180402332964686\nMonto: '+fmt(h.price)+'\n\nManda comprobante con el pedido #'+ord;
+  var ord=getNextOrder(),lu=addSpend(h.price);
+  addToHistory({name:'Honor - '+h.region,price:h.price,icon:'\uD83C\uDFC6',date:new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),order:ord});
+  var msg='*NUEVO PEDIDO #'+ord+' - CiberStore*\n\nServicio: Honor de Clan\nRegion: '+h.region+'\nPrecio: '+fmt(h.price)+'\nMetodo de pago: Transferencia Bancaria\n\nNombre: '+nombre+'\nID del Clan: '+clanId+'\nNombre del Clan: '+clanName+'\nWhatsApp: '+wa+'\n\nManda tu comprobante con el numero #'+ord;
   sendWA(msg,lu);
 }
 
@@ -1174,28 +1174,32 @@ var PINES_MIN = 200;
 var pinesCart = {};
 
 function renderPinesGrid(){
-  var g = document.getElementById('pines-grid');
+  var g=document.getElementById('pines-grid');
   if(!g) return;
-  var html2 = '';
+  var rows='';
   for(var i=0;i<PINES_PRODS.length;i++){
-    var p = PINES_PRODS[i];
-    var qty = pinesCart[p.id] || 0;
-    html2 += '<div class="prod-card" style="border-color:rgba(255,208,0,.18)">'
-      + '<div class="prod-thumb" style="background:linear-gradient(135deg,#120e00,#1a1400)">'
-      + '<div class="prod-thumb-ico">\uD83D\uDC8E</div></div>'
-      + '<div class="prod-body">'
-      + '<div class="prod-name">'+p.name+'</div>'
-      + '<div class="prod-desc">Precio revendedor</div>'
-      + '<div class="prod-foot">'
-      + '<div class="price-now" style="color:var(--c4)">$'+p.price+' MX</div>'
-      + '<div class="pines-qty">'
-      + '<button class="pines-qty-btn" onclick="pinesQty('+p.id+',-1)">-</button>'
-      + '<span class="pines-qty-n" id="pq-'+p.id+'">'+qty+'</span>'
-      + '<button class="pines-qty-btn" onclick="pinesQty('+p.id+',1)">+</button>'
-      + '</div>'
-      + '</div></div></div>';
+    var p=PINES_PRODS[i];
+    var qty=pinesCart[p.id]||0;
+    rows+='<div class="prod-card" style="border-color:rgba(255,208,0,.22)">'
+      +'<div class="prod-thumb" style="background:linear-gradient(135deg,#120e00,#1a1400)">'
+      +'<div class="prod-thumb-ico" style="color:var(--c4)">\uD83D\uDC8E</div>'
+      +'</div>'
+      +'<div class="prod-body">'
+      +'<div class="prod-name">'+p.name+'</div>'
+      +'<div class="prod-desc" style="color:rgba(255,208,0,.65)">Precio revendedor</div>'
+      +'<div class="prod-foot">'
+      +'<div><div class="price-now" style="color:var(--c4)">$'+p.price+' MX</div>'
+      +'<div style="font-size:.6rem;color:var(--muted)">por unidad</div></div>'
+      +'<div class="pines-qty">'
+      +'<button class="pines-qty-btn" onclick="pinesQty('+p.id+',-1)">-</button>'
+      +'<span class="pines-qty-n" id="pq-'+p.id+'">'+qty+'</span>'
+      +'<button class="pines-qty-btn" onclick="pinesQty('+p.id+',1)">+</button>'
+      +'</div>'
+      +'</div>'
+      +'</div>'
+      +'</div>';
   }
-  g.innerHTML = html2;
+  g.innerHTML=rows;
   updatePinesBar();
 }
 
@@ -1225,13 +1229,22 @@ function getPinesItems(){
 }
 
 function updatePinesBar(){
-  var total = getPinesTotal();
-  var items = getPinesItems();
-  var bar  = document.getElementById('pines-cart-bar');
-  var lbl  = document.getElementById('pc-items-lbl');
-  var warn = document.getElementById('pc-min-warn');
-  if(lbl) lbl.textContent = '$'+total.toLocaleString('es-MX')+' MX ('+(items.length > 0 ? items.reduce(function(s,i){return s+i.qty;},0)+' productos' : '0 productos')+')';
-  if(warn) warn.style.display = (total > 0 && total < PINES_MIN) ? 'inline' : 'none';
+  var total=getPinesTotal();
+  var items=getPinesItems();
+  var allQty=0;
+  for(var i=0;i<items.length;i++) allQty+=items[i].qty;
+  var bar=document.getElementById('pines-cart-bar');
+  var lbl=document.getElementById('pc-items-lbl');
+  var warn=document.getElementById('pc-min-warn');
+  var btn=document.getElementById('pc-checkout-btn');
+  if(bar) bar.style.display=(allQty>0)?'flex':'none';
+  if(lbl) lbl.textContent='$'+total.toLocaleString('es-MX')+' MX ('+allQty+' unidades)';
+  if(warn) warn.style.display=(total>0&&total<PINES_MIN)?'inline':'none';
+  if(btn){
+    btn.style.opacity=(total>=PINES_MIN)?'1':'.45';
+    btn.style.cursor=(total>=PINES_MIN)?'pointer':'not-allowed';
+    btn.title=(total<PINES_MIN)?('Minimo $'+PINES_MIN+' MX'):'';
+  }
 }
 
 function clearPinesCart(){
@@ -1295,6 +1308,58 @@ var _gp2 = goPage;
 goPage = function(id){
   _gp2(id);
   if(id === 'pines') renderPinesGrid();
+};
+
+function openStoriModal(){
+  var el=document.getElementById('modal-stori');
+  if(el) el.classList.add('show');
+}
+function closeStoriModal(){
+  var el=document.getElementById('modal-stori');
+  if(el) el.classList.remove('show');
+}
+function renderMisCompras(){
+  var hist=getHistory(),spent=getSpent(),tier=getTier(spent);
+  var o=document.getElementById('mc2-orders');
+  var s=document.getElementById('mc2-spent');
+  var t=document.getElementById('mc2-tier');
+  if(o) o.textContent=hist.length;
+  if(s) s.textContent='$'+spent.toLocaleString('es-MX');
+  if(t){t.textContent=tier.name;t.style.color=tier.color;}
+  var hl=document.getElementById('mc2-list');
+  if(!hl) return;
+  if(!hist.length){
+    hl.innerHTML='<div style="text-align:center;padding:2.5rem 1rem;color:var(--muted);font-size:.85rem">Aun no tienes compras registradas</div>';
+    return;
+  }
+  var rev=hist.slice().reverse(),rows='';
+  for(var i=0;i<rev.length;i++){
+    var it=rev[i];
+    rows+='<div style="display:flex;align-items:center;gap:.85rem;padding:.75rem .5rem;border-bottom:1px solid var(--border);border-radius:8px">'
+      +'<div style="width:42px;height:42px;border-radius:11px;background:rgba(0,170,255,.1);border:1px solid rgba(0,170,255,.2);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0">'+it.icon+'</div>'
+      +'<div style="flex:1;min-width:0"><div style="font-size:.84rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+it.name+'</div><div style="font-size:.68rem;color:var(--muted);margin-top:.1rem">'+it.date+'</div></div>'
+      +'<div style="text-align:right;flex-shrink:0"><div style="font-family:Orbitron;font-size:.84rem;font-weight:700;color:var(--c1)">'+fmt(it.price)+'</div><div style="font-size:.62rem;color:var(--muted);margin-top:.1rem">Pedido #'+it.order+'</div></div>'
+      +'</div>';
+  }
+  hl.innerHTML=rows;
+}
+function clearHistMC(){
+  if(!confirm('Borrar todo el historial?')) return;
+  localStorage.removeItem('cs_hist');
+  renderMisCompras();
+  if(typeof renderPerfil==='function') renderPerfil();
+  showToast('Historial borrado',2000);
+}
+
+var _ms_el = document.getElementById('modal-stori');
+if(_ms_el) _ms_el.addEventListener('click',function(e){if(e.target===this)closeStoriModal();});
+
+/* Patch goPage to render miscompras */
+var _gp_mc = goPage;
+goPage = function(id){
+  _gp_mc(id);
+  if(id==='miscompras') renderMisCompras();
+  if(id==='saldo'){}
 };
 </script>
 
@@ -1387,6 +1452,116 @@ goPage = function(id){
       <label class="flabel">Numero de WhatsApp</label>
       <input class="finput" id="mp-wa" type="tel" placeholder="Ej: 5512345678"/>
       <button class="btn-submit" onclick="submitPines()">Pedir por WhatsApp</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- RECARGAR SALDO -->
+<div class="page" id="page-saldo">
+  <div class="ph">
+    <div class="stag">Pagos</div>
+    <h2 class="ptitle">RECARGAR <span>SALDO</span></h2>
+    <p class="psub">Elige tu metodo de pago preferido.</p>
+  </div>
+  <div style="padding:0 5vw 3.5rem;max-width:580px;margin:0 auto">
+
+    <div style="background:var(--card);border:1px solid rgba(0,200,100,.22);border-radius:16px;padding:2rem 1.5rem;margin-bottom:1rem;cursor:pointer;transition:all .3s;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.5rem;position:relative;overflow:hidden" onclick="openStoriModal()">
+      <div style="position:absolute;top:.75rem;right:.75rem;padding:.2rem .6rem;border-radius:20px;font-size:.6rem;font-weight:800;letter-spacing:1px;background:rgba(0,200,100,.15);border:1px solid rgba(0,200,100,.3);color:#00e676">ACTIVO</div>
+      <span style="font-size:2.6rem;display:block;margin-bottom:.3rem">&#127968;</span>
+      <div style="font-family:Orbitron;font-size:1rem;font-weight:700;color:#fff">Cuenta Bancaria</div>
+      <div style="font-size:.82rem;color:var(--muted);max-width:300px">Transferencia STORI - MATINA RUBI HDZ - Inmediata y segura</div>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem 1.5rem;margin-bottom:1rem;opacity:.45;cursor:not-allowed;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.5rem;position:relative;overflow:hidden" onclick="showToast('PayPal proximamente disponible')">
+      <div style="position:absolute;top:.75rem;right:.75rem;padding:.2rem .6rem;border-radius:20px;font-size:.6rem;font-weight:800;letter-spacing:1px;background:rgba(255,165,0,.12);border:1px solid rgba(255,165,0,.25);color:#ffa500">PRONTO</div>
+      <span style="font-size:2.6rem;display:block;margin-bottom:.3rem">&#128179;</span>
+      <div style="font-family:Orbitron;font-size:1rem;font-weight:700;color:#fff">PayPal</div>
+      <div style="font-size:.82rem;color:var(--muted)">Pago rapido con tu cuenta PayPal</div>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem 1.5rem;margin-bottom:1rem;opacity:.45;cursor:not-allowed;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.5rem;position:relative;overflow:hidden" onclick="showToast('Binance Pay proximamente disponible')">
+      <div style="position:absolute;top:.75rem;right:.75rem;padding:.2rem .6rem;border-radius:20px;font-size:.6rem;font-weight:800;letter-spacing:1px;background:rgba(255,165,0,.12);border:1px solid rgba(255,165,0,.25);color:#ffa500">PRONTO</div>
+      <span style="font-size:2.6rem;display:block;margin-bottom:.3rem">&#128176;</span>
+      <div style="font-family:Orbitron;font-size:1rem;font-weight:700;color:#fff">Binance Pay</div>
+      <div style="font-size:.82rem;color:var(--muted)">Transferencia USDT con confirmacion manual</div>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem 1.5rem;margin-bottom:1rem;opacity:.45;cursor:not-allowed;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.5rem;position:relative;overflow:hidden" onclick="showToast('Mercado Pago proximamente disponible')">
+      <div style="position:absolute;top:.75rem;right:.75rem;padding:.2rem .6rem;border-radius:20px;font-size:.6rem;font-weight:800;letter-spacing:1px;background:rgba(255,165,0,.12);border:1px solid rgba(255,165,0,.25);color:#ffa500">PRONTO</div>
+      <span style="font-size:2.6rem;display:block;margin-bottom:.3rem">&#127970;</span>
+      <div style="font-family:Orbitron;font-size:1rem;font-weight:700;color:#fff">Mercado Pago</div>
+      <div style="font-size:.82rem;color:var(--muted)">Tarjetas mexicanas y OXXO</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MIS COMPRAS -->
+<div class="page" id="page-miscompras">
+  <div class="ph">
+    <div class="stag">Historial</div>
+    <h2 class="ptitle">MIS <span>COMPRAS</span></h2>
+    <p class="psub">Registro de todos tus pedidos en este dispositivo.</p>
+  </div>
+  <div style="padding:0 5vw 3.5rem;max-width:640px;margin:0 auto">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem;margin-bottom:1.5rem">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center">
+        <div style="font-family:Orbitron;font-size:1.4rem;font-weight:700;color:var(--c1)" id="mc2-orders">0</div>
+        <div style="font-size:.62rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:.2rem">Pedidos</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center">
+        <div style="font-family:Orbitron;font-size:1.4rem;font-weight:700;color:var(--c1)" id="mc2-spent">$0</div>
+        <div style="font-size:.62rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:.2rem">Gastado</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center">
+        <div style="font-family:Orbitron;font-size:.9rem;font-weight:700;color:var(--c1)" id="mc2-tier">Visitante</div>
+        <div style="font-size:.62rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:.2rem">Nivel</div>
+      </div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:1rem 1.25rem .7rem">
+        <div style="font-family:Orbitron;font-size:.82rem;font-weight:700;color:#fff">Historial de pedidos</div>
+        <button onclick="clearHistMC()" style="background:none;border:1px solid rgba(255,80,80,.3);color:rgba(255,80,80,.7);border-radius:6px;padding:.22rem .6rem;font-family:'Exo 2';font-size:.68rem;cursor:pointer;font-weight:700">Limpiar</button>
+      </div>
+      <div style="padding:0 .75rem .75rem" id="mc2-list">
+        <div style="text-align:center;padding:2.5rem 1rem;color:var(--muted);font-size:.85rem">Aun no tienes compras registradas</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL STORI -->
+<div class="modal-ov" id="modal-stori">
+  <div class="modal">
+    <div class="modal-h">
+      <h3>&#127968; Cuenta Bancaria STORI</h3>
+      <button class="modal-close" onclick="closeStoriModal()">&#215;</button>
+    </div>
+    <div class="modal-b">
+      <div style="text-align:center;margin-bottom:1.1rem">
+        <div style="font-size:2.5rem;margin-bottom:.5rem">&#127968;</div>
+        <div style="font-family:Orbitron;font-size:.9rem;font-weight:700;color:#fff;margin-bottom:.2rem">Transferencia Bancaria</div>
+        <div style="font-size:.8rem;color:var(--muted)">Realiza tu transferencia y manda el comprobante por WhatsApp</div>
+      </div>
+      <div style="background:rgba(37,211,102,.05);border:1px solid rgba(37,211,102,.2);border-radius:12px;padding:1.25rem;margin-bottom:1rem">
+        <div style="font-family:Orbitron;font-size:.72rem;font-weight:700;color:#25d366;margin-bottom:.7rem">Datos bancarios</div>
+        <div style="display:flex;justify-content:space-between;padding:.4rem .6rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:7px;margin-bottom:.35rem"><span style="font-size:.63rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Banco</span><span style="font-family:Orbitron;font-size:.73rem;font-weight:700;color:#fff">STORI</span></div>
+        <div style="display:flex;justify-content:space-between;padding:.4rem .6rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:7px;margin-bottom:.35rem"><span style="font-size:.63rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Titular</span><span style="font-family:Orbitron;font-size:.73rem;font-weight:700;color:#fff">MATINA RUBI HDZ</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:.4rem .6rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:7px;flex-wrap:wrap;gap:.35rem">
+          <div><div style="font-size:.63rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Cuenta / CLABE</div><div style="font-family:Orbitron;font-size:.7rem;font-weight:700;color:var(--c1)">646180402332964686</div></div>
+          <button onclick="copyClabe()" style="background:none;border:1px solid rgba(0,170,255,.3);color:var(--c1);border-radius:4px;padding:.1rem .42rem;font-size:.62rem;cursor:pointer;font-family:'Exo 2';font-weight:700">Copiar</button>
+        </div>
+      </div>
+      <div style="font-size:.75rem;color:var(--muted);line-height:1.7;padding:.65rem .85rem;background:rgba(255,255,255,.03);border-radius:7px;border:1px solid var(--border)">
+        1. Transfiere el monto exacto de tu pedido.<br/>
+        2. Toma captura del comprobante.<br/>
+        3. Manda comprobante + numero de pedido al WhatsApp.<br/>
+        4. Confirmamos y entregamos en menos de 3 minutos.
+      </div>
+      <a href="https://wa.me/5215523371367" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.85rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:7px;font-family:'Exo 2';font-weight:800;font-size:.88rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;margin-top:.85rem">
+        &#128222; Confirmar por WhatsApp
+      </a>
     </div>
   </div>
 </div>
