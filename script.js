@@ -1,3 +1,4 @@
+
 var WA='5215548461200';
 var TIERS=[
   {id:'free',    name:'Visitante',color:'#8892a4',colorBg:'rgba(136,146,164,.1)',threshold:0,     perks:['Precios estandar','Acceso a la tienda','Soporte por chat']},
@@ -7,15 +8,15 @@ var TIERS=[
   {id:'legend',  name:'Leyenda', color:'#00f5ff',colorBg:'rgba(0,245,255,.1)', threshold:15000, perks:['Precio minimo garantizado','Gestor personal','Precios bulk'],badge:{text:'ELITE',bg:'linear-gradient(90deg,#005fa3,#00aaff)',color:'#fff'}}
 ];
 var PRODUCTS=[
-  {id:1, name:'110 Diamantes',    desc:'Recarga las veces que quieras',prices:[17,17,17,17,17],          badge:null,         icon:'D', isPase:false},
-  {id:2, name:'341 Diamantes',    desc:'Recarga las veces que quieras',prices:[60,60,60,60,60],          badge:'POPULAR',    icon:'D', badgeBg:'#00aaff',isPase:false},
-  {id:3, name:'572 Diamantes',    desc:'Recarga las veces que quieras',prices:[85,85,85,85,85],          badge:null,         icon:'D', isPase:false},
-  {id:4, name:'1,166 Diamantes',  desc:'Recarga las veces que quieras',prices:[175,173,170,168,166],     badge:'OFERTA',     icon:'D', badgeBg:'#00f5ff',isPase:false},
-  {id:5, name:'2,398 Diamantes',  desc:'Recarga las veces que quieras',prices:[310,306,302,298,294],     badge:null,         icon:'D', isPase:false},
-  {id:6, name:'6,160 Diamantes',  desc:'Recarga las veces que quieras',prices:[770,760,750,740,730],     badge:'GRAN VALOR', icon:'D', badgeBg:'#ffd000',isPase:false},
-  {id:7, name:'12,320 Diamantes', desc:'Recarga las veces que quieras',prices:[1540,1520,1500,1480,1460],badge:null,         icon:'D', isPase:false},
-  {id:8, name:'18,480 Diamantes', desc:'Recarga las veces que quieras',prices:[2310,2280,2250,2220,2190],badge:'MEGA',       icon:'D', badgeBg:'#7c3aed',isPase:false},
-  {id:11,name:'Pase Elite',       desc:'Pase de temporada completa',   prices:[45,45,45,45,45],          badge:null,         icon:'P', isPase:true}
+  {id:1, name:'110',  bonus:10,  desc:'100 + 10 bonus', prices:[17,17,17,17,17],          badge:null,        isPase:false, popular:false},
+  {id:2, name:'341',  bonus:31,  desc:'310 + 31 bonus', prices:[60,60,60,60,60],           badge:'POPULAR',   isPase:false, popular:true},
+  {id:3, name:'572',  bonus:52,  desc:'520 + 52 bonus', prices:[85,85,85,85,85],           badge:null,        isPase:false, popular:false},
+  {id:4, name:'1,166',bonus:106, desc:'1060 + 106 bonus',prices:[175,173,170,168,166],     badge:'OFERTA',    isPase:false, popular:false},
+  {id:5, name:'2,398',bonus:218, desc:'2180 + 218 bonus',prices:[310,306,302,298,294],     badge:null,        isPase:false, popular:false},
+  {id:6, name:'6,160',bonus:560, desc:'5600 + 560 bonus',prices:[770,760,750,740,730],     badge:'GRAN VALOR',isPase:false, popular:false},
+  {id:7, name:'12,320',bonus:1120,desc:'11200 + 1120 bonus',prices:[1540,1520,1500,1480,1460],badge:null,    isPase:false, popular:false},
+  {id:8, name:'18,480',bonus:1680,desc:'16800 + 1680 bonus',prices:[2310,2280,2250,2220,2190],badge:'MEGA', isPase:false, popular:false},
+  {id:11,name:'Pase Elite',bonus:0,desc:'Pase de temporada completa',prices:[45,45,45,45,45],badge:null,    isPase:true,  popular:false}
 ];
 var LIKES=[
   {id:1,label:'14 Dias', priceMX:140,priceUSD:7,  total:3080, perDay:220,days:14, color:'#ff5050',lbl:'14 DIAS'},
@@ -68,26 +69,74 @@ function goPage(id){
 /* CONSTRUCION */
 /* PRODUCTS */
 function renderProds(){
-  var spent=getSpent(),tIdx=getTIdx(spent),tier=TIERS[tIdx];
-  var g=document.getElementById('prod-grid'),html='';
+  var spent=getSpent(),tIdx=getTIdx(spent);
+  var g=document.getElementById('prod-grid');
+  if(!g) return;
+  var rows='';
   for(var i=0;i<PRODUCTS.length;i++){
     var p=PRODUCTS[i];
-    var base=p.prices[0],now=p.prices[tIdx],saved=base-now;
-    var ico=p.isPase?'\u26D3':'\uD83D\uDC8E';
-    var bHtml=p.badge?'<div class="prod-badge" style="background:'+(p.badgeBg||'#00aaff')+';color:'+(p.badgeBg==='#ffd000'?'#020a0a':'#fff')+'">'+p.badge+'</div>':'';
-    var oHtml=tIdx>0&&saved>0?'<div class="price-orig" style="display:block">'+fmt(base)+'</div>':'';
-    var sHtml=tIdx>0&&saved>0?'<div class="price-save" style="display:block">Ahorras $'+saved+' MX</div>':'';
-    html+='<div class="prod-card" onclick="openProdModal('+p.id+')">'
-      +bHtml+'<div class="prod-thumb"><div class="prod-thumb-ico">'+ico+'</div></div>'
-      +'<div class="prod-body"><div class="prod-name">'+p.name+'</div><div class="prod-desc">'+p.desc+'</div>'
-      +'<div class="prod-foot"><div>'+oHtml+'<div class="price-now">'+fmt(now)+'</div>'+sHtml+'</div>'
-      +'<button class="btn-buy" onclick="event.stopPropagation();openProdModal('+p.id+')">Comprar</button>'
-      +'</div></div></div>';
+    var base=p.prices[0], now=p.prices[tIdx], saved=base-now;
+    var hasDisc=tIdx>0&&saved>0;
+
+    // Badge
+    var badgeHtml='';
+    if(p.popular){
+      badgeHtml='<div class="dp-badge dp-badge-popular">\uD83D\uDC51 POPULAR</div>';
+    } else if(p.badge){
+      badgeHtml='<div class="dp-badge dp-badge-normal">'+p.badge+'</div>';
+    }
+
+    // Gem icon area (SVG gem in red/orange tones for FF style)
+    var gemHtml='';
+    if(p.isPase){
+      gemHtml='<div class="dp-gem-wrap dp-pase"><span style="font-size:2.8rem">\u26D3</span></div>';
+    } else {
+      var gemSize = p.id<=2 ? 'small' : p.id<=4 ? 'med' : 'big';
+      gemHtml='<div class="dp-gem-wrap dp-gem-'+gemSize+'">'+buildGems(p.id)+'</div>';
+    }
+
+    // Bonus line
+    var bonusHtml = p.bonus>0
+      ? '<div class="dp-bonus"><span class="dp-num">'+p.name+'</span> <span class="dp-bonus-txt">+ '+p.bonus+' bonus</span></div>'
+      : '<div class="dp-bonus"><span class="dp-num">'+p.name+'</span></div>';
+
+    // Price
+    var priceHtml = hasDisc
+      ? '<div class="dp-price-orig">'+fmt(base)+'</div><div class="dp-price">'+fmt(now)+'</div>'
+      : '<div class="dp-price">'+fmt(now)+'</div>';
+
+    rows+='<div class="dp-card'+(p.popular?' dp-card-popular':'')+'" onclick="openProdModal('+p.id+')">'
+      +badgeHtml
+      +gemHtml
+      +'<div class="dp-body">'
+      +bonusHtml
+      +(p.bonus>0?'<div class="dp-desc">'+p.desc+'</div>':'')
+      +'<div class="dp-foot">'
+      +'<div>'+priceHtml+'</div>'
+      +'<button class="dp-btn" onclick="event.stopPropagation();openProdModal('+p.id+')">\u26A1 COMPRAR</button>'
+      +'</div>'
+      +'</div>'
+      +'</div>';
   }
-  g.innerHTML=html;
+  g.innerHTML=rows;
 }
 
-/* LIKES */
+function buildGems(id){
+  // Returns SVG gem cluster scaled by package size
+  var gems={
+    1:'<svg width="90" height="70" viewBox="0 0 90 70"><g transform="translate(15,5)"><polygon points="30,2 52,18 44,58 16,58 8,18" fill="#cc2200" opacity=".9"/><polygon points="30,2 52,18 30,14" fill="rgba(255,120,80,.7)"/><polygon points="30,2 8,18 30,14" fill="rgba(255,200,150,.4)"/><polygon points="30,14 52,18 44,58 30,42" fill="rgba(0,0,0,.25)"/><polygon points="30,14 8,18 16,58 30,42" fill="rgba(255,100,50,.15)"/></g></svg>',
+    2:'<svg width="110" height="80" viewBox="0 0 110 80"><g transform="translate(5,5)"><polygon points="55,2 85,22 74,72 36,72 25,22" fill="#cc2200" opacity=".9"/><polygon points="55,2 85,22 55,16" fill="rgba(255,120,80,.7)"/><polygon points="55,2 25,22 55,16" fill="rgba(255,200,150,.4)"/><polygon points="55,16 85,22 74,72 55,52" fill="rgba(0,0,0,.25)"/><polygon points="55,16 25,22 36,72 55,52" fill="rgba(255,100,50,.15)"/></g><g transform="translate(2,20) scale(.6)"><polygon points="20,2 36,14 30,44 10,44 4,14" fill="#aa1500" opacity=".8"/><polygon points="20,2 36,14 20,10" fill="rgba(255,100,60,.6)"/></g></svg>',
+    3:'<svg width="120" height="85" viewBox="0 0 120 85"><g transform="translate(25,5)"><polygon points="35,2 62,20 52,72 18,72 8,20" fill="#cc2200" opacity=".92"/><polygon points="35,2 62,20 35,15" fill="rgba(255,130,80,.7)"/><polygon points="35,2 8,20 35,15" fill="rgba(255,200,150,.4)"/><polygon points="35,15 62,20 52,72 35,52" fill="rgba(0,0,0,.28)"/><polygon points="35,15 8,20 18,72 35,52" fill="rgba(255,80,30,.15)"/></g><g transform="translate(2,25) scale(.55)"><polygon points="20,2 38,16 30,48 10,48 2,16" fill="#aa1500" opacity=".8"/><polygon points="20,2 38,16 20,11" fill="rgba(255,100,60,.6)"/></g><g transform="translate(72,18) scale(.5)"><polygon points="20,2 38,16 30,48 10,48 2,16" fill="#aa1500" opacity=".75"/></g></svg>',
+    4:'<svg width="130" height="90" viewBox="0 0 130 90"><g transform="translate(30,3)"><polygon points="38,2 68,22 56,78 20,78 8,22" fill="#dd2400" opacity=".93"/><polygon points="38,2 68,22 38,16" fill="rgba(255,140,80,.75)"/><polygon points="38,2 8,22 38,16" fill="rgba(255,210,160,.45)"/><polygon points="38,16 68,22 56,78 38,55" fill="rgba(0,0,0,.3)"/><polygon points="38,16 8,22 20,78 38,55" fill="rgba(255,90,30,.18)"/></g><g transform="translate(2,28) scale(.58)"><polygon points="22,2 40,16 32,50 12,50 4,16" fill="#bb1800" opacity=".85"/><polygon points="22,2 40,16 22,11" fill="rgba(255,110,60,.6)"/></g><g transform="translate(78,20) scale(.52)"><polygon points="20,2 36,14 28,46 12,46 4,14" fill="#bb1800" opacity=".8"/></g><g transform="translate(40,50) scale(.45)"><polygon points="18,2 34,14 26,42 10,42 2,14" fill="#991200" opacity=".75"/></g></svg>',
+    5:'<svg width="140" height="95" viewBox="0 0 140 95"><g transform="translate(35,2)"><polygon points="40,2 72,24 60,82 20,82 8,24" fill="#dd2400" opacity=".93"/><polygon points="40,2 72,24 40,16" fill="rgba(255,140,80,.75)"/><polygon points="40,2 8,24 40,16" fill="rgba(255,210,160,.45)"/><polygon points="40,16 72,24 60,82 40,58" fill="rgba(0,0,0,.3)"/><polygon points="40,16 8,24 20,82 40,58" fill="rgba(255,90,30,.18)"/><circle cx="30" cy="38" r="3" fill="rgba(255,200,150,.6)"/><circle cx="52" cy="30" r="2" fill="rgba(255,180,120,.5)"/></g><g transform="translate(2,30) scale(.6)"><polygon points="22,2 42,18 34,52 10,52 2,18" fill="#bb1800" opacity=".85"/><polygon points="22,2 42,18 22,12" fill="rgba(255,110,60,.6)"/></g><g transform="translate(82,22) scale(.55)"><polygon points="22,2 40,16 32,50 12,50 4,16" fill="#bb1800" opacity=".8"/></g><g transform="translate(45,55) scale(.45)"><polygon points="18,2 34,14 26,42 10,42 2,14" fill="#991200" opacity=".75"/></g><g transform="translate(10,60) scale(.4)"><polygon points="16,2 30,12 22,38 10,38 2,12" fill="#881000" opacity=".7"/></g></svg>',
+    6:'<svg width="150" height="100" viewBox="0 0 150 100"><g transform="translate(38,2)"><polygon points="42,2 76,26 62,86 22,86 8,26" fill="#ee2800" opacity=".94"/><polygon points="42,2 76,26 42,16" fill="rgba(255,150,80,.8)"/><polygon points="42,2 8,26 42,16" fill="rgba(255,220,170,.5)"/><polygon points="42,16 76,26 62,86 42,60" fill="rgba(0,0,0,.32)"/><polygon points="42,16 8,26 22,86 42,60" fill="rgba(255,100,30,.2)"/><circle cx="32" cy="40" r="4" fill="rgba(255,200,150,.7)"/><circle cx="56" cy="30" r="2.5" fill="rgba(255,180,120,.5)"/></g><g transform="translate(2,28) scale(.62)"><polygon points="24,2 44,20 35,56 13,56 4,20" fill="#cc1c00" opacity=".88"/><polygon points="24,2 44,20 24,13" fill="rgba(255,120,60,.65)"/></g><g transform="translate(90,20) scale(.56)"><polygon points="22,2 42,18 33,52 11,52 2,18" fill="#cc1c00" opacity=".82"/></g><g transform="translate(48,55) scale(.48)"><polygon points="20,2 36,16 28,44 12,44 4,16" fill="#aa1400" opacity=".78"/></g><g transform="translate(8,58) scale(.42)"><polygon points="18,2 32,14 24,40 10,40 2,14" fill="#991000" opacity=".72"/></g><g transform="translate(92,55) scale(.4)"><polygon points="16,2 30,12 22,36 8,36 2,12" fill="#881000" opacity=".68"/></g></svg>',
+    7:'<svg width="150" height="100" viewBox="0 0 150 100"><g transform="translate(38,2)"><polygon points="42,2 76,26 62,86 22,86 8,26" fill="#ee2800" opacity=".95"/><polygon points="42,2 76,26 42,16" fill="rgba(255,160,80,.85)"/><polygon points="42,2 8,26 42,16" fill="rgba(255,230,180,.5)"/><polygon points="42,16 76,26 62,86 42,60" fill="rgba(0,0,0,.35)"/><polygon points="42,16 8,26 22,86 42,60" fill="rgba(255,110,30,.22)"/></g><g transform="translate(2,24) scale(.65)"><polygon points="24,2 46,20 36,58 12,58 2,20" fill="#cc1c00" opacity=".9"/></g><g transform="translate(90,18) scale(.58)"><polygon points="22,2 44,18 34,54 10,54 2,18" fill="#cc1c00" opacity=".85"/></g><g transform="translate(46,52) scale(.5)"><polygon points="20,2 38,16 29,46 11,46 2,16" fill="#aa1400" opacity=".8"/></g><g transform="translate(6,55) scale(.44)"><polygon points="18,2 34,14 25,42 9,42 2,14" fill="#991000" opacity=".75"/></g><g transform="translate(94,52) scale(.42)"><polygon points="16,2 32,13 24,38 8,38 2,13" fill="#881000" opacity=".7"/></g><g transform="translate(48,72) scale(.38)"><polygon points="14,2 28,12 20,35 8,35 2,12" fill="#771000" opacity=".65"/></g></svg>',
+    8:'<svg width="150" height="100" viewBox="0 0 150 100"><g transform="translate(36,1)"><polygon points="44,2 78,28 64,88 24,88 10,28" fill="#ff2d00" opacity=".95"/><polygon points="44,2 78,28 44,16" fill="rgba(255,170,80,.88)"/><polygon points="44,2 10,28 44,16" fill="rgba(255,235,190,.55)"/><polygon points="44,16 78,28 64,88 44,62" fill="rgba(0,0,0,.38)"/><polygon points="44,16 10,28 24,88 44,62" fill="rgba(255,120,30,.24)"/><circle cx="34" cy="42" r="4" fill="rgba(255,220,170,.8)"/><circle cx="58" cy="32" r="3" fill="rgba(255,200,140,.6)"/></g><g transform="translate(1,22) scale(.66)"><polygon points="25,2 48,22 37,60 13,60 2,22" fill="#dd1c00" opacity=".92"/><polygon points="25,2 48,22 25,14" fill="rgba(255,130,60,.7)"/></g><g transform="translate(92,16) scale(.6)"><polygon points="23,2 45,20 35,56 11,56 2,20" fill="#dd1c00" opacity=".87"/></g><g transform="translate(46,54) scale(.52)"><polygon points="20,2 39,17 30,47 11,47 2,17" fill="#bb1400" opacity=".82"/></g><g transform="translate(5,57) scale(.46)"><polygon points="18,2 35,15 26,43 9,43 2,15" fill="#aa1000" opacity=".77"/></g><g transform="translate(96,54) scale(.43)"><polygon points="16,2 32,14 24,40 8,40 2,14" fill="#991000" opacity=".72"/></g><g transform="translate(46,74) scale(.4)"><polygon points="14,2 28,12 20,36 8,36 2,12" fill="#881000" opacity=".67"/></g><g transform="translate(6,74) scale(.36)"><polygon points="12,2 24,10 17,32 7,32 0,10" fill="#771000" opacity=".62"/></g></svg>',
+    11:'<svg width="120" height="85" viewBox="0 0 120 85"><text x="60" y="55" text-anchor="middle" font-size="52" fill="#ffd000">\u26D3</text></svg>'
+  };
+  return gems[id] || gems[1];
+}
+
 function renderLikes(){
   var bords=['rgba(255,80,80,.22)','rgba(0,170,255,.2)','rgba(255,208,0,.22)','rgba(0,245,255,.2)'];
   var g=document.getElementById('likes-grid'),html='';
@@ -488,45 +537,61 @@ function getPromoLog(){
 function savePromoLog(arr){ localStorage.setItem('cs_promo_log',JSON.stringify(arr)); }
 
 function applyPromo(){
-  var inp=document.getElementById('f-promo');
-  var msg=document.getElementById('promo-msg');
+  var inp = document.getElementById('f-promo');
+  var msg = document.getElementById('promo-msg');
   if(!inp||!msg) return;
-  var code=inp.value.trim().toUpperCase();
+  var code = inp.value.trim().toUpperCase();
   if(!code){ showToast('Ingresa un codigo'); return; }
+
   var codes=getPromoCodes(), found=null;
   for(var i=0;i<codes.length;i++){
-    if(codes[i].code===code&&codes[i].active){ found=codes[i]; break; }
+    if(codes[i].code===code && codes[i].active){ found=codes[i]; break; }
   }
   if(!found){
     msg.style.display='block'; msg.style.color='#ff5252';
-    msg.textContent='Codigo invalido o expirado';
-    activePromo=null; refreshModalPrice(); return;
+    msg.innerHTML='Codigo invalido o expirado';
+    activePromo=null; inp.style.borderColor='#ff5252';
+    refreshModalPrice(); return;
   }
-  if(found.maxUses>0&&(found.uses||0)>=found.maxUses){
+  if(found.maxUses>0 && (found.uses||0)>=found.maxUses){
     msg.style.display='block'; msg.style.color='#ff5252';
-    msg.textContent='Codigo sin usos disponibles';
-    activePromo=null; refreshModalPrice(); return;
+    msg.innerHTML='Codigo sin usos disponibles';
+    activePromo=null; inp.style.borderColor='#ff5252';
+    refreshModalPrice(); return;
   }
-  activePromo={code:found.code,disc:found.disc};
+
+  activePromo={code:found.code, disc:found.disc};
+  inp.style.borderColor='#00e676';
   msg.style.display='block'; msg.style.color='#00e676';
-  msg.textContent='Codigo aplicado: '+found.disc+'% de descuento'+(found.desc?' ('+found.desc+')':'');
+  msg.innerHTML='<strong>'+found.disc+'% de descuento aplicado</strong>'+(found.desc?' &bull; '+found.desc:'');
   refreshModalPrice();
-  showToast(found.disc+'% de descuento aplicado!',2500);
+  showToast(found.disc+'% de descuento aplicado!', 2500);
 }
 
 function refreshModalPrice(){
-  var priceEl=document.getElementById('m-price');
-  if(!priceEl||!curId) return;
+  var priceEl  = document.getElementById('m-price');
+  var prodCard = document.getElementById('m-prod-card-wrap');
+  if(!priceEl || !curId) return;
   var tIdx=getTIdx(getSpent()), p=null;
   for(var i=0;i<PRODUCTS.length;i++){ if(PRODUCTS[i].id===curId){ p=PRODUCTS[i]; break; } }
   if(!p) return;
-  var now=p.prices[tIdx];
+  var base = p.prices[tIdx];
   if(activePromo){
-    var disc2=Math.floor(now*(1-activePromo.disc/100));
-    priceEl.textContent=fmt(disc2)+' (antes: '+fmt(now)+')';
-    priceEl.style.color='#00e676';
+    var disc     = activePromo.disc;
+    var final2   = Math.floor(base * (1 - disc/100));
+    var saved    = base - final2;
+    // Precio tachado + precio final verde + ahorro
+    priceEl.innerHTML = '<span style="text-decoration:line-through;color:var(--muted);font-size:.8rem;font-weight:400">'+fmt(base)+'</span>'
+      + ' <span style="color:#00e676;font-size:1.3rem;font-weight:900">'+fmt(final2)+'</span>'
+      + '<span style="display:block;font-size:.72rem;color:#00e676;margin-top:.1rem">Ahorras $'+saved.toLocaleString('es-MX')+' MX con codigo '+activePromo.code+'</span>';
+    // Highlight the modal card
+    var mCard = document.querySelector('.m-prod-card');
+    if(mCard) mCard.style.borderColor='rgba(0,230,118,.3)';
   } else {
-    priceEl.textContent=fmt(now); priceEl.style.color='';
+    var tIdx2=getTIdx(getSpent());
+    priceEl.innerHTML = '<span style="font-family:Orbitron;font-size:1.2rem;font-weight:900;color:var(--c1)">'+fmt(p.prices[tIdx2])+'</span>';
+    var mCard2=document.querySelector('.m-prod-card');
+    if(mCard2) mCard2.style.borderColor='';
   }
 }
 
@@ -553,8 +618,10 @@ closeModal=function(){
   activePromo=null;
   var inp=document.getElementById('f-promo');
   var msg=document.getElementById('promo-msg');
-  if(inp) inp.value='';
+  if(inp){ inp.value=''; inp.style.borderColor=''; }
   if(msg) msg.style.display='none';
+  var mCard3=document.querySelector('.m-prod-card');
+  if(mCard3) mCard3.style.borderColor='';
 };
 
 var _origSubmitProd3=submitProd;
