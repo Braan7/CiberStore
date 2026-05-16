@@ -390,6 +390,12 @@ body{background:var(--bg);color:var(--text);font-family:"Exo 2",sans-serif;overf
 .pines-badge-lock{display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1.5rem;background:rgba(255,208,0,.12);border:1px solid rgba(255,208,0,.35);border-radius:10px;font-family:"Orbitron";font-size:.8rem;font-weight:700;color:var(--c4);letter-spacing:1.5px;margin-bottom:.85rem}
 .pines-wa-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.8rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:8px;font-family:"Exo 2";font-weight:800;font-size:.88rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;text-decoration:none;transition:all .25s;box-shadow:0 0 20px rgba(37,211,102,.3)}
 .pines-wa-btn:hover{box-shadow:0 0 35px rgba(37,211,102,.6);transform:translateY(-2px)}
+
+/* PINES CART BAR */
+#pines-cart-bar{display:flex!important}
+.pines-qty{display:flex;align-items:center;gap:.35rem;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:6px;padding:.18rem .45rem}
+.pines-qty-btn{background:none;border:none;color:var(--c1);font-size:1rem;cursor:pointer;padding:0 .15rem;line-height:1;font-weight:700}
+.pines-qty-n{font-family:Orbitron;font-size:.72rem;font-weight:700;color:#fff;min-width:18px;text-align:center}
 </style>
 </head>
 <body>
@@ -944,9 +950,7 @@ function openHonorModal(idx){
   var h=HONOR[idx];curMode='honor';curId=idx;
   setModal('Honor de Clan','\uD83C\uDFC6','Honor - '+h.region,fmt(h.price),null,'Entrega en menos de 24 horas - '+h.region,'Necesitamos el ID y nombre de tu clan.','ID del Clan','Nombre del Clan',submitHonor);
 }
-function clanWA(){window.open('https://wa.me/'+WA+'?text='+encodeURIComponent('*COTIZACION CLAN NIVEL 7 - CiberStore*
-
-Hola, quiero informacion sobre clanes nivel 7.'),'_blank');}
+function clanWA(){window.open('https://wa.me/'+WA+'?text='+encodeURIComponent('*COTIZACION CLAN NIVEL 7 - CiberStore*\n\nHola, quiero informacion sobre clanes nivel 7.'),'_blank');}
 function closeModal(){document.getElementById('modal-ov').classList.remove('show');}
 document.getElementById('modal-ov').addEventListener('click',function(e){if(e.target===this)closeModal();});
 
@@ -986,23 +990,7 @@ function submitProd(){
   var ord=getNextOrder();
   addToHistory({name:p.name,price:now,icon:p.isPase?'P':'D',date:getDateStr(),order:ord});
   var lu=addSpend(now);
-  var msg='*NUEVO PEDIDO #'+ord+' - CiberStore*
-
-Producto: '+p.name+'
-Precio: '+fmt(now)+(saved>0?'
-Ahorro: $'+saved+' MX':'')+'
-
-ID Free Fire: '+v.v1+'
-Correo: '+v.em+'
-Membresia: '+tier.name+'
-
---- PAGO ---
-Banco: STORI
-Titular: MATINA RUBI HDZ
-Cuenta: 646180402332964686
-Monto: '+fmt(now)+'
-
-Manda comprobante con el pedido #'+ord;
+  var msg='*NUEVO PEDIDO #'+ord+' - CiberStore*\n\nProducto: '+p.name+'\nPrecio: '+fmt(now)+(saved>0?'\nAhorro: $'+saved+' MX':'')+'\n\nID Free Fire: '+v.v1+'\nCorreo: '+v.em+'\nMembresia: '+tier.name+'\n\n--- PAGO ---\nBanco: STORI\nTitular: MATINA RUBI HDZ\nCuenta: 646180402332964686\nMonto: '+fmt(now)+'\n\nManda comprobante con el pedido #'+ord;
   sendWA(msg,lu);
 }
 
@@ -1012,23 +1000,7 @@ function submitLikes(){
   var ord=getNextOrder();
   addToHistory({name:'Likes '+plan.label,price:plan.priceMX,icon:'L',date:getDateStr(),order:ord});
   var lu=addSpend(plan.priceMX);
-  var msg='*NUEVO PEDIDO #'+ord+' - CiberStore*
-
-Servicio: Likes
-Plan: '+plan.label+'
-Precio: $'+plan.priceMX+' MX
-Likes: '+plan.total.toLocaleString()+'/'+plan.days+' dias
-
-ID Free Fire: '+v.v1+'
-Correo: '+v.em+'
-
---- PAGO ---
-Banco: STORI
-Titular: MATINA RUBI HDZ
-Cuenta: 646180402332964686
-Monto: $'+plan.priceMX+' MX
-
-Manda comprobante con el pedido #'+ord;
+  var msg='*NUEVO PEDIDO #'+ord+' - CiberStore*\n\nServicio: Likes\nPlan: '+plan.label+'\nPrecio: $'+plan.priceMX+' MX\nLikes: '+plan.total.toLocaleString()+'/'+plan.days+' dias\n\nID Free Fire: '+v.v1+'\nCorreo: '+v.em+'\n\n--- PAGO ---\nBanco: STORI\nTitular: MATINA RUBI HDZ\nCuenta: 646180402332964686\nMonto: $'+plan.priceMX+' MX\n\nManda comprobante con el pedido #'+ord;
   sendWA(msg,lu);
 }
 
@@ -1046,23 +1018,7 @@ function submitHonor(){
   var ord=getNextOrder();
   addToHistory({name:'Honor - '+h.region,price:h.price,icon:'H',date:getDateStr(),order:ord});
   var lu=addSpend(h.price);
-  var msg='*NUEVO PEDIDO #'+ord+' - CiberStore*
-
-Servicio: Honor de Clan
-Region: '+h.region+'
-Precio: '+fmt(h.price)+'
-
-ID Clan: '+clanId+'
-Nombre Clan: '+clanName+'
-Correo: '+em+'
-
---- PAGO ---
-Banco: STORI
-Titular: MATINA RUBI HDZ
-Cuenta: 646180402332964686
-Monto: '+fmt(h.price)+'
-
-Manda comprobante con el pedido #'+ord;
+  var msg='*NUEVO PEDIDO #'+ord+' - CiberStore*\n\nServicio: Honor de Clan\nRegion: '+h.region+'\nPrecio: '+fmt(h.price)+'\n\nID Clan: '+clanId+'\nNombre Clan: '+clanName+'\nCorreo: '+em+'\n\n--- PAGO ---\nBanco: STORI\nTitular: MATINA RUBI HDZ\nCuenta: 646180402332964686\nMonto: '+fmt(h.price)+'\n\nManda comprobante con el pedido #'+ord;
   sendWA(msg,lu);
 }
 
@@ -1204,6 +1160,142 @@ renderProds=function(){
   });
 };
 updateCartCount();
+
+/* ====== PINES FF ====== */
+var PINES_PRODS = [
+  {id:101, name:'110 Diamantes',   price:17,  icon:'\uD83D\uDC8E'},
+  {id:102, name:'341 Diamantes',   price:52,  icon:'\uD83D\uDC8E'},
+  {id:103, name:'572 Diamantes',   price:80,  icon:'\uD83D\uDC8E'},
+  {id:104, name:'1,166 Diamantes', price:140, icon:'\uD83D\uDC8E'},
+  {id:105, name:'2,398 Diamantes', price:275, icon:'\uD83D\uDC8E'},
+  {id:106, name:'6,160 Diamantes', price:668, icon:'\uD83D\uDC8E'}
+];
+var PINES_MIN = 200;
+var pinesCart = {};
+
+function renderPinesGrid(){
+  var g = document.getElementById('pines-grid');
+  if(!g) return;
+  var html2 = '';
+  for(var i=0;i<PINES_PRODS.length;i++){
+    var p = PINES_PRODS[i];
+    var qty = pinesCart[p.id] || 0;
+    html2 += '<div class="prod-card" style="border-color:rgba(255,208,0,.18)">'
+      + '<div class="prod-thumb" style="background:linear-gradient(135deg,#120e00,#1a1400)">'
+      + '<div class="prod-thumb-ico">\uD83D\uDC8E</div></div>'
+      + '<div class="prod-body">'
+      + '<div class="prod-name">'+p.name+'</div>'
+      + '<div class="prod-desc">Precio revendedor</div>'
+      + '<div class="prod-foot">'
+      + '<div class="price-now" style="color:var(--c4)">$'+p.price+' MX</div>'
+      + '<div class="pines-qty">'
+      + '<button class="pines-qty-btn" onclick="pinesQty('+p.id+',-1)">-</button>'
+      + '<span class="pines-qty-n" id="pq-'+p.id+'">'+qty+'</span>'
+      + '<button class="pines-qty-btn" onclick="pinesQty('+p.id+',1)">+</button>'
+      + '</div>'
+      + '</div></div></div>';
+  }
+  g.innerHTML = html2;
+  updatePinesBar();
+}
+
+function pinesQty(id, delta){
+  pinesCart[id] = Math.max(0, (pinesCart[id]||0) + delta);
+  var el = document.getElementById('pq-'+id);
+  if(el) el.textContent = pinesCart[id];
+  updatePinesBar();
+}
+
+function getPinesTotal(){
+  var total = 0;
+  for(var i=0;i<PINES_PRODS.length;i++){
+    var p = PINES_PRODS[i];
+    total += (pinesCart[p.id]||0) * p.price;
+  }
+  return total;
+}
+
+function getPinesItems(){
+  var items = [];
+  for(var i=0;i<PINES_PRODS.length;i++){
+    var p = PINES_PRODS[i];
+    if(pinesCart[p.id] > 0) items.push({name:p.name, qty:pinesCart[p.id], price:p.price, subtotal:pinesCart[p.id]*p.price});
+  }
+  return items;
+}
+
+function updatePinesBar(){
+  var total = getPinesTotal();
+  var items = getPinesItems();
+  var bar  = document.getElementById('pines-cart-bar');
+  var lbl  = document.getElementById('pc-items-lbl');
+  var warn = document.getElementById('pc-min-warn');
+  if(lbl) lbl.textContent = '$'+total.toLocaleString('es-MX')+' MX ('+(items.length > 0 ? items.reduce(function(s,i){return s+i.qty;},0)+' productos' : '0 productos')+')';
+  if(warn) warn.style.display = (total > 0 && total < PINES_MIN) ? 'inline' : 'none';
+}
+
+function clearPinesCart(){
+  pinesCart = {};
+  renderPinesGrid();
+}
+
+function checkoutPines(){
+  var total = getPinesTotal();
+  var items = getPinesItems();
+  if(items.length === 0){ showToast('Agrega productos al carrito'); return; }
+  if(total < PINES_MIN){ showToast('Minimo $'+PINES_MIN+' MX para pedir'); return; }
+  // Open modal
+  var ord = peekOrder();
+  document.getElementById('mp-order').textContent = 'PEDIDO #'+ord;
+  var namesHtml = items.map(function(i){return i.qty+'x '+i.name+' = $'+i.subtotal+' MX';}).join(' | ');
+  document.getElementById('mp-name').textContent = namesHtml;
+  document.getElementById('mp-price').textContent = 'Total: $'+total.toLocaleString('es-MX')+' MX';
+  document.getElementById('mp-nombre').value = '';
+  document.getElementById('mp-ffid').value   = '';
+  document.getElementById('mp-wa').value     = '';
+  document.getElementById('modal-pines').classList.add('show');
+}
+
+function closePinesModal(){
+  document.getElementById('modal-pines').classList.remove('show');
+}
+document.getElementById('modal-pines').addEventListener('click',function(e){if(e.target===this)closePinesModal();});
+
+function submitPines(){
+  var nombre = document.getElementById('mp-nombre').value.trim();
+  var ffid   = document.getElementById('mp-ffid').value.trim();
+  var wa2    = document.getElementById('mp-wa').value.trim();
+  if(!nombre){ showToast('Ingresa tu nombre'); return; }
+  if(!ffid){ showToast('Ingresa tu ID de Free Fire'); return; }
+  if(!wa2 || wa2.length < 8){ showToast('Ingresa tu WhatsApp'); return; }
+  var items = getPinesItems();
+  var total = getPinesTotal();
+  var ord   = getNextOrder();
+  var msg   = '*NUEVO PEDIDO #'+ord+' - CiberStore (PINES FF)*\n\n';
+  msg += 'Servicio: Pines FF Revendedor\n';
+  for(var i=0;i<items.length;i++){
+    msg += items[i].qty+'x '+items[i].name+' = $'+items[i].subtotal+' MX\n';
+  }
+  msg += '\nTotal: $'+total.toLocaleString('es-MX')+' MX';
+  msg += '\nMetodo de pago: Transferencia Bancaria';
+  msg += '\n\nNombre: '+nombre;
+  msg += '\nID Free Fire: '+ffid;
+  msg += '\nWhatsApp: '+wa2;
+  msg += '\n\nManda tu comprobante con el numero #'+ord;
+  closePinesModal();
+  addToHistory({name:'Pines FF - '+items.length+' productos',price:total,icon:'\uD83D\uDC8E',date:new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),order:ord});
+  addSpend(total);
+  refreshUI();
+  setTimeout(function(){window.open('https://wa.me/'+WA+'?text='+encodeURIComponent(msg),'_blank');},500);
+  clearPinesCart();
+}
+
+/* Render pines when page opened */
+var _gp2 = goPage;
+goPage = function(id){
+  _gp2(id);
+  if(id === 'pines') renderPinesGrid();
+};
 </script>
 
 <!-- CARRITO MODAL -->
@@ -1227,32 +1319,77 @@ updateCartCount();
   <div class="ph">
     <div class="stag" style="background:rgba(255,208,0,.07);border-color:rgba(255,208,0,.3);color:var(--c4)">Exclusivo Revendedores</div>
     <h2 class="ptitle"><span style="color:var(--c4)">PINES</span> DE FF</h2>
-    <p class="psub">Precios exclusivos para revendedores.</p>
+    <p class="psub">Precios mayoristas para revendedores. Compra minima <strong style="color:var(--c4)">$200 MX</strong>.</p>
   </div>
-  <div style="position:relative;overflow:hidden">
-    <!-- Blurred preview -->
-    <div class="pines-grid">
-      <div class="prod-card"><div class="prod-thumb"><div class="prod-thumb-ico">&#128142;</div></div><div class="prod-body"><div class="prod-name">110 Diamantes</div><div class="price-now">$17 MX</div></div></div>
-      <div class="prod-card"><div class="prod-thumb"><div class="prod-thumb-ico">&#128142;</div></div><div class="prod-body"><div class="prod-name">341 Diamantes</div><div class="price-now">$52 MX</div></div></div>
-      <div class="prod-card"><div class="prod-thumb"><div class="prod-thumb-ico">&#128142;</div></div><div class="prod-body"><div class="prod-name">572 Diamantes</div><div class="price-now">$80 MX</div></div></div>
-      <div class="prod-card"><div class="prod-thumb"><div class="prod-thumb-ico">&#128142;</div></div><div class="prod-body"><div class="prod-name">1,166 Diamantes</div><div class="price-now">$140 MX</div></div></div>
-      <div class="prod-card"><div class="prod-thumb"><div class="prod-thumb-ico">&#128142;</div></div><div class="prod-body"><div class="prod-name">2,398 Diamantes</div><div class="price-now">$275 MX</div></div></div>
-      <div class="prod-card"><div class="prod-thumb"><div class="prod-thumb-ico">&#128142;</div></div><div class="prod-body"><div class="prod-name">6,160 Diamantes</div><div class="price-now">$668 MX</div></div></div>
-    </div>
-    <!-- Lock overlay -->
-    <div class="pines-overlay">
-      <div style="background:rgba(6,8,15,.92);border:1px solid rgba(255,208,0,.3);border-radius:20px;padding:2.5rem 2rem;text-align:center;max-width:400px;backdrop-filter:blur(10px)">
-        <div class="pines-lock-ico">&#128274;</div>
-        <div class="pines-lock-title">EXCLUSIVO PARA REVENDEDORES</div>
-        <div class="pines-lock-sub">Accede a precios mayoristas para revender diamantes FF. Compra minima de $200 MX.</div>
-        <div class="pines-min">&#128176; Compra minima $200 MX</div>
-        <a href="https://wa.me/5215523371367?text=Hola%2C%20quiero%20acceso%20a%20Pines%20FF%20para%20revendedores" target="_blank" class="pines-wa-btn">
-          &#128222; Solicitar acceso
-        </a>
-        <div style="margin-top:1rem;font-size:.72rem;color:var(--muted);line-height:1.6">Contactanos por WhatsApp para obtener<br/>tus credenciales de revendedor.</div>
+
+  <!-- Carrito pines -->
+  <div style="max-width:900px;margin:0 auto;padding:0 5vw .75rem">
+    <div id="pines-cart-bar" style="display:none;background:rgba(255,208,0,.07);border:1px solid rgba(255,208,0,.25);border-radius:10px;padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem">
+      <div style="font-size:.82rem;color:var(--text)">Carrito: <span id="pc-items-lbl" style="font-family:Orbitron;font-weight:700;color:var(--c4)">$0 MX</span></div>
+      <div style="display:flex;gap:.6rem;align-items:center">
+        <span id="pc-min-warn" style="font-size:.7rem;color:#ff8c00;display:none">Minimo $200 MX</span>
+        <button onclick="clearPinesCart()" style="background:none;border:1px solid rgba(255,80,80,.3);color:rgba(255,80,80,.7);border-radius:6px;padding:.2rem .55rem;font-family:'Exo 2';font-size:.68rem;cursor:pointer;font-weight:700">Vaciar</button>
+        <button onclick="checkoutPines()" id="pc-checkout-btn" style="padding:.42rem 1.1rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:7px;font-family:'Exo 2';font-weight:800;font-size:.78rem;cursor:pointer;letter-spacing:1px;position:relative;overflow:hidden">Pedir por WhatsApp</button>
       </div>
     </div>
   </div>
+
+  <!-- Productos pines -->
+  <div class="pgrid" id="pines-grid"></div>
+
+  <!-- Bloqueo overlay si no tiene acceso -->
+  <div id="pines-lock-overlay" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(6,8,15,.92);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:1.5rem">
+    <div style="background:var(--card);border:1px solid rgba(255,208,0,.3);border-radius:20px;padding:2.5rem 2rem;text-align:center;max-width:400px;width:100%">
+      <div style="font-size:3.5rem;margin-bottom:.75rem">&#128274;</div>
+      <div style="font-family:Orbitron;font-size:1.3rem;font-weight:900;color:var(--c4);margin-bottom:.45rem;letter-spacing:1px">EXCLUSIVO PARA REVENDEDORES</div>
+      <div style="font-size:.86rem;color:var(--muted);line-height:1.7;margin-bottom:1.1rem">Accede a precios mayoristas para revender diamantes. Compra minima de $200 MX por pedido.</div>
+      <div style="display:inline-flex;align-items:center;gap:.45rem;padding:.45rem 1.1rem;background:rgba(255,208,0,.08);border:1px solid rgba(255,208,0,.3);border-radius:20px;font-size:.8rem;font-weight:700;color:var(--c4);margin-bottom:1.4rem">Compra minima $200 MX</div>
+      <br/>
+      <a href="https://wa.me/5215523371367?text=Hola%2C%20quiero%20acceso%20a%20Pines%20FF%20para%20revendedores" target="_blank" style="display:inline-flex;align-items:center;gap:.5rem;padding:.78rem 1.8rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:8px;font-family:'Exo 2';font-weight:800;font-size:.88rem;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none">
+        Solicitar acceso
+      </a>
+      <div style="margin-top:.85rem;font-size:.72rem;color:var(--muted)">Contactanos por WhatsApp para activar tu cuenta de revendedor.</div>
+    </div>
+  </div>
 </div>
+
+<!-- MODAL PINES COMPRA -->
+<div class="modal-ov" id="modal-pines">
+  <div class="modal">
+    <div class="modal-h">
+      <h3 id="mp-title">Pines FF - Revendedor</h3>
+      <button class="modal-close" onclick="closePinesModal()">&#215;</button>
+    </div>
+    <div class="modal-b">
+      <div class="m-prod-card">
+        <div class="m-prod-ico" id="mp-ico">&#128142;</div>
+        <div>
+          <div class="m-prod-name" id="mp-name"></div>
+          <div class="m-prod-price" id="mp-price"></div>
+          <div class="m-prod-sub">Precio exclusivo revendedor</div>
+        </div>
+      </div>
+      <div class="order-disp" id="mp-order"></div>
+      <div class="pay-box">
+        <div class="pay-title">Transferencia STORI MX</div>
+        <div class="pay-field"><div class="pf-label">Banco</div><div class="pf-val">STORI</div></div>
+        <div class="pay-field"><div class="pf-label">Titular</div><div class="pf-val">MATINA RUBI HDZ</div></div>
+        <div class="pay-field">
+          <div><div class="pf-label">Cuenta / CLABE</div><div class="pf-val pf-acc">646180402332964686</div></div>
+          <button class="copy-btn" onclick="copyClabe()">Copiar</button>
+        </div>
+        <div class="pay-note">Minimo $200 MX por pedido. Transfiere y manda comprobante por WhatsApp.</div>
+      </div>
+      <label class="flabel">Nombre completo</label>
+      <input class="finput" id="mp-nombre" type="text" placeholder="Ej: Roberto Gomez"/>
+      <label class="flabel">Tu ID de Free Fire</label>
+      <input class="finput" id="mp-ffid" type="text" placeholder="Ej: 123456789"/>
+      <label class="flabel">Numero de WhatsApp</label>
+      <input class="finput" id="mp-wa" type="tel" placeholder="Ej: 5512345678"/>
+      <button class="btn-submit" onclick="submitPines()">Pedir por WhatsApp</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
