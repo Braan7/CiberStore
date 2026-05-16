@@ -1,4 +1,3 @@
-
 var WA='5215548461200';
 var TIERS=[
   {id:'free',    name:'Visitante',color:'#8892a4',colorBg:'rgba(136,146,164,.1)',threshold:0,     perks:['Precios estandar','Acceso a la tienda','Soporte por chat']},
@@ -383,232 +382,41 @@ updateSidebarUser();
 setTimeout(runTyping,600);
 
 /* ====== CARRITO ====== */
-function getCart(){try{return JSON.parse(localStorage.getItem('cs_cart')||'[]');}catch(e){return[];}}
-function saveCart(c){localStorage.setItem('cs_cart',JSON.stringify(c));}
-function addToCart(item){
-  var c=getCart();
-  c.push({id:Date.now(),name:item.name,price:item.price,icon:item.icon});
-  saveCart(c);updateCartCount();
-  showToast(item.name+' agregado al carrito',2000);
-}
-function removeFromCart(id){
-  var c=getCart().filter(function(i){return i.id!==id;});
-  saveCart(c);renderCartModal();updateCartCount();
-}
-function clearCart(){saveCart([]);renderCartModal();updateCartCount();}
-function updateCartCount(){
-  var c=getCart(),el=document.getElementById('cart-count');
-  if(!el) return;
-  el.textContent=c.length;
-  el.className='cart-count'+(c.length>0?' vis':'');
-}
-function openCart(){renderCartModal();document.getElementById('modal-cart').classList.add('show');}
-function closeCart(){document.getElementById('modal-cart').classList.remove('show');}
-var _mc=document.getElementById('modal-cart');if(_mc)_mc.addEventListener('click',function(e){if(e.target===this)closeCart();});
-function renderCartModal(){
-  var c=getCart(),body=document.getElementById('cart-modal-body');
-  if(!body) return;
-  if(!c.length){body.innerHTML='<div class="cart-empty">Tu carrito esta vacio</div>';return;}
-  var total=c.reduce(function(s,i){return s+i.price;},0);
-  var rows='<div style="padding:0 .5rem">';
-  for(var i=0;i<c.length;i++){
-    var it=c[i];
-    rows+='<div class="cart-item-row">'
-      +'<div class="cart-item-ico">'+it.icon+'</div>'
-      +'<div class="cart-item-name">'+it.name+'</div>'
-      +'<div class="cart-item-price">$'+it.price.toLocaleString('es-MX')+'</div>'
-      +'<button class="cart-item-del" onclick="removeFromCart('+it.id+')">\u00D7</button>'
-      +'</div>';
-  }
-  rows+='</div>';
-  rows+='<div class="cart-total-row"><span class="cart-total-lbl">Total</span><span class="cart-total-val">$'+total.toLocaleString('es-MX')+' MX</span></div>';
-  rows+='<div style="padding:0 1.35rem 1.35rem"><button class="btn-cart-checkout" onclick="checkoutCart()">\uD83D\uDCDE Pedir por WhatsApp</button></div>';
-  body.innerHTML=rows;
-}
-function checkoutCart(){
-  var c=getCart();
-  if(!c.length){showToast('El carrito esta vacio');return;}
-  var total=c.reduce(function(s,i){return s+i.price;},0);
-  var lines='*PEDIDO CARRITO - CiberStore*\n\n';
-  for(var i=0;i<c.length;i++) lines+=c[i].name+': $'+c[i].price.toLocaleString('es-MX')+' MX\n';
-  lines+='\nTotal: $'+total.toLocaleString('es-MX')+' MX';
-  lines+='\nMetodo de pago: Transferencia Bancaria';
-  lines+='\n\nManda tu comprobante al recibir este mensaje.';
-  closeCart();
-  setTimeout(function(){window.open('https://wa.me/5215548461200?text='+encodeURIComponent(lines),'_blank');},400);
-}
+
+
+
+
+
 /* Add to cart button in prod cards */
-var _origRenderProds=renderProds;
-renderProds=function(){
-  _origRenderProds();
-  var g=document.getElementById('prod-grid');
-  if(!g) return;
-  var cards=g.querySelectorAll('.prod-card');
-  cards.forEach(function(card,i){
-    var p=PRODUCTS[i];
-    var spent=getSpent(),tIdx=getTIdx(spent);
-    var now=p.prices[tIdx];
-    var addBtn=document.createElement('button');
-    addBtn.className='btn-buy';addBtn.style.cssText='background:rgba(255,255,255,.08);color:var(--text);border:1px solid var(--border);margin-left:.3rem';
-    addBtn.innerHTML='\u002B';addBtn.title='Agregar al carrito';
-    addBtn.onclick=function(e){
-      e.stopPropagation();
-      addToCart({name:p.name,price:now,icon:p.isPase?'\u26D3':'\uD83D\uDC8E'});
-    };
-    var foot=card.querySelector('.prod-foot');
-    if(foot) foot.appendChild(addBtn);
-  });
-};
-updateCartCount();
+
+
 
 /* ====== PINES FF ====== */
-var PINES_PRODS = [
-  {id:101, name:'110 Diamantes',   price:17,  icon:'\uD83D\uDC8E'},
-  {id:102, name:'341 Diamantes',   price:52,  icon:'\uD83D\uDC8E'},
-  {id:103, name:'572 Diamantes',   price:80,  icon:'\uD83D\uDC8E'},
-  {id:104, name:'1,166 Diamantes', price:140, icon:'\uD83D\uDC8E'},
-  {id:105, name:'2,398 Diamantes', price:275, icon:'\uD83D\uDC8E'},
-  {id:106, name:'6,160 Diamantes', price:668, icon:'\uD83D\uDC8E'}
-];
-var PINES_MIN = 200;
-var pinesCart = {};
 
-function renderPinesGrid(){
-  var g=document.getElementById('pines-grid');
-  if(!g) return;
-  var rows='';
-  for(var i=0;i<PINES_PRODS.length;i++){
-    var p=PINES_PRODS[i];
-    var qty=pinesCart[p.id]||0;
-    rows+='<div class="prod-card" style="border-color:rgba(255,208,0,.22)">'
-      +'<div class="prod-thumb" style="background:linear-gradient(135deg,#120e00,#1a1400)">'
-      +'<div class="prod-thumb-ico" style="color:var(--c4)">\uD83D\uDC8E</div>'
-      +'</div>'
-      +'<div class="prod-body">'
-      +'<div class="prod-name">'+p.name+'</div>'
-      +'<div class="prod-desc" style="color:rgba(255,208,0,.65)">Precio revendedor</div>'
-      +'<div class="prod-foot">'
-      +'<div><div class="price-now" style="color:var(--c4)">$'+p.price+' MX</div>'
-      +'<div style="font-size:.6rem;color:var(--muted)">por unidad</div></div>'
-      +'<div class="pines-qty">'
-      +'<button class="pines-qty-btn" onclick="pinesQty('+p.id+',-1)">-</button>'
-      +'<span class="pines-qty-n" id="pq-'+p.id+'">'+qty+'</span>'
-      +'<button class="pines-qty-btn" onclick="pinesQty('+p.id+',1)">+</button>'
-      +'</div>'
-      +'</div>'
-      +'</div>'
-      +'</div>';
-  }
-  g.innerHTML=rows;
-  updatePinesBar();
-}
 
-function pinesQty(id, delta){
-  pinesCart[id] = Math.max(0, (pinesCart[id]||0) + delta);
-  var el = document.getElementById('pq-'+id);
-  if(el) el.textContent = pinesCart[id];
-  updatePinesBar();
-}
 
-function getPinesTotal(){
-  var total = 0;
-  for(var i=0;i<PINES_PRODS.length;i++){
-    var p = PINES_PRODS[i];
-    total += (pinesCart[p.id]||0) * p.price;
-  }
-  return total;
-}
 
-function getPinesItems(){
-  var items = [];
-  for(var i=0;i<PINES_PRODS.length;i++){
-    var p = PINES_PRODS[i];
-    if(pinesCart[p.id] > 0) items.push({name:p.name, qty:pinesCart[p.id], price:p.price, subtotal:pinesCart[p.id]*p.price});
-  }
-  return items;
-}
 
-function updatePinesBar(){
-  var total=getPinesTotal();
-  var items=getPinesItems();
-  var allQty=0;
-  for(var i=0;i<items.length;i++) allQty+=items[i].qty;
-  var bar=document.getElementById('pines-cart-bar');
-  var lbl=document.getElementById('pc-items-lbl');
-  var warn=document.getElementById('pc-min-warn');
-  var btn=document.getElementById('pc-checkout-btn');
-  if(bar) bar.style.display=(allQty>0)?'flex':'none';
-  if(lbl) lbl.textContent='$'+total.toLocaleString('es-MX')+' MX ('+allQty+' unidades)';
-  if(warn) warn.style.display=(total>0&&total<PINES_MIN)?'inline':'none';
-  if(btn){
-    btn.style.opacity=(total>=PINES_MIN)?'1':'.45';
-    btn.style.cursor=(total>=PINES_MIN)?'pointer':'not-allowed';
-    btn.title=(total<PINES_MIN)?('Minimo $'+PINES_MIN+' MX'):'';
-  }
-}
 
-function clearPinesCart(){
-  pinesCart = {};
-  renderPinesGrid();
-}
 
-function checkoutPines(){
-  var total = getPinesTotal();
-  var items = getPinesItems();
-  if(items.length === 0){ showToast('Agrega productos al carrito'); return; }
-  if(total < PINES_MIN){ showToast('Minimo $'+PINES_MIN+' MX para pedir'); return; }
-  // Open modal
-  var ord = peekOrder();
-  document.getElementById('mp-order').textContent = 'PEDIDO #'+ord;
-  var namesHtml = items.map(function(i){return i.qty+'x '+i.name+' = $'+i.subtotal+' MX';}).join(' | ');
-  document.getElementById('mp-name').textContent = namesHtml;
-  document.getElementById('mp-price').textContent = 'Total: $'+total.toLocaleString('es-MX')+' MX';
-  document.getElementById('mp-nombre').value = '';
-  document.getElementById('mp-ffid').value   = '';
-  document.getElementById('mp-wa').value     = '';
-  document.getElementById('modal-pines').classList.add('show');
-}
 
-function closePinesModal(){
-  document.getElementById('modal-pines').classList.remove('show');
-}
+
+
+
+
+
+
+
+
+
+
+
 var _mp=document.getElementById('modal-pines');if(_mp)_mp.addEventListener('click',function(e){if(e.target===this)closePinesModal();});
 
-function submitPines(){
-  var nombre = document.getElementById('mp-nombre').value.trim();
-  var ffid   = document.getElementById('mp-ffid').value.trim();
-  var wa2    = document.getElementById('mp-wa').value.trim();
-  if(!nombre){ showToast('Ingresa tu nombre'); return; }
-  if(!ffid){ showToast('Ingresa tu ID de Free Fire'); return; }
-  if(!wa2 || wa2.length < 8){ showToast('Ingresa tu WhatsApp'); return; }
-  var items = getPinesItems();
-  var total = getPinesTotal();
-  var ord   = getNextOrder();
-  var msg   = '*NUEVO PEDIDO #'+ord+' - CiberStore (PINES FF)*\n\n';
-  msg += 'Servicio: Pines FF Revendedor\n';
-  for(var i=0;i<items.length;i++){
-    msg += items[i].qty+'x '+items[i].name+' = $'+items[i].subtotal+' MX\n';
-  }
-  msg += '\nTotal: $'+total.toLocaleString('es-MX')+' MX';
-  msg += '\nMetodo de pago: Transferencia Bancaria';
-  msg += '\n\nNombre: '+nombre;
-  msg += '\nID Free Fire: '+ffid;
-  msg += '\nWhatsApp: '+wa2;
-  msg += '\n\nManda tu comprobante con el numero #'+ord;
-  closePinesModal();
-  addToHistory({name:'Pines FF - '+items.length+' productos',price:total,icon:'\uD83D\uDC8E',date:new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),order:ord});
-  addSpend(total);
-  refreshUI();
-  setTimeout(function(){window.open('https://wa.me/'+WA+'?text='+encodeURIComponent(msg),'_blank');},500);
-  clearPinesCart();
-}
+
 
 /* Render pines when page opened */
-var _gp2 = goPage;
-goPage = function(id){
-  _gp2(id);
-  if(id === 'pines') renderPinesGrid();
-};
+
 
 function openStoriModal(){
   var el=document.getElementById('modal-stori');
@@ -661,3 +469,351 @@ goPage = function(id){
   if(id==='miscompras') renderMisCompras();
   if(id==='saldo'){}
 };
+
+/* ================================================================
+   PROMO CODES SYSTEM
+================================================================ */
+var ADMIN_EMAIL = 'ciberstore@admin.com';
+var ADMIN_PASS  = 'ciberstore26';
+var adminLoggedIn = false;
+var activePromo = null;
+
+function getPromoCodes(){
+  try{ return JSON.parse(localStorage.getItem('cs_promos')||'[]'); }catch(e){ return []; }
+}
+function savePromoCodes(arr){ localStorage.setItem('cs_promos',JSON.stringify(arr)); }
+function getPromoLog(){
+  try{ return JSON.parse(localStorage.getItem('cs_promo_log')||'[]'); }catch(e){ return []; }
+}
+function savePromoLog(arr){ localStorage.setItem('cs_promo_log',JSON.stringify(arr)); }
+
+function applyPromo(){
+  var inp=document.getElementById('f-promo');
+  var msg=document.getElementById('promo-msg');
+  if(!inp||!msg) return;
+  var code=inp.value.trim().toUpperCase();
+  if(!code){ showToast('Ingresa un codigo'); return; }
+  var codes=getPromoCodes(), found=null;
+  for(var i=0;i<codes.length;i++){
+    if(codes[i].code===code&&codes[i].active){ found=codes[i]; break; }
+  }
+  if(!found){
+    msg.style.display='block'; msg.style.color='#ff5252';
+    msg.textContent='Codigo invalido o expirado';
+    activePromo=null; refreshModalPrice(); return;
+  }
+  if(found.maxUses>0&&(found.uses||0)>=found.maxUses){
+    msg.style.display='block'; msg.style.color='#ff5252';
+    msg.textContent='Codigo sin usos disponibles';
+    activePromo=null; refreshModalPrice(); return;
+  }
+  activePromo={code:found.code,disc:found.disc};
+  msg.style.display='block'; msg.style.color='#00e676';
+  msg.textContent='Codigo aplicado: '+found.disc+'% de descuento'+(found.desc?' ('+found.desc+')':'');
+  refreshModalPrice();
+  showToast(found.disc+'% de descuento aplicado!',2500);
+}
+
+function refreshModalPrice(){
+  var priceEl=document.getElementById('m-price');
+  if(!priceEl||!curId) return;
+  var tIdx=getTIdx(getSpent()), p=null;
+  for(var i=0;i<PRODUCTS.length;i++){ if(PRODUCTS[i].id===curId){ p=PRODUCTS[i]; break; } }
+  if(!p) return;
+  var now=p.prices[tIdx];
+  if(activePromo){
+    var disc2=Math.floor(now*(1-activePromo.disc/100));
+    priceEl.textContent=fmt(disc2)+' (antes: '+fmt(now)+')';
+    priceEl.style.color='#00e676';
+  } else {
+    priceEl.textContent=fmt(now); priceEl.style.color='';
+  }
+}
+
+function getDiscountedPrice(base){
+  if(!activePromo) return base;
+  return Math.floor(base*(1-activePromo.disc/100));
+}
+
+function recordPromoUse(code,orderId,discount){
+  var codes=getPromoCodes();
+  for(var i=0;i<codes.length;i++){
+    if(codes[i].code===code){ codes[i].uses=(codes[i].uses||0)+1; break; }
+  }
+  savePromoCodes(codes);
+  var log=getPromoLog();
+  log.push({code:code,order:orderId,discount:discount,
+    date:new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'})});
+  savePromoLog(log);
+}
+
+var _origCloseModal2=closeModal;
+closeModal=function(){
+  _origCloseModal2();
+  activePromo=null;
+  var inp=document.getElementById('f-promo');
+  var msg=document.getElementById('promo-msg');
+  if(inp) inp.value='';
+  if(msg) msg.style.display='none';
+};
+
+var _origSubmitProd3=submitProd;
+submitProd=function(){
+  var v=validateForm(); if(!v) return;
+  var p=null;
+  for(var i=0;i<PRODUCTS.length;i++){ if(PRODUCTS[i].id===curId){ p=PRODUCTS[i]; break; } }
+  if(!p) return;
+  var tIdx=getTIdx(getSpent()), tier=TIERS[tIdx];
+  var base=p.prices[tIdx], now=getDiscountedPrice(base), baseOrig=p.prices[0];
+  var ord=getNextOrder(), lu=addSpend(now);
+  if(activePromo) recordPromoUse(activePromo.code,ord,activePromo.disc);
+  addToHistory({name:p.name,price:now,icon:p.isPase?'\u26D3':'\uD83D\uDC8E',
+    date:new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),order:ord});
+  var promoLine=activePromo?('\nCodigo promo: '+activePromo.code+' (-'+activePromo.disc+'%)'):'';
+  var msg2='*NUEVO PEDIDO #'+ord+' - CiberStore*\n\nProducto: '+p.name
+    +'\nPrecio: '+fmt(now)+promoLine
+    +'\nMetodo de pago: Transferencia Bancaria'
+    +'\n\nNombre: '+v.nombre+'\nID Free Fire: '+v.v1+'\nWhatsApp: '+v.wa
+    +'\n\nManda tu comprobante con el numero #'+ord;
+  sendWA(msg2,lu);
+};
+
+/* ================================================================
+   ADMIN PANEL
+================================================================ */
+function openAdmin(){
+  closeSB();
+  var el=document.getElementById('admin-modal');
+  if(el) el.classList.add('show');
+  if(adminLoggedIn){
+    document.getElementById('admin-login-section').style.display='none';
+    document.getElementById('admin-dashboard').style.display='block';
+    renderAdminCodes(); renderAdminStats();
+  } else {
+    document.getElementById('admin-login-section').style.display='block';
+    document.getElementById('admin-dashboard').style.display='none';
+  }
+}
+function closeAdmin(){
+  var el=document.getElementById('admin-modal');
+  if(el) el.classList.remove('show');
+}
+var _aEl=document.getElementById('admin-modal');
+if(_aEl) _aEl.addEventListener('click',function(e){ if(e.target===this) closeAdmin(); });
+
+function adminLogin(){
+  var email=document.getElementById('adm-email').value.trim().toLowerCase();
+  var pass=document.getElementById('adm-pass').value.trim();
+  var err=document.getElementById('adm-login-err');
+  if(email!==ADMIN_EMAIL||pass!==ADMIN_PASS){
+    err.style.display='block'; err.textContent='Correo o contrasena incorrectos'; return;
+  }
+  adminLoggedIn=true; err.style.display='none';
+  document.getElementById('admin-login-section').style.display='none';
+  document.getElementById('admin-dashboard').style.display='block';
+  renderAdminCodes(); renderAdminStats();
+}
+
+function adminLogout(){
+  adminLoggedIn=false;
+  document.getElementById('admin-dashboard').style.display='none';
+  document.getElementById('admin-login-section').style.display='block';
+  document.getElementById('adm-email').value='';
+  document.getElementById('adm-pass').value='';
+}
+
+function adminCreateCode(){
+  var code=document.getElementById('adm-code').value.trim().toUpperCase();
+  var disc=parseInt(document.getElementById('adm-disc').value||'0');
+  var uses=parseInt(document.getElementById('adm-uses').value||'0');
+  var desc=document.getElementById('adm-desc').value.trim();
+  var msg3=document.getElementById('adm-create-msg');
+  if(!code||code.length<3){ showAdminMsg(msg3,'Codigo muy corto (min 3 caracteres)','#ff5252'); return; }
+  if(disc<1||disc>99){ showAdminMsg(msg3,'Descuento debe ser 1-99%','#ff5252'); return; }
+  if(uses<1){ showAdminMsg(msg3,'Usos debe ser mayor a 0','#ff5252'); return; }
+  var codes=getPromoCodes();
+  for(var i=0;i<codes.length;i++){
+    if(codes[i].code===code){ showAdminMsg(msg3,'Ese codigo ya existe','#ff5252'); return; }
+  }
+  codes.push({code:code,disc:disc,maxUses:uses,uses:0,desc:desc,active:true,
+    created:new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'})});
+  savePromoCodes(codes);
+  document.getElementById('adm-code').value='';
+  document.getElementById('adm-disc').value='';
+  document.getElementById('adm-uses').value='';
+  document.getElementById('adm-desc').value='';
+  showAdminMsg(msg3,'Codigo '+code+' creado!','#00e676');
+  renderAdminCodes(); renderAdminStats();
+}
+
+function showAdminMsg(el,text,color){
+  if(!el) return;
+  el.style.display='block'; el.style.color=color; el.textContent=text;
+  setTimeout(function(){ el.style.display='none'; },4000);
+}
+
+function adminDeleteCode(code){
+  if(!confirm('Eliminar codigo '+code+'?')) return;
+  savePromoCodes(getPromoCodes().filter(function(c){ return c.code!==code; }));
+  renderAdminCodes(); renderAdminStats();
+}
+
+function adminToggleCode(code){
+  var codes=getPromoCodes();
+  for(var i=0;i<codes.length;i++){
+    if(codes[i].code===code){ codes[i].active=!codes[i].active; break; }
+  }
+  savePromoCodes(codes);
+  renderAdminCodes();
+}
+
+function renderAdminCodes(){
+  var codes=getPromoCodes();
+  var el=document.getElementById('adm-codes-list');
+  var cnt=document.getElementById('adm-codes-count');
+  if(!el) return;
+  if(cnt) cnt.textContent=codes.length+' codigo'+(codes.length!==1?'s':'');
+  if(!codes.length){el.innerHTML='<div style="text-align:center;padding:1.5rem;color:var(--muted)">Sin codigos</div>';return;}
+  var rows='';
+  for(var i=codes.length-1;i>=0;i--){
+    var c=codes[i];
+    rows+='<div class="admin-code-item">'
+      +'<div class="code-active" style="background:'+(c.active?'#00e676':'#555')+'"></div>'
+      +'<div class="code-badge">'+c.code+'</div>'
+      +'<div class="code-disc">-'+c.disc+'%</div>'
+      +'<div class="code-uses">'+(c.uses||0)+'/'+c.maxUses+' usos</div>'
+      +(c.desc?'<div style="font-size:.62rem;color:var(--muted);flex:1">'+c.desc+'</div>':'<div style="flex:1"></div>')
+      +'<button class="code-del" data-code="'+c.code+'" onclick="adminToggleCode(this.dataset.code)" style="font-size:.62rem;color:var(--muted)">'+(c.active?'OFF':'ON')+'</button>'
+      +'<button class="code-del" data-code="'+c.code+'" onclick="adminDeleteCode(this.dataset.code)">\u00D7</button>'
+      +'</div>';
+  }
+  el.innerHTML=rows;
+}
+
+function renderAdminStats(){
+  var log=getPromoLog(), codes=getPromoCodes();
+  var el=document.getElementById('adm-stats');
+  if(!el) return;
+  var totalUses=codes.reduce(function(s,c){ return s+(c.uses||0); },0);
+  var html3='Total de usos: <strong style="color:#fff">'+totalUses+'</strong><br/>'
+    +'Codigos activos: <strong style="color:#00e676">'+codes.filter(function(c){return c.active;}).length+'</strong><br/>'
+    +'Codigos inactivos: <strong style="color:#ff5252">'+codes.filter(function(c){return !c.active;}).length+'</strong>';
+  if(log.length){
+    html3+='<br/><br/><strong style="color:var(--c1)">Ultimos usos:</strong><br/>';
+    var recent=log.slice(-5).reverse();
+    for(var i=0;i<recent.length;i++){
+      html3+=recent[i].date+'  -  Pedido #'+recent[i].order+'  -  '+recent[i].code+' (-'+recent[i].discount+'%)<br/>';
+    }
+  }
+  el.innerHTML=html3;
+}
+
+/* ====== CARRITO ====== */
+function getCart(){try{return JSON.parse(localStorage.getItem('cs_cart')||'[]');}catch(e){return[];}}
+function saveCart(c){localStorage.setItem('cs_cart',JSON.stringify(c));}
+
+function addToCart(item){
+  var c=getCart();
+  c.push({id:Date.now(),name:item.name,price:item.price,icon:item.icon});
+  saveCart(c);
+  updateCartCount();
+  showToast(item.name+' agregado al carrito',2000);
+}
+
+function removeFromCart(id){
+  var c=getCart().filter(function(i){return i.id!==id;});
+  saveCart(c);
+  renderCartModal();
+  updateCartCount();
+}
+
+function clearCart(){
+  saveCart([]);
+  renderCartModal();
+  updateCartCount();
+}
+
+function updateCartCount(){
+  var c=getCart(),el=document.getElementById('cart-count');
+  if(!el) return;
+  el.textContent=c.length;
+  el.className='cart-count'+(c.length>0?' vis':'');
+}
+
+function openCart(){
+  renderCartModal();
+  var el=document.getElementById('modal-cart');
+  if(el) el.classList.add('show');
+}
+
+function closeCart(){
+  var el=document.getElementById('modal-cart');
+  if(el) el.classList.remove('show');
+}
+
+function renderCartModal(){
+  var c=getCart(),body=document.getElementById('cart-modal-body');
+  if(!body) return;
+  if(!c.length){body.innerHTML='<div class="cart-empty">Tu carrito esta vacio</div>';return;}
+  var total=c.reduce(function(s,i){return s+i.price;},0);
+  var rows='<div style="padding:0 .5rem">';
+  for(var i=0;i<c.length;i++){
+    var it=c[i];
+    rows+='<div class="cart-item-row">'
+      +'<div class="cart-item-ico">'+it.icon+'</div>'
+      +'<div class="cart-item-name">'+it.name+'</div>'
+      +'<div class="cart-item-price">$'+it.price.toLocaleString('es-MX')+'</div>'
+      +'<button class="cart-item-del" data-id="'+it.id+'" onclick="removeFromCart(+this.dataset.id)">\u00D7</button>'
+      +'</div>';
+  }
+  rows+='</div>';
+  rows+='<div class="cart-total-row"><span class="cart-total-lbl">Total</span><span class="cart-total-val">$'+total.toLocaleString('es-MX')+' MX</span></div>';
+  rows+='<div style="padding:0 1.35rem 1.35rem"><button class="btn-cart-checkout" onclick="checkoutCart()">\uD83D\uDCDE Pedir todo por WhatsApp</button></div>';
+  body.innerHTML=rows;
+}
+
+function checkoutCart(){
+  var c=getCart();
+  if(!c.length){showToast('El carrito esta vacio');return;}
+  var total=c.reduce(function(s,i){return s+i.price;},0);
+  var lines='*PEDIDO CARRITO - CiberStore*\n\n';
+  for(var i=0;i<c.length;i++) lines+=c[i].name+': $'+c[i].price.toLocaleString('es-MX')+' MX\n';
+  lines+='\nTotal: $'+total.toLocaleString('es-MX')+' MX';
+  lines+='\nMetodo de pago: Transferencia Bancaria';
+  lines+='\n\nManda tu comprobante al recibir este mensaje.';
+  closeCart();
+  setTimeout(function(){window.open('https://wa.me/'+WA+'?text='+encodeURIComponent(lines),'_blank');},400);
+}
+
+/* Add + button to each product card */
+var _origRenderProds2=renderProds;
+renderProds=function(){
+  _origRenderProds2();
+  var g=document.getElementById('prod-grid');
+  if(!g) return;
+  var cards=g.querySelectorAll('.prod-card');
+  var tIdx=getTIdx(getSpent());
+  for(var i=0;i<cards.length&&i<PRODUCTS.length;i++){
+    var p=PRODUCTS[i];
+    var now=p.prices[tIdx];
+    var addBtn=document.createElement('button');
+    addBtn.className='btn-buy';
+    addBtn.style.cssText='background:rgba(255,255,255,.07);color:var(--text);border:1px solid var(--border);margin-left:.3rem';
+    addBtn.title='Agregar al carrito';
+    addBtn.innerHTML='+';
+    addBtn.setAttribute('data-idx',i);
+    addBtn.onclick=function(e){
+      e.stopPropagation();
+      var idx2=parseInt(this.dataset.idx);
+      var p2=PRODUCTS[idx2];
+      var tIdx2=getTIdx(getSpent());
+      addToCart({name:p2.name,price:p2.prices[tIdx2],icon:p2.isPase?'\u26D3':'\uD83D\uDC8E'});
+    };
+    var foot=cards[i].querySelector('.prod-foot');
+    if(foot) foot.appendChild(addBtn);
+  }
+};
+
+var _mcEl=document.getElementById('modal-cart');
+if(_mcEl) _mcEl.addEventListener('click',function(e){if(e.target===this)closeCart();});
+updateCartCount();
