@@ -1,5 +1,5 @@
 
-var WA='5215523371367';
+var WA='5215548461200';
 var TIERS=[
   {id:'free',    name:'Visitante',color:'#8892a4',colorBg:'rgba(136,146,164,.1)',threshold:0,     perks:['Precios estandar','Acceso a la tienda','Soporte por chat']},
   {id:'silver',  name:'Plata',   color:'#b0bec5',colorBg:'rgba(176,190,197,.1)',threshold:500,   perks:['Descuento en paquetes grandes','Soporte prioritario','Ofertas flash'],badge:{text:'STARTER',bg:'#b0bec5',color:'#111'}},
