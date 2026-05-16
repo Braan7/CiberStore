@@ -435,7 +435,7 @@ function checkoutCart(){
   lines+='\nMetodo de pago: Transferencia Bancaria';
   lines+='\n\nManda tu comprobante al recibir este mensaje.';
   closeCart();
-  setTimeout(function(){window.open('https://wa.me/5215523371367?text='+encodeURIComponent(lines),'_blank');},400);
+  setTimeout(function(){window.open('https://wa.me/5215548461200?text='+encodeURIComponent(lines),'_blank');},400);
 }
 /* Add to cart button in prod cards */
 var _origRenderProds=renderProds;
