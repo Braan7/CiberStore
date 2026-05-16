@@ -700,6 +700,211 @@ body{background:var(--bg);color:var(--text);font-family:"Exo 2",sans-serif;overf
 <button class="scrolltop" id="scrolltop" onclick="window.scrollTo({top:0,behavior:'smooth'})">&#8679;</button>
 <div class="toast" id="toast"></div>
 
+
+
+<!-- CARRITO MODAL -->
+<div class="modal-ov" id="modal-cart">
+  <div class="modal">
+    <div class="modal-h">
+      <h3>&#128722; Mi Carrito</h3>
+      <div style="display:flex;align-items:center;gap:.75rem">
+        <button class="btn-cart-clear" onclick="clearCart()">Vaciar</button>
+        <button class="modal-close" onclick="closeCart()">&#215;</button>
+      </div>
+    </div>
+    <div class="modal-b" id="cart-modal-body">
+      <div class="cart-empty">Tu carrito esta vacio</div>
+    </div>
+  </div>
+</div>
+
+<!-- PINES FF -->
+<div class="page" id="page-pines">
+  <div class="ph">
+    <div class="stag" style="background:rgba(255,208,0,.07);border-color:rgba(255,208,0,.3);color:var(--c4)">Exclusivo Revendedores</div>
+    <h2 class="ptitle"><span style="color:var(--c4)">PINES</span> DE FF</h2>
+    <p class="psub">Precios mayoristas para revendedores. Compra minima <strong style="color:var(--c4)">$200 MX</strong>.</p>
+  </div>
+
+  <!-- Carrito pines -->
+  <div style="max-width:900px;margin:0 auto;padding:0 5vw .75rem">
+    <div id="pines-cart-bar" style="display:none;background:rgba(255,208,0,.07);border:1px solid rgba(255,208,0,.25);border-radius:10px;padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem">
+      <div style="font-size:.82rem;color:var(--text)">Carrito: <span id="pc-items-lbl" style="font-family:Orbitron;font-weight:700;color:var(--c4)">$0 MX</span></div>
+      <div style="display:flex;gap:.6rem;align-items:center">
+        <span id="pc-min-warn" style="font-size:.7rem;color:#ff8c00;display:none">Minimo $200 MX</span>
+        <button onclick="clearPinesCart()" style="background:none;border:1px solid rgba(255,80,80,.3);color:rgba(255,80,80,.7);border-radius:6px;padding:.2rem .55rem;font-family:'Exo 2';font-size:.68rem;cursor:pointer;font-weight:700">Vaciar</button>
+        <button onclick="checkoutPines()" id="pc-checkout-btn" style="padding:.42rem 1.1rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:7px;font-family:'Exo 2';font-weight:800;font-size:.78rem;cursor:pointer;letter-spacing:1px;position:relative;overflow:hidden">Pedir por WhatsApp</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Productos pines -->
+  <div class="pgrid" id="pines-grid"></div>
+
+  <!-- Bloqueo overlay si no tiene acceso -->
+  <div id="pines-lock-overlay" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(6,8,15,.92);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:1.5rem">
+    <div style="background:var(--card);border:1px solid rgba(255,208,0,.3);border-radius:20px;padding:2.5rem 2rem;text-align:center;max-width:400px;width:100%">
+      <div style="font-size:3.5rem;margin-bottom:.75rem">&#128274;</div>
+      <div style="font-family:Orbitron;font-size:1.3rem;font-weight:900;color:var(--c4);margin-bottom:.45rem;letter-spacing:1px">EXCLUSIVO PARA REVENDEDORES</div>
+      <div style="font-size:.86rem;color:var(--muted);line-height:1.7;margin-bottom:1.1rem">Accede a precios mayoristas para revender diamantes. Compra minima de $200 MX por pedido.</div>
+      <div style="display:inline-flex;align-items:center;gap:.45rem;padding:.45rem 1.1rem;background:rgba(255,208,0,.08);border:1px solid rgba(255,208,0,.3);border-radius:20px;font-size:.8rem;font-weight:700;color:var(--c4);margin-bottom:1.4rem">Compra minima $200 MX</div>
+      <br/>
+      <a href="https://wa.me/5215523371367?text=Hola%2C%20quiero%20acceso%20a%20Pines%20FF%20para%20revendedores" target="_blank" style="display:inline-flex;align-items:center;gap:.5rem;padding:.78rem 1.8rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:8px;font-family:'Exo 2';font-weight:800;font-size:.88rem;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none">
+        Solicitar acceso
+      </a>
+      <div style="margin-top:.85rem;font-size:.72rem;color:var(--muted)">Contactanos por WhatsApp para activar tu cuenta de revendedor.</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PINES COMPRA -->
+<div class="modal-ov" id="modal-pines">
+  <div class="modal">
+    <div class="modal-h">
+      <h3 id="mp-title">Pines FF - Revendedor</h3>
+      <button class="modal-close" onclick="closePinesModal()">&#215;</button>
+    </div>
+    <div class="modal-b">
+      <div class="m-prod-card">
+        <div class="m-prod-ico" id="mp-ico">&#128142;</div>
+        <div>
+          <div class="m-prod-name" id="mp-name"></div>
+          <div class="m-prod-price" id="mp-price"></div>
+          <div class="m-prod-sub">Precio exclusivo revendedor</div>
+        </div>
+      </div>
+      <div class="order-disp" id="mp-order"></div>
+      <div class="pay-box">
+        <div class="pay-title">Transferencia STORI MX</div>
+        <div class="pay-field"><div class="pf-label">Banco</div><div class="pf-val">STORI</div></div>
+        <div class="pay-field"><div class="pf-label">Titular</div><div class="pf-val">MATINA RUBI HDZ</div></div>
+        <div class="pay-field">
+          <div><div class="pf-label">Cuenta / CLABE</div><div class="pf-val pf-acc">646180402332964686</div></div>
+          <button class="copy-btn" onclick="copyClabe()">Copiar</button>
+        </div>
+        <div class="pay-note">Minimo $200 MX por pedido. Transfiere y manda comprobante por WhatsApp.</div>
+      </div>
+      <label class="flabel">Nombre completo</label>
+      <input class="finput" id="mp-nombre" type="text" placeholder="Ej: Roberto Gomez"/>
+      <label class="flabel">Tu ID de Free Fire</label>
+      <input class="finput" id="mp-ffid" type="text" placeholder="Ej: 123456789"/>
+      <label class="flabel">Numero de WhatsApp</label>
+      <input class="finput" id="mp-wa" type="tel" placeholder="Ej: 5512345678"/>
+      <button class="btn-submit" onclick="submitPines()">Pedir por WhatsApp</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- RECARGAR SALDO -->
+<div class="page" id="page-saldo">
+  <div class="ph">
+    <div class="stag">Pagos</div>
+    <h2 class="ptitle">RECARGAR <span>SALDO</span></h2>
+    <p class="psub">Elige tu metodo de pago preferido.</p>
+  </div>
+  <div style="padding:0 5vw 3.5rem;max-width:580px;margin:0 auto">
+
+    <div style="background:var(--card);border:1px solid rgba(0,200,100,.22);border-radius:16px;padding:2rem 1.5rem;margin-bottom:1rem;cursor:pointer;transition:all .3s;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.5rem;position:relative;overflow:hidden" onclick="openStoriModal()">
+      <div style="position:absolute;top:.75rem;right:.75rem;padding:.2rem .6rem;border-radius:20px;font-size:.6rem;font-weight:800;letter-spacing:1px;background:rgba(0,200,100,.15);border:1px solid rgba(0,200,100,.3);color:#00e676">ACTIVO</div>
+      <span style="font-size:2.6rem;display:block;margin-bottom:.3rem">&#127968;</span>
+      <div style="font-family:Orbitron;font-size:1rem;font-weight:700;color:#fff">Cuenta Bancaria</div>
+      <div style="font-size:.82rem;color:var(--muted);max-width:300px">Transferencia STORI - MATINA RUBI HDZ - Inmediata y segura</div>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem 1.5rem;margin-bottom:1rem;opacity:.45;cursor:not-allowed;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.5rem;position:relative;overflow:hidden" onclick="showToast('PayPal proximamente disponible')">
+      <div style="position:absolute;top:.75rem;right:.75rem;padding:.2rem .6rem;border-radius:20px;font-size:.6rem;font-weight:800;letter-spacing:1px;background:rgba(255,165,0,.12);border:1px solid rgba(255,165,0,.25);color:#ffa500">PRONTO</div>
+      <span style="font-size:2.6rem;display:block;margin-bottom:.3rem">&#128179;</span>
+      <div style="font-family:Orbitron;font-size:1rem;font-weight:700;color:#fff">PayPal</div>
+      <div style="font-size:.82rem;color:var(--muted)">Pago rapido con tu cuenta PayPal</div>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem 1.5rem;margin-bottom:1rem;opacity:.45;cursor:not-allowed;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.5rem;position:relative;overflow:hidden" onclick="showToast('Binance Pay proximamente disponible')">
+      <div style="position:absolute;top:.75rem;right:.75rem;padding:.2rem .6rem;border-radius:20px;font-size:.6rem;font-weight:800;letter-spacing:1px;background:rgba(255,165,0,.12);border:1px solid rgba(255,165,0,.25);color:#ffa500">PRONTO</div>
+      <span style="font-size:2.6rem;display:block;margin-bottom:.3rem">&#128176;</span>
+      <div style="font-family:Orbitron;font-size:1rem;font-weight:700;color:#fff">Binance Pay</div>
+      <div style="font-size:.82rem;color:var(--muted)">Transferencia USDT con confirmacion manual</div>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem 1.5rem;margin-bottom:1rem;opacity:.45;cursor:not-allowed;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.5rem;position:relative;overflow:hidden" onclick="showToast('Mercado Pago proximamente disponible')">
+      <div style="position:absolute;top:.75rem;right:.75rem;padding:.2rem .6rem;border-radius:20px;font-size:.6rem;font-weight:800;letter-spacing:1px;background:rgba(255,165,0,.12);border:1px solid rgba(255,165,0,.25);color:#ffa500">PRONTO</div>
+      <span style="font-size:2.6rem;display:block;margin-bottom:.3rem">&#127970;</span>
+      <div style="font-family:Orbitron;font-size:1rem;font-weight:700;color:#fff">Mercado Pago</div>
+      <div style="font-size:.82rem;color:var(--muted)">Tarjetas mexicanas y OXXO</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MIS COMPRAS -->
+<div class="page" id="page-miscompras">
+  <div class="ph">
+    <div class="stag">Historial</div>
+    <h2 class="ptitle">MIS <span>COMPRAS</span></h2>
+    <p class="psub">Registro de todos tus pedidos en este dispositivo.</p>
+  </div>
+  <div style="padding:0 5vw 3.5rem;max-width:640px;margin:0 auto">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem;margin-bottom:1.5rem">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center">
+        <div style="font-family:Orbitron;font-size:1.4rem;font-weight:700;color:var(--c1)" id="mc2-orders">0</div>
+        <div style="font-size:.62rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:.2rem">Pedidos</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center">
+        <div style="font-family:Orbitron;font-size:1.4rem;font-weight:700;color:var(--c1)" id="mc2-spent">$0</div>
+        <div style="font-size:.62rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:.2rem">Gastado</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center">
+        <div style="font-family:Orbitron;font-size:.9rem;font-weight:700;color:var(--c1)" id="mc2-tier">Visitante</div>
+        <div style="font-size:.62rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:.2rem">Nivel</div>
+      </div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:1rem 1.25rem .7rem">
+        <div style="font-family:Orbitron;font-size:.82rem;font-weight:700;color:#fff">Historial de pedidos</div>
+        <button onclick="clearHistMC()" style="background:none;border:1px solid rgba(255,80,80,.3);color:rgba(255,80,80,.7);border-radius:6px;padding:.22rem .6rem;font-family:'Exo 2';font-size:.68rem;cursor:pointer;font-weight:700">Limpiar</button>
+      </div>
+      <div style="padding:0 .75rem .75rem" id="mc2-list">
+        <div style="text-align:center;padding:2.5rem 1rem;color:var(--muted);font-size:.85rem">Aun no tienes compras registradas</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL STORI -->
+<div class="modal-ov" id="modal-stori">
+  <div class="modal">
+    <div class="modal-h">
+      <h3>&#127968; Cuenta Bancaria STORI</h3>
+      <button class="modal-close" onclick="closeStoriModal()">&#215;</button>
+    </div>
+    <div class="modal-b">
+      <div style="text-align:center;margin-bottom:1.1rem">
+        <div style="font-size:2.5rem;margin-bottom:.5rem">&#127968;</div>
+        <div style="font-family:Orbitron;font-size:.9rem;font-weight:700;color:#fff;margin-bottom:.2rem">Transferencia Bancaria</div>
+        <div style="font-size:.8rem;color:var(--muted)">Realiza tu transferencia y manda el comprobante por WhatsApp</div>
+      </div>
+      <div style="background:rgba(37,211,102,.05);border:1px solid rgba(37,211,102,.2);border-radius:12px;padding:1.25rem;margin-bottom:1rem">
+        <div style="font-family:Orbitron;font-size:.72rem;font-weight:700;color:#25d366;margin-bottom:.7rem">Datos bancarios</div>
+        <div style="display:flex;justify-content:space-between;padding:.4rem .6rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:7px;margin-bottom:.35rem"><span style="font-size:.63rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Banco</span><span style="font-family:Orbitron;font-size:.73rem;font-weight:700;color:#fff">STORI</span></div>
+        <div style="display:flex;justify-content:space-between;padding:.4rem .6rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:7px;margin-bottom:.35rem"><span style="font-size:.63rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Titular</span><span style="font-family:Orbitron;font-size:.73rem;font-weight:700;color:#fff">MATINA RUBI HDZ</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:.4rem .6rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:7px;flex-wrap:wrap;gap:.35rem">
+          <div><div style="font-size:.63rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Cuenta / CLABE</div><div style="font-family:Orbitron;font-size:.7rem;font-weight:700;color:var(--c1)">646180402332964686</div></div>
+          <button onclick="copyClabe()" style="background:none;border:1px solid rgba(0,170,255,.3);color:var(--c1);border-radius:4px;padding:.1rem .42rem;font-size:.62rem;cursor:pointer;font-family:'Exo 2';font-weight:700">Copiar</button>
+        </div>
+      </div>
+      <div style="font-size:.75rem;color:var(--muted);line-height:1.7;padding:.65rem .85rem;background:rgba(255,255,255,.03);border-radius:7px;border:1px solid var(--border)">
+        1. Transfiere el monto exacto de tu pedido.<br/>
+        2. Toma captura del comprobante.<br/>
+        3. Manda comprobante + numero de pedido al WhatsApp.<br/>
+        4. Confirmamos y entregamos en menos de 3 minutos.
+      </div>
+      <a href="https://wa.me/5215523371367" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.85rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:7px;font-family:'Exo 2';font-weight:800;font-size:.88rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;margin-top:.85rem">
+        &#128222; Confirmar por WhatsApp
+      </a>
+    </div>
+  </div>
+</div>
+
 <script>
 var WA='5215523371367';
 var TIERS=[
@@ -931,7 +1136,7 @@ function setModal(title,ico,name,priceStr,origPrice,sub,discText,idLabel,lbl2Tex
   document.getElementById('f1').value='';document.getElementById('f2').value='';document.getElementById('f3').value='';
   document.getElementById('f2').placeholder=lbl2Text==='Nombre del Clan'?'Nombre exacto del clan':'Repite tu ID';
   document.getElementById('btn-submit').onclick=btnFn;
-  document.getElementById('modal-ov').classList.add('show');
+  var _msh=document.getElementById('modal');if(_msh)_msh.classList.add('show');
 }
 function openProdModal(id){
   var p=null;for(var i=0;i<PRODUCTS.length;i++){if(PRODUCTS[i].id===id){p=PRODUCTS[i];break;}}if(!p) return;
@@ -951,19 +1156,9 @@ function openHonorModal(idx){
   setModal('Honor de Clan','\uD83C\uDFC6','Honor - '+h.region,fmt(h.price),null,'Entrega en menos de 24 horas - '+h.region,'Necesitamos el ID y nombre de tu clan.','ID del Clan','Nombre del Clan',submitHonor);
 }
 function clanWA(){window.open('https://wa.me/'+WA+'?text='+encodeURIComponent('*COTIZACION CLAN NIVEL 7 - CiberStore*\n\nHola, quiero informacion sobre clanes nivel 7.'),'_blank');}
-function closeModal(){document.getElementById('modal-ov').classList.remove('show');}
-document.getElementById('modal-ov').addEventListener('click',function(e){if(e.target===this)closeModal();});
-
-function validateForm(){
-  var v1=document.getElementById('f1').value.trim();
-  var v2=document.getElementById('f2').value.trim();
-  var nombre=document.getElementById('f3')?document.getElementById('f3').value.trim():'';
-  var wa=document.getElementById('f4')?document.getElementById('f4').value.trim():'';
-  if(!v1){showToast('Completa el primer campo');return null;}
-  if(!v2){showToast('Completa el segundo campo');return null;}
-  if(!nombre){showToast('Ingresa tu nombre');return null;}
-  if(!wa||wa.length<8){showToast('Ingresa tu numero de WhatsApp');return null;}
-  return {v1:v1,v2:v2,nombre:nombre,wa:wa};
+function closeModal(){
+  var m=document.getElementById('modal');
+  if(m) m.classList.remove('show');
 }
 
 function addToHistory(item){var h=getHistory();h.push(item);saveHistory(h);}
@@ -1104,7 +1299,7 @@ function updateCartCount(){
 }
 function openCart(){renderCartModal();document.getElementById('modal-cart').classList.add('show');}
 function closeCart(){document.getElementById('modal-cart').classList.remove('show');}
-document.getElementById('modal-cart').addEventListener('click',function(e){if(e.target===this)closeCart();});
+var _mc=document.getElementById('modal-cart');if(_mc)_mc.addEventListener('click',function(e){if(e.target===this)closeCart();});
 function renderCartModal(){
   var c=getCart(),body=document.getElementById('cart-modal-body');
   if(!body) return;
@@ -1272,7 +1467,7 @@ function checkoutPines(){
 function closePinesModal(){
   document.getElementById('modal-pines').classList.remove('show');
 }
-document.getElementById('modal-pines').addEventListener('click',function(e){if(e.target===this)closePinesModal();});
+var _mp=document.getElementById('modal-pines');if(_mp)_mp.addEventListener('click',function(e){if(e.target===this)closePinesModal();});
 
 function submitPines(){
   var nombre = document.getElementById('mp-nombre').value.trim();
@@ -1362,209 +1557,5 @@ goPage = function(id){
   if(id==='saldo'){}
 };
 </script>
-
-<!-- CARRITO MODAL -->
-<div class="modal-ov" id="modal-cart">
-  <div class="modal">
-    <div class="modal-h">
-      <h3>&#128722; Mi Carrito</h3>
-      <div style="display:flex;align-items:center;gap:.75rem">
-        <button class="btn-cart-clear" onclick="clearCart()">Vaciar</button>
-        <button class="modal-close" onclick="closeCart()">&#215;</button>
-      </div>
-    </div>
-    <div class="modal-b" id="cart-modal-body">
-      <div class="cart-empty">Tu carrito esta vacio</div>
-    </div>
-  </div>
-</div>
-
-<!-- PINES FF -->
-<div class="page" id="page-pines">
-  <div class="ph">
-    <div class="stag" style="background:rgba(255,208,0,.07);border-color:rgba(255,208,0,.3);color:var(--c4)">Exclusivo Revendedores</div>
-    <h2 class="ptitle"><span style="color:var(--c4)">PINES</span> DE FF</h2>
-    <p class="psub">Precios mayoristas para revendedores. Compra minima <strong style="color:var(--c4)">$200 MX</strong>.</p>
-  </div>
-
-  <!-- Carrito pines -->
-  <div style="max-width:900px;margin:0 auto;padding:0 5vw .75rem">
-    <div id="pines-cart-bar" style="display:none;background:rgba(255,208,0,.07);border:1px solid rgba(255,208,0,.25);border-radius:10px;padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem">
-      <div style="font-size:.82rem;color:var(--text)">Carrito: <span id="pc-items-lbl" style="font-family:Orbitron;font-weight:700;color:var(--c4)">$0 MX</span></div>
-      <div style="display:flex;gap:.6rem;align-items:center">
-        <span id="pc-min-warn" style="font-size:.7rem;color:#ff8c00;display:none">Minimo $200 MX</span>
-        <button onclick="clearPinesCart()" style="background:none;border:1px solid rgba(255,80,80,.3);color:rgba(255,80,80,.7);border-radius:6px;padding:.2rem .55rem;font-family:'Exo 2';font-size:.68rem;cursor:pointer;font-weight:700">Vaciar</button>
-        <button onclick="checkoutPines()" id="pc-checkout-btn" style="padding:.42rem 1.1rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:7px;font-family:'Exo 2';font-weight:800;font-size:.78rem;cursor:pointer;letter-spacing:1px;position:relative;overflow:hidden">Pedir por WhatsApp</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Productos pines -->
-  <div class="pgrid" id="pines-grid"></div>
-
-  <!-- Bloqueo overlay si no tiene acceso -->
-  <div id="pines-lock-overlay" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(6,8,15,.92);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:1.5rem">
-    <div style="background:var(--card);border:1px solid rgba(255,208,0,.3);border-radius:20px;padding:2.5rem 2rem;text-align:center;max-width:400px;width:100%">
-      <div style="font-size:3.5rem;margin-bottom:.75rem">&#128274;</div>
-      <div style="font-family:Orbitron;font-size:1.3rem;font-weight:900;color:var(--c4);margin-bottom:.45rem;letter-spacing:1px">EXCLUSIVO PARA REVENDEDORES</div>
-      <div style="font-size:.86rem;color:var(--muted);line-height:1.7;margin-bottom:1.1rem">Accede a precios mayoristas para revender diamantes. Compra minima de $200 MX por pedido.</div>
-      <div style="display:inline-flex;align-items:center;gap:.45rem;padding:.45rem 1.1rem;background:rgba(255,208,0,.08);border:1px solid rgba(255,208,0,.3);border-radius:20px;font-size:.8rem;font-weight:700;color:var(--c4);margin-bottom:1.4rem">Compra minima $200 MX</div>
-      <br/>
-      <a href="https://wa.me/5215523371367?text=Hola%2C%20quiero%20acceso%20a%20Pines%20FF%20para%20revendedores" target="_blank" style="display:inline-flex;align-items:center;gap:.5rem;padding:.78rem 1.8rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:8px;font-family:'Exo 2';font-weight:800;font-size:.88rem;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none">
-        Solicitar acceso
-      </a>
-      <div style="margin-top:.85rem;font-size:.72rem;color:var(--muted)">Contactanos por WhatsApp para activar tu cuenta de revendedor.</div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL PINES COMPRA -->
-<div class="modal-ov" id="modal-pines">
-  <div class="modal">
-    <div class="modal-h">
-      <h3 id="mp-title">Pines FF - Revendedor</h3>
-      <button class="modal-close" onclick="closePinesModal()">&#215;</button>
-    </div>
-    <div class="modal-b">
-      <div class="m-prod-card">
-        <div class="m-prod-ico" id="mp-ico">&#128142;</div>
-        <div>
-          <div class="m-prod-name" id="mp-name"></div>
-          <div class="m-prod-price" id="mp-price"></div>
-          <div class="m-prod-sub">Precio exclusivo revendedor</div>
-        </div>
-      </div>
-      <div class="order-disp" id="mp-order"></div>
-      <div class="pay-box">
-        <div class="pay-title">Transferencia STORI MX</div>
-        <div class="pay-field"><div class="pf-label">Banco</div><div class="pf-val">STORI</div></div>
-        <div class="pay-field"><div class="pf-label">Titular</div><div class="pf-val">MATINA RUBI HDZ</div></div>
-        <div class="pay-field">
-          <div><div class="pf-label">Cuenta / CLABE</div><div class="pf-val pf-acc">646180402332964686</div></div>
-          <button class="copy-btn" onclick="copyClabe()">Copiar</button>
-        </div>
-        <div class="pay-note">Minimo $200 MX por pedido. Transfiere y manda comprobante por WhatsApp.</div>
-      </div>
-      <label class="flabel">Nombre completo</label>
-      <input class="finput" id="mp-nombre" type="text" placeholder="Ej: Roberto Gomez"/>
-      <label class="flabel">Tu ID de Free Fire</label>
-      <input class="finput" id="mp-ffid" type="text" placeholder="Ej: 123456789"/>
-      <label class="flabel">Numero de WhatsApp</label>
-      <input class="finput" id="mp-wa" type="tel" placeholder="Ej: 5512345678"/>
-      <button class="btn-submit" onclick="submitPines()">Pedir por WhatsApp</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- RECARGAR SALDO -->
-<div class="page" id="page-saldo">
-  <div class="ph">
-    <div class="stag">Pagos</div>
-    <h2 class="ptitle">RECARGAR <span>SALDO</span></h2>
-    <p class="psub">Elige tu metodo de pago preferido.</p>
-  </div>
-  <div style="padding:0 5vw 3.5rem;max-width:580px;margin:0 auto">
-
-    <div style="background:var(--card);border:1px solid rgba(0,200,100,.22);border-radius:16px;padding:2rem 1.5rem;margin-bottom:1rem;cursor:pointer;transition:all .3s;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.5rem;position:relative;overflow:hidden" onclick="openStoriModal()">
-      <div style="position:absolute;top:.75rem;right:.75rem;padding:.2rem .6rem;border-radius:20px;font-size:.6rem;font-weight:800;letter-spacing:1px;background:rgba(0,200,100,.15);border:1px solid rgba(0,200,100,.3);color:#00e676">ACTIVO</div>
-      <span style="font-size:2.6rem;display:block;margin-bottom:.3rem">&#127968;</span>
-      <div style="font-family:Orbitron;font-size:1rem;font-weight:700;color:#fff">Cuenta Bancaria</div>
-      <div style="font-size:.82rem;color:var(--muted);max-width:300px">Transferencia STORI - MATINA RUBI HDZ - Inmediata y segura</div>
-    </div>
-
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem 1.5rem;margin-bottom:1rem;opacity:.45;cursor:not-allowed;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.5rem;position:relative;overflow:hidden" onclick="showToast('PayPal proximamente disponible')">
-      <div style="position:absolute;top:.75rem;right:.75rem;padding:.2rem .6rem;border-radius:20px;font-size:.6rem;font-weight:800;letter-spacing:1px;background:rgba(255,165,0,.12);border:1px solid rgba(255,165,0,.25);color:#ffa500">PRONTO</div>
-      <span style="font-size:2.6rem;display:block;margin-bottom:.3rem">&#128179;</span>
-      <div style="font-family:Orbitron;font-size:1rem;font-weight:700;color:#fff">PayPal</div>
-      <div style="font-size:.82rem;color:var(--muted)">Pago rapido con tu cuenta PayPal</div>
-    </div>
-
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem 1.5rem;margin-bottom:1rem;opacity:.45;cursor:not-allowed;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.5rem;position:relative;overflow:hidden" onclick="showToast('Binance Pay proximamente disponible')">
-      <div style="position:absolute;top:.75rem;right:.75rem;padding:.2rem .6rem;border-radius:20px;font-size:.6rem;font-weight:800;letter-spacing:1px;background:rgba(255,165,0,.12);border:1px solid rgba(255,165,0,.25);color:#ffa500">PRONTO</div>
-      <span style="font-size:2.6rem;display:block;margin-bottom:.3rem">&#128176;</span>
-      <div style="font-family:Orbitron;font-size:1rem;font-weight:700;color:#fff">Binance Pay</div>
-      <div style="font-size:.82rem;color:var(--muted)">Transferencia USDT con confirmacion manual</div>
-    </div>
-
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem 1.5rem;margin-bottom:1rem;opacity:.45;cursor:not-allowed;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.5rem;position:relative;overflow:hidden" onclick="showToast('Mercado Pago proximamente disponible')">
-      <div style="position:absolute;top:.75rem;right:.75rem;padding:.2rem .6rem;border-radius:20px;font-size:.6rem;font-weight:800;letter-spacing:1px;background:rgba(255,165,0,.12);border:1px solid rgba(255,165,0,.25);color:#ffa500">PRONTO</div>
-      <span style="font-size:2.6rem;display:block;margin-bottom:.3rem">&#127970;</span>
-      <div style="font-family:Orbitron;font-size:1rem;font-weight:700;color:#fff">Mercado Pago</div>
-      <div style="font-size:.82rem;color:var(--muted)">Tarjetas mexicanas y OXXO</div>
-    </div>
-
-  </div>
-</div>
-
-<!-- MIS COMPRAS -->
-<div class="page" id="page-miscompras">
-  <div class="ph">
-    <div class="stag">Historial</div>
-    <h2 class="ptitle">MIS <span>COMPRAS</span></h2>
-    <p class="psub">Registro de todos tus pedidos en este dispositivo.</p>
-  </div>
-  <div style="padding:0 5vw 3.5rem;max-width:640px;margin:0 auto">
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem;margin-bottom:1.5rem">
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center">
-        <div style="font-family:Orbitron;font-size:1.4rem;font-weight:700;color:var(--c1)" id="mc2-orders">0</div>
-        <div style="font-size:.62rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:.2rem">Pedidos</div>
-      </div>
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center">
-        <div style="font-family:Orbitron;font-size:1.4rem;font-weight:700;color:var(--c1)" id="mc2-spent">$0</div>
-        <div style="font-size:.62rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:.2rem">Gastado</div>
-      </div>
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center">
-        <div style="font-family:Orbitron;font-size:.9rem;font-weight:700;color:var(--c1)" id="mc2-tier">Visitante</div>
-        <div style="font-size:.62rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:.2rem">Nivel</div>
-      </div>
-    </div>
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden">
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:1rem 1.25rem .7rem">
-        <div style="font-family:Orbitron;font-size:.82rem;font-weight:700;color:#fff">Historial de pedidos</div>
-        <button onclick="clearHistMC()" style="background:none;border:1px solid rgba(255,80,80,.3);color:rgba(255,80,80,.7);border-radius:6px;padding:.22rem .6rem;font-family:'Exo 2';font-size:.68rem;cursor:pointer;font-weight:700">Limpiar</button>
-      </div>
-      <div style="padding:0 .75rem .75rem" id="mc2-list">
-        <div style="text-align:center;padding:2.5rem 1rem;color:var(--muted);font-size:.85rem">Aun no tienes compras registradas</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL STORI -->
-<div class="modal-ov" id="modal-stori">
-  <div class="modal">
-    <div class="modal-h">
-      <h3>&#127968; Cuenta Bancaria STORI</h3>
-      <button class="modal-close" onclick="closeStoriModal()">&#215;</button>
-    </div>
-    <div class="modal-b">
-      <div style="text-align:center;margin-bottom:1.1rem">
-        <div style="font-size:2.5rem;margin-bottom:.5rem">&#127968;</div>
-        <div style="font-family:Orbitron;font-size:.9rem;font-weight:700;color:#fff;margin-bottom:.2rem">Transferencia Bancaria</div>
-        <div style="font-size:.8rem;color:var(--muted)">Realiza tu transferencia y manda el comprobante por WhatsApp</div>
-      </div>
-      <div style="background:rgba(37,211,102,.05);border:1px solid rgba(37,211,102,.2);border-radius:12px;padding:1.25rem;margin-bottom:1rem">
-        <div style="font-family:Orbitron;font-size:.72rem;font-weight:700;color:#25d366;margin-bottom:.7rem">Datos bancarios</div>
-        <div style="display:flex;justify-content:space-between;padding:.4rem .6rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:7px;margin-bottom:.35rem"><span style="font-size:.63rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Banco</span><span style="font-family:Orbitron;font-size:.73rem;font-weight:700;color:#fff">STORI</span></div>
-        <div style="display:flex;justify-content:space-between;padding:.4rem .6rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:7px;margin-bottom:.35rem"><span style="font-size:.63rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Titular</span><span style="font-family:Orbitron;font-size:.73rem;font-weight:700;color:#fff">MATINA RUBI HDZ</span></div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:.4rem .6rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:7px;flex-wrap:wrap;gap:.35rem">
-          <div><div style="font-size:.63rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Cuenta / CLABE</div><div style="font-family:Orbitron;font-size:.7rem;font-weight:700;color:var(--c1)">646180402332964686</div></div>
-          <button onclick="copyClabe()" style="background:none;border:1px solid rgba(0,170,255,.3);color:var(--c1);border-radius:4px;padding:.1rem .42rem;font-size:.62rem;cursor:pointer;font-family:'Exo 2';font-weight:700">Copiar</button>
-        </div>
-      </div>
-      <div style="font-size:.75rem;color:var(--muted);line-height:1.7;padding:.65rem .85rem;background:rgba(255,255,255,.03);border-radius:7px;border:1px solid var(--border)">
-        1. Transfiere el monto exacto de tu pedido.<br/>
-        2. Toma captura del comprobante.<br/>
-        3. Manda comprobante + numero de pedido al WhatsApp.<br/>
-        4. Confirmamos y entregamos en menos de 3 minutos.
-      </div>
-      <a href="https://wa.me/5215523371367" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.85rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:7px;font-family:'Exo 2';font-weight:800;font-size:.88rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;margin-top:.85rem">
-        &#128222; Confirmar por WhatsApp
-      </a>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>
