@@ -226,7 +226,7 @@ function setModal(title,ico,name,priceStr,origPrice,sub,discText,idLabel,lbl2Tex
   document.getElementById('m-order').textContent='PEDIDO #'+peekOrder();
   document.getElementById('lbl1').textContent=idLabel;
   document.getElementById('lbl2').textContent=lbl2Text;
-  document.getElementById('f1').value='';document.getElementById('f2').value='';document.getElementById('f3').value='';
+  document.getElementById('f1').value='';document.getElementById('f2').value='';document.getElementById('f3').value='';if(document.getElementById('f4'))document.getElementById('f4').value='';
   document.getElementById('f2').placeholder=lbl2Text==='Nombre del Clan'?'Nombre exacto del clan':'Repite tu ID';
   document.getElementById('btn-submit').onclick=btnFn;
   var _msh=document.getElementById('modal');if(_msh)_msh.classList.add('show');
@@ -271,6 +271,18 @@ function sendWA(msg,levelUp){
 }
 
 function getDateStr(){return new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});}
+
+function validateForm(){
+  var v1     = document.getElementById('f1') ? document.getElementById('f1').value.trim() : '';
+  var v2     = document.getElementById('f2') ? document.getElementById('f2').value.trim() : '';
+  var nombre = document.getElementById('f3') ? document.getElementById('f3').value.trim() : '';
+  var wa     = document.getElementById('f4') ? document.getElementById('f4').value.trim() : '';
+  if(!v1)           { showToast('Ingresa tu ID de Free Fire'); return null; }
+  if(!v2)           { showToast('Confirma tu ID de Free Fire'); return null; }
+  if(!nombre)       { showToast('Ingresa tu nombre'); return null; }
+  if(!wa||wa.replace(/\D/g,'').length < 8) { showToast('Ingresa tu numero de WhatsApp'); return null; }
+  return { v1:v1, v2:v2, nombre:nombre, wa:wa };
+}
 
 function submitProd(){
   var v=validateForm();if(!v) return;
