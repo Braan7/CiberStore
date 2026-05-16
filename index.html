@@ -396,6 +396,36 @@ body{background:var(--bg);color:var(--text);font-family:"Exo 2",sans-serif;overf
 .pines-qty{display:flex;align-items:center;gap:.35rem;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:6px;padding:.18rem .45rem}
 .pines-qty-btn{background:none;border:none;color:var(--c1);font-size:1rem;cursor:pointer;padding:0 .15rem;line-height:1;font-weight:700}
 .pines-qty-n{font-family:Orbitron;font-size:.72rem;font-weight:700;color:#fff;min-width:18px;text-align:center}
+
+/* ── CiberDMily border ── */
+.site-border-top,.site-border-bottom{
+  width:100%;background:linear-gradient(90deg,#0d0d0d,#0a0018,#0d0d0d);
+  border-top:1px solid rgba(255,105,180,.25);
+  border-bottom:1px solid rgba(255,105,180,.25);
+  overflow:hidden;height:26px;display:flex;align-items:center;
+  position:relative;z-index:10;flex-shrink:0;
+}
+.site-border-bottom{
+  position:fixed;bottom:0;left:0;right:0;z-index:95;
+  border-top:1px solid rgba(255,105,180,.3);border-bottom:none;
+}
+.border-marquee{
+  display:flex;align-items:center;gap:0;
+  white-space:nowrap;
+  animation:marquee-lr 18s linear infinite;
+}
+.border-marquee-item{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:0 1.5rem;
+  font-family:"Orbitron",sans-serif;font-size:.6rem;font-weight:700;
+  letter-spacing:2px;color:rgba(255,130,190,.7);
+}
+.border-marquee-item .bm-heart{color:#ff69b4;font-size:.75rem}
+@keyframes marquee-lr{
+  0%{transform:translateX(0)}
+  100%{transform:translateX(-50%)}
+}
+body{padding-bottom:26px}
 </style>
 </head>
 <body>
@@ -462,7 +492,7 @@ body{background:var(--bg);color:var(--text);font-family:"Exo 2",sans-serif;overf
     </div>
   <div class="sb-footer">
     Soporte 24/7<br/>
-    <a href="https://wa.me/5215523371367" target="_blank">+52 55 2337 1367</a><br/>
+    <a href="https://wa.me/5215548461200" target="_blank">+52 55 2337 1367</a><br/>
     <strong>STORI - MATINA RUBI HDZ</strong>
   </div>
 </div>
@@ -476,7 +506,7 @@ body{background:var(--bg);color:var(--text);font-family:"Exo 2",sans-serif;overf
   </div>
   <div class="mem-pill" id="mem-pill"></div>
   <button class="cart-btn" onclick="openCart()" title="Mi carrito">&#128722;<div class="cart-count" id="cart-count">0</div></button>
-  <a href="https://wa.me/5215523371367" target="_blank" class="btn-wa">&#128222; WhatsApp</a>
+  <a href="https://wa.me/5215548461200" target="_blank" class="btn-wa">&#128222; WhatsApp</a>
 </div>
 <div class="sp-ticker" id="sp-ticker">
   <div class="sp-ticker-inner" id="sp-ticker-inner">
@@ -695,7 +725,7 @@ body{background:var(--bg);color:var(--text);font-family:"Exo 2",sans-serif;overf
   </div>
 </div>
 
-<a href="https://wa.me/5215523371367" target="_blank" class="wa-float">&#128222;</a>
+<a href="https://wa.me/5215548461200" target="_blank" class="wa-float">&#128222;</a>
 <div class="social-proof" id="social-proof"><div class="sp-dot"></div><div id="sp-text"></div></div>
 <button class="scrolltop" id="scrolltop" onclick="window.scrollTo({top:0,behavior:'smooth'})">&#8679;</button>
 <div class="toast" id="toast"></div>
@@ -749,7 +779,7 @@ body{background:var(--bg);color:var(--text);font-family:"Exo 2",sans-serif;overf
       <div style="font-size:.86rem;color:var(--muted);line-height:1.7;margin-bottom:1.1rem">Accede a precios mayoristas para revender diamantes. Compra minima de $200 MX por pedido.</div>
       <div style="display:inline-flex;align-items:center;gap:.45rem;padding:.45rem 1.1rem;background:rgba(255,208,0,.08);border:1px solid rgba(255,208,0,.3);border-radius:20px;font-size:.8rem;font-weight:700;color:var(--c4);margin-bottom:1.4rem">Compra minima $200 MX</div>
       <br/>
-      <a href="https://wa.me/5215523371367?text=Hola%2C%20quiero%20acceso%20a%20Pines%20FF%20para%20revendedores" target="_blank" style="display:inline-flex;align-items:center;gap:.5rem;padding:.78rem 1.8rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:8px;font-family:'Exo 2';font-weight:800;font-size:.88rem;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none">
+      <a href="https://wa.me/5215548461200?text=Hola%2C%20quiero%20acceso%20a%20Pines%20FF%20para%20revendedores" target="_blank" style="display:inline-flex;align-items:center;gap:.5rem;padding:.78rem 1.8rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:8px;font-family:'Exo 2';font-weight:800;font-size:.88rem;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none">
         Solicitar acceso
       </a>
       <div style="margin-top:.85rem;font-size:.72rem;color:var(--muted)">Contactanos por WhatsApp para activar tu cuenta de revendedor.</div>
@@ -898,7 +928,7 @@ body{background:var(--bg);color:var(--text);font-family:"Exo 2",sans-serif;overf
         3. Manda comprobante + numero de pedido al WhatsApp.<br/>
         4. Confirmamos y entregamos en menos de 3 minutos.
       </div>
-      <a href="https://wa.me/5215523371367" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.85rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:7px;font-family:'Exo 2';font-weight:800;font-size:.88rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;margin-top:.85rem">
+      <a href="https://wa.me/5215548461200" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.85rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:7px;font-family:'Exo 2';font-weight:800;font-size:.88rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;margin-top:.85rem">
         &#128222; Confirmar por WhatsApp
       </a>
     </div>
@@ -906,5 +936,8 @@ body{background:var(--bg);color:var(--text);font-family:"Exo 2",sans-serif;overf
 </div>
 
 <script src="script.js"></script>
+<div class="site-border-bottom">
+  <div class="border-marquee"><span class="border-marquee-item">CiberDMily <span class="bm-heart">&#128149;</span></span><span class="border-marquee-item">CiberDMily <span class="bm-heart">&#128149;</span></span><span class="border-marquee-item">CiberDMily <span class="bm-heart">&#128149;</span></span><span class="border-marquee-item">CiberDMily <span class="bm-heart">&#128149;</span></span><span class="border-marquee-item">CiberDMily <span class="bm-heart">&#128149;</span></span><span class="border-marquee-item">CiberDMily <span class="bm-heart">&#128149;</span></span><span class="border-marquee-item">CiberDMily <span class="bm-heart">&#128149;</span></span><span class="border-marquee-item">CiberDMily <span class="bm-heart">&#128149;</span></span><span class="border-marquee-item">CiberDMily <span class="bm-heart">&#128149;</span></span><span class="border-marquee-item">CiberDMily <span class="bm-heart">&#128149;</span></span><span class="border-marquee-item">CiberDMily <span class="bm-heart">&#128149;</span></span><span class="border-marquee-item">CiberDMily <span class="bm-heart">&#128149;</span></span><span class="border-marquee-item">CiberDMily <span class="bm-heart">&#128149;</span></span><span class="border-marquee-item">CiberDMily <span class="bm-heart">&#128149;</span></span><span class="border-marquee-item">CiberDMily <span class="bm-heart">&#128149;</span></span><span class="border-marquee-item">CiberDMily <span class="bm-heart">&#128149;</span></span><span class="border-marquee-item">CiberDMily <span class="bm-heart">&#128149;</span></span><span class="border-marquee-item">CiberDMily <span class="bm-heart">&#128149;</span></span><span class="border-marquee-item">CiberDMily <span class="bm-heart">&#128149;</span></span><span class="border-marquee-item">CiberDMily <span class="bm-heart">&#128149;</span></span></div>
+</div>
 </body>
 </html>
