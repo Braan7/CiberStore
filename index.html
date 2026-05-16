@@ -469,6 +469,34 @@ body{padding-bottom:26px}
 .btn-cart-checkout:hover{box-shadow:0 0 22px rgba(37,211,102,.5)}
 .btn-cart-clear{background:none;border:1px solid rgba(255,80,80,.3);color:rgba(255,80,80,.65);border-radius:6px;padding:.22rem .65rem;font-family:"Exo 2";font-size:.68rem;cursor:pointer;font-weight:700}
 .btn-cart-clear:hover{border-color:#ff5252;color:#ff5252}
+
+/* ── DIAMOND CARDS (new style) ── */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1.1rem;padding:0 5vw 3.5rem;max-width:1100px;margin:0 auto}
+.dp-card{background:#111318;border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .3s;position:relative;display:flex;flex-direction:column}
+.dp-card:hover{transform:translateY(-5px);border-color:rgba(220,40,0,.5);box-shadow:0 12px 36px rgba(200,30,0,.25)}
+.dp-card-popular{border-color:rgba(220,40,0,.45);box-shadow:0 0 24px rgba(200,30,0,.2)}
+.dp-badge{position:absolute;top:.7rem;left:.7rem;padding:.2rem .6rem;border-radius:6px;font-size:.6rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;z-index:2}
+.dp-badge-popular{background:linear-gradient(90deg,#cc2200,#ff4400);color:#fff}
+.dp-badge-normal{background:rgba(220,40,0,.15);border:1px solid rgba(220,40,0,.4);color:#ff6644}
+.dp-gem-wrap{height:130px;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 60%,rgba(180,20,0,.18) 0%,transparent 70%),linear-gradient(180deg,#0d0608 0%,#110508 100%);position:relative;overflow:hidden}
+.dp-gem-wrap::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 80% 40% at 50% 80%,rgba(180,20,0,.12),transparent)}
+.dp-gem-small svg,.dp-gem-med svg,.dp-gem-big svg{filter:drop-shadow(0 0 12px rgba(220,60,0,.7)) drop-shadow(0 0 24px rgba(180,20,0,.4))}
+.dp-pase{background:radial-gradient(ellipse at 50% 60%,rgba(255,160,0,.12),transparent 70%),linear-gradient(180deg,#0d0a00,#110d00)}
+.dp-body{padding:.85rem .9rem .9rem;flex:1;display:flex;flex-direction:column;gap:.4rem}
+.dp-bonus{display:flex;align-items:baseline;gap:.4rem;flex-wrap:wrap}
+.dp-num{font-family:"Orbitron",sans-serif;font-size:1.6rem;font-weight:900;color:#fff;line-height:1}
+.dp-bonus-txt{font-size:.75rem;font-weight:700;color:#ff4422;letter-spacing:.5px}
+.dp-desc{font-size:.68rem;color:#4a5568;margin-top:-.2rem}
+.dp-foot{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:auto;padding-top:.5rem}
+.dp-price{font-family:"Orbitron",sans-serif;font-size:1.05rem;font-weight:900;color:#fff}
+.dp-price-orig{font-size:.68rem;color:#4a5568;text-decoration:line-through;font-family:"Orbitron"}
+.dp-btn{display:flex;align-items:center;gap:.3rem;padding:.38rem .72rem;background:linear-gradient(90deg,#aa1a00,#dd2800);color:#fff;border:none;border-radius:6px;font-family:"Exo 2",sans-serif;font-weight:800;font-size:.65rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;white-space:nowrap;position:relative;overflow:hidden;flex-shrink:0}
+.dp-btn:hover{background:linear-gradient(90deg,#cc2200,#ff3300);box-shadow:0 0 16px rgba(220,40,0,.5);transform:scale(1.04)}
+@media(max-width:640px){
+  .pgrid{grid-template-columns:repeat(2,1fr);gap:.75rem;padding:0 3vw 3rem}
+  .dp-num{font-size:1.3rem}
+  .dp-gem-wrap{height:100px}
+}
 </style>
 </head>
 <body>
@@ -924,11 +952,11 @@ body{padding-bottom:26px}
         <div class="admin-login-title">Acceso Administrador</div>
         <div>
           <label class="admin-label">Correo</label>
-          <input class="admin-input" id="adm-email" type="email" placeholder="ciberstore@admin.com" style="width:100%"/>
+          <input class="admin-input" id="adm-email" type="email" placeholder="Correo" style="width:100%"/>
         </div>
         <div>
           <label class="admin-label">Contrasena</label>
-          <input class="admin-input" id="adm-pass" type="password" placeholder="••••••••" style="width:100%"/>
+          <input class="admin-input" id="adm-pass" type="password" placeholder="Contrasena" style="width:100%"/>
         </div>
         <div id="adm-login-err" style="font-size:.72rem;color:#ff5252;display:none;text-align:center"></div>
         <button class="btn-admin-login" onclick="adminLogin()">Entrar</button>
