@@ -490,6 +490,36 @@ body{background:var(--bg);color:var(--text);font-family:"Exo 2",sans-serif;overf
   color:rgba(255,100,60,.7);
   text-transform:uppercase;
 }
+
+/* ── LIKES NEW DESIGN ── */
+.lk-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.1rem;padding:0 5vw 3.5rem;max-width:1000px;margin:0 auto}
+.lkn-card{background:#0f1120;border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:1.4rem 1.25rem 1.1rem;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:.8rem}
+.lkn-card:hover{transform:translateY(-5px);border-color:rgba(255,255,255,.18);box-shadow:0 12px 36px rgba(0,0,0,.4)}
+.lkn-popular{border-color:rgba(0,170,255,.35)!important;box-shadow:0 0 24px rgba(0,170,255,.12)}
+.lkn-best{border-color:rgba(0,200,160,.35)!important;box-shadow:0 0 24px rgba(0,200,160,.1)}
+.lkn-ribbon{position:absolute;top:0;right:0;padding:.22rem .75rem;background:linear-gradient(90deg,var(--c2),var(--c1));color:#fff;font-size:.58rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;border-radius:0 16px 0 10px}
+.lkn-best .lkn-ribbon{background:linear-gradient(90deg,#00a87a,#00f5d4);color:#002a22}
+.lkn-top{display:flex;align-items:center;gap:.85rem}
+.lkn-icon{width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;transition:transform .3s}
+.lkn-card:hover .lkn-icon{transform:scale(1.1) rotate(-5deg)}
+.lkn-info{flex:1;min-width:0}
+.lkn-label{font-family:"Orbitron",sans-serif;font-size:.78rem;font-weight:700;color:#fff;letter-spacing:.5px;margin-bottom:.18rem}
+.lkn-total{font-size:1.25rem;font-weight:900;color:var(--lk-clr);font-family:"Orbitron",sans-serif;line-height:1}
+.lkn-total span{font-size:.65rem;color:var(--muted);font-family:"Exo 2";font-weight:600}
+.lkn-price-row{display:flex;align-items:baseline;gap:.6rem}
+.lkn-price{font-family:"Orbitron",sans-serif;font-size:1.9rem;font-weight:900;color:#fff;line-height:1}
+.lkn-price span{font-size:1rem;color:var(--muted)}
+.lkn-price-usd{font-size:.8rem;color:var(--muted);font-weight:600}
+.lkn-stats{display:flex;align-items:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:9px;overflow:hidden}
+.lkn-stat{flex:1;padding:.5rem .3rem;text-align:center}
+.lkn-stat-n{display:block;font-family:"Orbitron",sans-serif;font-size:.82rem;font-weight:700;color:var(--lk-clr)}
+.lkn-stat-l{display:block;font-size:.58rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:.08rem}
+.lkn-stat-div{width:1px;background:rgba(255,255,255,.07);align-self:stretch}
+.lkn-bar-wrap{height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden}
+.lkn-bar-fill{height:100%;border-radius:2px;opacity:.75;transition:width 1s ease;background:var(--lk-clr)}
+.lkn-btn{width:100%;padding:.65rem;border:1px solid rgba(255,255,255,.12);border-radius:9px;font-family:"Exo 2",sans-serif;font-weight:800;font-size:.82rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;background:rgba(255,255,255,.07);color:#fff;transition:all .25s;position:relative;overflow:hidden}
+.lkn-btn:hover,.lkn-card:hover .lkn-btn{background:var(--lk-clr);border-color:var(--lk-clr);color:#000}
+@media(max-width:640px){.lk-grid{grid-template-columns:1fr;max-width:380px}}
 </style>
 </head>
 <body>
@@ -663,7 +693,7 @@ body{background:var(--bg);color:var(--text);font-family:"Exo 2",sans-serif;overf
 <!-- LIKES -->
 <div class="page" id="page-likes">
   <div class="ph"><div class="stag">Perfil Free Fire</div><h2 class="ptitle">&#128077; LIKES PARA <span>TU PERFIL</span></h2><p class="psub">220 likes diarios automaticos. Sin contrasena. Elige tu plan.</p></div>
-  <div style="max-width:900px;margin:0 auto;padding:0 5vw 1.25rem"><div style="background:rgba(255,80,80,.05);border:1px solid rgba(255,80,80,.18);border-radius:9px;padding:.85rem 1rem;display:flex;align-items:center;gap:.6rem"><span style="font-size:1.3rem;flex-shrink:0">&#128077;</span><span style="font-size:.81rem;color:var(--muted);line-height:1.6">Solo comparte tu <strong style="color:var(--text)">ID de Free Fire</strong> y mandamos <strong style="color:var(--text)">220 likes por dia</strong> durante el plan.</span></div></div>
+  <div style="max-width:900px;margin:0 auto;padding:0 5vw 1.25rem"><div style="display:flex;align-items:center;gap:.85rem;background:rgba(0,170,255,.06);border:1px solid rgba(0,170,255,.18);border-radius:12px;padding:.9rem 1.1rem"><div style="width:40px;height:40px;border-radius:10px;background:rgba(0,170,255,.12);border:1px solid rgba(0,170,255,.2);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">&#128077;</div><div style="font-size:.82rem;color:var(--muted);line-height:1.7">Solo comparte tu <strong style="color:#fff">ID de Free Fire</strong> y recibes <strong style="color:var(--c1)">220 likes automaticos por dia</strong>. Sin contrasena. Sin riesgo. Entrega inmediata.</div></div></div>
   <div class="lk-grid" id="likes-grid"></div>
 </div>
 
@@ -846,11 +876,11 @@ body{background:var(--bg);color:var(--text);font-family:"Exo 2",sans-serif;overf
       <div style="font-size:.82rem;color:var(--muted)">Pago rapido con tu cuenta PayPal</div>
     </div>
 
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem 1.5rem;margin-bottom:1rem;opacity:.45;cursor:not-allowed;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.5rem;position:relative;overflow:hidden" onclick="showToast('Binance Pay proximamente disponible')">
-      <div style="position:absolute;top:.75rem;right:.75rem;padding:.2rem .6rem;border-radius:20px;font-size:.6rem;font-weight:800;letter-spacing:1px;background:rgba(255,165,0,.12);border:1px solid rgba(255,165,0,.25);color:#ffa500">PRONTO</div>
+    <div style="background:var(--card);border:1px solid rgba(240,185,11,.22);border-radius:16px;padding:2rem 1.5rem;margin-bottom:1rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.5rem;position:relative;overflow:hidden;transition:all .3s" onclick="openBinanceModal()" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 28px rgba(240,185,11,.15)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+      <div style="position:absolute;top:.75rem;right:.75rem;padding:.2rem .6rem;border-radius:20px;font-size:.6rem;font-weight:800;letter-spacing:1px;background:rgba(240,185,11,.15);border:1px solid rgba(240,185,11,.3);color:#f0b90b">ACTIVO</div>
       <span style="font-size:2.6rem;display:block;margin-bottom:.3rem">&#128176;</span>
       <div style="font-family:Orbitron;font-size:1rem;font-weight:700;color:#fff">Binance Pay</div>
-      <div style="font-size:.82rem;color:var(--muted)">Transferencia USDT con confirmacion manual</div>
+      <div style="font-size:.82rem;color:var(--muted);max-width:300px">Transferencia con Binance ID - Confirmacion rapida</div>
     </div>
 
     <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem 1.5rem;margin-bottom:1rem;opacity:.45;cursor:not-allowed;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.5rem;position:relative;overflow:hidden" onclick="showToast('Mercado Pago proximamente disponible')">
@@ -1025,6 +1055,44 @@ body{background:var(--bg);color:var(--text);font-family:"Exo 2",sans-serif;overf
     </div>
     <div class="modal-b" id="cart-modal-body">
       <div class="cart-empty">Tu carrito esta vacio</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- MODAL BINANCE -->
+<div class="modal-ov" id="modal-binance">
+  <div class="modal">
+    <div class="modal-h">
+      <h3 style="color:#f0b90b">&#128176; Binance Pay</h3>
+      <button class="modal-close" onclick="closeBinanceModal()">&#215;</button>
+    </div>
+    <div class="modal-b">
+      <div style="text-align:center;margin-bottom:1.25rem">
+        <div style="font-size:2.5rem;margin-bottom:.5rem">&#128176;</div>
+        <div style="font-family:Orbitron;font-size:.9rem;font-weight:700;color:#fff;margin-bottom:.2rem">Pago con Binance</div>
+        <div style="font-size:.8rem;color:var(--muted)">Transfiere el monto de tu pedido y manda el comprobante por WhatsApp</div>
+      </div>
+      <div style="background:rgba(240,185,11,.05);border:1px solid rgba(240,185,11,.2);border-radius:12px;padding:1.25rem;margin-bottom:1rem">
+        <div style="font-family:Orbitron;font-size:.72rem;font-weight:700;color:#f0b90b;margin-bottom:.75rem;letter-spacing:.5px">Datos Binance</div>
+        <div style="display:flex;justify-content:space-between;padding:.4rem .6rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:7px;margin-bottom:.35rem;flex-wrap:wrap;gap:.3rem">
+          <div><div style="font-size:.63rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase">Metodo</div><div style="font-family:Orbitron;font-size:.73rem;font-weight:700;color:#fff">Binance Pay</div></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:.4rem .6rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:7px;margin-bottom:.35rem;flex-wrap:wrap;gap:.3rem">
+          <div><div style="font-size:.63rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase">Binance ID</div><div style="font-family:Orbitron;font-size:.78rem;font-weight:700;color:#f0b90b;letter-spacing:1px">1106987175</div></div>
+          <button onclick="copyBinanceID()" style="background:none;border:1px solid rgba(240,185,11,.3);color:#f0b90b;border-radius:4px;padding:.1rem .42rem;font-size:.62rem;cursor:pointer;font-family:'Exo 2';font-weight:700">Copiar</button>
+        </div>
+      </div>
+      <div style="font-size:.75rem;color:var(--muted);line-height:1.7;padding:.65rem .85rem;background:rgba(255,255,255,.03);border-radius:7px;border:1px solid var(--border);margin-bottom:.85rem">
+        1. Abre Binance y ve a Pay.<br/>
+        2. Busca por ID: <strong style="color:#f0b90b">1106987175</strong><br/>
+        3. Transfiere el monto exacto de tu pedido.<br/>
+        4. Toma captura del comprobante.<br/>
+        5. Manda comprobante + numero de pedido al WhatsApp.
+      </div>
+      <a href="https://wa.me/5215548461200" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.85rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:7px;font-family:'Exo 2';font-weight:800;font-size:.88rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none">
+        &#128222; Confirmar por WhatsApp
+      </a>
     </div>
   </div>
 </div>
