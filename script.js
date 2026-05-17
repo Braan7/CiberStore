@@ -8,15 +8,15 @@ var TIERS=[
   {id:'legend',  name:'Leyenda', color:'#00f5ff',colorBg:'rgba(0,245,255,.1)', threshold:15000, perks:['Precio minimo garantizado','Gestor personal','Precios bulk'],badge:{text:'ELITE',bg:'linear-gradient(90deg,#005fa3,#00aaff)',color:'#fff'}}
 ];
 var PRODUCTS=[
-  {id:1, name:'110',   base:100,  bonus:10,  region:'LATAM & BR', prices:[17,17,17,17,17],   badge:null,        isPase:false, popular:false},
-  {id:2, name:'341',   base:310,  bonus:31,  region:'LATAM & BR', prices:[60,60,60,60,60],   badge:'POPULAR',   isPase:false, popular:true},
-  {id:3, name:'572',   base:520,  bonus:52,  region:'LATAM & BR', prices:[85,85,85,85,85],   badge:null,        isPase:false, popular:false},
-  {id:4, name:'1,166', base:1060, bonus:106, region:'LATAM & BR', prices:[175,173,170,168,166], badge:'OFERTA', isPase:false, popular:false},
-  {id:5, name:'2,398', base:2180, bonus:218, region:'LATAM & BR', prices:[310,306,302,298,294], badge:null,     isPase:false, popular:false},
-  {id:6, name:'6,160', base:5600, bonus:560, region:'LATAM & BR', prices:[770,760,750,740,730], badge:'GRAN VALOR', isPase:false, popular:false},
-  {id:7, name:'12,320',base:11200,bonus:1120,region:'LATAM & BR', prices:[1540,1520,1500,1480,1460], badge:null, isPase:false, popular:false},
-  {id:8, name:'18,480',base:16800,bonus:1680,region:'LATAM & BR', prices:[2310,2280,2250,2220,2190], badge:'MEGA', isPase:false, popular:false},
-  {id:11,name:'Pase Elite',base:0,bonus:0,region:'LATAM & BR',    prices:[45,45,45,45,45],   badge:null,        isPase:true,  popular:false}
+  {id:1, name:'100',   base:100,  bonus:10,  region:'LATAM & BR', prices:[17,17,17,17,17],       badge:null,        isPase:false, popular:false},
+  {id:2, name:'310',   base:310,  bonus:31,  region:'LATAM & BR', prices:[60,60,60,60,60],        badge:'POPULAR',   isPase:false, popular:true},
+  {id:3, name:'520',   base:520,  bonus:52,  region:'LATAM & BR', prices:[85,85,85,85,85],        badge:null,        isPase:false, popular:false},
+  {id:4, name:'1,060', base:1060, bonus:106, region:'LATAM & BR', prices:[175,173,170,168,166],   badge:'OFERTA',    isPase:false, popular:false},
+  {id:5, name:'2,180', base:2180, bonus:218, region:'LATAM & BR', prices:[310,306,302,298,294],   badge:null,        isPase:false, popular:false},
+  {id:6, name:'5,600', base:5600, bonus:560, region:'LATAM & BR', prices:[770,760,750,740,730],   badge:'GRAN VALOR',isPase:false, popular:false},
+  {id:7, name:'11,200',base:11200,bonus:1120,region:'LATAM & BR', prices:[1540,1520,1500,1480,1460],badge:null,      isPase:false, popular:false},
+  {id:8, name:'16,800',base:16800,bonus:1680,region:'LATAM & BR', prices:[2310,2280,2250,2220,2190],badge:'MEGA',    isPase:false, popular:false},
+  {id:11,name:'Pase Elite',base:0,bonus:0,region:'LATAM & BR',    prices:[45,45,45,45,45],        badge:null,        isPase:true,  popular:false}
 ];
 var LIKES=[
   {id:1,label:'14 Dias', priceMX:140,priceUSD:7,  total:3080, perDay:220,days:14, color:'#ff5050',lbl:'14 DIAS'},
@@ -887,3 +887,23 @@ renderProds=function(){
 var _mcEl=document.getElementById('modal-cart');
 if(_mcEl) _mcEl.addEventListener('click',function(e){if(e.target===this)closeCart();});
 updateCartCount();
+
+/* ====== BINANCE PAY ====== */
+function openBinanceModal(){
+  var el=document.getElementById('modal-binance');
+  if(el) el.classList.add('show');
+}
+function closeBinanceModal(){
+  var el=document.getElementById('modal-binance');
+  if(el) el.classList.remove('show');
+}
+function copyBinanceID(){
+  navigator.clipboard.writeText('1106987175').then(function(){
+    showToast('Binance ID copiado: 1106987175',2000);
+  });
+}
+// Close on overlay click
+(function(){
+  var el=document.getElementById('modal-binance');
+  if(el) el.addEventListener('click',function(e){ if(e.target===this) closeBinanceModal(); });
+})();
