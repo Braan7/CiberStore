@@ -893,171 +893,213 @@ function ffAddCart(id){
   showToast(qty+'x '+p.name+' agregado al carrito',2000);
 }
 
+
 /* ================================================================
-   IDIOMA Y MONEDA
+   IDIOMA Y MONEDA  -  FUNCIONAL
 ================================================================ */
-var LANG = localStorage.getItem('cs_lang') || 'es';
+var LANG     = localStorage.getItem('cs_lang')     || 'es';
 var CURRENCY = localStorage.getItem('cs_currency') || 'MXN';
 
-/* Exchange rates vs MXN */
-var RATES = {
-  MXN: 1,
-  USD: 0.051,
-  EUR: 0.047,
-  ARS: 50.2,
-  PEN: 0.19
-};
-var CURRENCY_SYMBOLS = {
-  MXN: '$',
-  USD: 'USD $',
-  EUR: 'EUR ',
-  ARS: 'ARS $',
-  PEN: 'S/ '
-};
-var CURRENCY_LABELS = {
-  MXN: 'MX',
-  USD: 'USD',
-  EUR: 'EUR',
-  ARS: 'ARS',
-  PEN: 'PEN'
+/* Tasas vs MXN */
+var RATES   = {MXN:1, USD:0.051, EUR:0.047, ARS:50.2, PEN:0.19};
+var CUR_SYM = {MXN:'$', USD:'$', EUR:'\u20AC', ARS:'$', PEN:'S/'};
+var CUR_SUF = {MXN:' MX', USD:' USD', EUR:' EUR', ARS:' ARS', PEN:' PEN'};
+
+/* Override fmt to convert currency */
+fmt = function(mxn){
+  if(!mxn && mxn!==0) return '';
+  var rate = RATES[CURRENCY]||1;
+  var sym  = CUR_SYM[CURRENCY]||'$';
+  var suf  = CUR_SUF[CURRENCY]||'';
+  var val  = mxn * rate;
+  var str;
+  if(CURRENCY==='MXN') str = sym + Math.round(val).toLocaleString('es-MX');
+  else if(CURRENCY==='ARS') str = sym + Math.round(val).toLocaleString('es-AR');
+  else str = sym + val.toFixed(2);
+  return str + suf;
 };
 
-var TRANSLATIONS = {
-  es: {
-    'Recarga Instantanea': 'Recarga Instantanea',
-    'DIAMANTES FREE FIRE': 'DIAMANTES FREE FIRE',
-    'Recarga las veces que quieras. Descuento segun tu nivel.': 'Recarga las veces que quieras. Descuento segun tu nivel.',
-    'Comprar': 'Comprar',
-    'MAS VENDIDO': 'MAS VENDIDO',
-    'POPULAR': 'POPULAR',
-    'OFERTA': 'OFERTA',
-    'GRAN VALOR': 'GRAN VALOR',
-    'MEGA': 'MEGA',
-    'Confirmar y abrir WhatsApp': 'Confirmar y abrir WhatsApp',
-    'Tu ID de Free Fire': 'Tu ID de Free Fire',
-    'Confirmar ID': 'Confirmar ID',
-    'Nombre completo': 'Nombre completo',
-    'Numero de WhatsApp': 'Numero de WhatsApp',
-    'Codigo Promocional': 'Codigo Promocional',
-    'Inicio': 'Inicio',
-    'Likes Perfil': 'Likes Perfil',
-    'Honor de Clan': 'Honor de Clan',
-    'Venta de Clanes': 'Venta de Clanes',
-    'Mi Perfil': 'Mi Perfil',
-    'Recargar Saldo': 'Recargar Saldo',
-    'Mis Compras': 'Mis Compras',
-    'Mi Rango': 'Mi Rango',
-    'Ahorras': 'Ahorras',
-    'Pedir por WhatsApp': 'Pedir por WhatsApp',
-    'Obtener plan': 'Obtener plan',
-    '+Carrito': '+Carrito',
-    'Codigo Promo': 'Codigo Promo',
-    'aplicado': 'aplicado'
+/* -- TRANSLATIONS ----------------------------------------------- */
+var TR = {
+  es:{
+    nav_home:'Inicio', nav_diamantes:'Diamantes FF', nav_likes:'Likes Perfil',
+    nav_honor:'Honor de Clan', nav_clanes:'Venta de Clanes', nav_codigos:'Codigos FF',
+    nav_cajas:'Cajas Evolutiva', nav_canal:'Canal WhatsApp', nav_admin:'Panel Admin',
+    nav_perfil:'Mi Perfil', nav_saldo:'Recargar Saldo', nav_miscompras:'Mis Compras',
+    nav_membresia:'Mi Rango',
+    hero_sub:'La tienda definitiva de Free Fire. Diamantes, likes y honor de clan.',
+    hero_btn1:'Ver Diamantes', hero_btn2:'Honor de Clan',
+    buy_btn:'Comprar', add_cart:'+Carrito', get_plan:'Obtener plan',
+    best_seller:'MAS VENDIDO', popular:'POPULAR', oferta:'OFERTA',
+    gran_valor:'GRAN VALOR', mega:'MEGA',
+    modal_f1:'Tu ID de Free Fire', modal_f2:'Confirmar ID',
+    modal_f3:'Nombre completo', modal_f4:'Numero de WhatsApp',
+    modal_promo:'Codigo Promocional', modal_optional:'(opcional)',
+    modal_confirm:'Confirmar y abrir WhatsApp',
+    modal_note:'Despues envia tu comprobante al WhatsApp con tu numero de pedido',
+    buy_now:'Comprar ahora', delivery:'Entrega en menos de 24 hrs',
+    cotizar:'Cotizar por WhatsApp',
+    stori_tab:'STORI', binance_tab:'BINANCE',
+    promo_applied:'de descuento aplicado', promo_invalid:'Codigo invalido o expirado',
+    sec_dia:'DIAMANTES FREE FIRE', sec_dia_sub:'Recarga las veces que quieras. Descuento segun tu nivel.',
+    sec_likes:'LIKES PARA TU PERFIL', sec_likes_sub:'220 likes diarios. Sin contrasena. Elige tu plan.',
+    sec_honor:'HONOR DE CLAN', sec_honor_sub:'Selecciona tu region. Entrega rapida garantizada.',
+    sec_rank:'MI RANGO', sec_perfil:'MI PERFIL', sec_saldo:'RECARGAR SALDO',
+    sec_compras:'MIS COMPRAS', sec_codigos:'CODIGOS DE FREE FIRE', sec_cajas:'CAJAS PARA TU EVOLUTIVA',
+    savings:'Ahorras', level_up:'Subiste a nivel', empty_cart:'Tu carrito esta vacio',
+    add_to_cart_toast:'agregado al carrito', choose_qty:'Elige la cantidad primero',
+    banner_txt:'ENTREGA AUTOMATICA 24/7  |  MAS COMPRAS = MAS DESCUENTOS  |  PAGOS SEGUROS'
   },
-  en: {
-    'Recarga Instantanea': 'Instant Recharge',
-    'DIAMANTES FREE FIRE': 'FREE FIRE DIAMONDS',
-    'Recarga las veces que quieras. Descuento segun tu nivel.': 'Recharge as many times as you want. Discount based on your level.',
-    'Comprar': 'Buy',
-    'MAS VENDIDO': 'BEST SELLER',
-    'POPULAR': 'POPULAR',
-    'OFERTA': 'OFFER',
-    'GRAN VALOR': 'GREAT VALUE',
-    'MEGA': 'MEGA',
-    'Confirmar y abrir WhatsApp': 'Confirm and open WhatsApp',
-    'Tu ID de Free Fire': 'Your Free Fire ID',
-    'Confirmar ID': 'Confirm ID',
-    'Nombre completo': 'Full name',
-    'Numero de WhatsApp': 'WhatsApp number',
-    'Codigo Promocional': 'Promo Code',
-    'Inicio': 'Home',
-    'Likes Perfil': 'Profile Likes',
-    'Honor de Clan': 'Clan Honor',
-    'Venta de Clanes': 'Clan Sales',
-    'Mi Perfil': 'My Profile',
-    'Recargar Saldo': 'Add Funds',
-    'Mis Compras': 'My Orders',
-    'Mi Rango': 'My Rank',
-    'Ahorras': 'You save',
-    'Pedir por WhatsApp': 'Order via WhatsApp',
-    'Obtener plan': 'Get plan',
-    '+Carrito': '+Cart',
-    'Codigo Promo': 'Promo code',
-    'aplicado': 'applied'
+  en:{
+    nav_home:'Home', nav_diamantes:'FF Diamonds', nav_likes:'Profile Likes',
+    nav_honor:'Clan Honor', nav_clanes:'Clan Sales', nav_codigos:'FF Codes',
+    nav_cajas:'Evolutive Boxes', nav_canal:'WhatsApp Channel', nav_admin:'Admin Panel',
+    nav_perfil:'My Profile', nav_saldo:'Add Funds', nav_miscompras:'My Orders',
+    nav_membresia:'My Rank',
+    hero_sub:'The ultimate Free Fire store. Diamonds, likes and clan honor.',
+    hero_btn1:'See Diamonds', hero_btn2:'Clan Honor',
+    buy_btn:'Buy', add_cart:'+Cart', get_plan:'Get plan',
+    best_seller:'BEST SELLER', popular:'POPULAR', oferta:'OFFER',
+    gran_valor:'GREAT VALUE', mega:'MEGA',
+    modal_f1:'Your Free Fire ID', modal_f2:'Confirm ID',
+    modal_f3:'Full name', modal_f4:'WhatsApp number',
+    modal_promo:'Promo Code', modal_optional:'(optional)',
+    modal_confirm:'Confirm and open WhatsApp',
+    modal_note:'Then send your receipt to WhatsApp with your order number',
+    buy_now:'Buy now', delivery:'Delivery in less than 24 hrs',
+    cotizar:'Quote on WhatsApp',
+    stori_tab:'STORI', binance_tab:'BINANCE',
+    promo_applied:'discount applied', promo_invalid:'Invalid or expired code',
+    sec_dia:'FREE FIRE DIAMONDS', sec_dia_sub:'Recharge as many times as you want. Discounts based on your level.',
+    sec_likes:'LIKES FOR YOUR PROFILE', sec_likes_sub:'220 automatic daily likes. No password. Choose your plan.',
+    sec_honor:'CLAN HONOR', sec_honor_sub:'Select your region. Fast delivery guaranteed.',
+    sec_rank:'MY RANK', sec_perfil:'MY PROFILE', sec_saldo:'ADD FUNDS',
+    sec_compras:'MY ORDERS', sec_codigos:'FREE FIRE CODES', sec_cajas:'EVOLUTIVE BOXES',
+    savings:'You save', level_up:'Level up to', empty_cart:'Your cart is empty',
+    add_to_cart_toast:'added to cart', choose_qty:'Choose quantity first',
+    banner_txt:'INSTANT DELIVERY 24/7  |  MORE PURCHASES = MORE DISCOUNTS  |  SECURE PAYMENTS'
   }
 };
 
-function t(key){ return (TRANSLATIONS[LANG]&&TRANSLATIONS[LANG][key]) ? TRANSLATIONS[LANG][key] : key; }
+function t(k){ return (TR[LANG]&&TR[LANG][k]) ? TR[LANG][k] : (TR['es'][k]||k); }
 
-function fmtCurrency(mxnAmount){
-  var converted = mxnAmount * RATES[CURRENCY];
-  var sym = CURRENCY_SYMBOLS[CURRENCY];
-  var lbl = CURRENCY_LABELS[CURRENCY];
-  if(CURRENCY==='MXN') return '$'+mxnAmount.toLocaleString('es-MX')+' MX';
-  if(CURRENCY==='ARS') return sym+Math.round(converted).toLocaleString('es-AR')+' '+lbl;
-  return sym+converted.toFixed(2)+' '+lbl;
+/* -- APPLY ALL TRANSLATIONS TO DOM ------------------------------ */
+function applyTranslations(){
+  var lg = LANG;
+
+  /* NAV items */
+  var navMap = {
+    'ni-home':       'nav_home',
+    'ni-diamantes':  'nav_diamantes',
+    'ni-likes':      'nav_likes',
+    'ni-honor':      'nav_honor',
+    'ni-clanes':     'nav_clanes',
+    'ni-codigos':    'nav_codigos',
+    'ni-cajas':      'nav_cajas',
+    'ni-perfil':     'nav_perfil',
+    'ni-saldo':      'nav_saldo',
+    'ni-miscompras': 'nav_miscompras',
+    'ni-membresia':  'nav_membresia'
+  };
+  for(var id in navMap){
+    var el=document.getElementById(id);
+    if(!el) continue;
+    var ico=el.querySelector('.nav-icon');
+    var nb=el.querySelector('.nb');
+    var icoH=ico?ico.outerHTML:'';
+    var nbH=nb?(' '+nb.outerHTML):'';
+    el.innerHTML=icoH+' '+t(navMap[id])+nbH;
+  }
+
+  /* Hero */
+  var hSub=document.querySelector('.hero-sub');
+  if(hSub) hSub.innerHTML=t('hero_sub');
+  var hBtns=document.querySelectorAll('.btn-hero');
+  if(hBtns[0]) hBtns[0].textContent=t('hero_btn1');
+  if(hBtns[1]) hBtns[1].textContent=t('hero_btn2');
+
+  /* Banner */
+  var ban=document.querySelector('.banner');
+  if(ban) ban.textContent=t('banner_txt');
+
+  /* Page titles */
+  var titleMap={
+    'page-diamantes':['sec_dia','sec_dia_sub'],
+    'page-likes':    ['sec_likes','sec_likes_sub'],
+    'page-honor':    ['sec_honor','sec_honor_sub'],
+    'page-membresia':['sec_rank',null],
+    'page-perfil':   ['sec_perfil',null],
+    'page-saldo':    ['sec_saldo',null],
+    'page-miscompras':['sec_compras',null],
+    'page-codigos':  ['sec_codigos',null],
+    'page-cajas':    ['sec_cajas',null]
+  };
+  for(var pg in titleMap){
+    var pgEl=document.getElementById(pg);
+    if(!pgEl) continue;
+    var tEl=pgEl.querySelector('.ptitle');
+    var sEl=pgEl.querySelector('.psub');
+    if(tEl && titleMap[pg][0]) tEl.innerHTML=t(titleMap[pg][0]);
+    if(sEl && titleMap[pg][1]) sEl.textContent=t(titleMap[pg][1]);
+  }
+
+  /* Modal labels */
+  var l1=document.getElementById('lbl1'); if(l1) l1.textContent=t('modal_f1');
+  var l2=document.getElementById('lbl2'); if(l2) l2.textContent=t('modal_f2');
+  var l3=document.getElementById('lbl3'); if(l3) l3.textContent=t('modal_f3');
+  var f4l=document.querySelector('label[for="f4"]');
+  /* find label before f4 */
+  var f4=document.getElementById('f4');
+  if(f4 && f4.previousElementSibling && f4.previousElementSibling.tagName==='LABEL'){
+    f4.previousElementSibling.textContent=t('modal_f4');
+  }
+  /* promo label */
+  var promoLbl=document.querySelector('#promo-section .flabel');
+  if(promoLbl) promoLbl.textContent=t('modal_promo');
+  var promoOpt=document.querySelector('#promo-section span');
+  if(promoOpt) promoOpt.textContent=t('modal_optional');
+  /* submit btn */
+  var sub=document.getElementById('btn-submit');
+  if(sub) sub.innerHTML='\uD83D\uDCF1 '+t('modal_confirm');
+  /* modal note */
+  var note=document.querySelector('.wa-note');
+  if(note) note.innerHTML=t('modal_note');
+  /* pay tabs */
+  var ts=document.getElementById('tab-stori');   if(ts) ts.textContent=t('stori_tab');
+  var tb=document.getElementById('tab-binance'); if(tb) tb.textContent=t('binance_tab');
+
+  /* Refresh rendered sections */
+  renderProds();
+  renderLikes();
 }
 
-/* Override fmt with currency-aware version */
-var _origFmt = fmt;
-fmt = function(n){ return fmtCurrency(n); };
-
+/* -- CHANGE HANDLERS --------------------------------------------- */
 function changeLang(lang){
-  LANG = lang;
-  localStorage.setItem('cs_lang', lang);
+  LANG=lang;
+  localStorage.setItem('cs_lang',lang);
   applyTranslations();
   refreshUI();
 }
 
-function changeCurrency(currency){
-  CURRENCY = currency;
-  localStorage.setItem('cs_currency', currency);
+function changeCurrency(cur){
+  CURRENCY=cur;
+  localStorage.setItem('cs_currency',cur);
   refreshUI();
-}
-
-function applyTranslations(){
-  /* Nav items */
-  var navMap = {
-    'ni-home':       'Inicio',
-    'ni-likes':      'Likes Perfil',
-    'ni-honor':      'Honor de Clan',
-    'ni-clanes':     'Venta de Clanes',
-    'ni-perfil':     'Mi Perfil',
-    'ni-saldo':      'Recargar Saldo',
-    'ni-miscompras': 'Mis Compras',
-    'ni-membresia':  'Mi Rango'
-  };
-  for(var id in navMap){
-    var el=document.getElementById(id);
-    if(el){
-      var icon=el.querySelector('.nav-icon');
-      var iconHtml=icon?icon.outerHTML:'';
-      var nb=el.querySelector('.nb');
-      var nbHtml=nb?nb.outerHTML:'';
-      el.innerHTML=iconHtml+' '+t(navMap[id])+(nbHtml?' '+nbHtml:'');
-      if(icon) el.insertBefore(icon, el.firstChild);
-    }
+  /* Re-render prices everywhere */
+  var page=document.querySelector('.page.active');
+  if(page){
+    var id=page.id.replace('page-','');
+    if(id==='diamantes') renderProds();
+    if(id==='likes') renderLikes();
+    if(id==='membresia'){renderMems();renderWallet();}
   }
-  /* Modal labels */
-  var lbl1=document.getElementById('lbl1');
-  var lbl2=document.getElementById('lbl2');
-  var lbl3=document.getElementById('lbl3');
-  if(lbl1) lbl1.textContent=t('Tu ID de Free Fire');
-  if(lbl2) lbl2.textContent=t('Confirmar ID');
-  if(lbl3) lbl3.textContent=t('Nombre completo');
-  /* Submit btn */
-  var sub=document.getElementById('btn-submit');
-  if(sub) sub.innerHTML='\uD83D\uDCDE '+t('Confirmar y abrir WhatsApp');
-  /* Promo label */
-  var promoLbl=document.querySelector('#promo-section .flabel');
-  if(promoLbl) promoLbl.textContent=t('Codigo Promocional');
 }
 
-/* Init on load */
+/* -- INIT --------------------------------------------------------- */
 (function(){
   var ls=document.getElementById('lang-select');
   var cs=document.getElementById('currency-select');
   if(ls) ls.value=LANG;
   if(cs) cs.value=CURRENCY;
-  if(LANG!=='es') applyTranslations();
+  applyTranslations();
 })();
