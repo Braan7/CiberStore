@@ -8,15 +8,15 @@ var TIERS=[
   {id:'legend',  name:'Leyenda', color:'#00f5ff',colorBg:'rgba(0,245,255,.1)', threshold:15000, perks:['Precio minimo garantizado','Gestor personal','Precios bulk'],badge:{text:'ELITE',bg:'linear-gradient(90deg,#005fa3,#00aaff)',color:'#fff'}}
 ];
 var PRODUCTS=[
-  {id:1, name:'100',   base:100,  bonus:10,  region:'LATAM & BR', prices:[17,17,17,17,17],       badge:null,        isPase:false, popular:false},
-  {id:2, name:'310',   base:310,  bonus:31,  region:'LATAM & BR', prices:[60,60,60,60,60],        badge:'POPULAR',   isPase:false, popular:true},
-  {id:3, name:'520',   base:520,  bonus:52,  region:'LATAM & BR', prices:[85,85,85,85,85],        badge:null,        isPase:false, popular:false},
-  {id:4, name:'1,060', base:1060, bonus:106, region:'LATAM & BR', prices:[175,173,170,168,166],   badge:'OFERTA',    isPase:false, popular:false},
-  {id:5, name:'2,180', base:2180, bonus:218, region:'LATAM & BR', prices:[310,306,302,298,294],   badge:null,        isPase:false, popular:false},
-  {id:6, name:'5,600', base:5600, bonus:560, region:'LATAM & BR', prices:[770,760,750,740,730],   badge:'GRAN VALOR',isPase:false, popular:false},
-  {id:7, name:'11,200',base:11200,bonus:1120,region:'LATAM & BR', prices:[1540,1520,1500,1480,1460],badge:null,      isPase:false, popular:false},
-  {id:8, name:'16,800',base:16800,bonus:1680,region:'LATAM & BR', prices:[2310,2280,2250,2220,2190],badge:'MEGA',    isPase:false, popular:false},
-  {id:11,name:'Pase Elite',base:0,bonus:0,region:'LATAM & BR',    prices:[45,45,45,45,45],        badge:null,        isPase:true,  popular:false}
+  {id:1, name:'110',    total:110,   bonus:10,  region:'LATAM & BR', prices:[17,17,17,17,17],       badge:null,        isPase:false, popular:false},
+  {id:2, name:'341',    total:341,   bonus:31,  region:'LATAM & BR', prices:[60,60,60,60,60],        badge:'POPULAR',   isPase:false, popular:true},
+  {id:3, name:'572',    total:572,   bonus:52,  region:'LATAM & BR', prices:[85,85,85,85,85],        badge:null,        isPase:false, popular:false},
+  {id:4, name:'1,166',  total:1166,  bonus:106, region:'LATAM & BR', prices:[175,173,170,168,166],   badge:'OFERTA',    isPase:false, popular:false},
+  {id:5, name:'2,398',  total:2398,  bonus:218, region:'LATAM & BR', prices:[310,306,302,298,294],   badge:null,        isPase:false, popular:false},
+  {id:6, name:'6,160',  total:6160,  bonus:560, region:'LATAM & BR', prices:[770,760,750,740,730],   badge:'GRAN VALOR',isPase:false, popular:false},
+  {id:7, name:'12,320', total:12320, bonus:1120,region:'LATAM & BR', prices:[1540,1520,1500,1480,1460],badge:null,      isPase:false, popular:false},
+  {id:8, name:'18,480', total:18480, bonus:1680,region:'LATAM & BR', prices:[2310,2280,2250,2220,2190],badge:'MEGA',    isPase:false, popular:false},
+  {id:11,name:'Pase Elite',total:0,  bonus:0,   region:'LATAM & BR', prices:[45,45,45,45,45],        badge:null,        isPase:true,  popular:false}
 ];
 var LIKES=[
   {id:1,label:'14 Dias', priceMX:140,priceUSD:7,  total:3080, perDay:220,days:14, color:'#ff5050',lbl:'14 DIAS'},
@@ -77,47 +77,26 @@ function renderProds(){
     var p=PRODUCTS[i];
     var base=p.prices[0], now=p.prices[tIdx], saved=base-now;
     var hasDisc=tIdx>0&&saved>0;
-
     // Badge
     var badgeHtml='';
-    if(p.popular){
-      badgeHtml='<div class="dp-badge dp-badge-popular">\uD83D\uDC51 POPULAR</div>';
-    } else if(p.badge){
-      badgeHtml='<div class="dp-badge dp-badge-normal">'+p.badge+'</div>';
-    }
-
-    // Region tag
-    var regionHtml='<div class="dp-region">\u25C6 REGION: LATAM & BR</div>';
-    // Gem icon area (SVG gem in red/orange tones for FF style)
-    var gemHtml='';
-    if(p.isPase){
-      gemHtml='<div class="dp-gem-wrap dp-pase"><span style="font-size:2.8rem">\u26D3</span></div>';
-    } else {
-      var gemSize = p.id<=2 ? 'small' : p.id<=4 ? 'med' : 'big';
-      gemHtml='<div class="dp-gem-wrap dp-gem-'+gemSize+'">'+buildGems(p.id)+'</div>';
-    }
-
-    // Bonus line
-    var bonusHtml = p.bonus>0
-      ? '<div class="dp-bonus"><span class="dp-num">'+p.name+'</span> <span class="dp-bonus-txt">+ '+p.bonus+' BONO LAT</span></div>'
-      : '<div class="dp-bonus"><span class="dp-num">'+p.name+'</span></div>';
-
+    if(p.popular) badgeHtml='<div class="ff-badge ff-badge-hot">MAS VENDIDO</div>';
+    else if(p.badge) badgeHtml='<div class="ff-badge">'+p.badge+'</div>';
+    // Bonus pill
+    var bonusPill=p.bonus>0?'<div class="ff-bonus">+'+p.bonus+' BONUS</div>':'';
     // Price
-    var priceHtml = hasDisc
-      ? '<div class="dp-price-orig">'+fmt(base)+'</div><div class="dp-price">'+fmt(now)+'</div>'
-      : '<div class="dp-price">'+fmt(now)+'</div>';
-
-    rows+='<div class="dp-card'+(p.popular?' dp-card-popular':'')+'" onclick="openProdModal('+p.id+')">'
+    var priceHtml='<div class="ff-price">'+fmt(now)+'</div>';
+    if(hasDisc) priceHtml+='<div class="ff-price-orig">'+fmt(base)+'</div>';
+    rows+='<div class="ff-card" onclick="openProdModal('+p.id+')">'  
       +badgeHtml
-      +gemHtml
-      +regionHtml
-      +'<div class="dp-body">'
-      +bonusHtml
-      +(p.bonus>0?'<div class="dp-desc">'+p.base+' diamantes + '+p.bonus+' bono lat</div>':'')
-      +'<div class="dp-foot">'
-      +'<div>'+priceHtml+'</div>'
-      +'<button class="dp-btn" onclick="event.stopPropagation();openProdModal('+p.id+')">\u26A1 COMPRAR</button>'
-      +'</div>'
+      +'<div class="ff-card-top">'
+      +'<div class="ff-diamond-ico">\uD83D\uDC8E</div>'
+      +'<div class="ff-card-info">'
+      +'<div class="ff-num">'+p.name+'</div>'
+      +bonusPill
+      +'</div></div>'
+      +'<div class="ff-card-foot">'
+      +'<div class="ff-prices">'+priceHtml+'</div>'
+      +'<button class="ff-btn" onclick="event.stopPropagation();openProdModal('+p.id+')">Comprar</button>'
       +'</div>'
       +'</div>';
   }
@@ -907,3 +886,21 @@ function copyBinanceID(){
   var el=document.getElementById('modal-binance');
   if(el) el.addEventListener('click',function(e){ if(e.target===this) closeBinanceModal(); });
 })();
+
+function switchPayTab(tab){
+  var stori   = document.getElementById('paybox-stori');
+  var binance = document.getElementById('paybox-binance');
+  var tStori  = document.getElementById('tab-stori');
+  var tBin    = document.getElementById('tab-binance');
+  if(tab==='stori'){
+    if(stori)  stori.style.display='block';
+    if(binance)binance.style.display='none';
+    if(tStori) { tStori.style.background='rgba(37,211,102,.12)'; tStori.style.borderColor='rgba(37,211,102,.4)'; tStori.style.color='#25d366'; }
+    if(tBin)   { tBin.style.background='rgba(255,255,255,.04)';  tBin.style.borderColor='rgba(255,255,255,.1)';  tBin.style.color='var(--muted)'; }
+  } else {
+    if(stori)  stori.style.display='none';
+    if(binance)binance.style.display='block';
+    if(tBin)   { tBin.style.background='rgba(240,185,11,.12)';   tBin.style.borderColor='rgba(240,185,11,.4)';   tBin.style.color='#f0b90b'; }
+    if(tStori) { tStori.style.background='rgba(255,255,255,.04)';tStori.style.borderColor='rgba(255,255,255,.1)';tStori.style.color='var(--muted)'; }
+  }
+}
