@@ -892,3 +892,172 @@ function ffAddCart(id){
   if(el) el.textContent = '0';
   showToast(qty+'x '+p.name+' agregado al carrito',2000);
 }
+
+/* ================================================================
+   IDIOMA Y MONEDA
+================================================================ */
+var LANG = localStorage.getItem('cs_lang') || 'es';
+var CURRENCY = localStorage.getItem('cs_currency') || 'MXN';
+
+/* Exchange rates vs MXN */
+var RATES = {
+  MXN: 1,
+  USD: 0.051,
+  EUR: 0.047,
+  ARS: 50.2,
+  PEN: 0.19
+};
+var CURRENCY_SYMBOLS = {
+  MXN: '$',
+  USD: 'USD $',
+  EUR: 'EUR ',
+  ARS: 'ARS $',
+  PEN: 'S/ '
+};
+var CURRENCY_LABELS = {
+  MXN: 'MX',
+  USD: 'USD',
+  EUR: 'EUR',
+  ARS: 'ARS',
+  PEN: 'PEN'
+};
+
+var TRANSLATIONS = {
+  es: {
+    'Recarga Instantanea': 'Recarga Instantanea',
+    'DIAMANTES FREE FIRE': 'DIAMANTES FREE FIRE',
+    'Recarga las veces que quieras. Descuento segun tu nivel.': 'Recarga las veces que quieras. Descuento segun tu nivel.',
+    'Comprar': 'Comprar',
+    'MAS VENDIDO': 'MAS VENDIDO',
+    'POPULAR': 'POPULAR',
+    'OFERTA': 'OFERTA',
+    'GRAN VALOR': 'GRAN VALOR',
+    'MEGA': 'MEGA',
+    'Confirmar y abrir WhatsApp': 'Confirmar y abrir WhatsApp',
+    'Tu ID de Free Fire': 'Tu ID de Free Fire',
+    'Confirmar ID': 'Confirmar ID',
+    'Nombre completo': 'Nombre completo',
+    'Numero de WhatsApp': 'Numero de WhatsApp',
+    'Codigo Promocional': 'Codigo Promocional',
+    'Inicio': 'Inicio',
+    'Likes Perfil': 'Likes Perfil',
+    'Honor de Clan': 'Honor de Clan',
+    'Venta de Clanes': 'Venta de Clanes',
+    'Mi Perfil': 'Mi Perfil',
+    'Recargar Saldo': 'Recargar Saldo',
+    'Mis Compras': 'Mis Compras',
+    'Mi Rango': 'Mi Rango',
+    'Ahorras': 'Ahorras',
+    'Pedir por WhatsApp': 'Pedir por WhatsApp',
+    'Obtener plan': 'Obtener plan',
+    '+Carrito': '+Carrito',
+    'Codigo Promo': 'Codigo Promo',
+    'aplicado': 'aplicado'
+  },
+  en: {
+    'Recarga Instantanea': 'Instant Recharge',
+    'DIAMANTES FREE FIRE': 'FREE FIRE DIAMONDS',
+    'Recarga las veces que quieras. Descuento segun tu nivel.': 'Recharge as many times as you want. Discount based on your level.',
+    'Comprar': 'Buy',
+    'MAS VENDIDO': 'BEST SELLER',
+    'POPULAR': 'POPULAR',
+    'OFERTA': 'OFFER',
+    'GRAN VALOR': 'GREAT VALUE',
+    'MEGA': 'MEGA',
+    'Confirmar y abrir WhatsApp': 'Confirm and open WhatsApp',
+    'Tu ID de Free Fire': 'Your Free Fire ID',
+    'Confirmar ID': 'Confirm ID',
+    'Nombre completo': 'Full name',
+    'Numero de WhatsApp': 'WhatsApp number',
+    'Codigo Promocional': 'Promo Code',
+    'Inicio': 'Home',
+    'Likes Perfil': 'Profile Likes',
+    'Honor de Clan': 'Clan Honor',
+    'Venta de Clanes': 'Clan Sales',
+    'Mi Perfil': 'My Profile',
+    'Recargar Saldo': 'Add Funds',
+    'Mis Compras': 'My Orders',
+    'Mi Rango': 'My Rank',
+    'Ahorras': 'You save',
+    'Pedir por WhatsApp': 'Order via WhatsApp',
+    'Obtener plan': 'Get plan',
+    '+Carrito': '+Cart',
+    'Codigo Promo': 'Promo code',
+    'aplicado': 'applied'
+  }
+};
+
+function t(key){ return (TRANSLATIONS[LANG]&&TRANSLATIONS[LANG][key]) ? TRANSLATIONS[LANG][key] : key; }
+
+function fmtCurrency(mxnAmount){
+  var converted = mxnAmount * RATES[CURRENCY];
+  var sym = CURRENCY_SYMBOLS[CURRENCY];
+  var lbl = CURRENCY_LABELS[CURRENCY];
+  if(CURRENCY==='MXN') return '$'+mxnAmount.toLocaleString('es-MX')+' MX';
+  if(CURRENCY==='ARS') return sym+Math.round(converted).toLocaleString('es-AR')+' '+lbl;
+  return sym+converted.toFixed(2)+' '+lbl;
+}
+
+/* Override fmt with currency-aware version */
+var _origFmt = fmt;
+fmt = function(n){ return fmtCurrency(n); };
+
+function changeLang(lang){
+  LANG = lang;
+  localStorage.setItem('cs_lang', lang);
+  applyTranslations();
+  refreshUI();
+}
+
+function changeCurrency(currency){
+  CURRENCY = currency;
+  localStorage.setItem('cs_currency', currency);
+  refreshUI();
+}
+
+function applyTranslations(){
+  /* Nav items */
+  var navMap = {
+    'ni-home':       'Inicio',
+    'ni-likes':      'Likes Perfil',
+    'ni-honor':      'Honor de Clan',
+    'ni-clanes':     'Venta de Clanes',
+    'ni-perfil':     'Mi Perfil',
+    'ni-saldo':      'Recargar Saldo',
+    'ni-miscompras': 'Mis Compras',
+    'ni-membresia':  'Mi Rango'
+  };
+  for(var id in navMap){
+    var el=document.getElementById(id);
+    if(el){
+      var icon=el.querySelector('.nav-icon');
+      var iconHtml=icon?icon.outerHTML:'';
+      var nb=el.querySelector('.nb');
+      var nbHtml=nb?nb.outerHTML:'';
+      el.innerHTML=iconHtml+' '+t(navMap[id])+(nbHtml?' '+nbHtml:'');
+      if(icon) el.insertBefore(icon, el.firstChild);
+    }
+  }
+  /* Modal labels */
+  var lbl1=document.getElementById('lbl1');
+  var lbl2=document.getElementById('lbl2');
+  var lbl3=document.getElementById('lbl3');
+  if(lbl1) lbl1.textContent=t('Tu ID de Free Fire');
+  if(lbl2) lbl2.textContent=t('Confirmar ID');
+  if(lbl3) lbl3.textContent=t('Nombre completo');
+  /* Submit btn */
+  var sub=document.getElementById('btn-submit');
+  if(sub) sub.innerHTML='\uD83D\uDCDE '+t('Confirmar y abrir WhatsApp');
+  /* Promo label */
+  var promoLbl=document.querySelector('#promo-section .flabel');
+  if(promoLbl) promoLbl.textContent=t('Codigo Promocional');
+}
+
+/* Init on load */
+(function(){
+  var ls=document.getElementById('lang-select');
+  var cs=document.getElementById('currency-select');
+  if(ls) ls.value=LANG;
+  if(cs) cs.value=CURRENCY;
+  if(LANG!=='es') applyTranslations();
+})();
