@@ -1,4 +1,3 @@
-
 var WA='5215548461200';
 var TIERS=[
   {id:'free',    name:'Visitante',color:'#8892a4',colorBg:'rgba(136,146,164,.1)',threshold:0,     perks:['Precios estandar','Acceso a la tienda','Soporte por chat']},
