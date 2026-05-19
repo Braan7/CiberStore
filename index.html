@@ -9,7 +9,7 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--c1:#00aaff;--c2:#0055cc;--c4:#ffd000;--c5:#00f5ff;--bg:#07090f;--card:#10131f;--card2:#141828;--border:rgba(0,150,255,.12);--border2:rgba(0,170,255,.22);--text:#cdd5e0;--muted:#5a6580;--glow:rgba(0,170,255,.3)}
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:"Exo 2",sans-serif;overflow-x:hidden;padding-bottom:28px}
+body{background:var(--bg);color:var(--text);font-family:"Exo 2",sans-serif;overflow-x:hidden;padding-bottom:8px}
 .sidebar{position:fixed;top:0;left:0;height:100vh;width:280px;background:#0a0c14;z-index:500;transform:translateX(-100%);transition:transform .32s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;border-right:1px solid rgba(255,255,255,.06)}
 .sidebar.open{transform:translateX(0);box-shadow:8px 0 40px rgba(0,0,0,.7)}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:499;opacity:0;pointer-events:none;transition:opacity .3s}
@@ -322,9 +322,9 @@ body{background:var(--bg);color:var(--text);font-family:"Exo 2",sans-serif;overf
 .social-proof{position:fixed;bottom:5rem;left:1rem;z-index:89;background:var(--card2);border:1px solid rgba(0,170,255,.22);border-radius:9px;padding:.55rem .85rem;display:flex;align-items:center;gap:.55rem;font-size:.72rem;color:var(--text);box-shadow:0 8px 22px rgba(0,0,0,.38);transform:translateX(-130%);transition:transform .38s cubic-bezier(.4,0,.2,1);max-width:210px;line-height:1.4}
 .social-proof.show{transform:translateX(0)}
 .sp-dot{width:7px;height:7px;border-radius:50%;background:#00e676;flex-shrink:0;box-shadow:0 0 5px #00e676;animation:blink 1.5s infinite}
-.cbottom{position:fixed;bottom:0;left:0;right:0;z-index:95;background:#0a0a0a;border-top:1px solid rgba(255,100,170,.25);height:26px;display:flex;align-items:center;overflow:hidden}
-.cbottom-inner{display:flex;white-space:nowrap;animation:ticker 20s linear infinite}
-.cbottom-item{display:inline-flex;align-items:center;gap:.45rem;padding:0 1.4rem;font-family:"Orbitron",sans-serif;font-size:.58rem;font-weight:700;letter-spacing:2px;color:rgba(255,120,180,.65)}
+
+
+
 .ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.22);transform:scale(0);animation:rip .48s linear;pointer-events:none}
 @keyframes rip{to{transform:scale(4);opacity:0}}
 @media(max-width:640px){
@@ -361,6 +361,22 @@ body{background:var(--bg);color:var(--text);font-family:"Exo 2",sans-serif;overf
   .honor-grid{grid-template-columns:1fr}
   .hero h1{font-size:1.6rem}
 }
+
+/* CiberDMily corner */
+.cdm-corner{
+  position:fixed;bottom:5.2rem;left:.9rem;z-index:88;
+  background:rgba(10,8,14,.82);
+  border:1px solid rgba(255,100,170,.3);
+  border-radius:20px;
+  padding:.22rem .65rem;
+  font-family:"Orbitron",sans-serif;
+  font-size:.55rem;font-weight:700;
+  letter-spacing:1.5px;
+  color:rgba(255,130,180,.7);
+  backdrop-filter:blur(8px);
+  pointer-events:none;
+  white-space:nowrap;
+}
 </style>
 </head>
 <body>
@@ -378,6 +394,7 @@ body{background:var(--bg);color:var(--text);font-family:"Exo 2",sans-serif;overf
     <div class="nav-item" id="ni-diamantes" onclick="goPage('diamantes')"><div class="nav-ico">&#128142;</div> Diamantes FF</div>
     <div class="nav-item" id="ni-likes" onclick="goPage('likes')"><div class="nav-ico">&#128077;</div> Likes Perfil <span class="nb nb-new">NEW</span></div>
     <div class="nav-item" id="ni-honor" onclick="goPage('honor')"><div class="nav-ico">&#127942;</div> Honor de Clan</div>
+    <div class="nav-item" id="ni-honor-cuenta" onclick="goPage('honorcuenta')"><div class="nav-ico">&#127869;</div> Honor Cuenta FF <span class="nb" style="background:rgba(0,245,255,.15);border:1px solid rgba(0,245,255,.3);color:#00f5ff">NEW</span></div>
     <div class="nav-item" id="ni-clanes" onclick="goPage('clanes')"><div class="nav-ico">&#127959;</div> Venta de Clanes <span class="nb nb-lv7">NV.7</span></div>
     <div class="nav-item" id="ni-codigos" onclick="goPage('codigos')"><div class="nav-ico">&#127381;</div> Codigos FF <span class="nb nb-pronto">PRONTO</span></div>
     <div class="nav-item" id="ni-cajas" onclick="goPage('cajas')"><div class="nav-ico">&#127873;</div> Cajas Evolutiva <span class="nb nb-pronto">PRONTO</span></div>
@@ -453,6 +470,7 @@ body{background:var(--bg);color:var(--text);font-family:"Exo 2",sans-serif;overf
     <div class="qcard" onclick="goPage('diamantes')" style="border-color:rgba(0,170,255,.2)"><span class="qcard-ico">&#128142;</span><div class="qcard-name">Diamantes FF</div><div class="qcard-sub">Desde $17 MX</div></div>
     <div class="qcard" onclick="goPage('likes')" style="border-color:rgba(255,80,80,.18)"><span class="qcard-ico">&#128077;</span><div class="qcard-name">Likes Perfil</div><div class="qcard-sub">220 likes/dia</div></div>
     <div class="qcard" onclick="goPage('honor')" style="border-color:rgba(255,208,0,.18)"><span class="qcard-ico">&#127942;</span><div class="qcard-name">Honor de Clan</div><div class="qcard-sub">4 regiones</div></div>
+    <div class="qcard" onclick="goPage('honorcuenta')" style="border-color:rgba(0,245,255,.18)"><span class="qcard-ico">&#127869;</span><div class="qcard-name">Honor Cuenta FF</div><div class="qcard-sub">Lv1→40 &middot; $200 MX</div></div>
     <div class="qcard" onclick="goPage('clanes')" style="border-color:rgba(124,58,237,.18)"><span class="qcard-ico">&#127959;</span><div class="qcard-name">Clanes Nv.7</div><div class="qcard-sub">$500-$5,000 MX</div></div>
     <div class="qcard" onclick="goPage('saldo')" style="border-color:rgba(37,211,102,.18)"><span class="qcard-ico">&#128176;</span><div class="qcard-name">Recargar Saldo</div><div class="qcard-sub">STORI + Binance</div></div>
     <div class="qcard" onclick="goPage('codigos')" style="border-color:rgba(255,165,0,.18)"><span class="qcard-ico">&#127381;</span><div class="qcard-name">Codigos FF</div><div class="qcard-sub" style="color:#ffa500">Proximamente</div></div>
@@ -523,6 +541,145 @@ body{background:var(--bg);color:var(--text);font-family:"Exo 2",sans-serif;overf
     <div class="mc-card"><div class="mc-card-head"><div class="mc-card-title">Historial de pedidos</div><button class="btn-clr" onclick="clearHistMC()">Limpiar</button></div><div class="hist-list"><div id="mc2-list"><div class="hist-empty">Aun no tienes compras registradas</div></div></div></div>
   </div>
 </div>
+
+<!-- HONOR CUENTA FF -->
+<div class="page" id="page-honorcuenta">
+  <div class="ph">
+    <div class="stag">Cuenta Free Fire</div>
+    <h2 class="ptitle">&#127869; HONOR PARA TU <span>CUENTA FF</span></h2>
+    <p class="psub">Sube tu honor en lobo solitario. Sin riesgo de baneo. Seguro y rapido.</p>
+  </div>
+
+  <!-- INFO CARDS -->
+  <div style="max-width:820px;margin:0 auto;padding:0 5vw 1.5rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.75rem">
+    <div style="background:rgba(0,245,255,.05);border:1px solid rgba(0,245,255,.2);border-radius:11px;padding:1rem;text-align:center">
+      <div style="font-size:1.8rem;margin-bottom:.4rem">&#128737;</div>
+      <div style="font-family:Orbitron;font-size:.72rem;font-weight:700;color:#00f5ff;margin-bottom:.2rem">SIN RIESGO DE BANEO</div>
+      <div style="font-size:.72rem;color:var(--muted);line-height:1.5">Metodo seguro, se sube en lobo solitario sin comprometer tu cuenta</div>
+    </div>
+    <div style="background:rgba(0,230,118,.05);border:1px solid rgba(0,230,118,.2);border-radius:11px;padding:1rem;text-align:center">
+      <div style="font-size:1.8rem;margin-bottom:.4rem">&#9889;</div>
+      <div style="font-family:Orbitron;font-size:.72rem;font-weight:700;color:#00e676;margin-bottom:.2rem">ENTREGA RAPIDA</div>
+      <div style="font-size:.72rem;color:var(--muted);line-height:1.5">Nivel 1 al 40 aproximadamente. Tiempo estimado segun disponibilidad</div>
+    </div>
+    <div style="background:rgba(255,208,0,.05);border:1px solid rgba(255,208,0,.2);border-radius:11px;padding:1rem;text-align:center">
+      <div style="font-size:1.8rem;margin-bottom:.4rem">&#128176;</div>
+      <div style="font-family:Orbitron;font-size:.72rem;font-weight:700;color:#ffd000;margin-bottom:.2rem">PRECIO FIJO</div>
+      <div style="font-size:.72rem;color:var(--muted);line-height:1.5">Lv1 al 40 &mdash; $200 MXN. Pago por STORI o Binance</div>
+    </div>
+  </div>
+
+  <!-- ADVERTENCIA -->
+  <div style="max-width:820px;margin:0 auto;padding:0 5vw 1.5rem">
+    <div style="background:rgba(255,165,0,.07);border:1px solid rgba(255,165,0,.3);border-radius:11px;padding:1rem 1.15rem;display:flex;align-items:flex-start;gap:.75rem">
+      <div style="font-size:1.4rem;flex-shrink:0;margin-top:.08rem">&#9888;</div>
+      <div>
+        <div style="font-family:Orbitron;font-size:.72rem;font-weight:700;color:#ffa500;margin-bottom:.35rem">ADVERTENCIA IMPORTANTE</div>
+        <div style="font-size:.77rem;color:rgba(255,165,0,.8);line-height:1.7">
+          Se recomienda usar una <strong style="color:#ffd000">cuenta secundaria</strong>.<br/>
+          Si decides usar tu cuenta principal, existe un <strong style="color:#ffa500">riesgo bajo pero presente</strong> de suspension temporal.<br/>
+          CiberStore no se hace responsable por decisiones sobre cuentas principales.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMO OBTENER EL TOKEN -->
+  <div style="max-width:820px;margin:0 auto;padding:0 5vw 1.5rem">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:13px;padding:1.2rem 1.35rem">
+      <div style="font-family:Orbitron;font-size:.75rem;font-weight:700;color:#fff;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem">
+        <span>&#128273;</span> Como obtener tu token de Free Fire
+      </div>
+      <div style="font-size:.8rem;color:var(--muted);line-height:1.8">
+        &#9312; Abre Free Fire y ve a tu perfil<br/>
+        &#9313; Busca la opcion de <strong style="color:var(--text)">cuenta / ajustes</strong><br/>
+        &#9314; Escribe al soporte de CiberStore por WhatsApp<br/>
+        &#9315; Te explicamos paso a paso como obtenerlo en tu dispositivo
+      </div>
+      <a href="https://wa.me/5215548461200?text=Hola%2C%20necesito%20ayuda%20para%20obtener%20mi%20token%20de%20Free%20Fire" target="_blank" style="display:inline-flex;align-items:center;gap:.45rem;margin-top:.85rem;padding:.55rem 1.1rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:6px;font-family:'Exo 2';font-weight:800;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none">
+        &#128222; Preguntame como obtenerlo
+      </a>
+    </div>
+  </div>
+
+  <!-- PRECIO Y BOTON -->
+  <div style="max-width:820px;margin:0 auto;padding:0 5vw 3rem">
+    <div style="background:linear-gradient(135deg,#0a0f1e,#0d1528);border:1px solid rgba(0,245,255,.25);border-radius:15px;padding:1.75rem 1.5rem;text-align:center;position:relative;overflow:hidden">
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(0,245,255,.06),transparent)"></div>
+      <div style="position:relative;z-index:1">
+        <div style="font-size:2.5rem;margin-bottom:.6rem">&#127869;</div>
+        <div style="font-family:Orbitron;font-size:1.1rem;font-weight:900;color:#fff;margin-bottom:.2rem">Honor Cuenta FF</div>
+        <div style="font-size:.8rem;color:var(--muted);margin-bottom:1.2rem">Nivel 1 al 40 &mdash; Lobo solitario &mdash; Sin riesgo de baneo</div>
+        <div style="font-family:Orbitron;font-size:3rem;font-weight:900;color:#00f5ff;line-height:1;margin-bottom:.3rem" id="hcff-price">$200 MX</div>
+        <div style="font-size:.75rem;color:var(--muted);margin-bottom:1.5rem">Precio unico &mdash; Lv1 a Lv40 aprox.</div>
+        <button onclick="openHonorCuentaModal()" style="padding:.85rem 2.5rem;background:linear-gradient(90deg,#007799,#00f5ff);color:#020a0a;border:none;border-radius:8px;font-family:'Exo 2';font-weight:800;font-size:.9rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .22s;box-shadow:0 0 22px rgba(0,245,255,.3)" onmouseover="this.style.boxShadow='0 0 38px rgba(0,245,255,.6)'" onmouseout="this.style.boxShadow='0 0 22px rgba(0,245,255,.3)'">
+          &#9889; Contratar ahora
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EXPERIENCIA PARA TU CUENTA FF -->
+<div class="modal-ov" id="modal-honor-cuenta">
+  <div class="modal">
+    <div class="modal-h">
+      <h3 style="color:#00f5ff">&#127869; Experiencia para tu Cuenta FF</h3>
+      <button class="modal-close" onclick="closeHonorCuentaModal()">&#215;</button>
+    </div>
+    <div class="modal-b">
+      <!-- Producto -->
+      <div class="m-prod-card" style="border-color:rgba(0,245,255,.2)">
+        <div class="m-prod-ico" style="background:linear-gradient(135deg,#001a22,#003344)">&#127869;</div>
+        <div>
+          <div class="m-prod-name">Experiencia para tu Cuenta FF</div>
+          <div class="m-prod-price" style="color:#00f5ff" id="hcff-modal-price">$200 MX</div>
+          <div class="m-prod-sub">Nivel 1 al 40 &mdash; Lobo solitario</div>
+        </div>
+      </div>
+
+      <!-- Advertencia compacta -->
+      <div style="background:rgba(255,165,0,.07);border:1px solid rgba(255,165,0,.28);border-radius:7px;padding:.65rem .85rem;margin-bottom:.9rem;display:flex;align-items:flex-start;gap:.5rem">
+        <span style="font-size:1rem;flex-shrink:0">&#9888;</span>
+        <div style="font-size:.72rem;color:rgba(255,165,0,.85);line-height:1.6">Se recomienda <strong style="color:#ffd000">cuenta secundaria</strong>. Riesgo bajo pero existente en cuentas principales.</div>
+      </div>
+
+      <div class="order-disp" id="hcff-order">PEDIDO #...</div>
+
+      <!-- Pago tabs -->
+      <div style="display:flex;gap:.45rem;margin-bottom:.85rem">
+        <button id="hcff-tab-stori" onclick="hcffPayTab('stori')" style="flex:1;padding:.38rem .55rem;border-radius:6px;font-family:'Exo 2';font-weight:800;font-size:.7rem;letter-spacing:1px;cursor:pointer;border:1px solid rgba(37,211,102,.38);background:rgba(37,211,102,.1);color:#25d366">STORI</button>
+        <button id="hcff-tab-binance" onclick="hcffPayTab('binance')" style="flex:1;padding:.38rem .55rem;border-radius:6px;font-family:'Exo 2';font-weight:800;font-size:.7rem;letter-spacing:1px;cursor:pointer;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--muted)">BINANCE</button>
+      </div>
+      <div id="hcff-paybox-stori" class="pay-box">
+        <div class="pay-title">Transferencia STORI MX</div>
+        <div class="pay-field"><div class="pf-label">Banco</div><div class="pf-val">STORI</div></div>
+        <div class="pay-field"><div class="pf-label">Titular</div><div class="pf-val">MATINA RUBI HDZ</div></div>
+        <div class="pay-field"><div><div class="pf-label">Cuenta / CLABE</div><div class="pf-val pf-acc">646180402332964686</div></div><button class="copy-btn" onclick="copyClabe()">Copiar</button></div>
+        <div class="pay-note">Transfiere el monto exacto y manda el comprobante + numero de pedido al WhatsApp.</div>
+      </div>
+      <div id="hcff-paybox-binance" class="pay-box" style="display:none;background:rgba(240,185,11,.05);border-color:rgba(240,185,11,.2)">
+        <div class="pay-title" style="color:#f0b90b">&#128176; Binance Pay</div>
+        <div class="pay-field"><div><div class="pf-label">Binance ID</div><div class="pf-val" style="color:#f0b90b;letter-spacing:1px">1106987175</div></div><button class="copy-btn" onclick="copyBinanceID()" style="border-color:rgba(240,185,11,.3);color:#f0b90b">Copiar</button></div>
+        <div class="pay-note">Binance App &gt; Pay &gt; ID 1106987175 &gt; transfiere &gt; manda comprobante al WhatsApp.</div>
+      </div>
+
+      <!-- Campos -->
+      <label class="flabel">Token de Free Fire</label>
+      <input class="finput" id="hcff-token" type="text" placeholder="Tu token de FF"/>
+      <label class="flabel">Nombre de la cuenta</label>
+      <input class="finput" id="hcff-nombre-cuenta" type="text" placeholder="Nombre que aparece en tu perfil FF"/>
+      <label class="flabel">Tu nombre</label>
+      <input class="finput" id="hcff-nombre" type="text" placeholder="Ej: Roberto Gomez"/>
+      <label class="flabel">Numero de WhatsApp</label>
+      <input class="finput" id="hcff-wa" type="tel" placeholder="Ej: 5512345678"/>
+
+      <p class="wa-note">Manda tu <strong style="color:#25d366">comprobante</strong> al WhatsApp con el numero de pedido</p>
+      <button class="btn-submit" style="background:linear-gradient(90deg,#007799,#00f5ff);color:#020a0a" onclick="submitHonorCuenta()">&#9889; Confirmar y abrir WhatsApp</button>
+    </div>
+  </div>
+</div>
+
 <div class="page" id="page-codigos"><div class="wip-wrap"><div class="wip-ico">&#127381;</div><div class="wip-badge">&#9203; Proximamente</div><div class="wip-title">CODIGOS DE <span>FREE FIRE</span></div><div class="wip-desc">En esta seccion vas a poder encontrar a la venta codigos de Free Fire como armas, trajes, skins y mucho mas, a un precio super exclusivo.<br/><br/><strong style="color:var(--text)">Estamos preparando algo increible para ti.</strong></div><a href="https://wa.me/5215548461200?text=Hola%2C%20avisame%20cuando%20esten%20disponibles%20los%20Codigos%20FF" target="_blank" class="wip-wa">&#128222; Avisame cuando este disponible</a></div></div>
 <div class="page" id="page-cajas"><div class="wip-wrap"><div class="wip-ico">&#127873;</div><div class="wip-badge">&#9203; Proximamente</div><div class="wip-title">CAJAS PARA TU <span>EVOLUTIVA</span></div><div class="wip-desc">Pronto podras conseguir cajas para tu evolutiva directamente aqui. La mejor forma de potenciar tu personaje en Free Fire.<br/><br/><strong style="color:var(--text)">Muy pronto disponible en CiberStore.</strong></div><a href="https://wa.me/5215548461200?text=Hola%2C%20avisame%20cuando%20esten%20disponibles%20las%20Cajas%20Evolutiva" target="_blank" class="wip-wa">&#128222; Avisame cuando este disponible</a></div></div>
 <div class="modal-ov" id="modal">
@@ -575,7 +732,9 @@ body{background:var(--bg);color:var(--text);font-family:"Exo 2",sans-serif;overf
 <button class="scrolltop" id="scrolltop" onclick="window.scrollTo({top:0,behavior:'smooth'})">&#8679;</button>
 <div class="toast" id="toast"></div>
 <div class="social-proof" id="social-proof"><div class="sp-dot"></div><div id="sp-text"></div></div>
-<div class="cbottom"><div class="cbottom-inner"><span class="cbottom-item">CiberDMily &#128149;</span><span class="cbottom-item">CiberDMily &#128149;</span><span class="cbottom-item">CiberDMily &#128149;</span><span class="cbottom-item">CiberDMily &#128149;</span><span class="cbottom-item">CiberDMily &#128149;</span><span class="cbottom-item">CiberDMily &#128149;</span><span class="cbottom-item">CiberDMily &#128149;</span><span class="cbottom-item">CiberDMily &#128149;</span><span class="cbottom-item">CiberDMily &#128149;</span><span class="cbottom-item">CiberDMily &#128149;</span><span class="cbottom-item">CiberDMily &#128149;</span><span class="cbottom-item">CiberDMily &#128149;</span><span class="cbottom-item">CiberDMily &#128149;</span><span class="cbottom-item">CiberDMily &#128149;</span><span class="cbottom-item">CiberDMily &#128149;</span><span class="cbottom-item">CiberDMily &#128149;</span></div></div>
+
+
+<div class="cdm-corner">CiberDMily &#128149;</div>
 <script src="script.js"></script>
 </body>
 </html>
