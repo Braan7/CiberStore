@@ -820,35 +820,41 @@ function closeCart(){
 }
 
 function renderCartModal(){
-  var c=getCart(),body=document.getElementById('cart-modal-body');
+  var c=getCart(), body=document.getElementById('cart-modal-body');
   if(!body) return;
-  if(!c.length){body.innerHTML='<div class="cart-empty">Tu carrito esta vacio</div>';return;}
-  var total=c.reduce(function(s,i){return s+i.price;},0);
+  if(!c.length){ body.innerHTML='<div class="cart-empty">'+t('empty_cart')+'</div>'; return; }
+  var totalMXN=c.reduce(function(s,i){return s+i.price;},0);
   var rows='<div style="padding:0 .5rem">';
   for(var i=0;i<c.length;i++){
     var it=c[i];
     rows+='<div class="cart-item-row">'
       +'<div class="cart-item-ico">'+it.icon+'</div>'
       +'<div class="cart-item-name">'+it.name+'</div>'
-      +'<div class="cart-item-price">$'+it.price.toLocaleString('es-MX')+'</div>'
+      +'<div class="cart-item-price">'+fmt(it.price)+'</div>'
       +'<button class="cart-item-del" data-id="'+it.id+'" onclick="removeFromCart(+this.dataset.id)">\u00D7</button>'
       +'</div>';
   }
   rows+='</div>';
-  rows+='<div class="cart-total-row"><span class="cart-total-lbl">Total</span><span class="cart-total-val">$'+total.toLocaleString('es-MX')+' MX</span></div>';
-  rows+='<div style="padding:0 1.35rem 1.35rem"><button class="btn-cart-checkout" onclick="checkoutCart()">\uD83D\uDCDE Pedir todo por WhatsApp</button></div>';
+  rows+='<div class="cart-total-row">'
+    +'<span class="cart-total-lbl">Total</span>'
+    +'<span class="cart-total-val">'+fmt(totalMXN)+'</span>'
+    +'</div>';
+  rows+='<div style="padding:0 1.25rem 1.25rem">'
+    +'<button class="btn-cart-checkout" onclick="checkoutCart()">'
+    +'\uD83D\uDCDE Pedir todo por WhatsApp'
+    +'</button></div>';
   body.innerHTML=rows;
 }
 
 function checkoutCart(){
   var c=getCart();
   if(!c.length){showToast('El carrito esta vacio');return;}
-  var total=c.reduce(function(s,i){return s+i.price;},0);
+  var totalMXN=c.reduce(function(s,i){return s+i.price;},0);
   var lines='*PEDIDO CARRITO - CiberStore*\n\n';
   for(var i=0;i<c.length;i++) lines+=c[i].name+': $'+c[i].price.toLocaleString('es-MX')+' MX\n';
-  lines+='\nTotal: $'+total.toLocaleString('es-MX')+' MX';
+  lines+='\nTotal: $'+totalMXN.toLocaleString('es-MX')+' MX';
   lines+='\nMetodo de pago: Transferencia Bancaria';
-  lines+='\n\nManda tu comprobante al recibir este mensaje.';
+  lines+='\n\nPor favor manda tu nombre, ID de Free Fire y WhatsApp junto con el comprobante.';
   closeCart();
   setTimeout(function(){window.open('https://wa.me/'+WA+'?text='+encodeURIComponent(lines),'_blank');},400);
 }
@@ -908,22 +914,23 @@ function ffQty(id, delta){
 }
 
 function ffAddCart(id){
-  var qty = ffQtyMap[id]||0;
-  if(qty === 0){ showToast('Elige la cantidad primero'); return; }
-  var p = null;
+  var qty=ffQtyMap[id]||0;
+  if(qty===0){ showToast('Elige la cantidad primero'); return; }
+  var p=null;
   for(var i=0;i<PRODUCTS.length;i++){ if(PRODUCTS[i].id===id){ p=PRODUCTS[i]; break; } }
   if(!p) return;
-  var tIdx = getTIdx(getSpent());
-  var now  = p.prices[tIdx];
+  var tIdx=getTIdx(getSpent());
+  var now=p.prices[tIdx];
   for(var q=0;q<qty;q++){
     addToCart({name:p.name+' Diamantes',price:now,icon:'\uD83D\uDC8E'});
   }
-  // reset qty
-  ffQtyMap[id] = 0;
-  var el = document.getElementById('ffq-'+id);
-  if(el) el.textContent = '0';
-  showToast(qty+'x '+p.name+' agregado al carrito',2000);
+  ffQtyMap[id]=0;
+  var el=document.getElementById('ffq-'+id);
+  if(el) el.textContent='0';
+  showToast(qty+'x '+p.name+' Diamantes al carrito',2200);
 }
+
+
 
 
 /* ================================================================
@@ -1117,7 +1124,6 @@ function changeCurrency(cur){
   CURRENCY=cur;
   localStorage.setItem('cs_currency',cur);
   refreshUI();
-  /* Re-render prices everywhere */
   var page=document.querySelector('.page.active');
   if(page){
     var id=page.id.replace('page-','');
@@ -1125,6 +1131,9 @@ function changeCurrency(cur){
     if(id==='likes') renderLikes();
     if(id==='membresia'){renderMems();renderWallet();}
   }
+  /* Re-render open cart if visible */
+  var cart=document.getElementById('modal-cart');
+  if(cart && cart.classList.contains('show')) renderCartModal();
 }
 
 /* -- INIT --------------------------------------------------------- */
