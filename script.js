@@ -19,14 +19,19 @@ var PRODUCTS=[
   {id:11,name:'Pase Elite',total:0,  bonus:0,   region:'LATAM & BR', prices:[45,45,45,45,45],        badge:null,        isPase:true,  popular:false}
 ];
 var LIKES=[
-  {id:1,label:'14 Dias', priceMX:140,priceUSD:7,  total:3080, perDay:220,days:14, color:'#ff5050',lbl:'14 DIAS'},
-  {id:2,label:'30 Dias', priceMX:180,priceUSD:5.9,total:6600, perDay:220,days:30, color:'#00aaff',lbl:'30 DIAS - POPULAR'},
-  {id:3,label:'60 Dias', priceMX:260,priceUSD:13, total:13200,perDay:220,days:60, color:'#ffd000',lbl:'60 DIAS'},
-  {id:4,label:'120 Dias',priceMX:280,priceUSD:14, total:26400,perDay:220,days:120,color:'#00f5ff',lbl:'120 DIAS - MEJOR VALOR'}
+  {id:1, label:'Inicio',          emoji:'\uD83E\uDD49', priceMX:79,  priceUSD:4.1,  total:1400,  perDay:220, days:7,   color:'#cc7700', popular:false, best:false},
+  {id:2, label:'Bronce',          emoji:'\uD83E\uDD48', priceMX:99,  priceUSD:5.1,  total:2200,  perDay:220, days:10,  color:'#a05530', popular:false, best:false},
+  {id:3, label:'Plata',           emoji:'\uD83E\uDD47', priceMX:129, priceUSD:6.6,  total:3300,  perDay:220, days:15,  color:'#8899aa', popular:true,  best:false},
+  {id:4, label:'Oro',             emoji:'\uD83D\uDC8E', priceMX:159, priceUSD:8.1,  total:4400,  perDay:220, days:20,  color:'#ffd000', popular:false, best:false},
+  {id:5, label:'Diamante',        emoji:'\u26A1',         priceMX:189, priceUSD:9.7,  total:5500,  perDay:220, days:25,  color:'#00aaff', popular:false, best:false},
+  {id:6, label:'Mensual Completo',emoji:'\uD83D\uDC51',  priceMX:219, priceUSD:11.2, total:6600,  perDay:220, days:30,  color:'#7c3aed', popular:false, best:true},
+  {id:7, label:'Ultra',           emoji:'\uD83D\uDE80',  priceMX:279, priceUSD:14.2, total:8800,  perDay:220, days:40,  color:'#00f5ff', popular:false, best:false},
+  {id:8, label:'Supreme',         emoji:'\uD83D\uDD25',  priceMX:349, priceUSD:17.8, total:11000, perDay:220, days:50,  color:'#ff4422', popular:false, best:false},
+  {id:9, label:'MEGA PACK VIP',   emoji:'\uD83C\uDF1F',  priceMX:899, priceUSD:45.8, total:30000, perDay:220, days:136, color:'#f0b90b', popular:false, best:false, isVip:true, origMX:1299}
 ];
 var HONOR=[
   {id:0,region:'Norteamerica',  price:340,color:'#ffd000'},
-  {id:1,region:'Estados Unidos',price:180,color:'#4dabf7'},
+  {id:1,region:'Estados Unidos',price:160,color:'#4dabf7'},
   {id:2,region:'Sudamerica',    price:340,color:'#40c057'},
   {id:3,region:'Europa',        price:340,color:'#b39ddb'}
 ];
@@ -107,28 +112,55 @@ function renderProds(){
 
 
 function renderLikes(){
-  var bords=['rgba(255,80,80,.22)','rgba(0,170,255,.2)','rgba(255,208,0,.22)','rgba(0,245,255,.2)'];
-  var g=document.getElementById('likes-grid'),html='';
+  var g=document.getElementById('likes-grid');
+  if(!g) return;
+  var rows='';
   for(var i=0;i<LIKES.length;i++){
     var p=LIKES[i];
-    var dark=(p.color==='#ffd000'||p.color==='#00f5ff')?'#020a0a':'#fff';
-    html+='<div class="lk-card" onclick="openLikeModal('+p.id+')" style="border-color:'+bords[i]+'">'
-      +'<div class="lk-top" style="background:'+p.color+'18;color:'+p.color+'">'+p.lbl+'</div>'
-      +'<span class="lk-icon" style="color:'+p.color+'">\uD83D\uDC4D</span>'
-      +'<div class="lk-days" style="color:'+p.color+'">'+p.label+'</div>'
-      +'<div class="lk-price" style="color:'+p.color+'">$'+p.priceMX+' <span style="font-size:1rem">MX</span></div>'
-      +'<div class="lk-usd" style="color:'+p.color+'">$'+p.priceUSD+' USD</div>'
-      +'<div class="lk-div"></div>'
-      +'<div class="lk-row"><span class="lk-lbl">Total likes</span><span class="lk-val" style="color:'+p.color+'">'+p.total.toLocaleString()+'</span></div>'
-      +'<div class="lk-row"><span class="lk-lbl">Por dia</span><span class="lk-val" style="color:'+p.color+'">'+p.perDay+'</span></div>'
-      +'<div class="lk-row"><span class="lk-lbl">Duracion</span><span class="lk-val" style="color:'+p.color+'">'+p.days+' dias</span></div>'
-      +'<button class="btn-like" style="background:linear-gradient(90deg,'+p.color+'cc,'+p.color+');color:'+dark+'" onclick="event.stopPropagation();openLikeModal('+p.id+')">Obtener ahora</button>'
-      +'</div>';
+    var price=p.priceMX;
+    var isVip=p.isVip||false;
+    var cls='lk-card'+(p.popular?' lk-popular':'')+(p.best?' lk-best':'')+(isVip?' lk-vip':'');
+    var card='<div class="'+cls+'" onclick="openLikeModal('+p.id+')" style="--lk-clr:'+p.color+';border-color:'+p.color+'22">';
+    if(p.popular) card+='<div class="lk-ribbon">POPULAR</div>';
+    if(p.best)    card+='<div class="lk-ribbon" style="background:linear-gradient(90deg,#00a87a,#00f5d4);color:#002a22">MEJOR VALOR</div>';
+    if(isVip)     card+='<div class="lk-ribbon" style="background:linear-gradient(90deg,#c97b00,#f0b90b);color:#1a0a00">VIP</div>';
+    card+='<div class="lk-top">';
+    card+='<div class="lk-ico">'+p.emoji+'</div>';
+    card+='<div style="flex:1"><div class="lk-label">'+p.label+'</div>';
+    card+='<div class="lk-total">'+p.total.toLocaleString()+'<span> likes</span></div></div></div>';
+    card+='<div class="lk-price-row">';
+    if(isVip && p.origMX){
+      card+='<div>';
+      card+='<div style="text-decoration:line-through;font-size:.78rem;color:var(--muted);font-family:Orbitron">'+fmt(p.origMX)+'</div>';
+      card+='<div class="lk-price">'+fmt(price)+'<span> MX</span></div>';
+      card+='</div>';
+    } else {
+      card+='<div class="lk-price">'+fmt(price)+'<span> MX</span></div>';
+    }
+    card+='</div>';
+    card+='<div class="lk-stats">';
+    card+='<div class="lk-stat"><span class="lk-stat-n">'+p.perDay+'</span><span class="lk-stat-l">likes/dia</span></div>';
+    card+='<div class="lk-stat-div"></div>';
+    card+='<div class="lk-stat"><span class="lk-stat-n">'+p.days+'</span><span class="lk-stat-l">dias</span></div>';
+    card+='<div class="lk-stat-div"></div>';
+    card+='<div class="lk-stat"><span class="lk-stat-n">'+p.total.toLocaleString()+'</span><span class="lk-stat-l">total</span></div>';
+    card+='</div>';
+    if(isVip){
+      card+='<div style="display:flex;flex-direction:column;gap:.2rem;margin:.45rem 0;padding:.55rem;background:rgba(240,185,11,.07);border-radius:7px;border:1px solid rgba(240,185,11,.2)">';
+      card+='<div style="font-size:.68rem;color:#f0b90b;font-weight:700">\uD83C\uDF81 Incluye:</div>';
+      card+='<div style="font-size:.65rem;color:var(--muted)">\u2B50 Prioridad de entrega</div>';
+      card+='<div style="font-size:.65rem;color:var(--muted)">\uD83C\uDD95 Atencion preferente</div>';
+      card+='<div style="font-size:.65rem;color:var(--muted)">\uD83C\uDF81 Bonus sorpresa</div>';
+      card+='</div>';
+    }
+    card+='<button class="lk-btn" onclick="event.stopPropagation();openLikeModal('+p.id+')">';
+    card+=(LANG==='en'?'Get plan':'Obtener plan')+'</button>';
+    card+='</div>';
+    rows+=card;
   }
-  g.innerHTML=html;
+  g.innerHTML=rows;
 }
 
-/* MEMBERSHIPS */
 function renderMems(){
   var spent=getSpent(),cIdx=getTIdx(spent);
   var g=document.getElementById('mem-grid'),html='';
