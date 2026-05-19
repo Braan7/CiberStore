@@ -1144,3 +1144,96 @@ function changeCurrency(cur){
   if(cs) cs.value=CURRENCY;
   applyTranslations();
 })();
+
+/* ================================================================
+   HONOR CUENTA FF
+================================================================ */
+var HONOR_CUENTA_PRICE = 200;
+
+function openHonorCuentaModal(){
+  var el=document.getElementById('modal-honor-cuenta');
+  if(el) el.classList.add('show');
+  var ordEl=document.getElementById('hcff-order');
+  if(ordEl) ordEl.textContent='PEDIDO #'+peekOrder();
+  var prEl=document.getElementById('hcff-modal-price');
+  if(prEl) prEl.textContent=fmt(HONOR_CUENTA_PRICE);
+}
+
+function closeHonorCuentaModal(){
+  var el=document.getElementById('modal-honor-cuenta');
+  if(el) el.classList.remove('show');
+}
+
+function hcffPayTab(tab){
+  var s=document.getElementById('hcff-paybox-stori');
+  var b=document.getElementById('hcff-paybox-binance');
+  var ts=document.getElementById('hcff-tab-stori');
+  var tb=document.getElementById('hcff-tab-binance');
+  if(tab==='stori'){
+    if(s) s.style.display='block';
+    if(b) b.style.display='none';
+    if(ts){ts.style.background='rgba(37,211,102,.12)';ts.style.borderColor='rgba(37,211,102,.4)';ts.style.color='#25d366';}
+    if(tb){tb.style.background='rgba(255,255,255,.04)';tb.style.borderColor='rgba(255,255,255,.1)';tb.style.color='var(--muted)';}
+  } else {
+    if(s) s.style.display='none';
+    if(b) b.style.display='block';
+    if(tb){tb.style.background='rgba(240,185,11,.12)';tb.style.borderColor='rgba(240,185,11,.4)';tb.style.color='#f0b90b';}
+    if(ts){ts.style.background='rgba(255,255,255,.04)';ts.style.borderColor='rgba(255,255,255,.1)';ts.style.color='var(--muted)';}
+  }
+}
+
+function submitHonorCuenta(){
+  var token  = document.getElementById('hcff-token').value.trim();
+  var ncuenta= document.getElementById('hcff-nombre-cuenta').value.trim();
+  var nombre = document.getElementById('hcff-nombre').value.trim();
+  var wa     = document.getElementById('hcff-wa').value.trim();
+  if(!token)  { showToast('Ingresa tu token de Free Fire'); return; }
+  if(!ncuenta){ showToast('Ingresa el nombre de tu cuenta'); return; }
+  if(!nombre) { showToast('Ingresa tu nombre'); return; }
+  if(!wa || wa.replace(/\D/g,'').length<8){ showToast('Ingresa tu numero de WhatsApp'); return; }
+
+  var ord=getNextOrder();
+  var lu=addSpend(HONOR_CUENTA_PRICE);
+  addToHistory({
+    name:'Honor Cuenta FF',
+    price:HONOR_CUENTA_PRICE,
+    icon:'\uD83C\uDF71',
+    date:new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),
+    order:ord
+  });
+
+  var msg='*NUEVO PEDIDO #'+ord+' - CiberStore*\n\n'
+    +'Servicio: Honor Cuenta Free Fire\n'
+    +'Nivel: 1 al 40 (aprox)\n'
+    +'Precio: '+fmt(HONOR_CUENTA_PRICE)+'\n'
+    +'Metodo de pago: Transferencia Bancaria\n\n'
+    +'Nombre: '+nombre+'\n'
+    +'Nombre de cuenta FF: '+ncuenta+'\n'
+    +'Token FF: '+token+'\n'
+    +'WhatsApp: '+wa+'\n\n'
+    +'Manda tu comprobante con el numero #'+ord;
+
+  closeHonorCuentaModal();
+  updateSidebarUser();
+  if(lu) showToast(lu,5000); else showToast('Abriendo WhatsApp...',2500);
+  setTimeout(function(){
+    window.open('https://wa.me/'+WA+'?text='+encodeURIComponent(msg),'_blank');
+  },700);
+}
+
+/* Close modal on overlay click */
+(function(){
+  var el=document.getElementById('modal-honor-cuenta');
+  if(el) el.addEventListener('click',function(e){ if(e.target===this) closeHonorCuentaModal(); });
+})();
+
+/* Update price display when currency changes */
+var _origChangeCurHCFF=changeCurrency;
+changeCurrency=function(cur){
+  _origChangeCurHCFF(cur);
+  var prEl=document.getElementById('hcff-price');
+  if(prEl) prEl.textContent=fmt(HONOR_CUENTA_PRICE);
+  var prEl2=document.getElementById('hcff-modal-price');
+  if(prEl2) prEl2.textContent=fmt(HONOR_CUENTA_PRICE);
+};
+
