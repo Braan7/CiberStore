@@ -1444,12 +1444,7 @@ applyPromo = function(){
   _origApplyPromo2();
 };
 
-/* Render referidos when page loads */
-var _origGoPage2 = goPage;
-goPage = function(id){
-  _origGoPage2(id);
-  if(id==='referidos') renderReferidos();
-};
+/* goPage referidos merged below */
 
 /* ================================================================
    EXP PACKAGES - Experiencia Cuenta FF
@@ -1594,12 +1589,7 @@ submitHonorCuenta = function(){
   },700);
 };
 
-/* Render packages when page loads */
-var _origGoPage3 = goPage;
-goPage = function(id){
-  _origGoPage3(id);
-  if(id==='honorcuenta') renderExpPackages();
-};
+/* goPage honorcuenta merged below */
 
 /* ================================================================
    LIVE SALES COUNTER
@@ -1637,3 +1627,21 @@ if('serviceWorker' in navigator){
     navigator.serviceWorker.register('sw.js').catch(function(){});
   });
 }
+
+/* \u2500\u2500 Consolidated goPage hooks \u2500\u2500 */
+var _origGoPageFinal = goPage;
+goPage = function(id){
+  _origGoPageFinal(id);
+  if(id==='referidos')    { setTimeout(renderReferidos,   50); }
+  if(id==='honorcuenta')  { setTimeout(renderExpPackages, 50); }
+  if(id==='home')         { setTimeout(renderResenas,     50); }
+};
+
+/* Init exp packages on load if page is active */
+document.addEventListener('DOMContentLoaded', function(){
+  var pg = document.getElementById('page-honorcuenta');
+  if(pg && pg.classList.contains('active')) renderExpPackages();
+  var pgR = document.getElementById('page-referidos');
+  if(pgR && pgR.classList.contains('active')) renderReferidos();
+});
+
