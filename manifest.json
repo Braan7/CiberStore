@@ -1,0 +1,38 @@
+{
+  "name": "CiberStore - Free Fire",
+  "short_name": "CiberStore",
+  "description": "Compra diamantes de Free Fire al mejor precio. Entrega instantanea.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07090f",
+  "theme_color": "#07090f",
+  "orientation": "portrait",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["games", "shopping"],
+  "shortcuts": [
+    {
+      "name": "Comprar Diamantes",
+      "url": "/?page=diamantes",
+      "description": "Ir directo a diamantes FF"
+    },
+    {
+      "name": "Likes Perfil",
+      "url": "/?page=likes",
+      "description": "Comprar likes para tu perfil"
+    }
+  ]
+}
