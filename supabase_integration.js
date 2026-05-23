@@ -1,3 +1,4 @@
+/* CiberStore SB v1779504760 */
 /* ================================================================
    SUPABASE INTEGRATION — CiberStore SISTEMA FINAL
    - Auth: profiles table
