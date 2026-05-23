@@ -717,9 +717,10 @@ function exportCSV(){
       if(typeof renderPerfil === 'function') setTimeout(renderPerfil, 150);
       if(typeof renderResenas === 'function') setTimeout(renderResenas, 200);
     }).catch(function(){
-      /* Offline: mantiene sesion local hasta que haya conexion */
-      var el = document.getElementById('auth-modal');
-      if(el) el.style.display = 'none';
+      /* Offline: show auth modal so user can log in */
+      setTimeout(function(){
+        if(typeof showAuthModal === 'function') showAuthModal();
+      }, 100);
     });
   } else {
     setTimeout(function(){ if(typeof showAuthModal === 'function') showAuthModal(); }, 100);
