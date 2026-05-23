@@ -1655,3 +1655,4 @@ document.addEventListener('DOMContentLoaded', function(){
     renderResenas();
   }, 800);
 });
+
