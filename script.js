@@ -538,12 +538,16 @@ function goPage(id){
 
 function refreshUI(){
   updateSidebarUser();
+  /* Always re-render products and likes so prices update with new session */
+  setTimeout(function(){
+    renderProds();
+    renderLikes();
+    renderMems();
+  }, 50);
   var active=document.querySelector('.page.active');
   if(active){
     var id=active.id.replace('page-','');
-    if(id==='diamantes') renderProds();
-    if(id==='likes') renderLikes();
-    if(id==='membresia'){renderMems();renderWallet();}
+    if(id==='membresia') renderWallet();
     if(id==='perfil') renderPerfil();
     if(id==='miscompras') renderMisCompras();
     if(id==='home') setTimeout(renderResenas,100);
@@ -1328,7 +1332,11 @@ startLiveCounter();
     if(!el) return;
     var key='cs_offer_end';
     var end=localStorage.getItem(key);
-    if(!end||Date.now()>parseInt(end)){end=Date.now()+86399000;localStorage.setItem(key,end);}
+    /* Reset only if expired, not on every load */
+    if(!end || isNaN(parseInt(end)) || Date.now()>parseInt(end)){
+      end=Date.now()+86399000;
+      localStorage.setItem(key,String(end));
+    }
     var diff=Math.max(0,parseInt(end)-Date.now());
     var h=Math.floor(diff/3600000),m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);
     el.textContent=(h<10?'0':'')+h+':'+(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
@@ -1424,6 +1432,8 @@ var RULETA_PRIZES=[
 function drawRuleta(angle){
   var canvas=document.getElementById('ruleta-canvas');
   if(!canvas) return;
+  /* Always ensure proper size */
+  if(canvas.width < 100){ canvas.width=220; canvas.height=220; }
   var ctx=canvas.getContext('2d'), n=RULETA_PRIZES.length, arc=(Math.PI*2)/n;
   var cx=canvas.width/2, cy=canvas.height/2, r=cx-4;
   ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -1444,7 +1454,16 @@ function openRuleta(){
   if(!authSession){showToast('Inicia sesion para girar');setTimeout(showAuthModal,600);return;}
   var el=document.getElementById('modal-ruleta');
   if(el) el.classList.add('show');
-  ruletaAngle=0; drawRuleta(0);
+  ruletaAngle=0;
+  /* Wait for modal to be visible before drawing */
+  setTimeout(function(){
+    var canvas=document.getElementById('ruleta-canvas');
+    if(canvas){
+      canvas.width=220;
+      canvas.height=220;
+    }
+    drawRuleta(0);
+  },50);
   var rKey = 'cs_ruleta_'+(authSession?authSession.id:'guest');
   var lastSpin=localStorage.getItem(rKey+'_last');
   var res=document.getElementById('ruleta-result');
@@ -1606,6 +1625,11 @@ document.addEventListener('DOMContentLoaded', function(){
     else if(regVis) doRegister();
     else if(admVis) doAdminLogin();
   });
-  /* Render home */
-  setTimeout(function(){renderResenas();},300);
+  /* Render all sections on load */
+  setTimeout(function(){
+    renderResenas();
+    renderProds();
+    renderLikes();
+    renderMems();
+  }, 100);
 });
