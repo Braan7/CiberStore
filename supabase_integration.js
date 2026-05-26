@@ -245,6 +245,10 @@ function addSpend(amt, descripcion){
   sbUpdateProfile(authSession.id, { saldo: newSaldo });
   sbAddMovimiento(authSession.id, 'compra', amt, descripcion || 'Compra en CiberStore');
   if(typeof updateAuthUI === 'function') updateAuthUI();
+  if(typeof renderPerfil === 'function'){
+    var pfPage = document.getElementById('page-perfil');
+    if(pfPage && pfPage.classList.contains('active')) renderPerfil();
+  }
 }
 
 function sbAddMovimiento(userId, tipo, monto, descripcion){
@@ -265,11 +269,8 @@ function sbGetMovimientos(userId){
 
 /* ── HISTORY (linked to session) ────────────────────────────── */
 function addToHistory(item){
-  /* History is stored as movimientos for Supabase users */
-  if(authSession){
-    sbAddMovimiento(authSession.id, 'compra', item.price,
-      (item.name || 'Compra') + ' - Pedido #' + (item.order || 0));
-  }
+  /* addSpend already creates the movimiento - nothing to do here */
+  /* This function kept for compatibility only */
 }
 
 /* ── PROMO CODES ────────────────────────────────────────────── */
@@ -713,6 +714,13 @@ function exportCSV(){
 /* ── INIT ───────────────────────────────────────────────────── */
 (function initSB(){
   loadPromos();
+  /* Sync order counter with Supabase */
+  sb.get('movimientos_saldo','tipo=eq.compra&select=id').then(function(rows){
+    if(rows && Array.isArray(rows) && rows.length > 0){
+      var current = parseInt(localStorage.getItem('cs_ord_seq')||'0');
+      if(rows.length > current) localStorage.setItem('cs_ord_seq', rows.length);
+    }
+  }).catch(function(){});
   var saved = getSavedSession();
 
   if(saved && saved.id){
