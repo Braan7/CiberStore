@@ -3,7 +3,7 @@
    Sube la carpeta /api/ a tu repo de GitHub
 ================================================================ */
 const TOKEN   = '8324650981:AAGFM2gHPUH1OiCXZgu2efxL9s8FDaGCFEE';
-const CHAT_ID = '-1003914636059';
+const CHAT_ID = '-1003917741824';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin',  '*');
