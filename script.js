@@ -1054,6 +1054,7 @@ function submitProd(){
   }
   var ord=getNextOrder();
   addSpend(now);
+  if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession?authSession.username:'-', (p.isPase?'Pase Elite':p.name+' Diamantes FF'), now, ord);
   var item={name:(p.isPase?'Pase Elite':p.name+' Diamantes FF'),price:now,icon:p.isPase?'\u26D3':'\uD83D\uDC8E',
     date:new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),order:ord};
   addToHistoryLocal(item);
@@ -1171,6 +1172,7 @@ function submitHonor(){
   var h=HONOR[hIdx];
   var ord=getNextOrder();
   addSpend(h.price);
+  if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession?authSession.username:'-', 'Honor '+h.region, h.price, ord);
   addToHistoryLocal({name:'Honor '+h.region,price:h.price,icon:h.flag,
     date:new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),order:ord});
   var msg='*PEDIDO #'+ord+' - CiberStore*\n\nServicio: Honor de Clan - '+h.region
