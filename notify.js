@@ -5,8 +5,6 @@ const TOKEN         = process.env.TG_TOKEN      || '8324650981:AAGFM2gHPUH1OiCXZ
 const CHAT_ID       = process.env.TG_CHAT_ID    || '-1003917741824';
 const SB_URL        = 'https://pnotsqsudqpwqzssevig.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBub3RzcXN1ZHFwd3F6c3NldmlnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTQ2NTQ1MSwiZXhwIjoyMDk1MDQxNDUxfQ._EihGVFyFoqtfIenqfDpctyHnZXe84ZPTmvjyUO0nf8'; // service_role
-const LIKES_KEY     = process.env.LIKES_API_KEY || 'c642fba2-fcff-407f-8cba-3e14380689d7';
-const LIKES_URL     = 'https://hubsdev.com/api/frifas/sendlikes';
 
 const SB_HEADERS = {
   'apikey': SB_KEY,
@@ -220,25 +218,6 @@ export default async function handler(req, res) {
   try {
     const { message, buttons, action, playerId, username } = body;
 
-    if (action === 'sendlikes' && playerId) {
-      try {
-        const r      = await fetch(LIKES_URL + '?id=' + encodeURIComponent(playerId) + '&key=' + LIKES_KEY);
-        const result = await r.json();
-        if (result.sucesso) {
-          const d        = result.data && result.data[0];
-          const enviadas = d && d.likes && d.likes.enviadas || '~220';
-          const depois   = d && d.likes && d.likes.depois   || '?';
-          await tgSend('\u26A1 <b>Likes enviados</b>\n\n\uD83D\uDC64 <b>' + (username || '?') + '</b>\n\uD83C\uDFAE ID: ' + playerId + '\n\uD83D\uDC4D Enviados: <b>' + enviadas + '</b>\n\uD83D\uDCCA Total: ' + depois);
-          return res.status(200).json({ ok: true, enviadas, result });
-        } else {
-          await tgSend('\u26A0\uFE0F Error likes\n\nUsuario: ' + (username || '?') + '\nID: ' + playerId + '\nEstado: ' + (result.status || 'ERROR'));
-          return res.status(200).json({ ok: false, result });
-        }
-      } catch(e) {
-        await tgSend('\u26A0\uFE0F Error: ' + e.message);
-        return res.status(500).json({ error: e.message });
-      }
-    }
 
     if (!message) return res.status(400).json({ error: 'No message' });
     const payload = { chat_id: CHAT_ID, text: message, parse_mode: 'HTML' };
