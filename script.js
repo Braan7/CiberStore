@@ -3108,3 +3108,21 @@ goPage = function(id){
   _origGoPageLikesRank(id);
   if(id==='likes') setTimeout(loadLikesRanking, 500);
 };
+
+/* Load ranking when navigating */
+var _origGoPageRankFix = goPage;
+goPage = function(id){
+  _origGoPageRankFix(id);
+  if(id==='ranking'){
+    setTimeout(function(){
+      if(typeof loadRanking==='function') loadRanking();
+      if(typeof updateRankTimers==='function'){
+        updateRankTimers();
+        if(rankTimer) clearInterval(rankTimer);
+        rankTimer = setInterval(updateRankTimers, 1000);
+        if(rankAutoRefresh) clearInterval(rankAutoRefresh);
+        rankAutoRefresh = setInterval(loadRanking, 30000);
+      }
+    }, 200);
+  }
+};
