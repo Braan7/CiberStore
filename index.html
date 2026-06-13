@@ -1003,6 +1003,20 @@ document.addEventListener('keydown',function(e){
       </div>
     </div>
 
+    <!-- Likes Ranking -->
+    <div style="background:#0d1020;border:1px solid rgba(255,77,166,.2);border-radius:13px;overflow:hidden;margin-bottom:1.25rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(255,77,166,.05)">
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <span style="font-size:1rem">&#128077;</span>
+          <div style="font-family:Orbitron;font-size:.68rem;font-weight:700;color:#ff4da6;letter-spacing:1px">TOP COMPRADORES DE LIKES</div>
+        </div>
+        <button onclick="loadLikesRanking()" style="background:rgba(255,77,166,.1);border:1px solid rgba(255,77,166,.2);color:#ff4da6;border-radius:6px;padding:.22rem .6rem;font-family:'Exo 2';font-weight:700;font-size:.7rem;cursor:pointer">&#8635; Ver</button>
+      </div>
+      <div id="likes-ranking-list" style="min-height:60px">
+        <div style="text-align:center;padding:1.25rem;color:var(--muted);font-size:.8rem">Presiona Ver para cargar</div>
+      </div>
+    </div>
+
     <!-- Two column grid -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem;margin-bottom:1.25rem">
 

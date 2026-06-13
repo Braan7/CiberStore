@@ -3019,3 +3019,92 @@ function submitLkBuy(){
   closeLkModal();
   showToast('\u2705 Pedido #'+ord+' confirmado!', 2500);
 }
+
+/* ================================================================
+   LIKES RANKING
+================================================================ */
+function loadLikesRanking(){
+  var el = document.getElementById('likes-ranking-list');
+  if(!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:1.25rem;color:var(--muted)">Cargando...</div>';
+
+  /* Get all like purchases from movimientos */
+  sb.get('movimientos_saldo','tipo=eq.compra&select=user_id,descripcion,monto&order=created_at.desc')
+    .then(function(movs){
+      if(!movs||!movs.length){
+        el.innerHTML='<div style="text-align:center;padding:1.25rem;color:var(--muted);font-size:.8rem">Sin datos aun</div>';
+        return;
+      }
+      /* Aggregate likes per user */
+      var agg = {};
+      movs.forEach(function(m){
+        var d = (m.descripcion||'').toLowerCase();
+        if(d.indexOf('like')<0) return; /* only likes */
+        var uid = m.user_id;
+        if(!agg[uid]) agg[uid] = {likes:0, compras:0};
+        agg[uid].compras++;
+        /* Extract likes from description: "Likes 7 dias (1540)" */
+        var match = d.match(/\((\d+)\)/);
+        if(match){
+          agg[uid].likes += parseInt(match[1])||0;
+        } else {
+          /* Fallback by price */
+          var price = m.monto||0;
+          if(price<=45)       agg[uid].likes += 1540;
+          else if(price<=85)  agg[uid].likes += 3080;
+          else if(price<=100) agg[uid].likes += 4620;
+          else if(price<=130) agg[uid].likes += 6600;
+          else                agg[uid].likes += 2200;
+        }
+      });
+
+      if(!Object.keys(agg).length){
+        el.innerHTML='<div style="text-align:center;padding:1.25rem;color:var(--muted);font-size:.8rem">Sin compras de likes aun</div>';
+        return;
+      }
+
+      /* Get usernames */
+      sb.get('profiles','select=id,username,role').then(function(profs){
+        var umap={}, admins={};
+        if(profs) profs.forEach(function(p){
+          umap[p.id]=p.username;
+          if(p.role==='admin') admins[p.id]=true;
+        });
+
+        var sorted = Object.keys(agg)
+          .filter(function(uid){ return !admins[uid] && agg[uid].likes>0; })
+          .map(function(uid){ return {uid:uid, username:umap[uid]||'Usuario', likes:agg[uid].likes, compras:agg[uid].compras}; })
+          .sort(function(a,b){ return b.likes-a.likes; })
+          .slice(0,10);
+
+        if(!sorted.length){
+          el.innerHTML='<div style="text-align:center;padding:1.25rem;color:var(--muted);font-size:.8rem">Sin datos</div>';
+          return;
+        }
+
+        var medals=['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49'];
+        var h='';
+        sorted.forEach(function(u,i){
+          var isMe = authSession && authSession.username===u.username;
+          var initial = (u.username||'?').charAt(0).toUpperCase();
+          h+='<div style="display:flex;align-items:center;gap:.6rem;padding:.6rem 1rem;border-bottom:1px solid rgba(255,255,255,.04)'+(i===0?';background:rgba(255,77,166,.04)':'')+'">'
+            +'<span style="font-size:'+(i<3?'1rem':'.78rem')+';flex-shrink:0;color:'+(i===0?'#ffd700':i===1?'#c0c0c0':i===2?'#cd7f32':'var(--muted)')+'">'+(i<3?medals[i]:(i+1)+'.')+'</span>'
+            +'<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#ff006688,#ff4da6);display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-size:.65rem;font-weight:900;color:#fff;flex-shrink:0">'+initial+'</div>'
+            +'<div style="flex:1;min-width:0">'
+              +'<div style="font-size:.82rem;font-weight:700;color:#fff">'+u.username+(isMe?' <span style="font-size:.58rem;background:rgba(255,77,166,.15);color:#ff4da6;padding:.05rem .28rem;border-radius:3px">Tu</span>':'')+'</div>'
+              +'<div style="font-size:.65rem;color:var(--muted)">Compro '+u.likes.toLocaleString('es-MX')+' likes</div>'
+            +'</div>'
+
+            +'</div>';
+        });
+        el.innerHTML = h;
+      }).catch(function(){ el.innerHTML='<div style="text-align:center;padding:1.25rem;color:#ff6b6b;font-size:.8rem">Error al cargar</div>'; });
+    }).catch(function(){ el.innerHTML='<div style="text-align:center;padding:1.25rem;color:#ff6b6b;font-size:.8rem">Error al cargar</div>'; });
+}
+
+/* Auto load ranking when visiting likes page */
+var _origGoPageLikesRank = goPage;
+goPage = function(id){
+  _origGoPageLikesRank(id);
+  if(id==='likes') setTimeout(loadLikesRanking, 500);
+};
