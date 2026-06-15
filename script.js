@@ -2757,3 +2757,42 @@ goPage = function(id){
   if(id==='likes2k') setTimeout(loadLikes2kRanking,400);
   if(id==='likes200') setTimeout(loadLikes200Ranking,400);
 };
+
+/* ================================================================
+   LIKES 2K & 200 ORDER FORMS
+================================================================ */
+function submitLk2k(){
+  var plan   = ((document.getElementById('lk2k-plan')||{}).value||'').split('|');
+  var ffId   = ((document.getElementById('lk2k-id')||{}).value||'').trim();
+  var ffNom  = ((document.getElementById('lk2k-nombre')||{}).value||'').trim();
+  var errEl  = document.getElementById('lk2k-err');
+  function showErr(m){ if(errEl){errEl.textContent=m;errEl.style.display='block';} }
+  if(errEl) errEl.style.display='none';
+  if(!ffId)  { showErr('Ingresa tu ID de Free Fire'); return; }
+  if(!ffNom) { showErr('Ingresa tu nombre en el juego'); return; }
+  var likes  = plan[0]||'2000';
+  var precio = plan[1]||'85';
+  var msg = 'Hola!%20Quiero%20comprar%20Likes%202K%0A%0A'
+    + 'Plan%3A%20'+likes+'%20likes%20-%20%24'+precio+'%20MX%0A'
+    + 'ID%20FF%3A%20'+encodeURIComponent(ffId)+'%0A'
+    + 'Nombre%3A%20'+encodeURIComponent(ffNom);
+  window.open('https://wa.me/5215548461200?text='+msg,'_blank');
+}
+
+function submitLk200(){
+  var plan   = ((document.getElementById('lk200-plan')||{}).value||'').split('|');
+  var ffId   = ((document.getElementById('lk200-id')||{}).value||'').trim();
+  var ffNom  = ((document.getElementById('lk200-nombre')||{}).value||'').trim();
+  var errEl  = document.getElementById('lk200-err');
+  function showErr(m){ if(errEl){errEl.textContent=m;errEl.style.display='block';} }
+  if(errEl) errEl.style.display='none';
+  if(!ffId)  { showErr('Ingresa tu ID de Free Fire'); return; }
+  if(!ffNom) { showErr('Ingresa tu nombre en el juego'); return; }
+  var likes  = plan[0]||'200';
+  var precio = plan[1]||'35';
+  var msg = 'Hola!%20Quiero%20comprar%20Likes%20200%0A%0A'
+    + 'Plan%3A%20'+likes+'%20likes%20-%20%24'+precio+'%20MX%0A'
+    + 'ID%20FF%3A%20'+encodeURIComponent(ffId)+'%0A'
+    + 'Nombre%3A%20'+encodeURIComponent(ffNom);
+  window.open('https://wa.me/5215548461200?text='+msg,'_blank');
+}
