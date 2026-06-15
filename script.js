@@ -320,20 +320,10 @@ function renderCartModal(){
   body.innerHTML=rows;
 }
 function checkoutCart(){
-  var c=getCart();
-  if(!c.length){showToast(t('empty_cart'));return;}
-  var total=c.reduce(function(s,i){return s+i.price;},0);
-  var lines='*PEDIDO CARRITO - CiberStore*\n\n';
-  for(var i=0;i<c.length;i++) lines+=c[i].name+': $'+c[i].price.toLocaleString('es-MX')+' MX\n';
-  lines+='\nTotal: $'+total.toLocaleString('es-MX')+' MX\nMetodo: Transferencia Bancaria\n\nManda comprobante al recibir este mensaje.';
-  var cartUrl='https://wa.me/'+WA+'?text='+encodeURIComponent(lines);
-  var cartWin=window.open(cartUrl,'_blank');
-  if(!cartWin) window.location.href=cartUrl;
   closeCart();
-  showToast('Pedido enviado!',2500);
+  goPage('saldo');
+  showToast('Recarga tu saldo', 2000);
 }
-
-/* \u2500\u2500 DIAMOND QTY \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 function ffQty(id, delta){
   ffQtyMap[id]=Math.max(0,(ffQtyMap[id]||0)+delta);
   var el=document.getElementById('ffq-'+id);
@@ -1054,7 +1044,6 @@ function submitProd(){
   }
   var ord=getNextOrder();
   addSpend(now);
-  if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession?authSession.username:'-', (p.isPase?'Pase Elite':p.name+' Diamantes FF'), now, ord);
   var item={name:(p.isPase?'Pase Elite':p.name+' Diamantes FF'),price:now,icon:p.isPase?'\u26D3':'\uD83D\uDC8E',
     date:new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),order:ord};
   addToHistoryLocal(item);
@@ -1172,7 +1161,6 @@ function submitHonor(){
   var h=HONOR[hIdx];
   var ord=getNextOrder();
   addSpend(h.price);
-  if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession?authSession.username:'-', 'Honor '+h.region, h.price, ord);
   addToHistoryLocal({name:'Honor '+h.region,price:h.price,icon:h.flag,
     date:new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),order:ord});
   var msg='*PEDIDO #'+ord+' - CiberStore*\n\nServicio: Honor de Clan - '+h.region
@@ -2631,498 +2619,61 @@ function submitFrag(){
   if(!win) window.location.href = url;
 }
 
-/* ================================================================
-   LIKES PIN SYSTEM
-================================================================ */
-function activarPIN(){
-  if(!authSession){ showToast('Inicia sesion primero'); setTimeout(showAuthModal,500); return; }
-  var pin=((document.getElementById('pin-code')||{}).value||'').trim().toUpperCase();
-  var msg=document.getElementById('pin-msg');
-  function showMsg(txt,ok){
-    if(!msg) return;
-    msg.textContent=txt;
-    msg.style.color=ok?'#00e676':'#ff6b6b';
-    msg.style.background=ok?'rgba(0,230,118,.08)':'rgba(255,80,80,.08)';
-    msg.style.border='1px solid '+(ok?'rgba(0,230,118,.25)':'rgba(255,80,80,.25)');
-    msg.style.display='block';
+
+/* \u2500\u2500 CART WITH SALDO \u2500\u2500 */
+function renderCart(){
+  var body=document.getElementById('cart-modal-body');
+  if(!body) return;
+  var c=getCart(); cart=c;
+  if(!c.length){ body.innerHTML='<div class="cart-empty">Tu carrito esta vacio</div>'; return; }
+  var total=c.reduce(function(s,i){return s+i.price;},0);
+  var saldo=authSession?(authSession.saldo||0):0;
+  var enough=saldo>=total;
+  var rows=c.map(function(item){
+    return '<div class="cart-item"><div class="ci-info"><div class="ci-name">'+item.name+'</div><div class="ci-sub">'+fmt(item.price)+'</div></div><button class="ci-del" onclick="removeFromCart('+item.id+')">&#215;</button></div>';
+  }).join('');
+  rows+='<div class="cart-total"><span>Total</span><span style="color:'+(enough?'#00e676':'#ff6b6b')+'">'+fmt(total)+'</span></div>';
+  rows+='<div style="display:flex;justify-content:space-between;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.18);border-radius:8px;padding:.5rem .85rem;margin:.5rem 0"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span style="font-family:Orbitron;font-weight:700;color:'+(enough?'#00e676':'#ff6b6b')+'">$'+saldo.toLocaleString('es-MX')+' MX</span></div>';
+  if(!authSession){
+    rows+='<button onclick="closeCart();showAuthModal();" style="width:100%;padding:.72rem;background:linear-gradient(90deg,#0055cc,#00aaff);color:#fff;border:none;border-radius:7px;font-weight:700;font-size:.9rem;cursor:pointer">Inicia sesion</button>';
+  } else if(!enough){
+    var falta=total-saldo;
+    rows+='<div style="font-size:.78rem;color:#ff6b6b;margin-bottom:.5rem">Saldo insuficiente. Te faltan $'+falta.toLocaleString('es-MX')+' MX.</div>';
+    rows+='<button onclick="closeCart();goPage(String.fromCharCode(115,97,108,100,111));" style="width:100%;padding:.72rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:7px;font-weight:700;font-size:.9rem;cursor:pointer">Recargar saldo</button>';
+  } else {
+    rows+='<label style="display:block;font-size:.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#5a6580;margin:.5rem 0 .2rem">ID de Free Fire</label>';
+    rows+='<input id="cart-ff-id" type="text" placeholder="Ej: 123456789" style="width:100%;background:#10131f;border:1px solid rgba(0,150,255,.2);color:#fff;border-radius:5px;padding:.48rem .72rem;font-size:.84rem;margin-bottom:.4rem;box-sizing:border-box"/>';
+    rows+='<label style="display:block;font-size:.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#5a6580;margin-bottom:.2rem">Nombre en el juego</label>';
+    rows+='<input id="cart-ff-nombre" type="text" placeholder="Tu nickname" style="width:100%;background:#10131f;border:1px solid rgba(0,150,255,.2);color:#fff;border-radius:5px;padding:.48rem .72rem;font-size:.84rem;margin-bottom:.55rem;box-sizing:border-box"/>';
+    rows+='<div id="cart-err" style="color:#ff6b6b;font-size:.75rem;margin-bottom:.4rem;display:none"></div>';
+    rows+='<button onclick="submitCart()" style="width:100%;padding:.72rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:7px;font-weight:700;font-size:.9rem;cursor:pointer">Confirmar con saldo</button>';
   }
-  if(!pin||pin.length<4){ showMsg('Ingresa un PIN valido',false); return; }
-  showMsg('Verificando...',true);
-  sb.get('likes_pines','codigo=eq.'+encodeURIComponent(pin)+'&limit=1')
-    .then(function(rows){
-      if(!rows||!rows.length){ showMsg('\u274C PIN invalido',false); return; }
-      var pinData=rows[0];
-      /* Handle both Spanish and English boolean values from Supabase */
-      var yaUsado = pinData.usado===true||pinData.usado==='true'||pinData.usado==='verdadero';
-      var noActivo = pinData.activo===false||pinData.activo==='false'||pinData.activo==='falso';
-      if(yaUsado||noActivo){ showMsg('\u274C PIN ya utilizado',false); return; }
-      sb.get('likes_planes','user_id=eq.'+authSession.id+'&activo=eq.true&limit=1')
-        .then(function(planes){
-          if(planes&&planes.length){ showMsg('\u26A0\uFE0F Ya tienes un plan activo',false); return; }
-          sb.patch('likes_pines',{usado:true,usado_por:authSession.id,usado_at:new Date().toISOString()},'id=eq.'+pinData.id);
-          /* Get envios_por_dia from pin label */
-          var epd = pinData.envios_dia || 1;
-          sb.post('likes_planes',{user_id:authSession.id,username:authSession.username,ff_id:'',plan_dias:pinData.dias,dias_restantes:pinData.dias,likes_enviados:0,activo:true,envios_por_dia:epd})
-            .then(function(){
-              showMsg('\u2705 PIN activado! Plan '+pinData.dias+' dias activo.',true);
-              var ps=document.getElementById('likes-pin-section');
-              var pa=document.getElementById('likes-panel-activo');
-              if(ps) ps.style.display='none';
-              if(pa) pa.style.display='block';
-              cargarPanelActivo();
-              if(typeof tgSend==='function') tgSend('\uD83D\uDC4D <b>PIN activado</b>\n\n\uD83D\uDC64 <b>'+authSession.username+'</b>\n\uD83D\uDDD3 Plan: '+pinData.dias+' dias\n\uD83D\uDD11 '+pin);
-            }).catch(function(e){ showMsg('Error: '+(e.message||''),false); });
-        }).catch(function(){ showMsg('Error al verificar',false); });
-    }).catch(function(){ showMsg('Error al verificar PIN',false); });
+  body.innerHTML=rows;
 }
 
-function cargarPanelActivo(){
-  if(!authSession) return;
-  sb.get('likes_planes','user_id=eq.'+authSession.id+'&activo=eq.true&order=created_at.desc&limit=1')
-    .then(function(rows){
-      var ps=document.getElementById('likes-pin-section');
-      var pa=document.getElementById('likes-panel-activo');
-      if(!rows||!rows.length){
-        if(ps) ps.style.display='block';
-        if(pa) pa.style.display='none';
-        return;
-      }
-      if(ps) ps.style.display='none';
-      if(pa) pa.style.display='block';
-      setTimeout(loadLikesHistory, 300);
-      var r=rows[0];
-      var ahora=new Date();
-      var lastSend=r.ultimo_envio?new Date(r.ultimo_envio):null;
-      var mismodia=lastSend&&lastSend.toDateString()===ahora.toDateString();
-      var enviados_hoy=mismodia?(r.envios_hoy||0):0;
-      var epd=r.envios_por_dia||1;
-      var disponibles=epd-enviados_hoy;
-      var t=document.getElementById('lk-plan-title');
-      var s=document.getElementById('lk-plan-sub');
-      var d=document.getElementById('lk-dias-rest');
-      var te=document.getElementById('lk-total-enviados');
-      var di=document.getElementById('lk-disponibles');
-      var pb=document.getElementById('lk-progress-bar');
-      var ht=document.getElementById('lk-envios-hoy-txt');
-      if(t)  t.textContent='Plan '+r.plan_dias+' dias';
-      if(s)  s.textContent=r.dias_restantes+' dias restantes \u00B7 '+epd+' envio'+(epd>1?'s':'')+'/dia';
-      if(d)  d.textContent=r.dias_restantes;
-      if(te) te.textContent=(r.likes_enviados||0).toLocaleString('es-MX');
-      if(di) di.textContent=Math.max(0,disponibles);
-      if(pb) pb.style.width=(epd>0?Math.min(100,Math.round(enviados_hoy/epd*100)):0)+'%';
-      if(ht) ht.textContent=enviados_hoy+'/'+epd;
-      window._activePlanId=r.id;
-      window._activePlanDisp=disponibles;
-      window._activePlanEpd=epd;
-    }).catch(function(){});
-}
-
-function cerrarPlanActivo(){
-  var ps=document.getElementById('likes-pin-section');
-  var pa=document.getElementById('likes-panel-activo');
-  if(ps) ps.style.display='block';
-  if(pa) pa.style.display='none';
-}
-
-function enviarLikesPanel(){
+function submitCart(){
   if(!authSession){ showToast('Inicia sesion'); return; }
-  var ffId = ((document.getElementById('lk-uid-input')||{}).value||'').trim();
-  var smsg = document.getElementById('lk-send-msg');
-  var btn  = document.getElementById('lk-send-btn');
-
-  function showS(txt,ok){
-    if(!smsg) return;
-    smsg.textContent=txt;
-    smsg.style.color=ok?'#00e676':'#ff6b6b';
-    smsg.style.background=ok?'rgba(0,230,118,.08)':'rgba(255,80,80,.08)';
-    smsg.style.border='1px solid '+(ok?'rgba(0,230,118,.25)':'rgba(255,80,80,.25)');
-    smsg.style.display='block';
-  }
-
-  if(!ffId){ showS('Ingresa tu UID de Free Fire',false); return; }
-  if(!window._activePlanId){ showS('No hay plan activo',false); return; }
-  var epd2 = window._activePlanEpd||1;
-  if(window._activePlanDisp<=0){ showS('\u26A0\uFE0F Ya usaste tus '+epd2+' envios de hoy. Vuelve manana.',false); return; }
-
-  showS('Verificando...',true);
-
-  /* Check Supabase if this ID was already sent today */
-  var hoyStart = new Date(); hoyStart.setHours(0,0,0,0);
-  sb.get('likes_historial',
-    'user_id=eq.'+authSession.id
-    +'&ff_id=eq.'+encodeURIComponent(ffId)
-    +'&created_at=gte.'+hoyStart.toISOString()
-    +'&limit=1'
-  ).then(function(rows){
-    if(rows && rows.length > 0){
-      showS('\u26A0\uFE0F Ya enviaste likes a este ID hoy. Usa otro ID o vuelve manana.',false);
-      return;
-    }
-    /* All good - send likes */
-    if(btn){ btn.disabled=true; btn.style.opacity='.5'; }
-    showS('Enviando likes...',true);
-    var t0 = Date.now();
-
-    fetch('/api/notify',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({action:'sendlikes',playerId:ffId,username:authSession.username})
-    }).then(function(r){ return r.json(); })
-      .then(function(data){
-        var tiempo=((Date.now()-t0)/1000).toFixed(2)+'s';
-        if(btn){ btn.disabled=false; btn.style.opacity='1'; }
-        var d=data.result&&data.result.data&&data.result.data[0];
-        var nombre  =d&&d.conta&&d.conta.nome_conta||'Unknown';
-        var regiao  =d&&d.conta&&d.conta.regiao||'-';
-        var antes   =d&&d.likes&&d.likes.antes||0;
-        var depois  =d&&d.likes&&d.likes.depois||0;
-        var enviadas=d&&d.likes&&d.likes.enviadas||0;
-
-        /* Detect invalid ID */
-        if(!enviadas||parseInt(enviadas)===0||nombre==='Unknown'||!nombre){
-          showS('\u274C ID no encontrado. Verifica tu UID de Free Fire.',false);
-          return;
-        }
-
-        /* Show result card */
-        var rc =document.getElementById('lk-result-card');
-        var rm =document.getElementById('lk-result-msg');
-        var rav=document.getElementById('lk-result-avatar');
-        var rn =document.getElementById('lk-result-name');
-        var ri =document.getElementById('lk-result-info');
-        var rl =document.getElementById('lk-result-likes');
-        var ra =document.getElementById('lk-result-antes');
-        var rd =document.getElementById('lk-result-despues');
-        var rt =document.getElementById('lk-result-tiempo');
-        if(rc)  rc.style.display='block';
-        if(rm)  rm.textContent='\u2705 \u00A1'+enviadas+' likes enviados a '+nombre+'!';
-        if(rav) rav.textContent=(nombre||'?').substring(0,2).toUpperCase();
-        if(rn)  rn.textContent=nombre;
-        if(ri)  ri.textContent='UID '+ffId+' \u00B7 Nivel \u2014 \u00B7 '+regiao;
-        if(rl)  rl.textContent='+'+enviadas;
-        if(ra)  ra.textContent=parseInt(antes||0).toLocaleString('es-MX');
-        if(rd)  rd.textContent=parseInt(depois||0).toLocaleString('es-MX');
-        if(rt)  rt.textContent=tiempo;
-
-        /* Update plan in Supabase */
-        sb.get('likes_planes','id=eq.'+window._activePlanId+'&limit=1').then(function(rows){
-          if(!rows||!rows[0]) return;
-          var p=rows[0];
-          var nd=p.dias_restantes-1;
-          sb.patch('likes_planes',{
-            dias_restantes: nd,
-            likes_enviados: (p.likes_enviados||0)+parseInt(enviadas||0),
-            ultimo_envio:   new Date().toISOString(),
-            activo:         nd>0,
-            envios_hoy:     (p.envios_hoy||0)+1,
-            ff_id:          ffId
-          },'id=eq.'+window._activePlanId);
-
-          sb.post('likes_historial',{
-            user_id:  authSession.id,
-            username: authSession.username,
-            ff_id:    ffId,
-            likes:    parseInt(enviadas||0),
-            antes:    parseInt(antes||0),
-            despues:  parseInt(depois||0)
-          }).catch(function(){});
-
-          /* Update UI */
-          window._activePlanDisp = (window._activePlanDisp||1)-1;
-          var dispEl  =document.getElementById('lk-disponibles');
-          var diasEl  =document.getElementById('lk-dias-rest');
-          var totalEl =document.getElementById('lk-total-enviados');
-          var progEl  =document.getElementById('lk-progress-bar');
-          var hoyTxt  =document.getElementById('lk-envios-hoy-txt');
-          var epd3    =window._activePlanEpd||1;
-          var enviados_hoy2=(p.envios_hoy||0)+1;
-          if(dispEl)  dispEl.textContent  = Math.max(0,window._activePlanDisp);
-          if(diasEl)  diasEl.textContent  = nd;
-          if(totalEl) totalEl.textContent = ((p.likes_enviados||0)+parseInt(enviadas||0)).toLocaleString('es-MX');
-          if(progEl)  progEl.style.width  = Math.min(100,Math.round(enviados_hoy2/epd3*100))+'%';
-          if(hoyTxt)  hoyTxt.textContent  = enviados_hoy2+'/'+epd3;
-        });
-
-        showS('\u2705 Completado!',true);
-        loadLikesHistory();
-      }).catch(function(e){
-        if(btn){ btn.disabled=false; btn.style.opacity='1'; }
-        showS('Error: '+(e.message||'intenta de nuevo'),false);
-      });
-  }).catch(function(){
-    /* If Supabase check fails, proceed anyway */
-    if(btn){ btn.disabled=false; btn.style.opacity='1'; }
-    showS('Error al verificar. Intenta de nuevo.',false);
-  });
-}
-
-
-function loadLikesHistory(){
-  if(!authSession) return;
-  var el=document.getElementById('likes-history-list');
-  if(!el) return;
-  el.innerHTML='<div style="text-align:center;padding:1.5rem;color:var(--muted)">Cargando...</div>';
-  sb.get('likes_historial','user_id=eq.'+authSession.id+'&order=created_at.desc&limit=15')
-    .then(function(rows){
-      if(!rows||!rows.length){ el.innerHTML='<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.8rem">Sin envios aun</div>'; return; }
-      var h='';
-      rows.forEach(function(r){
-        var fecha=r.created_at?new Date(r.created_at).toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'';
-        h+='<div style="display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border-bottom:1px solid rgba(255,255,255,.04)">'
-          +'<div style="width:38px;height:38px;border-radius:9px;background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.1rem">\u2764\uFE0F</div>'
-          +'<div style="flex:1;min-width:0">'
-            +'<div style="font-size:.82rem;font-weight:600;color:#fff">'+(r.username||authSession.username)+'</div>'
-            +'<div style="font-size:.7rem;color:var(--muted);margin-top:.1rem">ID: '+r.ff_id+' \u2022 '+fecha+'</div>'
-            +'<div style="display:flex;gap:.85rem;margin-top:.35rem;font-size:.68rem;color:var(--muted)">'
-              +'<span>ANTES <strong style="color:#fff">'+((r.antes||0)).toLocaleString('es-MX')+'</strong></span>'
-              +'<span>DESPU\u00C9S <strong style="color:#00e676">'+((r.despues||0)).toLocaleString('es-MX')+'</strong></span>'
-              +'<span>+<strong style="color:#00e676">'+(r.likes||0)+'</strong></span>'
-            +'</div>'
-          +'</div>'
-          +'<div style="font-family:Orbitron;font-size:1rem;font-weight:900;color:#00e676;flex-shrink:0">+'+(r.likes||0)+'</div>'
-          +'</div>';
-      });
-      el.innerHTML=h;
-    }).catch(function(){ el.innerHTML='<div style="text-align:center;padding:1.5rem;color:#ff6b6b;font-size:.8rem">Error al cargar</div>'; });
-}
-
-/* Admin PIN generation */
-function admGenerarPIN(dias){
-  var chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  var code='CS-';
-  for(var i=0;i<4;i++) code+=chars[Math.floor(Math.random()*chars.length)];
-  code+='-';
-  for(var i=0;i<4;i++) code+=chars[Math.floor(Math.random()*chars.length)];
-  sb.post('likes_pines',{codigo:code,dias:parseInt(dias),activo:true,usado:false,creado_por:authSession?authSession.username:'admin'})
-    .then(function(){
-      showToast('\u2705 PIN: '+code+' ('+dias+' dias)');
-      if(navigator.clipboard) navigator.clipboard.writeText(code);
-      admLoadPines();
-      if(typeof tgSend==='function') tgSend('\uD83D\uDD11 PIN generado: <b>'+code+'</b> ('+dias+' dias)');
-    }).catch(function(e){ showToast('Error: '+(e.message||'')); });
-}
-
-function admLoadPines(){
-  var el=document.getElementById('adm-pines-list');
-  if(!el) return;
-  sb.get('likes_pines','order=created_at.desc&limit=30').then(function(rows){
-    if(!rows||!rows.length){ el.innerHTML='<div style="text-align:center;padding:1rem;color:var(--muted)">Sin PINs generados</div>'; return; }
-    var h='<table class="adm-table"><thead><tr><th>Codigo</th><th>Dias</th><th>Estado</th><th>Fecha</th><th>Accion</th></tr></thead><tbody>';
-    rows.forEach(function(r){
-      var fecha=r.created_at?new Date(r.created_at).toLocaleDateString('es-MX'):'';
-      var estado=r.usado?'<span class="adm-badge" style="background:rgba(255,80,80,.1);color:#ff6b6b">USADO</span>':'<span class="adm-badge" style="background:rgba(0,230,118,.1);color:#00e676">DISPONIBLE</span>';
-      h+='<tr>'
-        +'<td style="font-family:Orbitron;font-weight:700;color:#fff">'+r.codigo+'</td>'
-        +'<td style="color:var(--c1)">'+r.dias+' dias</td>'
-        +'<td>'+estado+'</td>'
-        +'<td style="color:var(--muted)">'+fecha+'</td>'
-        +'<td>'+(r.usado?'':'<button data-c="'+r.codigo+'" onclick="admCopyPIN(this.dataset.c)" class="adm-action-btn" style="padding:.28rem .6rem;border-color:rgba(0,170,255,.3);color:var(--c1)">Copiar</button>')+'</td>'
-        +'</tr>';
-    });
-    h+='</tbody></table>';
-    el.innerHTML=h;
-  }).catch(function(){ el.innerHTML='<div style="color:#ff6b6b;padding:1rem">Error</div>'; });
-}
-
-/* Auto-load when visiting likes page */
-var _origGoPageLikes2 = goPage;
-goPage = function(id){
-  _origGoPageLikes2(id);
-  if(id==='likes') setTimeout(cargarPanelActivo, 300);
-};
-
-function admCopyPIN(c){ if(navigator.clipboard) navigator.clipboard.writeText(c).then(function(){ showToast('\u2705 Copiado: '+c); }); }
-
-/* ================================================================
-   LIKES PURCHASE \u2014 saldo-based with Telegram receipt
-================================================================ */
-var LK_PLANS = [
-  null, // index 0 unused
-  {id:1,  name:'7 dias',      likes:1540,  days:7,  price:45},
-  {id:2,  name:'14 dias',     likes:3080,  days:14, price:85},
-  {id:3,  name:'21 dias',     likes:4620,  days:21, price:100},
-  {id:4,  name:'30 dias',     likes:6600,  days:30, price:130},
-  null,null,null,null,null,
-  {id:10, name:'Instantaneos',likes:2200,  days:1,  price:165, instant:true}
-];
-var _lkCurPlan = null;
-
-function openLkModal(id){
-  var p = LK_PLANS[id];
-  if(!p) return;
-  _lkCurPlan = p;
-  var nameEl  = document.getElementById('lk-modal-plan-name');
-  var precEl  = document.getElementById('lk-modal-precio');
-  var saldEl  = document.getElementById('lk-modal-saldo-disp');
-  var errEl   = document.getElementById('lk-modal-err');
-  var idEl    = document.getElementById('lk-modal-id');
-  var nomEl   = document.getElementById('lk-modal-nombre');
-  if(nameEl) nameEl.textContent = p.likes.toLocaleString('es-MX')+' likes \u2014 '+p.name;
-  if(precEl) precEl.textContent = '$'+p.price+' MX';
-  var saldo = authSession ? (authSession.saldo||0) : 0;
-  if(saldEl) saldEl.textContent = 'Tu saldo: $'+saldo.toLocaleString('es-MX')+' MX';
-  if(errEl) errEl.style.display='none';
-  if(idEl) idEl.value='';
-  if(nomEl) nomEl.value='';
-  var ov = document.getElementById('modal-lk-buy');
-  if(ov) ov.classList.add('show');
-}
-
-function closeLkModal(){
-  var ov = document.getElementById('modal-lk-buy');
-  if(ov) ov.classList.remove('show');
-  _lkCurPlan = null;
-}
-
-function submitLkBuy(){
-  if(!authSession){ showToast('Inicia sesion para comprar'); return; }
-  if(!_lkCurPlan) return;
-  var ffId  = ((document.getElementById('lk-modal-id')||{}).value||'').trim();
-  var ffNom = ((document.getElementById('lk-modal-nombre')||{}).value||'').trim();
-  var errEl = document.getElementById('lk-modal-err');
-  var btn   = document.getElementById('lk-modal-btn');
-
+  var ffId=((document.getElementById('cart-ff-id')||{}).value||'').trim();
+  var ffNom=((document.getElementById('cart-ff-nombre')||{}).value||'').trim();
+  var errEl=document.getElementById('cart-err');
   function showErr(m){ if(errEl){errEl.textContent=m;errEl.style.display='block';} }
-  if(errEl) errEl.style.display='none';
-  if(!ffId)  { showErr('Ingresa tu ID de Free Fire'); return; }
-  if(!ffNom) { showErr('Ingresa tu nombre en el juego'); return; }
-
-  var saldo = authSession.saldo||0;
-  if(saldo < _lkCurPlan.price){
-    showErr('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MX). Recarga tu cuenta.');
-    return;
-  }
-  if(btn&&btn.disabled) return;
-  if(btn){ btn.disabled=true; btn.style.opacity='.6'; }
-
-  var ord = getNextOrder();
-  var plan = _lkCurPlan;
-
-  /* Deduct saldo */
-  addSpend(plan.price, 'Likes '+plan.name+' ('+plan.likes+') - Pedido #'+ord);
-
-  /* Send Telegram notification with receipt */
-  var msg = '\uD83D\uDC4D <b>COMPRA DE LIKES - CiberStore</b>\n\n'
-    + '\uD83D\uDC64 Usuario: <b>'+authSession.username+'</b>\n'
-    + '\uD83C\uDFAE ID FF: <code>'+ffId+'</code>\n'
-    + '\uD83D\uDCCB Nombre: '+ffNom+'\n'
-    + '\u2728 Plan: <b>'+plan.name+'</b>\n'
-    + '\uD83D\uDC4D Likes: <b>'+plan.likes.toLocaleString('es-MX')+'</b>\n'
-    + '\uD83D\uDCB0 Precio: <b>$'+plan.price+' MX</b>\n'
-    + '\uD83D\uDCC4 Pedido: #'+ord+'\n'
-    + '\uD83D\uDD50 '+new Date().toLocaleString('es-MX')+'\n\n'
-    + (plan.instant ? '\u26A1 INSTANTANEO \u2014 Enviar ya' : '\uD83D\uDDD3 Entregar en las proximas 24h');
-
-  if(typeof tgSend === 'function') tgSend(msg);
-
-  if(btn){ btn.disabled=false; btn.style.opacity='1'; }
-  closeLkModal();
-  showToast('\u2705 Pedido #'+ord+' confirmado!', 2500);
+  if(!ffId){ showErr('Ingresa tu ID de Free Fire'); return; }
+  if(!ffNom){ showErr('Ingresa tu nombre en el juego'); return; }
+  var c=getCart();
+  var total=c.reduce(function(s,i){return s+i.price;},0);
+  var saldo=authSession.saldo||0;
+  if(saldo<total){ showErr('Saldo insuficiente'); return; }
+  var ord=getNextOrder();
+  var names=c.map(function(i){return i.name;}).join(', ');
+  addSpend(total,'Carrito: '+names+' - Pedido #'+ord);
+  if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username,'Carrito: '+names,total,ord);
+  showToast('Pedido #'+ord+' confirmado!',2500);
+  clearCart(); closeCart();
 }
 
-/* ================================================================
-   LIKES RANKING
-================================================================ */
-function loadLikesRanking(){
-  var el = document.getElementById('likes-ranking-list');
-  if(!el) return;
-  el.innerHTML = '<div style="text-align:center;padding:1.25rem;color:var(--muted)">Cargando...</div>';
-
-  /* Get all like purchases from movimientos */
-  sb.get('movimientos_saldo','tipo=eq.compra&select=user_id,descripcion,monto&order=created_at.desc')
-    .then(function(movs){
-      if(!movs||!movs.length){
-        el.innerHTML='<div style="text-align:center;padding:1.25rem;color:var(--muted);font-size:.8rem">Sin datos aun</div>';
-        return;
-      }
-      /* Aggregate likes per user */
-      var agg = {};
-      movs.forEach(function(m){
-        var d = (m.descripcion||'').toLowerCase();
-        if(d.indexOf('like')<0) return; /* only likes */
-        var uid = m.user_id;
-        if(!agg[uid]) agg[uid] = {likes:0, compras:0};
-        agg[uid].compras++;
-        /* Extract likes from description: "Likes 7 dias (1540)" */
-        var match = d.match(/\((\d+)\)/);
-        if(match){
-          agg[uid].likes += parseInt(match[1])||0;
-        } else {
-          /* Fallback by price */
-          var price = m.monto||0;
-          if(price<=45)       agg[uid].likes += 1540;
-          else if(price<=85)  agg[uid].likes += 3080;
-          else if(price<=100) agg[uid].likes += 4620;
-          else if(price<=130) agg[uid].likes += 6600;
-          else                agg[uid].likes += 2200;
-        }
-      });
-
-      if(!Object.keys(agg).length){
-        el.innerHTML='<div style="text-align:center;padding:1.25rem;color:var(--muted);font-size:.8rem">Sin compras de likes aun</div>';
-        return;
-      }
-
-      /* Get usernames */
-      sb.get('profiles','select=id,username,role').then(function(profs){
-        var umap={}, admins={};
-        if(profs) profs.forEach(function(p){
-          umap[p.id]=p.username;
-          if(p.role==='admin') admins[p.id]=true;
-        });
-
-        var sorted = Object.keys(agg)
-          .filter(function(uid){ return !admins[uid] && agg[uid].likes>0; })
-          .map(function(uid){ return {uid:uid, username:umap[uid]||'Usuario', likes:agg[uid].likes, compras:agg[uid].compras}; })
-          .sort(function(a,b){ return b.likes-a.likes; })
-          .slice(0,10);
-
-        if(!sorted.length){
-          el.innerHTML='<div style="text-align:center;padding:1.25rem;color:var(--muted);font-size:.8rem">Sin datos</div>';
-          return;
-        }
-
-        var medals=['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49'];
-        var h='';
-        sorted.forEach(function(u,i){
-          var isMe = authSession && authSession.username===u.username;
-          var initial = (u.username||'?').charAt(0).toUpperCase();
-          h+='<div style="display:flex;align-items:center;gap:.6rem;padding:.6rem 1rem;border-bottom:1px solid rgba(255,255,255,.04)'+(i===0?';background:rgba(255,77,166,.04)':'')+'">'
-            +'<span style="font-size:'+(i<3?'1rem':'.78rem')+';flex-shrink:0;color:'+(i===0?'#ffd700':i===1?'#c0c0c0':i===2?'#cd7f32':'var(--muted)')+'">'+(i<3?medals[i]:(i+1)+'.')+'</span>'
-            +'<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#ff006688,#ff4da6);display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-size:.65rem;font-weight:900;color:#fff;flex-shrink:0">'+initial+'</div>'
-            +'<div style="flex:1;min-width:0">'
-              +'<div style="font-size:.82rem;font-weight:700;color:#fff">'+u.username+(isMe?' <span style="font-size:.58rem;background:rgba(255,77,166,.15);color:#ff4da6;padding:.05rem .28rem;border-radius:3px">Tu</span>':'')+'</div>'
-              +'<div style="font-size:.65rem;color:var(--muted)">Compro '+u.likes.toLocaleString('es-MX')+' likes</div>'
-            +'</div>'
-
-            +'</div>';
-        });
-        el.innerHTML = h;
-      }).catch(function(){ el.innerHTML='<div style="text-align:center;padding:1.25rem;color:#ff6b6b;font-size:.8rem">Error al cargar</div>'; });
-    }).catch(function(){ el.innerHTML='<div style="text-align:center;padding:1.25rem;color:#ff6b6b;font-size:.8rem">Error al cargar</div>'; });
-}
-
-/* Auto load ranking when visiting likes page */
-var _origGoPageLikesRank = goPage;
-goPage = function(id){
-  _origGoPageLikesRank(id);
-  if(id==='likes') setTimeout(loadLikesRanking, 500);
-};
-
-/* Load ranking when navigating */
-var _origGoPageRankFix = goPage;
-goPage = function(id){
-  _origGoPageRankFix(id);
-  if(id==='ranking'){
-    setTimeout(function(){
-      if(typeof loadRanking==='function') loadRanking();
-      if(typeof updateRankTimers==='function'){
-        updateRankTimers();
-        if(rankTimer) clearInterval(rankTimer);
-        rankTimer = setInterval(updateRankTimers, 1000);
-        if(rankAutoRefresh) clearInterval(rankAutoRefresh);
-        rankAutoRefresh = setInterval(loadRanking, 30000);
-      }
-    }, 200);
-  }
+/* Auto-call renderCart when opening cart */
+var _origOpenCart=openCart;
+openCart=function(){
+  _origOpenCart();
+  setTimeout(renderCart,50);
 };
