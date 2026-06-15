@@ -2929,8 +2929,9 @@ document.addEventListener('keydown',function(e){
       <input id="lk2k-id" type="text" placeholder="Ej: 123456789" style="width:100%;background:#10131f;border:1px solid rgba(255,77,166,.2);color:#fff;border-radius:6px;padding:.5rem .75rem;font-family:Rajdhani,sans-serif;font-size:.84rem;margin-bottom:.55rem;box-sizing:border-box"/>
       <label style="display:block;font-size:.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#5a6580;margin-bottom:.22rem">Nombre en el juego</label>
       <input id="lk2k-nombre" type="text" placeholder="Tu nickname" style="width:100%;background:#10131f;border:1px solid rgba(255,77,166,.2);color:#fff;border-radius:6px;padding:.5rem .75rem;font-family:Rajdhani,sans-serif;font-size:.84rem;margin-bottom:.65rem;box-sizing:border-box"/>
+      <div id="lk2k-saldo-info" style="display:flex;justify-content:space-between;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.18);border-radius:7px;padding:.45rem .85rem;margin-bottom:.5rem"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span id="lk2k-saldo-val" style="font-family:Orbitron;font-weight:700;color:#00e676;font-size:.82rem">$0 MX</span></div>
       <div id="lk2k-err" style="color:#ff6b6b;font-size:.75rem;margin-bottom:.4rem;display:none"></div>
-      <button onclick="submitLk2k()" style="width:100%;padding:.75rem;background:linear-gradient(90deg,#ff006688,#ff4da6);color:#fff;border:none;border-radius:8px;font-family:Rajdhani,sans-serif;font-weight:900;font-size:.9rem;cursor:pointer">&#128222; Enviar Pedido por WhatsApp</button>
+      <button onclick="submitLk2kSaldo()" style="width:100%;padding:.75rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:8px;font-family:Rajdhani,sans-serif;font-weight:900;font-size:.9rem;cursor:pointer">&#128272; Confirmar con saldo</button>
     </div>
 
 
@@ -3008,8 +3009,9 @@ document.addEventListener('keydown',function(e){
       <input id="lk200-id" type="text" placeholder="Ej: 123456789" style="width:100%;background:#10131f;border:1px solid rgba(0,170,255,.2);color:#fff;border-radius:6px;padding:.5rem .75rem;font-family:Rajdhani,sans-serif;font-size:.84rem;margin-bottom:.55rem;box-sizing:border-box"/>
       <label style="display:block;font-size:.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#5a6580;margin-bottom:.22rem">Nombre en el juego</label>
       <input id="lk200-nombre" type="text" placeholder="Tu nickname" style="width:100%;background:#10131f;border:1px solid rgba(0,170,255,.2);color:#fff;border-radius:6px;padding:.5rem .75rem;font-family:Rajdhani,sans-serif;font-size:.84rem;margin-bottom:.65rem;box-sizing:border-box"/>
+      <div id="lk200-saldo-info" style="display:flex;justify-content:space-between;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.18);border-radius:7px;padding:.45rem .85rem;margin-bottom:.5rem"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span id="lk200-saldo-val" style="font-family:Orbitron;font-weight:700;color:#00e676;font-size:.82rem">$0 MX</span></div>
       <div id="lk200-err" style="color:#ff6b6b;font-size:.75rem;margin-bottom:.4rem;display:none"></div>
-      <button onclick="submitLk200()" style="width:100%;padding:.75rem;background:linear-gradient(90deg,#0055cc,#00aaff);color:#fff;border:none;border-radius:8px;font-family:Rajdhani,sans-serif;font-weight:900;font-size:.9rem;cursor:pointer">&#128222; Enviar Pedido por WhatsApp</button>
+      <button onclick="submitLk200Saldo()" style="width:100%;padding:.75rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:8px;font-family:Rajdhani,sans-serif;font-weight:900;font-size:.9rem;cursor:pointer">&#128272; Confirmar con saldo</button>
     </div>
 
 

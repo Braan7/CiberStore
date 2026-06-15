@@ -2796,3 +2796,97 @@ function submitLk200(){
     + 'Nombre%3A%20'+encodeURIComponent(ffNom);
   window.open('https://wa.me/5215548461200?text='+msg,'_blank');
 }
+
+/* ================================================================
+   LIKES 2K & 200 \u2014 SALDO PAYMENT
+================================================================ */
+var LK2K_PLANES = {
+  '2000|85':    {likes:2000,  precio:85,   label:'2,000 likes - 1 dia'},
+  '4000|170':   {likes:4000,  precio:170,  label:'4,000 likes - 2 dias'},
+  '6000|255':   {likes:6000,  precio:255,  label:'6,000 likes - 3 dias'},
+  '8000|340':   {likes:8000,  precio:340,  label:'8,000 likes - 4 dias'},
+  '10000|420':  {likes:10000, precio:420,  label:'10,000 likes - 5 dias'},
+  '20000|820':  {likes:20000, precio:820,  label:'20,000 likes - 10 dias'},
+  '100000|4200':{likes:100000,precio:4200, label:'100,000 likes - 50 dias'}
+};
+
+var LK200_PLANES = {
+  '200|35':   {likes:200,  precio:35,  label:'200 likes - 1 dia'},
+  '1400|45':  {likes:1400, precio:45,  label:'1,400 likes - 7 dias'},
+  '2800|60':  {likes:2800, precio:60,  label:'2,800 likes - 14 dias'},
+  '4200|80':  {likes:4200, precio:80,  label:'4,200 likes - 21 dias'},
+  '6600|95':  {likes:6600, precio:95,  label:'6,600 likes - 33 dias'}
+};
+
+function _updateLkSaldo(saldoElId){
+  var el = document.getElementById(saldoElId);
+  if(el && authSession) el.textContent='$'+(authSession.saldo||0).toLocaleString('es-MX')+' MX';
+}
+
+function submitLk2kSaldo(){
+  if(!authSession){ showToast('Inicia sesion para comprar'); return; }
+  var planKey = ((document.getElementById('lk2k-plan')||{}).value||'');
+  var ffId    = ((document.getElementById('lk2k-id')||{}).value||'').trim();
+  var ffNom   = ((document.getElementById('lk2k-nombre')||{}).value||'').trim();
+  var errEl   = document.getElementById('lk2k-err');
+  function showErr(m){ if(errEl){errEl.textContent=m;errEl.style.display='block';} }
+  if(errEl) errEl.style.display='none';
+  if(!ffId)  { showErr('Ingresa tu ID de Free Fire'); return; }
+  if(!ffNom) { showErr('Ingresa tu nombre en el juego'); return; }
+  var plan = LK2K_PLANES[planKey];
+  if(!plan){ showErr('Selecciona un plan'); return; }
+  var saldo = authSession.saldo||0;
+  if(saldo < plan.precio){
+    showErr('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MX). Recarga tu cuenta.');
+    return;
+  }
+  var ord = getNextOrder();
+  addSpend(plan.precio, 'Venta Likes 2K: '+plan.label+' - ID:'+ffId+' - Pedido #'+ord);
+  if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(
+    authSession.username,
+    'Likes 2K: '+plan.label+' (ID: '+ffId+' / '+ffNom+')',
+    plan.precio, ord
+  );
+  showToast('\u2705 Pedido #'+ord+' confirmado!', 2500);
+  var idEl=document.getElementById('lk2k-id'); if(idEl) idEl.value='';
+  var nomEl=document.getElementById('lk2k-nombre'); if(nomEl) nomEl.value='';
+  _updateLkSaldo('lk2k-saldo-val');
+}
+
+function submitLk200Saldo(){
+  if(!authSession){ showToast('Inicia sesion para comprar'); return; }
+  var planKey = ((document.getElementById('lk200-plan')||{}).value||'');
+  var ffId    = ((document.getElementById('lk200-id')||{}).value||'').trim();
+  var ffNom   = ((document.getElementById('lk200-nombre')||{}).value||'').trim();
+  var errEl   = document.getElementById('lk200-err');
+  function showErr(m){ if(errEl){errEl.textContent=m;errEl.style.display='block';} }
+  if(errEl) errEl.style.display='none';
+  if(!ffId)  { showErr('Ingresa tu ID de Free Fire'); return; }
+  if(!ffNom) { showErr('Ingresa tu nombre en el juego'); return; }
+  var plan = LK200_PLANES[planKey];
+  if(!plan){ showErr('Selecciona un plan'); return; }
+  var saldo = authSession.saldo||0;
+  if(saldo < plan.precio){
+    showErr('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MX). Recarga tu cuenta.');
+    return;
+  }
+  var ord = getNextOrder();
+  addSpend(plan.precio, 'Venta Likes 200: '+plan.label+' - ID:'+ffId+' - Pedido #'+ord);
+  if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(
+    authSession.username,
+    'Likes 200: '+plan.label+' (ID: '+ffId+' / '+ffNom+')',
+    plan.precio, ord
+  );
+  showToast('\u2705 Pedido #'+ord+' confirmado!', 2500);
+  var idEl=document.getElementById('lk200-id'); if(idEl) idEl.value='';
+  var nomEl=document.getElementById('lk200-nombre'); if(nomEl) nomEl.value='';
+  _updateLkSaldo('lk200-saldo-val');
+}
+
+/* Update saldo display when visiting pages */
+var _origGoPageLkSaldo = goPage;
+goPage = function(id){
+  _origGoPageLkSaldo(id);
+  if(id==='likes2k') setTimeout(function(){ _updateLkSaldo('lk2k-saldo-val'); }, 300);
+  if(id==='likes200') setTimeout(function(){ _updateLkSaldo('lk200-saldo-val'); }, 300);
+};
