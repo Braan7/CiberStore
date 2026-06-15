@@ -2677,3 +2677,83 @@ openCart=function(){
   _origOpenCart();
   setTimeout(renderCart,50);
 };
+
+/* ================================================================
+   LIKES 2K & 200 RANKINGS
+================================================================ */
+function _buildLikesRanking(listId, keyword, medals){
+  var el = document.getElementById(listId);
+  if(!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:1.25rem;color:var(--muted)">Cargando...</div>';
+
+  sb.get('movimientos_saldo','tipo=eq.compra&select=user_id,descripcion,monto&order=created_at.desc')
+    .then(function(movs){
+      if(!movs||!movs.length){
+        el.innerHTML='<div style="text-align:center;padding:1.25rem;color:var(--muted);font-size:.8rem">Sin datos aun</div>';
+        return;
+      }
+      var agg = {};
+      movs.forEach(function(m){
+        var d = (m.descripcion||'').toLowerCase();
+        if(d.indexOf(keyword)<0) return;
+        var uid = m.user_id;
+        if(!agg[uid]) agg[uid] = {likes:0};
+        var match = d.match(/\((\d[\d,]+)\)/);
+        if(match) agg[uid].likes += parseInt(match[1].replace(/,/g,''))||0;
+        else agg[uid].likes += parseInt(m.monto||0);
+      });
+
+      if(!Object.keys(agg).length){
+        el.innerHTML='<div style="text-align:center;padding:1.25rem;color:var(--muted);font-size:.8rem">Sin compras aun</div>';
+        return;
+      }
+
+      sb.get('profiles','select=id,username,role').then(function(profs){
+        var umap={}, admins={};
+        if(profs) profs.forEach(function(p){
+          umap[p.id]=p.username;
+          if(p.role==='admin') admins[p.id]=true;
+        });
+
+        var sorted = Object.keys(agg)
+          .filter(function(uid){ return !admins[uid] && agg[uid].likes>0; })
+          .map(function(uid){ return {uid:uid, username:umap[uid]||'Usuario', likes:agg[uid].likes}; })
+          .sort(function(a,b){ return b.likes-a.likes; })
+          .slice(0,10);
+
+        if(!sorted.length){
+          el.innerHTML='<div style="text-align:center;padding:1.25rem;color:var(--muted);font-size:.8rem">Sin datos</div>';
+          return;
+        }
+
+        var h='';
+        sorted.forEach(function(u,i){
+          var isMe = authSession && authSession.username===u.username;
+          var initial = (u.username||'?').charAt(0).toUpperCase();
+          var medalColor = i===0?'#ffd700':i===1?'#c0c0c0':i===2?'#cd7f32':'var(--muted)';
+          h+='<div style="display:flex;align-items:center;gap:.6rem;padding:.6rem 1rem;border-bottom:1px solid rgba(255,255,255,.04)'+(i===0?';background:rgba(255,77,166,.04)':'')+'">'
+            +'<span style="font-size:'+(i<3?'1rem':'.78rem')+';flex-shrink:0;color:'+medalColor+'">'+(i<3?medals[i]:(i+1)+'.')+'</span>'
+            +'<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#ff006688,#ff4da6);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;color:#fff;flex-shrink:0">'+initial+'</div>'
+            +'<div style="flex:1;min-width:0">'
+              +'<div style="font-size:.82rem;font-weight:700;color:#fff">'+u.username+(isMe?' <span style="font-size:.58rem;background:rgba(255,77,166,.15);color:#ff4da6;padding:.05rem .28rem;border-radius:3px">Tu</span>':'')+'</div>'
+              +'<div style="font-size:.65rem;color:var(--muted)">Compro '+u.likes.toLocaleString('es-MX')+' likes</div>'
+            +'</div>'
+            +'</div>';
+        });
+        el.innerHTML = h;
+      }).catch(function(){ el.innerHTML='<div style="text-align:center;padding:1.25rem;color:#ff6b6b;font-size:.8rem">Error</div>'; });
+    }).catch(function(){ el.innerHTML='<div style="text-align:center;padding:1.25rem;color:#ff6b6b;font-size:.8rem">Error</div>'; });
+}
+
+var _medals = ['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49'];
+
+function loadLikes2kRanking(){ _buildLikesRanking('likes2k-ranking-list','likes 2k',_medals); }
+function loadLikes200Ranking(){ _buildLikesRanking('likes200-ranking-list','likes 200',_medals); }
+
+/* Auto-load on page visit */
+var _origGoPageLk2 = goPage;
+goPage = function(id){
+  _origGoPageLk2(id);
+  if(id==='likes2k') setTimeout(loadLikes2kRanking,400);
+  if(id==='likes200') setTimeout(loadLikes200Ranking,400);
+};

@@ -705,6 +705,8 @@ document.addEventListener('keydown',function(e){
     <div class="sb-section">Servicios</div>
     <div class="nav-item" id="ni-diamantes" onclick="goPage('diamantes')"><div class="nav-ico">&#128142;</div> Diamantes FF</div>
     <div class="nav-item" id="ni-likes" onclick="goPage('likes')"><div class="nav-ico">&#128077;</div> Likes Perfil <span class="nb nb-new">NEW</span></div>
+    <div class="nav-item" id="ni-likes2k" onclick="goPage('likes2k')"><div class="nav-ico">&#128077;</div> Likes Perfil (2,000) <span class="nb" style="background:rgba(255,77,166,.8)">TOP</span></div>
+    <div class="nav-item" id="ni-likes200" onclick="goPage('likes200')"><div class="nav-ico">&#128077;</div> Likes Perfil (200)</div>
     <div class="nav-item" id="ni-honor" onclick="goPage('honor')"><div class="nav-ico">&#127942;</div> Honor de Clan</div>
     <div class="nav-item" id="ni-honor-cuenta" onclick="goPage('honorcuenta')"><div class="nav-ico">&#127869;</div> Experiencia Cuenta FF <span class="nb" style="background:rgba(0,245,255,.15);border:1px solid rgba(0,245,255,.3);color:#00f5ff">NEW</span></div>
     <div class="nav-item" id="ni-clanes" onclick="goPage('clanes')"><div class="nav-ico">&#127959;</div> Venta de Clanes <span class="nb nb-lv7">NV.7</span></div>
@@ -2857,5 +2859,141 @@ document.addEventListener('keydown',function(e){
 <script src="supabase.js"></script>
 <script src="supabase_integration.js"></script>
 <script src="script.js"></script>
+
+<div class="page" id="page-likes2k">
+  <div class="ph">
+    <div class="stag">Likes Perfil</div>
+    <h2 class="ptitle">&#128077; LIKES PERFIL <span>(2,000)</span></h2>
+    <p class="psub">Likes diarios automaticos para tu perfil. Suelen llegar entre 1,800 y 2,200 likes dependiendo del horario que se solicite.</p>
+  </div>
+  <div style="max-width:680px;margin:0 auto;padding:0 5vw 2.5rem">
+
+    <!-- Info bar -->
+    <div style="background:rgba(255,77,166,.07);border:1px solid rgba(255,77,166,.25);border-radius:12px;padding:.85rem 1rem;margin-bottom:1.25rem;text-align:center">
+      <div style="font-size:.8rem;font-weight:700;color:#ff4da6;margin-bottom:.2rem">&#9889; ENTREGA AUTOMATICA DIARIA</div>
+      <div style="font-size:.75rem;color:var(--text);line-height:1.7">Entre <strong style="color:#00e676">1,800</strong> y <strong style="color:#00e676">2,200</strong> likes diarios.<br>
+      <span style="font-size:.68rem;color:var(--muted)">La cantidad varia segun el horario de solicitud.</span></div>
+    </div>
+
+    <!-- Ranking -->
+    <div style="background:#0d1020;border:1px solid rgba(255,77,166,.2);border-radius:13px;overflow:hidden;margin-bottom:1.25rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(255,77,166,.05)">
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <span style="font-size:1rem">&#128081;</span>
+          <div style="font-family:Orbitron;font-size:.68rem;font-weight:700;color:#ff4da6;letter-spacing:1px">TOP COMPRADORES</div>
+        </div>
+        <button onclick="loadLikes2kRanking()" style="background:rgba(255,77,166,.1);border:1px solid rgba(255,77,166,.2);color:#ff4da6;border-radius:6px;padding:.22rem .6rem;font-family:Rajdhani,sans-serif;font-weight:700;font-size:.7rem;cursor:pointer">&#8635; Ver</button>
+      </div>
+      <div id="likes2k-ranking-list" style="min-height:60px">
+        <div style="text-align:center;padding:1.25rem;color:var(--muted);font-size:.8rem">Presiona Ver para cargar</div>
+      </div>
+    </div>
+
+    <!-- Planes -->
+    <div style="background:#0d1020;border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden;margin-bottom:1.25rem">
+      <div style="padding:.75rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.06)">
+        <div style="font-family:Orbitron;font-size:.68rem;font-weight:700;color:var(--muted);letter-spacing:2px">PLANES DISPONIBLES</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.04)">
+        <div><div style="font-size:.82rem;font-weight:700;color:#fff">2,000 likes</div><div style="font-size:.65rem;color:var(--muted)">1 dia</div></div>
+        <div style="font-family:Orbitron;font-size:.85rem;font-weight:700;color:#00e676">$85 MX</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.04)">
+        <div><div style="font-size:.82rem;font-weight:700;color:#fff">4,000 likes</div><div style="font-size:.65rem;color:var(--muted)">2 dias</div></div>
+        <div style="font-family:Orbitron;font-size:.85rem;font-weight:700;color:#00e676">$170 MX</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.04)">
+        <div><div style="font-size:.82rem;font-weight:700;color:#fff">6,000 likes</div><div style="font-size:.65rem;color:var(--muted)">3 dias</div></div>
+        <div style="font-family:Orbitron;font-size:.85rem;font-weight:700;color:#00e676">$255 MX</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.04)">
+        <div><div style="font-size:.82rem;font-weight:700;color:#fff">8,000 likes</div><div style="font-size:.65rem;color:var(--muted)">4 dias</div></div>
+        <div style="font-family:Orbitron;font-size:.85rem;font-weight:700;color:#00e676">$340 MX</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.04)">
+        <div><div style="font-size:.82rem;font-weight:700;color:#fff">10,000 likes</div><div style="font-size:.65rem;color:var(--muted)">5 dias</div></div>
+        <div style="font-family:Orbitron;font-size:.85rem;font-weight:700;color:#ffd700">$420 MX</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.04)">
+        <div><div style="font-size:.82rem;font-weight:700;color:#fff">20,000 likes</div><div style="font-size:.65rem;color:var(--muted)">10 dias</div></div>
+        <div style="font-family:Orbitron;font-size:.85rem;font-weight:700;color:#ffd700">$820 MX</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem">
+        <div><div style="font-size:.82rem;font-weight:700;color:#fff">100,000 likes</div><div style="font-size:.65rem;color:var(--muted)">50 dias</div></div>
+        <div style="font-family:Orbitron;font-size:.85rem;font-weight:700;color:#ff4da6">$4,200 MX</div>
+      </div>
+    </div>
+
+    <!-- WA -->
+    <a href="https://wa.me/5215548461200?text=Hola!%20Quiero%20comprar%20Likes%20Perfil%202k" target="_blank"
+       style="display:flex;align-items:center;justify-content:center;gap:.6rem;width:100%;padding:.85rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:10px;font-family:Rajdhani,sans-serif;font-weight:900;font-size:.9rem;cursor:pointer;text-decoration:none;box-sizing:border-box">
+      &#128222; Contactar por WhatsApp
+    </a>
+  </div>
+</div>
+
+<div class="page" id="page-likes200">
+  <div class="ph">
+    <div class="stag">Likes Perfil</div>
+    <h2 class="ptitle">&#128077; LIKES PERFIL <span>(200)</span></h2>
+    <p class="psub">Likes diarios automaticos para tu perfil. Suelen llegar entre 180 y 220 likes dependiendo del horario que se solicite.</p>
+  </div>
+  <div style="max-width:680px;margin:0 auto;padding:0 5vw 2.5rem">
+
+    <!-- Info bar -->
+    <div style="background:rgba(0,170,255,.07);border:1px solid rgba(0,170,255,.25);border-radius:12px;padding:.85rem 1rem;margin-bottom:1.25rem;text-align:center">
+      <div style="font-size:.8rem;font-weight:700;color:var(--c1);margin-bottom:.2rem">&#9889; ENTREGA AUTOMATICA DIARIA</div>
+      <div style="font-size:.75rem;color:var(--text);line-height:1.7">Entre <strong style="color:#00e676">180</strong> y <strong style="color:#00e676">220</strong> likes diarios.<br>
+      <span style="font-size:.68rem;color:var(--muted)">La cantidad varia segun el horario de solicitud.</span></div>
+    </div>
+
+    <!-- Ranking -->
+    <div style="background:#0d1020;border:1px solid rgba(0,170,255,.2);border-radius:13px;overflow:hidden;margin-bottom:1.25rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(0,170,255,.05)">
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <span style="font-size:1rem">&#128081;</span>
+          <div style="font-family:Orbitron;font-size:.68rem;font-weight:700;color:var(--c1);letter-spacing:1px">TOP COMPRADORES</div>
+        </div>
+        <button onclick="loadLikes200Ranking()" style="background:rgba(0,170,255,.1);border:1px solid rgba(0,170,255,.2);color:var(--c1);border-radius:6px;padding:.22rem .6rem;font-family:Rajdhani,sans-serif;font-weight:700;font-size:.7rem;cursor:pointer">&#8635; Ver</button>
+      </div>
+      <div id="likes200-ranking-list" style="min-height:60px">
+        <div style="text-align:center;padding:1.25rem;color:var(--muted);font-size:.8rem">Presiona Ver para cargar</div>
+      </div>
+    </div>
+
+    <!-- Planes -->
+    <div style="background:#0d1020;border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden;margin-bottom:1.25rem">
+      <div style="padding:.75rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.06)">
+        <div style="font-family:Orbitron;font-size:.68rem;font-weight:700;color:var(--muted);letter-spacing:2px">PLANES DISPONIBLES</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.04)">
+        <div><div style="font-size:.82rem;font-weight:700;color:#fff">200 likes</div><div style="font-size:.65rem;color:var(--muted)">1 dia</div></div>
+        <div style="font-family:Orbitron;font-size:.85rem;font-weight:700;color:#00e676">$35 MX</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.04)">
+        <div><div style="font-size:.82rem;font-weight:700;color:#fff">1,400 likes</div><div style="font-size:.65rem;color:var(--muted)">7 dias</div></div>
+        <div style="font-family:Orbitron;font-size:.85rem;font-weight:700;color:#00e676">$45 MX</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.04)">
+        <div><div style="font-size:.82rem;font-weight:700;color:#fff">2,800 likes</div><div style="font-size:.65rem;color:var(--muted)">14 dias</div></div>
+        <div style="font-family:Orbitron;font-size:.85rem;font-weight:700;color:#00e676">$60 MX</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.04)">
+        <div><div style="font-size:.82rem;font-weight:700;color:#fff">4,200 likes</div><div style="font-size:.65rem;color:var(--muted)">21 dias</div></div>
+        <div style="font-family:Orbitron;font-size:.85rem;font-weight:700;color:#ffd700">$80 MX</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem">
+        <div><div style="font-size:.82rem;font-weight:700;color:#fff">6,600 likes</div><div style="font-size:.65rem;color:var(--muted)">33 dias</div></div>
+        <div style="font-family:Orbitron;font-size:.85rem;font-weight:700;color:#ffd700">$95 MX</div>
+      </div>
+    </div>
+
+    <!-- WA -->
+    <a href="https://wa.me/5215548461200?text=Hola!%20Quiero%20comprar%20Likes%20Perfil%20200" target="_blank"
+       style="display:flex;align-items:center;justify-content:center;gap:.6rem;width:100%;padding:.85rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:10px;font-family:Rajdhani,sans-serif;font-weight:900;font-size:.9rem;cursor:pointer;text-decoration:none;box-sizing:border-box">
+      &#128222; Contactar por WhatsApp
+    </a>
+  </div>
+</div>
 </body>
 </html>
