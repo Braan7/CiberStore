@@ -43,11 +43,15 @@ var PRODUCTS_1VEZ = [
 ];
 
 var LIKES = [
-  {id:1,  label:'7 dias',      emoji:'\uD83D\uDD25', priceMX:45,   total:1540,  perDay:220, days:7,   color:'#cd7f32'},
-  {id:2,  label:'14 dias',     emoji:'\uD83D\uDD25', priceMX:85,   total:3080,  perDay:220, days:14,  color:'#c0c0c0', popular:true},
-  {id:3,  label:'21 dias',     emoji:'\uD83D\uDD25', priceMX:100,  total:4620,  perDay:220, days:21,  color:'#ffd700'},
-  {id:4,  label:'30 dias',     emoji:'\uD83D\uDD25', priceMX:130,  total:6600,  perDay:220, days:30,  color:'#00aaff', best:true},
-  {id:10, label:'Instantaneos',emoji:'\u26A1',        priceMX:165,  total:2200,  perDay:2200,days:1,   color:'#00f5ff', isInstant:true}
+  {id:1,  label:'1 dia',   emoji:'\uD83D\uDC4D', priceMX:10,  total:200,  perDay:200, days:1,   color:'#00e676'},
+  {id:2,  label:'7 dias',  emoji:'\uD83D\uDC4D', priceMX:25,  total:1400, perDay:200, days:7,   color:'#00aaff', popular:true},
+  {id:3,  label:'14 dias', emoji:'\uD83D\uDC4D', priceMX:35,  total:2800, perDay:200, days:14,  color:'#00aaff'},
+  {id:4,  label:'21 dias', emoji:'\uD83D\uDC4D', priceMX:60,  total:4200, perDay:200, days:21,  color:'#ffd700'},
+  {id:5,  label:'30 dias', emoji:'\uD83D\uDC4D', priceMX:70,  total:6600, perDay:220, days:30,  color:'#00aaff', best:true},
+  {id:11, label:'Instant 2K',  emoji:'\u26A1', priceMX:120,  total:2000,  perDay:2000, days:1,  color:'#ff4da6', isInstant:true},
+  {id:12, label:'Instant 4K',  emoji:'\u26A1', priceMX:230,  total:4000,  perDay:2000, days:2,  color:'#ff4da6', isInstant:true},
+  {id:13, label:'Instant 10K', emoji:'\u26A1', priceMX:590,  total:10000, perDay:2000, days:5,  color:'#ff4da6', isInstant:true},
+  {id:14, label:'Instant 20K', emoji:'\u26A1', priceMX:1190, total:20000, perDay:2000, days:10, color:'#ff4da6', isInstant:true}
 ];
 
 var HONOR = [

@@ -167,6 +167,21 @@ body{background:var(--bg);color:var(--text);font-family:"Rajdhani","Exo 2",sans-
 .lk-stat-div{width:1px;background:rgba(255,255,255,.07);align-self:stretch}
 .lk-btn{width:100%;padding:.6rem;border:1px solid rgba(255,255,255,.1);border-radius:8px;font-family:"Exo 2";font-weight:800;font-size:.78rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;background:rgba(255,255,255,.06);color:#fff;transition:all .22s}
 .lk-btn:hover,.lk-card:hover .lk-btn{background:var(--lk-clr,var(--c1));border-color:var(--lk-clr,var(--c1));color:#000}
+.lkpln-grid{display:grid;gap:.65rem;margin-bottom:1.25rem}
+.lkpln-wrap{position:relative}
+.lkpln{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#13182d,#0d1020);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:.85rem 1rem;transition:transform .2s,border-color .2s,box-shadow .2s}
+.lkpln:hover{transform:translateY(-2px);border-color:rgba(0,170,255,.45);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.lkpln-l{display:flex;align-items:center;gap:.8rem}
+.lkpln-ico{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.lkpln-name{font-family:"Orbitron";font-size:.98rem;font-weight:700;color:#fff;line-height:1}
+.lkpln-name span{font-size:.6rem;color:var(--muted);font-weight:600}
+.lkpln-meta{font-size:.64rem;color:var(--muted);margin-top:.28rem}
+.lkpln-r{text-align:right}
+.lkpln-price{font-family:"Orbitron";font-size:1.25rem;font-weight:900;line-height:1}
+.lkpln-cur{font-size:.54rem;color:var(--muted);letter-spacing:1.5px;margin-top:.18rem}
+.lkpln-best{border-color:rgba(255,208,0,.5);box-shadow:0 0 24px rgba(255,208,0,.12)}
+.lkpln-rib{position:absolute;top:-1px;right:-1px;background:linear-gradient(90deg,#f0b90b,#ffd700);color:#1a0a00;font-size:.52rem;font-weight:800;letter-spacing:1px;padding:.2rem .6rem;border-radius:0 14px 0 10px;z-index:2}
+.lkpln-wa{display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.55rem 1rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:9px;font-family:Rajdhani,sans-serif;font-weight:800;font-size:.78rem;text-decoration:none;white-space:nowrap}
 .honor-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:1rem;padding:0 5vw 3rem;max-width:920px;margin:0 auto}
 .honor-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.6rem 1.1rem;transition:all .28s;cursor:pointer;text-align:center;position:relative;overflow:hidden}
 .honor-card:hover{transform:translateY(-4px)}
@@ -2878,38 +2893,45 @@ document.addEventListener('keydown',function(e){
     </div>
 
     <!-- Planes -->
-    <div style="background:#0d1020;border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden;margin-bottom:1.25rem">
-      <div style="padding:.75rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.06)">
-        <div style="font-family:Orbitron;font-size:.68rem;font-weight:700;color:var(--muted);letter-spacing:2px">PLANES DISPONIBLES</div>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.04)">
-        <div><div style="font-size:.82rem;font-weight:700;color:#fff">2,000 likes</div><div style="font-size:.65rem;color:var(--muted)">1 dia</div></div>
-        <div style="font-family:Orbitron;font-size:.85rem;font-weight:700;color:#00e676">$85 MX</div>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.04)">
-        <div><div style="font-size:.82rem;font-weight:700;color:#fff">4,000 likes</div><div style="font-size:.65rem;color:var(--muted)">2 dias</div></div>
-        <div style="font-family:Orbitron;font-size:.85rem;font-weight:700;color:#00e676">$170 MX</div>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.04)">
-        <div><div style="font-size:.82rem;font-weight:700;color:#fff">6,000 likes</div><div style="font-size:.65rem;color:var(--muted)">3 dias</div></div>
-        <div style="font-family:Orbitron;font-size:.85rem;font-weight:700;color:#00e676">$255 MX</div>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.04)">
-        <div><div style="font-size:.82rem;font-weight:700;color:#fff">8,000 likes</div><div style="font-size:.65rem;color:var(--muted)">4 dias</div></div>
-        <div style="font-family:Orbitron;font-size:.85rem;font-weight:700;color:#00e676">$340 MX</div>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.04)">
-        <div><div style="font-size:.82rem;font-weight:700;color:#fff">10,000 likes</div><div style="font-size:.65rem;color:var(--muted)">5 dias</div></div>
-        <div style="font-family:Orbitron;font-size:.85rem;font-weight:700;color:#ffd700">$420 MX</div>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.04)">
-        <div><div style="font-size:.82rem;font-weight:700;color:#fff">20,000 likes</div><div style="font-size:.65rem;color:var(--muted)">10 dias</div></div>
-        <div style="font-family:Orbitron;font-size:.85rem;font-weight:700;color:#ffd700">$820 MX</div>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem">
-        <div><div style="font-size:.82rem;font-weight:700;color:#fff">100,000 likes</div><div style="font-size:.65rem;color:var(--muted)">50 dias</div></div>
-        <div style="font-family:Orbitron;font-size:.85rem;font-weight:700;color:#ff4da6">$4,200 MX</div>
-      </div>
+    <div style="margin-bottom:.4rem;padding:0 .15rem">
+      <div style="font-family:Orbitron;font-size:.66rem;font-weight:700;color:var(--muted);letter-spacing:2px">&#9889; PLANES DISPONIBLES</div>
+    </div>
+    <div class="lkpln-grid">
+      <div class="lkpln-wrap"><div class="lkpln">
+        <div class="lkpln-l">
+          <div class="lkpln-ico" style="background:rgba(255,77,166,.1);border:1px solid rgba(255,77,166,.28)">&#9889;</div>
+          <div><div class="lkpln-name">2,000 <span>likes</span></div><div class="lkpln-meta">1 d&iacute;a &bull; ~2,000/d&iacute;a</div></div>
+        </div>
+        <div class="lkpln-r"><div class="lkpln-price" style="color:#00e676">$120</div><div class="lkpln-cur">MXN</div></div>
+      </div></div>
+      <div class="lkpln-wrap"><div class="lkpln">
+        <div class="lkpln-l">
+          <div class="lkpln-ico" style="background:rgba(255,77,166,.1);border:1px solid rgba(255,77,166,.28)">&#9889;</div>
+          <div><div class="lkpln-name">4,000 <span>likes</span></div><div class="lkpln-meta">2 d&iacute;as &bull; ~2,000/d&iacute;a</div></div>
+        </div>
+        <div class="lkpln-r"><div class="lkpln-price" style="color:#00e676">$230</div><div class="lkpln-cur">MXN</div></div>
+      </div></div>
+      <div class="lkpln-wrap"><div class="lkpln">
+        <div class="lkpln-l">
+          <div class="lkpln-ico" style="background:rgba(255,77,166,.1);border:1px solid rgba(255,77,166,.28)">&#9889;</div>
+          <div><div class="lkpln-name">10,000 <span>likes</span></div><div class="lkpln-meta">5 d&iacute;as &bull; ~2,000/d&iacute;a</div></div>
+        </div>
+        <div class="lkpln-r"><div class="lkpln-price" style="color:#ffd700">$590</div><div class="lkpln-cur">MXN</div></div>
+      </div></div>
+      <div class="lkpln-wrap"><div class="lkpln lkpln-best"><div class="lkpln-rib">&#11088; MEJOR VALOR</div>
+        <div class="lkpln-l">
+          <div class="lkpln-ico" style="background:rgba(255,77,166,.1);border:1px solid rgba(255,77,166,.28)">&#9889;</div>
+          <div><div class="lkpln-name">20,000 <span>likes</span></div><div class="lkpln-meta">10 d&iacute;as &bull; ~2,000/d&iacute;a</div></div>
+        </div>
+        <div class="lkpln-r"><div class="lkpln-price" style="color:#ff4da6">$1,190</div><div class="lkpln-cur">MXN</div></div>
+      </div></div>
+      <div class="lkpln-wrap"><div class="lkpln" style="border-color:rgba(167,139,250,.35)">
+        <div class="lkpln-l">
+          <div class="lkpln-ico" style="background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3)">&#128293;</div>
+          <div><div class="lkpln-name">50K+ <span>likes</span></div><div class="lkpln-meta">Personalizado &bull; seg&uacute;n necesidad</div></div>
+        </div>
+        <a href="https://wa.me/5215548461200?text=Hola!%20Quiero%20una%20cotizaci%C3%B3n%20personalizada%20de%2050%2C000%2B%20likes%20instant%C3%A1neos" target="_blank" class="lkpln-wa">&#128241; Cotizar</a>
+      </div></div>
     </div>
 
     <!-- Order form -->
@@ -2917,13 +2939,10 @@ document.addEventListener('keydown',function(e){
       <div style="font-family:Orbitron;font-size:.68rem;font-weight:700;color:#ff4da6;letter-spacing:1px;margin-bottom:.75rem">&#128203; HACER PEDIDO</div>
       <label style="display:block;font-size:.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#5a6580;margin-bottom:.22rem">Plan que deseas</label>
       <select id="lk2k-plan" style="width:100%;background:#10131f;border:1px solid rgba(255,77,166,.2);color:#fff;border-radius:6px;padding:.5rem .75rem;font-family:Rajdhani,sans-serif;font-size:.84rem;margin-bottom:.55rem;box-sizing:border-box">
-        <option value="2000|85">2,000 likes — $85 MX (1 dia)</option>
-        <option value="4000|170">4,000 likes — $170 MX (2 dias)</option>
-        <option value="6000|255">6,000 likes — $255 MX (3 dias)</option>
-        <option value="8000|340">8,000 likes — $340 MX (4 dias)</option>
-        <option value="10000|420">10,000 likes — $420 MX (5 dias)</option>
-        <option value="20000|820">20,000 likes — $820 MX (10 dias)</option>
-        <option value="100000|4200">100,000 likes — $4,200 MX (50 dias)</option>
+        <option value="2000|120">2,000 likes &mdash; $120 MX (1 dia)</option>
+        <option value="4000|230">4,000 likes &mdash; $230 MX (2 dias)</option>
+        <option value="10000|590">10,000 likes &mdash; $590 MX (5 dias)</option>
+        <option value="20000|1190">20,000 likes &mdash; $1,190 MX (10 dias)</option>
       </select>
       <label style="display:block;font-size:.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#5a6580;margin-bottom:.22rem">Tu ID de Free Fire</label>
       <input id="lk2k-id" type="text" placeholder="Ej: 123456789" style="width:100%;background:#10131f;border:1px solid rgba(255,77,166,.2);color:#fff;border-radius:6px;padding:.5rem .75rem;font-family:Rajdhani,sans-serif;font-size:.84rem;margin-bottom:.55rem;box-sizing:border-box"/>
@@ -2968,30 +2987,45 @@ document.addEventListener('keydown',function(e){
     </div>
 
     <!-- Planes -->
-    <div style="background:#0d1020;border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden;margin-bottom:1.25rem">
-      <div style="padding:.75rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.06)">
-        <div style="font-family:Orbitron;font-size:.68rem;font-weight:700;color:var(--muted);letter-spacing:2px">PLANES DISPONIBLES</div>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.04)">
-        <div><div style="font-size:.82rem;font-weight:700;color:#fff">200 likes</div><div style="font-size:.65rem;color:var(--muted)">1 dia</div></div>
-        <div style="font-family:Orbitron;font-size:.85rem;font-weight:700;color:#00e676">$35 MX</div>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.04)">
-        <div><div style="font-size:.82rem;font-weight:700;color:#fff">1,400 likes</div><div style="font-size:.65rem;color:var(--muted)">7 dias</div></div>
-        <div style="font-family:Orbitron;font-size:.85rem;font-weight:700;color:#00e676">$45 MX</div>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.04)">
-        <div><div style="font-size:.82rem;font-weight:700;color:#fff">2,800 likes</div><div style="font-size:.65rem;color:var(--muted)">14 dias</div></div>
-        <div style="font-family:Orbitron;font-size:.85rem;font-weight:700;color:#00e676">$60 MX</div>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.04)">
-        <div><div style="font-size:.82rem;font-weight:700;color:#fff">4,200 likes</div><div style="font-size:.65rem;color:var(--muted)">21 dias</div></div>
-        <div style="font-family:Orbitron;font-size:.85rem;font-weight:700;color:#ffd700">$80 MX</div>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem">
-        <div><div style="font-size:.82rem;font-weight:700;color:#fff">6,600 likes</div><div style="font-size:.65rem;color:var(--muted)">33 dias</div></div>
-        <div style="font-family:Orbitron;font-size:.85rem;font-weight:700;color:#ffd700">$95 MX</div>
-      </div>
+    <div style="margin-bottom:.4rem;padding:0 .15rem">
+      <div style="font-family:Orbitron;font-size:.66rem;font-weight:700;color:var(--muted);letter-spacing:2px">&#128202; PLANES DISPONIBLES</div>
+    </div>
+    <div class="lkpln-grid">
+      <div class="lkpln-wrap"><div class="lkpln">
+        <div class="lkpln-l">
+          <div class="lkpln-ico" style="background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.28)">&#128077;</div>
+          <div><div class="lkpln-name">200 <span>likes</span></div><div class="lkpln-meta">1 d&iacute;a &bull; ~200/d&iacute;a</div></div>
+        </div>
+        <div class="lkpln-r"><div class="lkpln-price" style="color:#00e676">$10</div><div class="lkpln-cur">MXN</div></div>
+      </div></div>
+      <div class="lkpln-wrap"><div class="lkpln">
+        <div class="lkpln-l">
+          <div class="lkpln-ico" style="background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.28)">&#128077;</div>
+          <div><div class="lkpln-name">1,400 <span>likes</span></div><div class="lkpln-meta">7 d&iacute;as &bull; ~200/d&iacute;a</div></div>
+        </div>
+        <div class="lkpln-r"><div class="lkpln-price" style="color:#00e676">$25</div><div class="lkpln-cur">MXN</div></div>
+      </div></div>
+      <div class="lkpln-wrap"><div class="lkpln">
+        <div class="lkpln-l">
+          <div class="lkpln-ico" style="background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.28)">&#128077;</div>
+          <div><div class="lkpln-name">2,800 <span>likes</span></div><div class="lkpln-meta">14 d&iacute;as &bull; ~200/d&iacute;a</div></div>
+        </div>
+        <div class="lkpln-r"><div class="lkpln-price" style="color:#00e676">$35</div><div class="lkpln-cur">MXN</div></div>
+      </div></div>
+      <div class="lkpln-wrap"><div class="lkpln">
+        <div class="lkpln-l">
+          <div class="lkpln-ico" style="background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.28)">&#128077;</div>
+          <div><div class="lkpln-name">4,200 <span>likes</span></div><div class="lkpln-meta">21 d&iacute;as &bull; ~200/d&iacute;a</div></div>
+        </div>
+        <div class="lkpln-r"><div class="lkpln-price" style="color:#ffd700">$60</div><div class="lkpln-cur">MXN</div></div>
+      </div></div>
+      <div class="lkpln-wrap"><div class="lkpln lkpln-best"><div class="lkpln-rib">&#11088; MEJOR</div>
+        <div class="lkpln-l">
+          <div class="lkpln-ico" style="background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.28)">&#128077;</div>
+          <div><div class="lkpln-name">6,600 <span>likes</span></div><div class="lkpln-meta">30 d&iacute;as &bull; ~220/d&iacute;a</div></div>
+        </div>
+        <div class="lkpln-r"><div class="lkpln-price" style="color:#ffd700">$70</div><div class="lkpln-cur">MXN</div></div>
+      </div></div>
     </div>
 
     <!-- Order form -->
@@ -2999,11 +3033,11 @@ document.addEventListener('keydown',function(e){
       <div style="font-family:Orbitron;font-size:.68rem;font-weight:700;color:var(--c1);letter-spacing:1px;margin-bottom:.75rem">&#128203; HACER PEDIDO</div>
       <label style="display:block;font-size:.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#5a6580;margin-bottom:.22rem">Plan que deseas</label>
       <select id="lk200-plan" style="width:100%;background:#10131f;border:1px solid rgba(0,170,255,.2);color:#fff;border-radius:6px;padding:.5rem .75rem;font-family:Rajdhani,sans-serif;font-size:.84rem;margin-bottom:.55rem;box-sizing:border-box">
-        <option value="200|35">200 likes — $35 MX (1 dia)</option>
-        <option value="1400|45">1,400 likes — $45 MX (7 dias)</option>
-        <option value="2800|60">2,800 likes — $60 MX (14 dias)</option>
-        <option value="4200|80">4,200 likes — $80 MX (21 dias)</option>
-        <option value="6600|95">6,600 likes — $95 MX (33 dias)</option>
+        <option value="200|10">200 likes &mdash; $10 MX (1 dia)</option>
+        <option value="1400|25">1,400 likes &mdash; $25 MX (7 dias)</option>
+        <option value="2800|35">2,800 likes &mdash; $35 MX (14 dias)</option>
+        <option value="4200|60">4,200 likes &mdash; $60 MX (21 dias)</option>
+        <option value="6600|70">6,600 likes &mdash; $70 MX (30 dias)</option>
       </select>
       <label style="display:block;font-size:.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#5a6580;margin-bottom:.22rem">Tu ID de Free Fire</label>
       <input id="lk200-id" type="text" placeholder="Ej: 123456789" style="width:100%;background:#10131f;border:1px solid rgba(0,170,255,.2);color:#fff;border-radius:6px;padding:.5rem .75rem;font-family:Rajdhani,sans-serif;font-size:.84rem;margin-bottom:.55rem;box-sizing:border-box"/>
