@@ -3446,3 +3446,75 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 
 
+// ═══ FUNCIONES PARA PAGE-LIKES CONSOLIDADA ═══
+
+function updateLikesSaldo(){
+  if(!authSession) return;
+  var saldo = authSession.saldo || 0;
+  var saldoStr = '$' + Math.round(saldo).toLocaleString('es-MX') + ' MX';
+  
+  var el1 = document.getElementById('likes-basicos-saldo');
+  if(el1) el1.textContent = saldoStr;
+  
+  var el2 = document.getElementById('likes-instant-saldo');
+  if(el2) el2.textContent = saldoStr;
+  
+  var el3 = document.getElementById('renta-bot-saldo');
+  if(el3) el3.textContent = saldoStr;
+}
+
+function buyLikesBasico(){
+  if(!authSession){
+    showToast('Inicia sesión para comprar');
+    setTimeout(showAuthModal, 600);
+    return;
+  }
+  var saldo = authSession.saldo || 0;
+  if(saldo <= 0){
+    showToast('No tienes saldo. Te llevamos a recargar.');
+    setTimeout(function(){ goPage('saldo'); }, 800);
+    return;
+  }
+  openModal('Likes Básicos', '$10-$70 MX', '', '👍');
+}
+
+function buyLikesInstant(){
+  if(!authSession){
+    showToast('Inicia sesión para comprar');
+    setTimeout(showAuthModal, 600);
+    return;
+  }
+  var saldo = authSession.saldo || 0;
+  if(saldo <= 0){
+    showToast('No tienes saldo. Te llevamos a recargar.');
+    setTimeout(function(){ goPage('saldo'); }, 800);
+    return;
+  }
+  openModal('Likes Instantáneos', '$120-$1,190 MX', '', '⚡');
+}
+
+function quoteLikesBasico(){
+  var msg = 'Hola, quiero cotizar un plan de likes básicos. ¿Cuál es el mejor para mí?';
+  window.open('https://wa.me/5215548461200?text='+encodeURIComponent(msg), '_blank');
+}
+
+function quoteLikesInstant(){
+  var msg = 'Hola, me interesa un plan de likes instantáneos. ¿Cuál recomiendas?';
+  window.open('https://wa.me/5215548461200?text='+encodeURIComponent(msg), '_blank');
+}
+
+// Cargar saldo cuando se abre la página de likes
+var _origGoPageLikes = goPage;
+goPage = function(id){
+  _origGoPageLikes(id);
+  if(id === 'likes'){
+    setTimeout(updateLikesSaldo, 300);
+  }
+};
+
+// Actualizar saldo cada 5 segundos
+setInterval(function(){
+  if(document.getElementById('page-likes') && document.getElementById('page-likes').offsetParent !== null){
+    updateLikesSaldo();
+  }
+}, 5000);
