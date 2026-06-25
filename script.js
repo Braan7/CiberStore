@@ -2894,3 +2894,303 @@ goPage = function(id){
   if(id==='likes2k') setTimeout(function(){ _updateLkSaldo('lk2k-saldo-val'); }, 300);
   if(id==='likes200') setTimeout(function(){ _updateLkSaldo('lk200-saldo-val'); }, 300);
 };
+
+/* ════════════════════════════════════════════════════════════════════════════
+   TOP & RANKING SYSTEM - COMPLETE OVERHAUL
+   ════════════════════════════════════════════════════════════════════════════ */
+
+var rankPeriod = 'daily'; // daily, weekly, monthly
+
+/**
+ * Renderiza una lista de top generica
+ */
+function renderTopList(elId, data, colorFn, maxItems){
+  maxItems = maxItems || 10;
+  var el = document.getElementById(elId);
+  if(!el) return;
+
+  var medals = ['🥇','🥈','🥉'];
+  var medalColors = ['#ffd700','#c0c0c0','#cd7f32'];
+  var html = '';
+
+  data.slice(0, maxItems).forEach(function(item, i){
+    var medal = i < 3 ? medals[i] : (i+1)+'.';
+    var medalColor = i < 3 ? medalColors[i] : 'var(--muted)';
+    var value = item.value || item.monto || item.likes || item.diamonds || 0;
+    var valueColor = colorFn ? colorFn(i) : (i === 0 ? '#ffd700' : '#00e676');
+    var initial = (item.username || 'U').charAt(0).toUpperCase();
+    var isMe = authSession && authSession.username === item.username;
+    var bg = i === 0 ? 'rgba(255,215,0,.06)' : 'rgba(255,255,255,.02)';
+    var border = i === 0 ? 'rgba(255,215,0,.25)' : 'rgba(255,255,255,.06)';
+
+    html += '<div style="background:'+bg+';border:1px solid '+border+';border-radius:11px;padding:.75rem 1rem;display:flex;align-items:center;gap:.75rem;'+(i===0?'box-shadow:0 0 20px rgba(255,215,0,.08);':'')+'margin-bottom:.5rem">'
+      + '<div style="width:30px;text-align:center;font-size:'+(i<3?'1.2rem':'.82rem')+';color:'+medalColor+';font-weight:700;flex-shrink:0">'+medal+'</div>'
+      + '<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-size:.72rem;font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+medalColor+'44">'+initial+'</div>'
+      + '<div style="flex:1;min-width:0">'
+      + '<div style="font-size:.85rem;font-weight:700;color:#fff">'+item.username+(isMe?' <span style="font-size:.62rem;background:rgba(0,170,255,.15);color:var(--c1);padding:.1rem .35rem;border-radius:4px">Tu</span>':'')+' </div>'
+      + '</div>'
+      + '<div style="text-align:right;flex-shrink:0;font-family:Orbitron;font-size:.82rem;font-weight:900;color:'+valueColor+'">$'+Math.round(value).toLocaleString('es-MX')+'</div>'
+      + '</div>';
+  });
+
+  el.innerHTML = html || '<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Sin datos</div>';
+}
+
+/**
+ * Top por periodo (dinero gastado)
+ */
+function loadRankingByPeriod(period){
+  rankPeriod = period;
+  var since = null;
+
+  if(period === 'weekly')  since = new Date(Date.now()-7*86400000).toISOString();
+  if(period === 'monthly') since = new Date(Date.now()-30*86400000).toISOString();
+  // daily: since = null (mismo dia)
+  if(period === 'daily')   since = new Date(new Date().setHours(0,0,0,0)).toISOString();
+
+  // Mostrar "Cargando..."
+  ['rank-list-top-diario','rank-list-top-semanal','rank-list-top-mensual','rank-list-top-general'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted)">Cargando...</div>';
+  });
+
+  var qs = 'tipo=eq.compra&select=user_id,monto' + (since ? '&created_at=gte.'+since : '');
+  sb.get('movimientos_saldo', qs).then(function(movs){
+    if(!movs || !Array.isArray(movs) || !movs.length){
+      document.getElementById('rank-list-top-'+period).innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Sin compras</div>';
+      return;
+    }
+
+    // Agregar por usuario
+    var agg = {};
+    movs.forEach(function(m){
+      var uid = m.user_id;
+      agg[uid] = (agg[uid] || 0) + (m.monto || 0);
+    });
+
+    // Obtener usernames
+    var uids = Object.keys(agg);
+    sb.get('profiles', 'select=id,username&id=in.('+uids.map(function(u){return '"'+u+'"';}).join(',')+')').then(function(profs){
+      var umap = {};
+      if(profs) profs.forEach(function(p){ umap[p.id] = p.username; });
+
+      var sorted = uids.map(function(uid){
+        return {username: umap[uid] || 'Usuario', value: agg[uid]};
+      }).sort(function(a,b){ return b.value - a.value; }).slice(0,10);
+
+      renderTopList('rank-list-top-'+period, sorted);
+    });
+  }).catch(function(){
+    document.getElementById('rank-list-top-'+period).innerHTML = '<div style="text-align:center;padding:1.5rem;color:#ff6b6b;font-size:.82rem">Error</div>';
+  });
+}
+
+function setRankPeriod(period){
+  rankPeriod = period;
+  // Cambiar tabs activos
+  ['rtab-daily','rtab-weekly','rtab-monthly'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.classList.toggle('active', id === 'rtab-'+period);
+  });
+  // Cargar datos
+  loadRankingByPeriod(period);
+}
+
+/**
+ * Top general (todos los tiempos)
+ */
+function loadTopGeneral(){
+  var el = document.getElementById('rank-list-top-general');
+  if(!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted)">Cargando...</div>';
+
+  sb.get('movimientos_saldo', 'tipo=eq.compra&select=user_id,monto').then(function(movs){
+    if(!movs || !Array.isArray(movs) || !movs.length){
+      el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Sin datos historicos</div>';
+      return;
+    }
+
+    var agg = {};
+    movs.forEach(function(m){
+      var uid = m.user_id;
+      agg[uid] = (agg[uid] || 0) + (m.monto || 0);
+    });
+
+    var uids = Object.keys(agg);
+    sb.get('profiles', 'select=id,username&id=in.('+uids.map(function(u){return '"'+u+'"';}).join(',')+')').then(function(profs){
+      var umap = {};
+      if(profs) profs.forEach(function(p){ umap[p.id] = p.username; });
+
+      var sorted = uids.map(function(uid){
+        return {username: umap[uid] || 'Usuario', value: agg[uid]};
+      }).sort(function(a,b){ return b.value - a.value; }).slice(0,15);
+
+      renderTopList('rank-list-top-general', sorted);
+    });
+  }).catch(function(){
+    el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#ff6b6b;font-size:.82rem">Error</div>';
+  });
+}
+
+/**
+ * Top compradores de LIKES
+ */
+function loadTopLikes(){
+  var el = document.getElementById('rank-list-top-likes');
+  if(!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted)">Cargando...</div>';
+
+  sb.get('movimientos_saldo', 'tipo=eq.compra&select=user_id,descripcion,monto').then(function(movs){
+    if(!movs || !Array.isArray(movs) || !movs.length){
+      el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Sin compras de likes aun</div>';
+      return;
+    }
+
+    // Filtrar solo likes y sumar
+    var agg = {};
+    movs.forEach(function(m){
+      var desc = (m.descripcion || '').toLowerCase();
+      if(desc.indexOf('like') < 0) return; // solo likes
+
+      var uid = m.user_id;
+      if(!agg[uid]) agg[uid] = {monto: 0, likes: 0};
+      agg[uid].monto += (m.monto || 0);
+
+      // Extraer cantidad de likes
+      var match = desc.match(/(\\d[\\d,]*)\\s*like/);
+      if(match) agg[uid].likes += parseInt(match[1].replace(/[,]/g,''))||0;
+    });
+
+    var uids = Object.keys(agg);
+    if(!uids.length){
+      el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Sin compras de likes</div>';
+      return;
+    }
+
+    sb.get('profiles', 'select=id,username&id=in.('+uids.map(function(u){return '"'+u+'"';}).join(',')+')').then(function(profs){
+      var umap = {};
+      if(profs) profs.forEach(function(p){ umap[p.id] = p.username; });
+
+      var sorted = uids.map(function(uid){
+        return {username: umap[uid] || 'Usuario', value: agg[uid].monto, likes: agg[uid].likes};
+      }).sort(function(a,b){ return b.value - a.value; }).slice(0,15);
+
+      // Renderizar con likes incluidos
+      var medals = ['🥇','🥈','🥉'];
+      var html = '';
+      sorted.forEach(function(item, i){
+        var medal = i < 3 ? medals[i] : (i+1)+'.';
+        var medalColor = i < 3 ? (i===0?'#ffd700':i===1?'#c0c0c0':'#cd7f32') : 'var(--muted)';
+        var initial = (item.username || 'U').charAt(0).toUpperCase();
+        var isMe = authSession && authSession.username === item.username;
+        var bg = i === 0 ? 'rgba(255,215,0,.06)' : 'rgba(255,255,255,.02)';
+        var border = i === 0 ? 'rgba(255,215,0,.25)' : 'rgba(255,255,255,.06)';
+
+        html += '<div style="background:'+bg+';border:1px solid '+border+';border-radius:11px;padding:.75rem 1rem;display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem">'
+          + '<div style="width:30px;text-align:center;font-size:'+(i<3?'1.2rem':'.82rem')+';color:'+medalColor+';font-weight:700;flex-shrink:0">'+medal+'</div>'
+          + '<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-size:.72rem;font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+medalColor+'44">'+initial+'</div>'
+          + '<div style="flex:1;min-width:0">'
+          + '<div style="font-size:.85rem;font-weight:700;color:#fff">'+item.username+(isMe?' <span style="font-size:.62rem;background:rgba(0,170,255,.15);color:var(--c1);padding:.1rem .35rem;border-radius:4px">Tu</span>':'')+' </div>'
+          + '<div style="font-size:.65rem;color:var(--muted);margin-top:.15rem">👍 '+item.likes.toLocaleString('es-MX')+' likes</div>'
+          + '</div>'
+          + '<div style="text-align:right;flex-shrink:0;font-family:Orbitron;font-size:.82rem;font-weight:900;color:'+(i===0?'#ffd700':'#00e676')+'">$'+item.value.toLocaleString('es-MX')+'</div>'
+          + '</div>';
+      });
+
+      el.innerHTML = html;
+    });
+  }).catch(function(){
+    el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#ff6b6b;font-size:.82rem">Error</div>';
+  });
+}
+
+/**
+ * Top compradores de DIAMANTES
+ */
+function loadTopDiamantes(){
+  var el = document.getElementById('rank-list-top-diamantes');
+  if(!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted)">Cargando...</div>';
+
+  sb.get('movimientos_saldo', 'tipo=eq.compra&select=user_id,descripcion,monto').then(function(movs){
+    if(!movs || !Array.isArray(movs) || !movs.length){
+      el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Sin compras de diamantes aun</div>';
+      return;
+    }
+
+    // Filtrar solo diamantes y sumar
+    var agg = {};
+    movs.forEach(function(m){
+      var desc = (m.descripcion || '').toLowerCase();
+      if(desc.indexOf('diamante') < 0) return; // solo diamantes
+
+      var uid = m.user_id;
+      if(!agg[uid]) agg[uid] = {monto: 0, diamantes: 0};
+      agg[uid].monto += (m.monto || 0);
+
+      // Extraer cantidad de diamantes
+      var match = desc.match(/(\\d[\\d,]*)\\s*diamante/);
+      if(match) agg[uid].diamantes += parseInt(match[1].replace(/[,]/g,''))||0;
+    });
+
+    var uids = Object.keys(agg);
+    if(!uids.length){
+      el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Sin compras de diamantes</div>';
+      return;
+    }
+
+    sb.get('profiles', 'select=id,username&id=in.('+uids.map(function(u){return '"'+u+'"';}).join(',')+')').then(function(profs){
+      var umap = {};
+      if(profs) profs.forEach(function(p){ umap[p.id] = p.username; });
+
+      var sorted = uids.map(function(uid){
+        return {username: umap[uid] || 'Usuario', value: agg[uid].monto, diamantes: agg[uid].diamantes};
+      }).sort(function(a,b){ return b.value - a.value; }).slice(0,15);
+
+      // Renderizar con diamantes incluidos
+      var medals = ['🥇','🥈','🥉'];
+      var html = '';
+      sorted.forEach(function(item, i){
+        var medal = i < 3 ? medals[i] : (i+1)+'.';
+        var medalColor = i < 3 ? (i===0?'#ffd700':i===1?'#c0c0c0':'#cd7f32') : 'var(--muted)';
+        var initial = (item.username || 'U').charAt(0).toUpperCase();
+        var isMe = authSession && authSession.username === item.username;
+        var bg = i === 0 ? 'rgba(255,215,0,.06)' : 'rgba(255,255,255,.02)';
+        var border = i === 0 ? 'rgba(255,215,0,.25)' : 'rgba(255,255,255,.06)';
+
+        html += '<div style="background:'+bg+';border:1px solid '+border+';border-radius:11px;padding:.75rem 1rem;display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem">'
+          + '<div style="width:30px;text-align:center;font-size:'+(i<3?'1.2rem':'.82rem')+';color:'+medalColor+';font-weight:700;flex-shrink:0">'+medal+'</div>'
+          + '<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-size:.72rem;font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+medalColor+'44">'+initial+'</div>'
+          + '<div style="flex:1;min-width:0">'
+          + '<div style="font-size:.85rem;font-weight:700;color:#fff">'+item.username+(isMe?' <span style="font-size:.62rem;background:rgba(0,170,255,.15);color:var(--c1);padding:.1rem .35rem;border-radius:4px">Tu</span>':'')+' </div>'
+          + '<div style="font-size:.65rem;color:var(--muted);margin-top:.15rem">💎 '+item.diamantes.toLocaleString('es-MX')+' diamantes</div>'
+          + '</div>'
+          + '<div style="text-align:right;flex-shrink:0;font-family:Orbitron;font-size:.82rem;font-weight:900;color:'+(i===0?'#ffd700':'#00e676')+'">$'+item.value.toLocaleString('es-MX')+'</div>'
+          + '</div>';
+      });
+
+      el.innerHTML = html;
+    });
+  }).catch(function(){
+    el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#ff6b6b;font-size:.82rem">Error</div>';
+  });
+}
+
+/**
+ * Cargar todos los tops cuando se abre la página de ranking
+ */
+function initRankingPage(){
+  loadRankingByPeriod('daily');
+  loadTopGeneral();
+  loadTopLikes();
+  loadTopDiamantes();
+}
+
+// Auto-cargar cuando se abre page-ranking
+var _origGoPageRanking = goPage;
+goPage = function(id){
+  _origGoPageRanking(id);
+  if(id === 'ranking') setTimeout(initRankingPage, 300);
+};
+
+

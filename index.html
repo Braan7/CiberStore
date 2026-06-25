@@ -2343,7 +2343,7 @@ document.addEventListener('keydown',function(e){
           <span style="font-size:1.1rem">&#128179;</span>
           <div><div style="color:#00e676">Top Recargas</div><div style="font-size:.62rem;color:var(--muted);font-weight:400" id="rank-period-label-r">Hoy</div></div>
         </div>
-        <div class="rank-board-list" id="rank-list-recargas">
+        <div class="rank-board-list" id="rank-list-top-diario">
           <div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.8rem">Cargando...</div>
         </div>
       </div>
@@ -2353,11 +2353,50 @@ document.addEventListener('keydown',function(e){
           <span style="font-size:1.1rem">&#128722;</span>
           <div><div style="color:#ff4da6">Top Compras</div><div style="font-size:.62rem;color:var(--muted);font-weight:400" id="rank-period-label-g">Hoy</div></div>
         </div>
-        <div class="rank-board-list" id="rank-list-gastos">
+        <div class="rank-board-list" id="rank-list-top-semanal">
           <div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.8rem">Cargando...</div>
         </div>
       </div>
+    
+    <!-- Top Dinero por Periodo -->
+    <div style="margin-top:2rem">
+      <div style="background:rgba(0,230,118,.06);border-bottom:1px solid rgba(0,230,118,.15);padding:.75rem 1rem;margin-bottom:.85rem;border-radius:8px 8px 0 0">
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <span style="font-size:1rem">📊</span>
+          <div><div style="color:#00e676;font-weight:700">Top Dinero</div><div style="font-size:.62rem;color:var(--muted);font-weight:400">Todos los clientes que compraron</div></div>
+        </div>
+      </div>
+      <div style="background:#0d1020;border:1px solid rgba(0,230,118,.2);border-radius:0 0 8px 8px;padding:1rem">
+        <div id="rank-list-top-general" style="min-height:80px"><div style="text-align:center;padding:1.5rem;color:var(--muted)">Cargando...</div></div>
+      </div>
     </div>
+
+    <!-- Top Compradores de Likes -->
+    <div style="margin-top:2rem">
+      <div style="background:rgba(255,77,166,.06);border-bottom:1px solid rgba(255,77,166,.15);padding:.75rem 1rem;margin-bottom:.85rem;border-radius:8px 8px 0 0">
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <span style="font-size:1rem">👍</span>
+          <div><div style="color:#ff4da6;font-weight:700">Top Compradores Likes</div><div style="font-size:.62rem;color:var(--muted);font-weight:400">Todos los clientes con pedidos de likes</div></div>
+        </div>
+      </div>
+      <div style="background:#0d1020;border:1px solid rgba(255,77,166,.2);border-radius:0 0 8px 8px;padding:1rem">
+        <div id="rank-list-top-likes" style="min-height:80px"><div style="text-align:center;padding:1.5rem;color:var(--muted)">Cargando...</div></div>
+      </div>
+    </div>
+
+    <!-- Top Compradores de Diamantes -->
+    <div style="margin-top:2rem">
+      <div style="background:rgba(167,139,250,.06);border-bottom:1px solid rgba(167,139,250,.15);padding:.75rem 1rem;margin-bottom:.85rem;border-radius:8px 8px 0 0">
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <span style="font-size:1rem">💎</span>
+          <div><div style="color:#a78bfa;font-weight:700">Top Compradores Diamantes</div><div style="font-size:.62rem;color:var(--muted);font-weight:400">Todos los clientes con pedidos de diamantes</div></div>
+        </div>
+      </div>
+      <div style="background:#0d1020;border:1px solid rgba(167,139,250,.2);border-radius:0 0 8px 8px;padding:1rem">
+        <div id="rank-list-top-diamantes" style="min-height:80px"><div style="text-align:center;padding:1.5rem;color:var(--muted)">Cargando...</div></div>
+      </div>
+    </div>
+</div>
 
     <!-- Note -->
     <div style="margin-top:1rem;font-size:.72rem;color:var(--muted);text-align:center;line-height:1.7">
