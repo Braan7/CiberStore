@@ -3749,3 +3749,119 @@ setInterval(function(){
   var home = document.getElementById('page-home');
   if(el && home && home.classList.contains('active')) loadMillonarioTop();
 }, 20000);
+
+
+// ═══ TOP LIKERS - LIKES COMPRADOS (HOME) ═══
+var likerPeriod = 'historico';
+
+function setLikerPeriod(period){
+  likerPeriod = period;
+  ['historico','mes','semana','dia'].forEach(function(p){
+    var tab = document.getElementById('ltab-'+p);
+    if(tab){
+      if(p === period){
+        tab.style.background = 'linear-gradient(90deg,#ff4da6,#d6249f)';
+        tab.style.color = '#fff';
+      } else {
+        tab.style.background = 'transparent';
+        tab.style.color = 'var(--muted)';
+      }
+    }
+  });
+  loadLikerTop();
+}
+
+function loadLikerTop(){
+  var list = document.getElementById('liker-top-list');
+  if(!list) return;
+  if(!window.sb){ setTimeout(loadLikerTop, 1500); return; }
+
+  list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);font-size:.82rem">Cargando...</div>';
+
+  var since = null;
+  if(likerPeriod === 'dia')    since = new Date(new Date().setHours(0,0,0,0)).toISOString();
+  if(likerPeriod === 'semana') since = new Date(Date.now()-7*86400000).toISOString();
+  if(likerPeriod === 'mes')    since = new Date(Date.now()-30*86400000).toISOString();
+
+  var qs = 'tipo=eq.compra&select=user_id,descripcion,monto' + (since ? '&created_at=gte.'+since : '');
+  sb.get('movimientos_saldo', qs).then(function(movs){
+    if(!movs || !Array.isArray(movs)){
+      list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);font-size:.82rem">Sin datos</div>';
+      return;
+    }
+
+    // Sumar likes por usuario (cualquier compra que diga "like" = 2k o 200)
+    var agg = {};
+    movs.forEach(function(m){
+      var desc = (m.descripcion || '').toLowerCase();
+      if(desc.indexOf('like') < 0) return;
+      var uid = m.user_id;
+      if(!agg[uid]) agg[uid] = {likes: 0, monto: 0};
+      var match = desc.match(/(\d[\d,]*)\s*like/);
+      agg[uid].likes += match ? (parseInt(match[1].replace(/,/g,''))||0) : 0;
+      agg[uid].monto += (m.monto || 0);
+    });
+
+    var uids = Object.keys(agg);
+    if(!uids.length){
+      list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);font-size:.82rem">Sin compras de likes en este período</div>';
+      return;
+    }
+
+    sb.get('profiles', 'select=id,username&id=in.('+uids.map(function(u){return '"'+u+'"';}).join(',')+')').then(function(profs){
+      var umap = {};
+      if(profs) profs.forEach(function(p){ umap[p.id] = p.username; });
+
+      var sorted = uids.map(function(uid){
+        return {username: umap[uid] || 'Usuario', likes: agg[uid].likes, monto: agg[uid].monto};
+      }).sort(function(a,b){ return b.likes - a.likes; }).slice(0,10);
+
+      var medals = ['🥇','🥈','🥉'];
+      var medalColors = ['#ffd700','#c0c0c0','#cd7f32'];
+      var html = '';
+
+      sorted.forEach(function(item, i){
+        var rank = i < 3 ? medals[i] : (i+1);
+        var rankColor = i < 3 ? medalColors[i] : 'var(--muted)';
+        var initial = item.username.charAt(0).toUpperCase();
+        var isTop1 = i === 0;
+        var bg = isTop1 ? 'linear-gradient(90deg,rgba(255,77,166,.12),rgba(214,36,159,.05))' : 'rgba(255,255,255,.03)';
+        var border = isTop1 ? 'rgba(255,77,166,.35)' : 'rgba(255,255,255,.06)';
+        var avSize = isTop1 ? '44px' : '38px';
+
+        html += '<div style="background:'+bg+';border:1px solid '+border+';border-radius:11px;padding:'+(isTop1?'.85rem .9rem':'.65rem .9rem')+';display:flex;align-items:center;gap:.75rem;'+(isTop1?'box-shadow:0 0 18px rgba(255,77,166,.12);':'')+'">'
+          + '<div style="width:26px;text-align:center;font-size:'+(i<3?'1.2rem':'.85rem')+';font-weight:900;color:'+rankColor+';flex-shrink:0">'+rank+'</div>'
+          + '<div style="width:'+avSize+';height:'+avSize+';border-radius:11px;background:linear-gradient(135deg,#ff4da6,#d6249f);display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-size:'+(isTop1?'.9rem':'.78rem')+';font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+rankColor+'44">'+initial+'</div>'
+          + '<div style="flex:1;min-width:0">'
+          + '<div style="font-size:'+(isTop1?'1rem':'.85rem')+';font-weight:'+(isTop1?'900':'700')+';color:#fff">'+item.username+'</div>'
+          + '<div style="font-size:.62rem;color:var(--muted)">likes comprados</div>'
+          + '</div>'
+          + '<div style="text-align:right;flex-shrink:0;font-family:Orbitron;font-size:'+(isTop1?'1.05rem':'.88rem')+';font-weight:900;color:'+(isTop1?'#ff4da6':'#d6249f')+'">'+item.likes.toLocaleString('es-MX')+' 👍</div>'
+          + '</div>';
+      });
+
+      list.innerHTML = html;
+    });
+  }).catch(function(){
+    list.innerHTML = '<div style="text-align:center;padding:2rem;color:#ff6b6b;font-size:.82rem">Error al cargar</div>';
+  });
+}
+
+// Auto-cargar en el home
+var _origGoPageLiker = goPage;
+goPage = function(id){
+  _origGoPageLiker(id);
+  if(id === 'home') setTimeout(loadLikerTop, 600);
+};
+
+document.addEventListener('DOMContentLoaded', function(){
+  setTimeout(function(){
+    if(document.getElementById('liker-top-list')) loadLikerTop();
+  }, 1900);
+});
+
+setInterval(function(){
+  var el = document.getElementById('liker-top-list');
+  var home = document.getElementById('page-home');
+  if(el && home && home.classList.contains('active')) loadLikerTop();
+}, 20000);
