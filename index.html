@@ -2430,58 +2430,45 @@ document.addEventListener('keydown',function(e){
     </div>
 
     <script>
-      // Cargar rankings cuando se abre la página
-      (function(){
-        console.log('[RANKING] Inicializando rankings...');
-        
-        var maxAttempts = 100; // 10 segundos max
-        var attempts = 0;
-        
-        var loader = setInterval(function(){
-          attempts++;
-          var sbReady = typeof window.sb !== 'undefined' && window.sb;
-          var fnReady = typeof initRankingPage === 'function';
-          var sessionReady = typeof authSession !== 'undefined' && authSession;
+        (function(){
+          console.log('[RANKING] Inicializando sistema de rankings...');
+          var loaded = false;
           
-          console.log('[RANKING] '+attempts+'/'+maxAttempts+': sb='+sbReady+' fn='+fnReady+' session='+sessionReady);
-          
-          if(sbReady && fnReady && sessionReady){
-            clearInterval(loader);
-            console.log('[RANKING] ✓ Sistema listo, cargando rankings...');
-            try {
-              initRankingPage();
-              console.log('[RANKING] ✓ Rankings iniciados');
-            } catch(e){
-              console.error('[RANKING] Error al ejecutar:', e);
+          // Función para cargar
+          function tryLoad(){
+            if(loaded) return;
+            if(window.sb && typeof initRankingPage === 'function'){
+              console.log('[RANKING] ✓ Supabase disponible, cargando...');
+              try {
+                initRankingPage();
+                loaded = true;
+              } catch(e){
+                console.error('[RANKING] Error:', e);
+              }
             }
-          } else if(attempts >= maxAttempts){
-            clearInterval(loader);
-            console.warn('[RANKING] Timeout. Mostrando fallback...');
-            
-            // Mostrar fallback en todos los contenedores
-            var containers = ['rank-list-habibis', 'rank-list-top-diario', 'rank-list-top-semanal', 
-                             'rank-list-top-mensual', 'rank-list-top-general', 'rank-list-top-likes', 'rank-list-top-diamantes'];
+          }
+          
+          // Intentar inmediatamente
+          tryLoad();
+          
+          // Si no cargó, mostrar estado vacío y seguir intentando
+          if(!loaded){
+            console.log('[RANKING] Supabase aún no disponible, mostrando estado vacío...');
+            var containers = ['rank-list-habibis','rank-list-top-diario','rank-list-top-semanal','rank-list-top-mensual','rank-list-top-general','rank-list-top-likes','rank-list-top-diamantes'];
             containers.forEach(function(id){
               var el = document.getElementById(id);
-              if(el) el.innerHTML = '<div style="text-align:center;padding:2rem;color:#ff9900"><div style="font-size:1.2rem;margin-bottom:.5rem">⏳</div><div style="font-size:.85rem">Cargando datos...</div><div style="font-size:.7rem;color:#666;margin-top:.5rem">Si persiste, recarga la página</div></div>';
+              if(el) el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#999;font-size:.8rem">⏳ Datos en vivo<br><span style="font-size:.65rem">Los rankings se actualizarán cuando Supabase esté listo</span></div>';
             });
             
-            // Reintento automático después de 3 segundos
-            console.log('[RANKING] Reintentando en 3 segundos...');
-            setTimeout(function(){
-              if(window.sb && typeof initRankingPage === 'function'){
-                try {
-                  console.log('[RANKING] Reintento ejecutando...');
-                  initRankingPage();
-                } catch(e){
-                  console.error('[RANKING] Error en reintento:', e);
-                }
-              }
-            }, 3000);
+            // Seguir intentando cada 2 segundos
+            var retryInterval = setInterval(function(){
+              tryLoad();
+              if(loaded) clearInterval(retryInterval);
+            }, 2000);
           }
-        }, 100);
-      })();
-    </script>
+        })();
+      </script>
+
 
   </div>
 </div>

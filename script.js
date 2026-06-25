@@ -3332,11 +3332,9 @@ function loadTopDiamantes(){
 function loadTopHabibis(){
   var el = document.getElementById('rank-list-habibis');
   if(!el) return;
-  el.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted)">Cargando...</div>';
 
   if(!window.sb || typeof sb !== 'object'){
-    el.innerHTML = '<div style="text-align:center;padding:2rem;color:#ff9900;font-size:.82rem">⚠️ Esperando conexión...</div>';
-    setTimeout(loadTopHabibis, 1000);
+    console.log('[HABIBI] Supabase no listo');
     return;
   }
 
