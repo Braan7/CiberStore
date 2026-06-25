@@ -6,8 +6,58 @@ var WA = '5215548461200';
 if(typeof getSpent === 'undefined'){
   getSpent = function(){ return authSession ? (authSession.saldo||0) : 0; };
 }
-if(typeof addSpend === 'undefined'){
-  addSpend = function(amt){ return null; };
+/**
+ * Restar saldo y registrar movimiento en Supabase
+ */
+function addSpend(amount, description){
+  if(!authSession || !window.sb){
+    console.error('[ADDSPEND] No hay sesión o sb');
+    return;
+  }
+  
+  var userId = authSession.id;
+  var newSaldo = Math.max(0, (authSession.saldo || 0) - amount);
+  
+  console.log('[ADDSPEND] Restando $'+amount+' al usuario '+userId+'. Nuevo saldo: $'+newSaldo);
+  
+  // 1. Registrar movimiento en movimientos_saldo
+  sb.post('movimientos_saldo', {
+    user_id: userId,
+    tipo: 'compra',
+    monto: amount,
+    descripcion: description || 'Compra',
+    created_at: new Date().toISOString()
+  }).then(function(result){
+    console.log('[ADDSPEND] Movimiento registrado', result);
+    
+    // 2. Actualizar saldo en profiles
+    sb.patch('profiles', {saldo: newSaldo}, 'id=eq."'+userId+'"').then(function(){
+      console.log('[ADDSPEND] Saldo actualizado en BD');
+      
+      // 3. Actualizar en sesión y UI
+      authSession.saldo = newSaldo;
+      
+      // Actualizar saldo en sidebar
+      var sbEl = document.getElementById('saldo-page-balance');
+      if(sbEl) sbEl.textContent = '$' + Math.round(newSaldo).toLocaleString('es-MX') + ' MX';
+      
+      // Actualizar en modal si está abierto
+      var ms = document.getElementById('modal-saldo-amt');
+      if(ms) ms.textContent = '$' + Math.round(newSaldo).toLocaleString('es-MX') + ' MX';
+      
+      // Actualizar en fragmentos si está abierto
+      var fs = document.getElementById('frag-saldo-disp');
+      if(fs) fs.textContent = '$' + Math.round(newSaldo).toLocaleString('es-MX') + ' MX';
+      
+      showToast('✓ Compra registrada. Saldo actualizado.');
+    }).catch(function(e){
+      console.error('[ADDSPEND] Error actualizando saldo:', e);
+      showToast('Error al actualizar saldo');
+    });
+  }).catch(function(e){
+    console.error('[ADDSPEND] Error registrando movimiento:', e);
+    showToast('Error al registrar compra');
+  });
 }
 if(typeof addToHistory === 'undefined'){
   addToHistory = function(item){ return; };
@@ -1123,11 +1173,34 @@ function submitLikes(){
 }
 
 /* \u2500\u2500 HONOR MODAL \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+
+/**
+ * Actualizar saldo en TODOS los modales cuando se abren
+ */
+function updateModalBalance(){
+  setTimeout(function(){
+    var saldoMX = authSession ? Math.round(authSession.saldo || 0) : 0;
+    var saldoStr = '$' + saldoMX.toLocaleString('es-MX') + ' MX';
+    
+    // Modal principal
+    var ms = document.getElementById('modal-saldo-amt');
+    if(ms) ms.textContent = saldoStr;
+    
+    // Modal de fragmentos
+    var fs = document.getElementById('frag-saldo-disp');
+    if(fs) fs.textContent = saldoStr;
+    
+    // Sidebar
+    var sb = document.getElementById('saldo-page-balance');
+    if(sb) sb.textContent = saldoStr;
+  }, 50);
+}
 function openHonorModal(idx){
   if(!authSession){showToast('Inicia sesion para comprar');setTimeout(showAuthModal,600);return;}
   var h=HONOR[idx];
   if(!h) return;
   curId='honor_'+idx;
+  updateModalBalance();
   var mico=document.getElementById('m-ico');
   var mname=document.getElementById('m-name');
   var mprice=document.getElementById('m-price');
@@ -2556,12 +2629,49 @@ function submitAC80(){
 ================================================================ */
 var fragCurrent = {frags:0, diam:0, usd:0, mxn:0};
 
+
+/**
+ * Actualizar saldo en tiempo real desde Supabase
+ */
+function refreshUserBalance(){
+  if(!authSession || !window.sb) return;
+  
+  sb.get('profiles', 'select=saldo&id=eq."'+authSession.id+'"').then(function(result){
+    if(result && result[0]){
+      var newSaldo = result[0].saldo || 0;
+      authSession.saldo = newSaldo;
+      
+      // Actualizar en sidebar
+      var sbEl = document.getElementById('saldo-page-balance');
+      if(sbEl) sbEl.textContent = '$' + Math.round(newSaldo).toLocaleString('es-MX') + ' MX';
+      
+      // Actualizar en modal
+      var ms = document.getElementById('modal-saldo-amt');
+      if(ms) ms.textContent = '$' + Math.round(newSaldo).toLocaleString('es-MX') + ' MX';
+      
+      // Actualizar en modal de fragmentos
+      var fs = document.getElementById('frag-saldo-disp');
+      if(fs) fs.textContent = '$' + Math.round(newSaldo).toLocaleString('es-MX') + ' MX';
+      
+      console.log('[BALANCE] Saldo actualizado: $'+newSaldo.toLocaleString('es-MX'));
+    }
+  }).catch(function(e){
+    console.error('[BALANCE] Error refrescando saldo:', e);
+  });
+}
+
+// Refrescar saldo cada 5 segundos si hay una sesión activa
+setInterval(function(){
+  if(authSession) refreshUserBalance();
+}, 5000);
+
 function openFragModal(frags, diam, usd, mxn){
   if(!authSession){
     showToast('Inicia sesion para pedir');
     setTimeout(showAuthModal, 600);
     return;
   }
+  updateModalBalance();
   fragCurrent = {frags:frags, diam:diam, usd:usd, mxn:mxn};
   var eq = document.getElementById('frag-qty');
   var ed = document.getElementById('frag-diam');
@@ -2571,14 +2681,27 @@ function openFragModal(frags, diam, usd, mxn){
   var fi = document.getElementById('frag-id');
   var fn = document.getElementById('frag-nombre');
   var fp = document.getElementById('frag-pago');
+  var fs = document.getElementById('frag-saldo-disp');
   if(eq)  eq.textContent  = frags.toLocaleString('es-MX');
-  if(ed)  ed.textContent  = diam.toLocaleString('es-MX') + ' \uD83D\uDC8E';
+  if(ed)  ed.textContent  = diam.toLocaleString('es-MX') + ' 💎';
   if(eu)  eu.textContent  = '$' + mxn.toLocaleString('es-MX') + ' MX';
   if(em)  em.textContent  = '';
   if(err) err.style.display = 'none';
   if(fi)  fi.value  = '';
   if(fn)  fn.value  = '';
   if(fp)  fp.selectedIndex = 0;
+  // Cargar saldo actual
+  if(fs && authSession && authSession.saldo !== undefined){
+    fs.textContent = '$' + Math.round(authSession.saldo).toLocaleString('es-MX') + ' MX';
+  } else if(fs && window.sb && authSession){
+    // Si no hay saldo en sesión, cargar de Supabase
+    sb.get('profiles', 'select=saldo&id=eq."'+authSession.id+'"').then(function(result){
+      if(result && result[0]){
+        var saldo = result[0].saldo || 0;
+        if(fs) fs.textContent = '$' + Math.round(saldo).toLocaleString('es-MX') + ' MX';
+      }
+    });
+  }
   var el = document.getElementById('modal-frag');
   if(el){ el.style.display='flex'; el.style.alignItems='center'; el.style.justifyContent='center'; }
 }
@@ -2599,7 +2722,16 @@ function submitFrag(){
   if(!ffNom) { showErr('Ingresa tu nombre en el juego'); return; }
   if(!pago)  { showErr('Selecciona un metodo de pago'); return; }
 
+  // Verificar saldo para fragmentos
+  var saldoActual = authSession ? (authSession.saldo || 0) : 0;
+  if(saldoActual < fragCurrent.mxn){
+    showErr('Saldo insuficiente. Tu saldo: $'+Math.round(saldoActual).toLocaleString('es-MX')+' MX. Necesitas: $'+fragCurrent.mxn.toLocaleString('es-MX')+' MX');
+    return;
+  }
+
   var ord = getNextOrder();
+  // Restar saldo por la compra
+  addSpend(fragCurrent.mxn, 'Fragmentos Evo: '+fragCurrent.frags+' frags / '+fragCurrent.diam+' diamantes - Pedido #'+ord);
   var lines = [
     '*PEDIDO #' + ord + ' - CiberStore*',
     '',
@@ -3263,15 +3395,32 @@ function loadTopHabibis(){
 }
 
 function initRankingPage(){
-  console.log('[RANKING] Inicializando rankings...');
-  if(!window.sb) { console.error('[RANKING] sb no disponible'); return; }
-  loadTopHabibis();
-  loadRankingByPeriod('daily');
-  loadRankingByPeriod('weekly');
-  loadRankingByPeriod('monthly');
-  loadTopGeneral();
-  loadTopLikes();
-  loadTopDiamantes();
+  console.log('[RANKING] initRankingPage llamado');
+  
+  if(!window.sb){
+    console.error('[RANKING] sb NO disponible aún');
+    return false;
+  }
+  
+  if(typeof authSession === 'undefined' || !authSession){
+    console.warn('[RANKING] authSession no disponible');
+  }
+  
+  console.log('[RANKING] Iniciando todas las cargas...');
+  try {
+    loadTopHabibis();
+    loadRankingByPeriod('daily');
+    loadRankingByPeriod('weekly');
+    loadRankingByPeriod('monthly');
+    loadTopGeneral();
+    loadTopLikes();
+    loadTopDiamantes();
+    console.log('[RANKING] ✓ Todas las funciones lanzadas');
+    return true;
+  } catch(e){
+    console.error('[RANKING] Error en initRankingPage:', e);
+    return false;
+  }
 }
 
 // Auto-cargar cuando se abre page-ranking

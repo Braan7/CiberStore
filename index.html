@@ -1004,7 +1004,45 @@ document.addEventListener('keydown',function(e){
     <div class="offer-timer"><span id="offer-timer-txt">23:59:59</span> para la oferta especial</div>
     <div style="display:inline-flex;align-items:center;gap:.45rem;margin-bottom:1.5rem;padding:.35rem .95rem;background:rgba(0,170,255,.07);border:1px solid rgba(0,170,255,.22);border-radius:20px;font-size:.7rem;font-weight:700;color:var(--c1);letter-spacing:1px">&#9670; Disponibles para: REGION LATAM &amp; BR</div>
   </div>
-  <div class="pgrid" id="prod-grid"></div>
+    <div style="max-width:900px;margin:0 auto;padding:0 5vw 1.5rem">
+    <!-- BANNER HABIBIS -->
+    <div style="background:linear-gradient(135deg,rgba(255,215,0,.12),rgba(255,215,0,.06));border:2px solid rgba(255,215,0,.35);border-radius:14px;padding:1.2rem 1rem;position:relative;overflow:hidden">
+      <!-- Efecto de fondo -->
+      <div style="position:absolute;top:-50%;right:-20%;width:400px;height:400px;background:radial-gradient(circle,rgba(255,215,0,.15) 0%,transparent 70%);pointer-events:none"></div>
+      
+      <div style="position:relative;z-index:2">
+        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem">
+          <span style="font-size:1.8rem;line-height:1">👑</span>
+          <div>
+            <div style="font-family:Orbitron;font-size:.95rem;font-weight:900;color:#ffd700;letter-spacing:1.5px">PRECIO ESPECIAL PARA HABIBIS</div>
+            <div style="font-size:.7rem;color:#ffb800;font-weight:600;letter-spacing:.5px">Recargueros y clientes VIP</div>
+          </div>
+        </div>
+        
+        <div style="background:rgba(255,255,255,.04);border-left:3px solid #ffd700;border-radius:6px;padding:.75rem 1rem;margin-bottom:.75rem">
+          <div style="font-size:.82rem;color:#fff;line-height:1.8;margin-bottom:.35rem">
+            <strong style="color:#ffd700">✨ Solo para habibis o recargueros:</strong> Tenemos un precio especial para personas que recarguen muchos diamantes en nuestra web.
+          </div>
+          <div style="font-size:.78rem;color:#ffb800;margin-bottom:.25rem">
+            📊 <strong>Descuento</strong>: Si compras <strong>más de 20,000 diamantes</strong> en Diamantes Ilimitados, obtendrás un <strong>precio un poco más bajo</strong>.
+          </div>
+          <div style="font-size:.75rem;color:var(--muted);margin-top:.5rem">
+            💡 Esto aplica solo en nuestro paquete de <strong>Diamantes Ilimitados</strong> (sin limite de recarga).
+          </div>
+        </div>
+        
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+          <button onclick="goPage('saldo');showToast('💬 Contacta a nuestro WhatsApp para tu cotización personalizada')" style="padding:.65rem 1.2rem;background:linear-gradient(90deg,#ffd700,#ffed4e);color:#1a0a00;border:none;border-radius:8px;font-family:Orbitron;font-weight:900;font-size:.8rem;letter-spacing:1px;cursor:pointer;text-transform:uppercase;transition:all .3s;box-shadow:0 4px 15px rgba(255,215,0,.2)" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 25px rgba(255,215,0,.4)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(255,215,0,.2)'">
+            📞 Cotizar Mi Descuento
+          </button>
+          <button onclick="window.open('https://wa.me/5215548461200?text=Hola%21%20Soy%20un%20habibi%20y%20quiero%20cotizar%20descuento%20para%2020%2B%20mil%20diamantes%20ilimitados','_blank')" style="padding:.65rem 1.2rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:8px;font-family:Orbitron;font-weight:900;font-size:.8rem;letter-spacing:1px;cursor:pointer;text-transform:uppercase;transition:all .3s;box-shadow:0 4px 15px rgba(37,211,102,.2)" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 25px rgba(37,211,102,.4)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(37,211,102,.2)'">
+            💬 WhatsApp Directo
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+<div class="pgrid" id="prod-grid"></div>
 </div>
 <div class="page" id="page-likes">
   <div class="ph">
@@ -2394,19 +2432,52 @@ document.addEventListener('keydown',function(e){
     <script>
       // Cargar rankings cuando se abre la página
       (function(){
-        console.log('[RANKING] Inicializando...');
+        console.log('[RANKING] Inicializando rankings...');
         
-        // Esperar un poco para que sb esté listo
+        var maxAttempts = 100; // 10 segundos max
         var attempts = 0;
+        
         var loader = setInterval(function(){
           attempts++;
-          if(window.sb && typeof initRankingPage === 'function'){
+          var sbReady = typeof window.sb !== 'undefined' && window.sb;
+          var fnReady = typeof initRankingPage === 'function';
+          var sessionReady = typeof authSession !== 'undefined' && authSession;
+          
+          console.log('[RANKING] '+attempts+'/'+maxAttempts+': sb='+sbReady+' fn='+fnReady+' session='+sessionReady);
+          
+          if(sbReady && fnReady && sessionReady){
             clearInterval(loader);
-            console.log('[RANKING] Cargando datos...');
-            initRankingPage();
-          } else if(attempts > 30){
+            console.log('[RANKING] ✓ Sistema listo, cargando rankings...');
+            try {
+              initRankingPage();
+              console.log('[RANKING] ✓ Rankings iniciados');
+            } catch(e){
+              console.error('[RANKING] Error al ejecutar:', e);
+            }
+          } else if(attempts >= maxAttempts){
             clearInterval(loader);
-            console.error('[RANKING] Timeout - sb o initRankingPage no están listos');
+            console.warn('[RANKING] Timeout. Mostrando fallback...');
+            
+            // Mostrar fallback en todos los contenedores
+            var containers = ['rank-list-habibis', 'rank-list-top-diario', 'rank-list-top-semanal', 
+                             'rank-list-top-mensual', 'rank-list-top-general', 'rank-list-top-likes', 'rank-list-top-diamantes'];
+            containers.forEach(function(id){
+              var el = document.getElementById(id);
+              if(el) el.innerHTML = '<div style="text-align:center;padding:2rem;color:#ff9900"><div style="font-size:1.2rem;margin-bottom:.5rem">⏳</div><div style="font-size:.85rem">Cargando datos...</div><div style="font-size:.7rem;color:#666;margin-top:.5rem">Si persiste, recarga la página</div></div>';
+            });
+            
+            // Reintento automático después de 3 segundos
+            console.log('[RANKING] Reintentando en 3 segundos...');
+            setTimeout(function(){
+              if(window.sb && typeof initRankingPage === 'function'){
+                try {
+                  console.log('[RANKING] Reintento ejecutando...');
+                  initRankingPage();
+                } catch(e){
+                  console.error('[RANKING] Error en reintento:', e);
+                }
+              }
+            }, 3000);
           }
         }, 100);
       })();
