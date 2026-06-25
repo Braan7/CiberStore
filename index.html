@@ -945,30 +945,65 @@ document.addEventListener('keydown',function(e){
     <div style="text-align:center;margin-top:.65rem;font-size:.65rem;color:rgba(255,255,255,.2)" id="lb-updated"></div>
   </div>
 
-  <!-- TOP ELITE GAMERS -->
-  <div style="max-width:780px;margin:0 auto;padding:0 5vw 2rem">
-    <!-- Header -->
-    <div style="text-align:center;margin-bottom:1.75rem">
-      <div style="display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#ff6600,#ff4da6);box-shadow:0 0 30px rgba(255,102,0,.3);margin-bottom:.85rem;font-size:1.8rem">&#128081;</div>
-      <div style="font-size:1.5rem;font-weight:900;color:#fff;letter-spacing:2px;margin-bottom:.25rem">TOP <span style="color:#ff6600">ELITE</span> GAMERS</div>
-      <div style="font-size:.8rem;color:var(--muted)">Las leyendas de nuestra comunidad</div>
-      <div style="width:60px;height:3px;background:linear-gradient(90deg,#ff6600,#ff4da6);border-radius:2px;margin:.65rem auto 0"></div>
-    </div>
+      <!-- 💎 TOP COMPRADORES DIAMANTES -->
+  <div style="max-width:900px;margin:0 auto;padding:0 5vw 2rem">
+    <div style="background:linear-gradient(135deg,#1a0a14,#0d0710);border:1px solid rgba(167,139,250,.25);border-radius:16px;padding:1.25rem;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-30%;right:-10%;width:300px;height:300px;background:radial-gradient(circle,rgba(167,139,250,.12) 0%,transparent 70%);pointer-events:none"></div>
 
-    <!-- Cards grid -->
-    <div id="elite-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem">
-      <!-- Loading shimmer -->
-      <div style="background:#0d1020;border-radius:14px;overflow:hidden;animation:blink 1.5s infinite">
-        <div style="height:48px;background:rgba(255,102,0,.15)"></div>
-        <div style="padding:1rem;text-align:center"><div style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.06);margin:0 auto .75rem"></div><div style="height:12px;background:rgba(255,255,255,.06);border-radius:4px;margin-bottom:.4rem"></div><div style="height:8px;background:rgba(255,255,255,.04);border-radius:4px;width:60%;margin:0 auto"></div></div>
+      <!-- Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;position:relative;z-index:2">
+        <div style="display:flex;align-items:center;gap:.6rem">
+          <span style="font-size:1.1rem">💎</span>
+          <div style="font-family:Orbitron;font-size:.85rem;font-weight:900;color:#fff;letter-spacing:1.5px">TOP RECARGUEROS</div>
+        </div>
+        <div style="font-family:Orbitron;font-size:.7rem;font-weight:700;color:#a78bfa;letter-spacing:1px">TOP 10</div>
       </div>
-      <div style="background:#0d1020;border-radius:14px;overflow:hidden;animation:blink 1.5s infinite" id="elite-shimmer2">
-        <div style="height:48px;background:rgba(100,100,120,.15)"></div>
-        <div style="padding:1rem;text-align:center"><div style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.06);margin:0 auto .75rem"></div><div style="height:12px;background:rgba(255,255,255,.06);border-radius:4px;margin-bottom:.4rem"></div><div style="height:8px;background:rgba(255,255,255,.04);border-radius:4px;width:60%;margin:0 auto"></div></div>
+
+      <!-- Tabs de período -->
+      <div style="display:flex;gap:.4rem;margin-bottom:1rem;position:relative;z-index:2;background:rgba(0,0,0,.3);padding:.3rem;border-radius:10px">
+        <button onclick="setDiamondPeriod('historico')" id="dtab-historico" class="dperiod-tab dperiod-active" style="flex:1;padding:.5rem;background:linear-gradient(90deg,#a78bfa,#7c3aed);border:none;color:#fff;border-radius:7px;font-family:Rajdhani,sans-serif;font-weight:800;font-size:.72rem;cursor:pointer;letter-spacing:.5px">HISTÓRICO</button>
+        <button onclick="setDiamondPeriod('mes')" id="dtab-mes" class="dperiod-tab" style="flex:1;padding:.5rem;background:transparent;border:none;color:var(--muted);border-radius:7px;font-family:Rajdhani,sans-serif;font-weight:800;font-size:.72rem;cursor:pointer;letter-spacing:.5px">MES</button>
+        <button onclick="setDiamondPeriod('semana')" id="dtab-semana" class="dperiod-tab" style="flex:1;padding:.5rem;background:transparent;border:none;color:var(--muted);border-radius:7px;font-family:Rajdhani,sans-serif;font-weight:800;font-size:.72rem;cursor:pointer;letter-spacing:.5px">SEMANA</button>
+        <button onclick="setDiamondPeriod('dia')" id="dtab-dia" class="dperiod-tab" style="flex:1;padding:.5rem;background:transparent;border:none;color:var(--muted);border-radius:7px;font-family:Rajdhani,sans-serif;font-weight:800;font-size:.72rem;cursor:pointer;letter-spacing:.5px">DÍA</button>
+      </div>
+
+      <!-- Lista Top 10 -->
+      <div id="diamond-top-list" style="position:relative;z-index:2;display:flex;flex-direction:column;gap:.5rem">
+        <div style="text-align:center;padding:2rem;color:var(--muted);font-size:.82rem">Cargando...</div>
       </div>
     </div>
-    <div style="text-align:center;margin-top:.75rem">
-      <button onclick="goPage('ranking')" style="background:none;border:1px solid rgba(255,102,0,.3);color:#ff6600;border-radius:7px;padding:.38rem 1rem;font-family:'Exo 2';font-weight:700;font-size:.75rem;cursor:pointer">Ver ranking completo &#8594;</button>
+  </div>
+
+  <!-- 👑 TOP MILLONARIOS -->
+  <div style="max-width:900px;margin:0 auto;padding:0 5vw 2rem">
+    <div style="background:linear-gradient(135deg,#1a1408,#0d0a05);border:1px solid rgba(255,215,0,.25);border-radius:16px;padding:1.25rem;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-30%;right:-10%;width:300px;height:300px;background:radial-gradient(circle,rgba(255,215,0,.12) 0%,transparent 70%);pointer-events:none"></div>
+
+      <!-- Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;position:relative;z-index:2">
+        <div style="display:flex;align-items:center;gap:.6rem">
+          <span style="font-size:1.1rem">👑</span>
+          <div style="font-family:Orbitron;font-size:.85rem;font-weight:900;color:#fff;letter-spacing:1.5px">TOP MILLONARIOS</div>
+        </div>
+        <div style="font-family:Orbitron;font-size:.7rem;font-weight:700;color:#ffd700;letter-spacing:1px">TOP 10</div>
+      </div>
+
+      <!-- Tabs de período -->
+      <div style="display:flex;gap:.4rem;margin-bottom:1rem;position:relative;z-index:2;background:rgba(0,0,0,.3);padding:.3rem;border-radius:10px">
+        <button onclick="setMillonarioPeriod('historico')" id="mtab-historico" style="flex:1;padding:.5rem;background:linear-gradient(90deg,#ffd700,#f0a000);border:none;color:#1a0a00;border-radius:7px;font-family:Rajdhani,sans-serif;font-weight:800;font-size:.72rem;cursor:pointer;letter-spacing:.5px">HISTÓRICO</button>
+        <button onclick="setMillonarioPeriod('mes')" id="mtab-mes" style="flex:1;padding:.5rem;background:transparent;border:none;color:var(--muted);border-radius:7px;font-family:Rajdhani,sans-serif;font-weight:800;font-size:.72rem;cursor:pointer;letter-spacing:.5px">MES</button>
+        <button onclick="setMillonarioPeriod('semana')" id="mtab-semana" style="flex:1;padding:.5rem;background:transparent;border:none;color:var(--muted);border-radius:7px;font-family:Rajdhani,sans-serif;font-weight:800;font-size:.72rem;cursor:pointer;letter-spacing:.5px">SEMANA</button>
+        <button onclick="setMillonarioPeriod('dia')" id="mtab-dia" style="flex:1;padding:.5rem;background:transparent;border:none;color:var(--muted);border-radius:7px;font-family:Rajdhani,sans-serif;font-weight:800;font-size:.72rem;cursor:pointer;letter-spacing:.5px">DÍA</button>
+      </div>
+
+      <!-- Lista Top 10 -->
+      <div id="millonario-top-list" style="position:relative;z-index:2;display:flex;flex-direction:column;gap:.5rem">
+        <div style="text-align:center;padding:2rem;color:var(--muted);font-size:.82rem">Cargando...</div>
+      </div>
+
+      <div style="text-align:center;margin-top:.85rem;position:relative;z-index:2">
+        <button onclick="goPage('ranking')" style="background:none;border:1px solid rgba(255,215,0,.3);color:#ffd700;border-radius:7px;padding:.38rem 1rem;font-family:Rajdhani,sans-serif;font-weight:700;font-size:.75rem;cursor:pointer">Ver ranking completo →</button>
+      </div>
     </div>
   </div>
 
