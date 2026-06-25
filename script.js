@@ -2942,6 +2942,14 @@ function renderTopList(elId, data, colorFn, maxItems){
 function loadRankingByPeriod(period){
   rankPeriod = period;
   var since = null;
+  
+  // Verificar que sb esté disponible
+  if(!window.sb || typeof sb !== 'object'){
+    console.error('[RANKING] sb no disponible. Asegúrate de que supabase_integration.js está cargado');
+    var el = document.getElementById('rank-list-top-'+period);
+    if(el) el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#ff9900;font-size:.82rem">⚠️ Error: Supabase no está disponible</div>';
+    return;
+  }
 
   if(period === 'weekly')  since = new Date(Date.now()-7*86400000).toISOString();
   if(period === 'monthly') since = new Date(Date.now()-30*86400000).toISOString();
@@ -3002,6 +3010,12 @@ function setRankPeriod(period){
 function loadTopGeneral(){
   var el = document.getElementById('rank-list-top-general');
   if(!el) return;
+  
+  if(!window.sb || typeof sb !== 'object'){
+    el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#ff9900;font-size:.82rem">⚠️ Esperando conexión...</div>';
+    setTimeout(loadTopGeneral, 2000);
+    return;
+  }
   el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted)">Cargando...</div>';
 
   sb.get('movimientos_saldo', 'tipo=eq.compra&select=user_id,monto').then(function(movs){
@@ -3179,18 +3193,109 @@ function loadTopDiamantes(){
 /**
  * Cargar todos los tops cuando se abre la página de ranking
  */
+
+/**
+ * Top Habibis - Top 1-3 del día
+ */
+function loadTopHabibis(){
+  var el = document.getElementById('rank-list-habibis');
+  if(!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted)">Cargando...</div>';
+
+  if(!window.sb || typeof sb !== 'object'){
+    el.innerHTML = '<div style="text-align:center;padding:2rem;color:#ff9900;font-size:.82rem">⚠️ Esperando conexión...</div>';
+    setTimeout(loadTopHabibis, 1000);
+    return;
+  }
+
+  var hoy = new Date(new Date().setHours(0,0,0,0)).toISOString();
+  var qs = 'tipo=eq.compra&select=user_id,monto&created_at=gte.'+hoy;
+  
+  sb.get('movimientos_saldo', qs).then(function(movs){
+    if(!movs || !Array.isArray(movs) || !movs.length){
+      el.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);font-size:.82rem">Sin compras hoy</div>';
+      return;
+    }
+
+    var agg = {};
+    movs.forEach(function(m){
+      var uid = m.user_id;
+      agg[uid] = (agg[uid] || 0) + (m.monto || 0);
+    });
+
+    var uids = Object.keys(agg);
+    sb.get('profiles', 'select=id,username&id=in.('+uids.map(function(u){return '"'+u+'"';}).join(',')+')').then(function(profs){
+      var umap = {};
+      if(profs) profs.forEach(function(p){ umap[p.id] = p.username; });
+
+      var sorted = uids.map(function(uid){
+        return {username: umap[uid] || 'Usuario', value: agg[uid]};
+      }).sort(function(a,b){ return b.value - a.value; }).slice(0,3);
+
+      if(!sorted.length){
+        el.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);font-size:.82rem">Sin datos</div>';
+        return;
+      }
+
+      var medals = ['🥇','🥈','🥉'];
+      var html = '';
+      sorted.forEach(function(item, i){
+        var medal = medals[i];
+        var medalColor = i===0?'#ffd700':i===1?'#c0c0c0':'#cd7f32';
+        var initial = (item.username || 'U').charAt(0).toUpperCase();
+        var isMe = authSession && authSession.username === item.username;
+        var bg = i === 0 ? 'rgba(255,215,0,.08)' : 'rgba(255,255,255,.02)';
+        var border = i === 0 ? 'rgba(255,215,0,.3)' : 'rgba(255,255,255,.08)';
+
+        html += '<div style="background:'+bg+';border:1px solid '+border+';border-radius:10px;padding:.85rem 1rem;display:flex;align-items:center;gap:.8rem;box-shadow:'+(i===0?'0 0 20px rgba(255,215,0,.1);':'')+'transition:all .2s">'
+          + '<div style="width:32px;text-align:center;font-size:1.3rem;flex-shrink:0">'+medal+'</div>'
+          + '<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-size:.75rem;font-weight:900;color:#fff;flex-shrink:0">'+initial+'</div>'
+          + '<div style="flex:1"><div style="font-size:.88rem;font-weight:700;color:#fff">'+item.username+(isMe?' 👤':'')+' </div><div style="font-size:.65rem;color:var(--muted)">Dinero: $'+item.value.toLocaleString('es-MX')+'</div></div>'
+          + '<div style="text-align:right;flex-shrink:0"><div style="font-family:Orbitron;font-size:.95rem;font-weight:900;color:'+medalColor+'">$'+item.value.toLocaleString('es-MX')+'</div><div style="font-size:.6rem;color:var(--muted)">MX</div></div>'
+          + '</div>';
+      });
+
+      el.innerHTML = html;
+    });
+  }).catch(function(){
+    el.innerHTML = '<div style="text-align:center;padding:2rem;color:#ff6b6b;font-size:.82rem">Error</div>';
+  });
+}
+
 function initRankingPage(){
+  console.log('[RANKING] Inicializando rankings...');
+  if(!window.sb) { console.error('[RANKING] sb no disponible'); return; }
+  loadTopHabibis();
   loadRankingByPeriod('daily');
+  loadRankingByPeriod('weekly');
+  loadRankingByPeriod('monthly');
   loadTopGeneral();
   loadTopLikes();
   loadTopDiamantes();
 }
 
 // Auto-cargar cuando se abre page-ranking
-var _origGoPageRanking = goPage;
-goPage = function(id){
-  _origGoPageRanking(id);
-  if(id === 'ranking') setTimeout(initRankingPage, 300);
-};
+if(typeof goPage !== 'undefined'){
+  var _origGoPageRanking = goPage;
+  var newGoPage = function(id){
+    _origGoPageRanking(id);
+    if(id === 'ranking'){
+      setTimeout(function(){
+        if(typeof initRankingPage === 'function') initRankingPage();
+      }, 300);
+    }
+  };
+  goPage = newGoPage;
+}
+
+// Fallback: cargar directamente si la página se abre
+document.addEventListener('DOMContentLoaded', function(){
+  var page = document.getElementById('page-ranking');
+  if(page && page.classList.contains('active')){
+    setTimeout(function(){
+      if(typeof initRankingPage === 'function') initRankingPage();
+    }, 500);
+  }
+});
 
 

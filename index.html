@@ -2260,150 +2260,159 @@ document.addEventListener('keydown',function(e){
   <div class="ph" style="background:linear-gradient(180deg,rgba(255,102,0,.08),transparent);border-bottom:1px solid rgba(255,102,0,.12)">
     <div class="stag" style="color:#ff9900">Competencia</div>
     <h2 class="ptitle">&#127942; RANKING &amp; <span style="color:#ff9900">PREMIOS</span></h2>
-    <p class="psub">Compite por el TOP 1 y gana premios en saldo. Solo el primer lugar gana cada categoria.</p>
-    <div style="font-size:.72rem;color:var(--muted);margin-top:.35rem">&#8635; Se actualiza automaticamente cada 30 segundos</div>
+    <p class="psub">Compite por el TOP 1 y gana premios. Datos en tiempo real de todos los clientes.</p>
   </div>
 
-  <div style="max-width:780px;margin:0 auto;padding:0 5vw 3rem">
+  <div style="max-width:900px;margin:0 auto;padding:0 5vw 3rem">
 
-    <!-- Prize cards -->
-    <div class="rank-prize-grid" style="margin-top:1.5rem">
-      <div class="rank-prize-card daily">
-        <div style="position:absolute;inset:0;background:radial-gradient(ellipse at top,rgba(0,230,118,.08),transparent);pointer-events:none"></div>
-        <span class="rank-prize-ico">&#11088;</span>
-        <span class="rank-prize-amt" style="color:#00e676">$30 MX</span>
-        <span class="rank-prize-lbl">Premio TOP 1 Diario</span>
+    <!-- TOP HABIBIS - TOP 1-3 DINERO DIARIO -->
+    <div style="margin-bottom:2rem">
+      <div style="background:linear-gradient(90deg,rgba(255,215,0,.1),rgba(255,215,0,.05));border:1px solid rgba(255,215,0,.25);border-bottom:none;padding:1rem;border-radius:8px 8px 0 0">
+        <div style="display:flex;align-items:center;gap:.6rem">
+          <span style="font-size:1.2rem">👑</span>
+          <div>
+            <div style="font-family:Orbitron;font-size:.95rem;font-weight:900;color:#ffd700;letter-spacing:1px">TOP HABIBIS</div>
+            <div style="font-size:.65rem;color:var(--muted)">Del uno al top 3 - Hoy</div>
+          </div>
+        </div>
       </div>
-      <div class="rank-prize-card weekly">
-        <div style="position:absolute;inset:0;background:radial-gradient(ellipse at top,rgba(255,153,0,.08),transparent);pointer-events:none"></div>
-        <span class="rank-prize-ico">&#128081;</span>
-        <span class="rank-prize-amt" style="color:#ff9900">$100 MX</span>
-        <span class="rank-prize-lbl">Premio TOP 1 Semanal</span>
-      </div>
-      <div class="rank-prize-card monthly">
-        <div style="position:absolute;inset:0;background:radial-gradient(ellipse at top,rgba(255,77,166,.08),transparent);pointer-events:none"></div>
-        <span class="rank-prize-ico">&#128142;</span>
-        <span class="rank-prize-amt" style="color:#ff4da6">$300 MX</span>
-        <span class="rank-prize-lbl">Premio TOP 1 Mensual</span>
+      <div style="background:#0d1020;border:1px solid rgba(255,215,0,.25);border-top:none;border-radius:0 0 8px 8px;padding:1rem">
+        <div id="rank-list-habibis" style="min-height:100px;display:flex;flex-direction:column;gap:.5rem">
+          <div style="text-align:center;padding:2rem;color:var(--muted)">Cargando...</div>
+        </div>
       </div>
     </div>
 
-    <!-- Countdown timers -->
-    <div class="rank-timer-grid">
-      <div class="rank-timer daily">
-        <div class="rank-timer-title" style="color:#00e676">Premio Diario ($30)</div>
-        <div class="rank-timer-nums">
-          <span class="rank-timer-num" style="color:#00e676" id="rt-d-h">00</span>
-          <span style="color:#00e676;font-family:Orbitron;font-size:1.2rem">:</span>
-          <span class="rank-timer-num" style="color:#00e676" id="rt-d-m">00</span>
-          <span style="color:#00e676;font-family:Orbitron;font-size:1.2rem">:</span>
-          <span class="rank-timer-num" style="color:#00e676" id="rt-d-s">00</span>
+    <!-- TOP DIARIO - TOP 1-3 -->
+    <div style="margin-bottom:2rem">
+      <div style="background:linear-gradient(90deg,rgba(0,230,118,.1),rgba(0,230,118,.05));border:1px solid rgba(0,230,118,.25);border-bottom:none;padding:1rem;border-radius:8px 8px 0 0">
+        <div style="display:flex;align-items:center;gap:.6rem">
+          <span style="font-size:1.2rem">&#9728;</span>
+          <div>
+            <div style="font-family:Orbitron;font-size:.95rem;font-weight:900;color:#00e676;letter-spacing:1px">TOP DIARIO</div>
+            <div style="font-size:.65rem;color:var(--muted)">Hoy - Top 1 gana $30 MX</div>
+          </div>
         </div>
-        <div class="rank-timer-labels"><span>HRS</span><span></span><span>MIN</span><span></span><span>SEG</span></div>
-        <div class="rank-timer-until" style="color:#00e676">hasta medianoche</div>
       </div>
-      <div class="rank-timer weekly">
-        <div class="rank-timer-title" style="color:#ff9900">Premio Semanal ($100)</div>
-        <div class="rank-timer-nums">
-          <span class="rank-timer-num" style="color:#ff9900" id="rt-w-d">00</span>
-          <span style="color:#ff9900;font-family:Orbitron;font-size:1rem">d</span>
-          <span class="rank-timer-num" style="color:#ff9900" id="rt-w-h">00</span>
-          <span style="color:#ff9900;font-family:Orbitron;font-size:1rem">h</span>
-          <span class="rank-timer-num" style="color:#ff9900" id="rt-w-m">00</span>
+      <div style="background:#0d1020;border:1px solid rgba(0,230,118,.25);border-top:none;border-radius:0 0 8px 8px;padding:1rem">
+        <div id="rank-list-top-diario" style="min-height:100px;display:flex;flex-direction:column;gap:.5rem">
+          <div style="text-align:center;padding:2rem;color:var(--muted)">Cargando...</div>
         </div>
-        <div class="rank-timer-labels"><span>DIAS</span><span></span><span>HRS</span><span></span><span>MIN</span></div>
-        <div class="rank-timer-until" style="color:#ff9900">hasta domingo</div>
-      </div>
-      <div class="rank-timer monthly">
-        <div class="rank-timer-title" style="color:#ff4da6">Premio Mensual ($300)</div>
-        <div class="rank-timer-nums">
-          <span class="rank-timer-num" style="color:#ff4da6" id="rt-m-d">00</span>
-          <span style="color:#ff4da6;font-family:Orbitron;font-size:1rem">d</span>
-          <span class="rank-timer-num" style="color:#ff4da6" id="rt-m-h">00</span>
-          <span style="color:#ff4da6;font-family:Orbitron;font-size:1rem">h</span>
-          <span class="rank-timer-num" style="color:#ff4da6" id="rt-m-m">00</span>
-        </div>
-        <div class="rank-timer-labels"><span>DIAS</span><span></span><span>HRS</span><span></span><span>MIN</span></div>
-        <div class="rank-timer-until" style="color:#ff4da6">hasta fin de mes</div>
       </div>
     </div>
 
-    <!-- Period tabs -->
-    <div class="rank-tabs">
-      <button class="rank-tab daily active" id="rtab-daily"   onclick="setRankPeriod('daily')">&#9728; Diario</button>
-      <button class="rank-tab weekly"       id="rtab-weekly"  onclick="setRankPeriod('weekly')">&#128197; Semanal ($100)</button>
-      <button class="rank-tab monthly"      id="rtab-monthly" onclick="setRankPeriod('monthly')">&#128197; Mensual ($300)</button>
-    </div>
-
-    <!-- Leaderboards -->
-    <div class="rank-boards">
-      <!-- Top Recargas -->
-      <div class="rank-board" style="border:1px solid rgba(0,230,118,.2)">
-        <div class="rank-board-head" style="background:rgba(0,230,118,.06);border-bottom:1px solid rgba(0,230,118,.15)">
-          <span style="font-size:1.1rem">&#128179;</span>
-          <div><div style="color:#00e676">Top Recargas</div><div style="font-size:.62rem;color:var(--muted);font-weight:400" id="rank-period-label-r">Hoy</div></div>
-        </div>
-        <div class="rank-board-list" id="rank-list-top-diario">
-          <div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.8rem">Cargando...</div>
+    <!-- TOP SEMANAL -->
+    <div style="margin-bottom:2rem">
+      <div style="background:linear-gradient(90deg,rgba(255,153,0,.1),rgba(255,153,0,.05));border:1px solid rgba(255,153,0,.25);border-bottom:none;padding:1rem;border-radius:8px 8px 0 0">
+        <div style="display:flex;align-items:center;gap:.6rem">
+          <span style="font-size:1.2rem">&#128197;</span>
+          <div>
+            <div style="font-family:Orbitron;font-size:.95rem;font-weight:900;color:#ff9900;letter-spacing:1px">TOP SEMANAL</div>
+            <div style="font-size:.65rem;color:var(--muted)">7 últimos días - Top 1 gana $100 MX</div>
+          </div>
         </div>
       </div>
-      <!-- Top Gastos -->
-      <div class="rank-board" style="border:1px solid rgba(255,77,166,.2)">
-        <div class="rank-board-head" style="background:rgba(255,77,166,.06);border-bottom:1px solid rgba(255,77,166,.15)">
-          <span style="font-size:1.1rem">&#128722;</span>
-          <div><div style="color:#ff4da6">Top Compras</div><div style="font-size:.62rem;color:var(--muted);font-weight:400" id="rank-period-label-g">Hoy</div></div>
+      <div style="background:#0d1020;border:1px solid rgba(255,153,0,.25);border-top:none;border-radius:0 0 8px 8px;padding:1rem">
+        <div id="rank-list-top-semanal" style="min-height:100px;display:flex;flex-direction:column;gap:.5rem">
+          <div style="text-align:center;padding:2rem;color:var(--muted)">Cargando...</div>
         </div>
-        <div class="rank-board-list" id="rank-list-top-semanal">
-          <div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.8rem">Cargando...</div>
-        </div>
-      </div>
-    
-    <!-- Top Dinero por Periodo -->
-    <div style="margin-top:2rem">
-      <div style="background:rgba(0,230,118,.06);border-bottom:1px solid rgba(0,230,118,.15);padding:.75rem 1rem;margin-bottom:.85rem;border-radius:8px 8px 0 0">
-        <div style="display:flex;align-items:center;gap:.5rem">
-          <span style="font-size:1rem">📊</span>
-          <div><div style="color:#00e676;font-weight:700">Top Dinero</div><div style="font-size:.62rem;color:var(--muted);font-weight:400">Todos los clientes que compraron</div></div>
-        </div>
-      </div>
-      <div style="background:#0d1020;border:1px solid rgba(0,230,118,.2);border-radius:0 0 8px 8px;padding:1rem">
-        <div id="rank-list-top-general" style="min-height:80px"><div style="text-align:center;padding:1.5rem;color:var(--muted)">Cargando...</div></div>
       </div>
     </div>
 
-    <!-- Top Compradores de Likes -->
-    <div style="margin-top:2rem">
-      <div style="background:rgba(255,77,166,.06);border-bottom:1px solid rgba(255,77,166,.15);padding:.75rem 1rem;margin-bottom:.85rem;border-radius:8px 8px 0 0">
-        <div style="display:flex;align-items:center;gap:.5rem">
-          <span style="font-size:1rem">👍</span>
-          <div><div style="color:#ff4da6;font-weight:700">Top Compradores Likes</div><div style="font-size:.62rem;color:var(--muted);font-weight:400">Todos los clientes con pedidos de likes</div></div>
+    <!-- TOP MENSUAL -->
+    <div style="margin-bottom:2rem">
+      <div style="background:linear-gradient(90deg,rgba(255,77,166,.1),rgba(255,77,166,.05));border:1px solid rgba(255,77,166,.25);border-bottom:none;padding:1rem;border-radius:8px 8px 0 0">
+        <div style="display:flex;align-items:center;gap:.6rem">
+          <span style="font-size:1.2rem">&#128142;</span>
+          <div>
+            <div style="font-family:Orbitron;font-size:.95rem;font-weight:900;color:#ff4da6;letter-spacing:1px">TOP MENSUAL</div>
+            <div style="font-size:.65rem;color:var(--muted)">30 últimos días - Top 1 gana $300 MX</div>
+          </div>
         </div>
       </div>
-      <div style="background:#0d1020;border:1px solid rgba(255,77,166,.2);border-radius:0 0 8px 8px;padding:1rem">
-        <div id="rank-list-top-likes" style="min-height:80px"><div style="text-align:center;padding:1.5rem;color:var(--muted)">Cargando...</div></div>
+      <div style="background:#0d1020;border:1px solid rgba(255,77,166,.25);border-top:none;border-radius:0 0 8px 8px;padding:1rem">
+        <div id="rank-list-top-mensual" style="min-height:100px;display:flex;flex-direction:column;gap:.5rem">
+          <div style="text-align:center;padding:2rem;color:var(--muted)">Cargando...</div>
+        </div>
       </div>
     </div>
 
-    <!-- Top Compradores de Diamantes -->
-    <div style="margin-top:2rem">
-      <div style="background:rgba(167,139,250,.06);border-bottom:1px solid rgba(167,139,250,.15);padding:.75rem 1rem;margin-bottom:.85rem;border-radius:8px 8px 0 0">
-        <div style="display:flex;align-items:center;gap:.5rem">
-          <span style="font-size:1rem">💎</span>
-          <div><div style="color:#a78bfa;font-weight:700">Top Compradores Diamantes</div><div style="font-size:.62rem;color:var(--muted);font-weight:400">Todos los clientes con pedidos de diamantes</div></div>
+    <!-- TOP GENERAL - PURO DINERO -->
+    <div style="margin-bottom:2rem">
+      <div style="background:linear-gradient(90deg,rgba(0,170,255,.1),rgba(0,170,255,.05));border:1px solid rgba(0,170,255,.25);border-bottom:none;padding:1rem;border-radius:8px 8px 0 0">
+        <div style="display:flex;align-items:center;gap:.6rem">
+          <span style="font-size:1.2rem">💰</span>
+          <div>
+            <div style="font-family:Orbitron;font-size:.95rem;font-weight:900;color:#00aaff;letter-spacing:1px">TOP GENERAL</div>
+            <div style="font-size:.65rem;color:var(--muted)">Todos los tiempos - Puro dinero gastado</div>
+          </div>
         </div>
       </div>
-      <div style="background:#0d1020;border:1px solid rgba(167,139,250,.2);border-radius:0 0 8px 8px;padding:1rem">
-        <div id="rank-list-top-diamantes" style="min-height:80px"><div style="text-align:center;padding:1.5rem;color:var(--muted)">Cargando...</div></div>
+      <div style="background:#0d1020;border:1px solid rgba(0,170,255,.25);border-top:none;border-radius:0 0 8px 8px;padding:1rem">
+        <div id="rank-list-top-general" style="min-height:100px;display:flex;flex-direction:column;gap:.5rem">
+          <div style="text-align:center;padding:2rem;color:var(--muted)">Cargando...</div>
+        </div>
       </div>
     </div>
-</div>
 
-    <!-- Note -->
-    <div style="margin-top:1rem;font-size:.72rem;color:var(--muted);text-align:center;line-height:1.7">
-      * Los administradores no participan. El saldo del premio se acredita automaticamente al ganador cada periodo.
+    <!-- TOP COMPRADORES LIKES -->
+    <div style="margin-bottom:2rem">
+      <div style="background:linear-gradient(90deg,rgba(255,107,157,.1),rgba(255,107,157,.05));border:1px solid rgba(255,107,157,.25);border-bottom:none;padding:1rem;border-radius:8px 8px 0 0">
+        <div style="display:flex;align-items:center;gap:.6rem">
+          <span style="font-size:1.2rem">👍</span>
+          <div>
+            <div style="font-family:Orbitron;font-size:.95rem;font-weight:900;color:#ff6b9d;letter-spacing:1px">TOP COMPRADORES LIKES</div>
+            <div style="font-size:.65rem;color:var(--muted)">Todos los clientes que compraron likes</div>
+          </div>
+        </div>
+      </div>
+      <div style="background:#0d1020;border:1px solid rgba(255,107,157,.25);border-top:none;border-radius:0 0 8px 8px;padding:1rem">
+        <div id="rank-list-top-likes" style="min-height:100px;display:flex;flex-direction:column;gap:.5rem">
+          <div style="text-align:center;padding:2rem;color:var(--muted)">Cargando...</div>
+        </div>
+      </div>
     </div>
+
+    <!-- TOP COMPRADORES DIAMANTES -->
+    <div style="margin-bottom:2rem">
+      <div style="background:linear-gradient(90deg,rgba(167,139,250,.1),rgba(167,139,250,.05));border:1px solid rgba(167,139,250,.25);border-bottom:none;padding:1rem;border-radius:8px 8px 0 0">
+        <div style="display:flex;align-items:center;gap:.6rem">
+          <span style="font-size:1.2rem">💎</span>
+          <div>
+            <div style="font-family:Orbitron;font-size:.95rem;font-weight:900;color:#a78bfa;letter-spacing:1px">TOP COMPRADORES DIAMANTES</div>
+            <div style="font-size:.65rem;color:var(--muted)">Todos los clientes que compraron diamantes</div>
+          </div>
+        </div>
+      </div>
+      <div style="background:#0d1020;border:1px solid rgba(167,139,250,.25);border-top:none;border-radius:0 0 8px 8px;padding:1rem">
+        <div id="rank-list-top-diamantes" style="min-height:100px;display:flex;flex-direction:column;gap:.5rem">
+          <div style="text-align:center;padding:2rem;color:var(--muted)">Cargando...</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Cargar rankings cuando se abre la página
+      (function(){
+        console.log('[RANKING] Inicializando...');
+        
+        // Esperar un poco para que sb esté listo
+        var attempts = 0;
+        var loader = setInterval(function(){
+          attempts++;
+          if(window.sb && typeof initRankingPage === 'function'){
+            clearInterval(loader);
+            console.log('[RANKING] Cargando datos...');
+            initRankingPage();
+          } else if(attempts > 30){
+            clearInterval(loader);
+            console.error('[RANKING] Timeout - sb o initRankingPage no están listos');
+          }
+        }, 100);
+      })();
+    </script>
+
   </div>
-</div>
 </div>
 
 <!-- EXIT POPUP -->
