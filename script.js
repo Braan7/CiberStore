@@ -2763,9 +2763,27 @@ function renderCart(){
   var total=c.reduce(function(s,i){return s+i.price;},0);
   var saldo=authSession?(authSession.saldo||0):0;
   var enough=saldo>=total;
-  var rows=c.map(function(item){
-    return '<div class="cart-item"><div class="ci-info"><div class="ci-name">'+item.name+'</div><div class="ci-sub">'+fmt(item.price)+'</div></div><button class="ci-del" onclick="removeFromCart('+item.id+')">&#215;</button></div>';
+
+  // Cada item con SU PROPIO formulario de ID y nombre
+  var rows=c.map(function(item,idx){
+    var h='<div class="cart-item" style="flex-direction:column;align-items:stretch;gap:.5rem">';
+    h+='<div style="display:flex;align-items:center;justify-content:space-between">';
+    h+='<div class="ci-info"><div class="ci-name">'+(item.icon||'')+' '+item.name+'</div><div class="ci-sub">'+fmt(item.price)+'</div></div>';
+    h+='<button class="ci-del" onclick="removeFromCart('+item.id+')">&#215;</button>';
+    h+='</div>';
+    // Formulario por item (solo si hay sesion)
+    if(authSession){
+      h+='<div style="background:rgba(0,150,255,.04);border:1px solid rgba(0,150,255,.12);border-radius:7px;padding:.5rem .6rem">';
+      h+='<label style="display:block;font-size:.58rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#5a6580;margin-bottom:.15rem">ID de Free Fire</label>';
+      h+='<input id="cart-id-'+item.id+'" type="text" value="'+(item.ffId||'')+'" oninput="updateCartItemField('+item.id+',\'ffId\',this.value)" placeholder="Ej: 123456789" style="width:100%;background:#10131f;border:1px solid rgba(0,150,255,.2);color:#fff;border-radius:5px;padding:.42rem .6rem;font-size:.8rem;margin-bottom:.35rem;box-sizing:border-box"/>';
+      h+='<label style="display:block;font-size:.58rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#5a6580;margin-bottom:.15rem">Nombre en el juego</label>';
+      h+='<input id="cart-nom-'+item.id+'" type="text" value="'+(item.ffNom||'')+'" oninput="updateCartItemField('+item.id+',\'ffNom\',this.value)" placeholder="Tu nickname" style="width:100%;background:#10131f;border:1px solid rgba(0,150,255,.2);color:#fff;border-radius:5px;padding:.42rem .6rem;font-size:.8rem;box-sizing:border-box"/>';
+      h+='</div>';
+    }
+    h+='</div>';
+    return h;
   }).join('');
+
   rows+='<div class="cart-total"><span>Total</span><span style="color:'+(enough?'#00e676':'#ff6b6b')+'">'+fmt(total)+'</span></div>';
   rows+='<div style="display:flex;justify-content:space-between;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.18);border-radius:8px;padding:.5rem .85rem;margin:.5rem 0"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span style="font-family:Orbitron;font-weight:700;color:'+(enough?'#00e676':'#ff6b6b')+'">$'+saldo.toLocaleString('es-MX')+' MX</span></div>';
   if(!authSession){
@@ -2775,27 +2793,33 @@ function renderCart(){
     rows+='<div style="font-size:.78rem;color:#ff6b6b;margin-bottom:.5rem">Saldo insuficiente. Te faltan $'+falta.toLocaleString('es-MX')+' MX.</div>';
     rows+='<button onclick="closeCart();goPage(String.fromCharCode(115,97,108,100,111));" style="width:100%;padding:.72rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:7px;font-weight:700;font-size:.9rem;cursor:pointer">Recargar saldo</button>';
   } else {
-    rows+='<label style="display:block;font-size:.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#5a6580;margin:.5rem 0 .2rem">ID de Free Fire</label>';
-    rows+='<input id="cart-ff-id" type="text" placeholder="Ej: 123456789" style="width:100%;background:#10131f;border:1px solid rgba(0,150,255,.2);color:#fff;border-radius:5px;padding:.48rem .72rem;font-size:.84rem;margin-bottom:.4rem;box-sizing:border-box"/>';
-    rows+='<label style="display:block;font-size:.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#5a6580;margin-bottom:.2rem">Nombre en el juego</label>';
-    rows+='<input id="cart-ff-nombre" type="text" placeholder="Tu nickname" style="width:100%;background:#10131f;border:1px solid rgba(0,150,255,.2);color:#fff;border-radius:5px;padding:.48rem .72rem;font-size:.84rem;margin-bottom:.55rem;box-sizing:border-box"/>';
     rows+='<div id="cart-err" style="color:#ff6b6b;font-size:.75rem;margin-bottom:.4rem;display:none"></div>';
-    rows+='<button onclick="submitCart()" style="width:100%;padding:.72rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:7px;font-weight:700;font-size:.9rem;cursor:pointer">Confirmar con saldo</button>';
+    rows+='<button id="cart-confirm-btn" onclick="submitCart()" style="width:100%;padding:.72rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:7px;font-weight:700;font-size:.9rem;cursor:pointer">Confirmar con saldo</button>';
   }
   body.innerHTML=rows;
 }
 
+// Guardar ID/nombre de cada item del carrito
+function updateCartItemField(itemId, field, value){
+  var c=getCart();
+  var item=c.filter(function(i){return i.id===itemId;})[0];
+  if(item){ item[field]=value; saveCart(c); }
+}
+
 function submitCart(){
   if(!authSession){ showToast('Inicia sesion'); return; }
-  var ffId=((document.getElementById('cart-ff-id')||{}).value||'').trim();
-  var ffNom=((document.getElementById('cart-ff-nombre')||{}).value||'').trim();
   var errEl=document.getElementById('cart-err');
   var btn=document.getElementById('cart-confirm-btn');
   function showErr(m){ if(errEl){errEl.textContent=m;errEl.style.display='block';} }
-  if(!ffId){ showErr('Ingresa tu ID de Free Fire'); return; }
-  if(!ffNom){ showErr('Ingresa tu nombre en el juego'); return; }
   var c=getCart();
   if(!c.length){ showErr('Tu carrito esta vacio'); return; }
+
+  // Validar que CADA item tenga su ID y nombre
+  for(var i=0;i<c.length;i++){
+    if(!c[i].ffId || !c[i].ffId.trim()){ showErr('Falta el ID de Free Fire en: '+c[i].name); return; }
+    if(!c[i].ffNom || !c[i].ffNom.trim()){ showErr('Falta el nombre en el juego en: '+c[i].name); return; }
+  }
+
   var total=c.reduce(function(s,i){return s+i.price;},0);
   var saldo=authSession.saldo||0;
   if(saldo<total){ showErr('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MX). Recarga tu cuenta.'); return; }
@@ -2804,9 +2828,10 @@ function submitCart(){
   if(btn){ btn.disabled=true; setTimeout(function(){ if(btn) btn.disabled=false; }, 4000); }
   if(errEl) errEl.style.display='none';
   var ord=getNextOrder();
-  var names=c.map(function(i){return i.name;}).join(', ');
-  addSpend(total,'Carrito: '+names+' - Pedido #'+ord);
-  if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username,'Carrito: '+names,total,ord);
+  // Detalle por item: "110 diamantes (ID:123 / Nick)"
+  var detalle=c.map(function(i){return i.name+' [ID:'+i.ffId+' / '+i.ffNom+']';}).join(' | ');
+  addSpend(total,'Carrito: '+detalle+' - Pedido #'+ord);
+  if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username,'Carrito: '+detalle,total,ord);
   showToast('Pedido #'+ord+' confirmado!',2500);
   clearCart(); closeCart();
 }
