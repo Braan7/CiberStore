@@ -20,69 +20,75 @@ function _refreshSaldoUI(saldo){
 }
 
 function addSpend(amount, description){
-  if(!authSession || !window.sb){
-    console.error('[ADDSPEND] No hay sesión o sb');
+  if(!authSession){
+    console.error('[ADDSPEND] No hay sesión');
+    showToast('Inicia sesion de nuevo');
     return;
   }
   amount = Number(amount) || 0;
   if(amount <= 0){ console.warn('[ADDSPEND] Monto invalido:', amount); return; }
 
-  // LOCK: si ya hay un descuento en proceso, ignorar este (evita dobles)
+  // LOCK anti-doble
   if(_addSpendBusy){
-    console.warn('[ADDSPEND] Ya hay una compra en proceso, ignorando duplicado');
-    showToast('Espera, procesando tu compra...');
+    console.warn('[ADDSPEND] Compra en proceso, ignorando duplicado');
     return;
   }
-  _addSpendBusy = true;
 
   var userId = authSession.id;
+  var saldoActual = Number(authSession.saldo) || 0;
 
-  // 1. LEER el saldo REAL de la BD (no el local que puede estar viejo)
-  sb.get('profiles', 'select=saldo&id=eq."'+userId+'"').then(function(rows){
-    var saldoReal = (rows && rows[0]) ? (Number(rows[0].saldo)||0) : (authSession.saldo||0);
+  if(saldoActual < amount){
+    showToast('Saldo insuficiente. Tienes $'+Math.round(saldoActual).toLocaleString('es-MX')+' MX');
+    return;
+  }
 
-    // 2. Validar que alcance (sin forzar a 0)
-    if(saldoReal < amount){
-      _addSpendBusy = false;
-      authSession.saldo = saldoReal;
-      _refreshSaldoUI(saldoReal);
-      showToast('Saldo insuficiente. Tienes $'+Math.round(saldoReal).toLocaleString('es-MX')+' MX');
-      console.warn('[ADDSPEND] Saldo insuficiente. real='+saldoReal+' necesita='+amount);
-      return;
+  _addSpendBusy = true;
+  var newSaldo = saldoActual - amount;
+
+  // Descontar en sesion y UI de inmediato
+  authSession.saldo = newSaldo;
+  _refreshSaldoUI(newSaldo);
+
+  // Registrar movimiento con tipo 'compra' (para que los rankings lo cuenten)
+  function registrarMov(){
+    if(typeof sb !== 'undefined' && sb.post){
+      sb.post('movimientos_saldo', {
+        user_id: userId,
+        tipo: 'compra',
+        monto: amount,
+        descripcion: description || 'Compra'
+      }).catch(function(e){ console.warn('[ADDSPEND] registrarMov fallo:', e); });
     }
+  }
 
-    var newSaldo = saldoReal - amount;
-    console.log('[ADDSPEND] real='+saldoReal+' - '+amount+' = '+newSaldo);
-
-    // 3. Registrar movimiento
-    sb.post('movimientos_saldo', {
-      user_id: userId,
-      tipo: 'compra',
-      monto: amount,
-      descripcion: description || 'Compra',
-      created_at: new Date().toISOString()
-    }).then(function(){
-      // 4. Actualizar saldo en profiles
-      sb.patch('profiles', {saldo: newSaldo}, 'id=eq."'+userId+'"').then(function(){
-        authSession.saldo = newSaldo;
-        _refreshSaldoUI(newSaldo);
-        showToast('✓ Compra registrada. Saldo: $'+Math.round(newSaldo).toLocaleString('es-MX')+' MX');
-        _addSpendBusy = false;
-      }).catch(function(e){
-        console.error('[ADDSPEND] Error actualizando saldo:', e);
-        showToast('Error al actualizar saldo');
-        _addSpendBusy = false;
-      });
+  if(typeof sbUpdateProfile === 'function'){
+    sbUpdateProfile(userId, {saldo: newSaldo}).then(function(){
+      registrarMov();
+      console.log('[ADDSPEND] OK. Nuevo saldo: $'+newSaldo);
+      showToast('✓ Compra registrada. Saldo: $'+Math.round(newSaldo).toLocaleString('es-MX')+' MX');
+      _addSpendBusy = false;
     }).catch(function(e){
-      console.error('[ADDSPEND] Error registrando movimiento:', e);
-      showToast('Error al registrar compra');
+      // Revertir si falla
+      console.error('[ADDSPEND] Error actualizando saldo:', e);
+      authSession.saldo = saldoActual;
+      _refreshSaldoUI(saldoActual);
+      showToast('Error al procesar. Intenta de nuevo.');
       _addSpendBusy = false;
     });
-  }).catch(function(e){
-    console.error('[ADDSPEND] Error leyendo saldo:', e);
-    showToast('Error al leer saldo');
-    _addSpendBusy = false;
-  });
+  } else {
+    // Fallback si no existe sbUpdateProfile: usar sb.patch sin comillas
+    sb.patch('profiles', {saldo: newSaldo}, 'id=eq.'+userId).then(function(){
+      registrarMov();
+      showToast('✓ Compra registrada. Saldo: $'+Math.round(newSaldo).toLocaleString('es-MX')+' MX');
+      _addSpendBusy = false;
+    }).catch(function(e){
+      console.error('[ADDSPEND] Error (fallback):', e);
+      authSession.saldo = saldoActual;
+      _refreshSaldoUI(saldoActual);
+      showToast('Error al procesar. Intenta de nuevo.');
+      _addSpendBusy = false;
+    });
+  }
 }
 if(typeof addToHistory === 'undefined'){
   addToHistory = function(item){ return; };
