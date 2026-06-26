@@ -2937,21 +2937,18 @@ function submitLk200(){
    LIKES 2K & 200 \u2014 SALDO PAYMENT
 ================================================================ */
 var LK2K_PLANES = {
-  '2000|85':    {likes:2000,  precio:85,   label:'2,000 likes - 1 dia'},
-  '4000|170':   {likes:4000,  precio:170,  label:'4,000 likes - 2 dias'},
-  '6000|255':   {likes:6000,  precio:255,  label:'6,000 likes - 3 dias'},
-  '8000|340':   {likes:8000,  precio:340,  label:'8,000 likes - 4 dias'},
-  '10000|420':  {likes:10000, precio:420,  label:'10,000 likes - 5 dias'},
-  '20000|820':  {likes:20000, precio:820,  label:'20,000 likes - 10 dias'},
-  '100000|4200':{likes:100000,precio:4200, label:'100,000 likes - 50 dias'}
+  '2000|120':  {likes:2000,  precio:120,  label:'2,000 likes - 1 dia'},
+  '4000|230':  {likes:4000,  precio:230,  label:'4,000 likes - 2 dias'},
+  '10000|590': {likes:10000, precio:590,  label:'10,000 likes - 5 dias'},
+  '20000|1190':{likes:20000, precio:1190, label:'20,000 likes - 10 dias'}
 };
 
 var LK200_PLANES = {
-  '200|35':   {likes:200,  precio:35,  label:'200 likes - 1 dia'},
-  '1400|45':  {likes:1400, precio:45,  label:'1,400 likes - 7 dias'},
-  '2800|60':  {likes:2800, precio:60,  label:'2,800 likes - 14 dias'},
-  '4200|80':  {likes:4200, precio:80,  label:'4,200 likes - 21 dias'},
-  '6600|95':  {likes:6600, precio:95,  label:'6,600 likes - 33 dias'}
+  '200|10':   {likes:200,  precio:10,  label:'200 likes - 1 dia'},
+  '1400|25':  {likes:1400, precio:25,  label:'1,400 likes - 7 dias'},
+  '2800|35':  {likes:2800, precio:35,  label:'2,800 likes - 14 dias'},
+  '4200|60':  {likes:4200, precio:60,  label:'4,200 likes - 21 dias'},
+  '6600|70':  {likes:6600, precio:70,  label:'6,600 likes - 30 dias'}
 };
 
 function _updateLkSaldo(saldoElId){
@@ -3453,11 +3450,12 @@ function updateLikesSaldo(){
   var saldo = authSession.saldo || 0;
   var saldoStr = '$' + Math.round(saldo).toLocaleString('es-MX') + ' MX';
   
-  var el1 = document.getElementById('likes-basicos-saldo');
-  if(el1) el1.textContent = saldoStr;
+  // Campos del formulario de saldo (básicos y 2k)
+  var lk200 = document.getElementById('lk200-saldo-val');
+  if(lk200) lk200.textContent = saldoStr;
   
-  var el2 = document.getElementById('likes-instant-saldo');
-  if(el2) el2.textContent = saldoStr;
+  var lk2k = document.getElementById('lk2k-saldo-val');
+  if(lk2k) lk2k.textContent = saldoStr;
   
   var el3 = document.getElementById('renta-bot-saldo');
   if(el3) el3.textContent = saldoStr;
