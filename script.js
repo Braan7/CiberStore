@@ -9,54 +9,79 @@ if(typeof getSpent === 'undefined'){
 /**
  * Restar saldo y registrar movimiento en Supabase
  */
+var _addSpendBusy = false; // Lock para evitar descuentos simultaneos/dobles
+
+function _refreshSaldoUI(saldo){
+  var s = '$' + Math.round(saldo).toLocaleString('es-MX') + ' MX';
+  ['saldo-page-balance','modal-saldo-amt','frag-saldo-disp','lk200-saldo-val','lk2k-saldo-val','renta-bot-saldo'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.textContent = s;
+  });
+}
+
 function addSpend(amount, description){
   if(!authSession || !window.sb){
     console.error('[ADDSPEND] No hay sesión o sb');
     return;
   }
-  
+  amount = Number(amount) || 0;
+  if(amount <= 0){ console.warn('[ADDSPEND] Monto invalido:', amount); return; }
+
+  // LOCK: si ya hay un descuento en proceso, ignorar este (evita dobles)
+  if(_addSpendBusy){
+    console.warn('[ADDSPEND] Ya hay una compra en proceso, ignorando duplicado');
+    showToast('Espera, procesando tu compra...');
+    return;
+  }
+  _addSpendBusy = true;
+
   var userId = authSession.id;
-  var newSaldo = Math.max(0, (authSession.saldo || 0) - amount);
-  
-  console.log('[ADDSPEND] Restando $'+amount+' al usuario '+userId+'. Nuevo saldo: $'+newSaldo);
-  
-  // 1. Registrar movimiento en movimientos_saldo
-  sb.post('movimientos_saldo', {
-    user_id: userId,
-    tipo: 'compra',
-    monto: amount,
-    descripcion: description || 'Compra',
-    created_at: new Date().toISOString()
-  }).then(function(result){
-    console.log('[ADDSPEND] Movimiento registrado', result);
-    
-    // 2. Actualizar saldo en profiles
-    sb.patch('profiles', {saldo: newSaldo}, 'id=eq."'+userId+'"').then(function(){
-      console.log('[ADDSPEND] Saldo actualizado en BD');
-      
-      // 3. Actualizar en sesión y UI
-      authSession.saldo = newSaldo;
-      
-      // Actualizar saldo en sidebar
-      var sbEl = document.getElementById('saldo-page-balance');
-      if(sbEl) sbEl.textContent = '$' + Math.round(newSaldo).toLocaleString('es-MX') + ' MX';
-      
-      // Actualizar en modal si está abierto
-      var ms = document.getElementById('modal-saldo-amt');
-      if(ms) ms.textContent = '$' + Math.round(newSaldo).toLocaleString('es-MX') + ' MX';
-      
-      // Actualizar en fragmentos si está abierto
-      var fs = document.getElementById('frag-saldo-disp');
-      if(fs) fs.textContent = '$' + Math.round(newSaldo).toLocaleString('es-MX') + ' MX';
-      
-      showToast('✓ Compra registrada. Saldo actualizado.');
+
+  // 1. LEER el saldo REAL de la BD (no el local que puede estar viejo)
+  sb.get('profiles', 'select=saldo&id=eq."'+userId+'"').then(function(rows){
+    var saldoReal = (rows && rows[0]) ? (Number(rows[0].saldo)||0) : (authSession.saldo||0);
+
+    // 2. Validar que alcance (sin forzar a 0)
+    if(saldoReal < amount){
+      _addSpendBusy = false;
+      authSession.saldo = saldoReal;
+      _refreshSaldoUI(saldoReal);
+      showToast('Saldo insuficiente. Tienes $'+Math.round(saldoReal).toLocaleString('es-MX')+' MX');
+      console.warn('[ADDSPEND] Saldo insuficiente. real='+saldoReal+' necesita='+amount);
+      return;
+    }
+
+    var newSaldo = saldoReal - amount;
+    console.log('[ADDSPEND] real='+saldoReal+' - '+amount+' = '+newSaldo);
+
+    // 3. Registrar movimiento
+    sb.post('movimientos_saldo', {
+      user_id: userId,
+      tipo: 'compra',
+      monto: amount,
+      descripcion: description || 'Compra',
+      created_at: new Date().toISOString()
+    }).then(function(){
+      // 4. Actualizar saldo en profiles
+      sb.patch('profiles', {saldo: newSaldo}, 'id=eq."'+userId+'"').then(function(){
+        authSession.saldo = newSaldo;
+        _refreshSaldoUI(newSaldo);
+        showToast('✓ Compra registrada. Saldo: $'+Math.round(newSaldo).toLocaleString('es-MX')+' MX');
+        _addSpendBusy = false;
+      }).catch(function(e){
+        console.error('[ADDSPEND] Error actualizando saldo:', e);
+        showToast('Error al actualizar saldo');
+        _addSpendBusy = false;
+      });
     }).catch(function(e){
-      console.error('[ADDSPEND] Error actualizando saldo:', e);
-      showToast('Error al actualizar saldo');
+      console.error('[ADDSPEND] Error registrando movimiento:', e);
+      showToast('Error al registrar compra');
+      _addSpendBusy = false;
     });
   }).catch(function(e){
-    console.error('[ADDSPEND] Error registrando movimiento:', e);
-    showToast('Error al registrar compra');
+    console.error('[ADDSPEND] Error leyendo saldo:', e);
+    showToast('Error al leer saldo');
+    _addSpendBusy = false;
   });
 }
 if(typeof addToHistory === 'undefined'){
@@ -308,33 +333,6 @@ function removeFromCart(id){
   saveCart(getCart().filter(function(i){return i.id!==id;}));
   renderCartModal(); updateCartCount();
 }
-function submitCart(){
-  if(!authSession){ showToast('Inicia sesion para comprar'); return; }
-  var ffId   = ((document.getElementById('cart-ff-id')||{}).value||'').trim();
-  var ffId2  = ((document.getElementById('cart-ff-id2')||{}).value||'').trim();
-  var ffNom  = ((document.getElementById('cart-ff-nombre')||{}).value||'').trim();
-  var errEl  = document.getElementById('cart-err');
-  var btn    = document.getElementById('cart-confirm-btn');
-  function showErr(m){ if(errEl){errEl.textContent=m;errEl.style.display='block';} }
-  if(!ffId)            { showErr('Ingresa tu ID de Free Fire'); return; }
-  if(ffId !== ffId2)   { showErr('Los IDs no coinciden');       return; }
-  if(!ffNom)           { showErr('Ingresa tu nombre en el juego'); return; }
-  if(!cart.length)     { showErr('Tu carrito esta vacio');       return; }
-  var total = cart.reduce(function(s,i){return s+i.price;},0);
-  var saldo = authSession.saldo||0;
-  if(saldo < total){ showErr('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MX). Recarga tu cuenta.'); return; }
-  if(btn && btn.disabled) return;
-  if(btn){ btn.disabled=true; setTimeout(function(){if(btn)btn.disabled=false;},3000); }
-  if(errEl) errEl.style.display='none';
-  var ord = getNextOrder();
-  var names = cart.map(function(i){return i.name;}).join(', ');
-  addSpend(total, 'Carrito: '+names+' - Pedido #'+ord);
-  if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, 'Carrito: '+names, total, ord);
-  showToast('Pedido confirmado! #'+ord, 2500);
-  clearCart();
-  closeCart();
-}
-
 function clearCart(){ saveCart([]); renderCartModal(); updateCartCount(); }
 function updateCartCount(){
   var c=getCart(), el=document.getElementById('cart-count');
@@ -2792,13 +2790,19 @@ function submitCart(){
   var ffId=((document.getElementById('cart-ff-id')||{}).value||'').trim();
   var ffNom=((document.getElementById('cart-ff-nombre')||{}).value||'').trim();
   var errEl=document.getElementById('cart-err');
+  var btn=document.getElementById('cart-confirm-btn');
   function showErr(m){ if(errEl){errEl.textContent=m;errEl.style.display='block';} }
   if(!ffId){ showErr('Ingresa tu ID de Free Fire'); return; }
   if(!ffNom){ showErr('Ingresa tu nombre en el juego'); return; }
   var c=getCart();
+  if(!c.length){ showErr('Tu carrito esta vacio'); return; }
   var total=c.reduce(function(s,i){return s+i.price;},0);
   var saldo=authSession.saldo||0;
-  if(saldo<total){ showErr('Saldo insuficiente'); return; }
+  if(saldo<total){ showErr('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MX). Recarga tu cuenta.'); return; }
+  // Anti-doble-click
+  if(btn && btn.disabled) return;
+  if(btn){ btn.disabled=true; setTimeout(function(){ if(btn) btn.disabled=false; }, 4000); }
+  if(errEl) errEl.style.display='none';
   var ord=getNextOrder();
   var names=c.map(function(i){return i.name;}).join(', ');
   addSpend(total,'Carrito: '+names+' - Pedido #'+ord);
