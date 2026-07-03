@@ -705,6 +705,26 @@ document.addEventListener('keydown',function(e){
 </div>
 </head>
 <body>
+  <!-- 🎉 POPUP DE BIENVENIDA -->
+  <div id="welcome-modal" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(7,9,15,.92);align-items:center;justify-content:center;padding:1.2rem">
+    <div style="background:linear-gradient(135deg,#0d1020,#141828);border:1px solid rgba(37,211,102,.3);border-radius:18px;padding:1.75rem 1.5rem;max-width:380px;width:100%;position:relative;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.6)">
+      <div style="position:absolute;top:-30%;right:-20%;width:280px;height:280px;background:radial-gradient(circle,rgba(37,211,102,.15) 0%,transparent 70%);pointer-events:none"></div>
+      <button onclick="closeWelcome()" style="position:absolute;top:.75rem;right:.9rem;background:none;border:none;color:#5a6580;font-size:1.5rem;cursor:pointer;z-index:3">&times;</button>
+
+      <div style="position:relative;z-index:2;text-align:center">
+        <div style="font-size:3rem;margin-bottom:.5rem">🎉</div>
+        <div style="font-family:Orbitron;font-size:1.2rem;font-weight:900;color:#fff;margin-bottom:.4rem">¡BIENVENIDO A <span style="color:#00aaff">CIBERSTORE</span>!</div>
+        <p style="font-size:.85rem;color:var(--muted);line-height:1.6;margin-bottom:1.25rem">Gracias por registrarte 🙌 Únete a nuestro canal de WhatsApp para enterarte de <strong style="color:#25d366">ofertas, sorteos y novedades</strong> antes que nadie.</p>
+
+        <button onclick="joinWhatsAppChannel()" style="width:100%;padding:.85rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:10px;font-family:Orbitron;font-weight:900;font-size:.88rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;box-shadow:0 4px 18px rgba(37,211,102,.3);margin-bottom:.6rem">
+          💬 UNIRME AL CANAL
+        </button>
+        <button onclick="closeWelcome()" style="width:100%;padding:.6rem;background:transparent;border:1px solid rgba(255,255,255,.1);color:var(--muted);border-radius:10px;font-family:Rajdhani,sans-serif;font-weight:700;font-size:.8rem;cursor:pointer">Quizás después</button>
+      </div>
+    </div>
+  </div>
+
+
 <div class="overlay" id="overlay" onclick="closeSB()"></div>
 <div class="sidebar" id="sidebar">
   <div class="sb-top"><div class="sb-logo"><span class="l1">CIBER</span><span class="l2">STORE</span></div><button class="sb-close" onclick="closeSB()">&#215;</button></div>
@@ -1135,6 +1155,35 @@ document.addEventListener('keydown',function(e){
     </div>
   </div>
 <div class="pgrid" id="prod-grid"></div>
+
+  <!-- 💎 COTIZAR MÁS DIAMANTES -->
+  <div style="max-width:680px;margin:1.5rem auto 0;padding:0 5vw">
+    <div style="background:linear-gradient(135deg,#12091f,#0d0710);border:1px solid rgba(167,139,250,.3);border-radius:16px;padding:1.4rem 1.25rem;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-30%;right:-15%;width:280px;height:280px;background:radial-gradient(circle,rgba(167,139,250,.12) 0%,transparent 70%);pointer-events:none"></div>
+
+      <div style="position:relative;z-index:2">
+        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem">
+          <span style="font-size:1.5rem">💎</span>
+          <div>
+            <div style="font-family:Orbitron;font-size:1rem;font-weight:900;color:#a78bfa;letter-spacing:.5px">COTIZAR MÁS DIAMANTES</div>
+            <div style="font-size:.72rem;color:var(--muted)">¿Necesitas otra cantidad? Te cotizamos al instante</div>
+          </div>
+        </div>
+
+        <div style="margin-top:1rem">
+          <label style="display:block;font-size:.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#8b7bb8;margin-bottom:.3rem">Cantidad de diamantes</label>
+          <input id="cotizar-cantidad" type="number" placeholder="Ej: 5,000" style="width:100%;background:#0d0710;border:1px solid rgba(167,139,250,.25);color:#fff;border-radius:9px;padding:.7rem .9rem;font-family:Rajdhani,sans-serif;font-size:.95rem;margin-bottom:.7rem;box-sizing:border-box"/>
+
+          <label style="display:block;font-size:.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#8b7bb8;margin-bottom:.3rem">Tu ID de Free Fire</label>
+          <input id="cotizar-id" type="text" placeholder="Ej: 123456789" style="width:100%;background:#0d0710;border:1px solid rgba(167,139,250,.25);color:#fff;border-radius:9px;padding:.7rem .9rem;font-family:Rajdhani,sans-serif;font-size:.95rem;margin-bottom:1rem;box-sizing:border-box"/>
+
+          <button onclick="cotizarDiamantes()" style="width:100%;padding:.85rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:11px;font-family:Orbitron;font-weight:900;font-size:.88rem;letter-spacing:.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;box-shadow:0 4px 18px rgba(37,211,102,.25)">
+            💬 COTIZAR POR WHATSAPP
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 <div class="page" id="page-likes">
   <div class="ph">

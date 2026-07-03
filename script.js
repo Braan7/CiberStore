@@ -105,12 +105,13 @@ if(typeof recordPromoUse === 'undefined'){
 
 /* \u2500\u2500 DIAMANTES ILIMITADOS (precios actualizados) \u2500\u2500 */
 var PRODUCTS = [
-  {id:1,  name:'110',   total:110,  bonus:0, region:'LATAM & BR', prices:[18,18,18,18,18],  badge:null,        isPase:false, popular:false},
-  {id:2,  name:'341',   total:341,  bonus:0, region:'LATAM & BR', prices:[55,55,55,55,55],  badge:'POPULAR',   isPase:false, popular:true},
-  {id:3,  name:'572',   total:572,  bonus:0, region:'LATAM & BR', prices:[85,85,85,85,85],  badge:null,        isPase:false, popular:false},
-  {id:4,  name:'1,166', total:1166, bonus:0, region:'LATAM & BR', prices:[165,165,165,165,165], badge:'OFERTA',isPase:false, popular:false},
-  {id:5,  name:'2,398', total:2398, bonus:0, region:'LATAM & BR', prices:[295,295,295,295,295], badge:null,    isPase:false, popular:false},
-  {id:6,  name:'6,160', total:6160, bonus:0, region:'LATAM & BR', prices:[750,750,750,750,750], badge:'GRAN VALOR',isPase:false, popular:false}
+  {id:1,  name:'110',    total:110,   bonus:0, region:'LATAM & BR', prices:[16,16,16,16,16],       badge:null,          isPase:false, popular:false},
+  {id:2,  name:'341',    total:341,   bonus:0, region:'LATAM & BR', prices:[55,55,55,55,55],       badge:'POPULAR',     isPase:false, popular:true},
+  {id:3,  name:'572',    total:572,   bonus:0, region:'LATAM & BR', prices:[85,85,85,85,85],       badge:null,          isPase:false, popular:false},
+  {id:4,  name:'1,166',  total:1166,  bonus:0, region:'LATAM & BR', prices:[160,160,160,160,160],  badge:'OFERTA',      isPase:false, popular:false},
+  {id:5,  name:'2,398',  total:2398,  bonus:0, region:'LATAM & BR', prices:[280,280,280,280,280],  badge:null,          isPase:false, popular:false},
+  {id:6,  name:'6,160',  total:6160,  bonus:0, region:'LATAM & BR', prices:[700,700,700,700,700],  badge:'GRAN VALOR',  isPase:false, popular:false},
+  {id:7,  name:'12,320', total:12320, bonus:0, region:'LATAM & BR', prices:[1390,1390,1390,1390,1390], badge:'MEGA PACK', isPase:false, popular:false}
 ];
 
 /* \u2500\u2500 DIAMANTES 1 VEZ x ID (precios especiales) \u2500\u2500 */
@@ -3898,3 +3899,66 @@ setInterval(function(){
   var home = document.getElementById('page-home');
   if(el && home && home.classList.contains('active')) loadLikerTop();
 }, 20000);
+
+
+// ═══ POPUP DE BIENVENIDA (canal WhatsApp) ═══
+var WA_CHANNEL = 'https://whatsapp.com/channel/0029VbCXQVjJENyAgAoJLJ3g';
+
+function showWelcome(){
+  var el = document.getElementById('welcome-modal');
+  if(el){ el.style.display = 'flex'; }
+}
+
+function closeWelcome(){
+  var el = document.getElementById('welcome-modal');
+  if(el){ el.style.display = 'none'; }
+}
+
+function joinWhatsAppChannel(){
+  window.open(WA_CHANNEL, '_blank');
+  closeWelcome();
+}
+
+// Vigilante: detecta cuando un usuario NUEVO inicia sesión/se registra
+// y le muestra la bienvenida solo una vez (por usuario)
+(function(){
+  var lastSeenUser = null;
+  setInterval(function(){
+    if(typeof authSession !== 'undefined' && authSession && authSession.id){
+      // Si cambió el usuario logueado
+      if(lastSeenUser !== authSession.id){
+        lastSeenUser = authSession.id;
+        // ¿Ya vio la bienvenida este usuario?
+        var key = 'ciberstore_welcome_' + authSession.id;
+        try {
+          if(!localStorage.getItem(key)){
+            localStorage.setItem(key, '1');
+            setTimeout(showWelcome, 800); // pequeño delay para que cargue la UI
+          }
+        } catch(e){
+          // Si localStorage falla, mostrar igual una vez por sesión
+          setTimeout(showWelcome, 800);
+        }
+      }
+    } else {
+      lastSeenUser = null;
+    }
+  }, 1000);
+})();
+
+
+// ═══ COTIZAR MÁS DIAMANTES (WhatsApp) ═══
+function cotizarDiamantes(){
+  var cantidad = ((document.getElementById('cotizar-cantidad')||{}).value||'').trim();
+  var ffId = ((document.getElementById('cotizar-id')||{}).value||'').trim();
+
+  if(!cantidad){ showToast('Ingresa la cantidad de diamantes'); return; }
+  if(!ffId){ showToast('Ingresa tu ID de Free Fire'); return; }
+
+  var msg = 'Hola CiberStore! Quiero COTIZAR diamantes ilimitados.%0A%0A'
+          + '💎 Cantidad: ' + encodeURIComponent(cantidad) + ' diamantes%0A'
+          + '🆔 Mi ID de Free Fire: ' + encodeURIComponent(ffId) + '%0A%0A'
+          + 'Me pasan el precio por favor?';
+
+  window.open('https://wa.me/5215548461200?text=' + msg, '_blank');
+}
