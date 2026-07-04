@@ -13,7 +13,7 @@ var _addSpendBusy = false; // Lock para evitar descuentos simultaneos/dobles
 
 function _refreshSaldoUI(saldo){
   var s = '$' + Math.round(saldo).toLocaleString('es-MX') + ' MX';
-  ['saldo-page-balance','modal-saldo-amt','frag-saldo-disp','lk200-saldo-val','lk2k-saldo-val','renta-bot-saldo','bonus-saldo-val','ilim-saldo-val','v1-saldo-val'].forEach(function(id){
+  ['saldo-page-balance','modal-saldo-amt','frag-saldo-disp','lk200-saldo-val','lk2k-saldo-val','renta-bot-saldo','bonus-saldo-val','ilim-saldo-val','v1-saldo-val','pin-saldo-val','pin-api-saldo'].forEach(function(id){
     var el = document.getElementById(id);
     if(el) el.textContent = s;
   });
@@ -4065,7 +4065,7 @@ goPage = function(id){
 // ═══ COMPRA DIAMANTES ILIMITADOS / 1 VEZ x ID (con saldo) ═══
 function _updateDiamSaldos(){
   var s = authSession ? ('$'+Math.round(authSession.saldo||0).toLocaleString('es-MX')+' MX') : '$0 MX';
-  ['ilim-saldo-val','v1-saldo-val'].forEach(function(id){
+  ['ilim-saldo-val','v1-saldo-val','pin-saldo-val','pin-api-saldo'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.textContent=s;
   });
 }
@@ -4116,4 +4116,228 @@ function cotizarIlim(){
   var txt='Hola! Quiero pedir '+diamantes+' diamantes ilimitados';
   if(ffId) txt+=' para mi ID: '+ffId;
   window.open('https://wa.me/5215548461200?text='+encodeURIComponent(txt),'_blank');
+}
+
+
+// ═══ PINES DE FREE FIRE (stock + entrega automática) ═══
+// Tabla Supabase sugerida: "pines" con columnas:
+//   id, tipo (ej '110 diamantes'), precio (int), codigo (text), vendido (bool), user_id (text, null hasta vender)
+var _pinesDisponibles = [];
+var _ultimoPin = '';
+
+function loadPines(){
+  var grid = document.getElementById('pines-grid');
+  var sel = document.getElementById('pin-plan');
+  if(!grid) return;
+  if(!window.sb){ setTimeout(loadPines, 1500); return; }
+
+  // Traer pines NO vendidos
+  sb.get('pines', 'vendido=eq.false&select=id,tipo,precio,codigo&order=precio.asc').then(function(pins){
+    if(!pins || !Array.isArray(pins) || !pins.length){
+      grid.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">No hay pines en stock ahora. Vuelve pronto o contacta al admin.</div>';
+      if(sel) sel.innerHTML = '<option value="">Sin stock</option>';
+      return;
+    }
+
+    // Agrupar por tipo para mostrar cuántos hay disponibles
+    var porTipo = {};
+    pins.forEach(function(p){
+      if(!porTipo[p.tipo]) porTipo[p.tipo] = {tipo:p.tipo, precio:p.precio, count:0};
+      porTipo[p.tipo].count++;
+    });
+
+    _pinesDisponibles = pins;
+
+    // Render de tarjetas (por tipo)
+    var html = '';
+    Object.keys(porTipo).forEach(function(k){
+      var t = porTipo[k];
+      html += '<div class="lkpln-wrap"><div class="lkpln">'
+        + '<div class="lkpln-l">'
+        + '<div class="lkpln-ico" style="background:rgba(255,204,0,.1);border:1px solid rgba(255,204,0,.28)">🎟️</div>'
+        + '<div><div class="lkpln-name">'+t.tipo+'</div><div class="lkpln-meta">'+t.count+' disponibles</div></div>'
+        + '</div>'
+        + '<div class="lkpln-r"><div class="lkpln-price" style="color:#ffcc00">$'+t.precio+'</div><div class="lkpln-cur">MXN</div></div>'
+        + '</div></div>';
+    });
+    grid.innerHTML = html;
+
+    // Llenar el selector (un option por tipo)
+    if(sel){
+      var opts = '';
+      Object.keys(porTipo).forEach(function(k){
+        var t = porTipo[k];
+        opts += '<option value="'+t.tipo+'|'+t.precio+'">'+t.tipo+' — $'+t.precio+' MX ('+t.count+' disp.)</option>';
+      });
+      sel.innerHTML = opts;
+    }
+    _updatePinSaldo();
+  }).catch(function(e){
+    console.error('[PINES] Error:', e);
+    grid.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#ff6b6b;font-size:.82rem">Error al cargar stock. Contacta al admin.</div>';
+  });
+}
+
+function _updatePinSaldo(){
+  var s = authSession ? ('$'+Math.round(authSession.saldo||0).toLocaleString('es-MX')+' MX') : '$0 MX';
+  ['pin-saldo-val','pin-api-saldo'].forEach(function(id){ var el=document.getElementById(id); if(el) el.textContent=s; });
+}
+
+function submitPinSaldo(){
+  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
+  var err = document.getElementById('pin-err');
+  function showErr(m){ if(err){err.textContent=m;err.style.display='block';} }
+
+  var val = ((document.getElementById('pin-plan')||{}).value||'');
+  var parts = val.split('|');
+  var tipo = parts[0];
+  var precio = parseInt(parts[1])||0;
+
+  if(!tipo || !precio){ showErr('Selecciona un PIN'); return; }
+
+  var saldo = authSession.saldo||0;
+  if(saldo < precio){ showErr('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MX). Recarga tu cuenta.'); return; }
+  if(err) err.style.display='none';
+
+  // Buscar un PIN disponible de ese tipo
+  var pin = _pinesDisponibles.filter(function(p){ return p.tipo===tipo; })[0];
+  if(!pin){
+    showErr('Ese PIN se agotó. Recarga la página.');
+    loadPines();
+    return;
+  }
+
+  // Marcar el PIN como vendido en Supabase (para que nadie más lo reciba)
+  sb.patch('pines', {vendido:true, user_id:authSession.id}, 'id=eq.'+pin.id).then(function(){
+    // Descontar saldo
+    var ord = getNextOrder();
+    addSpend(precio, 'PIN Free Fire: '+tipo+' - Codigo entregado - Pedido #'+ord);
+    if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, 'PIN '+tipo, precio, ord);
+
+    // Mostrar el PIN al cliente
+    _ultimoPin = pin.codigo;
+    var box = document.getElementById('pin-entregado');
+    var cod = document.getElementById('pin-codigo');
+    if(cod) cod.textContent = pin.codigo;
+    if(box){ box.style.display='block'; box.scrollIntoView({behavior:'smooth',block:'center'}); }
+
+    showToast('✓ PIN entregado!', 3000);
+    // Refrescar stock
+    setTimeout(loadPines, 500);
+  }).catch(function(e){
+    console.error('[PINES] Error al vender:', e);
+    showErr('Hubo un error al procesar. Contacta al admin por WhatsApp (no se te cobró).');
+  });
+}
+
+function copiarPin(){
+  if(!_ultimoPin) return;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(_ultimoPin).then(function(){ showToast('✓ Código copiado'); });
+  } else {
+    showToast('Código: '+_ultimoPin);
+  }
+}
+
+// Cargar pines al abrir la página
+var _origGoPagePines = goPage;
+goPage = function(id){
+  _origGoPagePines(id);
+  if(id === 'pines') setTimeout(function(){ loadPines(); renderPinesAPI(); _updatePinSaldo(); }, 300);
+};
+
+
+// ═══ MODO API: comprar PIN via Recargas América (a través del Portero seguro) ═══
+// PEGA AQUÍ la URL de tu Edge Function de Supabase (Paso 3 de la guía):
+var PORTERO_URL = 'https://pnotsqsudqpwqzssevig.supabase.co/functions/v1/bright-processor';
+// La "anon key" pública de Supabase (segura de exponer). Si tu supabase_integration.js
+// ya la define en otra variable, se usa esa. Si no, pégala aquí entre las comillas:
+var SUPABASE_ANON = (typeof SUPABASE_ANON_KEY !== 'undefined' ? SUPABASE_ANON_KEY : (typeof supabaseAnonKey !== 'undefined' ? supabaseAnonKey : ''));
+
+// Compra un PIN por API. productId = id del producto en Recargas América.
+// precioLocal = lo que le cobras al cliente en TU web (en pesos).
+function comprarPinAPI(productId, precioLocal, nombreProducto){
+  if(!authSession){ showToast('Inicia sesion'); setTimeout(showAuthModal,600); return; }
+
+  var saldo = authSession.saldo || 0;
+  if(saldo < precioLocal){
+    showToast('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MX). Recarga tu cuenta.');
+    return;
+  }
+
+  showToast('Procesando compra...', 2000);
+
+  // Llamar al PORTERO (Edge Function), nunca a Recargas América directo
+  var _headers = { 'Content-Type': 'application/json' };
+  if(SUPABASE_ANON){ _headers['Authorization'] = 'Bearer '+SUPABASE_ANON; _headers['apikey'] = SUPABASE_ANON; }
+  fetch(PORTERO_URL, {
+    method: 'POST',
+    headers: _headers,
+    body: JSON.stringify({ product_id: productId, quantity: 1 })
+  }).then(function(r){ return r.json(); }).then(function(res){
+    if(!res || res.success === false){
+      showToast('Error: '+((res&&res.error)||'no se pudo comprar')+'. Contacta al admin.', 4000);
+      return;
+    }
+
+    // ✅ Compra exitosa: extraer el PIN de api_data
+    var pin = '';
+    try {
+      var apiData = res.data && res.data.api_data;
+      // api_data puede venir como objeto o texto según el producto
+      if(typeof apiData === 'string') pin = apiData;
+      else if(apiData && apiData.pin) pin = apiData.pin;
+      else if(apiData && apiData.codigo) pin = apiData.codigo;
+      else pin = JSON.stringify(apiData);
+    } catch(e){ pin = 'Ver en Mis Compras'; }
+
+    // Descontar saldo del cliente en TU web
+    var ord = getNextOrder();
+    addSpend(precioLocal, 'PIN API: '+(nombreProducto||'Producto')+' - '+pin+' - Pedido #'+ord);
+    if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, 'PIN API '+(nombreProducto||''), precioLocal, ord);
+
+    // Mostrar el PIN al cliente
+    _ultimoPin = pin;
+    var box = document.getElementById('pin-entregado');
+    var cod = document.getElementById('pin-codigo');
+    if(cod) cod.textContent = pin;
+    if(box){ box.style.display='block'; box.scrollIntoView({behavior:'smooth',block:'center'}); }
+
+    var msg = res.sandbox ? '✓ (PRUEBA) PIN generado' : '✓ PIN entregado!';
+    showToast(msg, 3000);
+  }).catch(function(e){
+    console.error('[PIN API] Error:', e);
+    showToast('Error de conexión. Contacta al admin por WhatsApp (no se te cobró).', 4000);
+  });
+}
+
+
+// ═══ PRODUCTOS PIN POR API (Recargas América) ═══
+// product_id = ID en Recargas América | precio = tu precio de venta en MXN
+var PINES_API = [
+  {product_id:1, nombre:'Free Fire 100 Diamantes +10 Bono',  precio:15,  diamantes:'110'},
+  {product_id:2, nombre:'Free Fire 310 Diamantes +31 Bono',  precio:55,  diamantes:'341'},
+  {product_id:3, nombre:'Free Fire 520 Diamantes +52 Bono',  precio:75,  diamantes:'572'},
+  {product_id:4, nombre:'Free Fire 1060 Diamantes +106 Bono', precio:140, diamantes:'1,166'},
+  {product_id:5, nombre:'Free Fire 2180 Diamantes +218 Bono', precio:270, diamantes:'2,398'},
+  {product_id:6, nombre:'Free Fire 5600 Diamantes +560 Bono', precio:665, diamantes:'6,160'}
+];
+
+function renderPinesAPI(){
+  var cont = document.getElementById('pines-api-grid');
+  if(!cont) return;
+  var html = '';
+  PINES_API.forEach(function(p){
+    html += '<div class="lkpln-wrap"><div class="lkpln">'
+      + '<div class="lkpln-l">'
+      + '<div class="lkpln-ico" style="background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.28)">\uD83D\uDC8E</div>'
+      + '<div><div class="lkpln-name">'+p.diamantes+' <span>diamantes</span></div><div class="lkpln-meta">Entrega automática por API</div></div>'
+      + '</div>'
+      + '<div class="lkpln-r" style="display:flex;flex-direction:column;align-items:flex-end;gap:.4rem">'
+      + '<div><div class="lkpln-price" style="color:#38bdf8">$'+p.precio+'</div><div class="lkpln-cur">MXN</div></div>'
+      + '<button onclick="comprarPinAPI('+p.product_id+','+p.precio+',\''+p.nombre.replace(/'/g,"")+'\')" style="padding:.35rem .8rem;background:linear-gradient(90deg,#128c3e,#25d366);border:none;border-radius:8px;color:#fff;font-family:Rajdhani,sans-serif;font-weight:800;font-size:.72rem;cursor:pointer;white-space:nowrap">Comprar</button>'
+      + '</div>'
+      + '</div></div>';
+  });
+  cont.innerHTML = html;
 }
