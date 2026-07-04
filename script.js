@@ -13,7 +13,7 @@ var _addSpendBusy = false; // Lock para evitar descuentos simultaneos/dobles
 
 function _refreshSaldoUI(saldo){
   var s = '$' + Math.round(saldo).toLocaleString('es-MX') + ' MX';
-  ['saldo-page-balance','modal-saldo-amt','frag-saldo-disp','lk200-saldo-val','lk2k-saldo-val','renta-bot-saldo'].forEach(function(id){
+  ['saldo-page-balance','modal-saldo-amt','frag-saldo-disp','lk200-saldo-val','lk2k-saldo-val','renta-bot-saldo','bonus-saldo-val'].forEach(function(id){
     var el = document.getElementById(id);
     if(el) el.textContent = s;
   });
@@ -3962,3 +3962,65 @@ function cotizarDiamantes(){
 
   window.open('https://wa.me/5215548461200?text=' + msg, '_blank');
 }
+
+
+// ═══ DIAMANTES X ID +20% BONUS ═══
+var BONUS_PLANES = {
+  '624|80':     {diamantes:624,   precio:80,   label:'624 diamantes (+20%)'},
+  '1272|165':   {diamantes:1272,  precio:165,  label:'1,272 diamantes (+20%)'},
+  '2616|290':   {diamantes:2616,  precio:290,  label:'2,616 diamantes (+20%)'},
+  '6720|700':   {diamantes:6720,  precio:700,  label:'6,720 diamantes (+20%)'},
+  '13440|1370': {diamantes:13440, precio:1370, label:'13,440 diamantes (+20%)'}
+};
+
+function submitBonusSaldo(){
+  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
+  var planKey = ((document.getElementById('bonus-plan')||{}).value||'');
+  var ffId = ((document.getElementById('bonus-id')||{}).value||'').trim();
+  var ffNom = ((document.getElementById('bonus-nombre')||{}).value||'').trim();
+  var err = document.getElementById('bonus-err');
+  function showErr(m){ if(err){err.textContent=m;err.style.display='block';} }
+
+  var plan = BONUS_PLANES[planKey];
+  if(!plan){ showErr('Selecciona una oferta'); return; }
+  if(!ffId){ showErr('Ingresa tu ID de Free Fire'); return; }
+  if(!ffNom){ showErr('Ingresa tu nombre en el juego'); return; }
+
+  var saldo = authSession.saldo || 0;
+  if(saldo < plan.precio){
+    showErr('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MX). Recarga tu cuenta.');
+    return;
+  }
+  if(err) err.style.display='none';
+
+  var ord = getNextOrder();
+  addSpend(plan.precio, 'Diamantes x ID +20%: '+plan.label+' - ID:'+ffId+' ('+ffNom+') - Pedido #'+ord);
+  if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, plan.label+' - ID:'+ffId, plan.precio, ord);
+  showToast('Pedido #'+ord+' confirmado!', 2500);
+
+  // Limpiar
+  var idEl=document.getElementById('bonus-id'); if(idEl) idEl.value='';
+  var nomEl=document.getElementById('bonus-nombre'); if(nomEl) nomEl.value='';
+  _updateBonusSaldo();
+}
+
+function cotizarBonus(){
+  var planKey = ((document.getElementById('bonus-plan')||{}).value||'');
+  var plan = BONUS_PLANES[planKey];
+  var ffId = ((document.getElementById('bonus-id')||{}).value||'').trim();
+  var txt = 'Hola! Quiero pedir '+(plan?plan.label:'diamantes x ID +20% bonus');
+  if(ffId) txt += ' para mi ID: '+ffId;
+  window.open('https://wa.me/5215548461200?text='+encodeURIComponent(txt), '_blank');
+}
+
+function _updateBonusSaldo(){
+  var el = document.getElementById('bonus-saldo-val');
+  if(el && authSession) el.textContent = '$'+Math.round(authSession.saldo||0).toLocaleString('es-MX')+' MX';
+}
+
+// Actualizar saldo del bonus al abrir diamantes
+var _origGoPageBonus = goPage;
+goPage = function(id){
+  _origGoPageBonus(id);
+  if(id === 'diamantes') setTimeout(_updateBonusSaldo, 300);
+};
