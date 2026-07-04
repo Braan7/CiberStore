@@ -4320,6 +4320,10 @@ function comprarPinAPI(productId, precioLocal, nombreProducto){
     // ✅ Compra exitosa: extraer el PIN de la respuesta (busca en cualquier formato)
     var pin = _extraerPin(res.data);
     console.log('[PIN API] Respuesta completa:', JSON.stringify(res.data));
+    // Si no encontró un PIN claro, mostrar la respuesta cruda para diagnosticar
+    if(!pin || pin === 'Ver detalle en Mis Compras'){
+      pin = 'DEBUG ▼\n' + JSON.stringify(res.data, null, 2);
+    }
 
     // Descontar saldo del cliente en TU web
     var ord = getNextOrder();
