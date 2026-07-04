@@ -13,7 +13,7 @@ var _addSpendBusy = false; // Lock para evitar descuentos simultaneos/dobles
 
 function _refreshSaldoUI(saldo){
   var s = '$' + Math.round(saldo).toLocaleString('es-MX') + ' MX';
-  ['saldo-page-balance','modal-saldo-amt','frag-saldo-disp','lk200-saldo-val','lk2k-saldo-val','renta-bot-saldo','bonus-saldo-val'].forEach(function(id){
+  ['saldo-page-balance','modal-saldo-amt','frag-saldo-disp','lk200-saldo-val','lk2k-saldo-val','renta-bot-saldo','bonus-saldo-val','ilim-saldo-val','v1-saldo-val'].forEach(function(id){
     var el = document.getElementById(id);
     if(el) el.textContent = s;
   });
@@ -690,57 +690,93 @@ function renderProds(){
   var g=document.getElementById('prod-grid');
   if(!g) return;
 
-  function makeCard(p, is1vez){
+  // Tarjeta estilo moderno (como +20% BONUS)
+  function makeModernCard(p, color, isBest){
     var now=p.prices[0];
-    var badgeHtml='';
-    if(p.popular) badgeHtml='<div class="ff-badge ff-badge-hot">'+t('best_seller')+'</div>';
-    else if(p.badge) badgeHtml='<div class="ff-badge ff-badge-normal">'+p.badge+'</div>';
-    var borderColor = is1vez ? 'rgba(0,230,118,.35)' : 'rgba(0,170,255,.18)';
-    if(p.popular) borderColor = is1vez ? 'rgba(0,230,118,.5)' : 'rgba(240,165,0,.3)';
-    return '<div class="ff-card" onclick="openProdModal('+p.id+')" style="border-color:'+borderColor+'">'
-      +badgeHtml
-      +'<div class="ff-top"><span class="ff-ico">\uD83D\uDC8E</span><span class="ff-num">'+p.name+'</span></div>'
-      +'<span class="ff-price" style="color:'+(is1vez?'#00e676':'var(--c1)')+'">'+fmt(now)+'</span>'
-      +'<div class="ff-qty-row" onclick="event.stopPropagation()">'
-      +'<div class="ff-qty">'
-      +'<button class="ff-qty-btn" onclick="ffQty('+p.id+',-1)">-</button>'
-      +'<span class="ff-qty-n" id="ffq-'+p.id+'">0</span>'
-      +'<button class="ff-qty-btn" onclick="ffQty('+p.id+',1)">+</button>'
-      +'</div>'
-      +'<button class="ff-cart-btn" onclick="ffAddCart('+p.id+')" style="background:'+(is1vez?'rgba(0,230,118,.15)':'rgba(0,170,255,.12)')+';border-color:'+(is1vez?'rgba(0,230,118,.4)':'rgba(0,170,255,.3)')+';color:'+(is1vez?'#00e676':'var(--c1)')+'">'+t('add_cart')+'</button>'
-      +'</div>'
-      +'</div>';
+    var metaTxt = p.popular ? 'Más vendido ⭐' : (p.badge ? p.badge : 'Recarga directa');
+    var cls = isBest ? 'lkpln lkpln-best' : 'lkpln';
+    return '<div class="lkpln-wrap"><div class="'+cls+'">'
+      + '<div class="lkpln-l">'
+      + '<div class="lkpln-ico" style="background:'+color+'1a;border:1px solid '+color+'47">\uD83D\uDC8E</div>'
+      + '<div><div class="lkpln-name">'+p.name+' <span>diamantes</span></div><div class="lkpln-meta">'+metaTxt+'</div></div>'
+      + '</div>'
+      + '<div class="lkpln-r"><div class="lkpln-price" style="color:'+color+'">'+fmt(now)+'</div><div class="lkpln-cur">MXN</div></div>'
+      + '</div></div>';
   }
 
   var rows='';
 
-  /* \u2500\u2500 Diamantes Ilimitados \u2500\u2500 */
-  rows+='<div style="grid-column:1/-1;margin-bottom:.35rem">'
-    +'<div style="font-family:Orbitron;font-size:.72rem;font-weight:700;color:var(--c1);letter-spacing:1.5px">\u26A1 DIAMANTES ILIMITADOS</div>'
+  /* ═══ DIAMANTES ILIMITADOS ═══ */
+  rows+='<div style="grid-column:1/-1;background:linear-gradient(135deg,#0a1420,#0d0710);border:1px solid rgba(56,189,248,.28);border-radius:16px;padding:1.3rem 1.15rem;margin-bottom:1.25rem">'
+    +'<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:1rem">'
+    +'<span style="font-size:1.5rem">\u26A1</span>'
+    +'<div><div style="font-family:Orbitron;font-size:1rem;font-weight:900;color:#38bdf8;letter-spacing:.5px">DIAMANTES ILIMITADOS</div>'
+    +'<div style="font-size:.72rem;color:var(--muted)">Recarga las veces que quieras</div></div>'
+    +'</div>'
+    +'<div class="lkpln-grid" style="margin-bottom:1.1rem">';
+  for(var i=0;i<PRODUCTS.length;i++){
+    rows+=makeModernCard(PRODUCTS[i], '#38bdf8', PRODUCTS[i].badge==='GRAN VALOR'||PRODUCTS[i].badge==='MEGA PACK');
+  }
+  rows+='</div>'
+    // Formulario ilimitados
+    +'<div style="border-top:1px solid rgba(56,189,248,.15);padding-top:1rem">'
+    +'<div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem">Pedir con saldo</div>'
+    +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Elige tu paquete</label>'
+    +'<select id="ilim-plan" style="width:100%;background:#0a1420;border:1px solid rgba(56,189,248,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Rajdhani,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box">';
+  for(var a=0;a<PRODUCTS.length;a++){
+    rows+='<option value="'+PRODUCTS[a].total+'|'+PRODUCTS[a].prices[0]+'">'+PRODUCTS[a].name+' diamantes \u2014 '+fmt(PRODUCTS[a].prices[0])+' MX</option>';
+  }
+  rows+='</select>'
+    +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Tu ID de Free Fire</label>'
+    +'<input id="ilim-id" type="text" placeholder="Ej: 123456789" style="width:100%;background:#0a1420;border:1px solid rgba(56,189,248,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Rajdhani,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box"/>'
+    +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Nombre en el juego</label>'
+    +'<input id="ilim-nombre" type="text" placeholder="Tu nickname" style="width:100%;background:#0a1420;border:1px solid rgba(56,189,248,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Rajdhani,sans-serif;font-size:.88rem;margin-bottom:.65rem;box-sizing:border-box"/>'
+    +'<div style="display:flex;justify-content:space-between;background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.18);border-radius:8px;padding:.45rem .85rem;margin-bottom:.5rem"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span id="ilim-saldo-val" style="font-family:Orbitron;font-weight:700;color:#38bdf8;font-size:.82rem">$0 MX</span></div>'
+    +'<div id="ilim-err" style="display:none;color:#ff6b6b;font-size:.75rem;margin-bottom:.5rem"></div>'
+    +'<button onclick="submitIlimSaldo()" style="width:100%;padding:.78rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:10px;font-family:Rajdhani,sans-serif;font-weight:900;font-size:.9rem;cursor:pointer">\uD83D\uDD12 Confirmar con saldo</button>'
+    +'<button onclick="cotizarIlim()" style="width:100%;padding:.62rem;margin-top:.5rem;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.3);color:#38bdf8;border-radius:10px;font-family:Rajdhani;font-weight:900;font-size:.82rem;cursor:pointer">\uD83D\uDCAC O cotizar por WhatsApp</button>'
+    +'</div>'
     +'</div>';
-  for(var i=0;i<PRODUCTS.length;i++) rows+=makeCard(PRODUCTS[i], false);
 
-  /* \u2500\u2500 Diamantes 1 Vez x ID \u2500\u2500 */
-  rows+='<div style="grid-column:1/-1;margin:1rem 0 .35rem">'
-    +'<div style="font-family:Orbitron;font-size:.72rem;font-weight:700;color:#00e676;letter-spacing:1.5px">\uD83C\uDF1F DIAMANTES 1 VEZ x ID</div>'
-    +'</div>';
-  /* Warning box */
-  rows+='<div style="grid-column:1/-1;background:rgba(255,165,0,.08);border:1px solid rgba(255,165,0,.3);border-radius:9px;padding:.75rem 1rem;display:flex;gap:.65rem;align-items:flex-start;margin-bottom:.5rem">'
+  /* ═══ DIAMANTES 1 VEZ x ID ═══ */
+  rows+='<div style="grid-column:1/-1;background:linear-gradient(135deg,#0a1f14,#0d0710);border:1px solid rgba(0,230,118,.28);border-radius:16px;padding:1.3rem 1.15rem">'
+    +'<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem">'
+    +'<span style="font-size:1.5rem">\uD83C\uDF1F</span>'
+    +'<div><div style="font-family:Orbitron;font-size:1rem;font-weight:900;color:#00e676;letter-spacing:.5px">DIAMANTES 1 VEZ x ID</div>'
+    +'<div style="font-size:.72rem;color:var(--muted)">Precios especiales · una vez por ID</div></div>'
+    +'</div>'
+    // Aviso verificar ID
+    +'<div style="background:rgba(255,165,0,.08);border:1px solid rgba(255,165,0,.3);border-radius:9px;padding:.7rem .9rem;display:flex;gap:.6rem;align-items:flex-start;margin-bottom:.85rem">'
     +'<span style="font-size:1.1rem;flex-shrink:0">\u26A0\uFE0F</span>'
-    +'<div style="font-size:.78rem;color:var(--text);line-height:1.65">'
-    +'<strong style="color:#ffa500">FAVOR DE MANDAR SU ID PARA COMPROBAR SI TIENE LA OFERTA.</strong>'
-    +' Una vez comprobada, puedes hacer tu pedido.'
+    +'<div style="font-size:.76rem;color:var(--text);line-height:1.6"><strong style="color:#ffa500">Manda tu ID para comprobar si tiene la oferta.</strong> Una vez comprobada, haz tu pedido con saldo.</div>'
     +'</div>'
+    +'<a href="https://wa.me/5215548461200?text=Hola!%20Quiero%20verificar%20mi%20ID%20para%20Diamantes%201%20Vez%20x%20ID" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:.72rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:9px;font-family:Rajdhani,sans-serif;font-weight:800;font-size:.85rem;text-decoration:none;box-sizing:border-box;margin-bottom:1.1rem">\uD83D\uDCF1 Verificar mi ID por WhatsApp</a>'
+    +'<div class="lkpln-grid" style="margin-bottom:1.1rem">';
+  for(var j=0;j<PRODUCTS_1VEZ.length;j++){
+    rows+=makeModernCard(PRODUCTS_1VEZ[j], '#00e676', PRODUCTS_1VEZ[j].badge==='MEJOR PRECIO');
+  }
+  rows+='</div>'
+    // Formulario 1 vez
+    +'<div style="border-top:1px solid rgba(0,230,118,.15);padding-top:1rem">'
+    +'<div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem">Pedir con saldo (ID ya verificado)</div>'
+    +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Elige tu paquete</label>'
+    +'<select id="v1-plan" style="width:100%;background:#0a1f14;border:1px solid rgba(0,230,118,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Rajdhani,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box">';
+  for(var b=0;b<PRODUCTS_1VEZ.length;b++){
+    rows+='<option value="'+PRODUCTS_1VEZ[b].total+'|'+PRODUCTS_1VEZ[b].prices[0]+'">'+PRODUCTS_1VEZ[b].name+' diamantes \u2014 '+fmt(PRODUCTS_1VEZ[b].prices[0])+' MX</option>';
+  }
+  rows+='</select>'
+    +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Tu ID de Free Fire</label>'
+    +'<input id="v1-id" type="text" placeholder="Ej: 123456789" style="width:100%;background:#0a1f14;border:1px solid rgba(0,230,118,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Rajdhani,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box"/>'
+    +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Nombre en el juego</label>'
+    +'<input id="v1-nombre" type="text" placeholder="Tu nickname" style="width:100%;background:#0a1f14;border:1px solid rgba(0,230,118,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Rajdhani,sans-serif;font-size:.88rem;margin-bottom:.65rem;box-sizing:border-box"/>'
+    +'<div style="display:flex;justify-content:space-between;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.18);border-radius:8px;padding:.45rem .85rem;margin-bottom:.5rem"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span id="v1-saldo-val" style="font-family:Orbitron;font-weight:700;color:#00e676;font-size:.82rem">$0 MX</span></div>'
+    +'<div id="v1-err" style="display:none;color:#ff6b6b;font-size:.75rem;margin-bottom:.5rem"></div>'
+    +'<button onclick="submitV1Saldo()" style="width:100%;padding:.78rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:10px;font-family:Rajdhani,sans-serif;font-weight:900;font-size:.9rem;cursor:pointer">\uD83D\uDD12 Confirmar con saldo</button>'
     +'</div>'
-    +'<div style="grid-column:1/-1;margin-bottom:.65rem">'
-    +'<a href="https://wa.me/5215548461200?text=Hola!%20Quiero%20verificar%20mi%20ID%20para%20Diamantes%201%20Vez%20x%20ID" target="_blank" '
-    +'style="display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:.72rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:8px;font-family:Exo 2,sans-serif;font-weight:800;font-size:.85rem;cursor:pointer;text-decoration:none;box-sizing:border-box">'
-    +'\uD83D\uDCF1 Mandar WhatsApp para verificar ID'
-    +'</a>'
     +'</div>';
-  for(var j=0;j<PRODUCTS_1VEZ.length;j++) rows+=makeCard(PRODUCTS_1VEZ[j], true);
 
   g.innerHTML=rows;
+  _updateDiamSaldos();
 }
 
 /* \u2500\u2500 RENDER LIKES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
@@ -4022,5 +4058,62 @@ function _updateBonusSaldo(){
 var _origGoPageBonus = goPage;
 goPage = function(id){
   _origGoPageBonus(id);
-  if(id === 'diamantes') setTimeout(_updateBonusSaldo, 300);
+  if(id === 'diamantes') setTimeout(function(){ _updateBonusSaldo(); if(typeof _updateDiamSaldos==='function') _updateDiamSaldos(); }, 300);
 };
+
+
+// ═══ COMPRA DIAMANTES ILIMITADOS / 1 VEZ x ID (con saldo) ═══
+function _updateDiamSaldos(){
+  var s = authSession ? ('$'+Math.round(authSession.saldo||0).toLocaleString('es-MX')+' MX') : '$0 MX';
+  ['ilim-saldo-val','v1-saldo-val'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.textContent=s;
+  });
+}
+
+function _procesarCompraDiam(planVal, idEl, nomEl, errEl, etiqueta){
+  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
+  var err=document.getElementById(errEl);
+  function showErr(m){ if(err){err.textContent=m;err.style.display='block';} }
+
+  var parts=(planVal||'').split('|');
+  var diamantes=parseInt(parts[0])||0;
+  var precio=parseInt(parts[1])||0;
+  var ffId=((document.getElementById(idEl)||{}).value||'').trim();
+  var ffNom=((document.getElementById(nomEl)||{}).value||'').trim();
+
+  if(!precio){ showErr('Selecciona un paquete'); return; }
+  if(!ffId){ showErr('Ingresa tu ID de Free Fire'); return; }
+  if(!ffNom){ showErr('Ingresa tu nombre en el juego'); return; }
+
+  var saldo=authSession.saldo||0;
+  if(saldo<precio){ showErr('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MX). Recarga tu cuenta.'); return; }
+  if(err) err.style.display='none';
+
+  var ord=getNextOrder();
+  addSpend(precio, etiqueta+': '+diamantes.toLocaleString('es-MX')+' diamantes - ID:'+ffId+' ('+ffNom+') - Pedido #'+ord);
+  if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, etiqueta+' '+diamantes+' - ID:'+ffId, precio, ord);
+  showToast('Pedido #'+ord+' confirmado!', 2500);
+
+  if(document.getElementById(idEl)) document.getElementById(idEl).value='';
+  if(document.getElementById(nomEl)) document.getElementById(nomEl).value='';
+  _updateDiamSaldos();
+}
+
+function submitIlimSaldo(){
+  var v=((document.getElementById('ilim-plan')||{}).value||'');
+  _procesarCompraDiam(v, 'ilim-id', 'ilim-nombre', 'ilim-err', 'Diamantes Ilimitados');
+}
+
+function submitV1Saldo(){
+  var v=((document.getElementById('v1-plan')||{}).value||'');
+  _procesarCompraDiam(v, 'v1-id', 'v1-nombre', 'v1-err', 'Diamantes 1 Vez x ID');
+}
+
+function cotizarIlim(){
+  var v=((document.getElementById('ilim-plan')||{}).value||'');
+  var diamantes=(v.split('|')[0])||'';
+  var ffId=((document.getElementById('ilim-id')||{}).value||'').trim();
+  var txt='Hola! Quiero pedir '+diamantes+' diamantes ilimitados';
+  if(ffId) txt+=' para mi ID: '+ffId;
+  window.open('https://wa.me/5215548461200?text='+encodeURIComponent(txt),'_blank');
+}
