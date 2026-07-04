@@ -4174,7 +4174,8 @@ function loadPines(){
     _updatePinSaldo();
   }).catch(function(e){
     console.error('[PINES] Error:', e);
-    grid.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#ff6b6b;font-size:.82rem">Error al cargar stock. Contacta al admin.</div>';
+    grid.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Pronto más pines disponibles aquí ⏳</div>';
+    var sel=document.getElementById('pin-plan'); if(sel) sel.innerHTML='<option value="">Sin stock por ahora</option>';
   });
 }
 
@@ -4193,7 +4194,7 @@ function submitPinSaldo(){
   var tipo = parts[0];
   var precio = parseInt(parts[1])||0;
 
-  if(!tipo || !precio){ showErr('Selecciona un PIN'); return; }
+  if(!tipo || !precio){ showErr('No hay pines en stock por ahora. Prueba los DIAMANTES AUTOMÁTICOS de arriba ⬆️'); return; }
 
   var saldo = authSession.saldo||0;
   if(saldo < precio){ showErr('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MX). Recarga tu cuenta.'); return; }
@@ -4256,6 +4257,42 @@ var SUPABASE_ANON = (typeof SUPABASE_ANON_KEY !== 'undefined' ? SUPABASE_ANON_KE
 
 // Compra un PIN por API. productId = id del producto en Recargas América.
 // precioLocal = lo que le cobras al cliente en TU web (en pesos).
+
+// Busca el código PIN en la respuesta sin importar cómo venga anidado
+function _extraerPin(data){
+  if(!data) return '';
+  // Nombres de campo comunes donde puede venir el pin
+  var claves = ['pin','pins','codigo','code','codes','serial','key','voucher','redemption_code','pin_code','api_data'];
+  function buscar(obj, depth){
+    if(depth > 5 || obj == null) return '';
+    if(typeof obj === 'string' || typeof obj === 'number') return String(obj);
+    if(Array.isArray(obj)){
+      // si es lista, unir los pines encontrados
+      var arr = obj.map(function(x){ return buscar(x, depth+1); }).filter(Boolean);
+      return arr.join('\n');
+    }
+    if(typeof obj === 'object'){
+      // primero buscar en claves conocidas
+      for(var i=0;i<claves.length;i++){
+        if(obj[claves[i]] != null){
+          var v = buscar(obj[claves[i]], depth+1);
+          if(v) return v;
+        }
+      }
+      // si no, buscar en cualquier propiedad
+      for(var k in obj){
+        if(obj.hasOwnProperty(k)){
+          var vv = buscar(obj[k], depth+1);
+          if(vv) return vv;
+        }
+      }
+    }
+    return '';
+  }
+  var found = buscar(data, 0);
+  return found || 'Ver detalle en Mis Compras';
+}
+
 function comprarPinAPI(productId, precioLocal, nombreProducto){
   if(!authSession){ showToast('Inicia sesion'); setTimeout(showAuthModal,600); return; }
 
@@ -4280,16 +4317,9 @@ function comprarPinAPI(productId, precioLocal, nombreProducto){
       return;
     }
 
-    // ✅ Compra exitosa: extraer el PIN de api_data
-    var pin = '';
-    try {
-      var apiData = res.data && res.data.api_data;
-      // api_data puede venir como objeto o texto según el producto
-      if(typeof apiData === 'string') pin = apiData;
-      else if(apiData && apiData.pin) pin = apiData.pin;
-      else if(apiData && apiData.codigo) pin = apiData.codigo;
-      else pin = JSON.stringify(apiData);
-    } catch(e){ pin = 'Ver en Mis Compras'; }
+    // ✅ Compra exitosa: extraer el PIN de la respuesta (busca en cualquier formato)
+    var pin = _extraerPin(res.data);
+    console.log('[PIN API] Respuesta completa:', JSON.stringify(res.data));
 
     // Descontar saldo del cliente en TU web
     var ord = getNextOrder();
