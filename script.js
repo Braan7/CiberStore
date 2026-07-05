@@ -4298,69 +4298,47 @@ if(SUPABASE_ANON === 'PEGA_TU_ANON_KEY_AQUI'){
 // Busca el código PIN en la respuesta sin importar cómo venga anidado
 function _extraerPin(data){
   if(!data) return '';
-  // Campos que SÍ son el PIN/código (prioridad alta)
-  var clavesPin = ['pin','pins','codigo','code','codes','serial','key','voucher','redemption_code','pin_code','pin_serial','coupon'];
-  // Campos a IGNORAR (son IDs/control, NO el pin)
-  var ignorar = ['transaction_id','id','order_id','amount_charged','amount','price','currency','status','success','sandbox','quantity','product_id','reference','fecha','date','created_at'];
 
-  // 1) Buscar SOLO en campos de PIN conocidos (recursivo)
-  function buscarEnClaves(obj, depth){
-    if(depth > 6 || obj == null) return '';
-    if(Array.isArray(obj)){
-      var arr = obj.map(function(x){ return buscarEnClaves(x, depth+1); }).filter(Boolean);
-      return arr.join('\n');
-    }
+  // Campos a IGNORAR (control, no son datos de canje)
+  var ignorar = ['transaction_id','id','order_id','amount_charged','amount','price','currency','status','success','sandbox','quantity','product_id','reference','fecha','date','created_at','http_status','message','name','sku','type','product'];
+
+  // Recolectar TODOS los campos de canje (serial, pin, code, etc.)
+  var encontrados = {};
+  var clavesInteres = ['serial','pin','pins','codigo','code','codes','voucher','redemption_code','pin_code','pin_serial','coupon','key','clave','numero'];
+
+  function recolectar(obj, depth){
+    if(depth > 6 || obj == null) return;
+    if(Array.isArray(obj)){ obj.forEach(function(x){ recolectar(x, depth+1); }); return; }
     if(typeof obj === 'object'){
-      // ¿tiene directamente un campo de pin?
-      for(var i=0;i<clavesPin.length;i++){
-        if(obj[clavesPin[i]] != null){
-          var val = obj[clavesPin[i]];
-          if(typeof val === 'string' || typeof val === 'number') return String(val);
-          var deep = buscarEnClaves(val, depth+1);
-          if(deep) return deep;
-        }
-      }
-      // buscar más profundo en objetos que no sean campos ignorados
       for(var k in obj){
-        if(obj.hasOwnProperty(k) && ignorar.indexOf(k) < 0){
-          if(typeof obj[k] === 'object'){
-            var r = buscarEnClaves(obj[k], depth+1);
-            if(r) return r;
-          }
+        if(!obj.hasOwnProperty(k)) continue;
+        var kl = k.toLowerCase();
+        var val = obj[k];
+        // ¿es un campo de interés con valor simple?
+        if(clavesInteres.indexOf(kl) >= 0 && (typeof val === 'string' || typeof val === 'number')){
+          encontrados[kl] = String(val);
+        } else if(typeof val === 'object' && ignorar.indexOf(kl) < 0){
+          recolectar(val, depth+1);
         }
       }
     }
-    return '';
   }
+  recolectar(data, 0);
 
-  var pin = buscarEnClaves(data, 0);
-  if(pin) return pin;
-
-  // 2) Si no encontró, buscar cualquier texto que PAREZCA pin
-  //    (tiene letras y/o guiones, no es puro número corto de id)
-  function parecePin(s){
-    if(typeof s !== 'string') return false;
-    if(s.length < 4) return false;
-    // debe tener alguna letra o guion (un id suele ser solo digitos)
-    return /[A-Za-z]/.test(s) || /[-_]/.test(s);
-  }
-  function buscarTexto(obj, depth){
-    if(depth > 6 || obj == null) return '';
-    if(typeof obj === 'string' && parecePin(obj)) return obj;
-    if(Array.isArray(obj)){
-      for(var i=0;i<obj.length;i++){ var r=buscarTexto(obj[i],depth+1); if(r) return r; }
-    } else if(typeof obj === 'object'){
-      for(var k in obj){
-        if(obj.hasOwnProperty(k) && ignorar.indexOf(k) < 0){
-          var rr=buscarTexto(obj[k],depth+1); if(rr) return rr;
-        }
-      }
+  // Armar el texto de canje con lo que se encontró
+  var partes = [];
+  if(encontrados['serial'])  partes.push('SERIAL: ' + encontrados['serial']);
+  if(encontrados['pin'])     partes.push('PIN: ' + encontrados['pin']);
+  if(encontrados['code'] && !encontrados['pin'])   partes.push('PIN: ' + encontrados['code']);
+  if(encontrados['codigo'] && !encontrados['pin'] && !encontrados['code']) partes.push('PIN: ' + encontrados['codigo']);
+  // otros campos que puedan servir
+  ['voucher','redemption_code','pin_code','coupon','clave','numero'].forEach(function(k){
+    if(encontrados[k] && partes.join(' ').indexOf(encontrados[k]) < 0){
+      partes.push(k.toUpperCase() + ': ' + encontrados[k]);
     }
-    return '';
-  }
-  var pin2 = buscarTexto(data, 0);
-  if(pin2) return pin2;
+  });
 
+  if(partes.length) return partes.join('\n');
   return 'Ver detalle en Mis Compras';
 }
 
@@ -4392,6 +4370,8 @@ function comprarPinAPI(productId, precioLocal, nombreProducto){
     var fuente = res.ra_response || res.data || res;
     var pin = _extraerPin(fuente);
     console.log('[PIN API] Respuesta completa:', JSON.stringify(res));
+    // TEMPORAL (una comprobacion mas): mostrar datos extraidos + respuesta cruda
+    pin = pin + '\n\n--- (temporal) respuesta completa ---\n' + JSON.stringify(fuente, null, 2);
     // Si no encontró un PIN claro, mostrar TODA la respuesta para diagnosticar
     if(!pin || pin === 'Ver detalle en Mis Compras' || pin === 'undefined'){
       pin = 'DEBUG ▼\n' + JSON.stringify(res, null, 2);
@@ -4498,33 +4478,4 @@ function solicitarAccesoAPI(){
 
   window.open('https://wa.me/5215548461200?text=' + msg, '_blank');
   showToast('Abriendo WhatsApp...', 2000);
-}
-
-
-// ═══ TEMPORAL: probar la API de revendedores ═══
-var API_REV_URL = 'https://pnotsqsudqpwqzssevig.supabase.co/functions/v1/dynamic-action';
-var API_REV_TESTKEY = 'csk_test_123456';
-
-function probarAPIRev(accion){
-  var box = document.getElementById('api-test-result');
-  if(box){ box.style.display='block'; box.textContent = 'Probando "'+accion+'"...'; }
-
-  var body = { action: accion };
-  if(accion === 'comprar'){ body.sku = 'ff_110'; body.player_id = '123456789'; }
-
-  fetch(API_REV_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + API_REV_TESTKEY
-    },
-    body: JSON.stringify(body)
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(d){
-    if(box) box.textContent = 'RESULTADO "'+accion+'":\n' + JSON.stringify(d, null, 2);
-  })
-  .catch(function(e){
-    if(box) box.textContent = 'ERROR: ' + e.message;
-  });
 }
