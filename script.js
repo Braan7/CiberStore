@@ -4253,7 +4253,13 @@ goPage = function(id){
 var PORTERO_URL = 'https://pnotsqsudqpwqzssevig.supabase.co/functions/v1/bright-processor';
 // La "anon key" pública de Supabase (segura de exponer). Si tu supabase_integration.js
 // ya la define en otra variable, se usa esa. Si no, pégala aquí entre las comillas:
-var SUPABASE_ANON = (typeof SUPABASE_ANON_KEY !== 'undefined' ? SUPABASE_ANON_KEY : (typeof supabaseAnonKey !== 'undefined' ? supabaseAnonKey : ''));
+// ⬇️ PEGA AQUÍ tu anon key PÚBLICA de Supabase (Settings → API → anon public)
+// Es pública y segura de compartir. Ejemplo: 'eyJhbGciOiJIUzI1...'
+var SUPABASE_ANON = 'PEGA_TU_ANON_KEY_AQUI';
+// (si dejas 'PEGA_TU_ANON_KEY_AQUI', intenta tomarla de supabase_integration.js)
+if(SUPABASE_ANON === 'PEGA_TU_ANON_KEY_AQUI'){
+  SUPABASE_ANON = (typeof SUPABASE_ANON_KEY !== 'undefined' ? SUPABASE_ANON_KEY : (typeof supabaseAnonKey !== 'undefined' ? supabaseAnonKey : (typeof SUPABASE_KEY !== 'undefined' ? SUPABASE_KEY : '')));
+}
 
 // Compra un PIN por API. productId = id del producto en Recargas América.
 // precioLocal = lo que le cobras al cliente en TU web (en pesos).
@@ -4261,36 +4267,70 @@ var SUPABASE_ANON = (typeof SUPABASE_ANON_KEY !== 'undefined' ? SUPABASE_ANON_KE
 // Busca el código PIN en la respuesta sin importar cómo venga anidado
 function _extraerPin(data){
   if(!data) return '';
-  // Nombres de campo comunes donde puede venir el pin
-  var claves = ['pin','pins','codigo','code','codes','serial','key','voucher','redemption_code','pin_code','api_data'];
-  function buscar(obj, depth){
-    if(depth > 5 || obj == null) return '';
-    if(typeof obj === 'string' || typeof obj === 'number') return String(obj);
+  // Campos que SÍ son el PIN/código (prioridad alta)
+  var clavesPin = ['pin','pins','codigo','code','codes','serial','key','voucher','redemption_code','pin_code','pin_serial','coupon'];
+  // Campos a IGNORAR (son IDs/control, NO el pin)
+  var ignorar = ['transaction_id','id','order_id','amount_charged','amount','price','currency','status','success','sandbox','quantity','product_id','reference','fecha','date','created_at'];
+
+  // 1) Buscar SOLO en campos de PIN conocidos (recursivo)
+  function buscarEnClaves(obj, depth){
+    if(depth > 6 || obj == null) return '';
     if(Array.isArray(obj)){
-      // si es lista, unir los pines encontrados
-      var arr = obj.map(function(x){ return buscar(x, depth+1); }).filter(Boolean);
+      var arr = obj.map(function(x){ return buscarEnClaves(x, depth+1); }).filter(Boolean);
       return arr.join('\n');
     }
     if(typeof obj === 'object'){
-      // primero buscar en claves conocidas
-      for(var i=0;i<claves.length;i++){
-        if(obj[claves[i]] != null){
-          var v = buscar(obj[claves[i]], depth+1);
-          if(v) return v;
+      // ¿tiene directamente un campo de pin?
+      for(var i=0;i<clavesPin.length;i++){
+        if(obj[clavesPin[i]] != null){
+          var val = obj[clavesPin[i]];
+          if(typeof val === 'string' || typeof val === 'number') return String(val);
+          var deep = buscarEnClaves(val, depth+1);
+          if(deep) return deep;
         }
       }
-      // si no, buscar en cualquier propiedad
+      // buscar más profundo en objetos que no sean campos ignorados
       for(var k in obj){
-        if(obj.hasOwnProperty(k)){
-          var vv = buscar(obj[k], depth+1);
-          if(vv) return vv;
+        if(obj.hasOwnProperty(k) && ignorar.indexOf(k) < 0){
+          if(typeof obj[k] === 'object'){
+            var r = buscarEnClaves(obj[k], depth+1);
+            if(r) return r;
+          }
         }
       }
     }
     return '';
   }
-  var found = buscar(data, 0);
-  return found || 'Ver detalle en Mis Compras';
+
+  var pin = buscarEnClaves(data, 0);
+  if(pin) return pin;
+
+  // 2) Si no encontró, buscar cualquier texto que PAREZCA pin
+  //    (tiene letras y/o guiones, no es puro número corto de id)
+  function parecePin(s){
+    if(typeof s !== 'string') return false;
+    if(s.length < 4) return false;
+    // debe tener alguna letra o guion (un id suele ser solo digitos)
+    return /[A-Za-z]/.test(s) || /[-_]/.test(s);
+  }
+  function buscarTexto(obj, depth){
+    if(depth > 6 || obj == null) return '';
+    if(typeof obj === 'string' && parecePin(obj)) return obj;
+    if(Array.isArray(obj)){
+      for(var i=0;i<obj.length;i++){ var r=buscarTexto(obj[i],depth+1); if(r) return r; }
+    } else if(typeof obj === 'object'){
+      for(var k in obj){
+        if(obj.hasOwnProperty(k) && ignorar.indexOf(k) < 0){
+          var rr=buscarTexto(obj[k],depth+1); if(rr) return rr;
+        }
+      }
+    }
+    return '';
+  }
+  var pin2 = buscarTexto(data, 0);
+  if(pin2) return pin2;
+
+  return 'Ver detalle en Mis Compras';
 }
 
 function comprarPinAPI(productId, precioLocal, nombreProducto){
@@ -4375,4 +4415,23 @@ function renderPinesAPI(){
       + '</div></div>';
   });
   cont.innerHTML = html;
+}
+
+
+// ═══ TEMPORAL: ver los product_id reales de Recargas América ═══
+function verProductosReales(){
+  var _headers = { 'Content-Type': 'application/json' };
+  if(SUPABASE_ANON){ _headers['Authorization'] = 'Bearer '+SUPABASE_ANON; _headers['apikey'] = SUPABASE_ANON; }
+  fetch(PORTERO_URL, {
+    method: 'POST',
+    headers: _headers,
+    body: JSON.stringify({ action: 'listar' })
+  }).then(function(r){ return r.json(); }).then(function(res){
+    var box = document.getElementById('pin-entregado');
+    var cod = document.getElementById('pin-codigo');
+    if(cod) cod.textContent = 'PRODUCTOS REALES:\n' + JSON.stringify(res.productos || res, null, 2);
+    if(box){ box.style.display='block'; box.scrollIntoView({behavior:'smooth'}); }
+  }).catch(function(e){
+    showToast('Error: '+e.message);
+  });
 }
