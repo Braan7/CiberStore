@@ -34,9 +34,41 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@400;600;800&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--c1:#38bdf8;--c2:#3b5bfd;--c4:#ffcf40;--c5:#22d3ee;--bg:#060810;--card:#0e1220;--card2:#131829;--border:rgba(120,150,255,.10);--border2:rgba(120,170,255,.20);--text:#d5dce8;--muted:#6b7690;--glow:rgba(80,140,255,.28);--accent2:#a78bfa}
+:root{
+  --c1:#4da3ff;        /* azul eléctrico */
+  --c2:#3b5bfd;        /* azul profundo */
+  --c4:#ffcf40;        /* dorado (badges) */
+  --c5:#22d3ee;        /* cyan */
+  --accent2:#a855f7;   /* violeta */
+  --accent3:#7c3aed;   /* violeta profundo */
+  --bg:#05070f;        /* azul-noche casi negro */
+  --bg2:#080b16;
+  --card:rgba(255,255,255,.035);
+  --card2:rgba(255,255,255,.055);
+  --card-solid:#0c1020;
+  --border:rgba(130,160,255,.10);
+  --border2:rgba(130,170,255,.22);
+  --text:#e2e8f5;
+  --muted:#7b87a3;
+  --glow:rgba(80,140,255,.35);
+  --grad:linear-gradient(135deg,#4da3ff,#a855f7);
+  --grad-soft:linear-gradient(135deg,rgba(77,163,255,.15),rgba(168,85,247,.15));
+}
 html{scroll-behavior:smooth}
-body{background:radial-gradient(1200px 800px at 50% -10%,#0d1430 0%,var(--bg) 55%) fixed,var(--bg);color:var(--text);font-family:"Rajdhani","Exo 2",sans-serif;letter-spacing:.3px;overflow-x:hidden;padding-bottom:8px;-webkit-font-smoothing:antialiased}
+body{
+  background:
+    radial-gradient(900px 600px at 15% -5%,rgba(77,163,255,.10) 0%,transparent 50%) fixed,
+    radial-gradient(800px 600px at 90% 10%,rgba(168,85,247,.10) 0%,transparent 50%) fixed,
+    linear-gradient(180deg,#070a15 0%,var(--bg) 100%) fixed,
+    var(--bg);
+  color:var(--text);
+  font-family:"Rajdhani","Exo 2",sans-serif;
+  letter-spacing:.3px;
+  overflow-x:hidden;
+  padding-bottom:8px;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
 .sidebar{position:fixed;top:0;left:0;height:100vh;width:280px;background:#0a0c14;z-index:500;transform:translateX(-100%);transition:transform .32s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;border-right:1px solid rgba(255,255,255,.06)}
 .sidebar.open{transform:translateX(0);box-shadow:8px 0 40px rgba(0,0,0,.7)}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:499;opacity:0;pointer-events:none;transition:opacity .3s}
@@ -695,6 +727,449 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:rgba(120,170,2
 .ff-cart-btn:hover{filter:brightness(1.12);transform:translateY(-1px)}
 .hamburger:hover{border-color:rgba(120,170,255,.5);background:rgba(120,150,255,.08)}
 .nav-item{border-radius:13px}
+
+/* ═══════════════════════════════════════════════════════════
+   CAPA PREMIUM · Fase 1 (reskin global sin tocar estructura)
+   ═══════════════════════════════════════════════════════════ */
+
+/* Títulos con más presencia */
+.ptitle{
+  font-family:'Orbitron',sans-serif;
+  font-weight:800;letter-spacing:.5px;
+  background:linear-gradient(135deg,#fff 30%,#a9c7ff 100%);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+  text-shadow:0 4px 30px rgba(80,140,255,.2);
+}
+.stag{
+  background:var(--grad-soft)!important;
+  border:1px solid var(--border2)!important;
+  backdrop-filter:blur(10px);
+  color:#9ec5ff!important;
+  font-weight:700;letter-spacing:2px;
+}
+
+/* Tarjetas con glass premium + hover fluido */
+.honor-card,.ff-card{
+  background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.02))!important;
+  border:1px solid var(--border)!important;
+  backdrop-filter:blur(12px);
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1),border-color .3s,box-shadow .3s!important;
+}
+.honor-card:hover,.ff-card:hover{
+  transform:translateY(-6px) scale(1.015)!important;
+  border-color:var(--border2)!important;
+  box-shadow:0 18px 50px rgba(60,100,255,.25),0 0 0 1px rgba(130,170,255,.15) inset!important;
+}
+
+/* Botones premium: gradiente animado + brillo al pasar */
+.btn-main,.btn-hero{
+  background:var(--grad)!important;
+  background-size:200% 200%!important;
+  border:none!important;
+  box-shadow:0 8px 28px rgba(80,140,255,.35)!important;
+  transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s,background-position .5s!important;
+  position:relative;overflow:hidden;
+}
+.btn-main:hover,.btn-hero:hover{
+  transform:translateY(-2px)!important;
+  background-position:100% 100%!important;
+  box-shadow:0 14px 40px rgba(120,90,255,.5)!important;
+}
+
+/* Barra superior: glass más pronunciado */
+.topbar{
+  background:rgba(8,11,22,.55)!important;
+  backdrop-filter:blur(28px) saturate(160%)!important;
+  -webkit-backdrop-filter:blur(28px) saturate(160%)!important;
+  border-bottom:1px solid rgba(130,170,255,.10)!important;
+}
+
+/* Sidebar: glass y transición fluida */
+.sidebar{
+  background:linear-gradient(180deg,rgba(10,13,26,.96),rgba(6,9,18,.98))!important;
+  backdrop-filter:blur(24px)!important;
+  border-right:1px solid var(--border2)!important;
+}
+.nav-item{transition:background .22s,color .22s,transform .22s,padding-left .22s!important}
+.nav-item:hover{transform:translateX(3px);padding-left:1.1rem}
+.nav-item.active{
+  background:var(--grad-soft)!important;
+  border-color:var(--border2)!important;
+  box-shadow:inset 0 0 24px rgba(80,140,255,.12),inset 3px 0 0 var(--c1)!important;
+}
+.nav-ico{transition:transform .22s}
+.nav-item:hover .nav-ico{transform:scale(1.12)}
+
+/* Badges tipo pill premium */
+.nb,.ff-badge{
+  border-radius:999px!important;
+  backdrop-filter:blur(6px);
+  letter-spacing:.5px;
+}
+
+/* Scrollbar premium */
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#4da3ff,#a855f7);border-radius:10px;border:2px solid var(--bg)}
+::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,#6db4ff,#b96bff)}
+
+/* Foco accesible */
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{
+  outline:2px solid var(--c1);outline-offset:2px;
+}
+
+/* Inputs premium */
+input,select,textarea{transition:border-color .2s,box-shadow .2s,background .2s}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--c1)!important;
+  box-shadow:0 0 0 3px rgba(77,163,255,.15)!important;
+}
+
+/* Respeta usuarios que prefieren menos movimiento */
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+
+/* Aparición suave de secciones al cargar */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.ph{animation:fadeUp .5s cubic-bezier(.4,0,.2,1) both}
+
+/* ═══════════ FASE 2 · NAV PREMIUM + BÚSQUEDA + SIDEBAR MÓVIL ═══════════ */
+
+/* Topbar más alta y espaciada */
+.topbar{height:60px!important;padding:0 1.1rem!important;gap:.75rem!important}
+
+/* Logo con gradiente premium */
+.topbar-logo{font-size:1.15rem!important;letter-spacing:2.5px!important}
+.topbar-logo .l1{
+  display:inline-block;
+  color:#fff;
+  background:linear-gradient(135deg,#fff,#cde0ff);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.topbar-logo .l2{
+  display:inline-block;
+  color:#a855f7;
+  background:linear-gradient(135deg,#4da3ff,#a855f7);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+/* Respaldo: navegadores sin soporte de background-clip muestran color sólido */
+@supports not (-webkit-background-clip:text){
+  .topbar-logo .l1{-webkit-text-fill-color:#fff;color:#fff}
+  .topbar-logo .l2{-webkit-text-fill-color:#4da3ff;color:#4da3ff}
+}
+
+/* Hamburguesa premium */
+.hamburger{
+  background:rgba(255,255,255,.05)!important;
+  border:1px solid var(--border2)!important;
+  border-radius:12px!important;padding:.5rem .55rem!important;
+}
+.hamburger span{background:var(--c1)!important;transition:.25s}
+.hamburger:hover{background:var(--grad-soft)!important;transform:scale(1.05)}
+
+/* User pill premium */
+.user-pill{
+  background:var(--grad-soft)!important;
+  border:1px solid var(--border2)!important;
+  border-radius:999px!important;padding:.25rem .65rem .25rem .3rem!important;
+  transition:transform .2s,box-shadow .2s!important;
+}
+.user-pill:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(80,140,255,.25)}
+.user-pill-av{background:var(--grad)!important;width:26px!important;height:26px!important}
+.user-pill-name{font-size:.72rem!important}
+
+/* Carrito y tema premium */
+.cart-btn,.theme-btn{
+  background:rgba(255,255,255,.04)!important;
+  border:1px solid var(--border2)!important;
+  border-radius:11px!important;padding:.4rem .5rem!important;
+  transition:transform .2s,background .2s,box-shadow .2s!important;
+}
+.cart-btn:hover,.theme-btn:hover{transform:translateY(-1px);background:var(--grad-soft)!important;box-shadow:0 6px 18px rgba(80,140,255,.2)}
+.cart-count{background:var(--grad)!important;box-shadow:0 2px 8px rgba(168,85,247,.5)}
+
+/* Botón WhatsApp premium */
+.btn-wa{
+  border-radius:11px!important;padding:.45rem .9rem!important;
+  box-shadow:0 4px 16px rgba(37,211,102,.3)!important;
+  transition:transform .2s,box-shadow .2s!important;
+}
+.btn-wa:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(37,211,102,.45)!important}
+
+/* Barra de búsqueda premium (glass, más grande) */
+.search-bar-wrap{max-width:600px!important;margin:0 auto!important}
+.search-bar{
+  background:rgba(255,255,255,.045)!important;
+  border:1px solid var(--border2)!important;
+  border-radius:14px!important;
+  padding:.8rem 1.1rem .8rem 3rem!important;
+  font-size:.95rem!important;
+  backdrop-filter:blur(12px);
+  transition:border-color .2s,box-shadow .2s,background .2s!important;
+}
+.search-bar:focus{
+  background:rgba(255,255,255,.07)!important;
+  border-color:var(--c1)!important;
+  box-shadow:0 0 0 3px rgba(77,163,255,.15),0 8px 30px rgba(60,100,255,.15)!important;
+}
+.search-ico{font-size:1.1rem;opacity:.7}
+#search-wrap{padding:.75rem 5vw 1rem!important}
+
+/* Resultados de búsqueda premium */
+.search-results{
+  background:rgba(12,16,32,.92)!important;
+  backdrop-filter:blur(20px)!important;
+  border:1px solid var(--border2)!important;
+  border-radius:14px!important;
+  box-shadow:0 20px 50px rgba(0,0,0,.5)!important;
+  margin-top:.5rem!important;
+}
+
+/* Overlay del sidebar más suave */
+.overlay{backdrop-filter:blur(4px);background:rgba(3,5,12,.65)!important}
+
+/* Sidebar móvil: entrada fluida con easing premium */
+.sidebar{transition:transform .38s cubic-bezier(.4,0,.2,1),box-shadow .38s!important}
+.sidebar.open{box-shadow:12px 0 60px rgba(0,0,0,.7),0 0 0 1px var(--border2)!important}
+
+/* ═══════════ FASE 3 · HERO PREMIUM + TARJETAS GRANDES ═══════════ */
+
+/* Hero más grande e impactante (estilo Epic/Gamerz) */
+.hero{padding:3rem 5vw 3.5rem!important;min-height:auto!important}
+.hero-bg{
+  background:
+    radial-gradient(ellipse 50% 60% at 25% 40%,rgba(77,163,255,.18),transparent 60%),
+    radial-gradient(ellipse 45% 55% at 80% 60%,rgba(168,85,247,.16),transparent 60%)!important;
+}
+.hero-grid{background-size:56px 56px!important;opacity:.6}
+.hero-content{max-width:640px!important}
+.hero-tag{
+  background:var(--grad-soft)!important;
+  border:1px solid var(--border2)!important;
+  color:#9ec5ff!important;
+  padding:.35rem 1rem!important;
+  backdrop-filter:blur(10px);
+  font-size:.7rem!important;
+}
+.hero h1{
+  font-size:clamp(2.4rem,8vw,5rem)!important;
+  letter-spacing:-1px!important;
+  text-shadow:0 8px 50px rgba(80,140,255,.35);
+}
+.hero h1 .l2{
+  display:inline-block!important;
+  color:#a855f7!important;
+  background:linear-gradient(135deg,#4da3ff,#a855f7)!important;
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent!important;
+}
+@supports not (-webkit-background-clip:text){
+  .hero h1 .l2{-webkit-text-fill-color:#4da3ff!important;color:#4da3ff!important}
+}
+.hero-sub{font-size:1rem!important;max-width:480px!important;line-height:1.75!important}
+.hero-ctas{gap:.85rem!important;margin-top:.5rem}
+
+/* Stats del hero como tarjetas glass */
+.hero-stats{gap:.75rem!important;margin-top:2.5rem!important;max-width:480px!important}
+.hero-stat,.hero-stats>div{
+  background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:.85rem .5rem!important;
+  backdrop-filter:blur(10px);
+  transition:transform .25s,border-color .25s;
+}
+.hero-stats>div:hover{transform:translateY(-3px);border-color:var(--border2)}
+
+/* Tarjetas de producto MÁS GRANDES con bordes redondeados */
+.ff-card{
+  border-radius:18px!important;
+  padding:1.2rem!important;
+  gap:.5rem!important;
+}
+.honor-card{border-radius:20px!important;padding:1.8rem 1.2rem!important}
+
+/* Grids con más aire entre tarjetas */
+.pgrid{gap:1rem!important}
+.honor-grid{gap:1rem!important}
+
+/* Más espacio entre secciones (respiración premium) */
+.ph{padding-top:2.5rem!important;padding-bottom:1.5rem!important}
+
+/* Íconos de tarjeta más grandes con glow */
+.ff-ico{font-size:1.7rem!important;filter:drop-shadow(0 0 12px rgba(120,170,255,.6))!important}
+
+/* Precios con gradiente */
+.ff-price,.lkpln-price{font-weight:900}
+
+/* ═══════════ FASE 4 · PANEL USUARIO + API DESTACADA ═══════════ */
+
+/* Tarjetas de perfil premium */
+.pf-card{
+  background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.02))!important;
+  border:1px solid var(--border)!important;
+  border-radius:20px!important;
+  backdrop-filter:blur(14px);
+}
+.pf-av{
+  background:var(--grad)!important;
+  box-shadow:0 8px 30px rgba(120,90,255,.4)!important;
+}
+
+/* Página de saldo premium: el balance como héroe */
+#page-saldo .ph{margin-bottom:.5rem}
+#saldo-page-balance{
+  font-size:2rem!important;
+  background:linear-gradient(135deg,#25d366,#4da3ff)!important;
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent!important;
+  color:transparent!important;
+}
+
+/* Item de API en el menú: destacado con gradiente */
+#ni-api{
+  background:var(--grad-soft)!important;
+  border:1px solid var(--border2)!important;
+  border-radius:13px!important;
+  margin-top:.35rem;
+  box-shadow:inset 0 0 20px rgba(120,90,255,.1);
+}
+#ni-api:hover{box-shadow:inset 0 0 30px rgba(120,90,255,.2),0 4px 16px rgba(80,140,255,.2)}
+#ni-api .nb{background:var(--grad)!important;color:#fff!important;border:none!important}
+
+/* Sección API (page-api): header como banner premium */
+#page-api .ptitle{
+  background:var(--grad)!important;
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent!important;
+}
+
+/* Selects e inputs de formularios: glass premium en toda la web */
+select,input[type=text],input[type=email],input[type=number],input[type=password]{
+  background:rgba(255,255,255,.04)!important;
+  border:1px solid var(--border2)!important;
+  border-radius:11px!important;
+}
+
+/* Toast/notificaciones premium (si existen) */
+.toast,#toast{
+  background:rgba(12,16,32,.92)!important;
+  backdrop-filter:blur(16px)!important;
+  border:1px solid var(--border2)!important;
+  border-radius:12px!important;
+  box-shadow:0 12px 40px rgba(0,0,0,.5)!important;
+}
+
+/* Modales premium (auth, cart, etc.) */
+.modal-box,.auth-box,.cart-modal-box,[class*="modal"]{
+  backdrop-filter:blur(20px);
+}
+
+/* Botones verdes (comprar con saldo) premium */
+button[onclick*="submit"],button[onclick*="comprar"],button[onclick*="Saldo"]{
+  transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s!important;
+}
+button[onclick*="submit"]:hover,button[onclick*="comprar"]:hover,button[onclick*="Saldo"]:hover{
+  transform:translateY(-2px);
+  box-shadow:0 10px 28px rgba(37,211,102,.35)!important;
+}
+
+/* Ranking / leaderboards: filas con hover sutil */
+.lkpln:hover{border-color:var(--border2)!important;background:rgba(255,255,255,.04)!important}
+
+/* Footer y secciones con más aire */
+.selbar{border-bottom:1px solid var(--border)!important}
+
+/* ═══════════ REDISEÑO PREMIUM · LOGIN / REGISTER ═══════════ */
+
+/* Fondo del modal con blur premium */
+#auth-modal{
+  background:rgba(5,7,15,.85)!important;
+  backdrop-filter:blur(16px)!important;
+}
+/* Caja del modal: glass + borde gradiente */
+#auth-modal > div{
+  background:linear-gradient(165deg,rgba(16,20,38,.98),rgba(9,12,24,.99))!important;
+  border:1px solid var(--border2)!important;
+  border-radius:22px!important;
+  box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 1px rgba(130,170,255,.08) inset!important;
+}
+
+/* Tabs (Iniciar sesión / Registrarse) */
+#atab-login,#atab-register{
+  border-bottom-width:2px!important;
+  transition:color .25s,border-color .25s!important;
+  letter-spacing:.5px;
+}
+#atab-login[style*="00aaff"],#atab-register[style*="00aaff"]{
+  border-bottom-color:var(--c1)!important;color:var(--c1)!important;
+}
+
+/* Logo del modal con gradiente */
+#auth-login .l1,#auth-register .l1{color:#fff}
+#auth-modal span[style*="00aaff"]{
+  background:var(--grad);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+
+/* Inputs del login/register premium */
+#auth-modal input[type=text],
+#auth-modal input[type=password],
+#auth-modal input[type=email],
+#auth-modal input[type=tel],
+#auth-modal select{
+  background:rgba(255,255,255,.045)!important;
+  border:1px solid var(--border2)!important;
+  border-radius:11px!important;
+  padding:.7rem .9rem!important;
+  transition:border-color .2s,box-shadow .2s,background .2s!important;
+}
+#auth-modal input:focus,#auth-modal select:focus{
+  background:rgba(255,255,255,.07)!important;
+  border-color:var(--c1)!important;
+  box-shadow:0 0 0 3px rgba(77,163,255,.15)!important;
+  outline:none!important;
+}
+
+/* Botón principal (Entrar / Crear cuenta): gradiente premium azul-violeta */
+#btn-do-login,
+#auth-register button[onclick*="doRegister"],
+#auth-modal button[onclick*="doRegister"]{
+  background:var(--grad)!important;
+  background-size:200% 200%!important;
+  border-radius:12px!important;
+  box-shadow:0 8px 26px rgba(80,140,255,.4)!important;
+  transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s,background-position .5s!important;
+  letter-spacing:1px!important;
+}
+#btn-do-login:hover,
+#auth-modal button[onclick*="doRegister"]:hover{
+  transform:translateY(-2px)!important;
+  background-position:100% 100%!important;
+  box-shadow:0 14px 38px rgba(120,90,255,.55)!important;
+}
+
+/* Botón invitado premium */
+#auth-modal button[onclick*="doGuest"]{
+  background:rgba(255,255,255,.05)!important;
+  border:1px solid var(--border2)!important;
+  border-radius:11px!important;
+  transition:background .2s,transform .2s!important;
+}
+#auth-modal button[onclick*="doGuest"]:hover{background:rgba(255,255,255,.09)!important;transform:translateY(-1px)}
+
+/* Enlaces (Regístrate / Inicia sesión) con color premium */
+#auth-modal a[onclick*="authTab"]{
+  background:var(--grad);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  font-weight:800!important;
+}
+
+/* Botón de ojo (ver contraseña) */
+#eye-login,#auth-modal button[onclick*="togglePass"]{transition:color .2s}
+#auth-modal button[onclick*="togglePass"]:hover{color:var(--c1)!important}
 </style>
 
 <script>
@@ -775,7 +1250,7 @@ document.addEventListener('keydown',function(e){
   <div class="mem-pill" id="mem-pill"></div>
   <div class="user-pill" id="user-pill" onclick="openUserMenu()" style="display:none"><div class="user-pill-av" id="user-pill-av">?</div><span class="user-pill-name" id="user-pill-name">Usuario</span></div><button class="cart-btn" onclick="openCart()" title="Carrito">&#128722;<div class="cart-count" id="cart-count">0</div></button>
   <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Cambiar tema">&#127763;</button>
-  <a href="https://wa.me/5215548461200" target="_blank" class="btn-wa">&#128222; WhatsApp</a>
+  <a href="https://wa.me/12894273983" target="_blank" class="btn-wa">&#128222; WhatsApp</a>
 </div>
 <div style="padding:.5rem 5vw;max-width:1050px;margin:0 auto;position:relative" id="search-wrap">
   <div class="search-bar-wrap">
@@ -1001,7 +1476,7 @@ document.addEventListener('keydown',function(e){
         </div>
 
         <!-- Botón donar -->
-        <button onclick="window.open('https://wa.me/5215548461200?text=Hola CiberStore! Quiero APOYAR A VENEZUELA con una donacion.%0A%0AMi nombre:%0AMonto a donar:%0AMetodo de pago (PayPal/Binance/Transferencia/OXXO):%0A%0AGracias por unirse a la causa!','_blank')" style="width:100%;padding:.85rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:10px;font-family:Orbitron;font-weight:900;font-size:.9rem;letter-spacing:.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;box-shadow:0 4px 18px rgba(37,211,102,.25);transition:all .3s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+        <button onclick="window.open('https://wa.me/12894273983?text=Hola CiberStore! Quiero APOYAR A VENEZUELA con una donacion.%0A%0AMi nombre:%0AMonto a donar:%0AMetodo de pago (PayPal/Binance/Transferencia/OXXO):%0A%0AGracias por unirse a la causa!','_blank')" style="width:100%;padding:.85rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:10px;font-family:Orbitron;font-weight:900;font-size:.9rem;letter-spacing:.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;box-shadow:0 4px 18px rgba(37,211,102,.25);transition:all .3s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
           💬 QUIERO DONAR
         </button>
         <div style="text-align:center;font-size:.68rem;color:var(--muted);margin-top:.6rem">Te enviamos al WhatsApp para coordinar tu donación 💛💙❤️</div>
@@ -1243,7 +1718,7 @@ document.addEventListener('keydown',function(e){
           <button onclick="goPage('saldo');showToast('💬 Contacta a nuestro WhatsApp para tu cotización personalizada')" style="padding:.65rem 1.2rem;background:linear-gradient(90deg,#ffd700,#ffed4e);color:#1a0a00;border:none;border-radius:8px;font-family:Orbitron;font-weight:900;font-size:.8rem;letter-spacing:1px;cursor:pointer;text-transform:uppercase;transition:all .3s;box-shadow:0 4px 15px rgba(255,215,0,.2)" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 25px rgba(255,215,0,.4)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(255,215,0,.2)'">
             📞 Cotizar Mi Descuento
           </button>
-          <button onclick="window.open('https://wa.me/5215548461200?text=Hola%21%20Soy%20un%20habibi%20y%20quiero%20cotizar%20descuento%20para%2020%2B%20mil%20diamantes%20ilimitados','_blank')" style="padding:.65rem 1.2rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:8px;font-family:Orbitron;font-weight:900;font-size:.8rem;letter-spacing:1px;cursor:pointer;text-transform:uppercase;transition:all .3s;box-shadow:0 4px 15px rgba(37,211,102,.2)" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 25px rgba(37,211,102,.4)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(37,211,102,.2)'">
+          <button onclick="window.open('https://wa.me/12894273983?text=Hola%21%20Soy%20un%20habibi%20y%20quiero%20cotizar%20descuento%20para%2020%2B%20mil%20diamantes%20ilimitados','_blank')" style="padding:.65rem 1.2rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:8px;font-family:Orbitron;font-weight:900;font-size:.8rem;letter-spacing:1px;cursor:pointer;text-transform:uppercase;transition:all .3s;box-shadow:0 4px 15px rgba(37,211,102,.2)" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 25px rgba(37,211,102,.4)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(37,211,102,.2)'">
             💬 WhatsApp Directo
           </button>
         </div>
@@ -1469,7 +1944,7 @@ document.addEventListener('keydown',function(e){
           <div style="font-family:Orbitron;font-weight:700;color:#40c057;font-size:1rem;margin-top:.25rem" id="renta-bot-saldo">$0 MX</div>
         </div>
         
-        <button onclick="window.open('https://wa.me/5215548461200?text=Quiero%20rentar%20el%20bot%20de%20likes%20básico%20por%2030%20días','_blank')" style="width:100%;padding:.75rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:8px;font-family:Rajdhani;font-weight:900;font-size:.85rem;cursor:pointer">💬 Cotizar por WhatsApp</button>
+        <button onclick="window.open('https://wa.me/12894273983?text=Quiero%20rentar%20el%20bot%20de%20likes%20básico%20por%2030%20días','_blank')" style="width:100%;padding:.75rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:8px;font-family:Rajdhani;font-weight:900;font-size:.85rem;cursor:pointer">💬 Cotizar por WhatsApp</button>
       </div>
     </div>
 
@@ -1494,7 +1969,7 @@ document.addEventListener('keydown',function(e){
           </div>
         </div>
         
-        <button onclick="window.open('https://wa.me/5215548461200?text=Necesito%20el%20método%20de%2050%20IDs%20por%202000%20pesos','_blank')" style="width:100%;padding:.75rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:8px;font-family:Rajdhani;font-weight:900;font-size:.85rem;cursor:pointer">💬 Cotizar por WhatsApp</button>
+        <button onclick="window.open('https://wa.me/12894273983?text=Necesito%20el%20método%20de%2050%20IDs%20por%202000%20pesos','_blank')" style="width:100%;padding:.75rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:8px;font-family:Rajdhani;font-weight:900;font-size:.85rem;cursor:pointer">💬 Cotizar por WhatsApp</button>
       </div>
     </div>
 
@@ -1557,7 +2032,7 @@ document.addEventListener('keydown',function(e){
           <div id="pin-err" style="display:none;color:#ff6b6b;font-size:.75rem;margin-bottom:.5rem"></div>
           <button onclick="submitPinSaldo()" style="width:100%;padding:.78rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:10px;font-family:Rajdhani,sans-serif;font-weight:900;font-size:.9rem;cursor:pointer">&#128274; Comprar y recibir PIN</button>
           <div style="text-align:center;font-size:.68rem;color:var(--muted);margin-top:.6rem">Si hay algún error, contacta al admin 👇</div>
-          <a href="https://wa.me/5215548461200?text=Hola!%20Tuve%20un%20problema%20con%20mi%20compra%20de%20PIN%20de%20Free%20Fire" target="_blank" style="display:block;text-align:center;margin-top:.4rem;color:#25d366;font-size:.78rem;font-weight:700;text-decoration:none">💬 Contactar al admin por WhatsApp</a>
+          <a href="https://wa.me/12894273983?text=Hola!%20Tuve%20un%20problema%20con%20mi%20compra%20de%20PIN%20de%20Free%20Fire" target="_blank" style="display:block;text-align:center;margin-top:.4rem;color:#25d366;font-size:.78rem;font-weight:700;text-decoration:none">💬 Contactar al admin por WhatsApp</a>
         </div>
       </div>
     </div>
@@ -1594,17 +2069,6 @@ document.addEventListener('keydown',function(e){
   </div>
 
   <div style="max-width:720px;margin:0 auto;padding:0 5vw 2.5rem">
-
-    <!-- 🧪 PRUEBA TEMPORAL -->
-    <div style="background:rgba(255,204,0,.08);border:1px dashed rgba(255,204,0,.4);border-radius:12px;padding:1rem;margin-bottom:1.25rem">
-      <div style="font-family:Orbitron;font-size:.8rem;font-weight:900;color:#ffcc00;margin-bottom:.6rem">🧪 PRUEBA DE API (temporal)</div>
-      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem">
-        <button onclick="probarAPIRev('saldo')" style="flex:1;min-width:90px;padding:.5rem;background:rgba(56,189,248,.15);border:1px solid rgba(56,189,248,.35);color:#38bdf8;border-radius:8px;font-family:Rajdhani,sans-serif;font-weight:800;font-size:.72rem;cursor:pointer">Ver saldo</button>
-        <button onclick="probarAPIRev('productos')" style="flex:1;min-width:90px;padding:.5rem;background:rgba(56,189,248,.15);border:1px solid rgba(56,189,248,.35);color:#38bdf8;border-radius:8px;font-family:Rajdhani,sans-serif;font-weight:800;font-size:.72rem;cursor:pointer">Ver productos</button>
-        <button onclick="probarAPIRev('comprar')" style="flex:1;min-width:90px;padding:.5rem;background:rgba(0,230,118,.15);border:1px solid rgba(0,230,118,.35);color:#00e676;border-radius:8px;font-family:Rajdhani,sans-serif;font-weight:800;font-size:.72rem;cursor:pointer">Comprar ff_110</button>
-      </div>
-      <div id="api-test-result" style="display:none;background:#04070f;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:.75rem;font-family:'Courier New',monospace;font-size:.7rem;color:#25d366;white-space:pre-wrap;word-break:break-all;max-height:300px;overflow:auto">-</div>
-    </div>
 
     <!-- Cómo empezar -->
     <div style="background:linear-gradient(135deg,#0a1420,#0d0710);border:1px solid rgba(56,189,248,.28);border-radius:16px;padding:1.4rem 1.2rem;margin-bottom:1.25rem">
@@ -1922,7 +2386,7 @@ document.addEventListener('keydown',function(e){
         &#9314; El sistema genera tu token automaticamente<br/>
         &#9315; Copialo y pegalo en el formulario de pedido
       </div>
-      <a href="https://wa.me/5215548461200?text=Hola%2C%20necesito%20ayuda%20para%20obtener%20mi%20token%20de%20Free%20Fire" target="_blank" style="display:inline-flex;align-items:center;gap:.45rem;margin-top:.85rem;padding:.55rem 1.1rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:6px;font-family:'Exo 2';font-weight:800;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none">
+      <a href="https://wa.me/12894273983?text=Hola%2C%20necesito%20ayuda%20para%20obtener%20mi%20token%20de%20Free%20Fire" target="_blank" style="display:inline-flex;align-items:center;gap:.45rem;margin-top:.85rem;padding:.55rem 1.1rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:6px;font-family:'Exo 2';font-weight:800;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none">
         &#128222; Preguntame como obtenerlo
       </a>
     </div>
@@ -2528,7 +2992,7 @@ document.addEventListener('keydown',function(e){
     <div style="background:linear-gradient(135deg,rgba(0,245,255,.08),rgba(124,58,237,.08));border:1px solid rgba(0,245,255,.2);border-radius:14px;padding:1.25rem;text-align:center">
       <div style="font-family:Orbitron;font-size:1.1rem;font-weight:900;color:#fff;margin-bottom:.4rem">Escríbeme ahora</div>
       <div style="font-size:.78rem;color:var(--muted);margin-bottom:.85rem">Atencion personalizada 24/7 &bull; Mejores precios para verdaderos jugadores</div>
-      <button onclick="window.open('https://wa.me/5215548461200?text='+encodeURIComponent('Hola! Quiero comprar Fragmentos Evo. ¿Puedes darme más información?'),'_blank')" style="padding:.75rem 2rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:8px;font-family:'Exo 2';font-weight:800;font-size:.88rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;box-shadow:0 0 20px rgba(37,211,102,.25)">&#128222; Escribir por WhatsApp</button>
+      <button onclick="window.open('https://wa.me/12894273983?text='+encodeURIComponent('Hola! Quiero comprar Fragmentos Evo. ¿Puedes darme más información?'),'_blank')" style="padding:.75rem 2rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:8px;font-family:'Exo 2';font-weight:800;font-size:.88rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;box-shadow:0 0 20px rgba(37,211,102,.25)">&#128222; Escribir por WhatsApp</button>
     </div>
   </div>
 
@@ -2635,10 +3099,10 @@ document.addEventListener('keydown',function(e){
   </div>
 </div>
 <div class="modal-ov" id="modal-stori">
-  <div class="modal"><div class="modal-h"><h3>&#127968; Transferencia Bancaria</h3><button class="modal-close" onclick="closeStoriModal()">&#215;</button></div><div class="modal-b"><div style="text-align:center;margin-bottom:1.1rem"><div style="font-size:2.4rem;margin-bottom:.45rem">&#127968;</div><div style="font-family:Orbitron;font-size:.88rem;font-weight:700;color:#fff;margin-bottom:.18rem">Transferencia Bancaria</div><div style="font-size:.78rem;color:var(--muted)">Realiza tu transferencia y manda el comprobante por WhatsApp</div></div><div style="background:rgba(37,211,102,.05);border:1px solid rgba(37,211,102,.18);border-radius:11px;padding:1.15rem;margin-bottom:.95rem"><div style="font-family:Orbitron;font-size:.7rem;font-weight:700;color:#25d366;margin-bottom:.65rem">Datos bancarios</div><div style="display:flex;justify-content:space-between;padding:.38rem .58rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:6px;margin-bottom:.3rem"><span style="font-size:.6rem;color:var(--muted);text-transform:uppercase">Banco</span><span style="font-family:Orbitron;font-size:.7rem;font-weight:700;color:#fff">Transferencia Bancaria</span></div><div style="display:flex;justify-content:space-between;padding:.38rem .58rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:6px;margin-bottom:.3rem"><span style="font-size:.6rem;color:var(--muted);text-transform:uppercase">Titular</span><span style="font-family:Orbitron;font-size:.7rem;font-weight:700;color:#fff"></span></div><div style="display:flex;justify-content:space-between;align-items:center;padding:.38rem .58rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:6px;flex-wrap:wrap;gap:.3rem"><div><div style="font-size:.6rem;color:var(--muted);text-transform:uppercase">CLABE</div><div style="font-family:Orbitron;font-size:.68rem;font-weight:700;color:var(--c1)">646180402332964686</div></div><button onclick="copyClabe()" style="background:none;border:1px solid rgba(0,170,255,.28);color:var(--c1);border-radius:3px;padding:.08rem .38rem;font-size:.6rem;cursor:pointer;font-family:'Exo 2';font-weight:700">Copiar</button></div></div><div style="font-size:.72rem;color:var(--muted);line-height:1.7;padding:.6rem .82rem;background:rgba(255,255,255,.03);border-radius:6px;border:1px solid var(--border)">1. Transfiere el monto exacto.<br/>2. Captura el comprobante.<br/>3. Manda comprobante + # pedido al WhatsApp.<br/>4. Confirmamos en menos de 3 min.</div><a href="https://wa.me/5215548461200" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.45rem;padding:.82rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:7px;font-family:'Exo 2';font-weight:800;font-size:.85rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;margin-top:.82rem">&#128222; Confirmar por WhatsApp</a></div></div>
+  <div class="modal"><div class="modal-h"><h3>&#127968; Transferencia Bancaria</h3><button class="modal-close" onclick="closeStoriModal()">&#215;</button></div><div class="modal-b"><div style="text-align:center;margin-bottom:1.1rem"><div style="font-size:2.4rem;margin-bottom:.45rem">&#127968;</div><div style="font-family:Orbitron;font-size:.88rem;font-weight:700;color:#fff;margin-bottom:.18rem">Transferencia Bancaria</div><div style="font-size:.78rem;color:var(--muted)">Realiza tu transferencia y manda el comprobante por WhatsApp</div></div><div style="background:rgba(37,211,102,.05);border:1px solid rgba(37,211,102,.18);border-radius:11px;padding:1.15rem;margin-bottom:.95rem"><div style="font-family:Orbitron;font-size:.7rem;font-weight:700;color:#25d366;margin-bottom:.65rem">Datos bancarios</div><div style="display:flex;justify-content:space-between;padding:.38rem .58rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:6px;margin-bottom:.3rem"><span style="font-size:.6rem;color:var(--muted);text-transform:uppercase">Banco</span><span style="font-family:Orbitron;font-size:.7rem;font-weight:700;color:#fff">Transferencia Bancaria</span></div><div style="display:flex;justify-content:space-between;padding:.38rem .58rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:6px;margin-bottom:.3rem"><span style="font-size:.6rem;color:var(--muted);text-transform:uppercase">Titular</span><span style="font-family:Orbitron;font-size:.7rem;font-weight:700;color:#fff"></span></div><div style="display:flex;justify-content:space-between;align-items:center;padding:.38rem .58rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:6px;flex-wrap:wrap;gap:.3rem"><div><div style="font-size:.6rem;color:var(--muted);text-transform:uppercase">CLABE</div><div style="font-family:Orbitron;font-size:.68rem;font-weight:700;color:var(--c1)">646180402332964686</div></div><button onclick="copyClabe()" style="background:none;border:1px solid rgba(0,170,255,.28);color:var(--c1);border-radius:3px;padding:.08rem .38rem;font-size:.6rem;cursor:pointer;font-family:'Exo 2';font-weight:700">Copiar</button></div></div><div style="font-size:.72rem;color:var(--muted);line-height:1.7;padding:.6rem .82rem;background:rgba(255,255,255,.03);border-radius:6px;border:1px solid var(--border)">1. Transfiere el monto exacto.<br/>2. Captura el comprobante.<br/>3. Manda comprobante + # pedido al WhatsApp.<br/>4. Confirmamos en menos de 3 min.</div><a href="https://wa.me/12894273983" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.45rem;padding:.82rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:7px;font-family:'Exo 2';font-weight:800;font-size:.85rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;margin-top:.82rem">&#128222; Confirmar por WhatsApp</a></div></div>
 </div>
 <div class="modal-ov" id="modal-binance">
-  <div class="modal"><div class="modal-h"><h3 style="color:#f0b90b">&#128176; Binance Pay</h3><button class="modal-close" onclick="closeBinanceModal()">&#215;</button></div><div class="modal-b"><div style="text-align:center;margin-bottom:1.1rem"><div style="font-size:2.4rem;margin-bottom:.45rem">&#128176;</div><div style="font-family:Orbitron;font-size:.88rem;font-weight:700;color:#fff;margin-bottom:.18rem">Pago con Binance</div><div style="font-size:.78rem;color:var(--muted)">Transfiere y manda el comprobante por WhatsApp</div></div><div style="background:rgba(240,185,11,.05);border:1px solid rgba(240,185,11,.18);border-radius:11px;padding:1.15rem;margin-bottom:.95rem"><div style="font-family:Orbitron;font-size:.7rem;font-weight:700;color:#f0b90b;margin-bottom:.65rem">Datos Binance</div><div style="display:flex;justify-content:space-between;align-items:center;padding:.38rem .58rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:6px;flex-wrap:wrap;gap:.28rem"><div><div style="font-size:.6rem;color:var(--muted);text-transform:uppercase">Binance ID</div><div style="font-family:Orbitron;font-size:.75rem;font-weight:700;color:#f0b90b;letter-spacing:1px">1106987175</div></div><button onclick="copyBinanceID()" style="background:none;border:1px solid rgba(240,185,11,.28);color:#f0b90b;border-radius:3px;padding:.08rem .38rem;font-size:.6rem;cursor:pointer;font-family:'Exo 2';font-weight:700">Copiar</button></div></div><div style="font-size:.72rem;color:var(--muted);line-height:1.7;padding:.6rem .82rem;background:rgba(255,255,255,.03);border-radius:6px;border:1px solid var(--border);margin-bottom:.82rem">1. Abre Binance &gt; Pay.<br/>2. Busca ID: <strong style="color:#f0b90b">1106987175</strong><br/>3. Transfiere el monto exacto.<br/>4. Captura y manda comprobante al WhatsApp.</div><a href="https://wa.me/5215548461200" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.45rem;padding:.82rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:7px;font-family:'Exo 2';font-weight:800;font-size:.85rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none">&#128222; Confirmar por WhatsApp</a></div></div>
+  <div class="modal"><div class="modal-h"><h3 style="color:#f0b90b">&#128176; Binance Pay</h3><button class="modal-close" onclick="closeBinanceModal()">&#215;</button></div><div class="modal-b"><div style="text-align:center;margin-bottom:1.1rem"><div style="font-size:2.4rem;margin-bottom:.45rem">&#128176;</div><div style="font-family:Orbitron;font-size:.88rem;font-weight:700;color:#fff;margin-bottom:.18rem">Pago con Binance</div><div style="font-size:.78rem;color:var(--muted)">Transfiere y manda el comprobante por WhatsApp</div></div><div style="background:rgba(240,185,11,.05);border:1px solid rgba(240,185,11,.18);border-radius:11px;padding:1.15rem;margin-bottom:.95rem"><div style="font-family:Orbitron;font-size:.7rem;font-weight:700;color:#f0b90b;margin-bottom:.65rem">Datos Binance</div><div style="display:flex;justify-content:space-between;align-items:center;padding:.38rem .58rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:6px;flex-wrap:wrap;gap:.28rem"><div><div style="font-size:.6rem;color:var(--muted);text-transform:uppercase">Binance ID</div><div style="font-family:Orbitron;font-size:.75rem;font-weight:700;color:#f0b90b;letter-spacing:1px">1106987175</div></div><button onclick="copyBinanceID()" style="background:none;border:1px solid rgba(240,185,11,.28);color:#f0b90b;border-radius:3px;padding:.08rem .38rem;font-size:.6rem;cursor:pointer;font-family:'Exo 2';font-weight:700">Copiar</button></div></div><div style="font-size:.72rem;color:var(--muted);line-height:1.7;padding:.6rem .82rem;background:rgba(255,255,255,.03);border-radius:6px;border:1px solid var(--border);margin-bottom:.82rem">1. Abre Binance &gt; Pay.<br/>2. Busca ID: <strong style="color:#f0b90b">1106987175</strong><br/>3. Transfiere el monto exacto.<br/>4. Captura y manda comprobante al WhatsApp.</div><a href="https://wa.me/12894273983" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.45rem;padding:.82rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:7px;font-family:'Exo 2';font-weight:800;font-size:.85rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none">&#128222; Confirmar por WhatsApp</a></div></div>
 </div>
 <div class="admin-ov" id="admin-modal">
   <div class="admin-box"><div class="admin-h"><h3>&#128274; Panel Admin - CiberStore</h3><button class="modal-close" onclick="closeAdmin()">&#215;</button></div>
