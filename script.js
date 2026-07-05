@@ -4421,12 +4421,12 @@ function comprarPinAPI(productId, precioLocal, nombreProducto){
 // ═══ PRODUCTOS PIN POR API (Recargas América) ═══
 // product_id = ID en Recargas América | precio = tu precio de venta en MXN
 var PINES_API = [
-  {product_id:1, nombre:'Free Fire 100 Diamantes +10 Bono',  precio:15,  diamantes:'110'},
-  {product_id:2, nombre:'Free Fire 310 Diamantes +31 Bono',  precio:55,  diamantes:'341'},
-  {product_id:3, nombre:'Free Fire 520 Diamantes +52 Bono',  precio:75,  diamantes:'572'},
-  {product_id:4, nombre:'Free Fire 1060 Diamantes +106 Bono', precio:140, diamantes:'1,166'},
-  {product_id:5, nombre:'Free Fire 2180 Diamantes +218 Bono', precio:270, diamantes:'2,398'},
-  {product_id:6, nombre:'Free Fire 5600 Diamantes +560 Bono', precio:665, diamantes:'6,160'}
+  {product_id:5, nombre:'Free Fire 100 Diamantes +10 Bono',  precio:15,  diamantes:'110'},
+  {product_id:3, nombre:'Free Fire 310 Diamantes +31 Bono',  precio:55,  diamantes:'341'},
+  {product_id:6, nombre:'Free Fire 520 Diamantes +52 Bono',  precio:75,  diamantes:'572'},
+  {product_id:1, nombre:'Free Fire 1060 Diamantes +106 Bono', precio:140, diamantes:'1,166'},
+  {product_id:2, nombre:'Free Fire 2180 Diamantes +218 Bono', precio:270, diamantes:'2,398'},
+  {product_id:4, nombre:'Free Fire 5600 Diamantes +560 Bono', precio:665, diamantes:'6,160'}
 ];
 
 function renderPinesAPI(){
