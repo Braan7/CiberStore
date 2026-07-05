@@ -749,6 +749,7 @@ document.addEventListener('keydown',function(e){
     <div class="nav-item" id="ni-diamantes" onclick="goPage('diamantes')"><div class="nav-ico">&#128142;</div> Diamantes FF</div>
     <div class="nav-item" id="ni-likes" onclick="goPage('likes')"><div class="nav-ico">&#128077;</div> Likes Perfil</div>
     <div class="nav-item" id="ni-pines" onclick="goPage('pines')"><div class="nav-ico">&#127915;</div> Pines de Free Fire <span class="nb" style="background:rgba(255,204,0,.15);border:1px solid rgba(255,204,0,.3);color:#ffcc00">NEW</span></div>
+    <div class="nav-item" id="ni-api" onclick="goPage('api')"><div class="nav-ico">&#128268;</div> API Revendedores <span class="nb" style="background:rgba(56,189,248,.15);border:1px solid rgba(56,189,248,.3);color:#38bdf8">API</span></div>
     <div class="nav-item" id="ni-honor" onclick="goPage('honor')"><div class="nav-ico">&#127942;</div> Honor de Clan</div>
     <div class="nav-item" id="ni-honor-cuenta" onclick="goPage('honorcuenta')"><div class="nav-ico">&#127869;</div> Experiencia Cuenta FF <span class="nb" style="background:rgba(0,245,255,.15);border:1px solid rgba(0,245,255,.3);color:#00f5ff">NEW</span></div>
     <div class="nav-item" id="ni-clanes" onclick="goPage('clanes')"><div class="nav-ico">&#127959;</div> Venta de Clanes <span class="nb nb-lv7">NV.7</span></div>
@@ -1582,6 +1583,91 @@ document.addEventListener('keydown',function(e){
       </div>
 
       <div style="font-size:.68rem;color:var(--muted);margin-top:.75rem">Guárdalo bien. También quedó en "Mis Compras".</div>
+    </div>
+
+  </div>
+</div><div class="page" id="page-api">
+  <div class="ph">
+    <div class="stag">Para Desarrolladores</div>
+    <h2 class="ptitle">&#128268; API <span>REVENDEDORES</span></h2>
+    <p class="psub">Vende nuestros productos en tu propia página. Compra por API con saldo prepagado.</p>
+  </div>
+
+  <div style="max-width:720px;margin:0 auto;padding:0 5vw 2.5rem">
+
+    <!-- 🧪 PRUEBA TEMPORAL -->
+    <div style="background:rgba(255,204,0,.08);border:1px dashed rgba(255,204,0,.4);border-radius:12px;padding:1rem;margin-bottom:1.25rem">
+      <div style="font-family:Orbitron;font-size:.8rem;font-weight:900;color:#ffcc00;margin-bottom:.6rem">🧪 PRUEBA DE API (temporal)</div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem">
+        <button onclick="probarAPIRev('saldo')" style="flex:1;min-width:90px;padding:.5rem;background:rgba(56,189,248,.15);border:1px solid rgba(56,189,248,.35);color:#38bdf8;border-radius:8px;font-family:Rajdhani,sans-serif;font-weight:800;font-size:.72rem;cursor:pointer">Ver saldo</button>
+        <button onclick="probarAPIRev('productos')" style="flex:1;min-width:90px;padding:.5rem;background:rgba(56,189,248,.15);border:1px solid rgba(56,189,248,.35);color:#38bdf8;border-radius:8px;font-family:Rajdhani,sans-serif;font-weight:800;font-size:.72rem;cursor:pointer">Ver productos</button>
+        <button onclick="probarAPIRev('comprar')" style="flex:1;min-width:90px;padding:.5rem;background:rgba(0,230,118,.15);border:1px solid rgba(0,230,118,.35);color:#00e676;border-radius:8px;font-family:Rajdhani,sans-serif;font-weight:800;font-size:.72rem;cursor:pointer">Comprar ff_110</button>
+      </div>
+      <div id="api-test-result" style="display:none;background:#04070f;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:.75rem;font-family:'Courier New',monospace;font-size:.7rem;color:#25d366;white-space:pre-wrap;word-break:break-all;max-height:300px;overflow:auto">-</div>
+    </div>
+
+    <!-- Cómo empezar -->
+    <div style="background:linear-gradient(135deg,#0a1420,#0d0710);border:1px solid rgba(56,189,248,.28);border-radius:16px;padding:1.4rem 1.2rem;margin-bottom:1.25rem">
+      <div style="font-family:Orbitron;font-size:.95rem;font-weight:900;color:#38bdf8;letter-spacing:.5px;margin-bottom:.85rem">&#128640; ¿CÓMO EMPEZAR?</div>
+      <div style="display:flex;flex-direction:column;gap:.75rem">
+        <div style="display:flex;gap:.7rem;align-items:flex-start"><span style="background:#38bdf8;color:#04121a;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-weight:900;font-size:.75rem;flex-shrink:0">1</span><div style="font-size:.85rem;color:var(--text);line-height:1.6">Regístrate abajo con tu nombre y correo</div></div>
+        <div style="display:flex;gap:.7rem;align-items:flex-start"><span style="background:#38bdf8;color:#04121a;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-weight:900;font-size:.75rem;flex-shrink:0">2</span><div style="font-size:.85rem;color:var(--text);line-height:1.6">Te aprobamos y te damos tu <strong style="color:#38bdf8">API Key</strong> privada</div></div>
+        <div style="display:flex;gap:.7rem;align-items:flex-start"><span style="background:#38bdf8;color:#04121a;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-weight:900;font-size:.75rem;flex-shrink:0">3</span><div style="font-size:.85rem;color:var(--text);line-height:1.6">Recargas saldo con nosotros (prepagado)</div></div>
+        <div style="display:flex;gap:.7rem;align-items:flex-start"><span style="background:#38bdf8;color:#04121a;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-weight:900;font-size:.75rem;flex-shrink:0">4</span><div style="font-size:.85rem;color:var(--text);line-height:1.6">Conectas la API a tu página y ¡a vender!</div></div>
+      </div>
+    </div>
+
+    <!-- Autenticación -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.25rem;margin-bottom:1.25rem">
+      <div style="font-family:Orbitron;font-size:.85rem;font-weight:900;color:#fff;margin-bottom:.6rem">&#128273; AUTENTICACIÓN</div>
+      <p style="font-size:.82rem;color:var(--muted);margin-bottom:.6rem">Incluye tu API Key en el header de cada petición:</p>
+      <div style="background:#04070f;border:1px solid rgba(56,189,248,.2);border-radius:8px;padding:.75rem;font-family:'Courier New',monospace;font-size:.78rem;color:#38bdf8;word-break:break-all">Authorization: Bearer TU_API_KEY</div>
+    </div>
+
+    <!-- URL Base -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.25rem;margin-bottom:1.25rem">
+      <div style="font-family:Orbitron;font-size:.85rem;font-weight:900;color:#fff;margin-bottom:.6rem">&#127760; URL BASE</div>
+      <div style="background:#04070f;border:1px solid rgba(56,189,248,.2);border-radius:8px;padding:.75rem;font-family:'Courier New',monospace;font-size:.72rem;color:#25d366;word-break:break-all;-webkit-user-select:all;user-select:all">https://pnotsqsudqpwqzssevig.supabase.co/functions/v1/api-revendedor</div>
+      <p style="font-size:.72rem;color:var(--muted);margin-top:.5rem">Todas las peticiones son POST con cuerpo JSON.</p>
+    </div>
+
+    <!-- Endpoints -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.25rem;margin-bottom:1.25rem">
+      <div style="font-family:Orbitron;font-size:.85rem;font-weight:900;color:#fff;margin-bottom:.85rem">&#128225; ACCIONES DISPONIBLES</div>
+
+      <!-- Saldo -->
+      <div style="margin-bottom:1.1rem">
+        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem"><span style="background:#25d366;color:#04120a;font-family:Orbitron;font-weight:900;font-size:.6rem;padding:.15rem .5rem;border-radius:5px">POST</span><span style="font-size:.82rem;color:#fff;font-weight:700">Consultar saldo</span></div>
+        <div style="background:#04070f;border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:.7rem;font-family:'Courier New',monospace;font-size:.72rem;color:var(--text);white-space:pre-wrap;-webkit-user-select:all;user-select:all">{ "action": "saldo" }</div>
+      </div>
+
+      <!-- Productos -->
+      <div style="margin-bottom:1.1rem">
+        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem"><span style="background:#25d366;color:#04120a;font-family:Orbitron;font-weight:900;font-size:.6rem;padding:.15rem .5rem;border-radius:5px">POST</span><span style="font-size:.82rem;color:#fff;font-weight:700">Listar productos</span></div>
+        <div style="background:#04070f;border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:.7rem;font-family:'Courier New',monospace;font-size:.72rem;color:var(--text);white-space:pre-wrap;-webkit-user-select:all;user-select:all">{ "action": "productos" }</div>
+      </div>
+
+      <!-- Comprar -->
+      <div>
+        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem"><span style="background:#25d366;color:#04120a;font-family:Orbitron;font-weight:900;font-size:.6rem;padding:.15rem .5rem;border-radius:5px">POST</span><span style="font-size:.82rem;color:#fff;font-weight:700">Comprar producto</span></div>
+        <div style="background:#04070f;border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:.7rem;font-family:'Courier New',monospace;font-size:.72rem;color:var(--text);white-space:pre-wrap;-webkit-user-select:all;user-select:all">{
+  "action": "comprar",
+  "sku": "ff_110",
+  "player_id": "123456789"
+}</div>
+        <p style="font-size:.72rem;color:var(--muted);margin-top:.5rem">Devuelve el PIN/código en el campo "entregable".</p>
+      </div>
+    </div>
+
+    <!-- Registro -->
+    <div style="background:linear-gradient(135deg,#0a1f14,#0d0710);border:1px solid rgba(0,230,118,.3);border-radius:16px;padding:1.4rem 1.2rem">
+      <div style="font-family:Orbitron;font-size:.95rem;font-weight:900;color:#00e676;letter-spacing:.5px;margin-bottom:.4rem">&#9989; SOLICITAR ACCESO</div>
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:1rem">Llena tus datos y te contactamos para darte tu API Key.</p>
+
+      <input id="api-reg-nombre" type="text" placeholder="Tu nombre o el de tu tienda" style="width:100%;background:#0a1f14;border:1px solid rgba(0,230,118,.25);color:#fff;border-radius:9px;padding:.65rem .85rem;font-family:Rajdhani,sans-serif;font-size:.88rem;margin-bottom:.6rem;box-sizing:border-box"/>
+      <input id="api-reg-email" type="email" placeholder="Tu correo electrónico" style="width:100%;background:#0a1f14;border:1px solid rgba(0,230,118,.25);color:#fff;border-radius:9px;padding:.65rem .85rem;font-family:Rajdhani,sans-serif;font-size:.88rem;margin-bottom:.6rem;box-sizing:border-box"/>
+      <input id="api-reg-tel" type="text" placeholder="Tu WhatsApp (con lada)" style="width:100%;background:#0a1f14;border:1px solid rgba(0,230,118,.25);color:#fff;border-radius:9px;padding:.65rem .85rem;font-family:Rajdhani,sans-serif;font-size:.88rem;margin-bottom:.85rem;box-sizing:border-box"/>
+      <button onclick="solicitarAccesoAPI()" style="width:100%;padding:.8rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:10px;font-family:Orbitron,sans-serif;font-weight:900;font-size:.85rem;cursor:pointer">&#128231; SOLICITAR MI API KEY</button>
     </div>
 
   </div>

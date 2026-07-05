@@ -4478,3 +4478,53 @@ function _seleccionarPin(el){
     sel.addRange(range);
   } catch(e){}
 }
+
+
+// ═══ Solicitar acceso a la API de revendedores (WhatsApp) ═══
+function solicitarAccesoAPI(){
+  var nombre = ((document.getElementById('api-reg-nombre')||{}).value||'').trim();
+  var email = ((document.getElementById('api-reg-email')||{}).value||'').trim();
+  var tel = ((document.getElementById('api-reg-tel')||{}).value||'').trim();
+
+  if(!nombre){ showToast('Ingresa tu nombre o tienda'); return; }
+  if(!email){ showToast('Ingresa tu correo'); return; }
+  if(!tel){ showToast('Ingresa tu WhatsApp'); return; }
+
+  var msg = 'Hola CiberStore! Quiero acceso a la API de REVENDEDORES.%0A%0A'
+    + '👤 Nombre/Tienda: ' + encodeURIComponent(nombre) + '%0A'
+    + '📧 Correo: ' + encodeURIComponent(email) + '%0A'
+    + '📱 WhatsApp: ' + encodeURIComponent(tel) + '%0A%0A'
+    + 'Quedo atento para recibir mi API Key y recargar saldo. Gracias!';
+
+  window.open('https://wa.me/5215548461200?text=' + msg, '_blank');
+  showToast('Abriendo WhatsApp...', 2000);
+}
+
+
+// ═══ TEMPORAL: probar la API de revendedores ═══
+var API_REV_URL = 'https://pnotsqsudqpwqzssevig.supabase.co/functions/v1/api-revendedor';
+var API_REV_TESTKEY = 'csk_test_123456';
+
+function probarAPIRev(accion){
+  var box = document.getElementById('api-test-result');
+  if(box){ box.style.display='block'; box.textContent = 'Probando "'+accion+'"...'; }
+
+  var body = { action: accion };
+  if(accion === 'comprar'){ body.sku = 'ff_110'; body.player_id = '123456789'; }
+
+  fetch(API_REV_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + API_REV_TESTKEY
+    },
+    body: JSON.stringify(body)
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(box) box.textContent = 'RESULTADO "'+accion+'":\n' + JSON.stringify(d, null, 2);
+  })
+  .catch(function(e){
+    if(box) box.textContent = 'ERROR: ' + e.message;
+  });
+}
