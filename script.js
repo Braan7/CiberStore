@@ -4502,7 +4502,7 @@ function solicitarAccesoAPI(){
 
 
 // ═══ TEMPORAL: probar la API de revendedores ═══
-var API_REV_URL = 'https://pnotsqsudqpwqzssevig.supabase.co/functions/v1/api-revendedor';
+var API_REV_URL = 'https://pnotsqsudqpwqzssevig.supabase.co/functions/v1/dynamic-action';
 var API_REV_TESTKEY = 'csk_test_123456';
 
 function probarAPIRev(accion){
