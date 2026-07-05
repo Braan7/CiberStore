@@ -4232,11 +4232,42 @@ function submitPinSaldo(){
 }
 
 function copiarPin(){
-  if(!_ultimoPin) return;
-  if(navigator.clipboard){
-    navigator.clipboard.writeText(_ultimoPin).then(function(){ showToast('✓ Código copiado'); });
+  // Copiar el contenido del recuadro (PIN o lista de IDs)
+  var texto = _ultimoPin;
+  var codEl = document.getElementById('pin-codigo');
+  if((!texto || texto==='') && codEl) texto = codEl.textContent;
+  if(!texto) return;
+
+  // Método 1: API moderna
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(texto).then(function(){
+      showToast('✓ Copiado');
+    }).catch(function(){
+      _copiarFallback(texto);
+    });
   } else {
-    showToast('Código: '+_ultimoPin);
+    _copiarFallback(texto);
+  }
+}
+
+// Respaldo para móviles/navegadores viejos
+function _copiarFallback(texto){
+  try {
+    var ta = document.createElement('textarea');
+    ta.value = texto;
+    ta.style.position = 'fixed';
+    ta.style.top = '0';
+    ta.style.left = '0';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    ta.setSelectionRange(0, texto.length); // importante en iOS
+    var ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast(ok ? '✓ Copiado' : 'Selecciona y copia manualmente');
+  } catch(e){
+    showToast('No se pudo copiar. Selecciona el texto manualmente.');
   }
 }
 
@@ -4434,4 +4465,16 @@ function verProductosReales(){
   }).catch(function(e){
     showToast('Error: '+e.message);
   });
+}
+
+
+// Seleccionar todo el texto del recuadro del PIN al tocarlo (facilita copiar manual)
+function _seleccionarPin(el){
+  try {
+    var range = document.createRange();
+    range.selectNodeContents(el);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  } catch(e){}
 }
