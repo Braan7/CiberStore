@@ -663,6 +663,7 @@ function goPage(id){
   if(id==='miscompras') renderMisCompras();
   if(id==='honorcuenta') setTimeout(renderExpPackages,50);
   if(id==='referidos') setTimeout(renderReferidos,50);
+  if(id==='retirar') setTimeout(_updateRetiroSaldo,50);
   if(id==='home'){setTimeout(renderResenas,50);}
   if(id==='comunidad') setTimeout(renderChat,50);
 }
@@ -4614,4 +4615,77 @@ function enviarPagoWA(metodo){
   }
 
   window.open('https://wa.me/12894273983?text=' + msg, '_blank');
+}
+
+
+// ═══ Colapsar/expandir secciones del menú lateral ═══
+function toggleNavGroup(header){
+  header.classList.toggle('collapsed');
+  var group = header.nextElementSibling;
+  if(group && group.classList.contains('sb-group')){
+    group.classList.toggle('collapsed');
+  }
+}
+
+
+// ═══ RETIRAR FONDOS (revendedores) ═══
+var _retMetodo = 'binance';
+
+function selRetMetodo(metodo, el){
+  _retMetodo = metodo;
+  document.querySelectorAll('.ret-metodo').forEach(function(c){ c.classList.remove('sel'); });
+  if(el) el.classList.add('sel');
+  var label = document.getElementById('ret-dato-label');
+  var input = document.getElementById('ret-destino');
+  if(metodo === 'binance'){
+    if(label) label.textContent = 'Correo de Binance Pay o ID';
+    if(input) input.placeholder = 'usuario@correo.com o ID de Binance';
+  } else {
+    if(label) label.textContent = 'Numero o correo de Zelle';
+    if(input) input.placeholder = '+1 (___) ___-____ o correo';
+  }
+}
+
+function calcRetiro(){
+  var monto = parseFloat((document.getElementById('ret-monto')||{}).value) || 0;
+  var box = document.getElementById('ret-resumen');
+  if(monto <= 0){ if(box) box.style.display='none'; return; }
+  var comision = monto * 0.05;
+  var recibe = monto - comision;
+  if(box) box.style.display='block';
+  var m=document.getElementById('ret-r-monto'); if(m) m.textContent='$'+monto.toLocaleString('es-MX');
+  var c=document.getElementById('ret-r-comision'); if(c) c.textContent='-$'+comision.toLocaleString('es-MX',{maximumFractionDigits:2});
+  var f=document.getElementById('ret-r-final'); if(f) f.textContent='$'+recibe.toLocaleString('es-MX',{maximumFractionDigits:2})+' MXN';
+}
+
+function solicitarRetiro(){
+  if(!authSession){ showToast('Inicia sesion'); setTimeout(showAuthModal,600); return; }
+  var destino = ((document.getElementById('ret-destino')||{}).value||'').trim();
+  var monto = parseFloat((document.getElementById('ret-monto')||{}).value) || 0;
+
+  if(monto < 100){ showToast('El minimo de retiro es $100 MXN'); return; }
+  if(!destino){ showToast('Escribe tu '+(_retMetodo==='binance'?'correo/ID de Binance':'dato de Zelle')); return; }
+
+  var comision = monto * 0.05;
+  var recibe = monto - comision;
+  var user = authSession.username || 'Revendedor';
+  var metodoNom = _retMetodo === 'binance' ? 'Binance Pay' : 'Zelle';
+
+  var msg = 'Hola CiberStore! Quiero SOLICITAR UN RETIRO de mis ganancias de revendedor.%0A%0A'
+    + 'Usuario: ' + encodeURIComponent(user) + '%0A'
+    + 'Metodo: ' + encodeURIComponent(metodoNom) + '%0A'
+    + 'Destino: ' + encodeURIComponent(destino) + '%0A'
+    + 'Monto solicitado: $' + monto.toLocaleString('es-MX') + ' MXN%0A'
+    + 'Comision (5%): $' + comision.toLocaleString('es-MX',{maximumFractionDigits:2}) + '%0A'
+    + 'Recibo: $' + recibe.toLocaleString('es-MX',{maximumFractionDigits:2}) + ' MXN%0A%0A'
+    + 'Confirmo que mis datos son correctos.';
+
+  window.open('https://wa.me/12894273983?text=' + msg, '_blank');
+  showToast('Abriendo WhatsApp...', 2000);
+}
+
+// Actualizar el saldo mostrado en la página de retiro
+function _updateRetiroSaldo(){
+  var el = document.getElementById('retiro-saldo');
+  if(el && authSession) el.textContent = '$'+Math.round(authSession.saldo||0).toLocaleString('es-MX')+' MXN';
 }

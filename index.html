@@ -1185,6 +1185,100 @@ button[onclick*="submit"]:hover,button[onclick*="comprar"]:hover,button[onclick*
 .bnc-line{font-size:.68rem;color:var(--muted)}
 .bnc-recibe{font-size:.75rem;color:#25d366;font-weight:700;margin:.15rem 0}
 .bnc-badge{display:inline-block;background:#f0b90b;color:#1a1200;font-family:Orbitron;font-weight:900;font-size:.58rem;padding:.2rem .6rem;border-radius:999px;letter-spacing:.5px;margin-top:.35rem}
+
+/* ═══════════ SECCIONES COLAPSABLES DEL MENÚ ═══════════ */
+.sb-collapsible{
+  cursor:pointer;display:flex;align-items:center;justify-content:space-between;
+  user-select:none;transition:color .2s;
+}
+.sb-collapsible:hover{color:var(--c1)!important}
+.sb-arrow{font-size:.7rem;transition:transform .3s;opacity:.7}
+.sb-collapsible.collapsed .sb-arrow{transform:rotate(-90deg)}
+.sb-group{
+  overflow:hidden;
+  max-height:1000px;
+  transition:max-height .35s ease,opacity .25s;
+  opacity:1;
+}
+.sb-group.collapsed{max-height:0;opacity:0}
+
+/* ═══════════ RETIRAR FONDOS ═══════════ */
+.ret-metodo{
+  background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
+  border:1px solid var(--border2);border-radius:14px;padding:1rem .75rem;cursor:pointer;text-align:center;
+  transition:transform .25s cubic-bezier(.34,1.56,.64,1),border-color .25s,box-shadow .25s;
+}
+.ret-metodo:hover{transform:translateY(-3px)}
+.ret-metodo.sel{border-color:var(--c1);box-shadow:0 0 0 2px rgba(77,163,255,.35),0 8px 24px rgba(80,140,255,.2);background:rgba(77,163,255,.06)}
+
+/* ═══════════ MENÚ ESTILO PREMIUM (tarjetas grandes) ═══════════ */
+
+/* Ancho del sidebar un poco mayor para las tarjetas */
+.sidebar{width:300px!important}
+@media(max-width:480px){.sidebar{width:88vw!important;max-width:340px!important}}
+
+/* Scroll interno con más padding */
+.sidebar-scroll,.sb-scroll{padding:.5rem .8rem!important}
+
+/* Secciones (títulos) con flechita a la derecha, estilo referencia */
+.sb-section{
+  padding:1.1rem .5rem .55rem!important;
+  font-size:.66rem!important;
+  color:#8a93a8!important;
+  letter-spacing:2.5px!important;
+  font-weight:800!important;
+}
+.sb-collapsible .sb-arrow{color:var(--accent2);font-size:.85rem}
+
+/* Items como tarjetas grandes separadas */
+.nav-item{
+  padding:.85rem .9rem!important;
+  margin-bottom:.55rem!important;
+  border-radius:15px!important;
+  background:linear-gradient(160deg,rgba(255,255,255,.045),rgba(255,255,255,.015))!important;
+  border:1px solid rgba(255,255,255,.06)!important;
+  font-size:.92rem!important;
+  font-weight:600!important;
+  color:#c8d0e0!important;
+  gap:.85rem!important;
+  box-shadow:0 2px 10px rgba(0,0,0,.15)!important;
+}
+.nav-item:hover{
+  background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.03))!important;
+  border-color:var(--border2)!important;
+  transform:translateX(2px)!important;
+}
+.nav-item.active{
+  color:#fff!important;
+  background:linear-gradient(135deg,rgba(77,163,255,.25),rgba(168,85,247,.18))!important;
+  border-color:rgba(120,170,255,.35)!important;
+  box-shadow:0 4px 18px rgba(80,140,255,.2),inset 0 0 20px rgba(80,140,255,.1)!important;
+}
+
+/* Íconos en cuadros redondeados con color (estilo referencia) */
+.nav-ico{
+  width:44px!important;height:44px!important;
+  border-radius:13px!important;
+  background:linear-gradient(160deg,rgba(255,180,90,.14),rgba(255,140,60,.06))!important;
+  border:1px solid rgba(255,170,80,.12)!important;
+  font-size:1.25rem!important;
+  box-shadow:inset 0 0 12px rgba(255,160,70,.08)!important;
+}
+.nav-item.active .nav-ico{
+  background:linear-gradient(160deg,rgba(77,163,255,.25),rgba(168,85,247,.15))!important;
+  border-color:rgba(120,170,255,.3)!important;
+}
+
+/* Badges (NUEVO, API, etc.) más redondeados y visibles */
+.nav-item .nb{
+  margin-left:auto!important;
+  border-radius:999px!important;
+  padding:.28rem .7rem!important;
+  font-size:.6rem!important;
+  font-weight:800!important;
+  letter-spacing:.5px!important;
+  box-shadow:0 0 12px rgba(0,0,0,.3)!important;
+}
 </style>
 
 <script>
@@ -1235,7 +1329,8 @@ document.addEventListener('keydown',function(e){
   <div class="sb-nav">
     <div class="sb-section">Principal</div>
     <div class="nav-item active" id="ni-home" onclick="goPage('home')"><div class="nav-ico">&#127968;</div> Inicio</div>
-    <div class="sb-section">Servicios</div>
+    <div class="sb-section sb-collapsible" onclick="toggleNavGroup(this)">Servicios <span class="sb-arrow">&#9662;</span></div>
+    <div class="sb-group">
     <div class="nav-item" id="ni-diamantes" onclick="goPage('diamantes')"><div class="nav-ico">&#128142;</div> Diamantes FF</div>
     <div class="nav-item" id="ni-likes" onclick="goPage('likes')"><div class="nav-ico">&#128077;</div> Likes Perfil</div>
     <div class="nav-item" id="ni-pines" onclick="goPage('pines')"><div class="nav-ico">&#127915;</div> Pines de Free Fire <span class="nb" style="background:rgba(255,204,0,.15);border:1px solid rgba(255,204,0,.3);color:#ffcc00">NEW</span></div>
@@ -1249,13 +1344,16 @@ document.addEventListener('keydown',function(e){
     <div class="nav-item" id="ni-codigos" onclick="goPage('codigos')"><div class="nav-ico">&#127381;</div> Codigos FF <span class="nb" style="background:linear-gradient(90deg,#ff4400,#ff8800);color:#fff;border:none">NUEVO</span></div>
     <div class="nav-item" id="ni-cajas" onclick="goPage('cajas')"><div class="nav-ico">&#128142;</div> Fragmentos EVO <span class="nb" style="background:linear-gradient(90deg,#ff4400,#ff8800);color:#fff;border:none">NUEVO</span></div>
     <div class="nav-item" onclick="window.open('https://whatsapp.com/channel/0029VbCXQVjJENyAgAoJLJ3g','_blank');closeSB()"><div class="nav-ico">&#128172;</div> Canal WhatsApp <span class="nb nb-new">NUEVO</span></div>
-    <div class="sb-section">Mi cuenta</div>
+    </div>
+    <div class="sb-section sb-collapsible" onclick="toggleNavGroup(this)">Mi cuenta <span class="sb-arrow">&#9662;</span></div>
+    <div class="sb-group">
     <div class="nav-item" id="ni-referidos" onclick="goPage('referidos')"><div class="nav-ico">&#127381;</div> Programa Referidos <span class="nb" style="background:rgba(255,208,0,.2);border:1px solid rgba(255,208,0,.4);color:#ffd000">NUEVO</span></div>
     <div class="nav-item" id="ni-perfil" onclick="goPage('perfil')"><div class="nav-ico">&#128100;</div> Mi Perfil</div>
     <div class="nav-item" id="ni-saldo" onclick="goPage('saldo')"><div class="nav-ico">&#128176;</div> Recargar Saldo</div>
     <div class="nav-item" id="ni-miscompras" onclick="goPage('miscompras')"><div class="nav-ico">&#128722;</div> Mis Compras</div>
     <div class="nav-item" id="ni-transferir" onclick="goPage('transferir')"><div class="nav-ico">&#8646;</div> Transferir Saldo</div>
-    
+    <div class="nav-item" id="ni-retirar" onclick="goPage('retirar')"><div class="nav-ico">&#127974;</div> Retirar Fondos <span class="nb" style="background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.35);color:#25d366">$</span></div>
+    </div>
   </div>
   <div class="sb-footer"><div class="ftitle"><span class="l1">CIBER</span><span class="l2">STORE</span></div><div style="font-size:.65rem;color:#3a4560;line-height:1.6;margin-bottom:.35rem">La tienda definitiva de Free Fire.<br/>Diamantes, likes y honor de clan.</div>Soporte 24/7</div>
 </div>
@@ -2547,6 +2645,58 @@ document.addEventListener('keydown',function(e){
     </div>
   </div>
 </div>
+<div class="page" id="page-retirar">
+  <div class="ph"><div class="stag">Revendedores</div><h2 class="ptitle">RETIRAR <span>FONDOS</span></h2><p class="psub">Retira las ganancias acumuladas de tu cuenta de revendedor.</p></div>
+  <div style="max-width:480px;margin:0 auto;padding:0 5vw 3rem">
+
+    <!-- Saldo disponible -->
+    <div style="background:linear-gradient(135deg,rgba(37,211,102,.1),rgba(37,211,102,.03));border:1px solid rgba(37,211,102,.25);border-radius:16px;padding:1.4rem;margin-bottom:1.25rem;text-align:center">
+      <div style="font-size:.7rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:.3rem">Saldo disponible para retiro</div>
+      <div style="font-family:Orbitron;font-size:2rem;font-weight:900;color:#25d366" id="retiro-saldo">$0.00 MXN</div>
+      <div style="font-size:.72rem;color:var(--muted);margin-top:.5rem;line-height:1.6">Comision de retiro: <strong style="color:#fff">5%</strong> &middot; Minimo: <strong style="color:#fff">$100 MXN</strong></div>
+    </div>
+
+    <!-- Aviso solo revendedores -->
+    <div style="background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.2);border-radius:12px;padding:.85rem 1rem;margin-bottom:1.25rem">
+      <div style="font-size:.78rem;color:#9ec5ff;line-height:1.6">&#8505; Los retiros son exclusivos para <strong>revendedores</strong> con ganancias acumuladas. Si no eres revendedor, tu saldo es solo para compras.</div>
+    </div>
+
+    <!-- Método de retiro -->
+    <div style="font-family:Orbitron;font-size:.8rem;font-weight:700;color:#fff;margin-bottom:.75rem">&#128179; Metodo de retiro</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:1.25rem">
+      <div class="ret-metodo sel" onclick="selRetMetodo('binance',this)" data-m="binance">
+        <div style="font-size:1.6rem">&#128176;</div>
+        <div style="font-family:Orbitron;font-weight:900;color:#f0b90b;font-size:.9rem">Binance</div>
+        <div style="font-size:.68rem;color:var(--muted)">Pay / ID</div>
+      </div>
+      <div class="ret-metodo" onclick="selRetMetodo('zelle',this)" data-m="zelle">
+        <div style="font-size:1.6rem">&#127482;&#127480;</div>
+        <div style="font-family:Orbitron;font-weight:900;color:#a78bfa;font-size:.9rem">Zelle</div>
+        <div style="font-size:.68rem;color:var(--muted)">USA</div>
+      </div>
+    </div>
+
+    <!-- Datos del retiro -->
+    <label class="flabel" id="ret-dato-label">Correo de Binance Pay o ID</label>
+    <input class="finput" id="ret-destino" type="text" placeholder="usuario@correo.com o ID de Binance"/>
+    <div style="font-size:.7rem;color:#ffb84d;margin:-.35rem 0 .85rem;display:flex;gap:.35rem;align-items:flex-start"><span>&#9888;</span> <span>Verifica bien el correo o ID. Los errores no se pueden revertir.</span></div>
+
+    <label class="flabel">Monto a retirar (MXN)</label>
+    <input class="finput" id="ret-monto" type="number" placeholder="Minimo: $100" min="100" oninput="calcRetiro()"/>
+
+    <!-- Resumen -->
+    <div id="ret-resumen" style="display:none;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:11px;padding:.9rem 1rem;margin:.85rem 0">
+      <div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);margin-bottom:.35rem"><span>Monto solicitado</span><span id="ret-r-monto" style="color:#fff">$0</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);margin-bottom:.35rem"><span>Comision (5%)</span><span id="ret-r-comision" style="color:#ff6b6b">-$0</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:.85rem;font-weight:700;padding-top:.35rem;border-top:1px solid var(--border)"><span style="color:#fff">Recibes</span><span id="ret-r-final" style="color:#25d366">$0</span></div>
+    </div>
+
+    <button onclick="solicitarRetiro()" style="width:100%;margin-top:.75rem;padding:.9rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:11px;font-family:Orbitron;font-weight:900;font-size:.85rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(37,211,102,.3)">&#128640; SOLICITAR RETIRO</button>
+
+    <div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.75rem;line-height:1.6">Tu solicitud se envia por WhatsApp. Procesamos los retiros en 24-48 hrs habiles tras verificar tu cuenta de revendedor.</div>
+  </div>
+</div>
+
 <div class="page" id="page-referidos">
   <div class="ph">
     <div class="stag">Gana saldo gratis</div>
