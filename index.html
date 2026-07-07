@@ -1170,6 +1170,21 @@ button[onclick*="submit"]:hover,button[onclick*="comprar"]:hover,button[onclick*
 /* Botón de ojo (ver contraseña) */
 #eye-login,#auth-modal button[onclick*="togglePass"]{transition:color .2s}
 #auth-modal button[onclick*="togglePass"]:hover{color:var(--c1)!important}
+
+/* ═══════════ MODAL RECARGA BINANCE ═══════════ */
+.bnc-card{
+  background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
+  border:1px solid rgba(240,185,11,.25);
+  border-radius:14px;padding:.9rem .75rem;cursor:pointer;text-align:center;
+  transition:transform .25s cubic-bezier(.34,1.56,.64,1),border-color .25s,box-shadow .25s;
+  position:relative;
+}
+.bnc-card:hover{transform:translateY(-3px);border-color:rgba(240,185,11,.6);box-shadow:0 10px 30px rgba(240,185,11,.18)}
+.bnc-card.sel{border-color:#f0b90b;box-shadow:0 0 0 2px rgba(240,185,11,.4),0 10px 30px rgba(240,185,11,.25);background:rgba(240,185,11,.08)}
+.bnc-amt{font-family:Orbitron;font-weight:900;font-size:1.5rem;color:#fff;margin-bottom:.15rem}
+.bnc-line{font-size:.68rem;color:var(--muted)}
+.bnc-recibe{font-size:.75rem;color:#25d366;font-weight:700;margin:.15rem 0}
+.bnc-badge{display:inline-block;background:#f0b90b;color:#1a1200;font-family:Orbitron;font-weight:900;font-size:.58rem;padding:.2rem .6rem;border-radius:999px;letter-spacing:.5px;margin-top:.35rem}
 </style>
 
 <script>
@@ -2241,56 +2256,39 @@ document.addEventListener('keydown',function(e){
 </div>
 
 <div class="page" id="page-saldo">
-  <div class="ph"><div class="stag">Recargas</div><h2 class="ptitle">RECARGAR <span>SALDO</span></h2><p class="psub">Elige tu metodo, paga y envia comprobante por WhatsApp.</p></div>
+  <div class="ph"><div class="stag">Recargas</div><h2 class="ptitle">RECARGAR <span>SALDO</span></h2><p class="psub">Elige tu metodo de pago para ver los datos y enviar tu comprobante.</p></div>
   <div class="saldo-wrap">
     <!-- Saldo actual -->
-    <div style="background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.2);border-radius:11px;padding:1rem 1.25rem;margin-bottom:1.1rem;display:flex;align-items:center;justify-content:space-between">
+    <div style="background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.2);border-radius:11px;padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between">
       <div>
         <div style="font-size:.65rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:.15rem">Tu saldo actual</div>
         <div style="font-family:Orbitron;font-size:1.4rem;font-weight:900;color:#00e676" id="saldo-page-balance">$0 MX</div>
       </div>
       <div style="font-size:2rem">&#128176;</div>
     </div>
-    <!-- Metodos -->
+
+    <div style="font-size:.78rem;color:var(--muted);text-align:center;margin-bottom:1rem">&#128071; Toca un metodo de pago para ver los datos</div>
+
+    <!-- Metodos: cada uno abre su modal -->
     <div class="pay-card" onclick="openStoriModal()" style="border-color:rgba(0,200,100,.2)">
       <span class="pay-badge pay-active">ACTIVO</span>
-      <span class="pay-ico">&#127968;</span>
+      <span class="pay-ico">&#127974;</span>
       <div class="pay-name">Transferencia Bancaria</div>
-      <div class="pay-desc"> &mdash; CLABE: 646180402332964686</div>
+      <div class="pay-desc">SPEI &mdash; Matiana Rubi Hernandez</div>
     </div>
+
     <div class="pay-card" onclick="openBinanceModal()" style="border-color:rgba(240,185,11,.2)">
-      <span class="pay-badge pay-active" style="background:rgba(240,185,11,.15);border-color:rgba(240,185,11,.3);color:#f0b90b">ACTIVO</span>
+      <span class="pay-badge pay-active" style="background:rgba(240,185,11,.15);border-color:rgba(240,185,11,.3);color:#f0b90b">BONO EXTRA</span>
       <span class="pay-ico">&#128176;</span>
       <div class="pay-name">Binance Pay</div>
-      <div class="pay-desc">ID: 1106987175</div>
+      <div class="pay-desc">Recibe bono en cada recarga</div>
     </div>
-    <!-- Como funciona -->
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:1rem 1.25rem;margin-top:.75rem">
-      <div style="font-family:Orbitron;font-size:.72rem;font-weight:700;color:#fff;margin-bottom:.75rem">Como recargar saldo:</div>
-      <div style="display:flex;flex-direction:column;gap:.55rem">
-        <div style="display:flex;align-items:center;gap:.7rem;font-size:.8rem;color:var(--muted)"><div style="width:24px;height:24px;border-radius:50%;background:var(--c2);display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-size:.65rem;font-weight:700;color:#fff;flex-shrink:0">1</div>Realiza la transferencia con el monto deseado</div>
-        <div style="display:flex;align-items:center;gap:.7rem;font-size:.8rem;color:var(--muted)"><div style="width:24px;height:24px;border-radius:50%;background:var(--c2);display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-size:.65rem;font-weight:700;color:#fff;flex-shrink:0">2</div>Captura tu comprobante de pago</div>
-        <div style="display:flex;align-items:center;gap:.7rem;font-size:.8rem;color:var(--muted)"><div style="width:24px;height:24px;border-radius:50%;background:var(--c2);display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-size:.65rem;font-weight:700;color:#fff;flex-shrink:0">3</div>Presiona el boton de abajo y envia todo por WhatsApp</div>
-        <div style="display:flex;align-items:center;gap:.7rem;font-size:.8rem;color:var(--muted)"><div style="width:24px;height:24px;border-radius:50%;background:#00e676;display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-size:.65rem;font-weight:700;color:#000;flex-shrink:0">4</div>Te confirmamos y agregamos el saldo en minutos</div>
-      </div>
-      <!-- Formulario de recarga -->
-      <div style="background:var(--card);border:1px solid rgba(0,230,118,.2);border-radius:11px;padding:1.1rem;margin-top:.75rem">
-        <div style="font-family:Orbitron;font-size:.72rem;font-weight:700;color:#00e676;margin-bottom:.85rem">Enviar comprobante de pago</div>
-        <label class="flabel">Monto recargado (MXN)</label>
-        <input class="finput" id="recarga-monto" type="number" placeholder="Ej: 200" min="1"/>
-        <label class="flabel">Metodo de pago</label>
-        <select class="finput" id="recarga-metodo" style="cursor:pointer">
-          <option value="">Selecciona...</option>
-          <option value="Transferencia Bancaria">Transferencia Bancaria - Transferencia bancaria</option>
-          <option value="Binance">Binance Pay</option>
-        </select>
-        <label class="flabel">TXID o referencia de pago</label>
-        <input class="finput" id="recarga-txid" type="text" placeholder="Numero de referencia o TXID"/>
-        <label class="flabel">Mensaje adicional (opcional)</label>
-        <input class="finput" id="recarga-nota" type="text" placeholder="Ej: Pague hace 5 minutos"/>
-        <button onclick="enviarComprobanteWA()" style="width:100%;margin-top:.5rem;padding:.78rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:7px;font-family:'Exo 2';font-weight:800;font-size:.85rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer">&#128222; Enviar por WhatsApp</button>
-        <div style="font-size:.72rem;color:var(--muted);text-align:center;margin-top:.65rem;line-height:1.6">Despues de enviar el formulario <strong style="color:#fff">adjunta la captura</strong> de tu comprobante en WhatsApp. Te confirmamos en menos de 3 minutos.</div>
-      </div>
+
+    <div class="pay-card" onclick="openZelleModal()" style="border-color:rgba(120,80,255,.25)">
+      <span class="pay-badge pay-active" style="background:rgba(120,80,255,.15);border-color:rgba(120,80,255,.35);color:#a78bfa">USA</span>
+      <span class="pay-ico">&#127482;&#127480;</span>
+      <div class="pay-name">Zelle</div>
+      <div class="pay-desc">Pago desde USA (+3 USD comision)</div>
     </div>
   </div>
 </div>
@@ -3099,11 +3097,181 @@ document.addEventListener('keydown',function(e){
   </div>
 </div>
 <div class="modal-ov" id="modal-stori">
-  <div class="modal"><div class="modal-h"><h3>&#127968; Transferencia Bancaria</h3><button class="modal-close" onclick="closeStoriModal()">&#215;</button></div><div class="modal-b"><div style="text-align:center;margin-bottom:1.1rem"><div style="font-size:2.4rem;margin-bottom:.45rem">&#127968;</div><div style="font-family:Orbitron;font-size:.88rem;font-weight:700;color:#fff;margin-bottom:.18rem">Transferencia Bancaria</div><div style="font-size:.78rem;color:var(--muted)">Realiza tu transferencia y manda el comprobante por WhatsApp</div></div><div style="background:rgba(37,211,102,.05);border:1px solid rgba(37,211,102,.18);border-radius:11px;padding:1.15rem;margin-bottom:.95rem"><div style="font-family:Orbitron;font-size:.7rem;font-weight:700;color:#25d366;margin-bottom:.65rem">Datos bancarios</div><div style="display:flex;justify-content:space-between;padding:.38rem .58rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:6px;margin-bottom:.3rem"><span style="font-size:.6rem;color:var(--muted);text-transform:uppercase">Banco</span><span style="font-family:Orbitron;font-size:.7rem;font-weight:700;color:#fff">Transferencia Bancaria</span></div><div style="display:flex;justify-content:space-between;padding:.38rem .58rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:6px;margin-bottom:.3rem"><span style="font-size:.6rem;color:var(--muted);text-transform:uppercase">Titular</span><span style="font-family:Orbitron;font-size:.7rem;font-weight:700;color:#fff"></span></div><div style="display:flex;justify-content:space-between;align-items:center;padding:.38rem .58rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:6px;flex-wrap:wrap;gap:.3rem"><div><div style="font-size:.6rem;color:var(--muted);text-transform:uppercase">CLABE</div><div style="font-family:Orbitron;font-size:.68rem;font-weight:700;color:var(--c1)">646180402332964686</div></div><button onclick="copyClabe()" style="background:none;border:1px solid rgba(0,170,255,.28);color:var(--c1);border-radius:3px;padding:.08rem .38rem;font-size:.6rem;cursor:pointer;font-family:'Exo 2';font-weight:700">Copiar</button></div></div><div style="font-size:.72rem;color:var(--muted);line-height:1.7;padding:.6rem .82rem;background:rgba(255,255,255,.03);border-radius:6px;border:1px solid var(--border)">1. Transfiere el monto exacto.<br/>2. Captura el comprobante.<br/>3. Manda comprobante + # pedido al WhatsApp.<br/>4. Confirmamos en menos de 3 min.</div><a href="https://wa.me/12894273983" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.45rem;padding:.82rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:7px;font-family:'Exo 2';font-weight:800;font-size:.85rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;margin-top:.82rem">&#128222; Confirmar por WhatsApp</a></div></div>
+  <div class="modal" style="max-width:430px">
+    <div class="modal-h"><h3>&#127974; Transferencia <span style="color:#25d366">Bancaria</span></h3><button class="modal-close" onclick="closeStoriModal()">&#215;</button></div>
+    <div class="modal-b">
+
+      <div style="text-align:center;margin-bottom:1.1rem">
+        <div style="font-size:2.4rem;margin-bottom:.4rem">&#127974;</div>
+        <div style="font-family:Orbitron;font-size:.85rem;font-weight:700;color:#fff">Transferencia SPEI</div>
+        <div style="font-size:.76rem;color:var(--muted)">Deposita y manda tu comprobante</div>
+      </div>
+
+      <!-- Datos bancarios -->
+      <div style="background:rgba(0,230,118,.05);border:1px solid rgba(0,230,118,.2);border-radius:12px;padding:1.1rem;margin-bottom:1rem">
+        <div style="font-family:Orbitron;font-size:.68rem;font-weight:700;color:#25d366;letter-spacing:1px;margin-bottom:.75rem">DATOS PARA TRANSFERIR</div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:.55rem .7rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;margin-bottom:.5rem">
+          <div style="text-align:left"><div style="font-size:.6rem;color:var(--muted);text-transform:uppercase">CLABE</div><div style="font-family:Orbitron;font-size:.78rem;font-weight:700;color:#fff;letter-spacing:.5px">646180402332964686</div></div>
+          <button onclick="copyStoriClabe()" style="background:none;border:1px solid rgba(0,230,118,.3);color:#25d366;border-radius:6px;padding:.35rem .7rem;font-size:.68rem;cursor:pointer;font-family:'Exo 2';font-weight:700">Copiar</button>
+        </div>
+
+        <div style="padding:.55rem .7rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;margin-bottom:.5rem">
+          <div style="font-size:.6rem;color:var(--muted);text-transform:uppercase">Titular</div>
+          <div style="font-size:.85rem;font-weight:700;color:#fff">Matiana Rubi Hernandez</div>
+        </div>
+
+        <div style="padding:.55rem .7rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px">
+          <div style="font-size:.6rem;color:var(--muted);text-transform:uppercase">Banco</div>
+          <div style="font-size:.85rem;font-weight:700;color:#fff">STORI / STP</div>
+        </div>
+      </div>
+
+      <button onclick="mostrarFormPago('stori')" id="stori-show-form-btn" style="width:100%;padding:.85rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:11px;font-family:Orbitron;font-weight:900;font-size:.82rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(37,211,102,.3)">&#9989; YA TRANSFERI, ENVIAR COMPROBANTE</button>
+
+      <!-- Formulario (oculto hasta presionar) -->
+      <div id="stori-form" style="display:none;margin-top:1rem;background:rgba(255,255,255,.03);border:1px solid rgba(0,230,118,.2);border-radius:12px;padding:1.1rem">
+        <div style="font-family:Orbitron;font-size:.72rem;font-weight:700;color:#25d366;margin-bottom:.85rem">Datos de tu pago</div>
+        <label class="flabel">Monto transferido (MXN)</label>
+        <input class="finput" id="stori-monto" type="number" placeholder="Ej: 200" min="1"/>
+        <label class="flabel">Referencia / clave de rastreo</label>
+        <input class="finput" id="stori-ref" type="text" placeholder="Numero de referencia"/>
+        <button onclick="enviarPagoWA('stori')" style="width:100%;margin-top:.5rem;padding:.78rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:9px;font-family:'Exo 2';font-weight:800;font-size:.82rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer">&#128241; Enviar por WhatsApp</button>
+        <div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.6rem;line-height:1.6">Luego <strong style="color:#fff">adjunta la captura</strong> del comprobante en WhatsApp.</div>
+      </div>
+
+    </div>
+  </div>
 </div>
+
+<div class="modal-ov" id="modal-zelle">
+  <div class="modal" style="max-width:430px">
+    <div class="modal-h"><h3>&#127482;&#127480; Pago con <span style="color:#a78bfa">Zelle</span></h3><button class="modal-close" onclick="closeZelleModal()">&#215;</button></div>
+    <div class="modal-b">
+
+      <div style="text-align:center;margin-bottom:1.1rem">
+        <div style="font-size:2.4rem;margin-bottom:.4rem">&#128179;</div>
+        <div style="font-family:Orbitron;font-size:.85rem;font-weight:700;color:#fff">Zelle (USA)</div>
+        <div style="font-size:.76rem;color:var(--muted)">Pago en dolares desde Estados Unidos</div>
+      </div>
+
+      <!-- Aviso comisión -->
+      <div style="background:linear-gradient(135deg,rgba(120,80,255,.12),rgba(120,80,255,.04));border:1px solid rgba(120,80,255,.3);border-radius:12px;padding:.8rem 1rem;margin-bottom:1rem;text-align:center">
+        <div style="font-size:.82rem;color:#c4b5fd;font-weight:700;line-height:1.5">&#9888; Este metodo tiene <strong style="color:#a78bfa">+3 USD de comision</strong></div>
+      </div>
+
+      <!-- Datos Zelle -->
+      <div style="background:rgba(120,80,255,.05);border:1px solid rgba(120,80,255,.2);border-radius:12px;padding:1.1rem;margin-bottom:1rem">
+        <div style="font-family:Orbitron;font-size:.68rem;font-weight:700;color:#a78bfa;letter-spacing:1px;margin-bottom:.75rem">DATOS DE ZELLE</div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:.55rem .7rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;margin-bottom:.5rem">
+          <div style="text-align:left"><div style="font-size:.6rem;color:var(--muted);text-transform:uppercase">Numero Zelle</div><div style="font-family:Orbitron;font-size:.82rem;font-weight:700;color:#fff;letter-spacing:.5px">+1 (440) 705-0630</div></div>
+          <button onclick="copyZelle()" style="background:none;border:1px solid rgba(120,80,255,.3);color:#a78bfa;border-radius:6px;padding:.35rem .7rem;font-size:.68rem;cursor:pointer;font-family:'Exo 2';font-weight:700">Copiar</button>
+        </div>
+
+        <div style="padding:.55rem .7rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px">
+          <div style="font-size:.6rem;color:var(--muted);text-transform:uppercase">Titular</div>
+          <div style="font-size:.82rem;font-weight:700;color:#fff">El nombre que aparezca al agregar el contacto</div>
+        </div>
+      </div>
+
+      <button onclick="mostrarFormPago('zelle')" id="zelle-show-form-btn" style="width:100%;padding:.85rem;background:linear-gradient(90deg,#6d3bef,#a78bfa);color:#fff;border:none;border-radius:11px;font-family:Orbitron;font-weight:900;font-size:.82rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(120,80,255,.3)">&#9989; YA PAGUE, ENVIAR COMPROBANTE</button>
+
+      <!-- Formulario (oculto hasta presionar) -->
+      <div id="zelle-form" style="display:none;margin-top:1rem;background:rgba(255,255,255,.03);border:1px solid rgba(120,80,255,.2);border-radius:12px;padding:1.1rem">
+        <div style="font-family:Orbitron;font-size:.72rem;font-weight:700;color:#a78bfa;margin-bottom:.85rem">Datos de tu pago</div>
+        <label class="flabel">Monto enviado (USD, incluye +3 comision)</label>
+        <input class="finput" id="zelle-monto" type="number" placeholder="Ej: 13" min="1"/>
+        <label class="flabel">Nombre del que envio</label>
+        <input class="finput" id="zelle-nombre" type="text" placeholder="Tu nombre en Zelle"/>
+        <button onclick="enviarPagoWA('zelle')" style="width:100%;margin-top:.5rem;padding:.78rem;background:linear-gradient(90deg,#6d3bef,#a78bfa);color:#fff;border:none;border-radius:9px;font-family:'Exo 2';font-weight:800;font-size:.82rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer">&#128241; Enviar por WhatsApp</button>
+        <div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.6rem;line-height:1.6">Luego <strong style="color:#fff">adjunta la captura</strong> del comprobante en WhatsApp.</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <div class="modal-ov" id="modal-binance">
-  <div class="modal"><div class="modal-h"><h3 style="color:#f0b90b">&#128176; Binance Pay</h3><button class="modal-close" onclick="closeBinanceModal()">&#215;</button></div><div class="modal-b"><div style="text-align:center;margin-bottom:1.1rem"><div style="font-size:2.4rem;margin-bottom:.45rem">&#128176;</div><div style="font-family:Orbitron;font-size:.88rem;font-weight:700;color:#fff;margin-bottom:.18rem">Pago con Binance</div><div style="font-size:.78rem;color:var(--muted)">Transfiere y manda el comprobante por WhatsApp</div></div><div style="background:rgba(240,185,11,.05);border:1px solid rgba(240,185,11,.18);border-radius:11px;padding:1.15rem;margin-bottom:.95rem"><div style="font-family:Orbitron;font-size:.7rem;font-weight:700;color:#f0b90b;margin-bottom:.65rem">Datos Binance</div><div style="display:flex;justify-content:space-between;align-items:center;padding:.38rem .58rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:6px;flex-wrap:wrap;gap:.28rem"><div><div style="font-size:.6rem;color:var(--muted);text-transform:uppercase">Binance ID</div><div style="font-family:Orbitron;font-size:.75rem;font-weight:700;color:#f0b90b;letter-spacing:1px">1106987175</div></div><button onclick="copyBinanceID()" style="background:none;border:1px solid rgba(240,185,11,.28);color:#f0b90b;border-radius:3px;padding:.08rem .38rem;font-size:.6rem;cursor:pointer;font-family:'Exo 2';font-weight:700">Copiar</button></div></div><div style="font-size:.72rem;color:var(--muted);line-height:1.7;padding:.6rem .82rem;background:rgba(255,255,255,.03);border-radius:6px;border:1px solid var(--border);margin-bottom:.82rem">1. Abre Binance &gt; Pay.<br/>2. Busca ID: <strong style="color:#f0b90b">1106987175</strong><br/>3. Transfiere el monto exacto.<br/>4. Captura y manda comprobante al WhatsApp.</div><a href="https://wa.me/12894273983" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.45rem;padding:.82rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:7px;font-family:'Exo 2';font-weight:800;font-size:.85rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none">&#128222; Confirmar por WhatsApp</a></div></div>
+  <div class="modal" style="max-width:440px">
+    <div class="modal-h">
+      <h3 style="display:flex;align-items:center;gap:.5rem"><span style="color:#f0b90b">&#128176;</span> Recarga con <span style="color:#f0b90b">Binance Pay</span></h3>
+      <button class="modal-close" onclick="closeBinanceModal()">&#215;</button>
+    </div>
+    <div class="modal-b">
+
+      <div style="background:linear-gradient(135deg,rgba(240,185,11,.12),rgba(240,185,11,.04));border:1px solid rgba(240,185,11,.3);border-radius:12px;padding:.85rem 1rem;margin-bottom:1.1rem;text-align:center">
+        <div style="font-size:.85rem;color:#ffd75e;font-weight:700;line-height:1.5">&#127873; &iexcl;Recibe <strong style="color:#f0b90b">BONO EXTRA</strong> en todas tus recargas por Binance Pay!</div>
+      </div>
+
+      <div style="font-size:.82rem;color:var(--muted);text-align:center;margin-bottom:1rem">Selecciona el monto que deseas recargar:</div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:1rem" id="binance-montos">
+        <div class="bnc-card" onclick="selBinance(200,205,this)">
+          <div class="bnc-amt">$200</div>
+          <div class="bnc-line">Pagas: $200 MXN</div>
+          <div class="bnc-recibe">Recibes: $205</div>
+          <div class="bnc-badge">+$5 BONO</div>
+        </div>
+        <div class="bnc-card" onclick="selBinance(500,510,this)">
+          <div class="bnc-amt">$500</div>
+          <div class="bnc-line">Pagas: $500 MXN</div>
+          <div class="bnc-recibe">Recibes: $510</div>
+          <div class="bnc-badge">+$10 BONO</div>
+        </div>
+        <div class="bnc-card" onclick="selBinance(1000,1050,this)">
+          <div class="bnc-amt">$1,000</div>
+          <div class="bnc-line">Pagas: $1,000 MXN</div>
+          <div class="bnc-recibe">Recibes: $1,050</div>
+          <div class="bnc-badge">+$50 BONO</div>
+        </div>
+        <div class="bnc-card" onclick="selBinance(2000,2080,this)">
+          <div class="bnc-amt">$2,000</div>
+          <div class="bnc-line">Pagas: $2,000 MXN</div>
+          <div class="bnc-recibe">Recibes: $2,080</div>
+          <div class="bnc-badge">+$80 BONO</div>
+        </div>
+      </div>
+
+      <div class="bnc-card" onclick="selBinanceCustom(this)" id="bnc-custom-card" style="margin-bottom:1rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap">
+          <div>
+            <div style="font-family:Orbitron;font-weight:900;color:#fff;font-size:.95rem">&#9997; PERSONALIZADO</div>
+            <div class="bnc-line">Tu eliges cuanto (sin bono)</div>
+          </div>
+          <input id="bnc-custom-input" type="number" min="1" placeholder="$ MXN" onclick="event.stopPropagation()" oninput="onBncCustom()" style="width:110px;background:#0a0e1a;border:1px solid rgba(240,185,11,.3);color:#fff;border-radius:8px;padding:.55rem .7rem;font-family:Orbitron;font-weight:700;font-size:.9rem;text-align:center"/>
+        </div>
+      </div>
+
+      <div id="bnc-resumen" style="display:none;background:rgba(240,185,11,.06);border:1px solid rgba(240,185,11,.2);border-radius:11px;padding:.85rem 1rem;margin-bottom:1rem;text-align:center">
+        <div style="font-size:.72rem;color:var(--muted)">Vas a recargar</div>
+        <div style="font-family:Orbitron;font-weight:900;font-size:1.3rem;color:#f0b90b" id="bnc-resumen-recibe">$0</div>
+        <div style="font-size:.72rem;color:#25d366" id="bnc-resumen-detalle">-</div>
+      </div>
+
+      <div style="background:rgba(240,185,11,.05);border:1px solid rgba(240,185,11,.18);border-radius:12px;padding:1.1rem;margin-bottom:1rem;text-align:center">
+        <div style="font-family:Orbitron;font-size:.68rem;font-weight:700;color:#f0b90b;letter-spacing:1px;margin-bottom:.75rem">ESCANEA O COPIA EL ID</div>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=Binance%20Pay%20ID%3A1106987175" alt="QR Binance" style="width:180px;height:180px;border-radius:10px;background:#fff;padding:8px;margin-bottom:.75rem"/>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem .7rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:8px">
+          <div style="text-align:left"><div style="font-size:.6rem;color:var(--muted);text-transform:uppercase">Binance ID</div><div style="font-family:Orbitron;font-size:.8rem;font-weight:700;color:#f0b90b;letter-spacing:1px">1106987175</div></div>
+          <button onclick="copyBinanceID()" style="background:none;border:1px solid rgba(240,185,11,.3);color:#f0b90b;border-radius:6px;padding:.35rem .7rem;font-size:.68rem;cursor:pointer;font-family:'Exo 2';font-weight:700">Copiar</button>
+        </div>
+      </div>
+
+      <div style="font-size:.72rem;color:var(--muted);line-height:1.7;padding:.7rem .85rem;background:rgba(255,255,255,.03);border-radius:8px;border:1px solid var(--border);margin-bottom:1rem">
+        1. Abre <strong style="color:#f0b90b">Binance &gt; Pay</strong><br/>
+        2. Escanea el QR o busca el ID <strong style="color:#f0b90b">1106987175</strong><br/>
+        3. Transfiere el monto exacto<br/>
+        4. Manda tu comprobante por WhatsApp &#128071;
+      </div>
+
+      <button onclick="confirmarBinance()" style="width:100%;padding:.9rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:11px;font-family:Orbitron;font-weight:900;font-size:.88rem;letter-spacing:.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;box-shadow:0 6px 20px rgba(37,211,102,.3)">
+        &#128241; ENVIAR COMPROBANTE POR WHATSAPP
+      </button>
+    </div>
+  </div>
 </div>
+
 <div class="admin-ov" id="admin-modal">
   <div class="admin-box"><div class="admin-h"><h3>&#128274; Panel Admin - CiberStore</h3><button class="modal-close" onclick="closeAdmin()">&#215;</button></div>
     <div id="admin-login-section"><div class="admin-login-box"><div class="admin-login-title">Acceso Administrador</div><div><label class="admin-lbl">Correo</label><input class="admin-inp" id="adm-email" type="email" placeholder="Correo" style="width:100%"/></div><div><label class="admin-lbl">Contrasena</label><input class="admin-inp" id="adm-pass" type="password" placeholder="Contrasena" style="width:100%"/></div><div id="adm-login-err" style="font-size:.7rem;color:#ff5252;display:none;text-align:center"></div><button class="btn-admin-login" onclick="adminLogin()">Entrar</button></div></div>

@@ -4479,3 +4479,139 @@ function solicitarAccesoAPI(){
   window.open('https://wa.me/12894273983?text=' + msg, '_blank');
   showToast('Abriendo WhatsApp...', 2000);
 }
+
+
+// ═══ MODAL RECARGA BINANCE ═══
+var _bncSel = null; // {paga, recibe}
+
+function selBinance(paga, recibe, el){
+  _bncSel = { paga: paga, recibe: recibe, custom: false };
+  document.querySelectorAll('.bnc-card').forEach(function(c){ c.classList.remove('sel'); });
+  if(el) el.classList.add('sel');
+  var inp = document.getElementById('bnc-custom-input'); if(inp) inp.value = '';
+  _bncMostrarResumen();
+}
+
+function selBinanceCustom(el){
+  var inp = document.getElementById('bnc-custom-input');
+  var val = parseFloat((inp||{}).value) || 0;
+  document.querySelectorAll('.bnc-card').forEach(function(c){ c.classList.remove('sel'); });
+  if(el) el.classList.add('sel');
+  if(val > 0){
+    _bncSel = { paga: val, recibe: val, custom: true };
+    _bncMostrarResumen();
+  } else {
+    if(inp) inp.focus();
+  }
+}
+
+function onBncCustom(){
+  var inp = document.getElementById('bnc-custom-input');
+  var val = parseFloat((inp||{}).value) || 0;
+  document.querySelectorAll('.bnc-card').forEach(function(c){ c.classList.remove('sel'); });
+  var card = document.getElementById('bnc-custom-card');
+  if(card) card.classList.add('sel');
+  if(val > 0){
+    _bncSel = { paga: val, recibe: val, custom: true };
+    _bncMostrarResumen();
+  } else {
+    _bncSel = null;
+    var r = document.getElementById('bnc-resumen'); if(r) r.style.display = 'none';
+  }
+}
+
+function _bncMostrarResumen(){
+  if(!_bncSel) return;
+  var r = document.getElementById('bnc-resumen');
+  var rec = document.getElementById('bnc-resumen-recibe');
+  var det = document.getElementById('bnc-resumen-detalle');
+  if(r) r.style.display = 'block';
+  if(rec) rec.textContent = '$' + _bncSel.recibe.toLocaleString('es-MX') + ' MXN';
+  if(det){
+    if(_bncSel.custom){
+      det.textContent = 'Pagas $' + _bncSel.paga.toLocaleString('es-MX') + ' (personalizado, sin bono)';
+    } else {
+      var bono = _bncSel.recibe - _bncSel.paga;
+      det.textContent = 'Pagas $' + _bncSel.paga.toLocaleString('es-MX') + ' + $' + bono + ' de bono';
+    }
+  }
+}
+
+function confirmarBinance(){
+  if(!_bncSel || _bncSel.paga <= 0){
+    showToast('Selecciona un monto primero');
+    return;
+  }
+  var user = (authSession && authSession.username) ? authSession.username : 'Cliente';
+  var msg = 'Hola CiberStore! Quiero RECARGAR SALDO por Binance Pay.%0A%0A'
+    + 'Usuario: ' + encodeURIComponent(user) + '%0A'
+    + 'Pago: $' + _bncSel.paga.toLocaleString('es-MX') + ' MXN%0A'
+    + 'Recibo: $' + _bncSel.recibe.toLocaleString('es-MX') + ' MXN'
+    + (_bncSel.custom ? '' : ' (con bono)') + '%0A%0A'
+    + 'Ya transferi a Binance ID 1106987175. Adjunto mi comprobante.';
+  window.open('https://wa.me/12894273983?text=' + msg, '_blank');
+}
+
+
+// ═══ MODALES DE PAGO: Zelle + formularios ═══
+function openZelleModal(){var el=document.getElementById('modal-zelle');if(el) el.classList.add('show');}
+function closeZelleModal(){var el=document.getElementById('modal-zelle');if(el) el.classList.remove('show');}
+
+function copyStoriClabe(){
+  _copiarTexto('646180402332964686', 'CLABE copiada');
+}
+function copyZelle(){
+  _copiarTexto('14407050630', 'Numero Zelle copiado');
+}
+
+// Helper de copiado con respaldo móvil
+function _copiarTexto(texto, msg){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(texto).then(function(){ showToast('✓ '+(msg||'Copiado')); }).catch(function(){ _copiarFallbackTxt(texto,msg); });
+  } else { _copiarFallbackTxt(texto,msg); }
+}
+function _copiarFallbackTxt(texto,msg){
+  try{
+    var ta=document.createElement('textarea'); ta.value=texto;
+    ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta);
+    ta.focus(); ta.select(); ta.setSelectionRange(0,texto.length);
+    document.execCommand('copy'); document.body.removeChild(ta);
+    showToast('✓ '+(msg||'Copiado'));
+  }catch(e){ showToast('Copia manual: '+texto); }
+}
+
+// Mostrar el formulario dentro del modal al presionar el botón
+function mostrarFormPago(metodo){
+  var form = document.getElementById(metodo+'-form');
+  var btn = document.getElementById(metodo+'-show-form-btn');
+  if(form){ form.style.display='block'; form.scrollIntoView({behavior:'smooth',block:'center'}); }
+  if(btn){ btn.style.display='none'; }
+}
+
+// Enviar el comprobante por WhatsApp según el método
+function enviarPagoWA(metodo){
+  var user = (authSession && authSession.username) ? authSession.username : 'Cliente';
+  var msg = '';
+
+  if(metodo === 'stori'){
+    var monto = ((document.getElementById('stori-monto')||{}).value||'').trim();
+    var ref = ((document.getElementById('stori-ref')||{}).value||'').trim();
+    if(!monto){ showToast('Escribe el monto transferido'); return; }
+    msg = 'Hola CiberStore! Recargue por TRANSFERENCIA BANCARIA.%0A%0A'
+      + 'Usuario: ' + encodeURIComponent(user) + '%0A'
+      + 'Monto: $' + encodeURIComponent(monto) + ' MXN%0A'
+      + (ref ? 'Referencia: ' + encodeURIComponent(ref) + '%0A' : '')
+      + '%0AAdjunto mi comprobante.';
+  } else if(metodo === 'zelle'){
+    var montoZ = ((document.getElementById('zelle-monto')||{}).value||'').trim();
+    var nombreZ = ((document.getElementById('zelle-nombre')||{}).value||'').trim();
+    if(!montoZ){ showToast('Escribe el monto enviado'); return; }
+    msg = 'Hola CiberStore! Recargue por ZELLE (USA).%0A%0A'
+      + 'Usuario: ' + encodeURIComponent(user) + '%0A'
+      + 'Monto: $' + encodeURIComponent(montoZ) + ' USD (incluye +3 comision)%0A'
+      + (nombreZ ? 'Enviado por: ' + encodeURIComponent(nombreZ) + '%0A' : '')
+      + '%0AAdjunto mi comprobante.';
+  }
+
+  window.open('https://wa.me/12894273983?text=' + msg, '_blank');
+}
