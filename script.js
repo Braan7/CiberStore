@@ -3997,7 +3997,40 @@ function cotizarDiamantes(){
           + '🆔 Mi ID de Free Fire: ' + encodeURIComponent(ffId) + '%0A%0A'
           + 'Me pasan el precio por favor?';
 
+  // Tambien avisar a Telegram (sin foto, ya que por WhatsApp va aparte)
+  _notifTelegramTexto(metodo);
+
   window.open('https://wa.me/12894273983?text=' + msg, '_blank');
+}
+
+// Manda solo el aviso de texto a Telegram (para el flujo de WhatsApp)
+function _notifTelegramTexto(metodo){
+  var user = (authSession && authSession.username) ? authSession.username : 'Cliente';
+  var metodoNom = '', monto = '', extra = '';
+
+  if(metodo === 'stori'){
+    metodoNom = 'Transferencia Bancaria';
+    monto = ((document.getElementById('stori-monto')||{}).value||'').trim();
+    var ref = ((document.getElementById('stori-ref')||{}).value||'').trim();
+    extra = (ref ? 'Referencia: '+ref+' | ' : '') + 'Enviara comprobante por WhatsApp';
+  } else if(metodo === 'zelle'){
+    metodoNom = 'Zelle (USA) +3 USD';
+    monto = ((document.getElementById('zelle-monto')||{}).value||'').trim();
+    var nom = ((document.getElementById('zelle-nombre')||{}).value||'').trim();
+    extra = (nom ? 'Enviado por: '+nom+' | ' : '') + 'Enviara comprobante por WhatsApp';
+  } else if(metodo === 'binance'){
+    metodoNom = 'Binance Pay';
+    if(_bncSel){ monto = 'Paga $'+_bncSel.paga+' / Recibe $'+_bncSel.recibe; }
+    extra = 'Enviara comprobante por WhatsApp';
+  }
+
+  try {
+    fetch(NOTIF_RECARGA_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ usuario: user, metodo: metodoNom, monto: monto, extra: extra, foto_base64: '' })
+    }).catch(function(){});
+  } catch(e){}
 }
 
 
@@ -4539,6 +4572,7 @@ function confirmarBinance(){
     + 'Recibo: $' + _bncSel.recibe.toLocaleString('es-MX') + ' MXN'
     + (_bncSel.custom ? '' : ' (con bono)') + '%0A%0A'
     + 'Ya transferi a Binance ID 1106987175. Adjunto mi comprobante.';
+  _notifTelegramTexto('binance');
   window.open('https://wa.me/12894273983?text=' + msg, '_blank');
 }
 
@@ -4682,7 +4716,7 @@ function _updateRetiroSaldo(){
 
 // ═══ ENVIAR COMPROBANTE DE RECARGA A TELEGRAM ═══
 // URL de la Edge Function que reenvía a tu canal de Telegram
-var NOTIF_RECARGA_URL = 'https://pnotsqsudqpwqzssevig.supabase.co/functions/v1/notif-recarga';
+var NOTIF_RECARGA_URL = 'https://pnotsqsudqpwqzssevig.supabase.co/functions/v1/bright-task';
 
 function enviarComprobante(metodo){
   var fotoInput, monto, extra, metodoNom;
