@@ -1186,24 +1186,7 @@ button[onclick*="submit"]:hover,button[onclick*="comprar"]:hover,button[onclick*
 .bnc-recibe{font-size:.75rem;color:#25d366;font-weight:700;margin:.15rem 0}
 .bnc-badge{display:inline-block;background:#f0b90b;color:#1a1200;font-family:Orbitron;font-weight:900;font-size:.58rem;padding:.2rem .6rem;border-radius:999px;letter-spacing:.5px;margin-top:.35rem}
 
-/* ═══════════ SECCIONES COLAPSABLES DEL MENÚ ═══════════ */
-.sb-collapsible{
-  cursor:pointer;display:flex;align-items:center;justify-content:space-between;
-  user-select:none;transition:color .2s;
-}
-.sb-collapsible:hover{color:var(--c1)!important}
-.sb-arrow{font-size:.7rem;transition:transform .3s;opacity:.7}
-.sb-collapsible.collapsed .sb-arrow{transform:rotate(-90deg)}
-.sb-group{
-  display:flex;
-  flex-direction:column;
-  gap:.3rem;
-  overflow:hidden;
-  max-height:2000px;
-  transition:max-height .35s ease,opacity .25s;
-  opacity:1;
-}
-.sb-group.collapsed{max-height:0;opacity:0}
+/* (secciones colapsables removidas) */
 
 /* ═══════════ RETIRAR FONDOS ═══════════ */
 .ret-metodo{
@@ -1225,26 +1208,26 @@ button[onclick*="submit"]:hover,button[onclick*="comprar"]:hover,button[onclick*
 
 /* Secciones (títulos) con flechita a la derecha, estilo referencia */
 .sb-section{
-  padding:1.1rem .5rem .55rem!important;
-  font-size:.66rem!important;
+  padding:.8rem .5rem .35rem!important;
+  font-size:.6rem!important;
   color:#8a93a8!important;
-  letter-spacing:2.5px!important;
+  letter-spacing:2px!important;
   font-weight:800!important;
 }
 .sb-collapsible .sb-arrow{color:var(--accent2);font-size:.85rem}
 
-/* Items como tarjetas grandes separadas */
+/* Items como tarjetas compactas */
 .nav-item{
-  padding:.85rem .9rem!important;
-  margin-bottom:.55rem!important;
-  border-radius:15px!important;
-  background:linear-gradient(160deg,rgba(255,255,255,.045),rgba(255,255,255,.015))!important;
-  border:1px solid rgba(255,255,255,.06)!important;
-  font-size:.92rem!important;
+  padding:.6rem .7rem!important;
+  margin-bottom:.35rem!important;
+  border-radius:12px!important;
+  background:linear-gradient(160deg,rgba(255,255,255,.04),rgba(255,255,255,.015))!important;
+  border:1px solid rgba(255,255,255,.055)!important;
+  font-size:.84rem!important;
   font-weight:600!important;
   color:#c8d0e0!important;
-  gap:.85rem!important;
-  box-shadow:0 2px 10px rgba(0,0,0,.15)!important;
+  gap:.65rem!important;
+  box-shadow:0 1px 6px rgba(0,0,0,.12)!important;
 }
 .nav-item:hover{
   background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.03))!important;
@@ -1260,12 +1243,11 @@ button[onclick*="submit"]:hover,button[onclick*="comprar"]:hover,button[onclick*
 
 /* Íconos en cuadros redondeados con color (estilo referencia) */
 .nav-ico{
-  width:44px!important;height:44px!important;
-  border-radius:13px!important;
-  background:linear-gradient(160deg,rgba(255,180,90,.14),rgba(255,140,60,.06))!important;
-  border:1px solid rgba(255,170,80,.12)!important;
-  font-size:1.25rem!important;
-  box-shadow:inset 0 0 12px rgba(255,160,70,.08)!important;
+  width:34px!important;height:34px!important;
+  border-radius:10px!important;
+  background:linear-gradient(160deg,rgba(255,180,90,.13),rgba(255,140,60,.05))!important;
+  border:1px solid rgba(255,170,80,.11)!important;
+  font-size:1rem!important;
 }
 .nav-item.active .nav-ico{
   background:linear-gradient(160deg,rgba(77,163,255,.25),rgba(168,85,247,.15))!important;
@@ -1345,8 +1327,7 @@ document.addEventListener('keydown',function(e){
   <div class="sb-nav">
     <div class="sb-section">Principal</div>
     <div class="nav-item active" id="ni-home" onclick="goPage('home')"><div class="nav-ico">&#127968;</div> Inicio</div>
-    <div class="sb-section sb-collapsible" onclick="toggleNavGroup(this)">Servicios <span class="sb-arrow">&#9662;</span></div>
-    <div class="sb-group">
+    <div class="sb-section">Servicios</div>
     <div class="nav-item" id="ni-diamantes" onclick="goPage('diamantes')"><div class="nav-ico">&#128142;</div> Diamantes FF</div>
     <div class="nav-item" id="ni-likes" onclick="goPage('likes')"><div class="nav-ico">&#128077;</div> Likes Perfil</div>
     <div class="nav-item" id="ni-pines" onclick="goPage('pines')"><div class="nav-ico">&#127915;</div> Pines de Free Fire <span class="nb" style="background:rgba(255,204,0,.15);border:1px solid rgba(255,204,0,.3);color:#ffcc00">NEW</span></div>
@@ -1360,16 +1341,13 @@ document.addEventListener('keydown',function(e){
     <div class="nav-item" id="ni-codigos" onclick="goPage('codigos')"><div class="nav-ico">&#127381;</div> Codigos FF <span class="nb" style="background:linear-gradient(90deg,#ff4400,#ff8800);color:#fff;border:none">NUEVO</span></div>
     <div class="nav-item" id="ni-cajas" onclick="goPage('cajas')"><div class="nav-ico">&#128142;</div> Fragmentos EVO <span class="nb" style="background:linear-gradient(90deg,#ff4400,#ff8800);color:#fff;border:none">NUEVO</span></div>
     <div class="nav-item" onclick="window.open('https://whatsapp.com/channel/0029VbCXQVjJENyAgAoJLJ3g','_blank');closeSB()"><div class="nav-ico">&#128172;</div> Canal WhatsApp <span class="nb nb-new">NUEVO</span></div>
-    </div>
-    <div class="sb-section sb-collapsible" onclick="toggleNavGroup(this)">Mi cuenta <span class="sb-arrow">&#9662;</span></div>
-    <div class="sb-group">
+    <div class="sb-section">Mi cuenta</div>
     <div class="nav-item" id="ni-referidos" onclick="goPage('referidos')"><div class="nav-ico">&#127381;</div> Programa Referidos <span class="nb" style="background:rgba(255,208,0,.2);border:1px solid rgba(255,208,0,.4);color:#ffd000">NUEVO</span></div>
     <div class="nav-item" id="ni-perfil" onclick="goPage('perfil')"><div class="nav-ico">&#128100;</div> Mi Perfil</div>
     <div class="nav-item" id="ni-saldo" onclick="goPage('saldo')"><div class="nav-ico">&#128176;</div> Recargar Saldo</div>
     <div class="nav-item" id="ni-miscompras" onclick="goPage('miscompras')"><div class="nav-ico">&#128722;</div> Mis Compras</div>
     <div class="nav-item" id="ni-transferir" onclick="goPage('transferir')"><div class="nav-ico">&#8646;</div> Transferir Saldo</div>
     <div class="nav-item" id="ni-retirar" onclick="goPage('retirar')"><div class="nav-ico">&#127974;</div> Retirar Fondos <span class="nb" style="background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.35);color:#25d366">$</span></div>
-    </div>
   </div>
   <div class="sb-footer"><div class="ftitle"><span class="l1">CIBER</span><span class="l2">STORE</span></div><div style="font-size:.65rem;color:#3a4560;line-height:1.6;margin-bottom:.35rem">La tienda definitiva de Free Fire.<br/>Diamantes, likes y honor de clan.</div>Soporte 24/7</div>
 </div>
