@@ -3280,7 +3280,10 @@ document.addEventListener('keydown',function(e){
         <input class="finput" id="stori-monto" type="number" placeholder="Ej: 200" min="1"/>
         <label class="flabel">Referencia / clave de rastreo</label>
         <input class="finput" id="stori-ref" type="text" placeholder="Numero de referencia"/>
-        <button onclick="enviarPagoWA('stori')" style="width:100%;margin-top:.5rem;padding:.78rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:9px;font-family:'Exo 2';font-weight:800;font-size:.82rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer">&#128241; Enviar por WhatsApp</button>
+        <label class="flabel">Comprobante (foto)</label>
+        <input class="finput" id="stori-foto" type="file" accept="image/*" style="padding:.55rem"/>
+        <button onclick="enviarComprobante('stori')" style="width:100%;margin-top:.5rem;padding:.85rem;background:linear-gradient(90deg,#0088cc,#29b6f6);color:#fff;border:none;border-radius:9px;font-family:'Exo 2';font-weight:800;font-size:.82rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer">&#9993; Enviar comprobante</button>
+        <button onclick="enviarPagoWA('stori')" style="width:100%;margin-top:.5rem;padding:.6rem;background:transparent;border:1px solid rgba(255,255,255,.15);color:var(--muted);border-radius:9px;font-family:'Exo 2';font-weight:700;font-size:.72rem;cursor:pointer">o enviar por WhatsApp</button>
         <div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.6rem;line-height:1.6">Luego <strong style="color:#fff">adjunta la captura</strong> del comprobante en WhatsApp.</div>
       </div>
 
@@ -3328,7 +3331,10 @@ document.addEventListener('keydown',function(e){
         <input class="finput" id="zelle-monto" type="number" placeholder="Ej: 13" min="1"/>
         <label class="flabel">Nombre del que envio</label>
         <input class="finput" id="zelle-nombre" type="text" placeholder="Tu nombre en Zelle"/>
-        <button onclick="enviarPagoWA('zelle')" style="width:100%;margin-top:.5rem;padding:.78rem;background:linear-gradient(90deg,#6d3bef,#a78bfa);color:#fff;border:none;border-radius:9px;font-family:'Exo 2';font-weight:800;font-size:.82rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer">&#128241; Enviar por WhatsApp</button>
+        <label class="flabel">Comprobante (foto)</label>
+        <input class="finput" id="zelle-foto" type="file" accept="image/*" style="padding:.55rem"/>
+        <button onclick="enviarComprobante('zelle')" style="width:100%;margin-top:.5rem;padding:.85rem;background:linear-gradient(90deg,#0088cc,#29b6f6);color:#fff;border:none;border-radius:9px;font-family:'Exo 2';font-weight:800;font-size:.82rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer">&#9993; Enviar comprobante</button>
+        <button onclick="enviarPagoWA('zelle')" style="width:100%;margin-top:.5rem;padding:.6rem;background:transparent;border:1px solid rgba(255,255,255,.15);color:var(--muted);border-radius:9px;font-family:'Exo 2';font-weight:700;font-size:.72rem;cursor:pointer">o enviar por WhatsApp</button>
         <div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.6rem;line-height:1.6">Luego <strong style="color:#fff">adjunta la captura</strong> del comprobante en WhatsApp.</div>
       </div>
 
@@ -3409,7 +3415,10 @@ document.addEventListener('keydown',function(e){
         4. Manda tu comprobante por WhatsApp &#128071;
       </div>
 
-      <button onclick="confirmarBinance()" style="width:100%;padding:.9rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:11px;font-family:Orbitron;font-weight:900;font-size:.88rem;letter-spacing:.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;box-shadow:0 6px 20px rgba(37,211,102,.3)">
+      <label class="flabel" style="margin-top:.5rem">Comprobante (foto)</label>
+      <input class="finput" id="binance-foto" type="file" accept="image/*" style="padding:.55rem;margin-bottom:.6rem"/>
+      <button onclick="enviarComprobante('binance')" style="width:100%;margin-bottom:.5rem;padding:.9rem;background:linear-gradient(90deg,#0088cc,#29b6f6);color:#fff;border:none;border-radius:11px;font-family:Orbitron;font-weight:900;font-size:.82rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(0,136,204,.3)">&#9993; ENVIAR COMPROBANTE</button>
+      <button onclick="confirmarBinance()" style="width:100%;padding:.7rem;background:transparent;border:1px solid rgba(255,255,255,.15);color:var(--muted);border-radius:11px;font-family:'Exo 2';font-weight:700;font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem">
         &#128241; ENVIAR COMPROBANTE POR WHATSAPP
       </button>
     </div>

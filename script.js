@@ -4678,3 +4678,72 @@ function _updateRetiroSaldo(){
   var el = document.getElementById('retiro-saldo');
   if(el && authSession) el.textContent = '$'+Math.round(authSession.saldo||0).toLocaleString('es-MX')+' MXN';
 }
+
+
+// ═══ ENVIAR COMPROBANTE DE RECARGA A TELEGRAM ═══
+// URL de la Edge Function que reenvía a tu canal de Telegram
+var NOTIF_RECARGA_URL = 'https://pnotsqsudqpwqzssevig.supabase.co/functions/v1/notif-recarga';
+
+function enviarComprobante(metodo){
+  var fotoInput, monto, extra, metodoNom;
+  var user = (authSession && authSession.username) ? authSession.username : 'Cliente';
+
+  if(metodo === 'stori'){
+    fotoInput = document.getElementById('stori-foto');
+    monto = ((document.getElementById('stori-monto')||{}).value||'').trim();
+    var ref = ((document.getElementById('stori-ref')||{}).value||'').trim();
+    extra = ref ? ('Referencia: '+ref) : '';
+    metodoNom = 'Transferencia Bancaria';
+    if(!monto){ showToast('Escribe el monto transferido'); return; }
+  } else if(metodo === 'zelle'){
+    fotoInput = document.getElementById('zelle-foto');
+    monto = ((document.getElementById('zelle-monto')||{}).value||'').trim();
+    var nom = ((document.getElementById('zelle-nombre')||{}).value||'').trim();
+    extra = nom ? ('Enviado por: '+nom) : '';
+    metodoNom = 'Zelle (USA) +3 USD comision';
+    if(!monto){ showToast('Escribe el monto enviado'); return; }
+  } else if(metodo === 'binance'){
+    fotoInput = document.getElementById('binance-foto');
+    if(_bncSel){ monto = 'Paga $'+_bncSel.paga+' / Recibe $'+_bncSel.recibe; }
+    else { monto = 'No especificado'; }
+    extra = 'Binance ID: 1106987175';
+    metodoNom = 'Binance Pay';
+  }
+
+  var file = fotoInput && fotoInput.files && fotoInput.files[0];
+  if(!file){ showToast('Adjunta la foto de tu comprobante'); return; }
+
+  showToast('Enviando comprobante...', 3000);
+
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var fotoB64 = e.target.result;
+    fetch(NOTIF_RECARGA_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        usuario: user,
+        metodo: metodoNom,
+        monto: monto,
+        extra: extra,
+        foto_base64: fotoB64
+      })
+    }).then(function(r){ return r.json(); }).then(function(res){
+      if(res && res.success){
+        showToast('✓ Comprobante enviado! Te acreditaremos pronto.', 4000);
+        // Cerrar el modal correspondiente
+        if(metodo==='stori') closeStoriModal();
+        else if(metodo==='zelle') closeZelleModal();
+        else if(metodo==='binance') closeBinanceModal();
+      } else {
+        showToast('Error al enviar. Usa WhatsApp mejor.', 4000);
+        console.error('[NOTIF] ', res);
+      }
+    }).catch(function(err){
+      showToast('Error de conexion. Usa WhatsApp mejor.', 4000);
+      console.error('[NOTIF] ', err);
+    });
+  };
+  reader.onerror = function(){ showToast('No se pudo leer la foto'); };
+  reader.readAsDataURL(file);
+}
