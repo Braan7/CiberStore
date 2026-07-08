@@ -4300,47 +4300,38 @@ if(SUPABASE_ANON === 'PEGA_TU_ANON_KEY_AQUI'){
 function _extraerPin(data){
   if(!data) return '';
 
-  // Campos a IGNORAR (control, no son datos de canje)
+  // Campos a IGNORAR (control, NO son el codigo de canje)
   var ignorar = ['transaction_id','id','order_id','amount_charged','amount','price','currency','status','success','sandbox','quantity','product_id','reference','fecha','date','created_at','http_status','message','name','sku','type','product'];
 
-  // Recolectar TODOS los campos de canje (serial, pin, code, etc.)
-  var encontrados = {};
-  var clavesInteres = ['serial','pin','pins','codigo','code','codes','voucher','redemption_code','pin_code','pin_serial','coupon','key','clave','numero'];
+  // El campo que SE CANJEA (prioridad). redeempins usa un solo codigo/key.
+  var clavesCodigo = ['key','pin','code','codigo','serial','voucher','redemption_code','pin_code','coupon','clave','numero','pins','codes'];
 
-  function recolectar(obj, depth){
-    if(depth > 6 || obj == null) return;
-    if(Array.isArray(obj)){ obj.forEach(function(x){ recolectar(x, depth+1); }); return; }
+  var encontrado = '';
+
+  function buscar(obj, depth){
+    if(depth > 6 || obj == null || encontrado) return;
+    if(Array.isArray(obj)){ obj.forEach(function(x){ buscar(x, depth+1); }); return; }
     if(typeof obj === 'object'){
+      // primero buscar en los campos de codigo conocidos
+      for(var i=0;i<clavesCodigo.length && !encontrado;i++){
+        var v = obj[clavesCodigo[i]];
+        if(v != null && (typeof v === 'string' || typeof v === 'number')){
+          encontrado = String(v).trim();
+          return;
+        }
+      }
+      // si no, seguir buscando en sub-objetos (ignorando campos de control)
       for(var k in obj){
-        if(!obj.hasOwnProperty(k)) continue;
-        var kl = k.toLowerCase();
-        var val = obj[k];
-        // ¿es un campo de interés con valor simple?
-        if(clavesInteres.indexOf(kl) >= 0 && (typeof val === 'string' || typeof val === 'number')){
-          encontrados[kl] = String(val);
-        } else if(typeof val === 'object' && ignorar.indexOf(kl) < 0){
-          recolectar(val, depth+1);
+        if(encontrado) return;
+        if(obj.hasOwnProperty(k) && ignorar.indexOf(k.toLowerCase()) < 0 && typeof obj[k] === 'object'){
+          buscar(obj[k], depth+1);
         }
       }
     }
   }
-  recolectar(data, 0);
+  buscar(data, 0);
 
-  // Armar el texto de canje con lo que se encontró
-  var partes = [];
-  if(encontrados['serial'])  partes.push('SERIAL: ' + encontrados['serial']);
-  if(encontrados['pin'])     partes.push('PIN: ' + encontrados['pin']);
-  if(encontrados['code'] && !encontrados['pin'])   partes.push('PIN: ' + encontrados['code']);
-  if(encontrados['codigo'] && !encontrados['pin'] && !encontrados['code']) partes.push('PIN: ' + encontrados['codigo']);
-  // otros campos que puedan servir
-  ['voucher','redemption_code','pin_code','coupon','clave','numero'].forEach(function(k){
-    if(encontrados[k] && partes.join(' ').indexOf(encontrados[k]) < 0){
-      partes.push(k.toUpperCase() + ': ' + encontrados[k]);
-    }
-  });
-
-  if(partes.length) return partes.join('\n');
-  return 'Ver detalle en Mis Compras';
+  return encontrado || '';
 }
 
 function comprarPinAPI(productId, precioLocal, nombreProducto){
@@ -4367,15 +4358,13 @@ function comprarPinAPI(productId, precioLocal, nombreProducto){
       return;
     }
 
-    // Buscar el PIN en la respuesta de Recargas América
+    // Buscar el PIN/serial en la respuesta de Recargas América
     var fuente = res.ra_response || res.data || res;
     var pin = _extraerPin(fuente);
-    console.log('[PIN API] Respuesta completa:', JSON.stringify(res));
-    // TEMPORAL (una comprobacion mas): mostrar datos extraidos + respuesta cruda
-    pin = pin + '\n\n--- (temporal) respuesta completa ---\n' + JSON.stringify(fuente, null, 2);
-    // Si no encontró un PIN claro, mostrar TODA la respuesta para diagnosticar
-    if(!pin || pin === 'Ver detalle en Mis Compras' || pin === 'undefined'){
-      pin = 'DEBUG ▼\n' + JSON.stringify(res, null, 2);
+    // Si de plano no se encontró nada, guardar la respuesta para soporte (sin mostrarla fea)
+    if(!pin || pin === 'Ver detalle en Mis Compras'){
+      console.log('[PIN API] Sin datos claros:', JSON.stringify(res));
+      pin = 'Codigo recibido. Si no lo ves completo, contacta al admin con tu numero de pedido.';
     }
 
     // Descontar saldo del cliente en TU web
