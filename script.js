@@ -4749,6 +4749,11 @@ function enviarComprobante(metodo){
 
   showToast('Enviando comprobante...', 3000);
 
+  // Calcular el monto a ACREDITAR (numero limpio) segun el metodo
+  var montoAcreditar = 0;
+  if(metodo === 'binance' && _bncSel){ montoAcreditar = _bncSel.recibe; }
+  else { montoAcreditar = parseFloat(monto) || 0; }
+
   var reader = new FileReader();
   reader.onload = function(e){
     var fotoB64 = e.target.result;
@@ -4757,8 +4762,10 @@ function enviarComprobante(metodo){
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         usuario: user,
+        username: user,
         metodo: metodoNom,
         monto: monto,
+        monto_acreditar: montoAcreditar,
         extra: extra,
         foto_base64: fotoB64
       })
