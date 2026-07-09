@@ -3327,8 +3327,14 @@ document.addEventListener('keydown',function(e){
       <!-- Formulario (oculto hasta presionar) -->
       <div id="zelle-form" style="display:none;margin-top:1rem;background:rgba(255,255,255,.03);border:1px solid rgba(120,80,255,.2);border-radius:12px;padding:1.1rem">
         <div style="font-family:Orbitron;font-size:.72rem;font-weight:700;color:#a78bfa;margin-bottom:.85rem">Datos de tu pago</div>
-        <label class="flabel">Monto enviado (USD, incluye +3 comision)</label>
-        <input class="finput" id="zelle-monto" type="number" placeholder="Ej: 13" min="1"/>
+        <label class="flabel">Monto que enviaste (USD)</label>
+        <input class="finput" id="zelle-monto" type="number" placeholder="Ej: 13" min="4" oninput="calcZelleConversion()"/>
+        <div id="zelle-conversion" style="display:none;background:rgba(120,80,255,.06);border:1px solid rgba(120,80,255,.2);border-radius:10px;padding:.7rem .85rem;margin-bottom:.6rem;font-size:.75rem;line-height:1.7">
+          <div style="display:flex;justify-content:space-between;color:var(--muted)"><span>Enviaste</span><span id="zc-usd" style="color:#fff">$0 USD</span></div>
+          <div style="display:flex;justify-content:space-between;color:var(--muted)"><span>Comision Zelle</span><span style="color:#ff6b6b">-$3 USD</span></div>
+          <div style="display:flex;justify-content:space-between;color:var(--muted)"><span>Convertible (x18)</span><span id="zc-neto" style="color:#fff">$0 USD</span></div>
+          <div style="display:flex;justify-content:space-between;font-weight:800;padding-top:.35rem;margin-top:.35rem;border-top:1px solid rgba(120,80,255,.2)"><span style="color:#fff">Saldo a recibir</span><span id="zc-mxn" style="color:#a78bfa">$0 MXN</span></div>
+        </div>
         <label class="flabel">Nombre del que envio</label>
         <input class="finput" id="zelle-nombre" type="text" placeholder="Tu nombre en Zelle"/>
         <label class="flabel">Comprobante (foto)</label>

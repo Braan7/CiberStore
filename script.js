@@ -4014,8 +4014,10 @@ function _notifTelegramTexto(metodo){
     var ref = ((document.getElementById('stori-ref')||{}).value||'').trim();
     extra = (ref ? 'Referencia: '+ref+' | ' : '') + 'Enviara comprobante por WhatsApp';
   } else if(metodo === 'zelle'){
-    metodoNom = 'Zelle (USA) +3 USD';
-    monto = ((document.getElementById('zelle-monto')||{}).value||'').trim();
+    metodoNom = 'Zelle (USA)';
+    var usdT = ((document.getElementById('zelle-monto')||{}).value||'').trim();
+    var mxnT = _zelleMXN(usdT);
+    monto = '$'+usdT+' USD = $'+mxnT.toLocaleString('es-MX')+' MXN';
     var nom = ((document.getElementById('zelle-nombre')||{}).value||'').trim();
     extra = (nom ? 'Enviado por: '+nom+' | ' : '') + 'Enviara comprobante por WhatsApp';
   } else if(metodo === 'binance'){
@@ -4630,9 +4632,11 @@ function enviarPagoWA(metodo){
     var montoZ = ((document.getElementById('zelle-monto')||{}).value||'').trim();
     var nombreZ = ((document.getElementById('zelle-nombre')||{}).value||'').trim();
     if(!montoZ){ showToast('Escribe el monto enviado'); return; }
+    var mxnW = _zelleMXN(montoZ);
     msg = 'Hola CiberStore! Recargue por ZELLE (USA).%0A%0A'
       + 'Usuario: ' + encodeURIComponent(user) + '%0A'
-      + 'Monto: $' + encodeURIComponent(montoZ) + ' USD (incluye +3 comision)%0A'
+      + 'Envie: $' + encodeURIComponent(montoZ) + ' USD%0A'
+      + 'Equivale a: $' + mxnW.toLocaleString('es-MX') + ' MXN (menos 3 USD comision, TC 18)%0A'
       + (nombreZ ? 'Enviado por: ' + encodeURIComponent(nombreZ) + '%0A' : '')
       + '%0AAdjunto mi comprobante.';
   }
@@ -4731,11 +4735,14 @@ function enviarComprobante(metodo){
     if(!monto){ showToast('Escribe el monto transferido'); return; }
   } else if(metodo === 'zelle'){
     fotoInput = document.getElementById('zelle-foto');
-    monto = ((document.getElementById('zelle-monto')||{}).value||'').trim();
+    var usdZ = ((document.getElementById('zelle-monto')||{}).value||'').trim();
     var nom = ((document.getElementById('zelle-nombre')||{}).value||'').trim();
-    extra = nom ? ('Enviado por: '+nom) : '';
-    metodoNom = 'Zelle (USA) +3 USD comision';
-    if(!monto){ showToast('Escribe el monto enviado'); return; }
+    var mxnZ = _zelleMXN(usdZ);
+    monto = '$'+usdZ+' USD = $'+mxnZ.toLocaleString('es-MX')+' MXN';
+    extra = (nom ? ('Enviado por: '+nom+' | ') : '') + 'Zelle (-3 USD comision, TC 18)';
+    metodoNom = 'Zelle (USA)';
+    if(!usdZ){ showToast('Escribe el monto enviado en USD'); return; }
+    if(parseFloat(usdZ) <= 3){ showToast('El monto debe ser mayor a 3 USD (comision)'); return; }
   } else if(metodo === 'binance'){
     fotoInput = document.getElementById('binance-foto');
     if(_bncSel){ monto = 'Paga $'+_bncSel.paga+' / Recibe $'+_bncSel.recibe; }
@@ -4749,10 +4756,11 @@ function enviarComprobante(metodo){
 
   showToast('Enviando comprobante...', 3000);
 
-  // Calcular el monto a ACREDITAR (numero limpio) segun el metodo
+  // Calcular el monto a ACREDITAR (numero limpio en MXN) segun el metodo
   var montoAcreditar = 0;
   if(metodo === 'binance' && _bncSel){ montoAcreditar = _bncSel.recibe; }
-  else { montoAcreditar = parseFloat(monto) || 0; }
+  else if(metodo === 'zelle'){ montoAcreditar = _zelleMXN((document.getElementById('zelle-monto')||{}).value); }
+  else { montoAcreditar = parseFloat((document.getElementById('stori-monto')||{}).value) || 0; }
 
   var reader = new FileReader();
   reader.onload = function(e){
@@ -4787,4 +4795,29 @@ function enviarComprobante(metodo){
   };
   reader.onerror = function(){ showToast('No se pudo leer la foto'); };
   reader.readAsDataURL(file);
+}
+
+
+// ═══ Conversión Zelle USD → MXN (18 por USD, -3 USD comision) ═══
+var ZELLE_TC = 18;        // tipo de cambio MXN por USD
+var ZELLE_COMISION = 3;   // comision fija en USD (no se convierte)
+
+function calcZelleConversion(){
+  var usd = parseFloat((document.getElementById('zelle-monto')||{}).value) || 0;
+  var box = document.getElementById('zelle-conversion');
+  if(usd <= 0){ if(box) box.style.display='none'; return; }
+
+  var neto = Math.max(0, usd - ZELLE_COMISION);  // USD convertibles
+  var mxn = neto * ZELLE_TC;                       // saldo en pesos
+
+  if(box) box.style.display='block';
+  var u=document.getElementById('zc-usd'); if(u) u.textContent='$'+usd+' USD';
+  var n=document.getElementById('zc-neto'); if(n) n.textContent='$'+neto+' USD';
+  var m=document.getElementById('zc-mxn'); if(m) m.textContent='$'+mxn.toLocaleString('es-MX')+' MXN';
+}
+
+// Devuelve el saldo MXN a acreditar por un pago Zelle en USD
+function _zelleMXN(usd){
+  var neto = Math.max(0, (parseFloat(usd)||0) - ZELLE_COMISION);
+  return neto * ZELLE_TC;
 }
