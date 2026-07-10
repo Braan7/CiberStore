@@ -711,7 +711,7 @@ function renderProds(){
   rows+='<div style="grid-column:1/-1;background:linear-gradient(135deg,#0a1420,#0d0710);border:1px solid rgba(56,189,248,.28);border-radius:16px;padding:1.3rem 1.15rem;margin-bottom:1.25rem">'
     +'<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:1rem">'
     +'<span style="font-size:1.5rem">\u26A1</span>'
-    +'<div><div style="font-family:Orbitron;font-size:1rem;font-weight:900;color:#38bdf8;letter-spacing:.5px">DIAMANTES ILIMITADOS</div>'
+    +'<div><div style="font-family:Oxanium;font-size:1rem;font-weight:900;color:#38bdf8;letter-spacing:.5px">DIAMANTES ILIMITADOS</div>'
     +'<div style="font-size:.72rem;color:var(--muted)">Recarga las veces que quieras</div></div>'
     +'</div>'
     +'<div class="lkpln-grid" style="margin-bottom:1.1rem">';
@@ -723,19 +723,19 @@ function renderProds(){
     +'<div style="border-top:1px solid rgba(56,189,248,.15);padding-top:1rem">'
     +'<div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem">Pedir con saldo</div>'
     +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Elige tu paquete</label>'
-    +'<select id="ilim-plan" style="width:100%;background:#0a1420;border:1px solid rgba(56,189,248,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Rajdhani,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box">';
+    +'<select id="ilim-plan" style="width:100%;background:#0a1420;border:1px solid rgba(56,189,248,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Poppins,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box">';
   for(var a=0;a<PRODUCTS.length;a++){
     rows+='<option value="'+PRODUCTS[a].total+'|'+PRODUCTS[a].prices[0]+'">'+PRODUCTS[a].name+' diamantes \u2014 '+fmt(PRODUCTS[a].prices[0])+' MX</option>';
   }
   rows+='</select>'
     +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Tu ID de Free Fire</label>'
-    +'<input id="ilim-id" type="text" placeholder="Ej: 123456789" style="width:100%;background:#0a1420;border:1px solid rgba(56,189,248,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Rajdhani,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box"/>'
+    +'<input id="ilim-id" type="text" placeholder="Ej: 123456789" style="width:100%;background:#0a1420;border:1px solid rgba(56,189,248,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Poppins,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box"/>'
     +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Nombre en el juego</label>'
-    +'<input id="ilim-nombre" type="text" placeholder="Tu nickname" style="width:100%;background:#0a1420;border:1px solid rgba(56,189,248,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Rajdhani,sans-serif;font-size:.88rem;margin-bottom:.65rem;box-sizing:border-box"/>'
-    +'<div style="display:flex;justify-content:space-between;background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.18);border-radius:8px;padding:.45rem .85rem;margin-bottom:.5rem"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span id="ilim-saldo-val" style="font-family:Orbitron;font-weight:700;color:#38bdf8;font-size:.82rem">$0 MX</span></div>'
+    +'<input id="ilim-nombre" type="text" placeholder="Tu nickname" style="width:100%;background:#0a1420;border:1px solid rgba(56,189,248,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Poppins,sans-serif;font-size:.88rem;margin-bottom:.65rem;box-sizing:border-box"/>'
+    +'<div style="display:flex;justify-content:space-between;background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.18);border-radius:8px;padding:.45rem .85rem;margin-bottom:.5rem"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span id="ilim-saldo-val" style="font-family:Oxanium;font-weight:700;color:#38bdf8;font-size:.82rem">$0 MX</span></div>'
     +'<div id="ilim-err" style="display:none;color:#ff6b6b;font-size:.75rem;margin-bottom:.5rem"></div>'
-    +'<button onclick="submitIlimSaldo()" style="width:100%;padding:.78rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:10px;font-family:Rajdhani,sans-serif;font-weight:900;font-size:.9rem;cursor:pointer">\uD83D\uDD12 Confirmar con saldo</button>'
-    +'<button onclick="cotizarIlim()" style="width:100%;padding:.62rem;margin-top:.5rem;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.3);color:#38bdf8;border-radius:10px;font-family:Rajdhani;font-weight:900;font-size:.82rem;cursor:pointer">\uD83D\uDCAC O cotizar por WhatsApp</button>'
+    +'<button onclick="submitIlimSaldo()" style="width:100%;padding:.78rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:10px;font-family:Poppins,sans-serif;font-weight:900;font-size:.9rem;cursor:pointer">\uD83D\uDD12 Confirmar con saldo</button>'
+    +'<button onclick="cotizarIlim()" style="width:100%;padding:.62rem;margin-top:.5rem;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.3);color:#38bdf8;border-radius:10px;font-family:Poppins;font-weight:900;font-size:.82rem;cursor:pointer">\uD83D\uDCAC O cotizar por WhatsApp</button>'
     +'</div>'
     +'</div>';
 
@@ -743,7 +743,7 @@ function renderProds(){
   rows+='<div style="grid-column:1/-1;background:linear-gradient(135deg,#0a1f14,#0d0710);border:1px solid rgba(0,230,118,.28);border-radius:16px;padding:1.3rem 1.15rem">'
     +'<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem">'
     +'<span style="font-size:1.5rem">\uD83C\uDF1F</span>'
-    +'<div><div style="font-family:Orbitron;font-size:1rem;font-weight:900;color:#00e676;letter-spacing:.5px">DIAMANTES 1 VEZ x ID</div>'
+    +'<div><div style="font-family:Oxanium;font-size:1rem;font-weight:900;color:#00e676;letter-spacing:.5px">DIAMANTES 1 VEZ x ID</div>'
     +'<div style="font-size:.72rem;color:var(--muted)">Precios especiales · una vez por ID</div></div>'
     +'</div>'
     // Aviso verificar ID
@@ -751,7 +751,7 @@ function renderProds(){
     +'<span style="font-size:1.1rem;flex-shrink:0">\u26A0\uFE0F</span>'
     +'<div style="font-size:.76rem;color:var(--text);line-height:1.6"><strong style="color:#ffa500">Manda tu ID para comprobar si tiene la oferta.</strong> Una vez comprobada, haz tu pedido con saldo.</div>'
     +'</div>'
-    +'<a href="https://wa.me/12894273983?text=Hola!%20Quiero%20verificar%20mi%20ID%20para%20Diamantes%201%20Vez%20x%20ID" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:.72rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:9px;font-family:Rajdhani,sans-serif;font-weight:800;font-size:.85rem;text-decoration:none;box-sizing:border-box;margin-bottom:1.1rem">\uD83D\uDCF1 Verificar mi ID por WhatsApp</a>'
+    +'<a href="https://wa.me/12894273983?text=Hola!%20Quiero%20verificar%20mi%20ID%20para%20Diamantes%201%20Vez%20x%20ID" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:.72rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:9px;font-family:Poppins,sans-serif;font-weight:800;font-size:.85rem;text-decoration:none;box-sizing:border-box;margin-bottom:1.1rem">\uD83D\uDCF1 Verificar mi ID por WhatsApp</a>'
     +'<div class="lkpln-grid" style="margin-bottom:1.1rem">';
   for(var j=0;j<PRODUCTS_1VEZ.length;j++){
     rows+=makeModernCard(PRODUCTS_1VEZ[j], '#00e676', PRODUCTS_1VEZ[j].badge==='MEJOR PRECIO');
@@ -761,18 +761,18 @@ function renderProds(){
     +'<div style="border-top:1px solid rgba(0,230,118,.15);padding-top:1rem">'
     +'<div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem">Pedir con saldo (ID ya verificado)</div>'
     +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Elige tu paquete</label>'
-    +'<select id="v1-plan" style="width:100%;background:#0a1f14;border:1px solid rgba(0,230,118,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Rajdhani,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box">';
+    +'<select id="v1-plan" style="width:100%;background:#0a1f14;border:1px solid rgba(0,230,118,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Poppins,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box">';
   for(var b=0;b<PRODUCTS_1VEZ.length;b++){
     rows+='<option value="'+PRODUCTS_1VEZ[b].total+'|'+PRODUCTS_1VEZ[b].prices[0]+'">'+PRODUCTS_1VEZ[b].name+' diamantes \u2014 '+fmt(PRODUCTS_1VEZ[b].prices[0])+' MX</option>';
   }
   rows+='</select>'
     +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Tu ID de Free Fire</label>'
-    +'<input id="v1-id" type="text" placeholder="Ej: 123456789" style="width:100%;background:#0a1f14;border:1px solid rgba(0,230,118,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Rajdhani,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box"/>'
+    +'<input id="v1-id" type="text" placeholder="Ej: 123456789" style="width:100%;background:#0a1f14;border:1px solid rgba(0,230,118,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Poppins,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box"/>'
     +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Nombre en el juego</label>'
-    +'<input id="v1-nombre" type="text" placeholder="Tu nickname" style="width:100%;background:#0a1f14;border:1px solid rgba(0,230,118,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Rajdhani,sans-serif;font-size:.88rem;margin-bottom:.65rem;box-sizing:border-box"/>'
-    +'<div style="display:flex;justify-content:space-between;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.18);border-radius:8px;padding:.45rem .85rem;margin-bottom:.5rem"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span id="v1-saldo-val" style="font-family:Orbitron;font-weight:700;color:#00e676;font-size:.82rem">$0 MX</span></div>'
+    +'<input id="v1-nombre" type="text" placeholder="Tu nickname" style="width:100%;background:#0a1f14;border:1px solid rgba(0,230,118,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Poppins,sans-serif;font-size:.88rem;margin-bottom:.65rem;box-sizing:border-box"/>'
+    +'<div style="display:flex;justify-content:space-between;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.18);border-radius:8px;padding:.45rem .85rem;margin-bottom:.5rem"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span id="v1-saldo-val" style="font-family:Oxanium;font-weight:700;color:#00e676;font-size:.82rem">$0 MX</span></div>'
     +'<div id="v1-err" style="display:none;color:#ff6b6b;font-size:.75rem;margin-bottom:.5rem"></div>'
-    +'<button onclick="submitV1Saldo()" style="width:100%;padding:.78rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:10px;font-family:Rajdhani,sans-serif;font-weight:900;font-size:.9rem;cursor:pointer">\uD83D\uDD12 Confirmar con saldo</button>'
+    +'<button onclick="submitV1Saldo()" style="width:100%;padding:.78rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:10px;font-family:Poppins,sans-serif;font-weight:900;font-size:.9rem;cursor:pointer">\uD83D\uDD12 Confirmar con saldo</button>'
     +'</div>'
     +'</div>';
 
@@ -799,7 +799,7 @@ function renderLikes(){
     card+='<div class="lk-total">'+p.total.toLocaleString()+'<span> likes</span></div></div></div>';
     card+='<div class="lk-price-row">';
     if(isVip&&p.origMX){
-      card+='<div><div style="text-decoration:line-through;font-size:.78rem;color:var(--muted);font-family:Orbitron">'+fmt(p.origMX)+'</div>';
+      card+='<div><div style="text-decoration:line-through;font-size:.78rem;color:var(--muted);font-family:Oxanium">'+fmt(p.origMX)+'</div>';
       card+='<div class="lk-price">'+fmt(p.priceMX)+'<span> MX</span></div></div>';
     } else {
       card+='<div class="lk-price">'+fmt(p.priceMX)+'<span> MX</span></div>';
@@ -945,7 +945,7 @@ function renderPerfil(){
         h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:.42rem .55rem;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px">'
           +'<div style="min-width:0;flex:1"><div style="font-size:.75rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis">'+(m.descripcion||m.tipo)+'</div>'
           +'<div style="font-size:.62rem;color:var(--muted)">'+f2+'</div></div>'
-          +'<div style="font-family:Orbitron;font-size:.75rem;font-weight:700;color:'+color+';flex-shrink:0;margin-left:.5rem">'+signo+'$'+(m.monto||0).toLocaleString('es-MX')+'</div>'
+          +'<div style="font-family:Oxanium;font-size:.75rem;font-weight:700;color:'+color+';flex-shrink:0;margin-left:.5rem">'+signo+'$'+(m.monto||0).toLocaleString('es-MX')+'</div>'
           +'</div>';
       });
       movs.innerHTML=h;
@@ -954,6 +954,8 @@ function renderPerfil(){
 }
 
 function renderMisCompras(){
+  // Actualizar saldo y movimientos (movidos desde el perfil)
+  _cargarSaldoYMovimientos();
   var hist=getHistory(), spent=getSpent(), tIdx=getTIdx(spent), tier=TIERS[tIdx];
   var o=document.getElementById('mc2-orders');
   var s=document.getElementById('mc2-spent');
@@ -1325,7 +1327,7 @@ function renderExpPackages(){
       +'</div>';
   }
   rows+='<div style="grid-column:1/-1;text-align:center;margin-top:.5rem">'
-    +'<button onclick="openHonorCuentaModalWithPkg()" style="padding:.75rem 2rem;background:linear-gradient(90deg,#007799,#00f5ff);color:#020a0a;border:none;border-radius:8px;font-family:\'Exo 2\';font-weight:800;font-size:.85rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;box-shadow:0 0 20px rgba(0,245,255,.3)">\u26A1 Contratar plan</button>'
+    +'<button onclick="openHonorCuentaModalWithPkg()" style="padding:.75rem 2rem;background:linear-gradient(90deg,#007799,#00f5ff);color:#020a0a;border:none;border-radius:8px;font-family:\'Poppins\';font-weight:800;font-size:.85rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;box-shadow:0 0 20px rgba(0,245,255,.3)">\u26A1 Contratar plan</button>'
     +'</div>';
   g.innerHTML=rows;
 }
@@ -1717,7 +1719,7 @@ function drawRuleta(angle){
     ctx.fillStyle=RULETA_PRIZES[i].color; ctx.fill();
     ctx.strokeStyle='rgba(255,255,255,.15)'; ctx.lineWidth=1.5; ctx.stroke();
     ctx.save(); ctx.translate(cx,cy); ctx.rotate(start+arc/2);
-    ctx.textAlign='right'; ctx.fillStyle='#fff'; ctx.font='bold 13px Orbitron,sans-serif';
+    ctx.textAlign='right'; ctx.fillStyle='#fff'; ctx.font='bold 13px Oxanium,sans-serif';
     ctx.fillText(RULETA_PRIZES[i].label,r-8,5); ctx.restore();
   }
   ctx.beginPath(); ctx.arc(cx,cy,16,0,Math.PI*2);
@@ -2045,7 +2047,7 @@ function loadLeaderboard(){
             /* Position */
             + '<div style="width:30px;text-align:center;font-size:'+(i<3?'1.2rem':'.82rem')+';color:'+color+';font-weight:700;flex-shrink:0">'+medal+'</div>'
             /* Avatar */
-            + '<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-size:.72rem;font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+(i===0?'#ffd700':color)+'44">'+initial+'</div>'
+            + '<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-size:.72rem;font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+(i===0?'#ffd700':color)+'44">'+initial+'</div>'
             /* Name + stats */
             + '<div style="flex:1;min-width:0">'
             + '<div style="font-size:.85rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'
@@ -2056,7 +2058,7 @@ function loadLeaderboard(){
             + '</div></div>'
             /* Amount */
             + '<div style="text-align:right;flex-shrink:0">'
-            + '<div style="font-family:Orbitron;font-size:.82rem;font-weight:900;color:'+(i===0?'#ffd700':'#00e676')+'">'+'$'+monto.toLocaleString('es-MX')+'</div>'
+            + '<div style="font-family:Oxanium;font-size:.82rem;font-weight:900;color:'+(i===0?'#ffd700':'#00e676')+'">'+'$'+monto.toLocaleString('es-MX')+'</div>'
             + '<div style="font-size:.6rem;color:var(--muted);margin-top:.1rem">MX</div>'
             + '</div>'
             + '</div>';
@@ -2195,7 +2197,7 @@ function admFullLoadStats(){
           h+='<tr>'
             +'<td style="font-weight:700;color:#fff">'+(umap[m.user_id]||'-')+'</td>'
             +'<td style="color:var(--muted)">'+(m.descripcion||'-')+'</td>'
-            +'<td style="font-family:Orbitron;color:#00e676;font-weight:700">$'+(m.monto||0).toLocaleString('es-MX')+'</td>'
+            +'<td style="font-family:Oxanium;color:#00e676;font-weight:700">$'+(m.monto||0).toLocaleString('es-MX')+'</td>'
             +'<td style="color:var(--muted)">'+fecha+'</td>'
             +'</tr>';
         });
@@ -2265,10 +2267,10 @@ function admRenderChart(canvas){
         var maxDay=Math.max.apply(null,sales);
         extra.innerHTML=
           '<div style="background:rgba(0,170,255,.07);border:1px solid rgba(0,170,255,.15);border-radius:8px;padding:.65rem;text-align:center">'
-          +'<div style="font-family:Orbitron;font-size:.9rem;font-weight:700;color:var(--c1)">$'+avg.toLocaleString('es-MX')+'</div>'
+          +'<div style="font-family:Oxanium;font-size:.9rem;font-weight:700;color:var(--c1)">$'+avg.toLocaleString('es-MX')+'</div>'
           +'<div style="font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:.1rem">Promedio/dia</div></div>'
           +'<div style="background:rgba(255,208,0,.07);border:1px solid rgba(255,208,0,.15);border-radius:8px;padding:.65rem;text-align:center">'
-          +'<div style="font-family:Orbitron;font-size:.9rem;font-weight:700;color:var(--c4)">$'+maxDay.toLocaleString('es-MX')+'</div>'
+          +'<div style="font-family:Oxanium;font-size:.9rem;font-weight:700;color:var(--c4)">$'+maxDay.toLocaleString('es-MX')+'</div>'
           +'<div style="font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:.1rem">Mejor dia</div></div>';
       }
     }).catch(function(){});
@@ -2304,7 +2306,7 @@ function admFullLoadUsers(){
         +'<td>'+(u.nombre||'-')+'</td>'
         +'<td>'+(u.whatsapp?'+'+u.whatsapp:'-')+'</td>'
         +'<td>'+roleBadge+'</td>'
-        +'<td style="font-family:Orbitron;color:#00e676;font-weight:700">$'+(u.saldo||0).toLocaleString('es-MX')+'</td>'
+        +'<td style="font-family:Oxanium;color:#00e676;font-weight:700">$'+(u.saldo||0).toLocaleString('es-MX')+'</td>'
         +'<td style="color:var(--muted)">'+fecha+'</td>'
         +'<td><div style="display:flex;gap:.3rem;flex-wrap:wrap">'
         +'<button data-u="'+u.id+'" data-n="'+u.username+'" onclick="admAddSaldo(this.dataset.u,this.dataset.n)" class="adm-action-btn" style="border-color:rgba(0,230,118,.3);color:#00e676">+$</button>'
@@ -2347,11 +2349,11 @@ function admLoadPedidos(){
         var isC=m.tipo==='credito'||m.tipo==='ajuste';
         var tipoBadge='<span class="adm-badge" style="background:rgba('+(isC?'0,230,118':'255,80,80')+',.1);color:'+(isC?'#00e676':m.tipo==='compra'?'var(--c1)':'#ff6b6b')+'">'+m.tipo+'</span>';
         h+='<tr>'
-          +'<td style="color:var(--muted);font-family:Orbitron;font-size:.7rem">'+(i+1)+'</td>'
+          +'<td style="color:var(--muted);font-family:Oxanium;font-size:.7rem">'+(i+1)+'</td>'
           +'<td style="font-weight:700;color:#fff">'+(umap[m.user_id]||'-')+'</td>'
           +'<td>'+tipoBadge+'</td>'
           +'<td style="color:var(--muted)">'+(m.descripcion||'-')+'</td>'
-          +'<td style="font-family:Orbitron;font-weight:700;color:'+(isC?'#00e676':'#ff6b6b')+'">'+(isC?'+':'-')+'$'+(m.monto||0).toLocaleString('es-MX')+'</td>'
+          +'<td style="font-family:Oxanium;font-weight:700;color:'+(isC?'#00e676':'#ff6b6b')+'">'+(isC?'+':'-')+'$'+(m.monto||0).toLocaleString('es-MX')+'</td>'
           +'<td style="color:var(--muted)">'+fecha+'</td>'
           +'</tr>';
       });
@@ -2377,7 +2379,7 @@ function admFullLoadMovs(){
         h+='<tr>'
           +'<td style="color:#fff;font-weight:600">'+(umap[m.user_id]||'-')+'</td>'
           +'<td><span class="adm-badge" style="background:rgba('+(isC?'0,230,118':'255,80,80')+',.1);color:'+(isC?'#00e676':'#ff6b6b')+'">'+m.tipo+'</span></td>'
-          +'<td style="font-family:Orbitron;font-weight:700;color:'+(isC?'#00e676':'#ff6b6b')+'">'+(isC?'+':'-')+'$'+(m.monto||0).toLocaleString('es-MX')+'</td>'
+          +'<td style="font-family:Oxanium;font-weight:700;color:'+(isC?'#00e676':'#ff6b6b')+'">'+(isC?'+':'-')+'$'+(m.monto||0).toLocaleString('es-MX')+'</td>'
           +'<td style="color:var(--muted)">'+(m.descripcion||'-')+'</td>'
           +'<td style="color:var(--muted)">'+fecha+'</td>'
           +'</tr>';
@@ -2436,9 +2438,9 @@ function admLoadTop(){
       var color=i===0?'#ffd700':i===1?'#c0c0c0':i===2?'#cd7f32':'var(--muted)';
       h+='<div style="display:flex;align-items:center;gap:.6rem;padding:.55rem .65rem;background:rgba(255,255,255,.02);border-radius:8px;border:1px solid rgba(255,255,255,.05)">'
         +'<div style="width:26px;text-align:center;font-size:'+(i<3?'1rem':'.8rem')+';color:'+color+';font-weight:700;flex-shrink:0">'+medal+'</div>'
-        +'<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-size:.62rem;font-weight:700;color:#fff;flex-shrink:0">'+u.username.charAt(0).toUpperCase()+'</div>'
+        +'<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-size:.62rem;font-weight:700;color:#fff;flex-shrink:0">'+u.username.charAt(0).toUpperCase()+'</div>'
         +'<div style="flex:1;font-size:.82rem;font-weight:700;color:#fff">'+u.username+'</div>'
-        +'<div style="font-family:Orbitron;font-size:.78rem;font-weight:900;color:'+(i===0?'#ffd700':'#00e676')+'">'+'$'+val.toLocaleString('es-MX')+'</div>'
+        +'<div style="font-family:Oxanium;font-size:.78rem;font-weight:900;color:'+(i===0?'#ffd700':'#00e676')+'">'+'$'+val.toLocaleString('es-MX')+'</div>'
         +'</div>';
     });
     el.innerHTML=h||'<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Sin datos</div>';
@@ -2844,7 +2846,7 @@ function renderCart(){
   }).join('');
 
   rows+='<div class="cart-total"><span>Total</span><span style="color:'+(enough?'#00e676':'#ff6b6b')+'">'+fmt(total)+'</span></div>';
-  rows+='<div style="display:flex;justify-content:space-between;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.18);border-radius:8px;padding:.5rem .85rem;margin:.5rem 0"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span style="font-family:Orbitron;font-weight:700;color:'+(enough?'#00e676':'#ff6b6b')+'">$'+saldo.toLocaleString('es-MX')+' MX</span></div>';
+  rows+='<div style="display:flex;justify-content:space-between;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.18);border-radius:8px;padding:.5rem .85rem;margin:.5rem 0"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span style="font-family:Oxanium;font-weight:700;color:'+(enough?'#00e676':'#ff6b6b')+'">$'+saldo.toLocaleString('es-MX')+' MX</span></div>';
   if(!authSession){
     rows+='<button onclick="closeCart();showAuthModal();" style="width:100%;padding:.72rem;background:linear-gradient(90deg,#0055cc,#00aaff);color:#fff;border:none;border-radius:7px;font-weight:700;font-size:.9rem;cursor:pointer">Inicia sesion</button>';
   } else if(!enough){
@@ -3144,11 +3146,11 @@ function renderTopList(elId, data, colorFn, maxItems){
 
     html += '<div style="background:'+bg+';border:1px solid '+border+';border-radius:11px;padding:.75rem 1rem;display:flex;align-items:center;gap:.75rem;'+(i===0?'box-shadow:0 0 20px rgba(255,215,0,.08);':'')+'margin-bottom:.5rem">'
       + '<div style="width:30px;text-align:center;font-size:'+(i<3?'1.2rem':'.82rem')+';color:'+medalColor+';font-weight:700;flex-shrink:0">'+medal+'</div>'
-      + '<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-size:.72rem;font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+medalColor+'44">'+initial+'</div>'
+      + '<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-size:.72rem;font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+medalColor+'44">'+initial+'</div>'
       + '<div style="flex:1;min-width:0">'
       + '<div style="font-size:.85rem;font-weight:700;color:#fff">'+item.username+(isMe?' <span style="font-size:.62rem;background:rgba(0,170,255,.15);color:var(--c1);padding:.1rem .35rem;border-radius:4px">Tu</span>':'')+' </div>'
       + '</div>'
-      + '<div style="text-align:right;flex-shrink:0;font-family:Orbitron;font-size:.82rem;font-weight:900;color:'+valueColor+'">$'+Math.round(value).toLocaleString('es-MX')+'</div>'
+      + '<div style="text-align:right;flex-shrink:0;font-family:Oxanium;font-size:.82rem;font-weight:900;color:'+valueColor+'">$'+Math.round(value).toLocaleString('es-MX')+'</div>'
       + '</div>';
   });
 
@@ -3321,12 +3323,12 @@ function loadTopLikes(){
 
         html += '<div style="background:'+bg+';border:1px solid '+border+';border-radius:11px;padding:.75rem 1rem;display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem">'
           + '<div style="width:30px;text-align:center;font-size:'+(i<3?'1.2rem':'.82rem')+';color:'+medalColor+';font-weight:700;flex-shrink:0">'+medal+'</div>'
-          + '<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-size:.72rem;font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+medalColor+'44">'+initial+'</div>'
+          + '<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-size:.72rem;font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+medalColor+'44">'+initial+'</div>'
           + '<div style="flex:1;min-width:0">'
           + '<div style="font-size:.85rem;font-weight:700;color:#fff">'+item.username+(isMe?' <span style="font-size:.62rem;background:rgba(0,170,255,.15);color:var(--c1);padding:.1rem .35rem;border-radius:4px">Tu</span>':'')+' </div>'
           + '<div style="font-size:.65rem;color:var(--muted);margin-top:.15rem">👍 '+item.likes.toLocaleString('es-MX')+' likes</div>'
           + '</div>'
-          + '<div style="text-align:right;flex-shrink:0;font-family:Orbitron;font-size:.82rem;font-weight:900;color:'+(i===0?'#ffd700':'#00e676')+'">$'+item.value.toLocaleString('es-MX')+'</div>'
+          + '<div style="text-align:right;flex-shrink:0;font-family:Oxanium;font-size:.82rem;font-weight:900;color:'+(i===0?'#ffd700':'#00e676')+'">$'+item.value.toLocaleString('es-MX')+'</div>'
           + '</div>';
       });
 
@@ -3393,12 +3395,12 @@ function loadTopDiamantes(){
 
         html += '<div style="background:'+bg+';border:1px solid '+border+';border-radius:11px;padding:.75rem 1rem;display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem">'
           + '<div style="width:30px;text-align:center;font-size:'+(i<3?'1.2rem':'.82rem')+';color:'+medalColor+';font-weight:700;flex-shrink:0">'+medal+'</div>'
-          + '<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-size:.72rem;font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+medalColor+'44">'+initial+'</div>'
+          + '<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-size:.72rem;font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+medalColor+'44">'+initial+'</div>'
           + '<div style="flex:1;min-width:0">'
           + '<div style="font-size:.85rem;font-weight:700;color:#fff">'+item.username+(isMe?' <span style="font-size:.62rem;background:rgba(0,170,255,.15);color:var(--c1);padding:.1rem .35rem;border-radius:4px">Tu</span>':'')+' </div>'
           + '<div style="font-size:.65rem;color:var(--muted);margin-top:.15rem">💎 '+item.diamantes.toLocaleString('es-MX')+' diamantes</div>'
           + '</div>'
-          + '<div style="text-align:right;flex-shrink:0;font-family:Orbitron;font-size:.82rem;font-weight:900;color:'+(i===0?'#ffd700':'#00e676')+'">$'+item.value.toLocaleString('es-MX')+'</div>'
+          + '<div style="text-align:right;flex-shrink:0;font-family:Oxanium;font-size:.82rem;font-weight:900;color:'+(i===0?'#ffd700':'#00e676')+'">$'+item.value.toLocaleString('es-MX')+'</div>'
           + '</div>';
       });
 
@@ -3466,9 +3468,9 @@ function loadTopHabibis(){
 
         html += '<div style="background:'+bg+';border:1px solid '+border+';border-radius:10px;padding:.85rem 1rem;display:flex;align-items:center;gap:.8rem;box-shadow:'+(i===0?'0 0 20px rgba(255,215,0,.1);':'')+'transition:all .2s">'
           + '<div style="width:32px;text-align:center;font-size:1.3rem;flex-shrink:0">'+medal+'</div>'
-          + '<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-size:.75rem;font-weight:900;color:#fff;flex-shrink:0">'+initial+'</div>'
+          + '<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-size:.75rem;font-weight:900;color:#fff;flex-shrink:0">'+initial+'</div>'
           + '<div style="flex:1"><div style="font-size:.88rem;font-weight:700;color:#fff">'+item.username+(isMe?' 👤':'')+' </div><div style="font-size:.65rem;color:var(--muted)">Dinero: $'+item.value.toLocaleString('es-MX')+'</div></div>'
-          + '<div style="text-align:right;flex-shrink:0"><div style="font-family:Orbitron;font-size:.95rem;font-weight:900;color:'+medalColor+'">$'+item.value.toLocaleString('es-MX')+'</div><div style="font-size:.6rem;color:var(--muted)">MX</div></div>'
+          + '<div style="text-align:right;flex-shrink:0"><div style="font-family:Oxanium;font-size:.95rem;font-weight:900;color:'+medalColor+'">$'+item.value.toLocaleString('es-MX')+'</div><div style="font-size:.6rem;color:var(--muted)">MX</div></div>'
           + '</div>';
       });
 
@@ -3690,12 +3692,12 @@ function loadDiamondTop(){
 
         html += '<div style="background:'+bg+';border:1px solid '+border+';border-radius:11px;padding:'+(isTop1?'.85rem .9rem':'.65rem .9rem')+';display:flex;align-items:center;gap:.75rem;'+(isTop1?'box-shadow:0 0 18px rgba(255,215,0,.1);':'')+'">'
           + '<div style="width:26px;text-align:center;font-size:'+(i<3?'1.2rem':'.85rem')+';font-weight:900;color:'+rankColor+';flex-shrink:0">'+rank+'</div>'
-          + '<div style="width:'+avSize+';height:'+avSize+';border-radius:11px;background:linear-gradient(135deg,#a78bfa,#7c3aed);display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-size:'+(isTop1?'.9rem':'.78rem')+';font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+rankColor+'44">'+initial+'</div>'
+          + '<div style="width:'+avSize+';height:'+avSize+';border-radius:11px;background:linear-gradient(135deg,#a78bfa,#7c3aed);display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-size:'+(isTop1?'.9rem':'.78rem')+';font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+rankColor+'44">'+initial+'</div>'
           + '<div style="flex:1;min-width:0">'
           + '<div style="font-size:'+(isTop1?'1rem':'.85rem')+';font-weight:'+(isTop1?'900':'700')+';color:#fff">'+item.username+'</div>'
           + '<div style="font-size:.62rem;color:var(--muted)">diamantes comprados</div>'
           + '</div>'
-          + '<div style="text-align:right;flex-shrink:0;font-family:Orbitron;font-size:'+(isTop1?'1.05rem':'.88rem')+';font-weight:900;color:'+(isTop1?'#ffd700':'#a78bfa')+'">'+item.diamonds.toLocaleString('es-MX')+' 💎</div>'
+          + '<div style="text-align:right;flex-shrink:0;font-family:Oxanium;font-size:'+(isTop1?'1.05rem':'.88rem')+';font-weight:900;color:'+(isTop1?'#ffd700':'#a78bfa')+'">'+item.diamonds.toLocaleString('es-MX')+' 💎</div>'
           + '</div>';
       });
 
@@ -3803,12 +3805,12 @@ function loadMillonarioTop(){
 
         html += '<div style="background:'+bg+';border:1px solid '+border+';border-radius:11px;padding:'+(isTop1?'.85rem .9rem':'.65rem .9rem')+';display:flex;align-items:center;gap:.75rem;'+(isTop1?'box-shadow:0 0 18px rgba(255,215,0,.12);':'')+'">'
           + '<div style="width:26px;text-align:center;font-size:'+(i<3?'1.2rem':'.85rem')+';font-weight:900;color:'+rankColor+';flex-shrink:0">'+rank+'</div>'
-          + '<div style="width:'+avSize+';height:'+avSize+';border-radius:11px;background:linear-gradient(135deg,#ffd700,#f0a000);display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-size:'+(isTop1?'.9rem':'.78rem')+';font-weight:900;color:#1a0a00;flex-shrink:0;border:2px solid '+rankColor+'44">'+initial+'</div>'
+          + '<div style="width:'+avSize+';height:'+avSize+';border-radius:11px;background:linear-gradient(135deg,#ffd700,#f0a000);display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-size:'+(isTop1?'.9rem':'.78rem')+';font-weight:900;color:#1a0a00;flex-shrink:0;border:2px solid '+rankColor+'44">'+initial+'</div>'
           + '<div style="flex:1;min-width:0">'
           + '<div style="font-size:'+(isTop1?'1rem':'.85rem')+';font-weight:'+(isTop1?'900':'700')+';color:#fff">'+item.username+'</div>'
           + '<div style="font-size:.62rem;color:var(--muted)">gastado en total</div>'
           + '</div>'
-          + '<div style="text-align:right;flex-shrink:0;font-family:Orbitron;font-size:'+(isTop1?'1.05rem':'.88rem')+';font-weight:900;color:'+(isTop1?'#ffd700':'#f0a000')+'">$'+Math.round(item.monto).toLocaleString('es-MX')+'</div>'
+          + '<div style="text-align:right;flex-shrink:0;font-family:Oxanium;font-size:'+(isTop1?'1.05rem':'.88rem')+';font-weight:900;color:'+(isTop1?'#ffd700':'#f0a000')+'">$'+Math.round(item.monto).toLocaleString('es-MX')+'</div>'
           + '</div>';
       });
 
@@ -3919,12 +3921,12 @@ function loadLikerTop(){
 
         html += '<div style="background:'+bg+';border:1px solid '+border+';border-radius:11px;padding:'+(isTop1?'.85rem .9rem':'.65rem .9rem')+';display:flex;align-items:center;gap:.75rem;'+(isTop1?'box-shadow:0 0 18px rgba(255,77,166,.12);':'')+'">'
           + '<div style="width:26px;text-align:center;font-size:'+(i<3?'1.2rem':'.85rem')+';font-weight:900;color:'+rankColor+';flex-shrink:0">'+rank+'</div>'
-          + '<div style="width:'+avSize+';height:'+avSize+';border-radius:11px;background:linear-gradient(135deg,#ff4da6,#d6249f);display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-size:'+(isTop1?'.9rem':'.78rem')+';font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+rankColor+'44">'+initial+'</div>'
+          + '<div style="width:'+avSize+';height:'+avSize+';border-radius:11px;background:linear-gradient(135deg,#ff4da6,#d6249f);display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-size:'+(isTop1?'.9rem':'.78rem')+';font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+rankColor+'44">'+initial+'</div>'
           + '<div style="flex:1;min-width:0">'
           + '<div style="font-size:'+(isTop1?'1rem':'.85rem')+';font-weight:'+(isTop1?'900':'700')+';color:#fff">'+item.username+'</div>'
           + '<div style="font-size:.62rem;color:var(--muted)">likes comprados</div>'
           + '</div>'
-          + '<div style="text-align:right;flex-shrink:0;font-family:Orbitron;font-size:'+(isTop1?'1.05rem':'.88rem')+';font-weight:900;color:'+(isTop1?'#ff4da6':'#d6249f')+'">'+item.likes.toLocaleString('es-MX')+' 👍</div>'
+          + '<div style="text-align:right;flex-shrink:0;font-family:Oxanium;font-size:'+(isTop1?'1.05rem':'.88rem')+';font-weight:900;color:'+(isTop1?'#ff4da6':'#d6249f')+'">'+item.likes.toLocaleString('es-MX')+' 👍</div>'
           + '</div>';
       });
 
@@ -4464,7 +4466,7 @@ function renderPinesAPI(){
       + '</div>'
       + '<div class="lkpln-r" style="display:flex;flex-direction:column;align-items:flex-end;gap:.4rem">'
       + '<div><div class="lkpln-price" style="color:#38bdf8">$'+p.precio+'</div><div class="lkpln-cur">MXN</div></div>'
-      + '<button onclick="comprarPinAPI('+p.product_id+','+p.precio+',\''+p.nombre.replace(/'/g,"")+'\')" style="padding:.35rem .8rem;background:linear-gradient(90deg,#128c3e,#25d366);border:none;border-radius:8px;color:#fff;font-family:Rajdhani,sans-serif;font-weight:800;font-size:.72rem;cursor:pointer;white-space:nowrap">Comprar</button>'
+      + '<button onclick="comprarPinAPI('+p.product_id+','+p.precio+',\''+p.nombre.replace(/'/g,"")+'\')" style="padding:.35rem .8rem;background:linear-gradient(90deg,#128c3e,#25d366);border:none;border-radius:8px;color:#fff;font-family:Poppins,sans-serif;font-weight:800;font-size:.72rem;cursor:pointer;white-space:nowrap">Comprar</button>'
       + '</div>'
       + '</div></div>';
   });
@@ -5039,4 +5041,37 @@ function notificarPedidoTelegram(titulo, detalles, precio, ord){
       })
     }).catch(function(e){ console.warn('[TG PEDIDO] ', e); });
   } catch(e){ console.warn('[TG PEDIDO] ', e); }
+}
+
+
+// ═══ Cargar saldo + movimientos (para Mis Compras) ═══
+function _cargarSaldoYMovimientos(){
+  var sdb = document.getElementById('pf-saldo-big');
+  var movs = document.getElementById('pf-movimientos');
+  if(!authSession){
+    if(sdb) sdb.textContent='$0 MX';
+    if(movs) movs.innerHTML='<div style="text-align:center;padding:1rem;color:var(--muted);font-size:.78rem">Inicia sesion para ver tu historial</div>';
+    return;
+  }
+  var saldo = authSession.saldo || 0;
+  if(sdb) sdb.textContent = '$'+saldo.toLocaleString('es-MX')+' MX';
+
+  if(movs && authSession.id && typeof sbGetMovimientos === 'function'){
+    sbGetMovimientos(authSession.id).then(function(rows){
+      if(!rows||!rows.length){movs.innerHTML='<div style="text-align:center;padding:1rem;color:var(--muted);font-size:.78rem">Sin movimientos</div>';return;}
+      var h='';
+      rows.forEach(function(m){
+        var f2=m.created_at?new Date(m.created_at).toLocaleDateString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'';
+        var isC=m.tipo==='credito'||m.tipo==='ajuste'||m.tipo==='recarga';
+        var color=isC?'#00e676':'#ff6b6b';
+        var signo=isC?'+':'-';
+        h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:.42rem .55rem;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px">'
+          +'<div style="min-width:0;flex:1"><div style="font-size:.75rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis">'+(m.descripcion||m.tipo)+'</div>'
+          +'<div style="font-size:.62rem;color:var(--muted)">'+f2+'</div></div>'
+          +'<div style="font-family:Oxanium;font-size:.75rem;font-weight:700;color:'+color+';flex-shrink:0;margin-left:.5rem">'+signo+'$'+(m.monto||0).toLocaleString('es-MX')+'</div>'
+          +'</div>';
+      });
+      movs.innerHTML=h;
+    }).catch(function(){movs.innerHTML='<div style="text-align:center;padding:1rem;color:var(--muted)">Error al cargar</div>';});
+  }
 }
