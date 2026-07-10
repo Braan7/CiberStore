@@ -5075,3 +5075,14 @@ function _cargarSaldoYMovimientos(){
     }).catch(function(){movs.innerHTML='<div style="text-align:center;padding:1rem;color:var(--muted)">Error al cargar</div>';});
   }
 }
+
+
+// ═══ Colapsar tablas de ranking (mostrar solo top 1-3) ═══
+function toggleTabla(listaId, btn){
+  var lista = document.getElementById(listaId);
+  if(!lista) return;
+  lista.classList.toggle('top3only');
+  // Rotar la flechita
+  var arrow = btn ? btn.querySelector('.tabla-arrow') : null;
+  if(arrow) arrow.classList.toggle('rot');
+}
