@@ -2330,6 +2330,32 @@ document.addEventListener('keydown',function(e){
 <div class="page" id="page-perfil">
   <div class="ph"><div class="stag">Mi cuenta</div><h2 class="ptitle">MI <span>PERFIL</span></h2><p class="psub">Tus datos reales conectados desde Supabase.</p></div>
   <div class="pf-wrap">
+    <!-- Datos rapidos: usuario, contrasena, hora Mexico -->
+    <div class="pf-card" style="margin-bottom:.85rem">
+      <div style="padding:1.1rem 1.25rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem">
+          <div>
+            <div style="font-size:.62rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase">Usuario</div>
+            <div style="font-family:Orbitron;font-weight:800;font-size:1.05rem;color:#fff" id="pf-quick-user">-</div>
+          </div>
+          <div class="pf-av" id="pf-quick-av" style="width:48px;height:48px;font-size:1.2rem">?</div>
+        </div>
+
+        <button onclick="openCambiarPass()" style="width:100%;padding:.7rem;background:var(--grad-soft);border:1px solid var(--border2);color:var(--c1);border-radius:10px;font-family:'Exo 2';font-weight:800;font-size:.82rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;margin-bottom:.85rem">&#128273; Cambiar contrase&ntilde;a</button>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem .9rem;background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.18);border-radius:10px">
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <span style="font-size:1.1rem">&#128197;</span>
+            <div>
+              <div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Hora local M&eacute;xico</div>
+              <div id="pf-hora-mx" style="font-family:Orbitron;font-weight:700;font-size:.92rem;color:#38bdf8">--:--:--</div>
+            </div>
+          </div>
+          <div id="pf-fecha-mx" style="font-size:.72rem;color:var(--muted);text-align:right;line-height:1.4">-</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Avatar + datos -->
     <div class="pf-card">
       <div class="pf-av-wrap">
@@ -2557,6 +2583,23 @@ document.addEventListener('keydown',function(e){
 </div>
 
 <!-- MODAL HONOR CUENTA FF -->
+
+<div class="modal-ov" id="modal-pass">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-h"><h3>&#128273; Cambiar <span style="color:var(--c1)">contrase&ntilde;a</span></h3><button class="modal-close" onclick="closeCambiarPass()">&#215;</button></div>
+    <div class="modal-b">
+      <label class="flabel">Contrase&ntilde;a actual</label>
+      <input class="finput" id="pass-actual" type="password" placeholder="Tu contrase&ntilde;a actual"/>
+      <label class="flabel">Nueva contrase&ntilde;a</label>
+      <input class="finput" id="pass-nueva" type="password" placeholder="M&iacute;nimo 6 caracteres"/>
+      <label class="flabel">Confirma la nueva</label>
+      <input class="finput" id="pass-confirma" type="password" placeholder="Repite la nueva contrase&ntilde;a"/>
+      <div id="pass-msg" style="display:none;font-size:.78rem;margin:.5rem 0;padding:.5rem .7rem;border-radius:8px"></div>
+      <button onclick="guardarNuevaPass()" style="width:100%;margin-top:.6rem;padding:.85rem;background:var(--grad);color:#fff;border:none;border-radius:10px;font-family:Orbitron;font-weight:900;font-size:.82rem;letter-spacing:.5px;cursor:pointer">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-ov" id="modal-honor-cuenta">
   <div class="modal">
     <div class="modal-h">

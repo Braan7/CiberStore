@@ -921,6 +921,10 @@ function renderPerfil(){
   var roleStr  = u.role === 'admin' ? 'Admin' : 'Usuario';
   if(av)   av.textContent   = u.username.charAt(0).toUpperCase();
   if(un)   un.textContent   = u.username;
+  // Campos rapidos nuevos
+  var qu=document.getElementById('pf-quick-user'); if(qu) qu.textContent=u.username;
+  var qav=document.getElementById('pf-quick-av'); if(qav) qav.textContent=u.username.charAt(0).toUpperCase();
+  _iniciarRelojMexico();
   if(sdo)  sdo.textContent  = saldoFmt;
   if(sdb)  sdb.textContent  = saldoFmt;
   if(sbp)  sbp.textContent  = saldoFmt;
@@ -1150,7 +1154,10 @@ function submitProd(){
     +'\nMetodo: Transferencia Bancaria'
     +'\n\nNombre: '+v.nombre+'\nID: '+v.v1+'\nWhatsApp: '+v.wa
     +'\n\nManda comprobante con # '+ord;
-  sendWA(msg);
+  // Notificar por Telegram (ya no WhatsApp) + registrar
+  notificarPedidoTelegram('Compra', msg.replace(/\*/g,'').replace(/\n/g,' | '), 0, ord);
+  showToast('\u2705 Pedido #'+ord+' enviado! Te contactaremos.', 3000);
+  closeModal();
 }
 
 /* \u2500\u2500 LIKES MODAL \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
@@ -1211,7 +1218,10 @@ function submitLikes(){
     +'\nMetodo: Transferencia Bancaria'
     +'\n\nNombre: '+v.nombre+'\nID FF: '+v.v1+'\nWhatsApp: '+v.wa
     +'\n\nManda comprobante con # '+ord;
-  sendWA(msg);
+  // Notificar por Telegram (ya no WhatsApp) + registrar
+  notificarPedidoTelegram('Compra', msg.replace(/\*/g,'').replace(/\n/g,' | '), 0, ord);
+  showToast('\u2705 Pedido #'+ord+' enviado! Te contactaremos.', 3000);
+  closeModal();
 }
 
 /* \u2500\u2500 HONOR MODAL \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
@@ -1289,7 +1299,10 @@ function submitHonor(){
     +'\nMetodo: Transferencia Bancaria'
     +'\n\nNombre: '+nombre+'\nNombre Clan: '+f1+'\nID Clan: '+f2+'\nWhatsApp: '+wa
     +'\n\nManda comprobante con # '+ord;
-  sendWA(msg);
+  // Notificar por Telegram (ya no WhatsApp) + registrar
+  notificarPedidoTelegram('Compra', msg.replace(/\*/g,'').replace(/\n/g,' | '), 0, ord);
+  showToast('\u2705 Pedido #'+ord+' enviado! Te contactaremos.', 3000);
+  closeModal();
 }
 function clanWA(){
   window.open('https://wa.me/'+WA+'?text='+encodeURIComponent('Hola! Me interesa comprar un clan nivel 7. Quiero mas informacion y cotizacion.'),'_blank');
@@ -4903,7 +4916,19 @@ function cargarPedidosSeguimiento(){
         var actual = p.progreso_actual || 0;
         var total = p.progreso_total;
         var pct = Math.min(100, Math.round((actual/total)*100));
+
+        // Calcular cantidad enviada (para likes: proporcional a los dias)
+        var cantNum = parseInt(String(p.cantidad).replace(/[^0-9]/g,'')) || 0;
+        var enviado = '';
+        if(cantNum > 0 && (p.tipo === 'likes')){
+          var yaEnviado = Math.round((actual/total) * cantNum);
+          enviado = '<div style="display:flex;justify-content:space-between;font-size:.72rem;margin-bottom:.5rem"><span style="color:var(--muted)">Likes enviados</span><span style="color:#25d366;font-weight:700">'+yaEnviado.toLocaleString('es-MX')+' / '+cantNum.toLocaleString('es-MX')+'</span></div>';
+        } else if(p.tipo === 'honor'){
+          enviado = '<div style="display:flex;justify-content:space-between;font-size:.72rem;margin-bottom:.5rem"><span style="color:var(--muted)">Honor de clan</span><span style="color:#ffcf40;font-weight:700">Dia '+actual+' de '+total+'</span></div>';
+        }
+
         html += '<div class="ped-prog-wrap">';
+        html += enviado;
         html += '<div class="ped-prog-head"><span>Progreso de entrega</span><span style="color:#c4a5f7;font-weight:700">'+actual+'/'+total+' dias</span></div>';
         html += '<div class="ped-prog-bar"><div class="ped-prog-fill" style="width:'+pct+'%"></div></div>';
         // Puntitos por día
@@ -4931,3 +4956,87 @@ function cargarPedidosSeguimiento(){
 
 function _esc(s){ return String(s||'').replace(/[<>&"]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];}); }
 function _fechaPed(s){ if(!s) return ''; var d=new Date(s); return d.toLocaleDateString('es-MX')+' '+d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}); }
+
+
+// ═══ RELOJ DE MÉXICO (hora local en vivo) ═══
+var _relojMxTimer = null;
+function _iniciarRelojMexico(){
+  if(_relojMxTimer) return; // ya corriendo
+  function tick(){
+    var horaEl = document.getElementById('pf-hora-mx');
+    var fechaEl = document.getElementById('pf-fecha-mx');
+    if(!horaEl){ return; }
+    try {
+      var ahora = new Date();
+      var hora = ahora.toLocaleTimeString('es-MX', { timeZone:'America/Mexico_City', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false });
+      var fecha = ahora.toLocaleDateString('es-MX', { timeZone:'America/Mexico_City', weekday:'long', day:'numeric', month:'long' });
+      horaEl.textContent = hora;
+      if(fechaEl) fechaEl.textContent = fecha.charAt(0).toUpperCase()+fecha.slice(1);
+    } catch(e){}
+  }
+  tick();
+  _relojMxTimer = setInterval(tick, 1000);
+}
+
+// ═══ CAMBIAR CONTRASEÑA ═══
+function openCambiarPass(){
+  if(!authSession){ showToast('Inicia sesion'); return; }
+  var el=document.getElementById('modal-pass'); if(el) el.classList.add('show');
+}
+function closeCambiarPass(){
+  var el=document.getElementById('modal-pass'); if(el) el.classList.remove('show');
+  ['pass-actual','pass-nueva','pass-confirma'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+  var m=document.getElementById('pass-msg'); if(m) m.style.display='none';
+}
+function guardarNuevaPass(){
+  var actual=((document.getElementById('pass-actual')||{}).value||'');
+  var nueva=((document.getElementById('pass-nueva')||{}).value||'');
+  var conf=((document.getElementById('pass-confirma')||{}).value||'');
+  var msg=document.getElementById('pass-msg');
+  function showMsg(txt,ok){ if(msg){ msg.textContent=txt; msg.style.display='block'; msg.style.background=ok?'rgba(37,211,102,.12)':'rgba(255,80,100,.12)'; msg.style.color=ok?'#25d366':'#ff5c6c'; } }
+
+  if(!actual){ showMsg('Ingresa tu contrasena actual',false); return; }
+  if(nueva.length < 6){ showMsg('La nueva debe tener minimo 6 caracteres',false); return; }
+  if(nueva !== conf){ showMsg('Las contrasenas nuevas no coinciden',false); return; }
+
+  // Verificar la contrasena actual contra la guardada
+  if(authSession.password && authSession.password !== actual){
+    showMsg('La contrasena actual es incorrecta',false); return;
+  }
+
+  // Actualizar en Supabase
+  if(typeof sbUpdateProfile === 'function' && authSession.id){
+    sbUpdateProfile(authSession.id, { password: nueva }).then(function(){
+      authSession.password = nueva;
+      showMsg('Contrasena actualizada!',true);
+      setTimeout(closeCambiarPass, 1500);
+    }).catch(function(e){
+      showMsg('Error al guardar. Intenta de nuevo.',false);
+      console.warn('[PASS] ', e);
+    });
+  } else {
+    showMsg('No se pudo actualizar (sin conexion)',false);
+  }
+}
+
+
+// ═══ NOTIFICAR PEDIDO A TELEGRAM (reemplaza WhatsApp en compras) ═══
+// Usa la misma Edge Function de recargas (bright-task) para mandar a Telegram.
+function notificarPedidoTelegram(titulo, detalles, precio, ord){
+  var user = (authSession && authSession.username) ? authSession.username : 'Cliente';
+  try {
+    fetch(NOTIF_RECARGA_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        usuario: user,
+        username: user,
+        metodo: 'PEDIDO: ' + titulo,
+        monto: (precio ? ('$'+precio+' MXN') : '') + (ord ? (' - Pedido #'+ord) : ''),
+        monto_acreditar: 0,
+        extra: detalles || '',
+        foto_base64: ''
+      })
+    }).catch(function(e){ console.warn('[TG PEDIDO] ', e); });
+  } catch(e){ console.warn('[TG PEDIDO] ', e); }
+}
