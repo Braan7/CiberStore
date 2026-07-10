@@ -660,7 +660,7 @@ function goPage(id){
   if(id==='likes') renderLikes();
   if(id==='membresia'){renderMems();renderWallet();}
   if(id==='perfil') renderPerfil();
-  if(id==='miscompras') renderMisCompras();
+  if(id==='miscompras'){ renderMisCompras(); setTimeout(cargarPedidosSeguimiento,300); }
   if(id==='honorcuenta') setTimeout(renderExpPackages,50);
   if(id==='referidos') setTimeout(renderReferidos,50);
   if(id==='retirar') setTimeout(_updateRetiroSaldo,50);
@@ -1282,6 +1282,8 @@ function submitHonor(){
   addSpend(h.price);
   addToHistoryLocal({name:'Honor '+h.region,price:h.price,icon:h.flag,
     date:new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),order:ord});
+  // Registrar pedido con progreso 1/7 fijo (Honor de Clan se entrega en 7 dias)
+  registrarPedidoHonor('Honor de Clan - '+h.region, f2, h.price, f1);
   var msg='*PEDIDO #'+ord+' - CiberStore*\n\nServicio: Honor de Clan - '+h.region
     +'\nPrecio: '+fmt(h.price)
     +'\nMetodo: Transferencia Bancaria'
@@ -3048,6 +3050,7 @@ function submitLk2kSaldo(){
   }
   var ord = getNextOrder();
   addSpend(plan.precio, 'Venta Likes 2K: '+plan.label+' - ID:'+ffId+' - Pedido #'+ord);
+  registrarPedido('Likes Instantaneos '+plan.label, plan.label, 'likes', ffId, plan.precio, 0);
   if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(
     authSession.username,
     'Likes 2K: '+plan.label+' (ID: '+ffId+' / '+ffNom+')',
@@ -3078,6 +3081,7 @@ function submitLk200Saldo(){
   }
   var ord = getNextOrder();
   addSpend(plan.precio, 'Venta Likes 200: '+plan.label+' - ID:'+ffId+' - Pedido #'+ord);
+  registrarPedido('Likes Basicos '+plan.label, plan.label, 'likes', ffId, plan.precio, 7);
   if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(
     authSession.username,
     'Likes 200: '+plan.label+' (ID: '+ffId+' / '+ffNom+')',
@@ -4127,6 +4131,7 @@ function _procesarCompraDiam(planVal, idEl, nomEl, errEl, etiqueta){
 
   var ord=getNextOrder();
   addSpend(precio, etiqueta+': '+diamantes.toLocaleString('es-MX')+' diamantes - ID:'+ffId+' ('+ffNom+') - Pedido #'+ord);
+  registrarPedido(etiqueta+' '+diamantes.toLocaleString('es-MX'), diamantes, 'diamantes', ffId, precio, 0);
   if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, etiqueta+' '+diamantes+' - ID:'+ffId, precio, ord);
   showToast('Pedido #'+ord+' confirmado!', 2500);
 
@@ -4821,3 +4826,108 @@ function _zelleMXN(usd){
   var neto = Math.max(0, (parseFloat(usd)||0) - ZELLE_COMISION);
   return neto * ZELLE_TC;
 }
+
+
+// ═══ REGISTRAR PEDIDO para seguimiento (tabla pedidos) ═══
+// tipo: 'likes'|'diamantes'|'pin'  | total: dias de progreso (7 para likes 7 dias, 0 si no aplica)
+function registrarPedido(producto, cantidad, tipo, ffId, precio, progresoTotal){
+  if(!authSession || typeof sb === 'undefined' || !sb.post) return;
+  try {
+    sb.post('pedidos', {
+      username: authSession.username,
+      producto: producto || 'Pedido',
+      cantidad: (cantidad != null ? String(cantidad) : ''),
+      tipo: tipo || 'otro',
+      ff_id: ffId || '',
+      estado: 'pendiente',
+      progreso_actual: 0,
+      progreso_total: progresoTotal || 0,
+      precio: precio || 0
+    }).catch(function(e){ console.warn('[PEDIDO] no se registro:', e); });
+  } catch(e){ console.warn('[PEDIDO] error:', e); }
+}
+
+// Registrar pedido de Honor de Clan (arranca en dia 1/7 fijo)
+function registrarPedidoHonor(producto, clanId, precio, clanNombre){
+  if(!authSession || typeof sb === 'undefined' || !sb.post) return;
+  try {
+    sb.post('pedidos', {
+      username: authSession.username,
+      producto: producto || 'Honor de Clan',
+      cantidad: clanNombre ? ('Clan: '+clanNombre) : '',
+      tipo: 'honor',
+      ff_id: clanId || '',
+      estado: 'procesando',
+      progreso_actual: 1,
+      progreso_total: 7,
+      precio: precio || 0
+    }).catch(function(e){ console.warn('[PEDIDO HONOR] no se registro:', e); });
+  } catch(e){ console.warn('[PEDIDO HONOR] error:', e); }
+}
+
+
+// ═══ CARGAR PEDIDOS EN SEGUIMIENTO (Mis Compras) ═══
+var ESTADO_LABEL = {
+  pendiente:{t:'Pendiente',c:'pe-pendiente',pct:10},
+  procesando:{t:'Procesando',c:'pe-procesando',pct:40},
+  enviado:{t:'Enviado',c:'pe-enviado',pct:75},
+  completado:{t:'Completado',c:'pe-completado',pct:100},
+  rechazado:{t:'Rechazado',c:'pe-rechazado',pct:0}
+};
+
+function cargarPedidosSeguimiento(){
+  var cont = document.getElementById('pedidos-seguimiento');
+  if(!cont) return;
+  if(!authSession){ cont.innerHTML='<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Inicia sesion para ver tus pedidos</div>'; return; }
+  if(typeof sb === 'undefined' || !sb.get){ cont.innerHTML=''; return; }
+
+  var qs = 'username=eq.'+encodeURIComponent(authSession.username)+'&order=created_at.desc&limit=20';
+  sb.get('pedidos', qs).then(function(peds){
+    if(!peds || !peds.length){
+      cont.innerHTML='<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">No tienes pedidos en seguimiento por ahora</div>';
+      return;
+    }
+    var html='';
+    peds.forEach(function(p){
+      var est = ESTADO_LABEL[p.estado] || ESTADO_LABEL.pendiente;
+      var tieneProgDias = (p.progreso_total && p.progreso_total > 0);
+
+      html += '<div class="ped-card">';
+      html += '<div class="ped-top">';
+      html += '<div><div class="ped-prod">'+_esc(p.producto)+'</div><div class="ped-meta">'+(p.ff_id?('ID: '+_esc(p.ff_id)+' \u00b7 '):'')+_fechaPed(p.created_at)+'</div></div>';
+      html += '<span class="ped-estado '+est.c+'">'+est.t+'</span>';
+      html += '</div>';
+
+      if(tieneProgDias && p.estado !== 'rechazado'){
+        // Progreso por días (ej: likes 3/7)
+        var actual = p.progreso_actual || 0;
+        var total = p.progreso_total;
+        var pct = Math.min(100, Math.round((actual/total)*100));
+        html += '<div class="ped-prog-wrap">';
+        html += '<div class="ped-prog-head"><span>Progreso de entrega</span><span style="color:#c4a5f7;font-weight:700">'+actual+'/'+total+' dias</span></div>';
+        html += '<div class="ped-prog-bar"><div class="ped-prog-fill" style="width:'+pct+'%"></div></div>';
+        // Puntitos por día
+        html += '<div class="ped-prog-dots">';
+        for(var d=0; d<total; d++){ html += '<div class="ped-dot'+(d<actual?' on':'')+'"></div>'; }
+        html += '</div>';
+        html += '</div>';
+      } else if(p.estado !== 'rechazado'){
+        // Progreso por estado (barra simple)
+        html += '<div class="ped-prog-wrap"><div class="ped-prog-bar"><div class="ped-prog-fill" style="width:'+est.pct+'%"></div></div></div>';
+      }
+
+      if(p.nota){
+        html += '<div class="ped-nota"><b>Nota del equipo:</b> '+_esc(p.nota)+'</div>';
+      }
+
+      html += '</div>';
+    });
+    cont.innerHTML = html;
+  }).catch(function(e){
+    console.warn('[PEDIDOS] error:', e);
+    cont.innerHTML='<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">No se pudieron cargar los pedidos</div>';
+  });
+}
+
+function _esc(s){ return String(s||'').replace(/[<>&"]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];}); }
+function _fechaPed(s){ if(!s) return ''; var d=new Date(s); return d.toLocaleDateString('es-MX')+' '+d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}); }
