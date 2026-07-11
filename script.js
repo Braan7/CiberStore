@@ -663,6 +663,7 @@ function goPage(id){
   if(id==='miscompras'){ renderMisCompras(); setTimeout(cargarPedidosSeguimiento,300); }
   if(id==='honorcuenta') setTimeout(renderExpPackages,50);
   if(id==='referidos') setTimeout(renderReferidos,50);
+  if(id==='creadores') setTimeout(renderCreadoresTabla,50);
   if(id==='retirar') setTimeout(_updateRetiroSaldo,50);
   if(id==='home'){setTimeout(renderResenas,50);}
   if(id==='comunidad') setTimeout(renderChat,50);
@@ -4843,41 +4844,33 @@ function _zelleMXN(usd){
 }
 
 
-// ═══ REGISTRAR PEDIDO para seguimiento (tabla pedidos) ═══
-// tipo: 'likes'|'diamantes'|'pin'  | total: dias de progreso (7 para likes 7 dias, 0 si no aplica)
+// ═══ REGISTRAR PEDIDO + notificar a Telegram con botones (Edge Function) ═══
+var NOTIF_PEDIDO_URL = 'https://pnotsqsudqpwqzssevig.supabase.co/functions/v1/notif-pedido';
+
+// tipo: 'likes'|'diamantes'|'pin'|'honor'  | total: dias de progreso (0 si no aplica)
 function registrarPedido(producto, cantidad, tipo, ffId, precio, progresoTotal){
-  if(!authSession || typeof sb === 'undefined' || !sb.post) return;
+  if(!authSession) return;
   try {
-    sb.post('pedidos', {
-      username: authSession.username,
-      producto: producto || 'Pedido',
-      cantidad: (cantidad != null ? String(cantidad) : ''),
-      tipo: tipo || 'otro',
-      ff_id: ffId || '',
-      estado: 'pendiente',
-      progreso_actual: 0,
-      progreso_total: progresoTotal || 0,
-      precio: precio || 0
+    fetch(NOTIF_PEDIDO_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: authSession.username,
+        producto: producto || 'Pedido',
+        cantidad: (cantidad != null ? String(cantidad) : ''),
+        tipo: tipo || 'otro',
+        ff_id: ffId || '',
+        precio: precio || 0,
+        progreso_total: progresoTotal || 0
+      })
     }).catch(function(e){ console.warn('[PEDIDO] no se registro:', e); });
   } catch(e){ console.warn('[PEDIDO] error:', e); }
 }
 
 // Registrar pedido de Honor de Clan (arranca en dia 1/7 fijo)
 function registrarPedidoHonor(producto, clanId, precio, clanNombre){
-  if(!authSession || typeof sb === 'undefined' || !sb.post) return;
-  try {
-    sb.post('pedidos', {
-      username: authSession.username,
-      producto: producto || 'Honor de Clan',
-      cantidad: clanNombre ? ('Clan: '+clanNombre) : '',
-      tipo: 'honor',
-      ff_id: clanId || '',
-      estado: 'procesando',
-      progreso_actual: 1,
-      progreso_total: 7,
-      precio: precio || 0
-    }).catch(function(e){ console.warn('[PEDIDO HONOR] no se registro:', e); });
-  } catch(e){ console.warn('[PEDIDO HONOR] error:', e); }
+  if(!authSession) return;
+  registrarPedido(producto || 'Honor de Clan', (clanNombre ? ('Clan: '+clanNombre) : ''), 'honor', clanId || '', precio || 0, 7);
 }
 
 
@@ -5085,4 +5078,82 @@ function toggleTabla(listaId, btn){
   // Rotar la flechita
   var arrow = btn ? btn.querySelector('.tabla-arrow') : null;
   if(arrow) arrow.classList.toggle('rot');
+}
+
+
+// ═══ SISTEMA DE CREADORES DE CONTENIDO ═══
+// Tramos de vistas → diamantes (Free Fire)
+var CREADORES_PREMIOS = [
+  { min: 1000,   max: 3999,   label: '1,000 - 3,999',    diamantes: 220 },
+  { min: 4000,   max: 9999,   label: '4,000 - 9,999',    diamantes: 452 },
+  { min: 10000,  max: 29999,  label: '10,000 - 29,999',  diamantes: 682 },
+  { min: 30000,  max: 49999,  label: '30,000 - 49,999',  diamantes: 1270 },
+  { min: 50000,  max: 99999,  label: '50,000 - 99,999',  diamantes: 2508 },
+  { min: 100000, max: Infinity, label: '100,000 o mas',  diamantes: 6270 }
+];
+
+function renderCreadoresTabla(){
+  var cont = document.getElementById('creadores-tabla');
+  if(!cont) return;
+  var html = '';
+  CREADORES_PREMIOS.forEach(function(p, i){
+    var bg = (i % 2 === 0) ? 'rgba(255,255,255,.015)' : 'transparent';
+    var esUltimo = (i === CREADORES_PREMIOS.length - 1);
+    html += '<div style="display:grid;grid-template-columns:1.3fr 1fr;padding:.85rem 1rem;background:'+bg+';'+(esUltimo?'background:rgba(255,207,64,.06);':'')+'border-bottom:'+(esUltimo?'none':'1px solid rgba(255,255,255,.05)')+'">';
+    html += '<div style="font-family:Oxanium;font-weight:700;font-size:.85rem;color:'+(esUltimo?'#ffcf40':'#fff')+';display:flex;align-items:center">'+p.label+'</div>';
+    html += '<div style="font-family:Oxanium;font-weight:800;font-size:.92rem;color:'+(esUltimo?'#ffcf40':'#38bdf8')+';display:flex;align-items:center;gap:.35rem">'+p.diamantes.toLocaleString('es-MX')+' \u{1F48E}</div>';
+    html += '</div>';
+  });
+  cont.innerHTML = html;
+}
+
+// Calcula la recompensa según las vistas ingresadas
+function _premioPorVistas(vistas){
+  for(var i=0;i<CREADORES_PREMIOS.length;i++){
+    if(vistas >= CREADORES_PREMIOS[i].min && vistas <= CREADORES_PREMIOS[i].max){
+      return CREADORES_PREMIOS[i];
+    }
+  }
+  return null;
+}
+
+function calcRecompensa(){
+  var vistas = parseInt((document.getElementById('cre-vistas')||{}).value) || 0;
+  var box = document.getElementById('cre-recompensa');
+  var val = document.getElementById('cre-recompensa-val');
+  if(vistas < 1000){ if(box) box.style.display='none'; return; }
+  var premio = _premioPorVistas(vistas);
+  if(premio && box && val){
+    box.style.display='block';
+    val.textContent = premio.diamantes.toLocaleString('es-MX') + ' \u{1F48E}';
+  }
+}
+
+function enviarCreadorWA(){
+  var user = ((document.getElementById('cre-user')||{}).value||'').trim();
+  var tiktok = ((document.getElementById('cre-tiktok')||{}).value||'').trim();
+  var link = ((document.getElementById('cre-link')||{}).value||'').trim();
+  var vistas = parseInt((document.getElementById('cre-vistas')||{}).value) || 0;
+  var ffid = ((document.getElementById('cre-ffid')||{}).value||'').trim();
+
+  if(!user){ showToast('Escribe tu usuario de CiberStore'); return; }
+  if(!tiktok){ showToast('Escribe tu TikTok'); return; }
+  if(!link){ showToast('Pega el link de tu video'); return; }
+  if(vistas < 1000){ showToast('Las vistas deben ser al menos 1,000'); return; }
+  if(!ffid){ showToast('Escribe tu ID de Free Fire'); return; }
+
+  var premio = _premioPorVistas(vistas);
+  var diamantes = premio ? premio.diamantes : 0;
+
+  var msg = 'Hola CiberStore! Quiero reclamar mi recompensa de CREADOR DE CONTENIDO.%0A%0A'
+    + 'Usuario: ' + encodeURIComponent(user) + '%0A'
+    + 'TikTok: ' + encodeURIComponent(tiktok) + '%0A'
+    + 'Video: ' + encodeURIComponent(link) + '%0A'
+    + 'Vistas: ' + vistas.toLocaleString('es-MX') + '%0A'
+    + 'Recompensa: ' + diamantes.toLocaleString('es-MX') + ' diamantes%0A'
+    + 'ID Free Fire: ' + encodeURIComponent(ffid) + '%0A%0A'
+    + 'Aqui esta mi video para verificacion.';
+
+  window.open('https://wa.me/12894273983?text=' + msg, '_blank');
+  showToast('Abriendo WhatsApp...', 2000);
 }
