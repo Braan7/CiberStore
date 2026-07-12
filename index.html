@@ -1325,6 +1325,51 @@ h2,h3{
   display:none!important;
 }
 .tabla-arrow.rot{transform:rotate(-90deg)}
+
+/* ═══════════ NUEVO DISEÑO DIAMANTES (estilo catálogo) ═══════════ */
+.dcat-head{display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem}
+.dcat-head-ico{width:48px;height:48px;border-radius:13px;background:linear-gradient(160deg,#0e7490,#155e75);display:flex;align-items:center;justify-content:center;font-size:1.4rem;box-shadow:0 4px 16px rgba(14,116,144,.3)}
+.dcat-head-txt{font-family:Oxanium;font-weight:800;font-size:1.3rem;color:#fff;display:flex;align-items:center;gap:.6rem}
+.dcat-count{font-size:.75rem;color:var(--muted);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:.15rem .6rem}
+
+.dcat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.9rem}
+.dcat-card{
+  background:linear-gradient(165deg,rgba(20,40,55,.5),rgba(10,20,30,.35));
+  border:1px solid rgba(56,189,248,.12);
+  border-radius:18px;padding:1.1rem;cursor:pointer;
+  transition:transform .25s cubic-bezier(.34,1.56,.64,1),border-color .25s,box-shadow .25s;
+  position:relative;overflow:hidden;
+}
+.dcat-card:hover{transform:translateY(-4px);border-color:rgba(56,189,248,.4);box-shadow:0 10px 30px rgba(14,116,144,.2)}
+.dcat-card-ico{width:52px;height:52px;border-radius:14px;background:linear-gradient(160deg,#0e7490,#0c4a5e);display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:.9rem;box-shadow:inset 0 0 16px rgba(56,189,248,.15)}
+.dcat-card-name{font-family:Poppins;font-weight:700;font-size:1rem;color:#fff;line-height:1.3;margin-bottom:.3rem}
+.dcat-card-sub{font-size:.78rem;color:var(--muted);margin-bottom:.85rem}
+.dcat-card-price{font-family:Oxanium;font-weight:800;font-size:1.25rem;color:#25d366}
+.dcat-badge{position:absolute;top:.8rem;right:.8rem;font-size:.58rem;font-weight:800;padding:.25rem .55rem;border-radius:999px;background:rgba(255,77,166,.15);border:1px solid rgba(255,77,166,.35);color:#ff4da6;letter-spacing:.5px}
+
+/* Pantalla de detalle */
+.ddet-back{display:flex;align-items:center;gap:.6rem;color:var(--muted);font-size:.92rem;cursor:pointer;margin-bottom:1.5rem;transition:color .2s;background:none;border:none;font-family:Poppins;font-weight:500}
+.ddet-back:hover{color:#fff}
+.ddet-head{display:flex;align-items:center;gap:1rem;margin-bottom:1rem}
+.ddet-head-ico{width:64px;height:64px;border-radius:16px;background:linear-gradient(160deg,#0e7490,#0c4a5e);display:flex;align-items:center;justify-content:center;font-size:2rem;flex-shrink:0;box-shadow:0 6px 20px rgba(14,116,144,.3)}
+.ddet-head-name{font-family:Poppins;font-weight:800;font-size:1.4rem;color:#fff;line-height:1.2}
+.ddet-head-sub{font-size:.9rem;color:var(--muted)}
+.ddet-price{font-family:Oxanium;font-weight:900;font-size:2.2rem;color:#25d366;margin-bottom:1.5rem}
+.ddet-label{font-family:Poppins;font-weight:700;font-size:1.05rem;color:#fff;margin-bottom:.85rem}
+.ddet-metodos{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.85rem}
+.ddet-metodo{padding:1rem;border-radius:14px;border:1px solid var(--border2);background:rgba(255,255,255,.03);cursor:pointer;text-align:center;font-family:Poppins;font-weight:700;font-size:.95rem;color:#fff;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:.5rem}
+.ddet-metodo.sel{background:#22d3ee;border-color:#22d3ee;color:#04252e}
+.ddet-metodo.sel .ddet-metodo-sub{color:#04252e}
+.ddet-metodo-sub{display:block;font-size:.72rem;color:var(--muted);font-weight:500;margin-top:.15rem}
+.ddet-msg{font-size:.85rem;line-height:1.5;margin-bottom:1.25rem}
+.ddet-msg.err{color:#ff6b6b}
+.ddet-btn{width:100%;padding:1.1rem;border:none;border-radius:14px;font-family:Poppins;font-weight:700;font-size:1.05rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;transition:all .2s}
+.ddet-btn.on{background:linear-gradient(135deg,#0e7490,#22d3ee);color:#fff}
+.ddet-btn.off{background:rgba(14,116,144,.3);color:rgba(255,255,255,.4);cursor:not-allowed}
+
+/* Tabs de tipo de diamante */
+.dtab-btn{flex:1;padding:.7rem .5rem;background:transparent;border:none;color:var(--muted);border-radius:9px;font-family:Poppins;font-weight:700;font-size:.82rem;cursor:pointer;transition:all .2s}
+.dtab-btn.active{background:linear-gradient(135deg,#0e7490,#22d3ee);color:#fff;box-shadow:0 4px 14px rgba(34,211,238,.25)}
 </style>
 
 <script>
@@ -1770,163 +1815,31 @@ document.addEventListener('keydown',function(e){
   <div class="ph">
     <div class="stag">Recarga Instantanea</div>
     <h2 class="ptitle">&#128142; DIAMANTES <span>FREE FIRE</span></h2>
-    <p class="psub">Recarga las veces que quieras. Descuento segun tu nivel.</p>
-    <div class="offer-timer"><span id="offer-timer-txt">23:59:59</span> para la oferta especial</div>
-    <div style="display:inline-flex;align-items:center;gap:.45rem;margin-bottom:1.5rem;padding:.35rem .95rem;background:rgba(0,170,255,.07);border:1px solid rgba(0,170,255,.22);border-radius:20px;font-size:.7rem;font-weight:700;color:var(--c1);letter-spacing:1px">&#9670; Disponibles para: REGION LATAM &amp; BR</div>
+    <p class="psub">Recarga directo a tu ID. Elige tu paquete.</p>
   </div>
 
-  <!-- 💎 DIAMANTES X ID + 20% BONUS -->
-  <div style="max-width:900px;margin:0 auto 1.5rem;padding:0 5vw">
-    <div style="background:linear-gradient(135deg,#0a1420,#0d0710);border:1px solid rgba(34,211,238,.3);border-radius:16px;padding:1.3rem 1.15rem;position:relative;overflow:hidden">
-      <div style="position:absolute;top:-30%;left:-10%;width:300px;height:300px;background:radial-gradient(circle,rgba(34,211,238,.12) 0%,transparent 70%);pointer-events:none"></div>
-
-      <div style="position:relative;z-index:2">
-        <!-- Header -->
-        <div style="display:flex;align-items:center;gap:.65rem;margin-bottom:.35rem">
-          <span style="font-size:1.6rem">💎</span>
-          <div>
-            <div style="font-family:Oxanium;font-size:1rem;font-weight:900;color:#22d3ee;letter-spacing:.5px">DIAMANTES X ID <span style="color:#00e676">+20% BONUS</span></div>
-            <div style="font-size:.72rem;color:var(--muted)">Ofertas ilimitadas · recarga directo a tu ID</div>
-          </div>
-        </div>
-        <div style="display:inline-block;background:linear-gradient(90deg,#00e676,#00b359);color:#04120a;font-family:Oxanium;font-weight:900;font-size:.62rem;letter-spacing:1px;padding:.22rem .6rem;border-radius:999px;margin-bottom:1rem">🔥 +20% DE BONUS INCLUIDO</div>
-
-        <!-- Grid de ofertas -->
-        <div class="lkpln-grid" style="margin-bottom:1.1rem">
-          <div class="lkpln-wrap"><div class="lkpln">
-            <div class="lkpln-l">
-              <div class="lkpln-ico" style="background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.28)">💎</div>
-              <div><div class="lkpln-name">624 <span>diamantes</span></div><div class="lkpln-meta">+20% bonus incluido</div></div>
-            </div>
-            <div class="lkpln-r"><div class="lkpln-price" style="color:#22d3ee">$80</div><div class="lkpln-cur">MXN</div></div>
-          </div></div>
-
-          <div class="lkpln-wrap"><div class="lkpln">
-            <div class="lkpln-l">
-              <div class="lkpln-ico" style="background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.28)">💎</div>
-              <div><div class="lkpln-name">1,272 <span>diamantes</span></div><div class="lkpln-meta">+20% bonus incluido</div></div>
-            </div>
-            <div class="lkpln-r"><div class="lkpln-price" style="color:#22d3ee">$165</div><div class="lkpln-cur">MXN</div></div>
-          </div></div>
-
-          <div class="lkpln-wrap"><div class="lkpln">
-            <div class="lkpln-l">
-              <div class="lkpln-ico" style="background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.28)">💎</div>
-              <div><div class="lkpln-name">2,616 <span>diamantes</span></div><div class="lkpln-meta">+20% bonus incluido</div></div>
-            </div>
-            <div class="lkpln-r"><div class="lkpln-price" style="color:#22d3ee">$290</div><div class="lkpln-cur">MXN</div></div>
-          </div></div>
-
-          <div class="lkpln-wrap"><div class="lkpln">
-            <div class="lkpln-l">
-              <div class="lkpln-ico" style="background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.28)">💎</div>
-              <div><div class="lkpln-name">6,720 <span>diamantes</span></div><div class="lkpln-meta">+20% bonus incluido</div></div>
-            </div>
-            <div class="lkpln-r"><div class="lkpln-price" style="color:#22d3ee">$700</div><div class="lkpln-cur">MXN</div></div>
-          </div></div>
-
-          <div class="lkpln-wrap"><div class="lkpln lkpln-best">
-            <div class="lkpln-l">
-              <div class="lkpln-ico" style="background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.28)">💎</div>
-              <div><div class="lkpln-name">13,440 <span>diamantes</span></div><div class="lkpln-meta">+20% bonus · MEGA ⭐</div></div>
-            </div>
-            <div class="lkpln-r"><div class="lkpln-price" style="color:#22d3ee">$1,370</div><div class="lkpln-cur">MXN</div></div>
-          </div></div>
-        </div>
-
-        <!-- Formulario de compra con saldo -->
-        <div style="border-top:1px solid rgba(34,211,238,.15);padding-top:1rem">
-          <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem">Pedir con saldo</div>
-          <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Elige tu oferta</label>
-          <select id="bonus-plan" style="width:100%;background:#0a1420;border:1px solid rgba(34,211,238,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Poppins,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box">
-            <option value="624|80">624 diamantes (+20%) — $80 MX</option>
-            <option value="1272|165">1,272 diamantes (+20%) — $165 MX</option>
-            <option value="2616|290">2,616 diamantes (+20%) — $290 MX</option>
-            <option value="6720|700">6,720 diamantes (+20%) — $700 MX</option>
-            <option value="13440|1370">13,440 diamantes (+20%) — $1,370 MX</option>
-          </select>
-          <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Tu ID de Free Fire</label>
-          <input id="bonus-id" type="text" placeholder="Ej: 123456789" style="width:100%;background:#0a1420;border:1px solid rgba(34,211,238,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Poppins,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box"/>
-          <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Nombre en el juego</label>
-          <input id="bonus-nombre" type="text" placeholder="Tu nickname" style="width:100%;background:#0a1420;border:1px solid rgba(34,211,238,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Poppins,sans-serif;font-size:.88rem;margin-bottom:.65rem;box-sizing:border-box"/>
-          <div style="display:flex;justify-content:space-between;background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.18);border-radius:8px;padding:.45rem .85rem;margin-bottom:.5rem"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span id="bonus-saldo-val" style="font-family:Oxanium;font-weight:700;color:#22d3ee;font-size:.82rem">$0 MX</span></div>
-          <div id="bonus-err" style="display:none;color:#ff6b6b;font-size:.75rem;margin-bottom:.5rem"></div>
-          <button onclick="submitBonusSaldo()" style="width:100%;padding:.78rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:10px;font-family:Poppins,sans-serif;font-weight:900;font-size:.9rem;cursor:pointer">🔒 Confirmar con saldo</button>
-          <button onclick="cotizarBonus()" style="width:100%;padding:.62rem;margin-top:.5rem;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.3);color:#22d3ee;border-radius:10px;font-family:Poppins;font-weight:900;font-size:.82rem;cursor:pointer">💬 O cotizar por WhatsApp</button>
-        </div>
-      </div>
+  <div style="max-width:760px;margin:0 auto;padding:0 5vw 3rem">
+    <!-- Selector de tipo -->
+    <div style="display:flex;gap:.5rem;margin-bottom:1.5rem;background:rgba(0,0,0,.25);padding:.35rem;border-radius:12px">
+      <button id="dtab-bonus" onclick="setDiamTipo('bonus')" class="dtab-btn">&#127873; Con Bono</button>
+      <button id="dtab-ilim" onclick="setDiamTipo('ilim')" class="dtab-btn">&#8734; Ilimitado</button>
+      <button id="dtab-1vez" onclick="setDiamTipo('1vez')" class="dtab-btn">&#127919; 1 vez x ID</button>
     </div>
-  </div>
 
-    <div style="max-width:900px;margin:0 auto;padding:0 5vw 1.5rem">
-    <!-- BANNER HABIBIS -->
-    <div style="background:linear-gradient(135deg,rgba(255,215,0,.12),rgba(255,215,0,.06));border:2px solid rgba(255,215,0,.35);border-radius:14px;padding:1.2rem 1rem;position:relative;overflow:hidden">
-      <!-- Efecto de fondo -->
-      <div style="position:absolute;top:-50%;right:-20%;width:400px;height:400px;background:radial-gradient(circle,rgba(255,215,0,.15) 0%,transparent 70%);pointer-events:none"></div>
-      
-      <div style="position:relative;z-index:2">
-        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem">
-          <span style="font-size:1.8rem;line-height:1">👑</span>
-          <div>
-            <div style="font-family:Oxanium;font-size:.95rem;font-weight:900;color:#ffd700;letter-spacing:1.5px">PRECIO ESPECIAL PARA HABIBIS</div>
-            <div style="font-size:.7rem;color:#ffb800;font-weight:600;letter-spacing:.5px">Recargueros y clientes VIP</div>
-          </div>
-        </div>
-        
-        <div style="background:rgba(255,255,255,.04);border-left:3px solid #ffd700;border-radius:6px;padding:.75rem 1rem;margin-bottom:.75rem">
-          <div style="font-size:.82rem;color:#fff;line-height:1.8;margin-bottom:.35rem">
-            <strong style="color:#ffd700">✨ Solo para habibis o recargueros:</strong> Tenemos un precio especial para personas que recarguen muchos diamantes en nuestra web.
-          </div>
-          <div style="font-size:.78rem;color:#ffb800;margin-bottom:.25rem">
-            📊 <strong>Descuento</strong>: Si compras <strong>más de 20,000 diamantes</strong> en Diamantes Ilimitados, obtendrás un <strong>precio un poco más bajo</strong>.
-          </div>
-          <div style="font-size:.75rem;color:var(--muted);margin-top:.5rem">
-            💡 Esto aplica solo en nuestro paquete de <strong>Diamantes Ilimitados</strong> (sin limite de recarga).
-          </div>
-        </div>
-        
-        <div style="display:flex;gap:.6rem;flex-wrap:wrap">
-          <button onclick="goPage('saldo');showToast('💬 Contacta a nuestro WhatsApp para tu cotización personalizada')" style="padding:.65rem 1.2rem;background:linear-gradient(90deg,#ffd700,#ffed4e);color:#1a0a00;border:none;border-radius:8px;font-family:Oxanium;font-weight:900;font-size:.8rem;letter-spacing:1px;cursor:pointer;text-transform:uppercase;transition:all .3s;box-shadow:0 4px 15px rgba(255,215,0,.2)" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 25px rgba(255,215,0,.4)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(255,215,0,.2)'">
-            📞 Cotizar Mi Descuento
-          </button>
-          <button onclick="window.open('https://wa.me/12894273983?text=Hola%21%20Soy%20un%20habibi%20y%20quiero%20cotizar%20descuento%20para%2020%2B%20mil%20diamantes%20ilimitados','_blank')" style="padding:.65rem 1.2rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:8px;font-family:Oxanium;font-weight:900;font-size:.8rem;letter-spacing:1px;cursor:pointer;text-transform:uppercase;transition:all .3s;box-shadow:0 4px 15px rgba(37,211,102,.2)" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 25px rgba(37,211,102,.4)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(37,211,102,.2)'">
-            💬 WhatsApp Directo
-          </button>
-        </div>
+    <!-- Catálogo (cuadrícula) -->
+    <div id="diam-catalogo">
+      <div class="dcat-head">
+        <div class="dcat-head-ico">&#127918;</div>
+        <div class="dcat-head-txt">Free Fire <span class="dcat-count" id="diam-count">0</span></div>
       </div>
+      <div class="dcat-grid" id="diam-grid"></div>
     </div>
-  </div>
-<div class="pgrid" id="prod-grid"></div>
 
-  <!-- 💎 COTIZAR MÁS DIAMANTES -->
-  <div style="max-width:680px;margin:1.5rem auto 0;padding:0 5vw">
-    <div style="background:linear-gradient(135deg,#12091f,#0d0710);border:1px solid rgba(167,139,250,.3);border-radius:16px;padding:1.4rem 1.25rem;position:relative;overflow:hidden">
-      <div style="position:absolute;top:-30%;right:-15%;width:280px;height:280px;background:radial-gradient(circle,rgba(167,139,250,.12) 0%,transparent 70%);pointer-events:none"></div>
-
-      <div style="position:relative;z-index:2">
-        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem">
-          <span style="font-size:1.5rem">💎</span>
-          <div>
-            <div style="font-family:Oxanium;font-size:1rem;font-weight:900;color:#a78bfa;letter-spacing:.5px">COTIZAR MÁS DIAMANTES</div>
-            <div style="font-size:.72rem;color:var(--muted)">¿Necesitas otra cantidad? Te cotizamos al instante</div>
-          </div>
-        </div>
-
-        <div style="margin-top:1rem">
-          <label style="display:block;font-size:.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#8b7bb8;margin-bottom:.3rem">Cantidad de diamantes</label>
-          <input id="cotizar-cantidad" type="number" placeholder="Ej: 5,000" style="width:100%;background:#0d0710;border:1px solid rgba(167,139,250,.25);color:#fff;border-radius:9px;padding:.7rem .9rem;font-family:Poppins,sans-serif;font-size:.95rem;margin-bottom:.7rem;box-sizing:border-box"/>
-
-          <label style="display:block;font-size:.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#8b7bb8;margin-bottom:.3rem">Tu ID de Free Fire</label>
-          <input id="cotizar-id" type="text" placeholder="Ej: 123456789" style="width:100%;background:#0d0710;border:1px solid rgba(167,139,250,.25);color:#fff;border-radius:9px;padding:.7rem .9rem;font-family:Poppins,sans-serif;font-size:.95rem;margin-bottom:1rem;box-sizing:border-box"/>
-
-          <button onclick="cotizarDiamantes()" style="width:100%;padding:.85rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.88rem;letter-spacing:.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;box-shadow:0 4px 18px rgba(37,211,102,.25)">
-            💬 COTIZAR POR WHATSAPP
-          </button>
-        </div>
-      </div>
-    </div>
+    <!-- Detalle (oculto hasta seleccionar) -->
+    <div id="diam-detalle" style="display:none"></div>
   </div>
 </div>
+
 <div class="page" id="page-likes">
   <div class="ph">
     <div class="stag">Perfil Free Fire</div>

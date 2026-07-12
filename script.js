@@ -197,7 +197,7 @@ function changeCurrency(cur){
   var page=document.querySelector('.page.active');
   if(page){
     var id=page.id.replace('page-','');
-    if(id==='diamantes') renderProds();
+    if(id==='diamantes') setTimeout(function(){ setDiamTipo('bonus'); }, 100);
     if(id==='likes') renderLikes();
     if(id==='membresia'){renderMems();renderWallet();}
   }
@@ -656,7 +656,7 @@ function goPage(id){
   if(ni) ni.classList.add('active');
   closeSB();
   window.scrollTo(0,0);
-  if(id==='diamantes') renderProds();
+  if(id==='diamantes') setTimeout(function(){ setDiamTipo('bonus'); }, 100);
   if(id==='likes') renderLikes();
   if(id==='membresia'){renderMems();renderWallet();}
   if(id==='perfil') renderPerfil();
@@ -5206,4 +5206,167 @@ function _setTotal(id, valor, esDinero){
   var txt = (esDinero ? '$' : '') + Math.round(valor).toLocaleString('es-MX');
   // Animación de conteo simple
   el.textContent = txt;
+}
+
+
+// ═══════════ NUEVO DISEÑO DIAMANTES (catálogo + detalle) ═══════════
+var _diamTipoActual = 'bonus';
+var _diamMetodoPago = 'saldo';
+var _diamSeleccionado = null;
+
+// Construye la lista de productos según el tipo
+function _getDiamProductos(tipo){
+  if(tipo === 'bonus'){
+    // Desde BONUS_PLANES
+    var arr = [];
+    for(var k in BONUS_PLANES){
+      if(BONUS_PLANES.hasOwnProperty(k)){
+        var p = BONUS_PLANES[k];
+        // Calcular base y bono (el +20%)
+        var base = Math.round(p.diamantes / 1.2);
+        var bono = p.diamantes - base;
+        arr.push({ key:k, nombre:base+' Diamantes + '+bono+' Bono', diamantes:p.diamantes, precio:p.precio, tipo:'bonus' });
+      }
+    }
+    return arr;
+  } else if(tipo === 'ilim'){
+    return PRODUCTS.map(function(p){
+      return { key:'ilim_'+p.id, nombre:p.name+' Diamantes', diamantes:p.total, precio:p.prices[0], tipo:'ilim', badge:p.badge };
+    });
+  } else if(tipo === '1vez'){
+    return PRODUCTS_1VEZ.map(function(p){
+      return { key:'1vez_'+p.id, nombre:p.name+' Diamantes', diamantes:p.total, precio:p.prices[0], tipo:'1vez', badge:p.badge };
+    });
+  }
+  return [];
+}
+
+function setDiamTipo(tipo){
+  _diamTipoActual = tipo;
+  ['bonus','ilim','1vez'].forEach(function(t){
+    var btn = document.getElementById('dtab-'+t);
+    if(btn) btn.classList.toggle('active', t===tipo);
+  });
+  // Volver al catálogo si estaba en detalle
+  document.getElementById('diam-catalogo').style.display='';
+  document.getElementById('diam-detalle').style.display='none';
+  renderDiamCatalogo();
+}
+
+function renderDiamCatalogo(){
+  var grid = document.getElementById('diam-grid');
+  var count = document.getElementById('diam-count');
+  if(!grid) return;
+  var productos = _getDiamProductos(_diamTipoActual);
+  if(count) count.textContent = productos.length;
+
+  grid.innerHTML = productos.map(function(p, i){
+    var badge = p.badge ? '<span class="dcat-badge">'+p.badge+'</span>' : '';
+    return '<div class="dcat-card" onclick="abrirDiamDetalle('+i+')">'
+      + badge
+      + '<div class="dcat-card-ico">&#127918;</div>'
+      + '<div class="dcat-card-name">'+p.nombre+'</div>'
+      + '<div class="dcat-card-sub">Free Fire</div>'
+      + '<div class="dcat-card-price">$'+p.precio+'</div>'
+      + '</div>';
+  }).join('');
+}
+
+function abrirDiamDetalle(idx){
+  var productos = _getDiamProductos(_diamTipoActual);
+  var p = productos[idx];
+  if(!p) return;
+  _diamSeleccionado = p;
+  _diamMetodoPago = 'saldo';
+
+  var saldo = (authSession && authSession.saldo) ? authSession.saldo : 0;
+  var alcanza = saldo >= p.precio;
+
+  var det = document.getElementById('diam-detalle');
+  det.innerHTML =
+    '<button class="ddet-back" onclick="cerrarDiamDetalle()">&#8592; Volver al catalogo</button>'
+    + '<div class="ddet-head"><div class="ddet-head-ico">&#127918;</div>'
+    + '<div><div class="ddet-head-name">'+p.nombre+'</div><div class="ddet-head-sub">Free Fire</div></div></div>'
+    + '<div class="ddet-price">$'+p.precio+'</div>'
+    + '<div class="ddet-label">Datos de la cuenta</div>'
+    + '<label class="flabel">Usuario / ID de jugador *</label>'
+    + '<input class="finput" id="diam-ffid" type="text" placeholder="Tu ID de Free Fire"/>'
+    + '<div class="ddet-label" style="margin-top:1rem">Metodo de pago</div>'
+    + '<div class="ddet-metodos">'
+    +   '<div class="ddet-metodo sel" id="dm-saldo" onclick="selDiamMetodo(\'saldo\')">&#128179; Saldo <span class="ddet-metodo-sub">($'+saldo.toLocaleString('es-MX')+')</span></div>'
+    +   '<div class="ddet-metodo" id="dm-binance" onclick="selDiamMetodo(\'binance\')">Binance Pay</div>'
+    + '</div>'
+    + '<div class="ddet-msg" id="diam-msg"></div>'
+    + '<button class="ddet-btn" id="diam-btn" onclick="confirmarDiamCompra()">Recargar &#8594;</button>';
+
+  document.getElementById('diam-catalogo').style.display='none';
+  det.style.display='';
+  _actualizarDiamBoton();
+}
+
+function cerrarDiamDetalle(){
+  document.getElementById('diam-detalle').style.display='none';
+  document.getElementById('diam-catalogo').style.display='';
+}
+
+function selDiamMetodo(metodo){
+  _diamMetodoPago = metodo;
+  var s=document.getElementById('dm-saldo'), b=document.getElementById('dm-binance');
+  if(s) s.classList.toggle('sel', metodo==='saldo');
+  if(b) b.classList.toggle('sel', metodo==='binance');
+  _actualizarDiamBoton();
+}
+
+function _actualizarDiamBoton(){
+  var btn=document.getElementById('diam-btn');
+  var msg=document.getElementById('diam-msg');
+  if(!btn||!_diamSeleccionado) return;
+  var saldo=(authSession&&authSession.saldo)?authSession.saldo:0;
+
+  if(_diamMetodoPago==='saldo'){
+    if(saldo>=_diamSeleccionado.precio){
+      btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;';
+      if(msg){ msg.textContent=''; msg.className='ddet-msg'; }
+    } else {
+      btn.className='ddet-btn off';
+      btn.innerHTML='Recargar con saldo &#8594;';
+      if(msg){ msg.textContent='Saldo insuficiente para pagar con saldo. Usa Binance o recarga tu saldo.'; msg.className='ddet-msg err'; }
+    }
+  } else {
+    btn.className='ddet-btn on'; btn.innerHTML='Pagar con Binance &#8594;';
+    if(msg){ msg.textContent=''; msg.className='ddet-msg'; }
+  }
+}
+
+function confirmarDiamCompra(){
+  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
+  var p=_diamSeleccionado;
+  if(!p) return;
+  var ffId=((document.getElementById('diam-ffid')||{}).value||'').trim();
+  if(!ffId){ showToast('Escribe tu ID de Free Fire'); return; }
+
+  var saldo=(authSession&&authSession.saldo)?authSession.saldo:0;
+
+  if(_diamMetodoPago==='binance'){
+    // Ir a recargar saldo por Binance
+    showToast('Recarga tu saldo con Binance para completar');
+    goPage('saldo');
+    setTimeout(function(){ if(typeof openBinanceModal==='function') openBinanceModal(); }, 400);
+    return;
+  }
+
+  // Pago con saldo
+  if(saldo < p.precio){
+    showToast('Saldo insuficiente. Recarga primero.');
+    return;
+  }
+
+  // Procesar la compra según el tipo
+  var ord=getNextOrder();
+  addSpend(p.precio, 'Diamantes '+p.tipo+': '+p.diamantes+' - ID:'+ffId+' - Pedido #'+ord);
+  registrarPedido(p.nombre, p.diamantes, 'diamantes', ffId, p.precio, 0);
+  if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, p.nombre+' - ID:'+ffId, p.precio, ord);
+
+  showToast('\u2705 Pedido #'+ord+' realizado! Te lo acreditamos pronto.', 3500);
+  cerrarDiamDetalle();
 }
