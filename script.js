@@ -3519,6 +3519,7 @@ if(typeof goPage !== 'undefined'){
     if(id === 'ranking'){
       setTimeout(function(){
         if(typeof initRankingPage === 'function') initRankingPage();
+        if(typeof cargarTotalesGlobales === 'function') cargarTotalesGlobales();
       }, 300);
     }
   };
@@ -5156,4 +5157,53 @@ function enviarCreadorWA(){
 
   window.open('https://wa.me/12894273983?text=' + msg, '_blank');
   showToast('Abriendo WhatsApp...', 2000);
+}
+
+
+// ═══ Colapsar secciones genéricas (reseñas, totales, etc.) ═══
+function toggleSeccion(elId, header){
+  var el = document.getElementById(elId);
+  if(!el) return;
+  var oculto = (el.style.display === 'none');
+  el.style.display = oculto ? '' : 'none';
+  var arrow = header ? header.querySelector('.secc-arrow') : null;
+  if(arrow) arrow.style.transform = oculto ? 'rotate(0deg)' : 'rotate(-90deg)';
+}
+
+// ═══ TOTALES GLOBALES de la plataforma (ranking) ═══
+function cargarTotalesGlobales(){
+  if(typeof sb === 'undefined' || !sb.get) return;
+
+  // Traer todas las compras
+  sb.get('movimientos_saldo', 'tipo=eq.compra&select=descripcion,monto').then(function(movs){
+    if(!movs || !Array.isArray(movs)) return;
+
+    var totalLikes = 0, totalDiamantes = 0, totalDinero = 0, totalPedidos = movs.length;
+
+    movs.forEach(function(m){
+      var desc = (m.descripcion || '').toLowerCase();
+      totalDinero += Number(m.monto) || 0;
+
+      // Extraer cantidad de likes (busca "200 likes", "2800 likes", etc.)
+      var mLikes = desc.match(/(\d[\d,]*)\s*likes?/);
+      if(mLikes){ totalLikes += parseInt(mLikes[1].replace(/,/g,'')) || 0; }
+
+      // Extraer cantidad de diamantes
+      var mDiam = desc.match(/(\d[\d,]*)\s*diamante/);
+      if(mDiam){ totalDiamantes += parseInt(mDiam[1].replace(/,/g,'')) || 0; }
+    });
+
+    _setTotal('total-likes', totalLikes);
+    _setTotal('total-diamantes', totalDiamantes);
+    _setTotal('total-dinero', totalDinero, true);
+    _setTotal('total-pedidos', totalPedidos);
+  }).catch(function(e){ console.warn('[TOTALES] ', e); });
+}
+
+function _setTotal(id, valor, esDinero){
+  var el = document.getElementById(id);
+  if(!el) return;
+  var txt = (esDinero ? '$' : '') + Math.round(valor).toLocaleString('es-MX');
+  // Animación de conteo simple
+  el.textContent = txt;
 }
