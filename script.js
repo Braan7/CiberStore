@@ -197,7 +197,7 @@ function changeCurrency(cur){
   var page=document.querySelector('.page.active');
   if(page){
     var id=page.id.replace('page-','');
-    if(id==='diamantes') setTimeout(function(){ setDiamTipo('bonus'); }, 100);
+    if(id==='diamantes') setTimeout(function(){ renderDiamCatalogo(); if(document.getElementById('diam-detalle').style.display!=='none' && _diamSeleccionado) _refrescarDiamPrecios(); }, 100);
     if(id==='likes') renderLikes();
     if(id==='membresia'){renderMems();renderWallet();}
   }
@@ -5267,7 +5267,7 @@ function renderDiamCatalogo(){
       + '<div class="dcat-card-ico">&#127918;</div>'
       + '<div class="dcat-card-name">'+p.nombre+'</div>'
       + '<div class="dcat-card-sub">Free Fire</div>'
-      + '<div class="dcat-card-price">$'+p.precio+'</div>'
+      + '<div class="dcat-card-price">'+fmt(p.precio)+'</div>'
       + '</div>';
   }).join('');
 }
@@ -5287,7 +5287,7 @@ function abrirDiamDetalle(idx){
     '<button class="ddet-back" onclick="cerrarDiamDetalle()">&#8592; Volver al catalogo</button>'
     + '<div class="ddet-head"><div class="ddet-head-ico">&#127918;</div>'
     + '<div><div class="ddet-head-name">'+p.nombre+'</div><div class="ddet-head-sub">Free Fire</div></div></div>'
-    + '<div class="ddet-price">$'+p.precio+'</div>'
+    + '<div class="ddet-price">'+fmt(p.precio)+'</div>'
     + '<div class="ddet-label">Datos de la cuenta</div>'
     + '<label class="flabel">Usuario / ID de jugador *</label>'
     + '<input class="finput" id="diam-ffid" type="text" placeholder="Tu ID de Free Fire"/>'
@@ -5369,4 +5369,15 @@ function confirmarDiamCompra(){
 
   showToast('\u2705 Pedido #'+ord+' realizado! Te lo acreditamos pronto.', 3500);
   cerrarDiamDetalle();
+}
+
+
+// Refresca los precios del detalle al cambiar la moneda (sin cerrar)
+function _refrescarDiamPrecios(){
+  if(!_diamSeleccionado) return;
+  var precioEl = document.querySelector('#diam-detalle .ddet-price');
+  if(precioEl) precioEl.innerHTML = fmt(_diamSeleccionado.precio);
+  var saldo=(authSession&&authSession.saldo)?authSession.saldo:0;
+  var subEl = document.querySelector('#dm-saldo .ddet-metodo-sub');
+  if(subEl) subEl.textContent = '('+fmt(saldo)+')';
 }
