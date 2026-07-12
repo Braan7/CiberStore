@@ -1750,7 +1750,7 @@ document.addEventListener('keydown',function(e){
   <div id="section-resenas" style="max-width:1000px;margin:0 auto;padding:0 5vw 3rem">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem;flex-wrap:wrap;gap:.75rem">
       <div>
-        <div style="font-family:Oxanium;font-size:.85rem;font-weight:700;color:#fff;margin-bottom:.18rem">&#11088; Resenas de clientes</div>
+        <div style="font-family:Oxanium;font-size:.85rem;font-weight:700;color:#fff;margin-bottom:.18rem;cursor:pointer;display:flex;align-items:center;gap:.5rem" onclick="toggleSeccion('resenas-grid',this)">&#11088; Resenas de clientes <span class="secc-arrow" style="transition:transform .3s;color:var(--c1);font-size:.75rem">&#9662;</span></div>
         <div style="font-size:.72rem;color:var(--muted)" id="resenas-summary">Se el primero en opinar</div>
       </div>
       <button onclick="openResenaModal()" style="padding:.45rem 1rem;background:linear-gradient(90deg,var(--c2),var(--c1));color:#fff;border:none;border-radius:7px;font-family:'Poppins';font-weight:800;font-size:.75rem;letter-spacing:1px;cursor:pointer">+ Dejar resena</button>
@@ -3493,8 +3493,8 @@ document.addEventListener('keydown',function(e){
         <label class="flabel">Comprobante (foto)</label>
         <input class="finput" id="stori-foto" type="file" accept="image/*" style="padding:.55rem"/>
         <button onclick="enviarComprobante('stori')" style="width:100%;margin-top:.5rem;padding:.85rem;background:linear-gradient(90deg,#0088cc,#29b6f6);color:#fff;border:none;border-radius:9px;font-family:'Poppins';font-weight:800;font-size:.82rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer">&#9993; Enviar comprobante</button>
-        <button onclick="enviarPagoWA('stori')" style="width:100%;margin-top:.5rem;padding:.6rem;background:transparent;border:1px solid rgba(255,255,255,.15);color:var(--muted);border-radius:9px;font-family:'Poppins';font-weight:700;font-size:.72rem;cursor:pointer">o enviar por WhatsApp</button>
-        <div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.6rem;line-height:1.6">Luego <strong style="color:#fff">adjunta la captura</strong> del comprobante en WhatsApp.</div>
+
+        <div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.6rem;line-height:1.6">Adjunta la <strong style="color:#fff">foto del comprobante</strong> arriba y presiona enviar. Te acreditaremos pronto.</div>
       </div>
 
     </div>
@@ -3550,8 +3550,8 @@ document.addEventListener('keydown',function(e){
         <label class="flabel">Comprobante (foto)</label>
         <input class="finput" id="zelle-foto" type="file" accept="image/*" style="padding:.55rem"/>
         <button onclick="enviarComprobante('zelle')" style="width:100%;margin-top:.5rem;padding:.85rem;background:linear-gradient(90deg,#0088cc,#29b6f6);color:#fff;border:none;border-radius:9px;font-family:'Poppins';font-weight:800;font-size:.82rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer">&#9993; Enviar comprobante</button>
-        <button onclick="enviarPagoWA('zelle')" style="width:100%;margin-top:.5rem;padding:.6rem;background:transparent;border:1px solid rgba(255,255,255,.15);color:var(--muted);border-radius:9px;font-family:'Poppins';font-weight:700;font-size:.72rem;cursor:pointer">o enviar por WhatsApp</button>
-        <div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.6rem;line-height:1.6">Luego <strong style="color:#fff">adjunta la captura</strong> del comprobante en WhatsApp.</div>
+
+        <div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.6rem;line-height:1.6">Adjunta la <strong style="color:#fff">foto del comprobante</strong> arriba y presiona enviar. Te acreditaremos pronto.</div>
       </div>
 
     </div>
@@ -3628,15 +3628,13 @@ document.addEventListener('keydown',function(e){
         1. Abre <strong style="color:#f0b90b">Binance &gt; Pay</strong><br/>
         2. Escanea el QR o busca el ID <strong style="color:#f0b90b">1106987175</strong><br/>
         3. Transfiere el monto exacto<br/>
-        4. Manda tu comprobante por WhatsApp &#128071;
+        4. Sube tu comprobante aqui abajo &#128071;
       </div>
 
       <label class="flabel" style="margin-top:.5rem">Comprobante (foto)</label>
       <input class="finput" id="binance-foto" type="file" accept="image/*" style="padding:.55rem;margin-bottom:.6rem"/>
       <button onclick="enviarComprobante('binance')" style="width:100%;margin-bottom:.5rem;padding:.9rem;background:linear-gradient(90deg,#0088cc,#29b6f6);color:#fff;border:none;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.82rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(0,136,204,.3)">&#9993; ENVIAR COMPROBANTE</button>
-      <button onclick="confirmarBinance()" style="width:100%;padding:.7rem;background:transparent;border:1px solid rgba(255,255,255,.15);color:var(--muted);border-radius:11px;font-family:'Poppins';font-weight:700;font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem">
-        &#128241; ENVIAR COMPROBANTE POR WHATSAPP
-      </button>
+
     </div>
   </div>
 </div>
@@ -3804,6 +3802,36 @@ document.addEventListener('keydown',function(e){
     <div class="stag" style="color:#ff9900">Competencia</div>
     <h2 class="ptitle">&#127942; RANKING &amp; <span style="color:#ff9900">PREMIOS</span></h2>
     <p class="psub">Compite por el TOP 1 y gana premios. Datos en tiempo real de todos los clientes.</p>
+  </div>
+
+  <!-- Totales globales de la plataforma -->
+  <div style="max-width:900px;margin:0 auto;padding:1.25rem 5vw 0">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;cursor:pointer" onclick="toggleSeccion('totales-globales',this)">
+      <div style="font-family:Oxanium;font-weight:800;font-size:.9rem;color:#fff;display:flex;align-items:center;gap:.5rem">&#128202; ESTAD&Iacute;STICAS GLOBALES</div>
+      <span class="secc-arrow" style="transition:transform .3s;color:#ff9900;font-size:.85rem">&#9662;</span>
+    </div>
+    <div id="totales-globales" style="display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem;margin-bottom:1.5rem">
+      <div style="background:linear-gradient(160deg,rgba(255,77,166,.1),rgba(255,255,255,.02));border:1px solid rgba(255,77,166,.25);border-radius:14px;padding:1.1rem">
+        <div style="font-size:1.5rem;margin-bottom:.3rem">&#128077;</div>
+        <div style="font-family:Oxanium;font-weight:900;font-size:1.35rem;color:#ff4da6" id="total-likes">0</div>
+        <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Likes enviados</div>
+      </div>
+      <div style="background:linear-gradient(160deg,rgba(56,189,248,.1),rgba(255,255,255,.02));border:1px solid rgba(56,189,248,.25);border-radius:14px;padding:1.1rem">
+        <div style="font-size:1.5rem;margin-bottom:.3rem">&#128142;</div>
+        <div style="font-family:Oxanium;font-weight:900;font-size:1.35rem;color:#38bdf8" id="total-diamantes">0</div>
+        <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Diamantes vendidos</div>
+      </div>
+      <div style="background:linear-gradient(160deg,rgba(37,211,102,.1),rgba(255,255,255,.02));border:1px solid rgba(37,211,102,.25);border-radius:14px;padding:1.1rem">
+        <div style="font-size:1.5rem;margin-bottom:.3rem">&#128176;</div>
+        <div style="font-family:Oxanium;font-weight:900;font-size:1.35rem;color:#25d366" id="total-dinero">$0</div>
+        <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Total movido (MXN)</div>
+      </div>
+      <div style="background:linear-gradient(160deg,rgba(255,207,64,.1),rgba(255,255,255,.02));border:1px solid rgba(255,207,64,.25);border-radius:14px;padding:1.1rem">
+        <div style="font-size:1.5rem;margin-bottom:.3rem">&#128101;</div>
+        <div style="font-family:Oxanium;font-weight:900;font-size:1.35rem;color:#ffcf40" id="total-pedidos">0</div>
+        <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Pedidos totales</div>
+      </div>
+    </div>
   </div>
 
   <div style="max-width:900px;margin:0 auto;padding:0 5vw 3rem">
