@@ -2369,7 +2369,7 @@ document.addEventListener('keydown',function(e){
       <span class="pay-badge pay-active" style="background:rgba(120,80,255,.15);border-color:rgba(120,80,255,.35);color:#a78bfa">USA</span>
       <span class="pay-ico">&#127482;&#127480;</span>
       <div class="pay-name">Zelle</div>
-      <div class="pay-desc">Pago desde USA (+3 USD comision)</div>
+      <div class="pay-desc">Pago desde USA (+6 USD comision)</div>
     </div>
   </div>
 </div>
@@ -3427,7 +3427,7 @@ document.addEventListener('keydown',function(e){
 
       <!-- Aviso comisión -->
       <div style="background:linear-gradient(135deg,rgba(120,80,255,.12),rgba(120,80,255,.04));border:1px solid rgba(120,80,255,.3);border-radius:12px;padding:.8rem 1rem;margin-bottom:1rem;text-align:center">
-        <div style="font-size:.82rem;color:#c4b5fd;font-weight:700;line-height:1.5">&#9888; Este metodo tiene <strong style="color:#a78bfa">+3 USD de comision</strong></div>
+        <div style="font-size:.82rem;color:#c4b5fd;font-weight:700;line-height:1.5">&#9888; Este metodo tiene <strong style="color:#a78bfa">+6 USD de comision</strong> (3 Zelle + 3 banco)</div>
       </div>
 
       <!-- Datos Zelle -->
@@ -3451,11 +3451,11 @@ document.addEventListener('keydown',function(e){
       <div id="zelle-form" style="display:none;margin-top:1rem;background:rgba(255,255,255,.03);border:1px solid rgba(120,80,255,.2);border-radius:12px;padding:1.1rem">
         <div style="font-family:Oxanium;font-size:.72rem;font-weight:700;color:#a78bfa;margin-bottom:.85rem">Datos de tu pago</div>
         <label class="flabel">Monto que enviaste (USD)</label>
-        <input class="finput" id="zelle-monto" type="number" placeholder="Ej: 13" min="4" oninput="calcZelleConversion()"/>
+        <input class="finput" id="zelle-monto" type="number" placeholder="Ej: 16" min="7" oninput="calcZelleConversion()"/>
         <div id="zelle-conversion" style="display:none;background:rgba(120,80,255,.06);border:1px solid rgba(120,80,255,.2);border-radius:10px;padding:.7rem .85rem;margin-bottom:.6rem;font-size:.75rem;line-height:1.7">
           <div style="display:flex;justify-content:space-between;color:var(--muted)"><span>Enviaste</span><span id="zc-usd" style="color:#fff">$0 USD</span></div>
-          <div style="display:flex;justify-content:space-between;color:var(--muted)"><span>Comision Zelle</span><span style="color:#ff6b6b">-$3 USD</span></div>
-          <div style="display:flex;justify-content:space-between;color:var(--muted)"><span>Convertible (x18)</span><span id="zc-neto" style="color:#fff">$0 USD</span></div>
+          <div style="display:flex;justify-content:space-between;color:var(--muted)"><span>Comision (Zelle+banco)</span><span style="color:#ff6b6b">-$6 USD</span></div>
+          <div style="display:flex;justify-content:space-between;color:var(--muted)"><span>Convertible (x17.5)</span><span id="zc-neto" style="color:#fff">$0 USD</span></div>
           <div style="display:flex;justify-content:space-between;font-weight:800;padding-top:.35rem;margin-top:.35rem;border-top:1px solid rgba(120,80,255,.2)"><span style="color:#fff">Saldo a recibir</span><span id="zc-mxn" style="color:#a78bfa">$0 MXN</span></div>
         </div>
         <label class="flabel">Nombre del que envio</label>

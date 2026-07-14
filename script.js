@@ -4658,7 +4658,7 @@ function enviarPagoWA(metodo){
     msg = 'Hola CiberStore! Recargue por ZELLE (USA).%0A%0A'
       + 'Usuario: ' + encodeURIComponent(user) + '%0A'
       + 'Envie: $' + encodeURIComponent(montoZ) + ' USD%0A'
-      + 'Equivale a: $' + mxnW.toLocaleString('es-MX') + ' MXN (menos 3 USD comision, TC 18)%0A'
+      + 'Equivale a: $' + mxnW.toLocaleString('es-MX') + ' MXN (menos 6 USD comision, TC 17.5)%0A'
       + (nombreZ ? 'Enviado por: ' + encodeURIComponent(nombreZ) + '%0A' : '')
       + '%0AAdjunto mi comprobante.';
   }
@@ -4761,10 +4761,10 @@ function enviarComprobante(metodo){
     var nom = ((document.getElementById('zelle-nombre')||{}).value||'').trim();
     var mxnZ = _zelleMXN(usdZ);
     monto = '$'+usdZ+' USD = $'+mxnZ.toLocaleString('es-MX')+' MXN';
-    extra = (nom ? ('Enviado por: '+nom+' | ') : '') + 'Zelle (-3 USD comision, TC 18)';
+    extra = (nom ? ('Enviado por: '+nom+' | ') : '') + 'Zelle (-6 USD comision, TC 17.5)';
     metodoNom = 'Zelle (USA)';
     if(!usdZ){ showToast('Escribe el monto enviado en USD'); return; }
-    if(parseFloat(usdZ) <= 3){ showToast('El monto debe ser mayor a 3 USD (comision)'); return; }
+    if(parseFloat(usdZ) <= 6){ showToast("El monto debe ser mayor a 6 USD (comision)"); return; }
   } else if(metodo === 'binance'){
     fotoInput = document.getElementById('binance-foto');
     if(_bncSel){ monto = 'Paga $'+_bncSel.paga+' / Recibe $'+_bncSel.recibe; }
@@ -4820,9 +4820,9 @@ function enviarComprobante(metodo){
 }
 
 
-// ═══ Conversión Zelle USD → MXN (18 por USD, -3 USD comision) ═══
-var ZELLE_TC = 18;        // tipo de cambio MXN por USD
-var ZELLE_COMISION = 3;   // comision fija en USD (no se convierte)
+// ═══ Conversión Zelle USD → MXN (18 por USD, -6 USD comision: 3 Zelle + 3 banco) ═══
+var ZELLE_TC = 17.5;      // tipo de cambio MXN por USD
+var ZELLE_COMISION = 6;   // comision fija en USD (3 Zelle + 3 banco)
 
 function calcZelleConversion(){
   var usd = parseFloat((document.getElementById('zelle-monto')||{}).value) || 0;
