@@ -926,6 +926,7 @@ function renderPerfil(){
   var qu=document.getElementById('pf-quick-user'); if(qu) qu.textContent=u.username;
   var qav=document.getElementById('pf-quick-av'); if(qav) qav.textContent=u.username.charAt(0).toUpperCase();
   _iniciarRelojMexico();
+  cargarWalletPerfil();
   if(sdo)  sdo.textContent  = saldoFmt;
   if(sdb)  sdb.textContent  = saldoFmt;
   if(sbp)  sbp.textContent  = saldoFmt;
@@ -5380,4 +5381,39 @@ function _refrescarDiamPrecios(){
   var saldo=(authSession&&authSession.saldo)?authSession.saldo:0;
   var subEl = document.querySelector('#dm-saldo .ddet-metodo-sub');
   if(subEl) subEl.textContent = '('+fmt(saldo)+')';
+}
+
+
+// ═══ PANEL BILLETERA (Mi Cuenta) ═══
+function cargarWalletPerfil(){
+  var sdb = document.getElementById('wallet-saldo');
+  var movs = document.getElementById('wallet-movimientos');
+  if(!authSession){
+    if(sdb) sdb.textContent = fmt(0);
+    if(movs) movs.innerHTML='<div style="text-align:center;padding:1rem;color:var(--muted);font-size:.78rem">Inicia sesion</div>';
+    return;
+  }
+  var saldo = authSession.saldo || 0;
+  if(sdb) sdb.textContent = fmt(saldo);
+
+  if(movs && authSession.id && typeof sbGetMovimientos === 'function'){
+    sbGetMovimientos(authSession.id).then(function(rows){
+      if(!rows || !rows.length){ movs.innerHTML='<div style="text-align:center;padding:1rem;color:var(--muted);font-size:.78rem">Sin movimientos aun</div>'; return; }
+      var h='';
+      rows.slice(0,4).forEach(function(m){
+        var isC = m.tipo==='credito'||m.tipo==='ajuste'||m.tipo==='recarga';
+        var color = isC?'#00e676':'#ff6b6b';
+        var signo = isC?'+':'-';
+        var hora = m.created_at ? new Date(m.created_at).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}) : '';
+        var ico = isC ? '\u{1F4B0}' : '\u{1F4B8}';
+        h += '<div style="display:flex;align-items:center;gap:.7rem;padding:.6rem 0;border-bottom:1px solid rgba(255,255,255,.05)">'
+          + '<div style="width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0">'+ico+'</div>'
+          + '<div style="flex:1;min-width:0"><div style="font-size:.82rem;font-weight:600;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(m.descripcion||m.tipo)+'</div>'
+          + '<div style="font-size:.68rem;color:var(--muted)">'+hora+'</div></div>'
+          + '<div style="text-align:right;flex-shrink:0"><div style="font-family:Oxanium;font-weight:700;font-size:.85rem;color:'+color+'">'+signo+fmt(m.monto||0)+'</div></div>'
+          + '</div>';
+      });
+      movs.innerHTML = h;
+    }).catch(function(){ movs.innerHTML='<div style="text-align:center;padding:1rem;color:var(--muted);font-size:.78rem">Error al cargar</div>'; });
+  }
 }

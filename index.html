@@ -2303,6 +2303,45 @@ document.addEventListener('keydown',function(e){
       </div>
     </div>
 
+    <!-- Panel billetera (estilo fintech) -->
+    <div class="pf-card" style="margin-bottom:.85rem">
+      <div style="padding:1.25rem">
+        <div style="font-family:Oxanium;font-weight:800;font-size:1.05rem;color:#fff;margin-bottom:1rem">Tu dinero</div>
+
+        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.35rem">
+          <div style="font-family:Oxanium;font-weight:900;font-size:2rem;color:#fff" id="wallet-saldo">$0</div>
+        </div>
+        <div style="font-size:.78rem;color:var(--muted);margin-bottom:1.25rem">Tu saldo disponible en CiberStore</div>
+
+        <!-- 3 botones -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem">
+          <div onclick="goPage('saldo')" style="background:rgba(77,163,255,.08);border:1px solid rgba(77,163,255,.18);border-radius:14px;padding:1rem .5rem;text-align:center;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(77,163,255,.15)'" onmouseout="this.style.background='rgba(77,163,255,.08)'">
+            <div style="font-size:1.4rem;margin-bottom:.35rem">&#128229;</div>
+            <div style="font-family:Poppins;font-weight:600;font-size:.82rem;color:var(--c1)">Ingresar</div>
+          </div>
+          <div onclick="goPage('transferir')" style="background:rgba(77,163,255,.08);border:1px solid rgba(77,163,255,.18);border-radius:14px;padding:1rem .5rem;text-align:center;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(77,163,255,.15)'" onmouseout="this.style.background='rgba(77,163,255,.08)'">
+            <div style="font-size:1.4rem;margin-bottom:.35rem">&#128257;</div>
+            <div style="font-family:Poppins;font-weight:600;font-size:.82rem;color:var(--c1)">Transferir</div>
+          </div>
+          <div onclick="goPage('retirar')" style="background:rgba(77,163,255,.08);border:1px solid rgba(77,163,255,.18);border-radius:14px;padding:1rem .5rem;text-align:center;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(77,163,255,.15)'" onmouseout="this.style.background='rgba(77,163,255,.08)'">
+            <div style="font-size:1.4rem;margin-bottom:.35rem">&#128228;</div>
+            <div style="font-family:Poppins;font-weight:600;font-size:.82rem;color:var(--c1)">Retirar</div>
+          </div>
+        </div>
+
+        <!-- Movimientos -->
+        <div style="margin-top:1.5rem">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem">
+            <div style="font-family:Oxanium;font-weight:800;font-size:.95rem;color:#fff">Movimientos</div>
+            <button onclick="goPage('miscompras')" style="background:none;border:none;color:var(--c1);font-family:Poppins;font-weight:600;font-size:.8rem;cursor:pointer;display:flex;align-items:center;gap:.3rem">Ver todos &#8594;</button>
+          </div>
+          <div id="wallet-movimientos" style="display:flex;flex-direction:column;gap:.35rem">
+            <div style="text-align:center;padding:1rem;color:var(--muted);font-size:.78rem">Cargando...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Avatar + datos -->
     <div class="pf-card">
       <div class="pf-av-wrap">
