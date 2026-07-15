@@ -5439,7 +5439,11 @@ function verProductosRA(){
     }
     var prods = res.productos;
     if(!prods || !prods.length){
-      cont.innerHTML = '<div style="color:#ff6b6b">No se recibieron productos. Respuesta: '+JSON.stringify(res)+'</div>';
+      var dbg = '';
+      if(res._debug_respuesta_cruda !== undefined){
+        dbg = '<div style="margin-top:.75rem;padding:.6rem;background:rgba(255,255,255,.03);border-radius:8px;font-size:.65rem;color:#9ec5ff;word-break:break-all">HTTP: '+(res._debug_http_status||'?')+'<br>Respuesta cruda:<br>'+JSON.stringify(res._debug_respuesta_cruda)+'</div>';
+      }
+      cont.innerHTML = '<div style="color:#ff6b6b">No se recibieron productos (lista vacia).</div>'+dbg;
       return;
     }
 
