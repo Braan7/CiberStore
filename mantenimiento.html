@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CiberStore · En Mantenimiento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --c1:#4da3ff; --accent2:#a855f7;
+    --grad:linear-gradient(135deg,#4da3ff,#a855f7);
+    --bg:#070912; --card:rgba(255,255,255,.04);
+    --border:rgba(255,255,255,.09); --muted:#8a93a8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:'Poppins',sans-serif;
+    background:radial-gradient(1200px 600px at 50% -10%,rgba(80,120,255,.12),transparent),var(--bg);
+    color:#fff;min-height:100vh;min-height:100dvh;
+    display:flex;align-items:center;justify-content:center;
+    padding:1.5rem;overflow-x:hidden;
+  }
+
+  /* Partículas decorativas */
+  .glow{position:fixed;border-radius:50%;filter:blur(80px);opacity:.5;z-index:0;pointer-events:none}
+  .glow1{width:300px;height:300px;background:rgba(77,163,255,.25);top:-80px;left:-80px}
+  .glow2{width:340px;height:340px;background:rgba(168,85,247,.2);bottom:-100px;right:-100px}
+
+  .box{
+    position:relative;z-index:1;max-width:460px;width:100%;text-align:center;
+    background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
+    border:1px solid var(--border);border-radius:24px;
+    padding:2.5rem 1.75rem;backdrop-filter:blur(20px);
+    box-shadow:0 20px 60px rgba(0,0,0,.5);
+  }
+
+  /* Logo */
+  .logo{font-family:'Oxanium',sans-serif;font-weight:800;font-size:1.5rem;letter-spacing:2px;margin-bottom:1.5rem}
+  .logo .l1{color:#fff}
+  .logo .l2{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+
+  /* Ícono animado */
+  .ico{
+    font-size:3.5rem;margin-bottom:1.25rem;display:inline-block;
+    animation:spin 3s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  h1{font-family:'Oxanium',sans-serif;font-weight:800;font-size:1.6rem;margin-bottom:.75rem;line-height:1.2}
+  h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .desc{color:var(--muted);font-size:.95rem;line-height:1.7;margin-bottom:1.5rem}
+
+  /* Estimación */
+  .eta{
+    display:inline-flex;align-items:center;gap:.6rem;
+    background:rgba(255,180,60,.1);border:1px solid rgba(255,180,60,.3);
+    border-radius:99px;padding:.6rem 1.2rem;margin-bottom:1.75rem;
+    font-weight:600;font-size:.9rem;color:#ffcf40;
+  }
+  .eta-dot{width:9px;height:9px;border-radius:50%;background:#ffcf40;animation:pulse 1.5s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+
+  /* Barra de carga */
+  .load-wrap{margin-bottom:2rem}
+  .load-label{display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted);margin-bottom:.5rem}
+  .load-bar{height:10px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;position:relative}
+  .load-fill{
+    height:100%;border-radius:99px;
+    background:linear-gradient(90deg,#4da3ff,#a855f7,#4da3ff);
+    background-size:200% 100%;
+    width:40%;
+    animation:load 2.5s ease-in-out infinite,shimmer 2s linear infinite;
+    box-shadow:0 0 14px rgba(120,120,255,.6);
+  }
+  @keyframes load{
+    0%{width:15%;margin-left:0}
+    50%{width:70%;margin-left:15%}
+    100%{width:15%;margin-left:85%}
+  }
+  @keyframes shimmer{to{background-position:200% 0}}
+
+  /* Botones de contacto */
+  .btns{display:flex;flex-direction:column;gap:.7rem}
+  .btn{
+    display:flex;align-items:center;justify-content:center;gap:.6rem;
+    padding:.9rem;border-radius:13px;text-decoration:none;
+    font-family:'Poppins';font-weight:700;font-size:.92rem;
+    transition:transform .2s,box-shadow .2s;
+  }
+  .btn:active{transform:scale(.97)}
+  .btn-wa{background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;box-shadow:0 6px 20px rgba(37,211,102,.3)}
+  .btn-canal{background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);color:#25d366}
+
+  .foot{margin-top:1.75rem;font-size:.72rem;color:#3a4560;line-height:1.6}
+</style>
+</head>
+<body>
+  <div class="glow glow1"></div>
+  <div class="glow glow2"></div>
+
+  <div class="box">
+    <div class="logo"><span class="l1">CIBER</span><span class="l2">STORE</span></div>
+
+    <div class="ico">&#9881;&#65039;</div>
+
+    <h1>Estamos en <span>mantenimiento</span></h1>
+    <p class="desc">Estamos mejorando la tienda para darte una mejor experiencia. Volvemos muy pronto con todo listo. &#128296;</p>
+
+    <div class="eta">
+      <span class="eta-dot"></span>
+      Estimado: hasta las 10:00 PM aprox.
+    </div>
+
+    <div class="load-wrap">
+      <div class="load-label"><span>Trabajando en ello...</span><span id="load-pct">cargando</span></div>
+      <div class="load-bar"><div class="load-fill"></div></div>
+    </div>
+
+    <div class="btns">
+      <a class="btn btn-wa" href="https://wa.me/12894273983" target="_blank">&#128241; Contactar por WhatsApp</a>
+      <a class="btn btn-canal" href="https://whatsapp.com/channel/0029VbCXQVjJENyAgAoJLJ3g" target="_blank">&#128226; Unirse al Canal de WhatsApp</a>
+    </div>
+
+    <div class="foot">CiberStore &middot; La tienda definitiva de Free Fire<br>Gracias por tu paciencia &#128153;</div>
+  </div>
+
+  <script>
+    // Texto de "cargando" animado con puntos
+    var pct = document.getElementById('load-pct');
+    var puntos = 0;
+    setInterval(function(){
+      puntos = (puntos + 1) % 4;
+      pct.textContent = 'cargando' + '.'.repeat(puntos);
+    }, 500);
+  </script>
+</body>
+</html>
