@@ -5447,16 +5447,30 @@ function verProductosRA(){
       return;
     }
 
-    var html = '<div style="font-family:Oxanium;font-weight:800;color:#ffb84d;margin-bottom:.75rem">'+prods.length+' PRODUCTOS DISPONIBLES:</div>';
-    prods.forEach(function(p){
-      var inputs = (p.input_fields || []).map(function(f){ return f.label || f.name; }).join(', ');
-      html += '<div style="padding:.6rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:8px;margin-bottom:.5rem">'
-        + '<div style="color:#fff;font-weight:700">ID: '+p.id+' &mdash; '+(p.package||p.name||'?')+'</div>'
-        + '<div style="color:var(--muted);font-size:.7rem">Juego: '+(p.game||'?')+'</div>'
-        + '<div style="color:#25d366;font-size:.72rem">Precio (tu costo): $'+(p.price||'?')+' USD</div>'
-        + '<div style="color:#38bdf8;font-size:.68rem">Pide: '+(inputs||'?')+'</div>'
-        + '</div>';
-    });
+    // Separar por tipo
+    var recargas = prods.filter(function(p){ return (p.type||p.tipo)==='recharge'; });
+    var pins = prods.filter(function(p){ return (p.type||p.tipo)==='pin'; });
+    var otros = prods.filter(function(p){ return (p.type||p.tipo)!=='recharge' && (p.type||p.tipo)!=='pin'; });
+
+    var html = '<div style="font-family:Oxanium;font-weight:800;color:#ffb84d;margin-bottom:.75rem">'+prods.length+' PRODUCTOS ('+recargas.length+' recargas, '+pins.length+' pins)</div>';
+
+    function pintar(lista, titulo, color){
+      if(!lista.length) return '';
+      var h = '<div style="font-weight:800;color:'+color+';margin:.75rem 0 .4rem;font-size:.72rem">'+titulo+'</div>';
+      lista.forEach(function(p){
+        var tipo = p.type || p.tipo || '?';
+        h += '<div style="padding:.6rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:8px;margin-bottom:.5rem">'
+          + '<div style="color:#fff;font-weight:700">ID: '+p.id+' &mdash; '+(p.name||p.sku||p.package||'?')+'</div>'
+          + '<div style="color:#ffb84d;font-size:.68rem">Tipo: '+tipo+' &middot; SKU: '+(p.sku||'?')+'</div>'
+          + '<div style="color:#25d366;font-size:.72rem">Precio (tu costo): $'+(p.price||'?')+'</div>'
+          + '</div>';
+      });
+      return h;
+    }
+
+    html += pintar(recargas, '\u{1F3AE} RECARGAS DIRECTAS (type=recharge):', '#25d366');
+    html += pintar(pins, '\u{1F39F}\uFE0F PINS (type=pin):', '#38bdf8');
+    html += pintar(otros, '\u{2753} OTROS:', '#a78bfa');
     html += '<div style="margin-top:.75rem;padding:.6rem;background:rgba(56,189,248,.08);border-radius:8px;color:#9ec5ff;font-size:.72rem">&#128203; Copia esta lista y pasala para conectar los productos.</div>';
     cont.innerHTML = html;
   }).catch(function(err){
