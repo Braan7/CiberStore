@@ -5216,20 +5216,30 @@ var _diamMetodoPago = 'saldo';
 var _diamSeleccionado = null;
 
 // Construye la lista de productos según el tipo
+
+// ═══════════ RECARGAS AUTOMÁTICAS (Recargas América type=recharge) ═══════════
+// package_id = el ID de Recargas América | precio = costo USD × 20 (redondeado)
+var RECARGAS_AUTO = [
+  { package_id:340, nombre:'100 Diamantes + 10 Bono',    diamantes:110,  costoUSD:0.79,  precio:16   },
+  { package_id:343, nombre:'310 Diamantes + 31 Bono',    diamantes:341,  costoUSD:2.65,  precio:55   },
+  { package_id:345, nombre:'520 Diamantes + 52 Bono',    diamantes:572,  costoUSD:3.71,  precio:85   },
+  { package_id:341, nombre:'1.060 Diamantes + 106 Bono', diamantes:1166, costoUSD:6.90,  precio:160  },
+  { package_id:342, nombre:'2.180 Diamantes + 218 Bono', diamantes:2398, costoUSD:13.70, precio:280  },
+  { package_id:344, nombre:'5.600 Diamantes + 560 Bono', diamantes:6160, costoUSD:34.87, precio:700  },
+  { package_id:null, nombre:'11.200 Diamantes + 1120 Bono', diamantes:12320, costoUSD:69.74, precio:1390, manual:true }
+];
+
 function _getDiamProductos(tipo){
   if(tipo === 'bonus'){
-    // Desde BONUS_PLANES
-    var arr = [];
-    for(var k in BONUS_PLANES){
-      if(BONUS_PLANES.hasOwnProperty(k)){
-        var p = BONUS_PLANES[k];
-        // Calcular base y bono (el +20%)
-        var base = Math.round(p.diamantes / 1.2);
-        var bono = p.diamantes - base;
-        arr.push({ key:k, nombre:base+' Diamantes + '+bono+' Bono', diamantes:p.diamantes, precio:p.precio, tipo:'bonus' });
-      }
-    }
-    return arr;
+    // Recargas automáticas (Recargas América) — entrega directa al ID
+    return RECARGAS_AUTO.map(function(r){
+      return {
+        key:(r.manual?'man_':'auto_')+(r.package_id||r.diamantes),
+        nombre:r.nombre, diamantes:r.diamantes, precio:r.precio,
+        tipo:(r.manual?'manual':'auto'), package_id:r.package_id,
+        badge:(r.manual?'MANUAL':'AUTO')
+      };
+    });
   } else if(tipo === 'ilim'){
     return PRODUCTS.map(function(p){
       return { key:'ilim_'+p.id, nombre:p.name+' Diamantes', diamantes:p.total, precio:p.prices[0], tipo:'ilim', badge:p.badge };
@@ -5262,7 +5272,10 @@ function renderDiamCatalogo(){
   if(count) count.textContent = productos.length;
 
   grid.innerHTML = productos.map(function(p, i){
-    var badge = p.badge ? '<span class="dcat-badge">'+p.badge+'</span>' : '';
+    var badgeColor = '';
+    if(p.badge === 'AUTO') badgeColor = 'background:rgba(37,211,102,.15);border-color:rgba(37,211,102,.4);color:#25d366';
+    else if(p.badge === 'MANUAL') badgeColor = 'background:rgba(255,180,60,.15);border-color:rgba(255,180,60,.4);color:#ffb84d';
+    var badge = p.badge ? '<span class="dcat-badge" style="'+badgeColor+'">'+p.badge+'</span>' : '';
     return '<div class="dcat-card" onclick="abrirDiamDetalle('+i+')">'
       + badge
       + '<div class="dcat-card-ico">&#127918;</div>'
@@ -5289,6 +5302,9 @@ function abrirDiamDetalle(idx){
     + '<div class="ddet-head"><div class="ddet-head-ico">&#127918;</div>'
     + '<div><div class="ddet-head-name">'+p.nombre+'</div><div class="ddet-head-sub">Free Fire</div></div></div>'
     + '<div class="ddet-price">'+fmt(p.precio)+'</div>'
+    + (p.tipo==='auto'
+        ? '<div style="background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.25);border-radius:10px;padding:.6rem .85rem;margin-bottom:1.25rem;font-size:.8rem;color:#25d366">\u26A1 Recarga instantanea directa a tu ID</div>'
+        : '<div style="background:rgba(255,180,60,.08);border:1px solid rgba(255,180,60,.25);border-radius:10px;padding:.6rem .85rem;margin-bottom:1.25rem;font-size:.8rem;color:#ffb84d">\u23F3 Se procesa manualmente (te contactamos)</div>')
     + '<div class="ddet-label">Datos de la cuenta</div>'
     + '<label class="flabel">Usuario / ID de jugador *</label>'
     + '<input class="finput" id="diam-ffid" type="text" placeholder="Tu ID de Free Fire"/>'
@@ -5349,27 +5365,82 @@ function confirmarDiamCompra(){
   var saldo=(authSession&&authSession.saldo)?authSession.saldo:0;
 
   if(_diamMetodoPago==='binance'){
-    // Ir a recargar saldo por Binance
     showToast('Recarga tu saldo con Binance para completar');
     goPage('saldo');
     setTimeout(function(){ if(typeof openBinanceModal==='function') openBinanceModal(); }, 400);
     return;
   }
 
-  // Pago con saldo
-  if(saldo < p.precio){
-    showToast('Saldo insuficiente. Recarga primero.');
+  if(saldo < p.precio){ showToast('Saldo insuficiente. Recarga primero.'); return; }
+
+  // ═══ RECARGA AUTOMÁTICA (productos type=auto) ═══
+  if(p.tipo === 'auto' && p.package_id){
+    _procesarRecargaAutomatica(p, ffId);
     return;
   }
 
-  // Procesar la compra según el tipo
+  // Compra normal (ilimitados / 1vez): pedido manual
   var ord=getNextOrder();
   addSpend(p.precio, 'Diamantes '+p.tipo+': '+p.diamantes+' - ID:'+ffId+' - Pedido #'+ord);
   registrarPedido(p.nombre, p.diamantes, 'diamantes', ffId, p.precio, 0);
   if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, p.nombre+' - ID:'+ffId, p.precio, ord);
-
   showToast('\u2705 Pedido #'+ord+' realizado! Te lo acreditamos pronto.', 3500);
   cerrarDiamDetalle();
+}
+
+// ═══ Procesar recarga automática: valida ID → cobra saldo → recarga ═══
+function _procesarRecargaAutomatica(p, ffId){
+  var btn = document.getElementById('diam-btn');
+  var msg = document.getElementById('diam-msg');
+  if(btn){ btn.className='ddet-btn off'; btn.innerHTML='Validando ID...'; }
+
+  // Paso 1: validar que el ID exista
+  fetch(COMPRAR_RECARGA_URL, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ action:'validar', product_id:p.package_id, service_user_id:ffId })
+  }).then(function(r){ return r.json(); }).then(function(val){
+    if(!val.success || !val.valido){
+      if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
+      if(msg){ msg.className='ddet-msg err'; msg.textContent='El ID no existe o no es valido. Revisalo bien.'; }
+      return;
+    }
+
+    // ID válido: mostrar nombre y confirmar
+    var nombre = val.nombre || 'Jugador';
+    if(msg){ msg.className='ddet-msg'; msg.style.color='#25d366'; msg.innerHTML='\u2705 Cuenta encontrada: <b>'+nombre+'</b><br>Procesando recarga...'; }
+    if(btn){ btn.innerHTML='Recargando...'; }
+
+    // Paso 2: cobrar el saldo AHORA (antes de recargar)
+    var ord=getNextOrder();
+    addSpend(p.precio, 'Recarga AUTO: '+p.nombre+' - ID:'+ffId+' ('+nombre+') - Pedido #'+ord);
+
+    // Paso 3: hacer la recarga automática
+    fetch(COMPRAR_RECARGA_URL, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ action:'comprar', package_id:p.package_id, player_id:ffId, client_name:authSession.username })
+    }).then(function(r){ return r.json(); }).then(function(res){
+      if(res.success && (res.status==='COMPLETED' || res.status==='PENDING')){
+        registrarPedido(p.nombre+' (AUTO)', p.diamantes, 'diamantes', ffId, p.precio, 0);
+        if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, 'RECARGA AUTO '+p.nombre+' - ID:'+ffId+' ('+nombre+')', p.precio, ord);
+        var txt = res.status==='COMPLETED' ? '\u2705 Recarga COMPLETADA para '+nombre+'!' : '\u23F3 Recarga en proceso (PENDING). Se acreditara pronto.';
+        showToast(txt, 4000);
+        cerrarDiamDetalle();
+      } else {
+        // Falló la recarga: devolver el saldo cobrado
+        addSpend(-p.precio, 'REEMBOLSO recarga fallida: '+p.nombre+' - Pedido #'+ord);
+        if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
+        if(msg){ msg.className='ddet-msg err'; msg.textContent='La recarga fallo: '+(res.error||'intenta de nuevo')+'. Se devolvio tu saldo.'; }
+      }
+    }).catch(function(err){
+      addSpend(-p.precio, 'REEMBOLSO recarga (error conexion): '+p.nombre+' - Pedido #'+ord);
+      if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
+      if(msg){ msg.className='ddet-msg err'; msg.textContent='Error de conexion. Se devolvio tu saldo. Intenta de nuevo.'; }
+    });
+
+  }).catch(function(err){
+    if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
+    if(msg){ msg.className='ddet-msg err'; msg.textContent='No se pudo validar el ID. Intenta de nuevo.'; }
+  });
 }
 
 
