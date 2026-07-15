@@ -5417,3 +5417,45 @@ function cargarWalletPerfil(){
     }).catch(function(){ movs.innerHTML='<div style="text-align:center;padding:1rem;color:var(--muted);font-size:.78rem">Error al cargar</div>'; });
   }
 }
+
+
+// ═══ [TEMPORAL] Ver productos de Recargas América con sus IDs ═══
+var COMPRAR_RECARGA_URL = 'https://pnotsqsudqpwqzssevig.supabase.co/functions/v1/rapid-handler';
+
+function verProductosRA(){
+  var cont = document.getElementById('ra-productos-lista');
+  if(!cont) return;
+  cont.style.display = 'block';
+  cont.innerHTML = '<div style="text-align:center;padding:1rem;color:#ffb84d">Cargando productos...</div>';
+
+  fetch(COMPRAR_RECARGA_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'listar' })
+  }).then(function(r){ return r.json(); }).then(function(res){
+    if(!res.success){
+      cont.innerHTML = '<div style="color:#ff6b6b">Error: '+(res.error||'no se pudo')+'</div>';
+      return;
+    }
+    var prods = res.productos;
+    if(!prods || !prods.length){
+      cont.innerHTML = '<div style="color:#ff6b6b">No se recibieron productos. Respuesta: '+JSON.stringify(res)+'</div>';
+      return;
+    }
+
+    var html = '<div style="font-family:Oxanium;font-weight:800;color:#ffb84d;margin-bottom:.75rem">'+prods.length+' PRODUCTOS DISPONIBLES:</div>';
+    prods.forEach(function(p){
+      var inputs = (p.input_fields || []).map(function(f){ return f.label || f.name; }).join(', ');
+      html += '<div style="padding:.6rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:8px;margin-bottom:.5rem">'
+        + '<div style="color:#fff;font-weight:700">ID: '+p.id+' &mdash; '+(p.package||p.name||'?')+'</div>'
+        + '<div style="color:var(--muted);font-size:.7rem">Juego: '+(p.game||'?')+'</div>'
+        + '<div style="color:#25d366;font-size:.72rem">Precio (tu costo): $'+(p.price||'?')+' USD</div>'
+        + '<div style="color:#38bdf8;font-size:.68rem">Pide: '+(inputs||'?')+'</div>'
+        + '</div>';
+    });
+    html += '<div style="margin-top:.75rem;padding:.6rem;background:rgba(56,189,248,.08);border-radius:8px;color:#9ec5ff;font-size:.72rem">&#128203; Copia esta lista y pasala para conectar los productos.</div>';
+    cont.innerHTML = html;
+  }).catch(function(err){
+    cont.innerHTML = '<div style="color:#ff6b6b">Error de conexion: '+err+'<br>Revisa que la funcion comprar-recarga este montada.</div>';
+  });
+}
