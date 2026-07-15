@@ -5231,7 +5231,17 @@ var RECARGAS_AUTO = [
 
 function _getDiamProductos(tipo){
   if(tipo === 'bonus'){
-    // Recargas automáticas (Recargas América) — entrega directa al ID
+    // Con Bono (productos originales +20%)
+    var arr = [];
+    for(var k in BONUS_PLANES){
+      if(BONUS_PLANES.hasOwnProperty(k)){
+        var bp = BONUS_PLANES[k];
+        arr.push({ key:k, nombre:bp.label, diamantes:bp.diamantes, precio:bp.precio, tipo:'bonus' });
+      }
+    }
+    return arr;
+  } else if(tipo === 'ilim'){
+    // Ilimitado = recargas automáticas (Recargas América, directo al ID)
     return RECARGAS_AUTO.map(function(r){
       return {
         key:(r.manual?'man_':'auto_')+(r.package_id||r.diamantes),
@@ -5239,10 +5249,6 @@ function _getDiamProductos(tipo){
         tipo:(r.manual?'manual':'auto'), package_id:r.package_id,
         badge:(r.manual?'MANUAL':'AUTO')
       };
-    });
-  } else if(tipo === 'ilim'){
-    return PRODUCTS.map(function(p){
-      return { key:'ilim_'+p.id, nombre:p.name+' Diamantes', diamantes:p.total, precio:p.prices[0], tipo:'ilim', badge:p.badge };
     });
   } else if(tipo === '1vez'){
     return PRODUCTS_1VEZ.map(function(p){
@@ -5429,7 +5435,10 @@ function _procesarRecargaAutomatica(p, ffId){
         // Falló la recarga: devolver el saldo cobrado
         addSpend(-p.precio, 'REEMBOLSO recarga fallida: '+p.nombre+' - Pedido #'+ord);
         if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
-        if(msg){ msg.className='ddet-msg err'; msg.textContent='La recarga fallo: '+(res.error||'intenta de nuevo')+'. Se devolvio tu saldo.'; }
+        var detalle = res.error || 'error desconocido';
+        if(res.raw){ detalle += ' | ' + JSON.stringify(res.raw); }
+        if(msg){ msg.className='ddet-msg err'; msg.style.fontSize='.7rem'; msg.textContent='Fallo: '+detalle+'. Saldo devuelto.'; }
+        console.error('[RECARGA] Respuesta completa:', res);
       }
     }).catch(function(err){
       addSpend(-p.precio, 'REEMBOLSO recarga (error conexion): '+p.nombre+' - Pedido #'+ord);
