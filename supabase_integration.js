@@ -23,22 +23,48 @@ function tgSend(msg){
 }
 
 function tgNotifyRegister(profile){
-  var msg = '\uD83D\uDC65 <b>Nuevo registro - CiberStore</b>\n\n'
-    + '\uD83D\uDC64 Usuario: <b>' + profile.username + '</b>\n'
-    + '\uD83D\uDCCB Nombre: ' + (profile.nombre || '-') + '\n'
-    + '\uD83D\uDCF1 WhatsApp: +' + (profile.whatsapp || '-') + '\n'
-    + '\uD83D\uDCC5 Fecha: ' + new Date().toLocaleString('es-MX') + '\n'
-    + '\uD83C\uDF1F Ref: ' + (profile.ref_code || '-');
-  tgSend(msg);
+  var ahora = new Date();
+  var fecha = ahora.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' });
+  var hora = ahora.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' });
+  var linea = '\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501';
+
+  function armarYenviar(num){
+    var titulo = num ? ('\u2728 <b>NUEVO USUARIO #' + num + '</b>') : '\u2728 <b>NUEVO USUARIO</b>';
+    var msg = linea + '\n'
+      + titulo + '\n'
+      + linea + '\n'
+      + '\uD83D\uDC64 Usuario: <b>' + profile.username + '</b>\n'
+      + '\uD83D\uDCCB Nombre: ' + (profile.nombre || '-') + '\n'
+      + '\uD83D\uDCF1 WhatsApp: +' + (profile.whatsapp || '-') + '\n'
+      + '\uD83C\uDF1F Ref: ' + (profile.ref_code || '-') + '\n'
+      + '\uD83D\uDCC5 ' + fecha + ' \u00B7 \uD83D\uDD52 ' + hora + '\n'
+      + linea;
+    tgSend(msg);
+  }
+
+  // Contar cuántos usuarios hay usando sb.get (que ya existe en el sistema)
+  try {
+    sb.get('profiles', 'select=id').then(function(rows){
+      armarYenviar(Array.isArray(rows) ? rows.length : null);
+    }).catch(function(){ armarYenviar(null); });
+  } catch(e){ armarYenviar(null); }
 }
 
 function tgNotifyPurchase(username, product, amount, orderId){
-  var msg = '\uD83D\uDCB0 <b>Nueva compra - CiberStore</b>\n\n'
-    + '\uD83D\uDC64 Usuario: <b>' + username + '</b>\n'
-    + '\uD83D\uDED2 Producto: ' + product + '\n'
-    + '\uD83D\uDCB5 Monto: <b>$' + amount.toLocaleString('es-MX') + ' MX</b>\n'
-    + '\uD83D\uDCCB Pedido: #' + orderId + '\n'
-    + '\uD83D\uDD50 ' + new Date().toLocaleString('es-MX');
+  var ahora = new Date();
+  var fecha = ahora.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' });
+  var hora = ahora.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' });
+  var linea = '\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501';
+  var msg = linea + '\n'
+    + '\uD83C\uDFAE <b>CIBERSTORE \u00B7 NUEVA VENTA</b>\n'
+    + linea + '\n'
+    + '\uD83D\uDC64 Cliente: <b>' + username + '</b>\n'
+    + '\uD83D\uDECD\uFE0F ' + product + '\n'
+    + linea + '\n'
+    + '\uD83D\uDCB5 Total: <b>$' + amount.toLocaleString('es-MX') + ' MX</b>\n'
+    + '\uD83D\uDCCB Pedido: <b>#' + orderId + '</b>\n'
+    + '\uD83D\uDCC5 ' + fecha + ' \u00B7 \uD83D\uDD52 ' + hora + '\n'
+    + linea;
   tgSend(msg);
 }
 
