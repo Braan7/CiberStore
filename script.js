@@ -5418,9 +5418,9 @@ function _procesarRecargaAutomatica(p, ffId){
       if(res.success && (res.status==='COMPLETED' || res.status==='PENDING')){
         registrarPedido(p.nombre+' (AUTO)', p.diamantes, 'diamantes', ffId, p.precio, 0);
         if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, 'RECARGA AUTO '+p.nombre+' - ID:'+ffId+' ('+nombre+')', p.precio, ord);
-        var txt = res.status==='COMPLETED' ? '\u2705 Recarga COMPLETADA para '+nombre+'!' : '\u23F3 Recarga en proceso (PENDING). Se acreditara pronto.';
-        showToast(txt, 4000);
-        cerrarDiamDetalle();
+        _mostrarReciboRecarga(p, ffId, nombre, res.status);
+        var txt = res.status==='COMPLETED' ? '\u2705 Recarga COMPLETADA!' : '\u23F3 Recarga en proceso...';
+        showToast(txt, 3000);
       } else {
         // NO reembolsar automatico (la recarga pudo haberse hecho igual).
         // Dejar el cobro y registrar el pedido para verificacion manual.
@@ -5745,4 +5745,49 @@ function _extraerPines(res, esperados){
   }
 
   return pines;
+}
+
+// ═══ Recibo visual de recarga exitosa ═══
+function _mostrarReciboRecarga(p, ffId, nombreJugador, status){
+  var det = document.getElementById('diam-detalle');
+  if(!det) return;
+
+  var ahora = new Date();
+  var fecha = ahora.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' });
+  var hora = ahora.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' });
+  var dia = ahora.toLocaleDateString('es-MX', { weekday:'long' });
+  dia = dia.charAt(0).toUpperCase() + dia.slice(1);
+
+  var esPend = (status === 'PENDING');
+  var colorBorde = esPend ? 'rgba(255,180,60,.4)' : 'rgba(37,211,102,.4)';
+  var colorTxt = esPend ? '#ffb84d' : '#25d366';
+  var titulo = esPend ? '\u23F3 RECARGA EN PROCESO' : '\u2705 RECARGA EXITOSA';
+
+  det.innerHTML =
+    '<div style="background:linear-gradient(160deg,rgba(37,211,102,.08),rgba(255,255,255,.02));border:2px solid '+colorBorde+';border-radius:18px;padding:1.75rem 1.35rem;text-align:center;max-width:420px;margin:0 auto">'
+    + '<div style="font-size:2.8rem;margin-bottom:.5rem">'+(esPend?'\u23F3':'\u2705')+'</div>'
+    + '<div style="font-family:Oxanium;font-weight:900;font-size:1.25rem;color:'+colorTxt+';margin-bottom:.35rem;letter-spacing:.5px">'+titulo+'</div>'
+    + '<div style="font-size:.8rem;color:var(--muted);margin-bottom:1.5rem">'+(esPend?'Tu recarga se acreditara en breve':'Los diamantes ya estan en tu cuenta')+'</div>'
+
+    + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
+    +   _filaRecibo('\uD83D\uDC8E Cantidad', p.nombre)
+    +   _filaRecibo('\uD83C\uDFAE ID Free Fire', ffId + (nombreJugador ? ' ('+nombreJugador+')' : ''))
+    +   _filaRecibo('\uD83D\uDCB5 Precio', fmt(p.precio))
+    +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' - ' + dia)
+    +   _filaRecibo('\uD83D\uDD52 Hora', hora, true)
+    + '</div>'
+
+    + '<button onclick="cerrarDiamDetalle()" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#22d3ee);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Volver al catalogo</button>'
+    + '</div>';
+
+  det.style.display = '';
+  document.getElementById('diam-catalogo').style.display = 'none';
+  det.scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+function _filaRecibo(label, valor, ultimo){
+  return '<div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem 0;'+(ultimo?'':'border-bottom:1px solid rgba(255,255,255,.06)')+'">'
+    + '<span style="font-size:.78rem;color:var(--muted)">'+label+'</span>'
+    + '<span style="font-size:.82rem;color:#fff;font-weight:600;text-align:right;max-width:60%">'+valor+'</span>'
+    + '</div>';
 }
