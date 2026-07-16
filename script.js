@@ -5396,7 +5396,8 @@ function _procesarRecargaAutomatica(p, ffId){
   }).then(function(r){ return r.json(); }).then(function(val){
     if(!val.success || !val.valido){
       if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
-      if(msg){ msg.className='ddet-msg err'; msg.textContent='El ID no existe o no es valido. Revisalo bien.'; }
+      if(msg){ msg.className='ddet-msg err'; msg.style.fontSize='.65rem'; msg.textContent='DEBUG VALIDAR: '+JSON.stringify(val).substring(0,300); }
+      console.error('[RECARGA] validacion fallo:', JSON.stringify(val));
       return;
     }
 
@@ -5421,23 +5422,29 @@ function _procesarRecargaAutomatica(p, ffId){
         showToast(txt, 4000);
         cerrarDiamDetalle();
       } else {
-        // Falló la recarga: devolver el saldo cobrado
-        addSpend(-p.precio, 'REEMBOLSO recarga fallida: '+p.nombre+' - Pedido #'+ord);
+        // NO reembolsar automatico (la recarga pudo haberse hecho igual).
+        // Dejar el cobro y registrar el pedido para verificacion manual.
+        registrarPedido(p.nombre+' (AUTO - VERIFICAR)', p.diamantes, 'diamantes', ffId, p.precio, 0);
+        if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, 'RECARGA AUTO VERIFICAR '+p.nombre+' - ID:'+ffId+' - '+(res.error||res.status||'sin confirmar'), p.precio, ord);
         if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
-        var detalle = res.error || 'error desconocido';
-        if(res.raw){ detalle += ' | ' + JSON.stringify(res.raw); }
-        if(msg){ msg.className='ddet-msg err'; msg.style.fontSize='.7rem'; msg.textContent='Fallo: '+detalle+'. Saldo devuelto.'; }
-        console.error('[RECARGA] Respuesta completa:', res);
+        if(msg){ msg.className='ddet-msg'; msg.style.color='#ffb84d'; msg.style.fontSize='.72rem'; msg.innerHTML='\u23F3 Tu recarga se esta verificando. Si no llega en unos minutos, contacta al admin con tu ID.'; }
+        console.error('[RECARGA] Sin confirmar (no reembolsado):', JSON.stringify(res));
+        setTimeout(cerrarDiamDetalle, 4000);
       }
     }).catch(function(err){
-      addSpend(-p.precio, 'REEMBOLSO recarga (error conexion): '+p.nombre+' - Pedido #'+ord);
+      // NO reembolsar: la recarga pudo haberse completado aunque la respuesta fallo
+      registrarPedido(p.nombre+' (AUTO - VERIFICAR)', p.diamantes, 'diamantes', ffId, p.precio, 0);
+      if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, 'RECARGA AUTO VERIFICAR (sin respuesta) '+p.nombre+' - ID:'+ffId, p.precio, ord);
       if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
-      if(msg){ msg.className='ddet-msg err'; msg.textContent='Error de conexion. Se devolvio tu saldo. Intenta de nuevo.'; }
+      if(msg){ msg.className='ddet-msg'; msg.style.color='#ffb84d'; msg.style.fontSize='.72rem'; msg.innerHTML='\u23F3 Tu recarga se esta verificando. Si no llega, contacta al admin.'; }
+      console.error('[RECARGA] catch compra (no reembolsado):', err);
+      setTimeout(cerrarDiamDetalle, 4000);
     });
 
   }).catch(function(err){
     if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
-    if(msg){ msg.className='ddet-msg err'; msg.textContent='No se pudo validar el ID. Intenta de nuevo.'; }
+    if(msg){ msg.className='ddet-msg err'; msg.style.fontSize='.65rem'; msg.textContent='DEBUG CATCH VALIDAR: '+(err&&err.message?err.message:err); }
+    console.error('[RECARGA] catch validar:', err);
   });
 }
 
