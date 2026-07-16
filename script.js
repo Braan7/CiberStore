@@ -5570,6 +5570,26 @@ function loadPinesMayoreo(){
 }
 
 // Total según producto seleccionado y cantidad
+// Devuelve el % de descuento según la cantidad de PINes
+function _descuentoPorCantidad(cant){
+  if(cant >= 10) return 5;
+  if(cant >= 8) return 4;
+  if(cant >= 7) return 3;
+  if(cant >= 5) return 2;
+  if(cant >= 3) return 1;
+  return 0;
+}
+
+// Calcula el total con descuento aplicado
+function _calcularTotalPin(idx, cant){
+  if(isNaN(idx) || !PINES_API[idx]) return { subtotal:0, descuento:0, total:0, pct:0 };
+  var subtotal = PINES_API[idx].precio * cant;
+  var pct = _descuentoPorCantidad(cant);
+  var descuento = Math.round(subtotal * pct / 100);
+  var total = subtotal - descuento;
+  return { subtotal:subtotal, descuento:descuento, total:total, pct:pct };
+}
+
 function _updatePinTotal(){
   var idx = parseInt((document.getElementById('pin-plan')||{}).value);
   var cant = parseInt((document.getElementById('pin-cantidad')||{}).value)||1;
@@ -5577,9 +5597,23 @@ function _updatePinTotal(){
   if(cant > 10){ cant = 10; var inp=document.getElementById('pin-cantidad'); if(inp) inp.value=10; }
 
   var el = document.getElementById('pin-total-val');
-  if(isNaN(idx) || !PINES_API[idx]){ if(el) el.textContent='$0 MX'; return; }
-  var total = PINES_API[idx].precio * cant;
-  if(el) el.textContent = '$'+total.toLocaleString('es-MX')+' MX';
+  var descEl = document.getElementById('pin-descuento-row');
+  if(isNaN(idx) || !PINES_API[idx]){ if(el) el.textContent='$0 MX'; if(descEl) descEl.style.display='none'; return; }
+
+  var c = _calcularTotalPin(idx, cant);
+
+  // Mostrar/ocultar la fila de descuento
+  if(descEl){
+    if(c.pct > 0){
+      descEl.style.display='flex';
+      var descTxt = document.getElementById('pin-descuento-val');
+      if(descTxt) descTxt.textContent = '-'+c.pct+'% (-$'+c.descuento.toLocaleString('es-MX')+')';
+    } else {
+      descEl.style.display='none';
+    }
+  }
+
+  if(el) el.textContent = '$'+c.total.toLocaleString('es-MX')+' MX';
 }
 
 function _cambiarCantPin(delta){
@@ -5605,7 +5639,8 @@ function submitPinSaldo(){
 
   if(isNaN(idx) || !PINES_API[idx]){ showErr('Elige un producto.'); return; }
   var prod = PINES_API[idx];
-  var total = prod.precio * cant;
+  var calc = _calcularTotalPin(idx, cant);
+  var total = calc.total;
   var saldo = authSession.saldo||0;
 
   if(saldo < total){ showErr('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MX). Necesitas $'+total.toLocaleString('es-MX')+' MX.'); return; }
@@ -5640,11 +5675,13 @@ function submitPinSaldo(){
       return;
     }
 
-    // Cobrar SOLO por los PINes realmente entregados (por si alguno falló)
-    var totalReal = prod.precio * entregados;
+    // Cobrar SOLO por los PINes realmente entregados, con descuento por volumen
+    var calcReal = _calcularTotalPin(idx, entregados);
+    var totalReal = calcReal.total;
     var ord = getNextOrder();
-    addSpend(totalReal, 'PINes API: '+entregados+'x '+prod.nombre+' - Pedido #'+ord);
-    if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, entregados+'x PIN '+prod.diamantes+' diamantes', totalReal, ord);
+    var descNota = calcReal.pct>0 ? (' ('+calcReal.pct+'% desc)') : '';
+    addSpend(totalReal, 'PINes API: '+entregados+'x '+prod.nombre+descNota+' - Pedido #'+ord);
+    if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, entregados+'x PIN '+prod.diamantes+' diamantes'+descNota, totalReal, ord);
 
     // Mostrar la lista
     _mostrarPinesEntregados(pines.map(function(c){ return {codigo:c}; }), prod.diamantes+' diamantes');
