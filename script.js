@@ -5376,7 +5376,7 @@ function confirmarDiamCompra(){
 
   // Compra normal (ilimitados / 1vez): pedido manual
   var ord=getNextOrder();
-  addSpend(p.precio, 'Diamantes '+p.tipo+': '+p.diamantes+' - ID:'+ffId+' - Pedido #'+ord);
+  addSpend(p.precio, p.diamantes+' Diamantes ('+p.tipo+') - ID:'+ffId+' - Pedido #'+ord);
   registrarPedido(p.nombre, p.diamantes, 'diamantes', ffId, p.precio, 0);
   if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, p.nombre+' - ID:'+ffId, p.precio, ord);
   showToast('\u2705 Pedido #'+ord+' realizado! Te lo acreditamos pronto.', 3500);
@@ -5408,7 +5408,7 @@ function _procesarRecargaAutomatica(p, ffId){
 
     // Paso 2: cobrar el saldo AHORA (antes de recargar)
     var ord=getNextOrder();
-    addSpend(p.precio, 'Recarga AUTO: '+p.nombre+' - ID:'+ffId+' ('+nombre+') - Pedido #'+ord);
+    addSpend(p.precio, p.diamantes+' Diamantes (Recarga AUTO '+p.nombre+') - ID:'+ffId+' ('+nombre+') - Pedido #'+ord);
 
     // Paso 3: hacer la recarga automática
     fetch(COMPRAR_RECARGA_URL, {
@@ -5687,7 +5687,10 @@ function submitPinSaldo(){
     var totalReal = calcReal.total;
     var ord = getNextOrder();
     var descNota = calcReal.pct>0 ? (' ('+calcReal.pct+'% desc)') : '';
-    addSpend(totalReal, 'PINes API: '+entregados+'x '+prod.nombre+descNota+' - Pedido #'+ord);
+    // Total de diamantes = cantidad x diamantes por PIN (va PRIMERO para que el ranking lo cuente bien)
+    var diamPorPin = parseInt(String(prod.diamantes).replace(/,/g,'')) || 0;
+    var totalDiam = diamPorPin * entregados;
+    addSpend(totalReal, totalDiam+' Diamantes en PINes ('+entregados+'x '+prod.nombre+')'+descNota+' - Pedido #'+ord);
     if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, entregados+'x PIN '+prod.diamantes+' diamantes'+descNota, totalReal, ord);
 
     // Mostrar la lista
