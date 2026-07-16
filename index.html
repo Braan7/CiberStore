@@ -2113,9 +2113,16 @@ document.addEventListener('keydown',function(e){
         <div style="border-top:1px solid rgba(255,204,0,.15);padding-top:1rem">
           <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem">Comprar con saldo</div>
           <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Elige tu PIN</label>
-          <select id="pin-plan" style="width:100%;background:#1a1408;border:1px solid rgba(255,204,0,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Poppins,sans-serif;font-size:.88rem;margin-bottom:.65rem;box-sizing:border-box">
+          <select id="pin-plan" onchange="_updatePinTotal()" style="width:100%;background:#1a1408;border:1px solid rgba(255,204,0,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Poppins,sans-serif;font-size:.88rem;margin-bottom:.65rem;box-sizing:border-box">
             <option value="">Cargando...</option>
           </select>
+          <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Cantidad</label>
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.65rem">
+            <button onclick="_cambiarCantPin(-1)" style="width:38px;height:38px;background:rgba(255,204,0,.1);border:1px solid rgba(255,204,0,.25);color:#ffcc00;border-radius:9px;font-size:1.2rem;font-weight:700;cursor:pointer">&minus;</button>
+            <input id="pin-cantidad" type="number" value="1" min="1" onchange="_updatePinTotal()" style="flex:1;text-align:center;background:#1a1408;border:1px solid rgba(255,204,0,.25);color:#fff;border-radius:9px;padding:.6rem;font-family:Oxanium;font-weight:700;font-size:1rem;box-sizing:border-box"/>
+            <button onclick="_cambiarCantPin(1)" style="width:38px;height:38px;background:rgba(255,204,0,.1);border:1px solid rgba(255,204,0,.25);color:#ffcc00;border-radius:9px;font-size:1.2rem;font-weight:700;cursor:pointer">+</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;background:rgba(255,204,0,.06);border:1px solid rgba(255,204,0,.18);border-radius:8px;padding:.45rem .85rem;margin-bottom:.5rem"><span style="font-size:.72rem;color:var(--muted)">Total a pagar</span><span id="pin-total-val" style="font-family:Oxanium;font-weight:700;color:#ffcc00;font-size:.82rem">$0 MX</span></div>
           <div style="display:flex;justify-content:space-between;background:rgba(255,204,0,.06);border:1px solid rgba(255,204,0,.18);border-radius:8px;padding:.45rem .85rem;margin-bottom:.5rem"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span id="pin-saldo-val" style="font-family:Oxanium;font-weight:700;color:#ffcc00;font-size:.82rem">$0 MX</span></div>
           <div id="pin-err" style="display:none;color:#ff6b6b;font-size:.75rem;margin-bottom:.5rem"></div>
           <button onclick="submitPinSaldo()" style="width:100%;padding:.78rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:10px;font-family:Poppins,sans-serif;font-weight:900;font-size:.9rem;cursor:pointer">&#128274; Comprar y recibir PIN</button>

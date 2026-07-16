@@ -4231,6 +4231,7 @@ function loadPines(){
       sel.innerHTML = opts;
     }
     _updatePinSaldo();
+    if(typeof _updatePinTotal==='function') _updatePinTotal();
   }).catch(function(e){
     console.error('[PINES] Error:', e);
     grid.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Pronto más pines disponibles aquí ⏳</div>';
@@ -4243,6 +4244,34 @@ function _updatePinSaldo(){
   ['pin-saldo-val','pin-api-saldo'].forEach(function(id){ var el=document.getElementById(id); if(el) el.textContent=s; });
 }
 
+// Cambiar cantidad con los botones + / -
+function _cambiarCantPin(delta){
+  var inp = document.getElementById('pin-cantidad');
+  if(!inp) return;
+  var v = (parseInt(inp.value)||1) + delta;
+  if(v < 1) v = 1;
+  inp.value = v;
+  _updatePinTotal();
+}
+
+// Actualizar el total según tipo y cantidad, con tope al stock disponible
+function _updatePinTotal(){
+  var val = ((document.getElementById('pin-plan')||{}).value||'');
+  var parts = val.split('|');
+  var precio = parseInt(parts[1])||0;
+  var tipo = parts[0];
+  var inp = document.getElementById('pin-cantidad');
+  var cant = parseInt((inp||{}).value)||1;
+
+  // Tope al stock disponible de ese tipo
+  var disp = _pinesDisponibles.filter(function(p){ return p.tipo===tipo; }).length;
+  if(disp > 0 && cant > disp){ cant = disp; if(inp) inp.value = disp; }
+
+  var total = precio * cant;
+  var el = document.getElementById('pin-total-val');
+  if(el) el.textContent = '$'+total.toLocaleString('es-MX')+' MX';
+}
+
 function submitPinSaldo(){
   if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
   var err = document.getElementById('pin-err');
@@ -4252,42 +4281,81 @@ function submitPinSaldo(){
   var parts = val.split('|');
   var tipo = parts[0];
   var precio = parseInt(parts[1])||0;
+  var cantidad = parseInt((document.getElementById('pin-cantidad')||{}).value)||1;
+  if(cantidad < 1) cantidad = 1;
 
-  if(!tipo || !precio){ showErr('No hay pines en stock por ahora. Prueba los DIAMANTES AUTOMÁTICOS de arriba ⬆️'); return; }
+  if(!tipo || !precio){ showErr('No hay pines en stock por ahora.'); return; }
 
-  var saldo = authSession.saldo||0;
-  if(saldo < precio){ showErr('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MX). Recarga tu cuenta.'); return; }
-  if(err) err.style.display='none';
-
-  // Buscar un PIN disponible de ese tipo
-  var pin = _pinesDisponibles.filter(function(p){ return p.tipo===tipo; })[0];
-  if(!pin){
-    showErr('Ese PIN se agotó. Recarga la página.');
-    loadPines();
+  // Verificar stock disponible de ese tipo
+  var disponibles = _pinesDisponibles.filter(function(p){ return p.tipo===tipo; });
+  if(disponibles.length < cantidad){
+    showErr('Solo hay '+disponibles.length+' pin(es) de ese tipo. Ajusta la cantidad.');
     return;
   }
 
-  // Marcar el PIN como vendido en Supabase (para que nadie más lo reciba)
-  sb.patch('pines', {vendido:true, user_id:authSession.id}, 'id=eq.'+pin.id).then(function(){
-    // Descontar saldo
+  var total = precio * cantidad;
+  var saldo = authSession.saldo||0;
+  if(saldo < total){ showErr('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MX). Necesitas $'+total.toLocaleString('es-MX')+' MX.'); return; }
+  if(err) err.style.display='none';
+
+  // Tomar los N pines a vender
+  var aVender = disponibles.slice(0, cantidad);
+  var ids = aVender.map(function(p){ return p.id; });
+
+  // Marcar todos como vendidos (patch por cada uno)
+  var promesas = ids.map(function(id){
+    return sb.patch('pines', {vendido:true, user_id:authSession.id}, 'id=eq.'+id);
+  });
+
+  Promise.all(promesas).then(function(){
     var ord = getNextOrder();
-    addSpend(precio, 'PIN Free Fire: '+tipo+' - Codigo entregado - Pedido #'+ord);
-    if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, 'PIN '+tipo, precio, ord);
+    addSpend(total, 'PINes Free Fire: '+cantidad+'x '+tipo+' - Pedido #'+ord);
+    if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, cantidad+'x PIN '+tipo, total, ord);
 
-    // Mostrar el PIN al cliente
-    _ultimoPin = pin.codigo;
-    var box = document.getElementById('pin-entregado');
-    var cod = document.getElementById('pin-codigo');
-    if(cod) cod.textContent = pin.codigo;
-    if(box){ box.style.display='block'; box.scrollIntoView({behavior:'smooth',block:'center'}); }
+    // Mostrar la lista de pines entregados
+    _mostrarPinesEntregados(aVender, tipo);
 
-    showToast('✓ PIN entregado!', 3000);
-    // Refrescar stock
+    showToast('\u2713 '+cantidad+' PIN(es) entregado(s)!', 3000);
     setTimeout(loadPines, 500);
   }).catch(function(e){
     console.error('[PINES] Error al vender:', e);
-    showErr('Hubo un error al procesar. Contacta al admin por WhatsApp (no se te cobró).');
+    showErr('Hubo un error al procesar. Contacta al admin (no se te cobro).');
   });
+}
+
+// Muestra los pines comprados en lista, cada uno con botón de copiar
+function _mostrarPinesEntregados(pines, tipo){
+  var box = document.getElementById('pin-entregado');
+  if(!box) return;
+
+  // Guardar todos los códigos para el botón "copiar todos"
+  _ultimoPin = pines.map(function(p){ return p.codigo; }).join('\n');
+
+  var lista = '';
+  pines.forEach(function(p, i){
+    lista += '<div style="display:flex;align-items:center;gap:.5rem;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.25);border-radius:10px;padding:.7rem .85rem;margin-bottom:.5rem">'
+      + '<div style="flex:1;min-width:0"><div style="font-size:.62rem;color:var(--muted);text-transform:uppercase">PIN '+(i+1)+'</div>'
+      + '<div id="pincode-'+i+'" style="font-family:Oxanium;font-weight:700;font-size:.92rem;color:#fff;word-break:break-all">'+p.codigo+'</div></div>'
+      + '<button onclick="_copiarUnPin(\''+String(p.codigo).replace(/'/g,"") +'\',this)" style="flex-shrink:0;background:rgba(0,230,118,.15);border:1px solid rgba(0,230,118,.4);color:#25d366;border-radius:8px;padding:.5rem .8rem;font-family:Poppins;font-weight:700;font-size:.72rem;cursor:pointer">Copiar</button>'
+      + '</div>';
+  });
+
+  box.innerHTML = '<div style="font-size:1.8rem;margin-bottom:.4rem;text-align:center">\u2705</div>'
+    + '<div style="font-family:Oxanium;font-weight:800;font-size:1rem;color:#25d366;text-align:center;margin-bottom:.25rem">'+pines.length+' PIN(es) de '+tipo+'</div>'
+    + '<div style="font-size:.72rem;color:var(--muted);text-align:center;margin-bottom:1rem">Copia cada uno y canjealo en redeempins.com</div>'
+    + lista
+    + '<button onclick="copiarPin()" style="width:100%;margin-top:.5rem;padding:.7rem;background:rgba(0,230,118,.12);border:1px solid rgba(0,230,118,.3);color:#25d366;border-radius:9px;font-family:Poppins;font-weight:700;font-size:.8rem;cursor:pointer">\u{1F4CB} Copiar todos</button>';
+
+  box.style.display = 'block';
+  box.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+// Copiar un PIN individual
+function _copiarUnPin(codigo, btn){
+  function ok(){ if(btn){ var t=btn.textContent; btn.textContent='\u2713 Copiado'; setTimeout(function(){ btn.textContent=t; },1500); } }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(codigo).then(ok).catch(function(){ _copiarFallback(codigo); ok(); });
+  } else { _copiarFallback(codigo); ok(); }
 }
 
 function copiarPin(){
