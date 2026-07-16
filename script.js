@@ -5629,22 +5629,31 @@ function submitPinSaldo(){
       return;
     }
 
-    // Extraer los PINes (puede venir varios en un array)
-    var pines = _extraerPines(res, cant);
-    if(!pines.length){
+    // El portero ahora devuelve res.pines (array) y res.entregados
+    var pines = Array.isArray(res.pines) ? res.pines : _extraerPines(res, cant);
+    var entregados = pines.length;
+
+    if(!entregados){
       showErr('No se recibieron los codigos. Contacta al admin con tu pedido.');
       console.error('[PIN MAYOREO] respuesta:', JSON.stringify(res));
       return;
     }
 
-    // Cobrar saldo
+    // Cobrar SOLO por los PINes realmente entregados (por si alguno falló)
+    var totalReal = prod.precio * entregados;
     var ord = getNextOrder();
-    addSpend(total, 'PINes API: '+cant+'x '+prod.nombre+' - Pedido #'+ord);
-    if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, cant+'x PIN '+prod.diamantes+' diamantes', total, ord);
+    addSpend(totalReal, 'PINes API: '+entregados+'x '+prod.nombre+' - Pedido #'+ord);
+    if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, entregados+'x PIN '+prod.diamantes+' diamantes', totalReal, ord);
 
     // Mostrar la lista
     _mostrarPinesEntregados(pines.map(function(c){ return {codigo:c}; }), prod.diamantes+' diamantes');
-    showToast('\u2713 '+pines.length+' PIN(es) generado(s)!', 3000);
+
+    // Aviso si entregó menos de los pedidos
+    if(entregados < cant){
+      showToast('\u26A0 Se entregaron '+entregados+' de '+cant+' (se cobro solo lo entregado)', 4500);
+    } else {
+      showToast('\u2713 '+entregados+' PIN(es) generado(s)!', 3000);
+    }
   }).catch(function(e){
     if(btn){ btn.disabled=false; btn.innerHTML='\uD83D\uDD12 Comprar y recibir PIN'; }
     console.error('[PIN MAYOREO] Error:', e);
@@ -5652,24 +5661,38 @@ function submitPinSaldo(){
   });
 }
 
-// Extraer múltiples PINes de la respuesta
+// Extraer múltiples PINes de la respuesta (busca en todas las estructuras posibles)
 function _extraerPines(res, esperados){
   var fuente = res.ra_response || res.data || res;
   var pines = [];
 
-  // Caso 1: viene un array "pins"
-  var arr = fuente.pins || fuente.codes || (fuente.data && fuente.data.pins);
-  if(Array.isArray(arr)){
-    arr.forEach(function(item){
-      if(typeof item === 'string'){ pines.push(item); }
-      else if(item && typeof item === 'object'){
-        var c = item.key || item.pin || item.code || item.codigo || item.serial;
-        if(c) pines.push(String(c));
-      }
-    });
+  // Buscar arrays de pines en varios lugares posibles
+  var posiblesArrays = [
+    fuente.pins,
+    fuente.codes,
+    fuente.data && fuente.data.pins,
+    fuente.data && fuente.data.codes,
+    fuente.data && fuente.data.data,
+    fuente.api_data && fuente.api_data.pins,
+    fuente.api_data,
+    Array.isArray(fuente.data) ? fuente.data : null,
+    Array.isArray(fuente) ? fuente : null
+  ];
+
+  for(var i=0; i<posiblesArrays.length && !pines.length; i++){
+    var arr = posiblesArrays[i];
+    if(Array.isArray(arr) && arr.length){
+      arr.forEach(function(item){
+        if(typeof item === 'string' && item.trim()){ pines.push(item.trim()); }
+        else if(item && typeof item === 'object'){
+          var c = item.key || item.pin || item.code || item.codigo || item.serial || item.redemption_code || item.voucher;
+          if(c) pines.push(String(c));
+        }
+      });
+    }
   }
 
-  // Caso 2: un solo pin (usar _extraerPin)
+  // Si no encontró array, buscar un solo pin
   if(!pines.length){
     var uno = _extraerPin(fuente);
     if(uno && uno !== 'Ver detalle en Mis Compras') pines.push(uno);
