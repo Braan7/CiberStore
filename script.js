@@ -5625,7 +5625,11 @@ function submitPinSaldo(){
   }).then(function(r){ return r.json(); }).then(function(res){
     if(btn){ btn.disabled=false; btn.innerHTML='\uD83D\uDD12 Comprar y recibir PIN'; }
     if(!res || res.success === false){
-      showErr('Error: '+((res&&res.error)||'no se pudo comprar')+'. No se te cobro.');
+      var det = (res&&res.error) ? res.error : 'no se pudo comprar';
+      // DEBUG temporal: mostrar respuesta completa
+      var extra = res ? JSON.stringify(res).substring(0,400) : 'sin respuesta';
+      showErr('Error: '+det+' | DEBUG: '+extra);
+      console.error('[PIN MAYOREO] Error completo:', JSON.stringify(res));
       return;
     }
 
