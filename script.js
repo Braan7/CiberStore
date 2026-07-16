@@ -4244,85 +4244,6 @@ function _updatePinSaldo(){
   ['pin-saldo-val','pin-api-saldo'].forEach(function(id){ var el=document.getElementById(id); if(el) el.textContent=s; });
 }
 
-// Cambiar cantidad con los botones + / -
-function _cambiarCantPin(delta){
-  var inp = document.getElementById('pin-cantidad');
-  if(!inp) return;
-  var v = (parseInt(inp.value)||1) + delta;
-  if(v < 1) v = 1;
-  inp.value = v;
-  _updatePinTotal();
-}
-
-// Actualizar el total según tipo y cantidad, con tope al stock disponible
-function _updatePinTotal(){
-  var val = ((document.getElementById('pin-plan')||{}).value||'');
-  var parts = val.split('|');
-  var precio = parseInt(parts[1])||0;
-  var tipo = parts[0];
-  var inp = document.getElementById('pin-cantidad');
-  var cant = parseInt((inp||{}).value)||1;
-
-  // Tope al stock disponible de ese tipo
-  var disp = _pinesDisponibles.filter(function(p){ return p.tipo===tipo; }).length;
-  if(disp > 0 && cant > disp){ cant = disp; if(inp) inp.value = disp; }
-
-  var total = precio * cant;
-  var el = document.getElementById('pin-total-val');
-  if(el) el.textContent = '$'+total.toLocaleString('es-MX')+' MX';
-}
-
-function submitPinSaldo(){
-  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
-  var err = document.getElementById('pin-err');
-  function showErr(m){ if(err){err.textContent=m;err.style.display='block';} }
-
-  var val = ((document.getElementById('pin-plan')||{}).value||'');
-  var parts = val.split('|');
-  var tipo = parts[0];
-  var precio = parseInt(parts[1])||0;
-  var cantidad = parseInt((document.getElementById('pin-cantidad')||{}).value)||1;
-  if(cantidad < 1) cantidad = 1;
-
-  if(!tipo || !precio){ showErr('No hay pines en stock por ahora.'); return; }
-
-  // Verificar stock disponible de ese tipo
-  var disponibles = _pinesDisponibles.filter(function(p){ return p.tipo===tipo; });
-  if(disponibles.length < cantidad){
-    showErr('Solo hay '+disponibles.length+' pin(es) de ese tipo. Ajusta la cantidad.');
-    return;
-  }
-
-  var total = precio * cantidad;
-  var saldo = authSession.saldo||0;
-  if(saldo < total){ showErr('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MX). Necesitas $'+total.toLocaleString('es-MX')+' MX.'); return; }
-  if(err) err.style.display='none';
-
-  // Tomar los N pines a vender
-  var aVender = disponibles.slice(0, cantidad);
-  var ids = aVender.map(function(p){ return p.id; });
-
-  // Marcar todos como vendidos (patch por cada uno)
-  var promesas = ids.map(function(id){
-    return sb.patch('pines', {vendido:true, user_id:authSession.id}, 'id=eq.'+id);
-  });
-
-  Promise.all(promesas).then(function(){
-    var ord = getNextOrder();
-    addSpend(total, 'PINes Free Fire: '+cantidad+'x '+tipo+' - Pedido #'+ord);
-    if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, cantidad+'x PIN '+tipo, total, ord);
-
-    // Mostrar la lista de pines entregados
-    _mostrarPinesEntregados(aVender, tipo);
-
-    showToast('\u2713 '+cantidad+' PIN(es) entregado(s)!', 3000);
-    setTimeout(loadPines, 500);
-  }).catch(function(e){
-    console.error('[PINES] Error al vender:', e);
-    showErr('Hubo un error al procesar. Contacta al admin (no se te cobro).');
-  });
-}
-
 // Muestra los pines comprados en lista, cada uno con botón de copiar
 function _mostrarPinesEntregados(pines, tipo){
   var box = document.getElementById('pin-entregado');
@@ -4402,7 +4323,7 @@ function _copiarFallback(texto){
 var _origGoPagePines = goPage;
 goPage = function(id){
   _origGoPagePines(id);
-  if(id === 'pines') setTimeout(function(){ loadPines(); renderPinesAPI(); _updatePinSaldo(); }, 300);
+  if(id === 'pines') setTimeout(function(){ loadPinesMayoreo(); renderPinesAPI(); _updatePinSaldo(); }, 300);
 };
 
 
@@ -5624,4 +5545,135 @@ function verProductosRA(){
   }).catch(function(err){
     cont.innerHTML = '<div style="color:#ff6b6b">Error de conexion: '+err+'<br>Revisa que la funcion comprar-recarga este montada.</div>';
   });
+}
+
+
+// ═══════════ COMPRA DE PINES AL POR MAYOR (API Recargas América) ═══════════
+// Llena el selector de la sección "PINES POR STOCK" con los productos de API
+function loadPinesMayoreo(){
+  var sel = document.getElementById('pin-plan');
+  var grid = document.getElementById('pines-grid');
+  if(!sel) return;
+
+  // Llenar el selector con los productos de PINES_API
+  var opts = '';
+  PINES_API.forEach(function(p, i){
+    opts += '<option value="'+i+'">'+p.diamantes+' diamantes — $'+p.precio+' MX c/u</option>';
+  });
+  sel.innerHTML = opts;
+
+  // Mensaje en el grid
+  if(grid){
+    grid.innerHTML = '<div style="text-align:center;padding:1rem;color:#25d366;font-size:.82rem">\u26A1 Compra al por mayor: elige producto y cantidad (hasta 10 por compra)</div>';
+  }
+  _updatePinTotal();
+}
+
+// Total según producto seleccionado y cantidad
+function _updatePinTotal(){
+  var idx = parseInt((document.getElementById('pin-plan')||{}).value);
+  var cant = parseInt((document.getElementById('pin-cantidad')||{}).value)||1;
+  if(cant < 1) cant = 1;
+  if(cant > 10){ cant = 10; var inp=document.getElementById('pin-cantidad'); if(inp) inp.value=10; }
+
+  var el = document.getElementById('pin-total-val');
+  if(isNaN(idx) || !PINES_API[idx]){ if(el) el.textContent='$0 MX'; return; }
+  var total = PINES_API[idx].precio * cant;
+  if(el) el.textContent = '$'+total.toLocaleString('es-MX')+' MX';
+}
+
+function _cambiarCantPin(delta){
+  var inp = document.getElementById('pin-cantidad');
+  if(!inp) return;
+  var v = (parseInt(inp.value)||1) + delta;
+  if(v < 1) v = 1;
+  if(v > 10) v = 10;
+  inp.value = v;
+  _updatePinTotal();
+}
+
+// Comprar N pines por API
+function submitPinSaldo(){
+  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
+  var err = document.getElementById('pin-err');
+  function showErr(m){ if(err){err.textContent=m;err.style.display='block';} }
+
+  var idx = parseInt((document.getElementById('pin-plan')||{}).value);
+  var cant = parseInt((document.getElementById('pin-cantidad')||{}).value)||1;
+  if(cant < 1) cant = 1;
+  if(cant > 10) cant = 10;
+
+  if(isNaN(idx) || !PINES_API[idx]){ showErr('Elige un producto.'); return; }
+  var prod = PINES_API[idx];
+  var total = prod.precio * cant;
+  var saldo = authSession.saldo||0;
+
+  if(saldo < total){ showErr('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MX). Necesitas $'+total.toLocaleString('es-MX')+' MX.'); return; }
+  if(err) err.style.display='none';
+
+  var btn = event && event.target ? event.target : null;
+  if(btn){ btn.disabled=true; btn.textContent='Generando '+cant+' PIN(es)...'; }
+  showToast('Generando '+cant+' PIN(es)...', 3000);
+
+  // Llamar al portero con quantity = cant
+  var _headers = { 'Content-Type': 'application/json' };
+  if(SUPABASE_ANON){ _headers['Authorization']='Bearer '+SUPABASE_ANON; _headers['apikey']=SUPABASE_ANON; }
+
+  fetch(PORTERO_URL, {
+    method:'POST', headers:_headers,
+    body: JSON.stringify({ product_id: prod.product_id, quantity: cant })
+  }).then(function(r){ return r.json(); }).then(function(res){
+    if(btn){ btn.disabled=false; btn.innerHTML='\uD83D\uDD12 Comprar y recibir PIN'; }
+    if(!res || res.success === false){
+      showErr('Error: '+((res&&res.error)||'no se pudo comprar')+'. No se te cobro.');
+      return;
+    }
+
+    // Extraer los PINes (puede venir varios en un array)
+    var pines = _extraerPines(res, cant);
+    if(!pines.length){
+      showErr('No se recibieron los codigos. Contacta al admin con tu pedido.');
+      console.error('[PIN MAYOREO] respuesta:', JSON.stringify(res));
+      return;
+    }
+
+    // Cobrar saldo
+    var ord = getNextOrder();
+    addSpend(total, 'PINes API: '+cant+'x '+prod.nombre+' - Pedido #'+ord);
+    if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, cant+'x PIN '+prod.diamantes+' diamantes', total, ord);
+
+    // Mostrar la lista
+    _mostrarPinesEntregados(pines.map(function(c){ return {codigo:c}; }), prod.diamantes+' diamantes');
+    showToast('\u2713 '+pines.length+' PIN(es) generado(s)!', 3000);
+  }).catch(function(e){
+    if(btn){ btn.disabled=false; btn.innerHTML='\uD83D\uDD12 Comprar y recibir PIN'; }
+    console.error('[PIN MAYOREO] Error:', e);
+    showErr('Error de conexion. No se te cobro. Intenta de nuevo.');
+  });
+}
+
+// Extraer múltiples PINes de la respuesta
+function _extraerPines(res, esperados){
+  var fuente = res.ra_response || res.data || res;
+  var pines = [];
+
+  // Caso 1: viene un array "pins"
+  var arr = fuente.pins || fuente.codes || (fuente.data && fuente.data.pins);
+  if(Array.isArray(arr)){
+    arr.forEach(function(item){
+      if(typeof item === 'string'){ pines.push(item); }
+      else if(item && typeof item === 'object'){
+        var c = item.key || item.pin || item.code || item.codigo || item.serial;
+        if(c) pines.push(String(c));
+      }
+    });
+  }
+
+  // Caso 2: un solo pin (usar _extraerPin)
+  if(!pines.length){
+    var uno = _extraerPin(fuente);
+    if(uno && uno !== 'Ver detalle en Mis Compras') pines.push(uno);
+  }
+
+  return pines;
 }
