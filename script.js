@@ -5350,8 +5350,14 @@ function _actualizarDiamBoton(){
   }
 }
 
+var _comprandoDiam = false; // candado anti-doble-compra
+
 function confirmarDiamCompra(){
   if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
+
+  // Evitar doble clic / doble pedido
+  if(_comprandoDiam){ return; }
+
   var p=_diamSeleccionado;
   if(!p) return;
   var ffId=((document.getElementById('diam-ffid')||{}).value||'').trim();
@@ -5374,17 +5380,67 @@ function confirmarDiamCompra(){
     return;
   }
 
+  // Activar candado y deshabilitar el botón
+  _comprandoDiam = true;
+  var btn = document.getElementById('diam-btn');
+  if(btn){ btn.className='ddet-btn off'; btn.innerHTML='Procesando...'; }
+
   // Compra normal (ilimitados / 1vez): pedido manual
   var ord=getNextOrder();
   addSpend(p.precio, p.diamantes+' Diamantes ('+p.tipo+') - ID:'+ffId+' - Pedido #'+ord);
   registrarPedido(p.nombre, p.diamantes, 'diamantes', ffId, p.precio, 0);
   if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, p.nombre+' - ID:'+ffId, p.precio, ord);
-  showToast('\u2705 Pedido #'+ord+' realizado! Te lo acreditamos pronto.', 3500);
-  cerrarDiamDetalle();
+  _mostrarReciboProceso(p, ffId, ord);
+  showToast('\u2705 Pedido #'+ord+' realizado!', 3000);
+
+  // Liberar el candado después de un momento
+  setTimeout(function(){ _comprandoDiam = false; }, 3000);
+}
+
+// ═══ Recibo "en proceso" con barra para compras normales ═══
+function _mostrarReciboProceso(p, ffId, ord){
+  var det = document.getElementById('diam-detalle');
+  if(!det) return;
+
+  var ahora = new Date();
+  var fecha = ahora.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' });
+  var hora = ahora.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' });
+
+  det.innerHTML =
+    '<div style="background:linear-gradient(160deg,rgba(255,180,60,.08),rgba(255,255,255,.02));border:2px solid rgba(255,180,60,.35);border-radius:18px;padding:1.75rem 1.35rem;text-align:center;max-width:420px;margin:0 auto">'
+    + '<div style="font-size:2.8rem;margin-bottom:.5rem">\u23F3</div>'
+    + '<div style="font-family:Oxanium;font-weight:900;font-size:1.25rem;color:#ffb84d;margin-bottom:.35rem;letter-spacing:.5px">RECARGA EN PROCESO</div>'
+    + '<div style="font-size:.8rem;color:var(--muted);margin-bottom:1.35rem">Tu pedido se esta procesando, te lo acreditamos pronto</div>'
+
+    // Barra de progreso animada
+    + '<div style="background:rgba(0,0,0,.25);border-radius:99px;height:10px;overflow:hidden;margin-bottom:1.5rem">'
+    +   '<div id="recibo-barra" style="height:100%;width:15%;border-radius:99px;background:linear-gradient(90deg,#ffb84d,#ff9900,#ffb84d);background-size:200% 100%;box-shadow:0 0 12px rgba(255,180,60,.5);transition:width .8s ease"></div>'
+    + '</div>'
+
+    + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
+    +   _filaRecibo('\uD83D\uDCCB Pedido', '#'+ord)
+    +   _filaRecibo('\uD83D\uDC8E Cantidad', p.nombre)
+    +   _filaRecibo('\uD83C\uDFAE ID Free Fire', ffId)
+    +   _filaRecibo('\uD83D\uDCB5 Precio', fmt(p.precio))
+    +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' \u00B7 \uD83D\uDD52 ' + hora, true)
+    + '</div>'
+
+    + '<button onclick="cerrarDiamDetalle()" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#22d3ee);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Volver al catalogo</button>'
+    + '</div>';
+
+  det.style.display = '';
+  document.getElementById('diam-catalogo').style.display = 'none';
+  det.scrollIntoView({ behavior:'smooth', block:'center' });
+
+  // Animar la barra (avanza gradualmente)
+  setTimeout(function(){ var b=document.getElementById('recibo-barra'); if(b) b.style.width='55%'; }, 400);
+  setTimeout(function(){ var b=document.getElementById('recibo-barra'); if(b) b.style.width='80%'; }, 1500);
 }
 
 // ═══ Procesar recarga automática: valida ID → cobra saldo → recarga ═══
 function _procesarRecargaAutomatica(p, ffId){
+  if(_comprandoDiam){ return; }
+  _comprandoDiam = true;
   var btn = document.getElementById('diam-btn');
   var msg = document.getElementById('diam-msg');
   if(btn){ btn.className='ddet-btn off'; btn.innerHTML='Validando ID...'; }
@@ -5398,6 +5454,7 @@ function _procesarRecargaAutomatica(p, ffId){
       if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
       if(msg){ msg.className='ddet-msg err'; msg.style.fontSize='.65rem'; msg.textContent='DEBUG VALIDAR: '+JSON.stringify(val).substring(0,300); }
       console.error('[RECARGA] validacion fallo:', JSON.stringify(val));
+      _comprandoDiam = false;
       return;
     }
 
@@ -5421,6 +5478,7 @@ function _procesarRecargaAutomatica(p, ffId){
         _mostrarReciboRecarga(p, ffId, nombre, res.status);
         var txt = res.status==='COMPLETED' ? '\u2705 Recarga COMPLETADA!' : '\u23F3 Recarga en proceso...';
         showToast(txt, 3000);
+        _comprandoDiam = false;
       } else {
         // NO reembolsar automatico (la recarga pudo haberse hecho igual).
         // Dejar el cobro y registrar el pedido para verificacion manual.
@@ -5429,6 +5487,7 @@ function _procesarRecargaAutomatica(p, ffId){
         if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
         if(msg){ msg.className='ddet-msg'; msg.style.color='#ffb84d'; msg.style.fontSize='.72rem'; msg.innerHTML='\u23F3 Tu recarga se esta verificando. Si no llega en unos minutos, contacta al admin con tu ID.'; }
         console.error('[RECARGA] Sin confirmar (no reembolsado):', JSON.stringify(res));
+        _comprandoDiam = false;
         setTimeout(cerrarDiamDetalle, 4000);
       }
     }).catch(function(err){
@@ -5438,6 +5497,7 @@ function _procesarRecargaAutomatica(p, ffId){
       if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
       if(msg){ msg.className='ddet-msg'; msg.style.color='#ffb84d'; msg.style.fontSize='.72rem'; msg.innerHTML='\u23F3 Tu recarga se esta verificando. Si no llega, contacta al admin.'; }
       console.error('[RECARGA] catch compra (no reembolsado):', err);
+      _comprandoDiam = false;
       setTimeout(cerrarDiamDetalle, 4000);
     });
 
@@ -5445,6 +5505,7 @@ function _procesarRecargaAutomatica(p, ffId){
     if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
     if(msg){ msg.className='ddet-msg err'; msg.style.fontSize='.65rem'; msg.textContent='DEBUG CATCH VALIDAR: '+(err&&err.message?err.message:err); }
     console.error('[RECARGA] catch validar:', err);
+    _comprandoDiam = false;
   });
 }
 
@@ -5634,8 +5695,11 @@ function _cambiarCantPin(delta){
 }
 
 // Comprar N pines por API
+var _comprandoPin = false; // candado anti-doble-compra de pines
+
 function submitPinSaldo(){
   if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
+  if(_comprandoPin){ return; }
   var err = document.getElementById('pin-err');
   function showErr(m){ if(err){err.textContent=m;err.style.display='block';} }
 
@@ -5653,6 +5717,7 @@ function submitPinSaldo(){
   if(saldo < total){ showErr('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MX). Necesitas $'+total.toLocaleString('es-MX')+' MX.'); return; }
   if(err) err.style.display='none';
 
+  _comprandoPin = true;
   var btn = event && event.target ? event.target : null;
   if(btn){ btn.disabled=true; btn.textContent='Generando '+cant+' PIN(es)...'; }
   showToast('Generando '+cant+' PIN(es)...', 3000);
@@ -5665,6 +5730,7 @@ function submitPinSaldo(){
     method:'POST', headers:_headers,
     body: JSON.stringify({ product_id: prod.product_id, quantity: cant })
   }).then(function(r){ return r.json(); }).then(function(res){
+    _comprandoPin = false;
     if(btn){ btn.disabled=false; btn.innerHTML='\uD83D\uDD12 Comprar y recibir PIN'; }
     if(!res || res.success === false){
       showErr('Error: '+((res&&res.error)||'no se pudo comprar')+'. No se te cobro.');
@@ -5703,6 +5769,7 @@ function submitPinSaldo(){
       showToast('\u2713 '+entregados+' PIN(es) generado(s)!', 3000);
     }
   }).catch(function(e){
+    _comprandoPin = false;
     if(btn){ btn.disabled=false; btn.innerHTML='\uD83D\uDD12 Comprar y recibir PIN'; }
     console.error('[PIN MAYOREO] Error:', e);
     showErr('Error de conexion. No se te cobro. Intenta de nuevo.');
