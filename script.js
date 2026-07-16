@@ -5625,11 +5625,8 @@ function submitPinSaldo(){
   }).then(function(r){ return r.json(); }).then(function(res){
     if(btn){ btn.disabled=false; btn.innerHTML='\uD83D\uDD12 Comprar y recibir PIN'; }
     if(!res || res.success === false){
-      var det = (res&&res.error) ? res.error : 'no se pudo comprar';
-      // DEBUG temporal: mostrar respuesta completa
-      var extra = res ? JSON.stringify(res).substring(0,400) : 'sin respuesta';
-      showErr('Error: '+det+' | DEBUG: '+extra);
-      console.error('[PIN MAYOREO] Error completo:', JSON.stringify(res));
+      showErr('Error: '+((res&&res.error)||'no se pudo comprar')+'. No se te cobro.');
+      console.error('[PIN MAYOREO] Error:', JSON.stringify(res));
       return;
     }
 
@@ -5674,10 +5671,11 @@ function _extraerPines(res, esperados){
   var posiblesArrays = [
     fuente.pins,
     fuente.codes,
+    fuente.api_data && fuente.api_data.pins,
+    fuente.data && fuente.data.api_data && fuente.data.api_data.pins,
     fuente.data && fuente.data.pins,
     fuente.data && fuente.data.codes,
     fuente.data && fuente.data.data,
-    fuente.api_data && fuente.api_data.pins,
     fuente.api_data,
     Array.isArray(fuente.data) ? fuente.data : null,
     Array.isArray(fuente) ? fuente : null
