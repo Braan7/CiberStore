@@ -657,6 +657,7 @@ function goPage(id){
   closeSB();
   window.scrollTo(0,0);
   if(id==='diamantes') setTimeout(function(){ setDiamTipo('bonus'); }, 100);
+  if(id==='codigos') setTimeout(_updateScarSaldo, 100);
   if(id==='likes') renderLikes();
   if(id==='membresia'){renderMems();renderWallet();}
   if(id==='perfil') renderPerfil();
@@ -5860,4 +5861,82 @@ function _filaRecibo(label, valor, ultimo){
     + '<span style="font-size:.78rem;color:var(--muted)">'+label+'</span>'
     + '<span style="font-size:.82rem;color:#fff;font-weight:600;text-align:right;max-width:60%">'+valor+'</span>'
     + '</div>';
+}
+
+
+// ═══════════ SCAR EVOLUTIVA NIVEL 7 ═══════════
+var SCAR_PRECIO = 1500; // MXN
+var _comprandoScar = false;
+
+function _updateScarSaldo(){
+  var el = document.getElementById('scar-saldo');
+  var precioEl = document.getElementById('scar-precio');
+  if(el) el.textContent = authSession ? fmt(authSession.saldo||0) : fmt(0);
+  if(precioEl) precioEl.textContent = fmt(SCAR_PRECIO);
+}
+
+function comprarScar(){
+  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
+  if(_comprandoScar){ return; }
+
+  var err = document.getElementById('scar-err');
+  function showErr(m){ if(err){ err.textContent=m; err.style.display='block'; } }
+
+  var ffId = ((document.getElementById('scar-id')||{}).value||'').trim();
+  var user = ((document.getElementById('scar-user')||{}).value||'').trim();
+  var wa = ((document.getElementById('scar-wa')||{}).value||'').trim();
+
+  if(!ffId){ showErr('Escribe tu ID de Free Fire.'); return; }
+  if(!user){ showErr('Escribe tu nombre de usuario.'); return; }
+  if(!wa){ showErr('Escribe tu WhatsApp.'); return; }
+
+  var saldo = authSession.saldo||0;
+  if(saldo < SCAR_PRECIO){ showErr('Saldo insuficiente ('+fmt(saldo)+'). Necesitas '+fmt(SCAR_PRECIO)+'. Recarga tu cuenta.'); return; }
+  if(err) err.style.display='none';
+
+  _comprandoScar = true;
+  var btn = event && event.target ? event.target : null;
+  if(btn){ btn.disabled=true; btn.innerHTML='Procesando...'; }
+
+  var ord = getNextOrder();
+  addSpend(SCAR_PRECIO, 'SCAR Evolutiva Nivel 7 - ID:'+ffId+' - User:'+user+' - WA:'+wa+' - Pedido #'+ord);
+  registrarPedido('SCAR Evolutiva Nivel 7 (2-3 semanas)', 0, 'skin', ffId, SCAR_PRECIO, 0);
+  if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, 'SCAR EVOLUTIVA N7 - ID:'+ffId+' - User:'+user+' - WA:'+wa, SCAR_PRECIO, ord);
+
+  _mostrarReciboScar(ffId, user, ord);
+  showToast('\u2705 Pedido #'+ord+' realizado!', 3000);
+
+  setTimeout(function(){ _comprandoScar = false; if(btn){ btn.disabled=false; btn.innerHTML='\uD83D\uDC8E COMPRAR CON SALDO'; } }, 3000);
+}
+
+// Recibo de la compra de SCAR
+function _mostrarReciboScar(ffId, user, ord){
+  var ahora = new Date();
+  var fecha = ahora.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' });
+  var hora = ahora.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' });
+
+  var cont = document.getElementById('page-codigos');
+  if(!cont) return;
+  var wrap = cont.querySelector('div[style*="max-width:620px"]');
+  if(!wrap) return;
+
+  wrap.innerHTML =
+    '<div style="background:linear-gradient(160deg,rgba(255,180,60,.08),rgba(255,255,255,.02));border:2px solid rgba(255,180,60,.35);border-radius:18px;padding:2rem 1.35rem;text-align:center;max-width:440px;margin:2rem auto">'
+    + '<div style="font-size:3rem;margin-bottom:.5rem">\u2705</div>'
+    + '<div style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#25d366;margin-bottom:.35rem;letter-spacing:.5px">PEDIDO CONFIRMADO</div>'
+    + '<div style="font-size:.82rem;color:var(--muted);margin-bottom:1.5rem">Tu SCAR Evolutiva esta en proceso</div>'
+    + '<div style="background:rgba(0,0,0,.25);border-radius:99px;height:10px;overflow:hidden;margin-bottom:1.5rem"><div style="height:100%;width:25%;border-radius:99px;background:linear-gradient(90deg,#ffb84d,#ff9900);box-shadow:0 0 12px rgba(255,180,60,.5)"></div></div>'
+    + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
+    +   _filaRecibo('\uD83D\uDCCB Pedido', '#'+ord)
+    +   _filaRecibo('\uD83D\uDD2B Producto', 'SCAR Evolutiva Nivel 7')
+    +   _filaRecibo('\uD83C\uDFAE ID', ffId)
+    +   _filaRecibo('\uD83D\uDC64 Usuario', user)
+    +   _filaRecibo('\uD83D\uDCB5 Precio', fmt(SCAR_PRECIO))
+    +   _filaRecibo('\u23F3 Entrega', '2 a 3 semanas')
+    +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' \u00B7 ' + hora, true)
+    + '</div>'
+    + '<div style="font-size:.75rem;color:#ffb84d;margin-top:1rem;line-height:1.5">Te contactaremos por WhatsApp. La skin llega en 2-3 semanas al correo de tu cuenta.</div>'
+    + '<button onclick="goPage(\'home\')" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#22d3ee);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Volver al inicio</button>'
+    + '</div>';
+  wrap.scrollIntoView({ behavior:'smooth', block:'start' });
 }
