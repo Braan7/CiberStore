@@ -35,19 +35,45 @@ function addSpend(amount, description){
   }
 
   var userId = authSession.id;
-  var saldoActual = Number(authSession.saldo) || 0;
+  _addSpendBusy = true;
 
-  if(saldoActual < amount){
-    showToast('Saldo insuficiente. Tienes $'+Math.round(saldoActual).toLocaleString('es-MX')+' MX');
-    return;
+  // ⚠️ CLAVE: leer el saldo REAL de Supabase justo antes de descontar
+  // (evita pisar ajustes manuales del panel admin o descuentos dobles)
+  function procederConSaldo(saldoReal){
+    var saldoActual = Number(saldoReal) || 0;
+
+    if(saldoActual < amount){
+      authSession.saldo = saldoActual;
+      _refreshSaldoUI(saldoActual);
+      showToast('Saldo insuficiente. Tienes $'+Math.round(saldoActual).toLocaleString('es-MX')+' MX');
+      _addSpendBusy = false;
+      return;
+    }
+
+    var newSaldo = saldoActual - amount;
+    authSession.saldo = newSaldo;
+    _refreshSaldoUI(newSaldo);
+    _guardarNuevoSaldo(userId, newSaldo, amount, description, saldoActual);
   }
 
-  _addSpendBusy = true;
-  var newSaldo = saldoActual - amount;
+  // Intentar leer saldo fresco de Supabase; si falla, usar el de memoria
+  if(typeof sb !== 'undefined' && sb.get){
+    sb.get('profiles', 'select=saldo&id=eq.\"'+userId+'\"').then(function(r){
+      if(r && r[0] && r[0].saldo !== undefined && r[0].saldo !== null){
+        procederConSaldo(r[0].saldo);
+      } else {
+        procederConSaldo(Number(authSession.saldo) || 0);
+      }
+    }).catch(function(){
+      procederConSaldo(Number(authSession.saldo) || 0);
+    });
+  } else {
+    procederConSaldo(Number(authSession.saldo) || 0);
+  }
+}
 
-  // Descontar en sesion y UI de inmediato
-  authSession.saldo = newSaldo;
-  _refreshSaldoUI(newSaldo);
+// Guarda el nuevo saldo en Supabase + registra el movimiento
+function _guardarNuevoSaldo(userId, newSaldo, amount, description, saldoActual){
 
   // Registrar movimiento con tipo 'compra' (para que los rankings lo cuenten)
   function registrarMov(){
