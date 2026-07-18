@@ -5236,14 +5236,25 @@ var _diamSeleccionado = null;
 // ═══════════ RECARGAS AUTOMÁTICAS (Recargas América type=recharge) ═══════════
 // package_id = el ID de Recargas América | precio = costo USD × 20 (redondeado)
 var RECARGAS_AUTO = [
-  { package_id:340, nombre:'100 Diamantes + 10 Bono',    diamantes:110,  costoUSD:0.79,  precio:16   },
-  { package_id:343, nombre:'310 Diamantes + 31 Bono',    diamantes:341,  costoUSD:2.65,  precio:55   },
-  { package_id:345, nombre:'520 Diamantes + 52 Bono',    diamantes:572,  costoUSD:3.71,  precio:85   },
-  { package_id:341, nombre:'1.060 Diamantes + 106 Bono', diamantes:1166, costoUSD:6.90,  precio:160  },
-  { package_id:342, nombre:'2.180 Diamantes + 218 Bono', diamantes:2398, costoUSD:13.70, precio:280  },
-  { package_id:344, nombre:'5.600 Diamantes + 560 Bono', diamantes:6160, costoUSD:34.87, precio:700  },
+  { package_id:null, nombre:'Pase Booyah', diamantes:0, costoUSD:0, precio:40, manual:true, esPase:true },
+  { package_id:340, nombre:'100 Diamantes + 10 Bono',    diamantes:110,  costoUSD:0.79,  precio:16,  img:'img/diam-100.png'  },
+  { package_id:343, nombre:'310 Diamantes + 31 Bono',    diamantes:341,  costoUSD:2.65,  precio:55,  img:'img/diam-310.png'  },
+  { package_id:345, nombre:'520 Diamantes + 52 Bono',    diamantes:572,  costoUSD:3.71,  precio:85,  img:'img/diam-520.png'  },
+  { package_id:341, nombre:'1.060 Diamantes + 106 Bono', diamantes:1166, costoUSD:6.90,  precio:160, img:'img/diam-1060.png' },
+  { package_id:342, nombre:'2.180 Diamantes + 218 Bono', diamantes:2398, costoUSD:13.70, precio:280, img:'img/diam-2180.png' },
+  { package_id:344, nombre:'5.600 Diamantes + 560 Bono', diamantes:6160, costoUSD:34.87, precio:700, img:'img/diam-5600.png' },
   { package_id:null, nombre:'11.200 Diamantes + 1120 Bono', diamantes:12320, costoUSD:69.74, precio:1390, manual:true }
 ];
+
+
+// Devuelve la imagen del diamante según la cantidad total
+function _imgPorDiamantes(total){
+  var mapa = {
+    110:'img/diam-100.png', 341:'img/diam-310.png', 572:'img/diam-520.png',
+    1166:'img/diam-1060.png', 2398:'img/diam-2180.png', 6160:'img/diam-5600.png'
+  };
+  return mapa[total] || null;
+}
 
 function _getDiamProductos(tipo){
   if(tipo === 'bonus'){
@@ -5263,12 +5274,13 @@ function _getDiamProductos(tipo){
         key:(r.manual?'man_':'auto_')+(r.package_id||r.diamantes),
         nombre:r.nombre, diamantes:r.diamantes, precio:r.precio,
         tipo:(r.manual?'manual':'auto'), package_id:r.package_id,
-        badge:(r.manual?'MANUAL':'AUTO')
+        badge:(r.manual?'MANUAL':'AUTO'),
+        img:r.img || _imgPorDiamantes(r.diamantes)
       };
     });
   } else if(tipo === '1vez'){
     return PRODUCTS_1VEZ.map(function(p){
-      return { key:'1vez_'+p.id, nombre:p.name+' Diamantes', diamantes:p.total, precio:p.prices[0], tipo:'1vez', badge:p.badge };
+      return { key:'1vez_'+p.id, nombre:p.name+' Diamantes', diamantes:p.total, precio:p.prices[0], tipo:'1vez', badge:p.badge, img:_imgPorDiamantes(p.total) };
     });
   }
   return [];
@@ -5298,9 +5310,12 @@ function renderDiamCatalogo(){
     if(p.badge === 'AUTO') badgeColor = 'background:rgba(37,211,102,.15);border-color:rgba(37,211,102,.4);color:#25d366';
     else if(p.badge === 'MANUAL') badgeColor = 'background:rgba(255,180,60,.15);border-color:rgba(255,180,60,.4);color:#ffb84d';
     var badge = p.badge ? '<span class="dcat-badge" style="'+badgeColor+'">'+p.badge+'</span>' : '';
+    var visual = p.img
+      ? '<div style="width:100%;aspect-ratio:4/3;border-radius:11px;overflow:hidden;margin-bottom:.65rem;background:#0a0f1a"><img src="'+p.img+'" alt="'+p.nombre+'" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.parentNode.innerHTML=\'<div class=&quot;dcat-card-ico&quot;>&#127918;</div>\'"/></div>'
+      : '<div class="dcat-card-ico">&#127918;</div>';
     return '<div class="dcat-card" onclick="abrirDiamDetalle('+i+')">'
       + badge
-      + '<div class="dcat-card-ico">&#127918;</div>'
+      + visual
       + '<div class="dcat-card-name">'+p.nombre+'</div>'
       + '<div class="dcat-card-sub">Free Fire</div>'
       + '<div class="dcat-card-price">'+fmt(p.precio)+'</div>'
@@ -5321,6 +5336,7 @@ function abrirDiamDetalle(idx){
   var det = document.getElementById('diam-detalle');
   det.innerHTML =
     '<button class="ddet-back" onclick="cerrarDiamDetalle()">&#8592; Volver al catalogo</button>'
+    + (p.img ? '<div style="width:100%;border-radius:14px;overflow:hidden;margin-bottom:1rem;background:#0a0f1a"><img src="'+p.img+'" alt="'+p.nombre+'" style="width:100%;display:block" onerror="this.parentNode.style.display=\'none\'"/></div>' : '')
     + '<div class="ddet-head"><div class="ddet-head-ico">&#127918;</div>'
     + '<div><div class="ddet-head-name">'+p.nombre+'</div><div class="ddet-head-sub">Free Fire</div></div></div>'
     + '<div class="ddet-price">'+fmt(p.precio)+'</div>'
@@ -5966,3 +5982,61 @@ function _mostrarReciboScar(ffId, user, ord){
     + '</div>';
   wrap.scrollIntoView({ behavior:'smooth', block:'start' });
 }
+
+
+// ═══ Botón de WhatsApp ARRASTRABLE ═══
+var _waDragged = false;
+(function initWaDrag(){
+  function setup(){
+    var btn = document.getElementById('wa-float-btn');
+    if(!btn){ setTimeout(setup, 500); return; }
+
+    var arrastrando = false, offsetX = 0, offsetY = 0, startX = 0, startY = 0;
+
+    function inicio(e){
+      arrastrando = true;
+      _waDragged = false;
+      var punto = e.touches ? e.touches[0] : e;
+      var rect = btn.getBoundingClientRect();
+      offsetX = punto.clientX - rect.left;
+      offsetY = punto.clientY - rect.top;
+      startX = punto.clientX;
+      startY = punto.clientY;
+      btn.style.transition = 'none';
+    }
+
+    function mover(e){
+      if(!arrastrando) return;
+      var punto = e.touches ? e.touches[0] : e;
+      // Si se movió más de 6px, cuenta como arrastre (no clic)
+      if(Math.abs(punto.clientX-startX) > 6 || Math.abs(punto.clientY-startY) > 6){
+        _waDragged = true;
+      }
+      var x = punto.clientX - offsetX;
+      var y = punto.clientY - offsetY;
+      // Limitar a la pantalla
+      x = Math.max(4, Math.min(x, window.innerWidth - btn.offsetWidth - 4));
+      y = Math.max(4, Math.min(y, window.innerHeight - btn.offsetHeight - 4));
+      btn.style.left = x + 'px';
+      btn.style.top = y + 'px';
+      btn.style.bottom = 'auto';
+      btn.style.right = 'auto';
+      if(e.cancelable) e.preventDefault();
+    }
+
+    function fin(){
+      arrastrando = false;
+      btn.style.transition = '';
+      // Resetear la bandera después de un momento (para que el clic funcione luego)
+      setTimeout(function(){ _waDragged = false; }, 100);
+    }
+
+    btn.addEventListener('mousedown', inicio);
+    document.addEventListener('mousemove', mover);
+    document.addEventListener('mouseup', fin);
+    btn.addEventListener('touchstart', inicio, {passive:true});
+    document.addEventListener('touchmove', mover, {passive:false});
+    document.addEventListener('touchend', fin);
+  }
+  setup();
+})();

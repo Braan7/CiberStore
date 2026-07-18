@@ -3442,7 +3442,7 @@ document.addEventListener('keydown',function(e){
     </div>
   </div>
 </div>
-<a href="#" onclick="openSmartWA();return false;" class="wa-float">&#128222;</a>
+<a href="#" id="wa-float-btn" onclick="if(!_waDragged){openSmartWA();}return false;" class="wa-float">&#128222;</a>
 <button class="scrolltop" id="scrolltop" onclick="window.scrollTo({top:0,behavior:'smooth'})">&#8679;</button>
 <div class="toast" id="toast"></div>
 <div class="social-proof" id="social-proof"><div class="sp-dot"></div><div id="sp-text"></div></div>
@@ -3613,11 +3613,6 @@ document.addEventListener('keydown',function(e){
         <div style="font-size:1.5rem;margin-bottom:.3rem">&#128142;</div>
         <div style="font-family:Oxanium;font-weight:900;font-size:1.35rem;color:#38bdf8" id="total-diamantes">0</div>
         <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Diamantes vendidos</div>
-      </div>
-      <div style="background:linear-gradient(160deg,rgba(37,211,102,.1),rgba(255,255,255,.02));border:1px solid rgba(37,211,102,.25);border-radius:14px;padding:1.1rem">
-        <div style="font-size:1.5rem;margin-bottom:.3rem">&#128176;</div>
-        <div style="font-family:Oxanium;font-weight:900;font-size:1.35rem;color:#25d366" id="total-dinero">$0</div>
-        <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Total movido (MXN)</div>
       </div>
       <div style="background:linear-gradient(160deg,rgba(255,207,64,.1),rgba(255,255,255,.02));border:1px solid rgba(255,207,64,.25);border-radius:14px;padding:1.1rem">
         <div style="font-size:1.5rem;margin-bottom:.3rem">&#128101;</div>
