@@ -684,6 +684,7 @@ function goPage(id){
   window.scrollTo(0,0);
   if(id==='diamantes') setTimeout(function(){ setDiamTipo('bonus'); }, 100);
   if(id==='codigos') setTimeout(_updateScarSaldo, 100);
+  if(id==='clanes') setTimeout(renderClanes, 100);
   if(id==='likes') renderLikes();
   if(id==='membresia'){renderMems();renderWallet();}
   if(id==='perfil') renderPerfil();
@@ -1147,7 +1148,7 @@ function openProdModal(id){
   activePromo=null;
   /* Show current saldo */
   var saldoEl=document.getElementById('modal-saldo-amt');
-  if(saldoEl) saldoEl.textContent='$'+(authSession?(authSession.saldo||0).toLocaleString('es-MX'):0)+' MX';
+  if(saldoEl) saldoEl.textContent=authSession?fmt(authSession.saldo||0):fmt(0);
   var el=document.getElementById('modal');
   if(el) el.classList.add('show');
   var bsub=document.getElementById('btn-submit');
@@ -1218,7 +1219,7 @@ function openLikeModal(id){
   if(lbl2) lbl2.textContent='Confirmar ID';
   activePromo=null;
   var saldoEl2=document.getElementById('modal-saldo-amt');
-  if(saldoEl2) saldoEl2.textContent='$'+(authSession?(authSession.saldo||0).toLocaleString('es-MX'):0)+' MX';
+  if(saldoEl2) saldoEl2.textContent=authSession?fmt(authSession.saldo||0):fmt(0);
   var el=document.getElementById('modal');
   if(el) el.classList.add('show');
   var bsub2=document.getElementById('btn-submit');
@@ -2875,7 +2876,7 @@ function renderCart(){
   }).join('');
 
   rows+='<div class="cart-total"><span>Total</span><span style="color:'+(enough?'#00e676':'#ff6b6b')+'">'+fmt(total)+'</span></div>';
-  rows+='<div style="display:flex;justify-content:space-between;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.18);border-radius:8px;padding:.5rem .85rem;margin:.5rem 0"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span style="font-family:Oxanium;font-weight:700;color:'+(enough?'#00e676':'#ff6b6b')+'">$'+saldo.toLocaleString('es-MX')+' MX</span></div>';
+  rows+='<div style="display:flex;justify-content:space-between;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.18);border-radius:8px;padding:.5rem .85rem;margin:.5rem 0"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span style="font-family:Oxanium;font-weight:700;color:'+(enough?'#00e676':'#ff6b6b')+'">'+fmt(saldo)+'</span></div>';
   if(!authSession){
     rows+='<button onclick="closeCart();showAuthModal();" style="width:100%;padding:.72rem;background:linear-gradient(90deg,#0055cc,#00aaff);color:#fff;border:none;border-radius:7px;font-weight:700;font-size:.9rem;cursor:pointer">Inicia sesion</button>';
   } else if(!enough){
@@ -3072,7 +3073,7 @@ var LK200_PLANES = {
 
 function _updateLkSaldo(saldoElId){
   var el = document.getElementById(saldoElId);
-  if(el && authSession) el.textContent='$'+(authSession.saldo||0).toLocaleString('es-MX')+' MX';
+  if(el && authSession) el.textContent=fmt(authSession.saldo||0);
 }
 
 function submitLk2kSaldo(){
@@ -4136,7 +4137,7 @@ function cotizarBonus(){
 
 function _updateBonusSaldo(){
   var el = document.getElementById('bonus-saldo-val');
-  if(el && authSession) el.textContent = '$'+Math.round(authSession.saldo||0).toLocaleString('es-MX')+' MX';
+  if(el && authSession) el.textContent = fmt(authSession.saldo||0);
 }
 
 // Actualizar saldo del bonus al abrir diamantes
@@ -4149,7 +4150,7 @@ goPage = function(id){
 
 // ═══ COMPRA DIAMANTES ILIMITADOS / 1 VEZ x ID (con saldo) ═══
 function _updateDiamSaldos(){
-  var s = authSession ? ('$'+Math.round(authSession.saldo||0).toLocaleString('es-MX')+' MX') : '$0 MX';
+  var s = authSession ? fmt(authSession.saldo||0) : fmt(0);
   ['ilim-saldo-val','v1-saldo-val','pin-saldo-val','pin-api-saldo'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.textContent=s;
   });
@@ -4267,7 +4268,7 @@ function loadPines(){
 }
 
 function _updatePinSaldo(){
-  var s = authSession ? ('$'+Math.round(authSession.saldo||0).toLocaleString('es-MX')+' MX') : '$0 MX';
+  var s = authSession ? fmt(authSession.saldo||0) : fmt(0);
   ['pin-saldo-val','pin-api-saldo'].forEach(function(id){ var el=document.getElementById(id); if(el) el.textContent=s; });
 }
 
@@ -4753,7 +4754,7 @@ function solicitarRetiro(){
 // Actualizar el saldo mostrado en la página de retiro
 function _updateRetiroSaldo(){
   var el = document.getElementById('retiro-saldo');
-  if(el && authSession) el.textContent = '$'+Math.round(authSession.saldo||0).toLocaleString('es-MX')+' MXN';
+  if(el && authSession) el.textContent = fmt(authSession.saldo||0);
 }
 
 
@@ -6040,3 +6041,130 @@ var _waDragged = false;
   }
   setup();
 })();
+
+
+// ═══════════ VENTA DE CLANES NIVEL 7 ═══════════
+var CLANES = [
+  {
+    id: 'cjng',
+    nombre: 'CJNG OF1C1AL',
+    nivel: 'En proceso de ser Nivel 7',
+    honor: '~400,000',
+    precio: 500,
+    img: 'img/clan-cjng.jpg'
+  }
+];
+var _comprandoClan = false;
+
+function renderClanes(){
+  var cont = document.getElementById('clanes-lista');
+  if(!cont) return;
+  if(!CLANES.length){
+    cont.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted)">Pronto mas clanes disponibles</div>';
+    return;
+  }
+
+  cont.innerHTML = CLANES.map(function(c){
+    return '<div style="background:linear-gradient(160deg,rgba(255,179,0,.08),rgba(20,15,8,.4));border:1px solid rgba(255,179,0,.3);border-radius:20px;overflow:hidden;margin-bottom:1.5rem">'
+      + '<div style="position:relative;background:radial-gradient(circle at center,rgba(255,179,0,.12),transparent);padding:1.5rem 1.5rem 0">'
+      +   '<div style="position:absolute;top:1rem;right:1rem;background:linear-gradient(90deg,#ffb300,#ff8800);color:#fff;font-family:Oxanium;font-weight:800;font-size:.68rem;padding:.35rem .85rem;border-radius:99px;letter-spacing:.5px;z-index:2;box-shadow:0 4px 14px rgba(255,179,0,.4)">NIVEL 7</div>'
+      +   '<img src="'+c.img+'" alt="'+c.nombre+'" style="width:100%;border-radius:14px;display:block" onerror="this.style.display=\'none\'"/>'
+      + '</div>'
+      + '<div style="padding:1.5rem">'
+      +   '<div style="font-family:Oxanium;font-weight:800;font-size:1.4rem;color:#fff;margin-bottom:.75rem">&#129409; '+c.nombre+'</div>'
+      +   '<div style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.35rem">'
+      +     '<div style="display:flex;align-items:center;gap:.6rem;font-size:.85rem;color:#e8ecf4"><span style="color:#ffb300">&#127894;</span> Nivel: <b>'+c.nivel+'</b></div>'
+      +     '<div style="display:flex;align-items:center;gap:.6rem;font-size:.85rem;color:#e8ecf4"><span style="color:#ffb300">&#128081;</span> Honor aprox: <b>'+c.honor+'</b></div>'
+      +   '</div>'
+      +   '<div style="display:flex;align-items:baseline;gap:.5rem;margin-bottom:1.35rem;padding:1rem;background:rgba(255,179,0,.06);border:1px solid rgba(255,179,0,.2);border-radius:12px">'
+      +     '<span style="font-size:.75rem;color:var(--muted)">Precio:</span>'
+      +     '<span style="font-family:Oxanium;font-weight:900;font-size:1.7rem;color:#ffb300">'+fmt(c.precio)+'</span>'
+      +   '</div>'
+      +   '<div style="font-family:Oxanium;font-weight:700;font-size:.95rem;color:#fff;margin-bottom:.85rem">Datos para la entrega</div>'
+      +   '<label class="flabel">ID de la cuenta a entregar *</label>'
+      +   '<input class="finput" id="clan-id-'+c.id+'" type="text" placeholder="ID de tu cuenta de Free Fire"/>'
+      +   '<label class="flabel">Usuario del panel *</label>'
+      +   '<input class="finput" id="clan-user-'+c.id+'" type="text" placeholder="Tu usuario de CiberStore"/>'
+      +   '<label class="flabel">WhatsApp *</label>'
+      +   '<input class="finput" id="clan-wa-'+c.id+'" type="text" placeholder="Tu numero de WhatsApp"/>'
+      +   '<div style="display:flex;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;margin:1rem 0"><span style="font-size:.8rem;color:var(--muted)">Tu saldo</span><span id="clan-saldo-'+c.id+'" style="font-family:Oxanium;font-weight:700;color:#25d366">'+fmt(0)+'</span></div>'
+      +   '<div id="clan-err-'+c.id+'" style="display:none;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.3);color:#ff6b6b;border-radius:9px;padding:.7rem .9rem;font-size:.8rem;margin-bottom:.85rem"></div>'
+      +   '<button onclick="comprarClan(\''+c.id+'\')" style="width:100%;padding:1rem;background:linear-gradient(135deg,#ffb300,#ff8800);color:#fff;border:none;border-radius:12px;font-family:Oxanium;font-weight:900;font-size:.95rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(255,179,0,.3)">&#129409; COMPRAR CON SALDO</button>'
+      +   '<div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.85rem;line-height:1.5">Despues de pagar, te contactaremos por WhatsApp (o tu a nosotros) para coordinar la entrega del clan.</div>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+
+  _updateClanSaldos();
+}
+
+function _updateClanSaldos(){
+  CLANES.forEach(function(c){
+    var el = document.getElementById('clan-saldo-'+c.id);
+    if(el) el.textContent = authSession ? fmt(authSession.saldo||0) : fmt(0);
+  });
+}
+
+function comprarClan(clanId){
+  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
+  if(_comprandoClan){ return; }
+
+  var c = CLANES.filter(function(x){ return x.id===clanId; })[0];
+  if(!c) return;
+
+  var err = document.getElementById('clan-err-'+clanId);
+  function showErr(m){ if(err){ err.textContent=m; err.style.display='block'; } }
+
+  var ffId = ((document.getElementById('clan-id-'+clanId)||{}).value||'').trim();
+  var user = ((document.getElementById('clan-user-'+clanId)||{}).value||'').trim();
+  var wa = ((document.getElementById('clan-wa-'+clanId)||{}).value||'').trim();
+
+  if(!ffId){ showErr('Escribe el ID de la cuenta.'); return; }
+  if(!user){ showErr('Escribe tu usuario del panel.'); return; }
+  if(!wa){ showErr('Escribe tu WhatsApp.'); return; }
+
+  var saldo = authSession.saldo||0;
+  if(saldo < c.precio){ showErr('Saldo insuficiente ('+fmt(saldo)+'). Necesitas '+fmt(c.precio)+'.'); return; }
+  if(err) err.style.display='none';
+
+  _comprandoClan = true;
+
+  var ord = getNextOrder();
+  addSpend(c.precio, 'Clan '+c.nombre+' (Nivel 7) - ID:'+ffId+' - User:'+user+' - WA:'+wa+' - Pedido #'+ord);
+  registrarPedido('Clan '+c.nombre+' (entrega por WhatsApp)', 0, 'clan', ffId, c.precio, 0);
+  if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, 'CLAN '+c.nombre+' - ID:'+ffId+' - User:'+user+' - WA:'+wa, c.precio, ord);
+
+  _mostrarReciboClan(c, ffId, user, ord);
+  showToast('\u2705 Pedido #'+ord+' realizado!', 3000);
+
+  setTimeout(function(){ _comprandoClan = false; }, 3000);
+}
+
+function _mostrarReciboClan(c, ffId, user, ord){
+  var ahora = new Date();
+  var fecha = ahora.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' });
+  var hora = ahora.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' });
+
+  var cont = document.getElementById('clanes-lista');
+  if(!cont) return;
+
+  cont.innerHTML =
+    '<div style="background:linear-gradient(160deg,rgba(37,211,102,.08),rgba(255,255,255,.02));border:2px solid rgba(37,211,102,.35);border-radius:18px;padding:2rem 1.35rem;text-align:center;max-width:440px;margin:1rem auto">'
+    + '<div style="font-size:3rem;margin-bottom:.5rem">\u2705</div>'
+    + '<div style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#25d366;margin-bottom:.35rem;letter-spacing:.5px">PEDIDO CONFIRMADO</div>'
+    + '<div style="font-size:.82rem;color:var(--muted);margin-bottom:1.5rem">Te contactaremos para entregar tu clan</div>'
+    + '<div style="background:rgba(0,0,0,.25);border-radius:99px;height:10px;overflow:hidden;margin-bottom:1.5rem"><div style="height:100%;width:25%;border-radius:99px;background:linear-gradient(90deg,#ffb300,#ff8800);box-shadow:0 0 12px rgba(255,179,0,.5)"></div></div>'
+    + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
+    +   _filaRecibo('\uD83D\uDCCB Pedido', '#'+ord)
+    +   _filaRecibo('\uD83E\uDD81 Clan', c.nombre)
+    +   _filaRecibo('\uD83C\uDFAE ID cuenta', ffId)
+    +   _filaRecibo('\uD83D\uDC64 Usuario', user)
+    +   _filaRecibo('\uD83D\uDCB5 Precio', fmt(c.precio))
+    +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' \u00B7 ' + hora, true)
+    + '</div>'
+    + '<div style="font-size:.75rem;color:#ffb300;margin-top:1rem;line-height:1.5">Te contactaremos por WhatsApp para coordinar la entrega. Tambien puedes escribirnos tu.</div>'
+    + '<button onclick="openSmartWA()" style="width:100%;margin-top:1rem;padding:.9rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">\uD83D\uDCF1 Contactar por WhatsApp</button>'
+    + '<button onclick="goPage(\'home\')" style="width:100%;margin-top:.6rem;padding:.9rem;background:rgba(255,255,255,.05);color:#fff;border:1px solid var(--border);border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Volver al inicio</button>'
+    + '</div>';
+  cont.scrollIntoView({ behavior:'smooth', block:'start' });
+}
