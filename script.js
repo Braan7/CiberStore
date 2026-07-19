@@ -1330,23 +1330,92 @@ function submitHonor(){
   if(!f2){showToast('Ingresa el ID del clan');return;}
   if(!nombre){showToast('Ingresa tu nombre');return;}
   if(!wa||wa.replace(/\D/g,'').length<8){showToast('Ingresa tu WhatsApp');return;}
+
   var hIdx=parseInt(curId.replace('honor_',''));
   var h=HONOR[hIdx];
+  if(!h) return;
+
+  // Anti doble compra
+  if(_comprandoHonor){ return; }
+
+  // Validar saldo suficiente
+  var saldo=(authSession&&authSession.saldo)?authSession.saldo:0;
+  if(saldo < h.price){
+    showToast('Saldo insuficiente. Tienes '+fmt(saldo)+' y necesitas '+fmt(h.price));
+    return;
+  }
+
+  _comprandoHonor = true;
+  var btnH=document.getElementById('btn-submit');
+  if(btnH){ btnH.disabled=true; }
+
   var ord=getNextOrder();
-  addSpend(h.price);
+
+  // COBRAR CON SALDO (con descripcion completa para historial/ranking)
+  addSpend(h.price, 'Honor de Clan '+h.region+' - Clan:'+f1+' - ID:'+f2+' - Pedido #'+ord);
+
   addToHistoryLocal({name:'Honor '+h.region,price:h.price,icon:h.flag,
     date:new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),order:ord});
-  // Registrar pedido con progreso 1/7 fijo (Honor de Clan se entrega en 7 dias)
+
+  // Registrar pedido con progreso (Honor de Clan se entrega en 7 dias)
   registrarPedidoHonor('Honor de Clan - '+h.region, f2, h.price, f1);
-  var msg='*PEDIDO #'+ord+' - CiberStore*\n\nServicio: Honor de Clan - '+h.region
-    +'\nPrecio: '+fmt(h.price)
-    +'\nMetodo: Transferencia Bancaria'
-    +'\n\nNombre: '+nombre+'\nNombre Clan: '+f1+'\nID Clan: '+f2+'\nWhatsApp: '+wa
-    +'\n\nManda comprobante con # '+ord;
-  // Notificar por Telegram (ya no WhatsApp) + registrar
-  notificarPedidoTelegram('Compra', msg.replace(/\*/g,'').replace(/\n/g,' | '), 0, ord);
-  showToast('\u2705 Pedido #'+ord+' enviado! Te contactaremos.', 3000);
+
+  // NOTIFICAR SOLO POR TELEGRAM
+  if(typeof tgNotifyPurchase==='function'){
+    tgNotifyPurchase(authSession.username,
+      'HONOR DE CLAN '+h.region+' | Clan: '+f1+' | ID: '+f2+' | Nombre: '+nombre+' | WA: '+wa,
+      h.price, ord);
+  }
+
+  _mostrarReciboHonor(h, f1, f2, ord);
+  showToast('\u2705 Pedido #'+ord+' confirmado!', 3000);
+
+  setTimeout(function(){
+    _comprandoHonor = false;
+    if(btnH){ btnH.disabled=false; }
+  }, 3000);
+}
+
+var _comprandoHonor = false;
+
+// Recibo de compra de Honor de Clan
+function _mostrarReciboHonor(h, nombreClan, idClan, ord){
+  var ahora = new Date();
+  var fecha = ahora.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' });
+  var hora = ahora.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' });
+
+  // Cerrar el modal de compra (se reutiliza para otros productos)
   closeModal();
+
+  // Crear una ventana propia para el recibo
+  var ov = document.getElementById('recibo-honor-ov');
+  if(ov) ov.remove();
+  ov = document.createElement('div');
+  ov.id = 'recibo-honor-ov';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;padding:1.2rem;overflow-y:auto';
+  ov.onclick = function(e){ if(e.target===ov) ov.remove(); };
+  document.body.appendChild(ov);
+  var cont = document.createElement('div');
+  cont.style.cssText = 'max-width:420px;width:100%';
+  ov.appendChild(cont);
+
+  cont.innerHTML =
+    '<div style="background:linear-gradient(160deg,#0f1a15,#0a0f14);border:2px solid rgba(37,211,102,.35);border-radius:18px;padding:1.75rem 1.25rem;text-align:center">'
+    + '<div style="font-size:2.8rem;margin-bottom:.5rem">\u2705</div>'
+    + '<div style="font-family:Oxanium;font-weight:900;font-size:1.25rem;color:#25d366;margin-bottom:.35rem;letter-spacing:.5px">PEDIDO CONFIRMADO</div>'
+    + '<div style="font-size:.8rem;color:var(--muted);margin-bottom:1.35rem">Tu honor de clan esta en proceso</div>'
+    + '<div style="background:rgba(0,0,0,.25);border-radius:99px;height:10px;overflow:hidden;margin-bottom:1.4rem"><div style="height:100%;width:20%;border-radius:99px;background:linear-gradient(90deg,#ffb84d,#ff9900);box-shadow:0 0 12px rgba(255,180,60,.5)"></div></div>'
+    + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
+    +   _filaRecibo('\uD83D\uDCCB Pedido', '#'+ord)
+    +   _filaRecibo('\uD83C\uDFC6 Servicio', 'Honor '+h.region)
+    +   _filaRecibo('\uD83D\uDEE1\uFE0F Clan', nombreClan)
+    +   _filaRecibo('\uD83C\uDD94 ID Clan', idClan)
+    +   _filaRecibo('\uD83D\uDCB5 Precio', fmt(h.price))
+    +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' \u00B7 ' + hora, true)
+    + '</div>'
+    + '<div style="background:rgba(255,180,60,.08);border:1px solid rgba(255,180,60,.25);border-radius:10px;padding:.75rem .9rem;margin-top:1rem;font-size:.73rem;color:#ffb84d;line-height:1.55">&#128197; Los pedidos se procesan <b>sabados y domingos</b>.<br/>&#129302; Los bots se uniran entre las <b>3:00 y 7:00 AM</b>.</div>'
+    + '<button onclick="var o=document.getElementById(\'recibo-honor-ov\'); if(o) o.remove();" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#22d3ee);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Entendido</button>'
+    + '</div>';
 }
 function clanWA(){
   window.open('https://wa.me/'+WA+'?text='+encodeURIComponent('Hola! Me interesa comprar un clan nivel 7. Quiero mas informacion y cotizacion.'),'_blank');
