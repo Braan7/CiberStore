@@ -37,39 +37,28 @@ function addSpend(amount, description){
   var userId = authSession.id;
   _addSpendBusy = true;
 
-  // ⚠️ CLAVE: leer el saldo REAL de Supabase justo antes de descontar
-  // (evita pisar ajustes manuales del panel admin o descuentos dobles)
-  function procederConSaldo(saldoReal){
-    var saldoActual = Number(saldoReal) || 0;
+  // ⚠️ DESCUENTO ATÓMICO: la base de datos resta en UNA sola operacion.
+  // Imposible que se pise con otra compra o con un ajuste del panel admin.
+  _rpcAjustarSaldo(userId, -amount).then(function(saldoNuevo){
+    var sn = Number(saldoNuevo) || 0;
+    authSession.saldo = sn;
+    _refreshSaldoUI(sn);
+    if(typeof saveSession === 'function') saveSession();
 
-    if(saldoActual < amount){
-      authSession.saldo = saldoActual;
-      _refreshSaldoUI(saldoActual);
-      showToast('Saldo insuficiente. Tienes $'+Math.round(saldoActual).toLocaleString('es-MX')+' MX');
-      _addSpendBusy = false;
-      return;
+    // Registrar el movimiento
+    if(typeof sbAddMovimiento === 'function'){
+      sbAddMovimiento(userId, 'compra', amount, description);
     }
-
-    var newSaldo = saldoActual - amount;
-    authSession.saldo = newSaldo;
-    _refreshSaldoUI(newSaldo);
-    _guardarNuevoSaldo(userId, newSaldo, amount, description, saldoActual);
-  }
-
-  // Intentar leer saldo fresco de Supabase; si falla, usar el de memoria
-  if(typeof sb !== 'undefined' && sb.get){
-    sb.get('profiles', 'select=saldo&id=eq.\"'+userId+'\"').then(function(r){
-      if(r && r[0] && r[0].saldo !== undefined && r[0].saldo !== null){
-        procederConSaldo(r[0].saldo);
-      } else {
-        procederConSaldo(Number(authSession.saldo) || 0);
-      }
-    }).catch(function(){
-      procederConSaldo(Number(authSession.saldo) || 0);
-    });
-  } else {
-    procederConSaldo(Number(authSession.saldo) || 0);
-  }
+    console.log('[ADDSPEND] OK. Saldo real ahora: $'+sn);
+    showToast('\u2713 Compra registrada. Saldo: '+fmt(sn));
+    _addSpendBusy = false;
+  }).catch(function(err){
+    console.error('[ADDSPEND] RPC fallo:', err);
+    showToast('Error al procesar el pago. Contacta al admin.');
+    _addSpendBusy = false;
+    // Refrescar el saldo real por si acaso
+    if(typeof refreshUserBalance === 'function') refreshUserBalance();
+  });
 }
 
 // Guarda el nuevo saldo en Supabase + registra el movimiento
@@ -163,10 +152,10 @@ var LIKES = [
 ];
 
 var HONOR = [
-  {region:'Norteamerica',flag:'\uD83C\uDDE8\uD83C\uDDE6',color:'#ffd000',price:340},
-  {region:'Estados Unidos',flag:'\uD83C\uDDFA\uD83C\uDDF8',color:'#4dabf7',price:285},
-  {region:'Sudamerica',flag:'\uD83C\uDDE7\uD83C\uDDF7',color:'#40c057',price:340},
-  {region:'Europa',flag:'\uD83C\uDDEA\uD83C\uDDFA',color:'#b39ddb',price:340}
+  {region:'Norteamerica',flag:'\uD83C\uDDE8\uD83C\uDDE6',color:'#ffd000',price:340,paises:'Canada, Rep. Dominicana'},
+  {region:'Estados Unidos',flag:'\uD83C\uDDFA\uD83C\uDDF8',color:'#4dabf7',price:290,paises:'Mexico'},
+  {region:'Sudamerica',flag:'\uD83C\uDDE7\uD83C\uDDF7',color:'#40c057',price:340,paises:'Peru, Chile'},
+  {region:'Europa',flag:'\uD83C\uDDEA\uD83C\uDDFA',color:'#b39ddb',price:340,paises:'Espana'}
 ];
 
 var TIERS = [
@@ -1036,6 +1025,8 @@ function sendWA(msg){
 function closeModal(){
   var el=document.getElementById('modal');
   if(el) el.classList.remove('show');
+  var instr=document.getElementById('honor-instr');
+  if(instr) instr.style.display='none';
   activePromo=null;
   var inp=document.getElementById('f-promo');
   var msg=document.getElementById('promo-msg');
@@ -1149,6 +1140,8 @@ function openProdModal(id){
   /* Show current saldo */
   var saldoEl=document.getElementById('modal-saldo-amt');
   if(saldoEl) saldoEl.textContent=authSession?fmt(authSession.saldo||0):fmt(0);
+  var instrH=document.getElementById('honor-instr');
+  if(instrH) instrH.style.display='none';
   var el=document.getElementById('modal');
   if(el) el.classList.add('show');
   var bsub=document.getElementById('btn-submit');
@@ -1220,6 +1213,8 @@ function openLikeModal(id){
   activePromo=null;
   var saldoEl2=document.getElementById('modal-saldo-amt');
   if(saldoEl2) saldoEl2.textContent=authSession?fmt(authSession.saldo||0):fmt(0);
+  var instrH2=document.getElementById('honor-instr');
+  if(instrH2) instrH2.style.display='none';
   var el=document.getElementById('modal');
   if(el) el.classList.add('show');
   var bsub2=document.getElementById('btn-submit');
@@ -1304,6 +1299,11 @@ function openHonorModal(idx){
   if(lbl1) lbl1.textContent='Nombre del Clan';
   if(lbl2) lbl2.textContent='ID del Clan';
   activePromo=null;
+  // Mostrar instrucciones OBLIGATORIAS de configuracion del clan
+  var instr=document.getElementById('honor-instr');
+  if(instr) instr.style.display='';
+  var chk=document.getElementById('honor-confirmo');
+  if(chk) chk.checked=false;
   var el=document.getElementById('modal');
   if(el) el.classList.add('show');
   switchPayTab('stori');
@@ -1314,6 +1314,18 @@ function submitHonor(){
   var f2=((document.getElementById('f2')||{}).value||'').trim();
   var nombre=((document.getElementById('f3')||{}).value||'').trim();
   var wa=((document.getElementById('f4')||{}).value||'').trim();
+  // OBLIGATORIO: debe confirmar que configuro el clan
+  var chk=document.getElementById('honor-confirmo');
+  if(chk && !chk.checked){
+    showToast('\u26A0 Debes confirmar que ya configuraste tu clan');
+    var instr=document.getElementById('honor-instr');
+    if(instr){
+      instr.scrollIntoView({behavior:'smooth', block:'center'});
+      instr.style.borderColor='#ff6b6b';
+      setTimeout(function(){ instr.style.borderColor='rgba(255,180,60,.3)'; }, 2500);
+    }
+    return;
+  }
   if(!f1){showToast('Ingresa el nombre del clan');return;}
   if(!f2){showToast('Ingresa el ID del clan');return;}
   if(!nombre){showToast('Ingresa tu nombre');return;}
@@ -2437,15 +2449,20 @@ function admSaldoAction(action){
   sb.get('profiles','username=eq.'+encodeURIComponent(username)+'&limit=1').then(function(users){
     if(!users||!users[0]){showMsg('Usuario no encontrado','#ff6b6b');return;}
     var u=users[0];
-    var newSaldo=action==='add'?(u.saldo||0)+monto:Math.max(0,(u.saldo||0)-monto);
-    sbUpdateProfile(u.id,{saldo:newSaldo}).then(function(){
-      sbAddMovimiento(u.id,action==='add'?'credito':'debito',monto,desc);
-      showMsg((action==='add'?'+':'-')+'$'+monto+' MX a '+username+'. Nuevo saldo: $'+newSaldo.toLocaleString('es-MX'),'#00e676');
+    var delta = (action==='add') ? monto : -monto;
+
+    // AJUSTE ATÓMICO: la base de datos suma/resta (no se puede pisar)
+    _rpcAjustarSaldo(u.id, delta).then(function(saldoNuevo){
+      var sn = Number(saldoNuevo) || 0;
+      sbAddMovimiento(u.id, action==='add'?'credito':'debito', monto, desc);
+      showMsg((action==='add'?'+':'-')+'$'+monto+' MX a '+username+'. Saldo TOTAL ahora: $'+sn.toLocaleString('es-MX'),'#00e676');
       admFullLoadMovs();
-      /* Clear fields */
       var mu=document.getElementById('adm-saldo-monto');
       var md=document.getElementById('adm-saldo-desc');
       if(mu) mu.value=''; if(md) md.value='';
+    }).catch(function(err){
+      console.error('[ADM SALDO] RPC fallo:', err);
+      showMsg('Error: falta ejecutar FIX-SALDO-ATOMICO.sql en Supabase. Detalle: '+(err&&err.message?err.message:err),'#ff6b6b');
     });
   }).catch(function(){showMsg('Error de conexion','#ff6b6b');});
 }
@@ -4363,9 +4380,51 @@ var PORTERO_URL = 'https://pnotsqsudqpwqzssevig.supabase.co/functions/v1/bright-
 // ⬇️ PEGA AQUÍ tu anon key PÚBLICA de Supabase (Settings → API → anon public)
 // Es pública y segura de compartir. Ejemplo: 'eyJhbGciOiJIUzI1...'
 var SUPABASE_ANON = 'PEGA_TU_ANON_KEY_AQUI';
-// (si dejas 'PEGA_TU_ANON_KEY_AQUI', intenta tomarla de supabase_integration.js)
+// (si dejas 'PEGA_TU_ANON_KEY_AQUI', la busca automaticamente en supabase.js)
+function _detectarAnonKey(){
+  // 1) Probar nombres de variable globales comunes
+  var nombres = ['SUPABASE_ANON_KEY','supabaseAnonKey','SUPABASE_KEY','SB_KEY','SB_ANON','ANON_KEY',
+                 'SUPABASE_ANON_PUBLIC','sbKey','sbAnonKey','SUPABASE_PUBLIC_KEY','supabaseKey','SUPA_KEY'];
+  for(var i=0;i<nombres.length;i++){
+    try{
+      var v = window[nombres[i]];
+      if(typeof v === 'string' && v.indexOf('eyJ') === 0) return v;
+    }catch(e){}
+  }
+  // 2) Buscar dentro del objeto sb (por si guarda la key ahi)
+  try{
+    if(typeof sb === 'object' && sb){
+      var props = ['key','anon','anonKey','apikey','_key','KEY','token'];
+      for(var j=0;j<props.length;j++){
+        var val = sb[props[j]];
+        if(typeof val === 'string' && val.indexOf('eyJ') === 0) return val;
+      }
+      // Buscar en cualquier propiedad de sb que parezca un JWT
+      for(var k in sb){
+        try{
+          if(typeof sb[k] === 'string' && sb[k].indexOf('eyJ') === 0 && sb[k].length > 100) return sb[k];
+        }catch(e){}
+      }
+    }
+  }catch(e){}
+  // 3) Escanear todas las variables globales buscando un JWT
+  try{
+    for(var g in window){
+      try{
+        if(typeof window[g] === 'string' && window[g].indexOf('eyJ') === 0 && window[g].length > 100) return window[g];
+      }catch(e){}
+    }
+  }catch(e){}
+  return '';
+}
+
 if(SUPABASE_ANON === 'PEGA_TU_ANON_KEY_AQUI'){
-  SUPABASE_ANON = (typeof SUPABASE_ANON_KEY !== 'undefined' ? SUPABASE_ANON_KEY : (typeof supabaseAnonKey !== 'undefined' ? supabaseAnonKey : (typeof SUPABASE_KEY !== 'undefined' ? SUPABASE_KEY : '')));
+  SUPABASE_ANON = _detectarAnonKey();
+  if(!SUPABASE_ANON){
+    console.error('[SALDO] No se encontro la anon key. El sistema de saldo atomico no funcionara.');
+  } else {
+    console.log('[SALDO] Anon key detectada correctamente.');
+  }
 }
 
 // Compra un PIN por API. productId = id del producto en Recargas América.
@@ -6177,4 +6236,49 @@ function _mostrarReciboClan(c, ffId, user, ord){
     + '<button onclick="goPage(\'home\')" style="width:100%;margin-top:.6rem;padding:.9rem;background:rgba(255,255,255,.05);color:#fff;border:1px solid var(--border);border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Volver al inicio</button>'
     + '</div>';
   cont.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+
+// ═══════════ AJUSTE ATÓMICO DE SALDO (arregla el bug del dinero) ═══════════
+// Llama a la funcion de Postgres que suma/resta el saldo en UNA sola operacion.
+// Asi es imposible que dos operaciones se pisen y se pierda dinero.
+var _SB_URL_RPC = 'https://pnotsqsudqpwqzssevig.supabase.co';
+
+function _rpcAjustarSaldo(userId, delta){
+  var key = (typeof SUPABASE_ANON !== 'undefined' && SUPABASE_ANON) ? SUPABASE_ANON : '';
+  // Reintentar detectar la key si no la tenemos (por si supabase.js cargo despues)
+  if(!key && typeof _detectarAnonKey === 'function'){
+    key = _detectarAnonKey();
+    if(key) SUPABASE_ANON = key;
+  }
+  if(!key) return Promise.reject(new Error('No se encontro la anon key de Supabase'));
+  return fetch(_SB_URL_RPC + '/rest/v1/rpc/ajustar_saldo', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': key,
+      'Authorization': 'Bearer ' + key
+    },
+    body: JSON.stringify({ p_user_id: userId, p_delta: delta })
+  }).then(function(r){
+    if(!r.ok) return r.text().then(function(t){ throw new Error(t || ('HTTP '+r.status)); });
+    return r.json();
+  });
+}
+
+function _rpcAjustarSaldoUsername(username, delta){
+  var key = (typeof SUPABASE_ANON !== 'undefined' && SUPABASE_ANON) ? SUPABASE_ANON : '';
+  if(!key) return Promise.reject(new Error('Sin key'));
+  return fetch(_SB_URL_RPC + '/rest/v1/rpc/ajustar_saldo_username', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': key,
+      'Authorization': 'Bearer ' + key
+    },
+    body: JSON.stringify({ p_username: username, p_delta: delta })
+  }).then(function(r){
+    if(!r.ok) return r.text().then(function(t){ throw new Error(t || ('HTTP '+r.status)); });
+    return r.json();
+  });
 }
