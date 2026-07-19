@@ -4450,37 +4450,27 @@ var PORTERO_URL = 'https://pnotsqsudqpwqzssevig.supabase.co/functions/v1/bright-
 // Es pública y segura de compartir. Ejemplo: 'eyJhbGciOiJIUzI1...'
 var SUPABASE_ANON = 'PEGA_TU_ANON_KEY_AQUI';
 // (si dejas 'PEGA_TU_ANON_KEY_AQUI', la busca automaticamente en supabase.js)
+function _esKeyValida(v){
+  if(typeof v !== 'string' || v.length < 20) return false;
+  // Formato JWT antiguo (eyJ...) o formato nuevo (sb_publishable_... / sb_secret_...)
+  return v.indexOf('eyJ') === 0 || v.indexOf('sb_publishable_') === 0 || v.indexOf('sb_') === 0;
+}
+
 function _detectarAnonKey(){
-  // 1) Probar nombres de variable globales comunes
-  var nombres = ['SUPABASE_ANON_KEY','supabaseAnonKey','SUPABASE_KEY','SB_KEY','SB_ANON','ANON_KEY',
+  // 1) Nombres de variable conocidos (SB_KEY es el que usa supabase.js de CiberStore)
+  var nombres = ['SB_KEY','SUPABASE_ANON_KEY','supabaseAnonKey','SUPABASE_KEY','SB_ANON','ANON_KEY',
                  'SUPABASE_ANON_PUBLIC','sbKey','sbAnonKey','SUPABASE_PUBLIC_KEY','supabaseKey','SUPA_KEY'];
   for(var i=0;i<nombres.length;i++){
     try{
       var v = window[nombres[i]];
-      if(typeof v === 'string' && v.indexOf('eyJ') === 0) return v;
+      if(_esKeyValida(v)) return v;
     }catch(e){}
   }
-  // 2) Buscar dentro del objeto sb (por si guarda la key ahi)
-  try{
-    if(typeof sb === 'object' && sb){
-      var props = ['key','anon','anonKey','apikey','_key','KEY','token'];
-      for(var j=0;j<props.length;j++){
-        var val = sb[props[j]];
-        if(typeof val === 'string' && val.indexOf('eyJ') === 0) return val;
-      }
-      // Buscar en cualquier propiedad de sb que parezca un JWT
-      for(var k in sb){
-        try{
-          if(typeof sb[k] === 'string' && sb[k].indexOf('eyJ') === 0 && sb[k].length > 100) return sb[k];
-        }catch(e){}
-      }
-    }
-  }catch(e){}
-  // 3) Escanear todas las variables globales buscando un JWT
+  // 2) Escanear globales por si cambia el nombre
   try{
     for(var g in window){
       try{
-        if(typeof window[g] === 'string' && window[g].indexOf('eyJ') === 0 && window[g].length > 100) return window[g];
+        if(_esKeyValida(window[g])) return window[g];
       }catch(e){}
     }
   }catch(e){}
@@ -6311,7 +6301,7 @@ function _mostrarReciboClan(c, ffId, user, ord){
 // ═══════════ AJUSTE ATÓMICO DE SALDO (arregla el bug del dinero) ═══════════
 // Llama a la funcion de Postgres que suma/resta el saldo en UNA sola operacion.
 // Asi es imposible que dos operaciones se pisen y se pierda dinero.
-var _SB_URL_RPC = 'https://pnotsqsudqpwqzssevig.supabase.co';
+var _SB_URL_RPC = (typeof SB_URL !== 'undefined' && SB_URL) ? SB_URL : 'https://pnotsqsudqpwqzssevig.supabase.co';
 
 function _rpcAjustarSaldo(userId, delta){
   var key = (typeof SUPABASE_ANON !== 'undefined' && SUPABASE_ANON) ? SUPABASE_ANON : '';
