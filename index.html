@@ -736,9 +736,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:rgba(120,170,2
   font-family:'Oxanium',sans-serif;
   font-weight:800;letter-spacing:.5px;
   background:linear-gradient(135deg,#fff 30%,#a9c7ff 100%);
-  -webkit-background-clip:text;background-clip:text;
-  -webkit-text-fill-color:transparent;
-  text-shadow:0 4px 30px rgba(80,140,255,.2);
+  -webkit-background-clip:text!important;background-clip:text!important;
+  -webkit-text-fill-color:transparent!important;
 }
 .stag{
   background:var(--grad-soft)!important;
@@ -845,15 +844,15 @@ input:focus,select:focus,textarea:focus{
   display:inline-block;
   color:#fff;
   background:linear-gradient(135deg,#fff,#cde0ff);
-  -webkit-background-clip:text;background-clip:text;
-  -webkit-text-fill-color:transparent;
+  -webkit-background-clip:text!important;background-clip:text!important;
+  -webkit-text-fill-color:transparent!important;
 }
 .topbar-logo .l2{
   display:inline-block;
   color:#a855f7;
   background:linear-gradient(135deg,#4da3ff,#a855f7);
-  -webkit-background-clip:text;background-clip:text;
-  -webkit-text-fill-color:transparent;
+  -webkit-background-clip:text!important;background-clip:text!important;
+  -webkit-text-fill-color:transparent!important;
 }
 /* Respaldo: navegadores sin soporte de background-clip muestran color sólido */
 @supports not (-webkit-background-clip:text){
@@ -963,7 +962,7 @@ input:focus,select:focus,textarea:focus{
   display:inline-block!important;
   color:#a855f7!important;
   background:linear-gradient(135deg,#4da3ff,#a855f7)!important;
-  -webkit-background-clip:text;background-clip:text;
+  -webkit-background-clip:text!important;background-clip:text!important;
   -webkit-text-fill-color:transparent!important;
 }
 @supports not (-webkit-background-clip:text){
@@ -1370,6 +1369,16 @@ h2,h3{
 /* Tabs de tipo de diamante */
 .dtab-btn{flex:1;padding:.7rem .5rem;background:transparent;border:none;color:var(--muted);border-radius:9px;font-family:Poppins;font-weight:700;font-size:.82rem;cursor:pointer;transition:all .2s}
 .dtab-btn.active{background:linear-gradient(135deg,#0e7490,#22d3ee);color:#fff;box-shadow:0 4px 14px rgba(34,211,238,.25)}
+
+/* ═══ Arreglo de la "línea azul": evita seleccion accidental en logos/titulos ═══ */
+.sb-logo, .sb-footer .ftitle, .topbar-logo, .hero h1, .ptitle, .auth-logo-txt,
+.l1, .l2, .dcat-card-price, .ddet-price{
+  -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none; user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+/* Color de seleccion suave (por si el usuario selecciona algo) */
+::selection{background:rgba(77,163,255,.25);color:#fff}
+::-moz-selection{background:rgba(77,163,255,.25);color:#fff}
 </style>
 
 <script>
@@ -3421,7 +3430,9 @@ document.addEventListener('keydown',function(e){
         4. Sube tu comprobante aqui abajo &#128071;
       </div>
 
-      <label class="flabel" style="margin-top:.5rem">Comprobante (foto)</label>
+      <div style="background:rgba(255,180,60,.1);border:1px solid rgba(255,180,60,.3);border-radius:10px;padding:.7rem .9rem;margin:.75rem 0;font-size:.75rem;color:#ffb84d;line-height:1.5">&#9888; <b>Obligatorio:</b> selecciona arriba el monto que enviaste y adjunta la foto del comprobante. Sin estos datos no podemos acreditar tu saldo.</div>
+
+      <label class="flabel" style="margin-top:.5rem">Comprobante (foto) *</label>
       <input class="finput" id="binance-foto" type="file" accept="image/*" style="padding:.55rem;margin-bottom:.6rem"/>
       <button onclick="enviarComprobante('binance')" style="width:100%;margin-bottom:.5rem;padding:.9rem;background:linear-gradient(90deg,#0088cc,#29b6f6);color:#fff;border:none;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.82rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(0,136,204,.3)">&#9993; ENVIAR COMPROBANTE</button>
 

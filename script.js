@@ -4785,14 +4785,24 @@ function enviarComprobante(metodo){
     if(parseFloat(usdZ) <= 6){ showToast("El monto debe ser mayor a 6 USD (comision)"); return; }
   } else if(metodo === 'binance'){
     fotoInput = document.getElementById('binance-foto');
-    if(_bncSel){ monto = 'Paga $'+_bncSel.paga+' / Recibe $'+_bncSel.recibe; }
-    else { monto = 'No especificado'; }
+    // OBLIGATORIO: debe elegir un paquete o escribir un monto
+    if(!_bncSel || !_bncSel.paga || _bncSel.paga <= 0){
+      showToast('Selecciona el paquete o escribe el monto que enviaste');
+      var mb = document.getElementById('binance-montos');
+      if(mb) mb.scrollIntoView({behavior:'smooth', block:'center'});
+      return;
+    }
+    monto = 'Paga $'+_bncSel.paga+' / Recibe $'+_bncSel.recibe;
     extra = 'Binance ID: 1106987175';
     metodoNom = 'Binance Pay';
   }
 
   var file = fotoInput && fotoInput.files && fotoInput.files[0];
-  if(!file){ showToast('Adjunta la foto de tu comprobante'); return; }
+  if(!file){
+    showToast('\u26A0 Debes adjuntar la foto de tu comprobante');
+    if(fotoInput){ fotoInput.scrollIntoView({behavior:'smooth', block:'center'}); fotoInput.style.border='2px solid #ff6b6b'; setTimeout(function(){ fotoInput.style.border=''; }, 2500); }
+    return;
+  }
 
   showToast('Enviando comprobante...', 3000);
 
