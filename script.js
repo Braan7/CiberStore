@@ -5198,11 +5198,11 @@ function registrarPedidoHonor(producto, clanId, precio, clanNombre){
 
 // ═══ CARGAR PEDIDOS EN SEGUIMIENTO (Mis Compras) ═══
 var ESTADO_LABEL = {
-  pendiente:{t:'Pendiente',c:'pe-pendiente',pct:10},
-  procesando:{t:'Procesando',c:'pe-procesando',pct:40},
-  enviado:{t:'Enviado',c:'pe-enviado',pct:75},
-  completado:{t:'Completado',c:'pe-completado',pct:100},
-  rechazado:{t:'Rechazado',c:'pe-rechazado',pct:0}
+  pendiente:{t:'\uD83D\uDCE5 Recibido',c:'pe-pendiente',pct:15},
+  procesando:{t:'\u2699\uFE0F Preparando',c:'pe-procesando',pct:50},
+  enviado:{t:'\uD83D\uDE9A Enviado',c:'pe-enviado',pct:80},
+  completado:{t:'\u2705 Entregado',c:'pe-completado',pct:100},
+  rechazado:{t:'\u274C Rechazado',c:'pe-rechazado',pct:0}
 };
 
 function cargarPedidosSeguimiento(){
@@ -6646,4 +6646,84 @@ function _mostrarReembolsoEnviado(motivo){
     + '<div style="font-size:.78rem;color:var(--muted);line-height:1.6;margin-bottom:1rem">Recibimos tu solicitud por <b style="color:#fff">'+motivo+'</b>.<br/>La revisaremos y te contactaremos por WhatsApp.</div>'
     + '<button onclick="openSmartWA()" style="width:100%;padding:.85rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:11px;font-family:Poppins;font-weight:700;font-size:.85rem;cursor:pointer">\uD83D\uDCF1 Escribirnos por WhatsApp</button>'
     + '</div>';
+}
+
+
+// ═══════════ GESTION DE ENTREGAS (admin cambia estado de pedidos) ═══════════
+var _ESTADOS_FLUJO = ['pendiente','procesando','enviado','completado'];
+var _ESTADOS_NOMBRE = {
+  pendiente:'\uD83D\uDCE5 Recibido',
+  procesando:'\u2699\uFE0F Preparando',
+  enviado:'\uD83D\uDE9A Enviado',
+  completado:'\u2705 Entregado',
+  rechazado:'\u274C Rechazado'
+};
+
+function admLoadEntregas(){
+  var cont = document.getElementById('adm-entregas-lista');
+  if(!cont) return;
+  cont.innerHTML = '<div style="text-align:center;color:var(--muted);padding:1.5rem;font-size:.82rem">Cargando...</div>';
+
+  var userF = ((document.getElementById('adm-entrega-user')||{}).value||'').trim().toLowerCase();
+  var qs = 'order=created_at.desc&limit=60';
+  if(userF) qs = 'username=eq.'+encodeURIComponent(userF)+'&order=created_at.desc&limit=60';
+
+  sb.get('pedidos', qs).then(function(peds){
+    if(!peds || !peds.length){
+      cont.innerHTML = '<div style="text-align:center;color:var(--muted);padding:1.5rem;font-size:.82rem">Sin pedidos</div>';
+      return;
+    }
+    var h = '';
+    peds.forEach(function(p){
+      var estActual = p.estado || 'pendiente';
+      if(estActual === 'rechazado'){
+        h += _tarjetaEntrega(p, estActual, true);
+      } else {
+        h += _tarjetaEntrega(p, estActual, false);
+      }
+    });
+    cont.innerHTML = h;
+  }).catch(function(){
+    cont.innerHTML = '<div style="text-align:center;color:#ff6b6b;padding:1.5rem;font-size:.82rem">Error al cargar</div>';
+  });
+}
+
+function _tarjetaEntrega(p, estActual, rechazado){
+  var fecha = p.created_at ? new Date(p.created_at).toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+  var botones = '';
+  if(!rechazado){
+    _ESTADOS_FLUJO.forEach(function(est){
+      var activo = (est === estActual);
+      botones += '<button onclick="admSetEstado(\''+p.id+'\',\''+est+'\')" style="flex:1;min-width:70px;padding:.45rem .3rem;border-radius:8px;font-family:Oxanium;font-weight:700;font-size:.65rem;cursor:pointer;border:1px solid '
+        + (activo?'#a78bfa;background:linear-gradient(90deg,#a78bfa,#7c3aed);color:#fff':'rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:var(--muted)')+'">'
+        + _ESTADOS_NOMBRE[est].replace(/[^\x00-\x7F ]/g,'').trim() + '</button>';
+    });
+  }
+  return '<div style="background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:12px;padding:.9rem 1rem">'
+    + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;margin-bottom:.7rem">'
+    +   '<div><div style="font-weight:700;color:#fff;font-size:.85rem">'+_esc(p.producto||'Pedido')+'</div>'
+    +   '<div style="font-size:.7rem;color:var(--muted);margin-top:.2rem">'+_esc(p.username||'')+(p.ff_id?(' \u00b7 ID: '+_esc(p.ff_id)):'')+' \u00b7 '+fecha+'</div></div>'
+    +   '<span style="font-size:.68rem;font-weight:700;color:#c4a5f7;white-space:nowrap">'+(_ESTADOS_NOMBRE[estActual]||estActual)+'</span>'
+    + '</div>'
+    + (rechazado ? '<div style="font-size:.72rem;color:#ff6b6b">Pedido rechazado</div>'
+       : '<div style="display:flex;gap:.35rem;flex-wrap:wrap">'+botones+'</div>'
+         + '<button onclick="admSetEstado(\''+p.id+'\',\'rechazado\')" style="width:100%;margin-top:.5rem;padding:.4rem;border-radius:8px;background:rgba(255,80,80,.08);border:1px solid rgba(255,80,80,.25);color:#ff6b6b;font-family:Oxanium;font-weight:700;font-size:.65rem;cursor:pointer">Rechazar pedido</button>')
+    + '</div>';
+}
+
+function admSetEstado(pedidoId, nuevoEstado){
+  if(typeof sb === 'undefined' || !sb.patch){
+    showToast('No se puede actualizar ahora');
+    return;
+  }
+  // Calcular progreso segun el estado
+  var pct = { pendiente:15, procesando:50, enviado:80, completado:100, rechazado:0 }[nuevoEstado] || 0;
+
+  sb.patch('pedidos', { estado: nuevoEstado }, 'id=eq.'+encodeURIComponent(pedidoId)).then(function(){
+    showToast('\u2705 Estado actualizado a '+(_ESTADOS_NOMBRE[nuevoEstado]||nuevoEstado), 2500);
+    admLoadEntregas();
+  }).catch(function(e){
+    console.error('[ENTREGA]', e);
+    showToast('Error al actualizar. Revisa que la tabla pedidos permita UPDATE.', 4000);
+  });
 }
