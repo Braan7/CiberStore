@@ -584,8 +584,9 @@ body.light-mode .lk-card{background:#fff}
 .adm-section{display:none;padding:1.5rem}
 .adm-section.active{display:block}
 .adm-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.75rem}
-.adm-stat-card{background:linear-gradient(135deg,#0d1020,#0a0e1a);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:1.25rem;text-align:center;transition:all .2s;cursor:default}
-.adm-stat-card:hover{transform:translateY(-2px);border-color:rgba(0,170,255,.25)}
+.adm-stat-card{background:linear-gradient(160deg,rgba(124,58,237,.1),rgba(255,255,255,.02));border:1px solid rgba(124,58,237,.2);border-radius:18px;padding:1.35rem 1.1rem;text-align:center;transition:all .25s;cursor:default;position:relative;overflow:hidden}
+.adm-stat-card::after{content:'';position:absolute;top:-30%;right:-20%;width:120px;height:120px;background:radial-gradient(circle,rgba(124,58,237,.15),transparent 70%);pointer-events:none}
+.adm-stat-card:hover{transform:translateY(-3px);border-color:rgba(124,58,237,.4);box-shadow:0 10px 28px rgba(124,58,237,.18)}
 .adm-stat-val{font-family:Oxanium;font-size:1.6rem;font-weight:900;display:block;margin-bottom:.3rem}
 .adm-stat-lbl{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px}
 .adm-stat-ico{font-size:1.6rem;margin-bottom:.5rem;display:block}
@@ -1379,6 +1380,109 @@ h2,h3{
 /* Color de seleccion suave (por si el usuario selecciona algo) */
 ::selection{background:rgba(77,163,255,.25);color:#fff}
 ::-moz-selection{background:rgba(77,163,255,.25);color:#fff}
+
+/* ═══════════ PANEL ADMIN MODERNO ═══════════ */
+.admin-card, .adm-card{
+  background:linear-gradient(160deg,#12172a,#0c0f1c)!important;
+  border:1px solid rgba(255,255,255,.08)!important;
+  border-radius:18px!important;
+  padding:1.4rem!important;
+  margin-bottom:1.1rem!important;
+  box-shadow:0 8px 30px rgba(0,0,0,.25)!important;
+  transition:border-color .2s;
+}
+.admin-card:hover, .adm-card:hover{ border-color:rgba(124,58,237,.25)!important; }
+
+/* Inputs modernos */
+.admin-inp{
+  background:rgba(255,255,255,.03)!important;
+  border:1px solid rgba(255,255,255,.1)!important;
+  border-radius:10px!important;
+  padding:.62rem .85rem!important;
+  font-size:.85rem!important;
+  transition:all .2s;
+}
+.admin-inp:focus{
+  border-color:#7c3aed!important;
+  background:rgba(124,58,237,.06)!important;
+  box-shadow:0 0 0 3px rgba(124,58,237,.12)!important;
+}
+
+/* Botones de accion modernos */
+.btn-admin-create, .btn-admin-login{
+  background:linear-gradient(135deg,#7c3aed,#a78bfa)!important;
+  border:none!important;
+  border-radius:11px!important;
+  padding:.7rem 1.4rem!important;
+  font-family:Oxanium!important;
+  font-weight:800!important;
+  letter-spacing:.5px!important;
+  box-shadow:0 6px 18px rgba(124,58,237,.3)!important;
+  transition:transform .15s, box-shadow .2s;
+}
+.btn-admin-create:hover, .btn-admin-login:hover{
+  transform:translateY(-2px)!important;
+  box-shadow:0 8px 24px rgba(124,58,237,.45)!important;
+}
+.btn-admin-create:active, .btn-admin-login:active{ transform:translateY(0)!important; }
+
+/* Titulos de seccion con barra lateral */
+.adm-card-title, .admin-sec-title{
+  position:relative;
+  padding-left:.7rem!important;
+}
+.adm-card-title::before, .admin-sec-title::before{
+  content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);
+  width:3px;height:14px;border-radius:2px;
+  background:linear-gradient(180deg,#a78bfa,#7c3aed);
+}
+
+/* Tablas modernas: en movil se vuelven tarjetas */
+.adm-table{border-collapse:separate!important;border-spacing:0!important}
+.adm-table th{
+  background:rgba(124,58,237,.06)!important;
+  color:#a78bfa!important;
+  font-size:.62rem!important;
+}
+.adm-table tr:hover td{ background:rgba(124,58,237,.05)!important; }
+
+/* Nav del panel admin */
+.adm-nav{
+  background:rgba(0,0,0,.3)!important;
+  border-radius:14px!important;
+  padding:.4rem!important;
+  gap:.3rem!important;
+  flex-wrap:wrap;
+}
+.adm-nav-btn{
+  border-radius:10px!important;
+  font-family:Oxanium!important;
+  font-weight:700!important;
+  transition:all .2s;
+}
+.adm-nav-btn.active, .adm-nav-btn[data-active="true"]{
+  background:linear-gradient(90deg,#7c3aed,#a78bfa)!important;
+  color:#fff!important;
+}
+
+/* Stats cards del admin */
+.adm-stat{
+  background:linear-gradient(160deg,rgba(124,58,237,.08),rgba(255,255,255,.02))!important;
+  border:1px solid rgba(124,58,237,.18)!important;
+  border-radius:16px!important;
+  transition:transform .2s;
+}
+.adm-stat:hover{ transform:translateY(-3px); }
+
+/* Responsive: tablas scrolleables suaves en movil */
+@media(max-width:720px){
+  .adm-table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;white-space:nowrap}
+  .admin-card, .adm-card{padding:1.1rem!important;border-radius:15px!important}
+  .adm-inp-row, .admin-row{flex-direction:column!important}
+  .adm-inp-group, .admin-row>div{max-width:100%!important;width:100%!important;flex:1 1 100%!important}
+  .btn-admin-create, .btn-admin-login{width:100%!important}
+}
+
 </style>
 
 <script>
