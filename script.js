@@ -188,7 +188,9 @@ var obStep = 0;
 /* \u2500\u2500 CURRENCY / LANG \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 var LANG     = localStorage.getItem('cs_lang')     || 'es';
 var CURRENCY = localStorage.getItem('cs_currency') || 'MXN';
-var RATES    = {MXN:1, USD:0.051, EUR:0.047, ARS:50.2, PEN:0.19};
+var USD_MXN  = 17.45; // 1 USD = 17.45 MXN
+var RETIRO_COMISION = 0.15; // 15% de comision por retiro
+var RATES    = {MXN:1, USD:(1/USD_MXN), EUR:0.047, ARS:50.2, PEN:0.19};
 var CUR_SYM  = {MXN:'$', USD:'$', EUR:'\u20AC', ARS:'$', PEN:'S/'};
 var CUR_SUF  = {MXN:' MX', USD:' USD', EUR:' EUR', ARS:' ARS', PEN:' PEN'};
 
@@ -2500,10 +2502,26 @@ function admFullLoadMovs(){
   }).catch(function(){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:#ff6b6b;padding:2rem">Error</td></tr>';});
 }
 
+// Muestra el equivalente en MXN mientras el admin escribe
+function admCalcEquiv(){
+  var monto=parseFloat((document.getElementById('adm-saldo-monto')||{}).value||'0');
+  var cur=((document.getElementById('adm-saldo-moneda')||{}).value||'MXN');
+  var el=document.getElementById('adm-saldo-equiv');
+  if(!el) return;
+  if(!monto || monto<=0 || cur==='MXN'){ el.style.display='none'; return; }
+  var mxn = monto / (RATES[cur]||1);
+  el.style.display='block';
+  el.textContent = '\u2248 $'+mxn.toLocaleString('es-MX',{maximumFractionDigits:2})+' MXN (se aplicara este monto)';
+}
+
 function admSaldoAction(action){
   var username=((document.getElementById('adm-saldo-user')||{}).value||'').trim().toLowerCase();
-  var monto=parseFloat((document.getElementById('adm-saldo-monto')||{}).value||'0');
+  var montoInput=parseFloat((document.getElementById('adm-saldo-monto')||{}).value||'0');
+  var curAdm=((document.getElementById('adm-saldo-moneda')||{}).value||'MXN');
+  // Convertir siempre a MXN (el saldo se guarda en MXN)
+  var monto = Math.round((montoInput / (RATES[curAdm]||1)) * 100) / 100;
   var desc=((document.getElementById('adm-saldo-desc')||{}).value||'').trim()||'Ajuste manual por admin';
+  if(curAdm!=='MXN'){ desc += ' ('+montoInput+' '+curAdm+')'; }
   var msgEl=document.getElementById('adm-saldo-msg');
   function showMsg(txt,color){
     if(!msgEl) return;
@@ -2514,7 +2532,7 @@ function admSaldoAction(action){
     msgEl.style.display='block';
   }
   if(!username){showMsg('Ingresa el usuario','#ff6b6b');return;}
-  if(!monto||monto<=0){showMsg('Ingresa un monto valido','#ff6b6b');return;}
+  if(!montoInput||montoInput<=0){showMsg('Ingresa un monto valido','#ff6b6b');return;}
   sb.get('profiles','username=eq.'+encodeURIComponent(username)+'&limit=1').then(function(users){
     if(!users||!users[0]){showMsg('Usuario no encontrado','#ff6b6b');return;}
     var u=users[0];
@@ -2524,11 +2542,13 @@ function admSaldoAction(action){
     _rpcAjustarSaldo(u.id, delta).then(function(saldoNuevo){
       var sn = Number(saldoNuevo) || 0;
       sbAddMovimiento(u.id, action==='add'?'credito':'debito', monto, desc);
-      showMsg((action==='add'?'+':'-')+'$'+monto+' MX a '+username+'. Saldo TOTAL ahora: $'+sn.toLocaleString('es-MX'),'#00e676');
+      var detCur = (curAdm!=='MXN') ? (' ('+montoInput+' '+curAdm+')') : '';
+      showMsg((action==='add'?'+':'-')+'$'+monto+' MXN'+detCur+' a '+username+'. Saldo TOTAL ahora: $'+sn.toLocaleString('es-MX'),'#00e676');
       admFullLoadMovs();
       var mu=document.getElementById('adm-saldo-monto');
       var md=document.getElementById('adm-saldo-desc');
       if(mu) mu.value=''; if(md) md.value='';
+      var eqEl=document.getElementById('adm-saldo-equiv'); if(eqEl) eqEl.style.display='none';
     }).catch(function(err){
       console.error('[ADM SALDO] RPC fallo:', err);
       showMsg('Error: falta ejecutar FIX-SALDO-ATOMICO.sql en Supabase. Detalle: '+(err&&err.message?err.message:err),'#ff6b6b');
@@ -4834,39 +4854,173 @@ function selRetMetodo(metodo, el){
 function calcRetiro(){
   var monto = parseFloat((document.getElementById('ret-monto')||{}).value) || 0;
   var box = document.getElementById('ret-resumen');
-  if(monto <= 0){ if(box) box.style.display='none'; return; }
-  var comision = monto * 0.05;
+  var eq = document.getElementById('ret-equiv');
+  if(monto <= 0){
+    if(box) box.style.display='none';
+    if(eq) eq.style.display='none';
+    return;
+  }
+
+  var rate = RATES[_retMoneda] || 1;
+  var sym = CUR_SYM[_retMoneda] || '$';
+  var suf = CUR_SUF[_retMoneda] || '';
+
+  // Convertir a MXN (base) para validar y para el mensaje
+  var montoMxn = monto / rate;
+  var comision = monto * RETIRO_COMISION;
   var recibe = monto - comision;
+
   if(box) box.style.display='block';
-  var m=document.getElementById('ret-r-monto'); if(m) m.textContent='$'+monto.toLocaleString('es-MX');
-  var c=document.getElementById('ret-r-comision'); if(c) c.textContent='-$'+comision.toLocaleString('es-MX',{maximumFractionDigits:2});
-  var f=document.getElementById('ret-r-final'); if(f) f.textContent='$'+recibe.toLocaleString('es-MX',{maximumFractionDigits:2})+' MXN';
+  var m=document.getElementById('ret-r-monto'); if(m) m.textContent=sym+monto.toLocaleString('es-MX',{maximumFractionDigits:2})+suf;
+  var c=document.getElementById('ret-r-comision'); if(c) c.textContent='-'+sym+comision.toLocaleString('es-MX',{maximumFractionDigits:2});
+  var f=document.getElementById('ret-r-final'); if(f) f.textContent=sym+recibe.toLocaleString('es-MX',{maximumFractionDigits:2})+suf;
+
+  // Equivalente en MXN si eligio otra moneda
+  var rowMxn=document.getElementById('ret-r-mxn');
+  var valMxn=document.getElementById('ret-r-mxn-val');
+  if(_retMoneda !== 'MXN'){
+    if(rowMxn) rowMxn.style.display='flex';
+    if(valMxn) valMxn.textContent='$'+montoMxn.toLocaleString('es-MX',{maximumFractionDigits:2})+' MXN';
+    if(eq){
+      eq.style.display='block';
+      eq.textContent = '\u2248 $'+montoMxn.toLocaleString('es-MX',{maximumFractionDigits:2})+' MXN  (1 USD = '+USD_MXN+' MXN)';
+    }
+  } else {
+    if(rowMxn) rowMxn.style.display='none';
+    if(eq) eq.style.display='none';
+  }
 }
+
+// Moneda elegida para el retiro
+var _retMoneda = 'MXN';
+
+function selRetMoneda(cur){
+  _retMoneda = cur;
+  ['MXN','USD','EUR','ARS','PEN'].forEach(function(c){
+    var b = document.getElementById('retcur-'+c);
+    if(!b) return;
+    if(c === cur){
+      b.style.background='linear-gradient(90deg,#128c3e,#25d366)';
+      b.style.border='none';
+      b.style.color='#fff';
+    } else {
+      b.style.background='rgba(255,255,255,.04)';
+      b.style.border='1px solid var(--border)';
+      b.style.color='var(--muted)';
+    }
+  });
+  // Actualizar etiqueta y placeholder
+  var lbl = document.getElementById('ret-monto-label');
+  if(lbl) lbl.textContent = 'Monto a retirar ('+cur+')';
+  var inp = document.getElementById('ret-monto');
+  if(inp){
+    var minCur = 100 * (RATES[cur]||1);
+    inp.placeholder = 'Minimo: '+(CUR_SYM[cur]||'$')+minCur.toLocaleString('es-MX',{maximumFractionDigits:2})+(CUR_SUF[cur]||'');
+  }
+  calcRetiro();
+}
+
+// URL de la Edge Function de retiros
+var NOTIF_RETIRO_URL = 'https://pnotsqsudqpwqzssevig.supabase.co/functions/v1/notif-retiro';
+var _enviandoRetiro = false;
 
 function solicitarRetiro(){
   if(!authSession){ showToast('Inicia sesion'); setTimeout(showAuthModal,600); return; }
+  if(_enviandoRetiro){ return; }
+
   var destino = ((document.getElementById('ret-destino')||{}).value||'').trim();
   var monto = parseFloat((document.getElementById('ret-monto')||{}).value) || 0;
 
-  if(monto < 100){ showToast('El minimo de retiro es $100 MXN'); return; }
+  if(monto <= 0){ showToast('Escribe el monto a retirar'); return; }
+
+  var rate = RATES[_retMoneda] || 1;
+  var montoMxn = monto / rate;
+
+  if(montoMxn < 100){
+    showToast('El minimo de retiro es $100 MXN');
+    return;
+  }
   if(!destino){ showToast('Escribe tu '+(_retMetodo==='binance'?'correo/ID de Binance':'dato de Zelle')); return; }
 
-  var comision = monto * 0.05;
-  var recibe = monto - comision;
+  var saldo = authSession.saldo || 0;
+  if(montoMxn > saldo){
+    showToast('No tienes saldo suficiente. Tienes '+fmt(saldo));
+    return;
+  }
+
+  var comisionMxn = montoMxn * RETIRO_COMISION;
+  var recibeMxn = montoMxn - comisionMxn;
   var user = authSession.username || 'Revendedor';
   var metodoNom = _retMetodo === 'binance' ? 'Binance Pay' : 'Zelle';
 
-  var msg = 'Hola CiberStore! Quiero SOLICITAR UN RETIRO de mis ganancias de revendedor.%0A%0A'
-    + 'Usuario: ' + encodeURIComponent(user) + '%0A'
-    + 'Metodo: ' + encodeURIComponent(metodoNom) + '%0A'
-    + 'Destino: ' + encodeURIComponent(destino) + '%0A'
-    + 'Monto solicitado: $' + monto.toLocaleString('es-MX') + ' MXN%0A'
-    + 'Comision (5%): $' + comision.toLocaleString('es-MX',{maximumFractionDigits:2}) + '%0A'
-    + 'Recibo: $' + recibe.toLocaleString('es-MX',{maximumFractionDigits:2}) + ' MXN%0A%0A'
-    + 'Confirmo que mis datos son correctos.';
+  _enviandoRetiro = true;
+  var btnR = event && event.target ? event.target : null;
+  if(btnR){ btnR.disabled = true; btnR.innerHTML = 'Enviando...'; }
 
-  window.open('https://wa.me/12894273983?text=' + msg, '_blank');
-  showToast('Abriendo WhatsApp...', 2000);
+  fetch(NOTIF_RETIRO_URL, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      tipo: 'retiro',
+      username: user,
+      monto_mxn: Math.round(montoMxn*100)/100,
+      moneda: _retMoneda,
+      monto_moneda: monto,
+      comision_mxn: Math.round(comisionMxn*100)/100,
+      recibe_mxn: Math.round(recibeMxn*100)/100,
+      metodo: metodoNom,
+      destino: destino
+    })
+  }).then(function(r){ return r.json(); }).then(function(res){
+    _enviandoRetiro = false;
+    if(btnR){ btnR.disabled=false; btnR.innerHTML='\uD83D\uDE80 SOLICITAR RETIRO'; }
+    if(res && res.success){
+      _mostrarRetiroEnviado(monto, montoMxn, recibeMxn, metodoNom, destino);
+    } else {
+      showToast('No se pudo enviar: '+((res&&res.error)||'error'), 4000);
+    }
+  }).catch(function(){
+    _enviandoRetiro = false;
+    if(btnR){ btnR.disabled=false; btnR.innerHTML='\uD83D\uDE80 SOLICITAR RETIRO'; }
+    showToast('Error de conexion. Intenta de nuevo.', 3500);
+  });
+}
+
+function _mostrarRetiroEnviado(monto, montoMxn, recibeMxn, metodo, destino){
+  var ahora = new Date();
+  var fecha = ahora.toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'});
+  var hora = ahora.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+  var sym = CUR_SYM[_retMoneda] || '$';
+  var suf = CUR_SUF[_retMoneda] || '';
+
+  var ov = document.getElementById('recibo-retiro-ov');
+  if(ov) ov.remove();
+  ov = document.createElement('div');
+  ov.id = 'recibo-retiro-ov';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;padding:1.2rem;overflow-y:auto';
+  ov.onclick = function(e){ if(e.target===ov) ov.remove(); };
+  document.body.appendChild(ov);
+
+  var cont = document.createElement('div');
+  cont.style.cssText = 'max-width:420px;width:100%';
+  ov.appendChild(cont);
+
+  cont.innerHTML =
+    '<div style="background:linear-gradient(160deg,#0f1a15,#0a0f14);border:2px solid rgba(37,211,102,.35);border-radius:18px;padding:1.75rem 1.25rem;text-align:center">'
+    + '<div style="font-size:2.8rem;margin-bottom:.5rem">\uD83D\uDCB8</div>'
+    + '<div style="font-family:Oxanium;font-weight:900;font-size:1.2rem;color:#25d366;margin-bottom:.35rem;letter-spacing:.5px">SOLICITUD ENVIADA</div>'
+    + '<div style="font-size:.8rem;color:var(--muted);margin-bottom:1.35rem">Estamos revisando tu retiro</div>'
+    + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
+    +   _filaRecibo('\uD83D\uDCB0 Solicitas', sym+monto.toLocaleString('es-MX',{maximumFractionDigits:2})+suf)
+    +   (_retMoneda!=='MXN' ? _filaRecibo('\uD83D\uDCB1 En MXN', '$'+montoMxn.toLocaleString('es-MX',{maximumFractionDigits:2})+' MXN') : '')
+    +   _filaRecibo('\u2705 Recibes', '$'+recibeMxn.toLocaleString('es-MX',{maximumFractionDigits:2})+' MXN')
+    +   _filaRecibo('\uD83C\uDFE6 Metodo', metodo)
+    +   _filaRecibo('\uD83D\uDCE7 Destino', destino)
+    +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha+' \u00B7 '+hora, true)
+    + '</div>'
+    + '<div style="background:rgba(255,180,60,.08);border:1px solid rgba(255,180,60,.25);border-radius:10px;padding:.75rem .9rem;margin-top:1rem;font-size:.73rem;color:#ffb84d;line-height:1.55">\u23F3 Procesamos los retiros en <b>24-48 hrs habiles</b>. El saldo se descuenta cuando aprobamos la solicitud.</div>'
+    + '<button onclick="var o=document.getElementById(\'recibo-retiro-ov\'); if(o) o.remove();" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#22d3ee);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Entendido</button>'
+    + '</div>';
 }
 
 // Actualizar el saldo mostrado en la página de retiro
@@ -6345,6 +6499,7 @@ function _rpcAjustarSaldoUsername(username, delta){
 
 // ═══════════ SOLICITAR REEMBOLSO ═══════════
 var _enviandoReembolso = false;
+var _reembMovs = []; // movimientos cargados en el selector
 
 function toggleReembolso(){
   var form = document.getElementById('reembolso-form');
@@ -6383,16 +6538,16 @@ function _cargarPedidosReembolso(){
       sel.innerHTML = '<option value="">No tienes compras registradas</option>';
       return;
     }
+    _reembMovs = compras.slice(0,25);
     var h = '<option value="">Selecciona el pedido</option>';
-    compras.slice(0,25).forEach(function(m){
+    _reembMovs.forEach(function(m, i){
       var fechaTxt = m.created_at ? new Date(m.created_at).toLocaleDateString('es-MX',{day:'2-digit',month:'short'}) : '';
       var desc = (m.descripcion || 'Compra');
       var corto = desc.length > 55 ? desc.substring(0,55)+'...' : desc;
       var etiqueta = corto + ' - ' + fmt(m.monto||0) + (fechaTxt ? ' ('+fechaTxt+')' : '');
-      var valor = desc + ' | ' + fmt(m.monto||0) + (fechaTxt ? ' | '+fechaTxt : '');
-      h += '<option value="'+valor.replace(/"/g,'')+'">'+etiqueta+'</option>';
+      h += '<option value="'+i+'">'+etiqueta+'</option>';
     });
-    h += '<option value="Otro pedido no listado">Otro pedido no listado</option>';
+    h += '<option value="otro">Otro pedido no listado</option>';
     sel.innerHTML = h;
   }).catch(function(){
     sel.innerHTML = '<option value="">Error al cargar</option><option value="Otro pedido no listado">Otro pedido no listado</option>';
@@ -6406,43 +6561,58 @@ function enviarReembolso(){
   var err = document.getElementById('reemb-err');
   function showErr(m){ if(err){ err.textContent=m; err.style.display='block'; } }
 
-  var pedido = ((document.getElementById('reemb-pedido')||{}).value||'').trim();
+  var idxSel = ((document.getElementById('reemb-pedido')||{}).value||'').trim();
   var motivo = ((document.getElementById('reemb-motivo')||{}).value||'').trim();
   var detalle = ((document.getElementById('reemb-detalle')||{}).value||'').trim();
   var wa = ((document.getElementById('reemb-wa')||{}).value||'').trim();
 
-  if(!pedido){ showErr('Selecciona el pedido del que quieres reembolso.'); return; }
+  if(!idxSel){ showErr('Selecciona el pedido del que quieres reembolso.'); return; }
   if(!motivo){ showErr('Selecciona el motivo.'); return; }
   if(detalle.length < 10){ showErr('Explica un poco mas que paso (minimo 10 caracteres).'); return; }
   if(!wa || wa.replace(/\D/g,'').length < 8){ showErr('Escribe un WhatsApp valido.'); return; }
   if(err) err.style.display='none';
 
-  _enviandoReembolso = true;
-
-  var ahora = new Date();
-  var fecha = ahora.toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'});
-  var hora = ahora.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
-  var linea = '\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501';
-
-  var msg = linea + '\n'
-    + '\uD83D\uDD04 <b>SOLICITUD DE REEMBOLSO</b>\n'
-    + linea + '\n'
-    + '\uD83D\uDC64 Usuario: <b>' + authSession.username + '</b>\n'
-    + '\uD83D\uDCE6 Pedido: ' + pedido + '\n'
-    + '\u2753 Motivo: <b>' + motivo + '</b>\n'
-    + '\uD83D\uDCDD ' + detalle + '\n'
-    + '\uD83D\uDCF1 WhatsApp: +' + wa + '\n'
-    + '\uD83D\uDCC5 ' + fecha + ' \u00B7 \uD83D\uDD52 ' + hora + '\n'
-    + linea;
-
-  if(typeof tgSend === 'function'){ tgSend(msg); }
-  else if(typeof notificarPedidoTelegram === 'function'){
-    notificarPedidoTelegram('Reembolso', 'REEMBOLSO '+authSession.username+' | '+pedido+' | '+motivo+' | '+detalle+' | WA:'+wa, 0, 0);
+  // Obtener descripcion y monto del pedido elegido
+  var pedidoTxt = 'Otro pedido no listado';
+  var montoMxn = 0;
+  if(idxSel !== 'otro'){
+    var mov = _reembMovs[parseInt(idxSel)];
+    if(mov){
+      var fTxt = mov.created_at ? new Date(mov.created_at).toLocaleDateString('es-MX',{day:'2-digit',month:'short'}) : '';
+      pedidoTxt = (mov.descripcion||'Compra') + (fTxt ? ' ('+fTxt+')' : '');
+      montoMxn = Number(mov.monto) || 0;
+    }
   }
 
-  _mostrarReembolsoEnviado(motivo);
+  _enviandoReembolso = true;
+  var btnRe = event && event.target ? event.target : null;
+  if(btnRe){ btnRe.disabled = true; btnRe.innerHTML = 'Enviando...'; }
 
-  setTimeout(function(){ _enviandoReembolso = false; }, 3000);
+  fetch(NOTIF_RETIRO_URL, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      tipo: 'reembolso',
+      username: authSession.username,
+      monto_mxn: montoMxn,
+      pedido: pedidoTxt,
+      motivo: motivo,
+      detalle: detalle,
+      whatsapp: wa
+    })
+  }).then(function(r){ return r.json(); }).then(function(res){
+    _enviandoReembolso = false;
+    if(btnRe){ btnRe.disabled=false; btnRe.innerHTML='ENVIAR SOLICITUD'; }
+    if(res && res.success){
+      _mostrarReembolsoEnviado(motivo);
+    } else {
+      showErr('No se pudo enviar: '+((res&&res.error)||'error'));
+    }
+  }).catch(function(){
+    _enviandoReembolso = false;
+    if(btnRe){ btnRe.disabled=false; btnRe.innerHTML='ENVIAR SOLICITUD'; }
+    showErr('Error de conexion. Intenta de nuevo.');
+  });
 }
 
 function _mostrarReembolsoEnviado(motivo){

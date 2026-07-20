@@ -2681,7 +2681,7 @@ document.addEventListener('keydown',function(e){
     <div style="background:linear-gradient(135deg,rgba(37,211,102,.1),rgba(37,211,102,.03));border:1px solid rgba(37,211,102,.25);border-radius:16px;padding:1.4rem;margin-bottom:1.25rem;text-align:center">
       <div style="font-size:.7rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:.3rem">Saldo disponible para retiro</div>
       <div style="font-family:Oxanium;font-size:2rem;font-weight:900;color:#25d366" id="retiro-saldo">$0.00 MXN</div>
-      <div style="font-size:.72rem;color:var(--muted);margin-top:.5rem;line-height:1.6">Comision de retiro: <strong style="color:#fff">5%</strong> &middot; Minimo: <strong style="color:#fff">$100 MXN</strong></div>
+      <div style="font-size:.72rem;color:var(--muted);margin-top:.5rem;line-height:1.6">Comision de retiro: <strong style="color:#fff">15%</strong> &middot; Minimo: <strong style="color:#fff">$100 MXN</strong></div>
     </div>
 
     <!-- Aviso solo revendedores -->
@@ -2709,19 +2709,31 @@ document.addEventListener('keydown',function(e){
     <input class="finput" id="ret-destino" type="text" placeholder="usuario@correo.com o ID de Binance"/>
     <div style="font-size:.7rem;color:#ffb84d;margin:-.35rem 0 .85rem;display:flex;gap:.35rem;align-items:flex-start"><span>&#9888;</span> <span>Verifica bien el correo o ID. Los errores no se pueden revertir.</span></div>
 
-    <label class="flabel">Monto a retirar (MXN)</label>
-    <input class="finput" id="ret-monto" type="number" placeholder="Minimo: $100" min="100" oninput="calcRetiro()"/>
+    <!-- Moneda del retiro -->
+    <div style="font-family:Oxanium;font-size:.8rem;font-weight:700;color:#fff;margin-bottom:.6rem">&#128176; Moneda</div>
+    <div id="ret-monedas" style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem">
+      <button onclick="selRetMoneda('MXN')" id="retcur-MXN" class="retcur sel" style="flex:1;min-width:62px;padding:.6rem .3rem;background:linear-gradient(90deg,#128c3e,#25d366);border:none;color:#fff;border-radius:10px;font-family:Oxanium;font-weight:800;font-size:.75rem;cursor:pointer">MXN</button>
+      <button onclick="selRetMoneda('USD')" id="retcur-USD" class="retcur" style="flex:1;min-width:62px;padding:.6rem .3rem;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted);border-radius:10px;font-family:Oxanium;font-weight:800;font-size:.75rem;cursor:pointer">USD</button>
+      <button onclick="selRetMoneda('EUR')" id="retcur-EUR" class="retcur" style="flex:1;min-width:62px;padding:.6rem .3rem;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted);border-radius:10px;font-family:Oxanium;font-weight:800;font-size:.75rem;cursor:pointer">EUR</button>
+      <button onclick="selRetMoneda('ARS')" id="retcur-ARS" class="retcur" style="flex:1;min-width:62px;padding:.6rem .3rem;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted);border-radius:10px;font-family:Oxanium;font-weight:800;font-size:.75rem;cursor:pointer">ARS</button>
+      <button onclick="selRetMoneda('PEN')" id="retcur-PEN" class="retcur" style="flex:1;min-width:62px;padding:.6rem .3rem;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted);border-radius:10px;font-family:Oxanium;font-weight:800;font-size:.75rem;cursor:pointer">PEN</button>
+    </div>
+
+    <label class="flabel" id="ret-monto-label">Monto a retirar (MXN)</label>
+    <input class="finput" id="ret-monto" type="number" placeholder="Minimo: $100 MXN" min="1" step="0.01" oninput="calcRetiro()"/>
+    <div id="ret-equiv" style="font-size:.72rem;color:var(--c1);margin:-.35rem 0 .85rem;display:none"></div>
 
     <!-- Resumen -->
     <div id="ret-resumen" style="display:none;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:11px;padding:.9rem 1rem;margin:.85rem 0">
       <div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);margin-bottom:.35rem"><span>Monto solicitado</span><span id="ret-r-monto" style="color:#fff">$0</span></div>
-      <div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);margin-bottom:.35rem"><span>Comision (5%)</span><span id="ret-r-comision" style="color:#ff6b6b">-$0</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);margin-bottom:.35rem"><span>Comision (15%)</span><span id="ret-r-comision" style="color:#ff6b6b">-$0</span></div>
       <div style="display:flex;justify-content:space-between;font-size:.85rem;font-weight:700;padding-top:.35rem;border-top:1px solid var(--border)"><span style="color:#fff">Recibes</span><span id="ret-r-final" style="color:#25d366">$0</span></div>
+      <div id="ret-r-mxn" style="display:none;justify-content:space-between;font-size:.72rem;color:var(--muted);padding-top:.45rem;margin-top:.45rem;border-top:1px dashed rgba(255,255,255,.08)"><span>Equivalente en MXN</span><span id="ret-r-mxn-val" style="color:#9ec5ff">$0 MXN</span></div>
     </div>
 
     <button onclick="solicitarRetiro()" style="width:100%;margin-top:.75rem;padding:.9rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.85rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(37,211,102,.3)">&#128640; SOLICITAR RETIRO</button>
 
-    <div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.75rem;line-height:1.6">Tu solicitud se envia por WhatsApp. Procesamos los retiros en 24-48 hrs habiles tras verificar tu cuenta de revendedor.</div>
+    <div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.75rem;line-height:1.6">Tu solicitud se revisa manualmente. Procesamos los retiros en 24-48 hrs habiles tras verificar tu cuenta de revendedor.</div>
   </div>
 </div>
 
@@ -4178,13 +4190,23 @@ document.addEventListener('keydown',function(e){
       <div style="font-family:Oxanium;font-size:.72rem;color:#00e676;letter-spacing:1px;margin-bottom:.85rem">&#128176; GESTIONAR SALDO</div>
       <div class="adm-inp-row">
         <div class="adm-inp-group" style="flex:2"><label>Usuario</label><input class="admin-inp" id="adm-saldo-user" type="text" placeholder="Username exacto" style="width:100%"/></div>
-        <div class="adm-inp-group" style="max-width:130px"><label>Monto MXN</label><input class="admin-inp" id="adm-saldo-monto" type="number" placeholder="200" style="width:100%"/></div>
+        <div class="adm-inp-group" style="max-width:120px"><label>Monto</label><input class="admin-inp" id="adm-saldo-monto" type="number" step="0.01" placeholder="200" oninput="admCalcEquiv()" style="width:100%"/></div>
+        <div class="adm-inp-group" style="max-width:100px"><label>Moneda</label>
+          <select class="admin-inp" id="adm-saldo-moneda" onchange="admCalcEquiv()" style="width:100%">
+            <option value="MXN">MXN</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="ARS">ARS</option>
+            <option value="PEN">PEN</option>
+          </select>
+        </div>
         <div class="adm-inp-group" style="flex:2"><label>Descripcion</label><input class="admin-inp" id="adm-saldo-desc" type="text" placeholder="Recarga STORI #ref" style="width:100%"/></div>
       </div>
       <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.25rem">
         <button onclick="admSaldoAction('add')" style="padding:.48rem 1.1rem;background:rgba(0,230,118,.12);border:1px solid rgba(0,230,118,.3);color:#00e676;border-radius:6px;font-family:'Poppins';font-weight:800;font-size:.78rem;cursor:pointer">&#43; Agregar Saldo</button>
         <button onclick="admSaldoAction('remove')" style="padding:.48rem 1.1rem;background:rgba(255,80,80,.1);border:1px solid rgba(255,80,80,.25);color:#ff6b6b;border-radius:6px;font-family:'Poppins';font-weight:800;font-size:.78rem;cursor:pointer">&#8722; Quitar Saldo</button>
       </div>
+      <div id="adm-saldo-equiv" style="margin-top:.5rem;font-size:.78rem;color:#9ec5ff;display:none"></div>
       <div id="adm-saldo-msg" style="margin-top:.65rem;font-size:.82rem;display:none;padding:.55rem .75rem;border-radius:7px;border:1px solid"></div>
     </div>
     <div style="font-family:Oxanium;font-size:.72rem;color:var(--muted);letter-spacing:1px;margin-bottom:.65rem">ULTIMOS MOVIMIENTOS</div>
