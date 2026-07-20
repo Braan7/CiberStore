@@ -42,7 +42,6 @@ function tgNotifyRegister(profile){
     tgSend(msg);
   }
 
-  // Contar cuántos usuarios hay usando sb.get (que ya existe en el sistema)
   try {
     sb.get('profiles', 'select=id').then(function(rows){
       armarYenviar(Array.isArray(rows) ? rows.length : null);
@@ -561,29 +560,80 @@ function submitResena(){
     .then(function(){ closeResenaModal(); renderResenas(); showToast('Gracias por tu resena!', 2500); })
     .catch(function(){ showToast('Error al publicar. Intenta de nuevo.'); });
 }
+// Colores para los avatares (segun inicial del nombre)
+var _RESENA_COLORS = ['#7c3aed','#2563eb','#0891b2','#059669','#d97706','#dc2626','#db2777','#9333ea','#4f46e5','#0d9488'];
+
+function _avatarColor(nombre){
+  var n = (nombre || 'U').toUpperCase().charCodeAt(0) || 85;
+  return _RESENA_COLORS[n % _RESENA_COLORS.length];
+}
+
+// Estrellas con relleno preciso (soporta medias estrellas)
+function _estrellasHTML(stars){
+  var full = Math.floor(stars);
+  var half = (stars - full) >= 0.5;
+  var h = '<span style="display:inline-flex;gap:1px;letter-spacing:0">';
+  for(var s = 1; s <= 5; s++){
+    var color = (s <= full) ? '#ffb800' : ((s === full+1 && half) ? '#ffb800' : '#39394d');
+    h += '<span style="color:'+color+';font-size:.85rem">\u2605</span>';
+  }
+  h += '</span>';
+  return h;
+}
+
+// Tiempo relativo: "hace 2 dias", "hace 3 h", etc.
+function _tiempoRelativo(fechaISO){
+  if(!fechaISO) return '';
+  var diff = Date.now() - new Date(fechaISO).getTime();
+  var min = Math.floor(diff/60000);
+  if(min < 1) return 'ahora';
+  if(min < 60) return 'hace '+min+' min';
+  var hrs = Math.floor(min/60);
+  if(hrs < 24) return 'hace '+hrs+' h';
+  var dias = Math.floor(hrs/24);
+  if(dias < 7) return 'hace '+dias+(dias===1?' dia':' dias');
+  var sem = Math.floor(dias/7);
+  if(sem < 5) return 'hace '+sem+(sem===1?' semana':' semanas');
+  var meses = Math.floor(dias/30);
+  return 'hace '+meses+(meses===1?' mes':' meses');
+}
+
 function renderResenas(){
   var grid    = document.getElementById('resenas-grid');
   var summary = document.getElementById('resenas-summary');
   if(!grid) return;
   grid.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);font-size:.82rem;grid-column:1/-1">Cargando...</div>';
-  sb.get('resenas', 'order=created_at.desc&limit=9').then(function(rows){
+  sb.get('resenas', 'order=created_at.desc&limit=12').then(function(rows){
     if(!rows || !rows.length){
       grid.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);font-size:.82rem;grid-column:1/-1;background:var(--card);border:1px solid var(--border);border-radius:11px">Aun no hay resenas. Se el primero!</div>';
       if(summary) summary.textContent = 'Se el primero en opinar';
       return;
     }
     var avg = (rows.reduce(function(s, r){ return s + r.stars; }, 0) / rows.length).toFixed(1);
-    if(summary) summary.textContent = avg + ' de 5 \u2605 \u2014 ' + rows.length + ' resena' + (rows.length !== 1 ? 's' : '');
+    if(summary){
+      summary.innerHTML = '<span style="color:#ffb800;font-weight:700">'+_estrellasHTML(parseFloat(avg))+'</span> <b style="color:#fff">'+avg+'</b> de 5 \u00b7 '+rows.length+' rese\u00f1a'+(rows.length !== 1 ? 's' : '');
+    }
     var h = '';
     rows.forEach(function(r){
-      var stars = '';
-      for(var s = 1; s <= 5; s++) stars += '<span style="color:' + (s <= r.stars ? '#ffd000' : '#2a2a3a') + '">&#11088;</span>';
-      var fecha = r.created_at ? new Date(r.created_at).toLocaleDateString('es-MX', {day:'2-digit', month:'short', year:'numeric'}) : '';
-      h += '<div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:1rem;display:flex;flex-direction:column;gap:.5rem">'
-        + '<div style="display:flex;justify-content:space-between"><span style="font-size:.85rem;font-weight:700;color:#fff">' + r.username + '</span><span style="font-size:.62rem;color:var(--muted)">' + fecha + '</span></div>'
-        + '<div>' + stars + '</div>'
-        + '<div style="font-size:.65rem;color:var(--c1);font-weight:600">' + r.servicio + '</div>'
-        + '<div style="font-size:.78rem;color:var(--muted);line-height:1.55">' + r.texto + '</div>'
+      var inicial = (r.username || 'U').charAt(0).toUpperCase();
+      var color = _avatarColor(r.username);
+      var tiempo = _tiempoRelativo(r.created_at);
+
+      h += '<div style="background:linear-gradient(160deg,rgba(255,255,255,.025),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:1.1rem;display:flex;flex-direction:column;gap:.7rem;transition:border-color .2s" onmouseover="this.style.borderColor=\'rgba(124,58,237,.25)\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.08)\'">'
+        // Header: avatar + nombre + verificado
+        + '<div style="display:flex;align-items:center;gap:.65rem">'
+        +   '<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,'+color+','+color+'aa);display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-weight:800;font-size:1.05rem;color:#fff;flex-shrink:0;box-shadow:0 3px 10px '+color+'55">'+inicial+'</div>'
+        +   '<div style="flex:1;min-width:0">'
+        +     '<div style="display:flex;align-items:center;gap:.35rem"><span style="font-size:.85rem;font-weight:700;color:#fff">'+r.username+'</span><span title="Compra verificada" style="color:#25d366;font-size:.7rem">\u2714\uFE0F</span></div>'
+        +     '<div style="font-size:.62rem;color:var(--muted)">'+tiempo+'</div>'
+        +   '</div>'
+        + '</div>'
+        // Estrellas
+        + '<div style="display:flex;align-items:center;gap:.5rem">'+_estrellasHTML(r.stars)+'<span style="font-size:.65rem;color:#25d366;font-weight:700;background:rgba(37,211,102,.1);padding:.1rem .45rem;border-radius:99px">Compra verificada</span></div>'
+        // Servicio
+        + '<div style="font-size:.68rem;color:#a78bfa;font-weight:600;display:flex;align-items:center;gap:.3rem">\uD83D\uDCE6 '+r.servicio+'</div>'
+        // Texto
+        + '<div style="font-size:.8rem;color:#c5cad6;line-height:1.6">\u201c'+r.texto+'\u201d</div>'
         + '</div>';
     });
     grid.innerHTML = h;
