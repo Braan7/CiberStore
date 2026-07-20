@@ -614,12 +614,15 @@ function renderResenas(){
       summary.innerHTML = '<span style="color:#ffb800;font-weight:700">'+_estrellasHTML(parseFloat(avg))+'</span> <b style="color:#fff">'+avg+'</b> de 5 \u00b7 '+rows.length+' rese\u00f1a'+(rows.length !== 1 ? 's' : '');
     }
     var h = '';
-    rows.forEach(function(r){
+    rows.forEach(function(r, idx){
       var inicial = (r.username || 'U').charAt(0).toUpperCase();
       var color = _avatarColor(r.username);
       var tiempo = _tiempoRelativo(r.created_at);
+      // Las reseñas de la 4ta en adelante se ocultan hasta tocar "Ver todas"
+      var claseExtra = (idx >= 3) ? ' resena-extra' : '';
+      var estiloExtra = (idx >= 3) ? 'display:none;' : '';
 
-      h += '<div style="background:linear-gradient(160deg,rgba(255,255,255,.025),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:1.1rem;display:flex;flex-direction:column;gap:.7rem;transition:border-color .2s" onmouseover="this.style.borderColor=\'rgba(124,58,237,.25)\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.08)\'">'
+      h += '<div class="resena-card'+claseExtra+'" style="'+estiloExtra+'background:linear-gradient(160deg,rgba(255,255,255,.025),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:1.1rem;flex-direction:column;gap:.7rem;transition:border-color .2s" onmouseover="this.style.borderColor=\'rgba(124,58,237,.25)\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.08)\'">'
         // Header: avatar + nombre + verificado
         + '<div style="display:flex;align-items:center;gap:.65rem">'
         +   '<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,'+color+','+color+'aa);display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-weight:800;font-size:1.05rem;color:#fff;flex-shrink:0;box-shadow:0 3px 10px '+color+'55">'+inicial+'</div>'
