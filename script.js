@@ -700,6 +700,7 @@ function goPage(id){
   if(id==='diamantes') setTimeout(function(){ setDiamTipo('bonus'); }, 100);
   if(id==='codigos') setTimeout(_updateScarSaldo, 100);
   if(id==='clanes') setTimeout(renderClanes, 100);
+  if(id==='sobre') setTimeout(function(){ sobreTab('resenas'); }, 100);
   if(id==='likes') renderLikes();
   if(id==='membresia'){renderMems();renderWallet();}
   if(id==='perfil') renderPerfil();
@@ -6727,4 +6728,64 @@ function admSetEstado(pedidoId, nuevoEstado){
     console.error('[ENTREGA]', e);
     showToast('Error al actualizar. Revisa que la tabla pedidos permita UPDATE.', 4000);
   });
+}
+
+// ═══════════ SOBRE LA PAGINA (tabs: reseñas, terminos, contacto) ═══════════
+function sobreTab(tab){
+  ['resenas','terminos','contacto'].forEach(function(t){
+    var cont = document.getElementById('sobre-'+t);
+    var btn = document.getElementById('sobretab-'+t);
+    if(cont) cont.style.display = (t===tab)?'':'none';
+    if(btn){
+      if(t===tab){
+        btn.style.background='linear-gradient(90deg,var(--c2),var(--c1))';
+        btn.style.color='#fff';
+      } else {
+        btn.style.background='transparent';
+        btn.style.color='var(--muted)';
+      }
+    }
+  });
+  if(tab==='resenas') renderResenasFull();
+}
+
+// Renderiza TODAS las reseñas en la página Sobre
+function renderResenasFull(){
+  var grid = document.getElementById('sobre-resenas-grid');
+  var summary = document.getElementById('sobre-resenas-summary');
+  if(!grid) return;
+  if(typeof sb === 'undefined' || !sb.get){ return; }
+  grid.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);font-size:.82rem;grid-column:1/-1">Cargando...</div>';
+  sb.get('resenas', 'order=created_at.desc&limit=100').then(function(rows){
+    if(!rows || !rows.length){
+      grid.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);font-size:.82rem;grid-column:1/-1;background:var(--card);border:1px solid var(--border);border-radius:11px">Aun no hay resenas. Se el primero!</div>';
+      if(summary) summary.textContent = 'Se el primero en opinar';
+      return;
+    }
+    var avg = (rows.reduce(function(s, r){ return s + r.stars; }, 0) / rows.length).toFixed(1);
+    if(summary && typeof _estrellasHTML === 'function'){
+      summary.innerHTML = _estrellasHTML(parseFloat(avg)) + ' <b style="color:#fff">'+avg+'</b> de 5 \u00b7 '+rows.length+' resena'+(rows.length!==1?'s':'');
+    }
+    var h = '';
+    rows.forEach(function(r){
+      var inicial = (r.username || 'U').charAt(0).toUpperCase();
+      var color = (typeof _avatarColor==='function') ? _avatarColor(r.username) : '#7c3aed';
+      var tiempo = (typeof _tiempoRelativo==='function') ? _tiempoRelativo(r.created_at) : '';
+      var estrellas = (typeof _estrellasHTML==='function') ? _estrellasHTML(r.stars) : '';
+
+      h += '<div style="background:linear-gradient(160deg,rgba(255,255,255,.025),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:1.1rem;display:flex;flex-direction:column;gap:.7rem">'
+        + '<div style="display:flex;align-items:center;gap:.65rem">'
+        +   '<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,'+color+','+color+'aa);display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-weight:800;font-size:1.05rem;color:#fff;flex-shrink:0;box-shadow:0 3px 10px '+color+'55">'+inicial+'</div>'
+        +   '<div style="flex:1;min-width:0">'
+        +     '<div style="display:flex;align-items:center;gap:.35rem"><span style="font-size:.85rem;font-weight:700;color:#fff">'+r.username+'</span><span style="color:#25d366;font-size:.7rem">\u2714\uFE0F</span></div>'
+        +     '<div style="font-size:.62rem;color:var(--muted)">'+tiempo+'</div>'
+        +   '</div>'
+        + '</div>'
+        + '<div style="display:flex;align-items:center;gap:.5rem">'+estrellas+'<span style="font-size:.65rem;color:#25d366;font-weight:700;background:rgba(37,211,102,.1);padding:.1rem .45rem;border-radius:99px">Compra verificada</span></div>'
+        + '<div style="font-size:.68rem;color:#a78bfa;font-weight:600">\uD83D\uDCE6 '+r.servicio+'</div>'
+        + '<div style="font-size:.8rem;color:#c5cad6;line-height:1.6">\u201c'+r.texto+'\u201d</div>'
+        + '</div>';
+    });
+    grid.innerHTML = h;
+  }).catch(function(){ grid.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted);grid-column:1/-1">Error al cargar.</div>'; });
 }

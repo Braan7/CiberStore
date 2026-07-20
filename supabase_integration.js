@@ -603,7 +603,7 @@ function renderResenas(){
   var summary = document.getElementById('resenas-summary');
   if(!grid) return;
   grid.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);font-size:.82rem;grid-column:1/-1">Cargando...</div>';
-  sb.get('resenas', 'order=created_at.desc&limit=12').then(function(rows){
+  sb.get('resenas', 'order=created_at.desc&limit=3').then(function(rows){
     if(!rows || !rows.length){
       grid.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);font-size:.82rem;grid-column:1/-1;background:var(--card);border:1px solid var(--border);border-radius:11px">Aun no hay resenas. Se el primero!</div>';
       if(summary) summary.textContent = 'Se el primero en opinar';
