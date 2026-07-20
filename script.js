@@ -6341,3 +6341,118 @@ function _rpcAjustarSaldoUsername(username, delta){
     return r.json();
   });
 }
+
+
+// ═══════════ SOLICITAR REEMBOLSO ═══════════
+var _enviandoReembolso = false;
+
+function toggleReembolso(){
+  var form = document.getElementById('reembolso-form');
+  var arrow = document.getElementById('reembolso-arrow');
+  if(!form) return;
+  var abierto = form.style.display !== 'none';
+  form.style.display = abierto ? 'none' : 'block';
+  if(arrow) arrow.style.transform = abierto ? '' : 'rotate(180deg)';
+  if(!abierto){
+    _cargarPedidosReembolso();
+    // Prellenar WhatsApp si lo tenemos
+    var wa = document.getElementById('reemb-wa');
+    if(wa && !wa.value && authSession && authSession.whatsapp) wa.value = authSession.whatsapp;
+    form.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+}
+
+// Llena el selector con las compras del usuario
+function _cargarPedidosReembolso(){
+  var sel = document.getElementById('reemb-pedido');
+  if(!sel) return;
+  if(!authSession || !authSession.id || typeof sbGetMovimientos !== 'function'){
+    sel.innerHTML = '<option value="">No se pudieron cargar</option>';
+    return;
+  }
+  sbGetMovimientos(authSession.id).then(function(rows){
+    if(!rows || !rows.length){
+      sel.innerHTML = '<option value="">No tienes compras registradas</option>';
+      return;
+    }
+    // Solo compras (debitos), no recargas
+    var compras = rows.filter(function(m){
+      return m.tipo !== 'credito' && m.tipo !== 'ajuste' && m.tipo !== 'recarga';
+    });
+    if(!compras.length){
+      sel.innerHTML = '<option value="">No tienes compras registradas</option>';
+      return;
+    }
+    var h = '<option value="">Selecciona el pedido</option>';
+    compras.slice(0,25).forEach(function(m){
+      var fechaTxt = m.created_at ? new Date(m.created_at).toLocaleDateString('es-MX',{day:'2-digit',month:'short'}) : '';
+      var desc = (m.descripcion || 'Compra');
+      var corto = desc.length > 55 ? desc.substring(0,55)+'...' : desc;
+      var etiqueta = corto + ' - ' + fmt(m.monto||0) + (fechaTxt ? ' ('+fechaTxt+')' : '');
+      var valor = desc + ' | ' + fmt(m.monto||0) + (fechaTxt ? ' | '+fechaTxt : '');
+      h += '<option value="'+valor.replace(/"/g,'')+'">'+etiqueta+'</option>';
+    });
+    h += '<option value="Otro pedido no listado">Otro pedido no listado</option>';
+    sel.innerHTML = h;
+  }).catch(function(){
+    sel.innerHTML = '<option value="">Error al cargar</option><option value="Otro pedido no listado">Otro pedido no listado</option>';
+  });
+}
+
+function enviarReembolso(){
+  if(!authSession){ showToast('Inicia sesion primero'); setTimeout(showAuthModal,600); return; }
+  if(_enviandoReembolso){ return; }
+
+  var err = document.getElementById('reemb-err');
+  function showErr(m){ if(err){ err.textContent=m; err.style.display='block'; } }
+
+  var pedido = ((document.getElementById('reemb-pedido')||{}).value||'').trim();
+  var motivo = ((document.getElementById('reemb-motivo')||{}).value||'').trim();
+  var detalle = ((document.getElementById('reemb-detalle')||{}).value||'').trim();
+  var wa = ((document.getElementById('reemb-wa')||{}).value||'').trim();
+
+  if(!pedido){ showErr('Selecciona el pedido del que quieres reembolso.'); return; }
+  if(!motivo){ showErr('Selecciona el motivo.'); return; }
+  if(detalle.length < 10){ showErr('Explica un poco mas que paso (minimo 10 caracteres).'); return; }
+  if(!wa || wa.replace(/\D/g,'').length < 8){ showErr('Escribe un WhatsApp valido.'); return; }
+  if(err) err.style.display='none';
+
+  _enviandoReembolso = true;
+
+  var ahora = new Date();
+  var fecha = ahora.toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'});
+  var hora = ahora.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+  var linea = '\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501';
+
+  var msg = linea + '\n'
+    + '\uD83D\uDD04 <b>SOLICITUD DE REEMBOLSO</b>\n'
+    + linea + '\n'
+    + '\uD83D\uDC64 Usuario: <b>' + authSession.username + '</b>\n'
+    + '\uD83D\uDCE6 Pedido: ' + pedido + '\n'
+    + '\u2753 Motivo: <b>' + motivo + '</b>\n'
+    + '\uD83D\uDCDD ' + detalle + '\n'
+    + '\uD83D\uDCF1 WhatsApp: +' + wa + '\n'
+    + '\uD83D\uDCC5 ' + fecha + ' \u00B7 \uD83D\uDD52 ' + hora + '\n'
+    + linea;
+
+  if(typeof tgSend === 'function'){ tgSend(msg); }
+  else if(typeof notificarPedidoTelegram === 'function'){
+    notificarPedidoTelegram('Reembolso', 'REEMBOLSO '+authSession.username+' | '+pedido+' | '+motivo+' | '+detalle+' | WA:'+wa, 0, 0);
+  }
+
+  _mostrarReembolsoEnviado(motivo);
+
+  setTimeout(function(){ _enviandoReembolso = false; }, 3000);
+}
+
+function _mostrarReembolsoEnviado(motivo){
+  var form = document.getElementById('reembolso-form');
+  if(!form) return;
+  form.innerHTML =
+    '<div style="text-align:center;padding:1.25rem .5rem">'
+    + '<div style="font-size:2.4rem;margin-bottom:.5rem">\u2705</div>'
+    + '<div style="font-family:Oxanium;font-weight:900;font-size:1rem;color:#25d366;margin-bottom:.4rem">SOLICITUD ENVIADA</div>'
+    + '<div style="font-size:.78rem;color:var(--muted);line-height:1.6;margin-bottom:1rem">Recibimos tu solicitud por <b style="color:#fff">'+motivo+'</b>.<br/>La revisaremos y te contactaremos por WhatsApp.</div>'
+    + '<button onclick="openSmartWA()" style="width:100%;padding:.85rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:11px;font-family:Poppins;font-weight:700;font-size:.85rem;cursor:pointer">\uD83D\uDCF1 Escribirnos por WhatsApp</button>'
+    + '</div>';
+}

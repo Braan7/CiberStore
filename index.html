@@ -2261,6 +2261,49 @@ document.addEventListener('keydown',function(e){
             <div style="text-align:center;padding:1rem;color:var(--muted);font-size:.78rem">Cargando...</div>
           </div>
         </div>
+
+        <!-- SOLICITAR REEMBOLSO -->
+        <div style="margin-top:1.35rem;border-top:1px solid rgba(255,255,255,.06);padding-top:1.15rem">
+          <button onclick="toggleReembolso()" id="btn-reembolso" style="width:100%;display:flex;align-items:center;justify-content:space-between;background:rgba(255,180,60,.07);border:1px solid rgba(255,180,60,.22);border-radius:12px;padding:.85rem 1rem;cursor:pointer">
+            <span style="display:flex;align-items:center;gap:.6rem">
+              <span style="font-size:1.1rem">&#128260;</span>
+              <span style="font-family:Poppins;font-weight:600;font-size:.85rem;color:#ffb84d">Solicitar reembolso</span>
+            </span>
+            <span id="reembolso-arrow" style="color:#ffb84d;font-size:.8rem;transition:transform .3s">&#9662;</span>
+          </button>
+
+          <div id="reembolso-form" style="display:none;margin-top:.9rem;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:1rem">
+            <div style="font-size:.73rem;color:var(--muted);line-height:1.55;margin-bottom:.9rem">Cuentanos que paso y revisaremos tu caso. Te responderemos por WhatsApp.</div>
+
+            <label class="flabel">Pedido / movimiento *</label>
+            <select class="finput" id="reemb-pedido" style="margin-bottom:.7rem">
+              <option value="">Cargando tus pedidos...</option>
+            </select>
+
+            <label class="flabel">Motivo *</label>
+            <select class="finput" id="reemb-motivo" style="margin-bottom:.7rem">
+              <option value="">Selecciona un motivo</option>
+              <option value="No llego mi pedido">No llego mi pedido</option>
+              <option value="Llego incompleto">Llego incompleto</option>
+              <option value="Cobro duplicado">Me cobraron dos veces</option>
+              <option value="Compre por error">Compre por error</option>
+              <option value="ID equivocado">Puse el ID equivocado</option>
+              <option value="Otro">Otro motivo</option>
+            </select>
+
+            <label class="flabel">Explica que paso *</label>
+            <textarea class="finput" id="reemb-detalle" rows="3" placeholder="Danos detalles: que compraste, que paso, tu ID..." style="resize:vertical;min-height:70px;margin-bottom:.7rem"></textarea>
+
+            <label class="flabel">WhatsApp de contacto *</label>
+            <input class="finput" id="reemb-wa" type="text" placeholder="Tu numero de WhatsApp" style="margin-bottom:.8rem"/>
+
+            <div id="reemb-err" style="display:none;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.3);color:#ff6b6b;border-radius:9px;padding:.65rem .85rem;font-size:.76rem;margin-bottom:.75rem"></div>
+
+            <button onclick="enviarReembolso()" style="width:100%;padding:.9rem;background:linear-gradient(135deg,#ffb300,#ff8800);color:#fff;border:none;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.85rem;letter-spacing:.5px;cursor:pointer">ENVIAR SOLICITUD</button>
+
+            <div style="font-size:.68rem;color:var(--muted);text-align:center;margin-top:.75rem;line-height:1.5">Las solicitudes se revisan manualmente. El reembolso no es automatico.</div>
+          </div>
+        </div>
       </div>
     </div>
 
