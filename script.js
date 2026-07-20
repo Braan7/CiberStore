@@ -4198,8 +4198,8 @@ function _notifTelegramTexto(metodo){
     var nom = ((document.getElementById('zelle-nombre')||{}).value||'').trim();
     extra = (nom ? 'Enviado por: '+nom+' | ' : '') + 'Enviara comprobante por WhatsApp';
   } else if(metodo === 'binance'){
-    metodoNom = 'Binance Pay';
-    if(_bncSel){ monto = 'Paga $'+_bncSel.paga+' / Recibe $'+_bncSel.recibe; }
+    metodoNom = 'Binance Pay (USDT)';
+    if(_bncSel){ monto = 'Paga '+_bncSel.paga+' USDT / Recibe $'+_bncSel.recibe+' MXN'; }
     extra = 'Enviara comprobante por WhatsApp';
   }
 
@@ -4722,7 +4722,8 @@ function selBinanceCustom(el){
   document.querySelectorAll('.bnc-card').forEach(function(c){ c.classList.remove('sel'); });
   if(el) el.classList.add('sel');
   if(val > 0){
-    _bncSel = { paga: val, recibe: val, custom: true };
+    // paga = USDT, recibe = USDT * 17.45 en MXN (sin bono)
+    _bncSel = { paga: val, recibe: Math.round(val * USD_MXN), custom: true };
     _bncMostrarResumen();
   } else {
     if(inp) inp.focus();
@@ -4736,7 +4737,7 @@ function onBncCustom(){
   var card = document.getElementById('bnc-custom-card');
   if(card) card.classList.add('sel');
   if(val > 0){
-    _bncSel = { paga: val, recibe: val, custom: true };
+    _bncSel = { paga: val, recibe: Math.round(val * USD_MXN), custom: true };
     _bncMostrarResumen();
   } else {
     _bncSel = null;
@@ -4750,13 +4751,13 @@ function _bncMostrarResumen(){
   var rec = document.getElementById('bnc-resumen-recibe');
   var det = document.getElementById('bnc-resumen-detalle');
   if(r) r.style.display = 'block';
-  if(rec) rec.textContent = '$' + _bncSel.recibe.toLocaleString('es-MX') + ' MXN';
+  if(rec) rec.textContent = fmt(_bncSel.recibe);
   if(det){
     if(_bncSel.custom){
-      det.textContent = 'Pagas $' + _bncSel.paga.toLocaleString('es-MX') + ' (personalizado, sin bono)';
+      det.textContent = 'Pagas ' + _bncSel.paga.toLocaleString('es-MX',{maximumFractionDigits:2}) + ' USDT (personalizado, sin bono)';
     } else {
-      var bono = _bncSel.recibe - _bncSel.paga;
-      det.textContent = 'Pagas $' + _bncSel.paga.toLocaleString('es-MX') + ' + $' + bono + ' de bono';
+      var bonoMxn = _bncSel.recibe - Math.round(_bncSel.paga * USD_MXN);
+      det.textContent = 'Pagas ' + _bncSel.paga + ' USDT' + (bonoMxn>0 ? (' + '+fmt(bonoMxn)+' de bono') : '');
     }
   }
 }
@@ -5085,7 +5086,7 @@ function enviarComprobante(metodo){
       if(mb) mb.scrollIntoView({behavior:'smooth', block:'center'});
       return;
     }
-    monto = 'Paga $'+_bncSel.paga+' / Recibe $'+_bncSel.recibe;
+    monto = 'Paga '+_bncSel.paga+' USDT / Recibe $'+_bncSel.recibe+' MXN';
     extra = 'Binance ID: 1106987175';
     metodoNom = 'Binance Pay';
   }
