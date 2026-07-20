@@ -1024,8 +1024,9 @@ input:focus,select:focus,textarea:focus{
 #saldo-page-balance{
   font-size:2rem!important;
   background:linear-gradient(135deg,#25d366,#4da3ff)!important;
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent!important;
+  -webkit-background-clip:text!important;background-clip:text!important;-webkit-text-fill-color:transparent!important;
   color:transparent!important;
+  -webkit-user-select:none;user-select:none;
 }
 
 /* Item de API en el menú: destacado con gradiente */
@@ -1042,7 +1043,8 @@ input:focus,select:focus,textarea:focus{
 /* Sección API (page-api): header como banner premium */
 #page-api .ptitle{
   background:var(--grad)!important;
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent!important;
+  -webkit-background-clip:text!important;background-clip:text!important;-webkit-text-fill-color:transparent!important;
+  -webkit-user-select:none;user-select:none;
 }
 
 /* Selects e inputs de formularios: glass premium en toda la web */
@@ -1110,7 +1112,8 @@ button[onclick*="submit"]:hover,button[onclick*="comprar"]:hover,button[onclick*
 #auth-login .l1,#auth-register .l1{color:#fff}
 #auth-modal span[style*="00aaff"]{
   background:var(--grad);
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  -webkit-background-clip:text!important;background-clip:text!important;-webkit-text-fill-color:transparent!important;
+  -webkit-user-select:none;user-select:none;
 }
 
 /* Inputs del login/register premium */
@@ -1162,8 +1165,9 @@ button[onclick*="submit"]:hover,button[onclick*="comprar"]:hover,button[onclick*
 /* Enlaces (Regístrate / Inicia sesión) con color premium */
 #auth-modal a[onclick*="authTab"]{
   background:var(--grad);
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  -webkit-background-clip:text!important;background-clip:text!important;-webkit-text-fill-color:transparent!important;
   font-weight:800!important;
+  -webkit-user-select:none;user-select:none;
 }
 
 /* Botón de ojo (ver contraseña) */
@@ -1483,6 +1487,14 @@ h2,h3{
   .btn-admin-create, .btn-admin-login{width:100%!important}
 }
 
+
+/* ═══ Respaldo anti "bloque de color": si el navegador no soporta clip de texto, mostrar color solido ═══ */
+@supports not ((-webkit-background-clip:text) or (background-clip:text)){
+  #saldo-page-balance{ -webkit-text-fill-color:#25d366!important; color:#25d366!important; background:none!important; }
+  #page-api .ptitle, .ptitle{ -webkit-text-fill-color:#fff!important; color:#fff!important; background:none!important; }
+  #auth-modal span[style*="00aaff"], #auth-modal a[onclick*="authTab"]{ -webkit-text-fill-color:#4da3ff!important; color:#4da3ff!important; background:none!important; }
+  .l2, .hero h1 .l2, .topbar-logo .l2{ -webkit-text-fill-color:#a855f7!important; color:#a855f7!important; background:none!important; }
+}
 </style>
 
 <script>
