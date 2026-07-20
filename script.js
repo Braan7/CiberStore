@@ -194,6 +194,30 @@ var RATES    = {MXN:1, USD:(1/USD_MXN), EUR:0.047, ARS:50.2, PEN:0.19};
 var CUR_SYM  = {MXN:'$', USD:'$', EUR:'\u20AC', ARS:'$', PEN:'S/'};
 var CUR_SUF  = {MXN:' MX', USD:' USD', EUR:' EUR', ARS:' ARS', PEN:' PEN'};
 
+// Calcula el inicio real del periodo (dia = hoy 00:00, semana = lunes 00:00, mes = dia 1)
+function _inicioPeriodo(period){
+  var ahora = new Date();
+  if(period === 'dia'){
+    var d = new Date(ahora); d.setHours(0,0,0,0);
+    return d.toISOString();
+  }
+  if(period === 'semana'){
+    var s = new Date(ahora);
+    s.setHours(0,0,0,0);
+    // getDay(): 0=domingo, 1=lunes ... queremos que la semana empiece el LUNES
+    var dia = s.getDay();
+    var diffAlLunes = (dia === 0) ? 6 : (dia - 1); // domingo cuenta como fin de semana anterior
+    s.setDate(s.getDate() - diffAlLunes);
+    return s.toISOString();
+  }
+  if(period === 'mes'){
+    var m = new Date(ahora.getFullYear(), ahora.getMonth(), 1, 0, 0, 0, 0);
+    return m.toISOString();
+  }
+  return null; // historico = sin filtro
+}
+
+
 function fmt(mxn){
   if(!mxn&&mxn!==0) return '';
   var rate=RATES[CURRENCY]||1, sym=CUR_SYM[CURRENCY]||'$', suf=CUR_SUF[CURRENCY]||'';
@@ -2095,8 +2119,8 @@ function loadLeaderboard(){
 
   /* Date filter */
   var since = null;
-  if(lbPeriod==='semana')  since = new Date(Date.now()-7*86400000).toISOString();
-  if(lbPeriod==='mes')     since = new Date(Date.now()-30*86400000).toISOString();
+  if(lbPeriod==='semana')  since = _inicioPeriodo('semana');
+  if(lbPeriod==='mes')     since = _inicioPeriodo('mes');
 
   /* Get movimientos to count diamonds/likes per user */
   var movsQs = 'tipo=eq.compra&select=user_id,descripcion,monto' + (since?'&created_at=gte.'+since:'');
@@ -3308,8 +3332,8 @@ function loadRankingByPeriod(period){
     return;
   }
 
-  if(period === 'weekly')  since = new Date(Date.now()-7*86400000).toISOString();
-  if(period === 'monthly') since = new Date(Date.now()-30*86400000).toISOString();
+  if(period === 'weekly')  since = _inicioPeriodo('semana');
+  if(period === 'monthly') since = _inicioPeriodo('mes');
   // daily: since = null (mismo dia)
   if(period === 'daily')   since = new Date(new Date().setHours(0,0,0,0)).toISOString();
 
@@ -3775,11 +3799,8 @@ function loadDiamondTop(){
 
   list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);font-size:.82rem">Cargando...</div>';
 
-  // Filtro de fecha según período
-  var since = null;
-  if(diamondPeriod === 'dia')    since = new Date(new Date().setHours(0,0,0,0)).toISOString();
-  if(diamondPeriod === 'semana') since = new Date(Date.now()-7*86400000).toISOString();
-  if(diamondPeriod === 'mes')    since = new Date(Date.now()-30*86400000).toISOString();
+  // Filtro de fecha según período (calendario real, no "ultimos N dias")
+  var since = _inicioPeriodo(diamondPeriod);
 
   var qs = 'tipo=eq.compra&select=user_id,descripcion,monto' + (since ? '&created_at=gte.'+since : '');
   sb.get('movimientos_saldo', qs).then(function(movs){
