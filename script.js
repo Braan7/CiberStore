@@ -5649,13 +5649,16 @@ function enviarVerificacionID(){
 
   if(typeof tgSend === 'function'){ tgSend(msg); }
 
-  // Mostrar confirmacion en el aviso
+  // Mostrar confirmacion en el aviso + boton de WhatsApp con el ID pre-escrito
   var aviso = document.getElementById('diam-1vez-aviso');
   if(aviso){
+    var msgWA = 'Hola! Envie mi ID *' + ffId + '* para verificar la oferta *1 vez por ID*. Esta disponible para mi cuenta?';
+    var urlWA = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(msgWA);
     aviso.innerHTML = '<div style="background:linear-gradient(160deg,rgba(37,211,102,.1),rgba(255,255,255,.02));border:1px solid rgba(37,211,102,.35);border-radius:14px;padding:1.15rem;text-align:center">'
       + '<div style="font-size:2rem;margin-bottom:.4rem">\u2705</div>'
       + '<div style="font-family:Oxanium;font-weight:800;font-size:.92rem;color:#25d366;margin-bottom:.4rem">ID ENVIADO A VERIFICAR</div>'
-      + '<div style="font-size:.77rem;color:#e8ecf4;line-height:1.6">Tu ID <b style="color:#fff">' + ffId + '</b> fue enviado. Te confirmaremos si tu cuenta es elegible antes de que compres.</div>'
+      + '<div style="font-size:.77rem;color:#e8ecf4;line-height:1.6;margin-bottom:1rem">Tu ID <b style="color:#fff">' + ffId + '</b> fue enviado. <b style="color:#ffb84d">Consultanos por WhatsApp</b> si tu cuenta es elegible antes de comprar.</div>'
+      + '<a href="' + urlWA + '" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:.85rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border-radius:11px;font-family:Poppins;font-weight:700;font-size:.85rem;text-decoration:none;box-sizing:border-box">\uD83D\uDCF1 Consultar disponibilidad por WhatsApp</a>'
       + '</div>';
   }
 
