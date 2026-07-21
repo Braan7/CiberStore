@@ -188,7 +188,7 @@ var obStep = 0;
 /* \u2500\u2500 CURRENCY / LANG \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 var LANG     = localStorage.getItem('cs_lang')     || 'es';
 var CURRENCY = localStorage.getItem('cs_currency') || 'MXN';
-var USD_MXN  = 17.45; // 1 USD = 17.45 MXN
+var USD_MXN  = 17; // 1 USD = 17 MXN
 var RETIRO_COMISION = 0.15; // 15% de comision por retiro
 var RATES    = {MXN:1, USD:(1/USD_MXN), EUR:0.047, ARS:50.2, PEN:0.19};
 var CUR_SYM  = {MXN:'$', USD:'$', EUR:'\u20AC', ARS:'$', PEN:'S/'};
@@ -4723,7 +4723,7 @@ function selBinanceCustom(el){
   document.querySelectorAll('.bnc-card').forEach(function(c){ c.classList.remove('sel'); });
   if(el) el.classList.add('sel');
   if(val > 0){
-    // paga = USDT, recibe = USDT * 17.45 en MXN (sin bono)
+    // paga = USDT, recibe = USDT * USD_MXN en MXN (sin bono)
     _bncSel = { paga: val, recibe: Math.round(val * USD_MXN), custom: true };
     _bncMostrarResumen();
   } else {
