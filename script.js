@@ -4244,8 +4244,12 @@ function submitBonusSaldo(){
   if(err) err.style.display='none';
 
   var ord = getNextOrder();
-  addSpend(plan.precio, 'Diamantes x ID +20%: '+plan.label+' - ID:'+ffId+' ('+ffNom+') - Pedido #'+ord);
-  if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, plan.label+' - ID:'+ffId, plan.precio, ord);
+  addSpend(plan.precio, plan.label+' Diamantes (Bonus +20%) - ID:'+ffId+' ('+ffNom+') - Pedido #'+ord);
+  if(typeof tgNotifyPurchase==='function'){
+    tgNotifyPurchase(authSession.username,
+      '\uD83C\uDF81 Bonus (+20%)\n\uD83D\uDCA0 Paquete: ' + plan.label + '\n\uD83C\uDFAE ID: ' + ffId + '\n\uD83D\uDC64 Nombre IG: ' + ffNom,
+      plan.precio, ord);
+  }
   showToast('Pedido #'+ord+' confirmado!', 2500);
 
   // Limpiar
@@ -4304,9 +4308,14 @@ function _procesarCompraDiam(planVal, idEl, nomEl, errEl, etiqueta){
   if(err) err.style.display='none';
 
   var ord=getNextOrder();
-  addSpend(precio, etiqueta+': '+diamantes.toLocaleString('es-MX')+' diamantes - ID:'+ffId+' ('+ffNom+') - Pedido #'+ord);
-  registrarPedido(etiqueta+' '+diamantes.toLocaleString('es-MX'), diamantes, 'diamantes', ffId, precio, 0);
-  if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, etiqueta+' '+diamantes+' - ID:'+ffId, precio, ord);
+  var diamTxt = diamantes.toLocaleString('es-MX');
+  addSpend(precio, diamTxt+' Diamantes ('+etiqueta+') - ID:'+ffId+' ('+ffNom+') - Pedido #'+ord);
+  registrarPedido(diamTxt+' Diamantes ('+etiqueta+')', diamantes, 'diamantes', ffId, precio, 0);
+  if(typeof tgNotifyPurchase==='function'){
+    tgNotifyPurchase(authSession.username,
+      '\uD83D\uDC8E ' + etiqueta + '\n\uD83D\uDCA0 Cantidad: ' + diamTxt + ' diamantes\n\uD83C\uDFAE ID: ' + ffId + '\n\uD83D\uDC64 Nombre IG: ' + ffNom,
+      precio, ord);
+  }
   showToast('Pedido #'+ord+' confirmado!', 2500);
 
   if(document.getElementById(idEl)) document.getElementById(idEl).value='';
@@ -5598,10 +5607,60 @@ function setDiamTipo(tipo){
     var btn = document.getElementById('dtab-'+t);
     if(btn) btn.classList.toggle('active', t===tipo);
   });
+  // Mostrar el aviso de verificacion solo en "1 vez por ID"
+  var aviso = document.getElementById('diam-1vez-aviso');
+  if(aviso) aviso.style.display = (tipo === '1vez') ? 'block' : 'none';
   // Volver al catálogo si estaba en detalle
   document.getElementById('diam-catalogo').style.display='';
   document.getElementById('diam-detalle').style.display='none';
   renderDiamCatalogo();
+}
+
+// Enviar el ID a verificar (solo pide ID, llega por Telegram)
+var _enviandoVerif = false;
+function enviarVerificacionID(){
+  if(!authSession){ showToast('Inicia sesion primero'); setTimeout(showAuthModal,600); return; }
+  if(_enviandoVerif){ return; }
+
+  var err = document.getElementById('diam-verif-err');
+  function showErr(m){ if(err){ err.textContent=m; err.style.display='block'; } }
+
+  var ffId = ((document.getElementById('diam-verif-id')||{}).value||'').trim();
+  if(!ffId || ffId.replace(/\D/g,'').length < 5){
+    showErr('Escribe un ID de Free Fire valido.');
+    return;
+  }
+  if(err) err.style.display='none';
+
+  _enviandoVerif = true;
+
+  var ahora = new Date();
+  var fecha = ahora.toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'});
+  var hora = ahora.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+  var linea = '\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501';
+  var msg = linea + '\n'
+    + '\uD83D\uDD0D <b>VERIFICACION DE ID (1 vez x ID)</b>\n'
+    + linea + '\n'
+    + '\uD83D\uDC64 Usuario: <b>' + authSession.username + '</b>\n'
+    + '\uD83C\uDFAE ID Free Fire: <code>' + ffId + '</code>\n'
+    + '\uD83D\uDCC5 ' + fecha + ' \u00B7 \uD83D\uDD52 ' + hora + '\n'
+    + linea + '\n'
+    + '\u2139\uFE0F Verifica si esta cuenta es elegible para paquetes 1 vez.';
+
+  if(typeof tgSend === 'function'){ tgSend(msg); }
+
+  // Mostrar confirmacion en el aviso
+  var aviso = document.getElementById('diam-1vez-aviso');
+  if(aviso){
+    aviso.innerHTML = '<div style="background:linear-gradient(160deg,rgba(37,211,102,.1),rgba(255,255,255,.02));border:1px solid rgba(37,211,102,.35);border-radius:14px;padding:1.15rem;text-align:center">'
+      + '<div style="font-size:2rem;margin-bottom:.4rem">\u2705</div>'
+      + '<div style="font-family:Oxanium;font-weight:800;font-size:.92rem;color:#25d366;margin-bottom:.4rem">ID ENVIADO A VERIFICAR</div>'
+      + '<div style="font-size:.77rem;color:#e8ecf4;line-height:1.6">Tu ID <b style="color:#fff">' + ffId + '</b> fue enviado. Te confirmaremos si tu cuenta es elegible antes de que compres.</div>'
+      + '</div>';
+  }
+
+  showToast('\u2705 ID enviado a verificar', 3000);
+  setTimeout(function(){ _enviandoVerif = false; }, 3000);
 }
 
 function renderDiamCatalogo(){
@@ -5823,7 +5882,7 @@ function _procesarRecargaAutomatica(p, ffId){
     }).then(function(r){ return r.json(); }).then(function(res){
       if(res.success && (res.status==='COMPLETED' || res.status==='PENDING')){
         registrarPedido(p.nombre+' (AUTO)', p.diamantes, 'diamantes', ffId, p.precio, 0);
-        if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, 'RECARGA AUTO '+p.nombre+' - ID:'+ffId+' ('+nombre+')', p.precio, ord);
+        if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A1 Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\uD83D\uDC64 Nombre IG: '+nombre, p.precio, ord);
         _mostrarReciboRecarga(p, ffId, nombre, res.status);
         var txt = res.status==='COMPLETED' ? '\u2705 Recarga COMPLETADA!' : '\u23F3 Recarga en proceso...';
         showToast(txt, 3000);
@@ -5832,7 +5891,7 @@ function _procesarRecargaAutomatica(p, ffId){
         // NO reembolsar automatico (la recarga pudo haberse hecho igual).
         // Dejar el cobro y registrar el pedido para verificacion manual.
         registrarPedido(p.nombre+' (AUTO - VERIFICAR)', p.diamantes, 'diamantes', ffId, p.precio, 0);
-        if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, 'RECARGA AUTO VERIFICAR '+p.nombre+' - ID:'+ffId+' - '+(res.error||res.status||'sin confirmar'), p.precio, ord);
+        if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F VERIFICAR - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+(res.error||res.status||'sin confirmar'), p.precio, ord);
         if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
         if(msg){ msg.className='ddet-msg'; msg.style.color='#ffb84d'; msg.style.fontSize='.72rem'; msg.innerHTML='\u23F3 Tu recarga se esta verificando. Si no llega en unos minutos, contacta al admin con tu ID.'; }
         console.error('[RECARGA] Sin confirmar (no reembolsado):', JSON.stringify(res));
@@ -5842,7 +5901,7 @@ function _procesarRecargaAutomatica(p, ffId){
     }).catch(function(err){
       // NO reembolsar: la recarga pudo haberse completado aunque la respuesta fallo
       registrarPedido(p.nombre+' (AUTO - VERIFICAR)', p.diamantes, 'diamantes', ffId, p.precio, 0);
-      if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, 'RECARGA AUTO VERIFICAR (sin respuesta) '+p.nombre+' - ID:'+ffId, p.precio, ord);
+      if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F VERIFICAR (sin respuesta) - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId, p.precio, ord);
       if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
       if(msg){ msg.className='ddet-msg'; msg.style.color='#ffb84d'; msg.style.fontSize='.72rem'; msg.innerHTML='\u23F3 Tu recarga se esta verificando. Si no llega, contacta al admin.'; }
       console.error('[RECARGA] catch compra (no reembolsado):', err);

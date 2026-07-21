@@ -1863,13 +1863,35 @@ document.addEventListener('keydown',function(e){
   <div style="max-width:760px;margin:0 auto;padding:0 5vw 3rem">
     <!-- Selector de tipo -->
     <div style="display:flex;gap:.5rem;margin-bottom:1.5rem;background:rgba(0,0,0,.25);padding:.35rem;border-radius:12px">
-      <button id="dtab-bonus" onclick="setDiamTipo('bonus')" class="dtab-btn">&#127873; Con Bono</button>
-      <button id="dtab-ilim" onclick="setDiamTipo('ilim')" class="dtab-btn">&#8734; Ilimitado</button>
-      <button id="dtab-1vez" onclick="setDiamTipo('1vez')" class="dtab-btn">&#127919; 1 vez x ID</button>
+      <button id="dtab-bonus" onclick="setDiamTipo('bonus')" class="dtab-btn">&#127873; Bonus (+20%)</button>
+      <button id="dtab-ilim" onclick="setDiamTipo('ilim')" class="dtab-btn">&#8734; Ilimitados</button>
+      <button id="dtab-1vez" onclick="setDiamTipo('1vez')" class="dtab-btn">&#127919; 1 vez por ID</button>
     </div>
 
     <!-- Catálogo (cuadrícula) -->
     <div id="diam-catalogo">
+      <!-- ADVERTENCIA + VERIFICACION para 1 VEZ POR ID -->
+      <div id="diam-1vez-aviso" style="display:none;margin-bottom:1.15rem">
+        <div style="background:linear-gradient(160deg,rgba(255,80,80,.1),rgba(255,180,60,.05));border:1px solid rgba(255,120,80,.35);border-radius:14px;padding:1.15rem">
+          <div style="display:flex;align-items:center;gap:.55rem;margin-bottom:.7rem">
+            <span style="font-size:1.2rem">&#9888;&#65039;</span>
+            <div style="font-family:Oxanium;font-weight:800;font-size:.9rem;color:#ff9068;letter-spacing:.3px">IMPORTANTE - LEE ANTES DE COMPRAR</div>
+          </div>
+          <div style="font-size:.78rem;color:#e8ecf4;line-height:1.65;margin-bottom:.9rem">
+            Los paquetes <b style="color:#fff">1 vez por ID</b> solo se pueden usar <b style="color:#fff">una vez por cuenta</b>. Antes de comprar, <b style="color:#ffb84d">debes enviar tu ID a verificar</b> para confirmar que tu cuenta es elegible.
+          </div>
+          <div style="background:rgba(255,80,80,.1);border:1px solid rgba(255,80,80,.3);border-radius:10px;padding:.7rem .9rem;margin-bottom:1rem;font-size:.75rem;color:#ff8080;line-height:1.55">
+            &#128683; Si NO envias tu ID a verificar y realizas la compra, <b>el pedido NO sera reembolsado</b>.
+          </div>
+
+          <div style="font-family:Oxanium;font-weight:700;font-size:.8rem;color:#fff;margin-bottom:.5rem">&#128269; Verifica tu ID primero</div>
+          <label class="flabel">Tu ID de Free Fire *</label>
+          <input class="finput" id="diam-verif-id" type="text" inputmode="numeric" placeholder="Ej: 123456789" style="margin-bottom:.7rem"/>
+          <div id="diam-verif-err" style="display:none;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.3);color:#ff6b6b;border-radius:9px;padding:.6rem .8rem;font-size:.76rem;margin-bottom:.7rem"></div>
+          <button onclick="enviarVerificacionID()" style="width:100%;padding:.85rem;background:linear-gradient(135deg,#0e7490,#22d3ee);color:#fff;border:none;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.82rem;letter-spacing:.5px;cursor:pointer">&#128232; ENVIAR ID A VERIFICAR</button>
+        </div>
+      </div>
+
       <div class="dcat-head">
         <div class="dcat-head-ico">&#127918;</div>
         <div class="dcat-head-txt">Free Fire <span class="dcat-count" id="diam-count">0</span></div>
