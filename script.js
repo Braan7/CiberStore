@@ -5979,15 +5979,35 @@ function _procesarRecargaAutomatica(p, ffId){
         showToast(txt, 3000);
         _comprandoDiam = false;
       } else {
-        // NO reembolsar automatico (la recarga pudo haberse hecho igual).
-        // Dejar el cobro y registrar el pedido para verificacion manual.
-        registrarPedido(p.nombre+' (AUTO - VERIFICAR)', p.diamantes, 'diamantes', ffId, p.precio, 0);
-        if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F VERIFICAR - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+(res.error||res.status||'sin confirmar'), p.precio, ord);
-        if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
-        if(msg){ msg.className='ddet-msg'; msg.style.color='#22d3ee'; msg.style.fontSize='.72rem'; msg.innerHTML='\u23F3 Tu recarga se esta verificando. Si no llega en unos minutos, contacta al admin con tu ID.'; }
-        console.error('[RECARGA] Sin confirmar (no reembolsado):', JSON.stringify(res));
-        _comprandoDiam = false;
-        setTimeout(cerrarDiamDetalle, 4000);
+        var errTxt = String(res.error||res.status||'sin confirmar');
+        var noDisponible = /no disponible|not available|no encontrado|not found|sin stock|out of stock/i.test(errTxt);
+
+        if(noDisponible){
+          // La recarga NO se hizo (producto no disponible): DEVOLVER el saldo automatico
+          _rpcAjustarSaldo(authSession.id, p.precio).then(function(saldoNuevo){
+            var sn = Number(saldoNuevo)||0;
+            authSession.saldo = sn;
+            _refreshSaldoUI(sn);
+            if(typeof saveSession==='function') saveSession();
+            if(typeof sbAddMovimiento==='function') sbAddMovimiento(authSession.id, 'credito', p.precio, 'Devolucion Pedido #'+ord+' - producto no disponible');
+          }).catch(function(e){ console.error('[RECARGA] devolucion fallo:', e); });
+
+          registrarPedido(p.nombre+' (AUTO - NO DISPONIBLE, devuelto)', p.diamantes, 'diamantes', ffId, 0, 0);
+          if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F NO DISPONIBLE - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\u2705 SALDO DEVUELTO automaticamente ('+fmt(p.precio)+')', p.precio, ord);
+          if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
+          if(msg){ msg.className='ddet-msg err'; msg.style.fontSize='.75rem'; msg.innerHTML='\u274C Este paquete no esta disponible para tu ID en este momento (puede que tu cuenta ya haya usado el bono +20% o no haya stock).<br/><b>Tu saldo fue devuelto.</b> Intenta mas tarde o contacta al admin.'; }
+          showToast('\u274C No disponible. Saldo devuelto.', 4000);
+          _comprandoDiam = false;
+        } else {
+          // Error ambiguo: la recarga pudo haberse hecho igual. NO reembolsar, verificar manual.
+          registrarPedido(p.nombre+' (AUTO - VERIFICAR)', p.diamantes, 'diamantes', ffId, p.precio, 0);
+          if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F VERIFICAR - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt, p.precio, ord);
+          if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
+          if(msg){ msg.className='ddet-msg'; msg.style.color='#22d3ee'; msg.style.fontSize='.72rem'; msg.innerHTML='\u23F3 Tu recarga se esta verificando. Si no llega en unos minutos, contacta al admin con tu ID.'; }
+          console.error('[RECARGA] Sin confirmar (no reembolsado):', JSON.stringify(res));
+          _comprandoDiam = false;
+          setTimeout(cerrarDiamDetalle, 4000);
+        }
       }
     }).catch(function(err){
       // NO reembolsar: la recarga pudo haberse completado aunque la respuesta fallo
