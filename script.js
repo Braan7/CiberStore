@@ -1524,6 +1524,9 @@ function hcffPayTab(tab){
   }
 }
 function submitHonorCuenta(){
+  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
+  if(typeof _comprandoHC!=='undefined' && _comprandoHC){ return; }
+
   var token=((document.getElementById('hcff-token')||{}).value||'').trim();
   var ncuenta=((document.getElementById('hcff-nombre-cuenta')||{}).value||'').trim();
   var nombre=((document.getElementById('hcff-nombre')||{}).value||'').trim();
@@ -1532,23 +1535,42 @@ function submitHonorCuenta(){
   if(!ncuenta){showToast('Ingresa el nombre de tu cuenta');return;}
   if(!nombre){showToast('Ingresa tu nombre');return;}
   if(!wa||wa.replace(/\D/g,'').length<8){showToast('Ingresa tu WhatsApp');return;}
+
   var modalEl=document.getElementById('modal-honor-cuenta');
   var pkgPrice=modalEl?parseInt(modalEl.getAttribute('data-pkg-price')||HONOR_CUENTA_PRICE):HONOR_CUENTA_PRICE;
   var pkgDays=modalEl?modalEl.getAttribute('data-pkg-days')||'':'';
   var pkgExp=modalEl?modalEl.getAttribute('data-pkg-exp')||'':'';
+
+  // Solo pago con saldo
+  var saldo = authSession.saldo || 0;
+  if(saldo < pkgPrice){
+    showToast('Saldo insuficiente. Tienes '+fmt(saldo)+' y necesitas '+fmt(pkgPrice)+'.');
+    return;
+  }
+
+  _comprandoHC = true;
   var ord=getNextOrder();
-  addSpend(pkgPrice);
-  var planLine=pkgDays?('Plan: '+pkgDays+' dias - '+pkgExp+' EXP total (50K/dia)\n'):'Plan: Nivel 1 al 40\n';
+  var planTxt = pkgDays?(pkgDays+' dias - '+pkgExp+' EXP'):'Nivel 1 al 40';
+  addSpend(pkgPrice, 'Experiencia FF ('+planTxt+') - Cuenta:'+ncuenta+' - Pedido #'+ord);
   addToHistoryLocal({name:'Experiencia FF'+(pkgDays?' '+pkgDays+'D':''),price:pkgPrice,icon:'\uD83C\uDF71',
     date:new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),order:ord});
-  var msg='*PEDIDO #'+ord+' - CiberStore*\n\nServicio: Experiencia Cuenta Free Fire\n'
-    +planLine+'Precio: $'+pkgPrice.toLocaleString('es-MX')+' MX\nMetodo: Transferencia Bancaria'
-    +'\n\nNombre: '+nombre+'\nNombre cuenta FF: '+ncuenta+'\nToken FF: '+token+'\nWhatsApp: '+wa
-    +'\n\nManda comprobante con # '+ord;
+  if(typeof registrarPedido==='function') registrarPedido('Experiencia FF '+planTxt, 0, 'otro', ncuenta, pkgPrice, 0);
+  if(typeof tgNotifyPurchase==='function'){
+    tgNotifyPurchase(authSession.username,
+      '\uD83C\uDF71 Experiencia FF\n\uD83D\uDCC5 Plan: '+planTxt+'\n\uD83D\uDC64 Cuenta FF: '+ncuenta+'\n\uD83D\uDD11 Token: '+token+'\n\uD83D\uDCF1 WA: +'+wa,
+      pkgPrice, ord);
+  }
+
   closeHonorCuentaModal();
-  showToast('Abriendo WhatsApp...',2500);
-  setTimeout(function(){window.open('https://wa.me/'+WA+'?text='+encodeURIComponent(msg),'_blank');},700);
+  if(typeof _mostrarAvisoModal==='function'){
+    _mostrarAvisoModal('PEDIDO #'+ord+' CONFIRMADO',
+      'Tu <b style="color:#fff">Experiencia FF</b> ('+planTxt+') fue pedida.<br/>Te contactaremos por WhatsApp para coordinar.',
+      '#22d3ee');
+  }
+  showToast('\u2705 Pedido #'+ord+' confirmado!', 3000);
+  setTimeout(function(){ _comprandoHC = false; }, 3000);
 }
+var _comprandoHC = false;
 
 /* \u2500\u2500 STORI / BINANCE MODALS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 function openStoriModal(){var el=document.getElementById('modal-stori');if(el) el.classList.add('show');}
@@ -2935,49 +2957,45 @@ function closeFragModal(){
 }
 
 function submitFrag(){
+  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
+  if(typeof _comprandoFrag!=='undefined' && _comprandoFrag){ return; }
+
   var ffId   = ((document.getElementById('frag-id')||{}).value||'').trim();
   var ffNom  = ((document.getElementById('frag-nombre')||{}).value||'').trim();
-  var pago   = ((document.getElementById('frag-pago')||{}).value||'');
   var err    = document.getElementById('frag-err');
   function showErr(msg){ if(err){err.textContent=msg;err.style.display='block';} }
 
   if(!ffId)  { showErr('Ingresa tu ID de Free Fire'); return; }
   if(!ffNom) { showErr('Ingresa tu nombre en el juego'); return; }
-  if(!pago)  { showErr('Selecciona un metodo de pago'); return; }
 
-  // Verificar saldo para fragmentos
-  var saldoActual = authSession ? (authSession.saldo || 0) : 0;
+  // Solo pago con saldo
+  var saldoActual = authSession.saldo || 0;
   if(saldoActual < fragCurrent.mxn){
-    showErr('Saldo insuficiente. Tu saldo: $'+Math.round(saldoActual).toLocaleString('es-MX')+' MX. Necesitas: $'+fragCurrent.mxn.toLocaleString('es-MX')+' MX');
+    showErr('Saldo insuficiente. Tienes '+fmt(saldoActual)+' y necesitas '+fmt(fragCurrent.mxn)+'.');
     return;
   }
+  if(err) err.style.display='none';
 
+  _comprandoFrag = true;
   var ord = getNextOrder();
-  // Restar saldo por la compra
-  addSpend(fragCurrent.mxn, 'Fragmentos Evo: '+fragCurrent.frags+' frags / '+fragCurrent.diam+' diamantes - Pedido #'+ord);
-  var lines = [
-    '*PEDIDO #' + ord + ' - CiberStore*',
-    '',
-    'Servicio: Fragmentos Evo',
-    'Fragmentos: ' + fragCurrent.frags.toLocaleString('es-MX'),
-    'Diamantes: ' + fragCurrent.diam.toLocaleString('es-MX') + ' \uD83D\uDC8E',
-    'Precio: $' + fragCurrent.usd + ' USD (~$' + fragCurrent.mxn.toLocaleString('es-MX') + ' MX)',
-    'Metodo de pago: ' + pago,
-    '',
-    'ID Free Fire: ' + ffId,
-    'Nombre en juego: ' + ffNom,
-    'Usuario CiberStore: ' + (authSession ? authSession.username : '-'),
-    '',
-    'Por favor coordinar pago y entrega.'
-  ];
+  addSpend(fragCurrent.mxn, fragCurrent.diam+' Diamantes (Fragmentos Evo '+fragCurrent.frags+' frags) - ID:'+ffId+' ('+ffNom+') - Pedido #'+ord);
+  registrarPedido('Fragmentos Evo '+fragCurrent.frags, fragCurrent.diam, 'diamantes', ffId, fragCurrent.mxn, 0);
+  if(typeof tgNotifyPurchase==='function'){
+    tgNotifyPurchase(authSession.username,
+      '\uD83E\uDDE9 Fragmentos Evo\n\uD83D\uDCA0 '+fragCurrent.frags+' frags / '+fragCurrent.diam+' diamantes\n\uD83C\uDFAE ID: '+ffId+'\n\uD83D\uDC64 Nombre IG: '+ffNom,
+      fragCurrent.mxn, ord);
+  }
 
   closeFragModal();
-  showToast('Abriendo WhatsApp...', 2000);
-  var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(lines.join('\n'));
-  var win = window.open(url, '_blank');
-  if(!win) window.location.href = url;
+  if(typeof _mostrarAvisoModal==='function'){
+    _mostrarAvisoModal('PEDIDO #'+ord+' CONFIRMADO',
+      'Tus <b style="color:#fff">'+fragCurrent.frags+' Fragmentos Evo</b> fueron pedidos.<br/>Te avisaremos cuando esten entregados.',
+      '#22d3ee');
+  }
+  showToast('\u2705 Pedido #'+ord+' confirmado!', 3000);
+  setTimeout(function(){ _comprandoFrag = false; }, 3000);
 }
-
+var _comprandoFrag = false;
 
 /* \u2500\u2500 CART WITH SALDO \u2500\u2500 */
 function renderCart(){
@@ -5761,22 +5779,22 @@ function abrirDiamDetalle(idx){
 
   var det = document.getElementById('diam-detalle');
   det.innerHTML =
-    '<button class="ddet-back" onclick="cerrarDiamDetalle()">&#8592; Volver al catalogo</button>'
-    + (p.img ? '<div style="width:100%;border-radius:14px;overflow:hidden;margin-bottom:1rem;background:#0a0f1a"><img src="'+p.img+'" alt="'+p.nombre+'" style="width:100%;display:block" onerror="this.parentNode.style.display=\'none\'"/></div>' : '')
-    + '<div class="ddet-head"><div class="ddet-head-ico">&#127918;</div>'
-    + '<div><div class="ddet-head-name">'+p.nombre+'</div><div class="ddet-head-sub">Free Fire</div></div></div>'
-    + '<div class="ddet-price">'+fmt(p.precio)+'</div>'
-    + _avisoEntrega(p)
-    + '<div class="ddet-label">Datos de la cuenta</div>'
-    + '<label class="flabel">Usuario / ID de jugador *</label>'
-    + '<input class="finput" id="diam-ffid" type="text" placeholder="Tu ID de Free Fire"/>'
-    + '<div class="ddet-label" style="margin-top:1rem">Metodo de pago</div>'
-    + '<div class="ddet-metodos">'
-    +   '<div class="ddet-metodo sel" id="dm-saldo" onclick="selDiamMetodo(\'saldo\')">&#128179; Saldo <span class="ddet-metodo-sub">($'+saldo.toLocaleString('es-MX')+')</span></div>'
-    +   '<div class="ddet-metodo" id="dm-binance" onclick="selDiamMetodo(\'binance\')">Binance Pay</div>'
+    '<button class="ddet-back" onclick="cerrarDiamDetalle()" style="background:none;border:none;color:#6b7280;font-size:.85rem;cursor:pointer;margin-bottom:1rem;padding:0">&#8592; Volver al catalogo</button>'
+    + '<div style="background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:18px;padding:1.35rem">'
+    + (p.img ? '<img src="'+p.img+'" alt="'+p.nombre+'" style="width:150px;display:block;margin:0 auto 1rem;border-radius:12px" onerror="this.style.display=\'none\'"/>' : '')
+    + '<div style="text-align:center;margin-bottom:1.15rem">'
+    +   '<div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.15rem;color:#fff;margin-bottom:.2rem">'+p.nombre+'</div>'
+    +   '<div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.9rem;color:#fff">'+fmt(p.precio)+'</div>'
+    +   '<div style="font-size:.78rem;color:#6b7280;margin-top:.15rem">Pago con saldo</div>'
     + '</div>'
+    + _avisoEntrega(p)
+    + '<label class="flabel">Tu ID de Free Fire *</label>'
+    + '<input class="finput" id="diam-ffid" type="text" inputmode="numeric" placeholder="Ej: 123456789"/>'
+    + '<div style="display:flex;justify-content:space-between;background:rgba(34,211,238,.05);border:1px solid rgba(34,211,238,.15);border-radius:11px;padding:.65rem 1rem;margin:.3rem 0 .8rem"><span style="font-size:.76rem;color:#6b7280">Tu saldo</span><span style="font-weight:600;color:'+(alcanza?'#22d3ee':'#ff6b6b')+';font-size:.85rem">'+fmt(saldo)+'</span></div>'
+    + (alcanza ? '' : '<div style="background:rgba(255,60,60,.08);border:1px solid rgba(255,60,60,.25);border-radius:10px;padding:.65rem .85rem;font-size:.77rem;color:#ff6b6b;margin-bottom:.75rem">Saldo insuficiente. <span onclick="goPage(\'saldo\')" style="text-decoration:underline;cursor:pointer">Recarga aqui</span></div>')
     + '<div class="ddet-msg" id="diam-msg"></div>'
-    + '<button class="ddet-btn" id="diam-btn" onclick="confirmarDiamCompra()">Recargar &#8594;</button>';
+    + '<button id="diam-btn" onclick="confirmarDiamCompra()" style="width:100%;padding:.9rem;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.42);color:#22d3ee;border-radius:13px;font-family:Poppins;font-weight:600;font-size:.92rem;cursor:pointer">Comprar con saldo</button>'
+    + '</div>';
 
   document.getElementById('diam-catalogo').style.display='none';
   det.style.display='';
@@ -5831,13 +5849,6 @@ function confirmarDiamCompra(){
   if(!ffId){ showToast('Escribe tu ID de Free Fire'); return; }
 
   var saldo=(authSession&&authSession.saldo)?authSession.saldo:0;
-
-  if(_diamMetodoPago==='binance'){
-    showToast('Recarga tu saldo con Binance para completar');
-    goPage('saldo');
-    setTimeout(function(){ if(typeof openBinanceModal==='function') openBinanceModal(); }, 400);
-    return;
-  }
 
   if(saldo < p.precio){ showToast('Saldo insuficiente. Recarga primero.'); return; }
 
