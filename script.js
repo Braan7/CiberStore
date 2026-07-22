@@ -697,7 +697,7 @@ function goPage(id){
   if(ni) ni.classList.add('active');
   closeSB();
   window.scrollTo(0,0);
-  if(id==='diamantes') setTimeout(function(){ setDiamTipo('bonus'); }, 100);
+  if(id==='diamantes') setTimeout(function(){ setDiamTipo('ilim'); }, 100);
   if(id==='codigos') setTimeout(_updateScarSaldo, 100);
   if(id==='clanes') setTimeout(renderClanes, 100);
   if(id==='pase') setTimeout(_updatePasePagina, 100);
@@ -5586,7 +5586,7 @@ function _setTotal(id, valor, esDinero){
 
 
 // ═══════════ NUEVO DISEÑO DIAMANTES (catálogo + detalle) ═══════════
-var _diamTipoActual = 'bonus';
+var _diamTipoActual = 'ilim';
 var _diamMetodoPago = 'saldo';
 var _diamSeleccionado = null;
 
@@ -5595,13 +5595,13 @@ var _diamSeleccionado = null;
 // ═══════════ RECARGAS AUTOMÁTICAS (Recargas América type=recharge) ═══════════
 // package_id = el ID de Recargas América | precio = costo USD × 20 (redondeado)
 var RECARGAS_AUTO = [
-  { package_id:340, nombre:'100 Diamantes + 10 Bono',    diamantes:110,  costoUSD:0.79,  precio:15,  img:'img/diam-100.png'  },
-  { package_id:343, nombre:'310 Diamantes + 31 Bono',    diamantes:341,  costoUSD:2.65,  precio:45,  img:'img/diam-310.png'  },
-  { package_id:345, nombre:'520 Diamantes + 52 Bono',    diamantes:572,  costoUSD:3.71,  precio:80,  img:'img/diam-520.png'  },
-  { package_id:341, nombre:'1.060 Diamantes + 106 Bono', diamantes:1166, costoUSD:6.90,  precio:160, img:'img/diam-1060.png' },
-  { package_id:342, nombre:'2.180 Diamantes + 218 Bono', diamantes:2398, costoUSD:13.70, precio:260, img:'img/diam-2180.png' },
-  { package_id:344, nombre:'5.600 Diamantes + 560 Bono', diamantes:6160, costoUSD:34.87, precio:680, img:'img/diam-5600.png' },
-  { package_id:null, nombre:'11.200 Diamantes + 1120 Bono', diamantes:12320, costoUSD:69.74, precio:1390, manual:true }
+  { package_id:340, nombre:'100 + 20% = 120 Diamantes',     diamantes:120,   costoUSD:0.79,  precio:15,  img:'img/diam-100.png'  },
+  { package_id:343, nombre:'310 + 20% = 372 Diamantes',     diamantes:372,   costoUSD:2.65,  precio:45,  img:'img/diam-310.png'  },
+  { package_id:345, nombre:'520 + 20% = 624 Diamantes',     diamantes:624,   costoUSD:3.71,  precio:80,  img:'img/diam-520.png'  },
+  { package_id:341, nombre:'1060 + 20% = 1,272 Diamantes',  diamantes:1272,  costoUSD:6.90,  precio:160, img:'img/diam-1060.png' },
+  { package_id:342, nombre:'2180 + 20% = 2,616 Diamantes',  diamantes:2616,  costoUSD:13.70, precio:260, img:'img/diam-2180.png' },
+  { package_id:344, nombre:'5600 + 20% = 6,720 Diamantes',  diamantes:6720,  costoUSD:34.87, precio:680, img:'img/diam-5600.png' },
+  { package_id:null, nombre:'11200 + 20% = 13,440 Diamantes', diamantes:13440, costoUSD:69.74, precio:1390, manual:true }
 ];
 
 
@@ -5647,7 +5647,7 @@ function _getDiamProductos(tipo){
 
 function setDiamTipo(tipo){
   _diamTipoActual = tipo;
-  ['bonus','ilim','1vez'].forEach(function(t){
+  ['ilim','1vez'].forEach(function(t){
     var btn = document.getElementById('dtab-'+t);
     if(btn) btn.classList.toggle('active', t===tipo);
   });
