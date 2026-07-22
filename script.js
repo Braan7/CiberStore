@@ -141,10 +141,10 @@ var PRODUCTS_1VEZ = [
 
 var LIKES = [
   {id:1,  label:'1 dia',   emoji:'\uD83D\uDC4D', priceMX:10,  total:200,  perDay:200, days:1,   color:'#00e676'},
-  {id:2,  label:'7 dias',  emoji:'\uD83D\uDC4D', priceMX:25,  total:1400, perDay:200, days:7,   color:'#10d98a', popular:true},
-  {id:3,  label:'14 dias', emoji:'\uD83D\uDC4D', priceMX:35,  total:2800, perDay:200, days:14,  color:'#10d98a'},
+  {id:2,  label:'7 dias',  emoji:'\uD83D\uDC4D', priceMX:25,  total:1400, perDay:200, days:7,   color:'#22d3ee', popular:true},
+  {id:3,  label:'14 dias', emoji:'\uD83D\uDC4D', priceMX:35,  total:2800, perDay:200, days:14,  color:'#22d3ee'},
   {id:4,  label:'21 dias', emoji:'\uD83D\uDC4D', priceMX:60,  total:4200, perDay:200, days:21,  color:'#ffd700'},
-  {id:5,  label:'30 dias', emoji:'\uD83D\uDC4D', priceMX:70,  total:6600, perDay:220, days:30,  color:'#10d98a', best:true},
+  {id:5,  label:'30 dias', emoji:'\uD83D\uDC4D', priceMX:70,  total:6600, perDay:220, days:30,  color:'#22d3ee', best:true},
   {id:11, label:'Instant 2K',  emoji:'\u26A1', priceMX:120,  total:2000,  perDay:2000, days:1,  color:'#ff4da6', isInstant:true},
   {id:12, label:'Instant 4K',  emoji:'\u26A1', priceMX:230,  total:4000,  perDay:2000, days:2,  color:'#ff4da6', isInstant:true},
   {id:13, label:'Instant 10K', emoji:'\u26A1', priceMX:590,  total:10000, perDay:2000, days:5,  color:'#ff4da6', isInstant:true},
@@ -159,7 +159,7 @@ var HONOR = [
 ];
 
 var TIERS = [
-  {id:'free', name:'Cliente', color:'#10d98a', colorBg:'rgba(16,217,138,.1)', threshold:0, perks:['Precio fijo'], disc:0, icon:'\uD83D\uDC64'}
+  {id:'free', name:'Cliente', color:'#22d3ee', colorBg:'rgba(34,211,238,.1)', threshold:0, perks:['Precio fijo'], disc:0, icon:'\uD83D\uDC64'}
 ];
 
 var EXP_PACKAGES = [
@@ -518,8 +518,8 @@ function authTab(tab){
   /* Highlight selected tab */
   var tabBtn=document.getElementById('atab-'+tab);
   if(tabBtn){
-    tabBtn.style.color='#10d98a';
-    tabBtn.style.borderBottom='2px solid #10d98a';
+    tabBtn.style.color='#22d3ee';
+    tabBtn.style.borderBottom='2px solid #22d3ee';
   }
 }
 function updateAuthUI(){
@@ -580,8 +580,8 @@ function admSubTab(tab){
     var btn=document.getElementById('adm-stab-'+tabs[i]);
     if(panel) panel.style.display=tabs[i]===tab?'block':'none';
     if(btn){
-      var colors={dash:['rgba(16,217,138,.2)','rgba(16,217,138,.45)','#5eeab0'],
-                  users:['rgba(16,217,138,.12)','rgba(16,217,138,.35)','var(--c1)'],
+      var colors={dash:['rgba(34,211,238,.2)','rgba(34,211,238,.45)','#67e8f9'],
+                  users:['rgba(34,211,238,.12)','rgba(34,211,238,.35)','var(--c1)'],
                   codes:['rgba(0,230,118,.1)','rgba(0,230,118,.3)','#00e676'],
                   chat:['rgba(255,165,0,.1)','rgba(255,165,0,.3)','#ffa500']};
       var cc=tabs[i]===tab?(colors[tabs[i]]||colors.dash):null;
@@ -754,34 +754,34 @@ function renderProds(){
   var rows='';
 
   /* ═══ DIAMANTES ILIMITADOS ═══ */
-  rows+='<div style="grid-column:1/-1;background:linear-gradient(135deg,#0a0a0a,#0a0a0a);border:1px solid rgba(16,217,138,.28);border-radius:16px;padding:1.3rem 1.15rem;margin-bottom:1.25rem">'
+  rows+='<div style="grid-column:1/-1;background:linear-gradient(135deg,#0a0a0a,#0a0a0a);border:1px solid rgba(34,211,238,.28);border-radius:16px;padding:1.3rem 1.15rem;margin-bottom:1.25rem">'
     +'<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:1rem">'
     +'<span style="font-size:1.5rem">\u26A1</span>'
-    +'<div><div style="font-family:Oxanium;font-size:1rem;font-weight:900;color:#10d98a;letter-spacing:.5px">DIAMANTES ILIMITADOS</div>'
+    +'<div><div style="font-family:Oxanium;font-size:1rem;font-weight:900;color:#22d3ee;letter-spacing:.5px">DIAMANTES ILIMITADOS</div>'
     +'<div style="font-size:.72rem;color:var(--muted)">Recarga las veces que quieras</div></div>'
     +'</div>'
     +'<div class="lkpln-grid" style="margin-bottom:1.1rem">';
   for(var i=0;i<PRODUCTS.length;i++){
-    rows+=makeModernCard(PRODUCTS[i], '#10d98a', PRODUCTS[i].badge==='GRAN VALOR'||PRODUCTS[i].badge==='MEGA PACK');
+    rows+=makeModernCard(PRODUCTS[i], '#22d3ee', PRODUCTS[i].badge==='GRAN VALOR'||PRODUCTS[i].badge==='MEGA PACK');
   }
   rows+='</div>'
     // Formulario ilimitados
-    +'<div style="border-top:1px solid rgba(16,217,138,.15);padding-top:1rem">'
+    +'<div style="border-top:1px solid rgba(34,211,238,.15);padding-top:1rem">'
     +'<div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem">Pedir con saldo</div>'
     +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Elige tu paquete</label>'
-    +'<select id="ilim-plan" style="width:100%;background:#0a0a0a;border:1px solid rgba(16,217,138,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Poppins,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box">';
+    +'<select id="ilim-plan" style="width:100%;background:#0a0a0a;border:1px solid rgba(34,211,238,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Poppins,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box">';
   for(var a=0;a<PRODUCTS.length;a++){
     rows+='<option value="'+PRODUCTS[a].total+'|'+PRODUCTS[a].prices[0]+'">'+PRODUCTS[a].name+' diamantes \u2014 '+fmt(PRODUCTS[a].prices[0])+' MX</option>';
   }
   rows+='</select>'
     +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Tu ID de Free Fire</label>'
-    +'<input id="ilim-id" type="text" placeholder="Ej: 123456789" style="width:100%;background:#0a0a0a;border:1px solid rgba(16,217,138,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Poppins,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box"/>'
+    +'<input id="ilim-id" type="text" placeholder="Ej: 123456789" style="width:100%;background:#0a0a0a;border:1px solid rgba(34,211,238,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Poppins,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box"/>'
     +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Nombre en el juego</label>'
-    +'<input id="ilim-nombre" type="text" placeholder="Tu nickname" style="width:100%;background:#0a0a0a;border:1px solid rgba(16,217,138,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Poppins,sans-serif;font-size:.88rem;margin-bottom:.65rem;box-sizing:border-box"/>'
-    +'<div style="display:flex;justify-content:space-between;background:rgba(16,217,138,.06);border:1px solid rgba(16,217,138,.18);border-radius:8px;padding:.45rem .85rem;margin-bottom:.5rem"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span id="ilim-saldo-val" style="font-family:Oxanium;font-weight:700;color:#10d98a;font-size:.82rem">$0 MX</span></div>'
+    +'<input id="ilim-nombre" type="text" placeholder="Tu nickname" style="width:100%;background:#0a0a0a;border:1px solid rgba(34,211,238,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Poppins,sans-serif;font-size:.88rem;margin-bottom:.65rem;box-sizing:border-box"/>'
+    +'<div style="display:flex;justify-content:space-between;background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.18);border-radius:8px;padding:.45rem .85rem;margin-bottom:.5rem"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span id="ilim-saldo-val" style="font-family:Oxanium;font-weight:700;color:#22d3ee;font-size:.82rem">$0 MX</span></div>'
     +'<div id="ilim-err" style="display:none;color:#ff6b6b;font-size:.75rem;margin-bottom:.5rem"></div>'
     +'<button onclick="submitIlimSaldo()" style="width:100%;padding:.78rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:10px;font-family:Poppins,sans-serif;font-weight:900;font-size:.9rem;cursor:pointer">\uD83D\uDD12 Confirmar con saldo</button>'
-    +'<button onclick="cotizarIlim()" style="width:100%;padding:.62rem;margin-top:.5rem;background:rgba(16,217,138,.08);border:1px solid rgba(16,217,138,.3);color:#10d98a;border-radius:10px;font-family:Poppins;font-weight:900;font-size:.82rem;cursor:pointer">\uD83D\uDCAC O cotizar por WhatsApp</button>'
+    +'<button onclick="cotizarIlim()" style="width:100%;padding:.62rem;margin-top:.5rem;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.3);color:#22d3ee;border-radius:10px;font-family:Poppins;font-weight:900;font-size:.82rem;cursor:pointer">\uD83D\uDCAC O cotizar por WhatsApp</button>'
     +'</div>'
     +'</div>';
 
@@ -1428,11 +1428,11 @@ function _mostrarReciboHonor(h, nombreClan, idClan, ord){
   ov.appendChild(cont);
 
   cont.innerHTML =
-    '<div style="background:linear-gradient(160deg,#0a0f0c,#0a0f14);border:2px solid rgba(37,211,102,.35);border-radius:18px;padding:1.75rem 1.25rem;text-align:center">'
+    '<div style="background:linear-gradient(160deg,#0a0e14,#0a0f14);border:2px solid rgba(37,211,102,.35);border-radius:18px;padding:1.75rem 1.25rem;text-align:center">'
     + '<div style="font-size:2.8rem;margin-bottom:.5rem">\u2705</div>'
     + '<div style="font-family:Oxanium;font-weight:900;font-size:1.25rem;color:#25d366;margin-bottom:.35rem;letter-spacing:.5px">PEDIDO CONFIRMADO</div>'
     + '<div style="font-size:.8rem;color:var(--muted);margin-bottom:1.35rem">Tu honor de clan esta en proceso</div>'
-    + '<div style="background:rgba(0,0,0,.25);border-radius:99px;height:10px;overflow:hidden;margin-bottom:1.4rem"><div style="height:100%;width:20%;border-radius:99px;background:linear-gradient(90deg,#10d98a,#ff9900);box-shadow:0 0 12px rgba(255,180,60,.5)"></div></div>'
+    + '<div style="background:rgba(0,0,0,.25);border-radius:99px;height:10px;overflow:hidden;margin-bottom:1.4rem"><div style="height:100%;width:20%;border-radius:99px;background:linear-gradient(90deg,#22d3ee,#ff9900);box-shadow:0 0 12px rgba(255,180,60,.5)"></div></div>'
     + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
     +   _filaRecibo('\uD83D\uDCCB Pedido', '#'+ord)
     +   _filaRecibo('\uD83C\uDFC6 Servicio', 'Honor '+h.region)
@@ -1441,8 +1441,8 @@ function _mostrarReciboHonor(h, nombreClan, idClan, ord){
     +   _filaRecibo('\uD83D\uDCB5 Precio', fmt(h.price))
     +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' \u00B7 ' + hora, true)
     + '</div>'
-    + '<div style="background:rgba(255,180,60,.08);border:1px solid rgba(255,180,60,.25);border-radius:10px;padding:.75rem .9rem;margin-top:1rem;font-size:.73rem;color:#10d98a;line-height:1.55">&#128197; Los pedidos se procesan <b>sabados y domingos</b>.<br/>&#129302; Los bots se uniran entre las <b>3:00 y 7:00 AM</b>.</div>'
-    + '<button onclick="var o=document.getElementById(\'recibo-honor-ov\'); if(o) o.remove();" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0b6b45,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Entendido</button>'
+    + '<div style="background:rgba(255,180,60,.08);border:1px solid rgba(255,180,60,.25);border-radius:10px;padding:.75rem .9rem;margin-top:1rem;font-size:.73rem;color:#22d3ee;line-height:1.55">&#128197; Los pedidos se procesan <b>sabados y domingos</b>.<br/>&#129302; Los bots se uniran entre las <b>3:00 y 7:00 AM</b>.</div>'
+    + '<button onclick="var o=document.getElementById(\'recibo-honor-ov\'); if(o) o.remove();" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Entendido</button>'
     + '</div>';
 }
 function clanWA(){
@@ -1774,7 +1774,7 @@ function launchConfetti(){
   canvas.width=window.innerWidth; canvas.height=window.innerHeight;
   var ctx=canvas.getContext('2d');
   var pieces=[];
-  var colors=['#10d98a','#ffd000','#ff4422','#00f5ff','#25d366','#0b8a58'];
+  var colors=['#22d3ee','#ffd000','#ff4422','#00f5ff','#25d366','#0e7490'];
   for(var i=0;i<120;i++) pieces.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height-canvas.height,w:Math.random()*10+4,h:Math.random()*6+3,color:colors[Math.floor(Math.random()*colors.length)],rot:Math.random()*360,vx:(Math.random()-.5)*3,vy:Math.random()*4+2,vr:(Math.random()-.5)*5});
   var frame=0;
   function draw(){
@@ -1839,8 +1839,8 @@ function copyExitCode(){
 
 /* \u2500\u2500 RULETA \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 var RULETA_PRIZES=[
-  {label:'2%',disc:2,color:'#0055cc'},{label:'5%',disc:5,color:'#10d98a'},
-  {label:'3%',disc:3,color:'#0b8a58'},{label:'10%',disc:10,color:'#ffd000'},
+  {label:'2%',disc:2,color:'#0055cc'},{label:'5%',disc:5,color:'#22d3ee'},
+  {label:'3%',disc:3,color:'#0e7490'},{label:'10%',disc:10,color:'#ffd000'},
   {label:'1%',disc:1,color:'#333855'},{label:'7%',disc:7,color:'#00f5ff'},
   {label:'15%',disc:15,color:'#ff4422'},{label:'4%',disc:4,color:'#25d366'}
 ];
@@ -1863,7 +1863,7 @@ function drawRuleta(angle){
   }
   ctx.beginPath(); ctx.arc(cx,cy,16,0,Math.PI*2);
   ctx.fillStyle='#0b0b0b'; ctx.fill();
-  ctx.strokeStyle='rgba(16,217,138,.5)'; ctx.lineWidth=2; ctx.stroke();
+  ctx.strokeStyle='rgba(34,211,238,.5)'; ctx.lineWidth=2; ctx.stroke();
 }
 function openRuleta(){
   if(!authSession){showToast('Inicia sesion para girar');setTimeout(showAuthModal,600);return;}
@@ -2191,9 +2191,9 @@ function loadLeaderboard(){
             /* Name + stats */
             + '<div style="flex:1;min-width:0">'
             + '<div style="font-size:.85rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'
-            + u.username + (isMe?' <span style="font-size:.62rem;background:rgba(16,217,138,.15);color:var(--c1);padding:.1rem .35rem;border-radius:4px;font-family:sans-serif">Tu</span>':'')+'</div>'
+            + u.username + (isMe?' <span style="font-size:.62rem;background:rgba(34,211,238,.15);color:var(--c1);padding:.1rem .35rem;border-radius:4px;font-family:sans-serif">Tu</span>':'')+'</div>'
             + '<div style="display:flex;align-items:center;gap:.6rem;margin-top:.2rem;flex-wrap:wrap">'
-            + (diamonds>0?'<span style="font-size:.68rem;color:#5eeab0;font-weight:600">&#128142; '+diamonds.toLocaleString('es-MX')+'</span>':'')
+            + (diamonds>0?'<span style="font-size:.68rem;color:#67e8f9;font-weight:600">&#128142; '+diamonds.toLocaleString('es-MX')+'</span>':'')
             + (likes>0?'<span style="font-size:.68rem;color:#ff6b9d;font-weight:600">&#128077; '+likes.toLocaleString('es-MX')+'</span>':'')
             + '</div></div>'
             /* Amount */
@@ -2382,7 +2382,7 @@ function admRenderChart(canvas){
         var bh=Math.round((sales[k]/mx)*(H-36));
         /* Bar */
         var g=ctx.createLinearGradient(0,H-bh,0,H);
-        g.addColorStop(0,'#10d98a');
+        g.addColorStop(0,'#22d3ee');
         g.addColorStop(1,'rgba(0,85,204,.3)');
         ctx.fillStyle=g;
         if(ctx.roundRect) ctx.roundRect(x,H-bh-16,bw,bh,4);
@@ -2406,7 +2406,7 @@ function admRenderChart(canvas){
         var avg=totalVentas>0?Math.round(totalVentas/sales.filter(function(s){return s>0;}).length):0;
         var maxDay=Math.max.apply(null,sales);
         extra.innerHTML=
-          '<div style="background:rgba(16,217,138,.07);border:1px solid rgba(16,217,138,.15);border-radius:8px;padding:.65rem;text-align:center">'
+          '<div style="background:rgba(34,211,238,.07);border:1px solid rgba(34,211,238,.15);border-radius:8px;padding:.65rem;text-align:center">'
           +'<div style="font-family:Oxanium;font-size:.9rem;font-weight:700;color:var(--c1)">$'+avg.toLocaleString('es-MX')+'</div>'
           +'<div style="font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:.1rem">Promedio/dia</div></div>'
           +'<div style="background:rgba(255,208,0,.07);border:1px solid rgba(255,208,0,.15);border-radius:8px;padding:.65rem;text-align:center">'
@@ -2451,8 +2451,8 @@ function admFullLoadUsers(){
         +'<td><div style="display:flex;gap:.3rem;flex-wrap:wrap">'
         +'<button data-u="'+u.id+'" data-n="'+u.username+'" onclick="admAddSaldo(this.dataset.u,this.dataset.n)" class="adm-action-btn" style="border-color:rgba(0,230,118,.3);color:#00e676">+$</button>'
         +'<button data-u="'+u.id+'" data-n="'+u.username+'" onclick="admQuitarSaldo(this.dataset.u,this.dataset.n)" class="adm-action-btn" style="border-color:rgba(255,80,80,.3);color:#ff6b6b">-$</button>'
-        +'<button data-u="'+u.id+'" data-n="'+u.username+'" onclick="admVerHistorial(this.dataset.u,this.dataset.n)" class="adm-action-btn" style="border-color:rgba(16,217,138,.3);color:var(--c1)">Hist</button>'
-        +'<button data-u="'+u.id+'" data-n="'+u.username+'" data-r="'+u.role+'" onclick="admCambiarRol(this.dataset.u,this.dataset.n,this.dataset.r)" class="adm-action-btn" style="border-color:rgba(16,217,138,.3);color:#5eeab0">Rol</button>'
+        +'<button data-u="'+u.id+'" data-n="'+u.username+'" onclick="admVerHistorial(this.dataset.u,this.dataset.n)" class="adm-action-btn" style="border-color:rgba(34,211,238,.3);color:var(--c1)">Hist</button>'
+        +'<button data-u="'+u.id+'" data-n="'+u.username+'" data-r="'+u.role+'" onclick="admCambiarRol(this.dataset.u,this.dataset.n,this.dataset.r)" class="adm-action-btn" style="border-color:rgba(34,211,238,.3);color:#67e8f9">Rol</button>'
         +'<button data-u="'+u.id+'" data-n="'+u.username+'" data-b="'+u.banned+'" onclick="admBanear(this.dataset.u,this.dataset.n,this.dataset.b)" class="adm-action-btn" style="border-color:rgba(255,165,0,.3);color:#ffa500">'+(u.banned?'Des':'Ban')+'</button>'
         +'<button data-u="'+u.id+'" data-n="'+u.username+'" onclick="admResetPass(this.dataset.u,this.dataset.n)" class="adm-action-btn" style="border-color:rgba(255,255,255,.15);color:var(--muted)">Reset</button>'
         +'</div></td></tr>';
@@ -3011,7 +3011,7 @@ function renderCart(){
   rows+='<div class="cart-total"><span>Total</span><span style="color:'+(enough?'#00e676':'#ff6b6b')+'">'+fmt(total)+'</span></div>';
   rows+='<div style="display:flex;justify-content:space-between;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.18);border-radius:8px;padding:.5rem .85rem;margin:.5rem 0"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span style="font-family:Oxanium;font-weight:700;color:'+(enough?'#00e676':'#ff6b6b')+'">'+fmt(saldo)+'</span></div>';
   if(!authSession){
-    rows+='<button onclick="closeCart();showAuthModal();" style="width:100%;padding:.72rem;background:linear-gradient(90deg,#0055cc,#10d98a);color:#fff;border:none;border-radius:7px;font-weight:700;font-size:.9rem;cursor:pointer">Inicia sesion</button>';
+    rows+='<button onclick="closeCart();showAuthModal();" style="width:100%;padding:.72rem;background:linear-gradient(90deg,#0055cc,#22d3ee);color:#fff;border:none;border-radius:7px;font-weight:700;font-size:.9rem;cursor:pointer">Inicia sesion</button>';
   } else if(!enough){
     var falta=total-saldo;
     rows+='<div style="font-size:.78rem;color:#ff6b6b;margin-bottom:.5rem">Saldo insuficiente. Te faltan $'+falta.toLocaleString('es-MX')+' MX.</div>';
@@ -3311,7 +3311,7 @@ function renderTopList(elId, data, colorFn, maxItems){
       + '<div style="width:30px;text-align:center;font-size:'+(i<3?'1.2rem':'.82rem')+';color:'+medalColor+';font-weight:700;flex-shrink:0">'+medal+'</div>'
       + '<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-size:.72rem;font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+medalColor+'44">'+initial+'</div>'
       + '<div style="flex:1;min-width:0">'
-      + '<div style="font-size:.85rem;font-weight:700;color:#fff">'+item.username+(isMe?' <span style="font-size:.62rem;background:rgba(16,217,138,.15);color:var(--c1);padding:.1rem .35rem;border-radius:4px">Tu</span>':'')+' </div>'
+      + '<div style="font-size:.85rem;font-weight:700;color:#fff">'+item.username+(isMe?' <span style="font-size:.62rem;background:rgba(34,211,238,.15);color:var(--c1);padding:.1rem .35rem;border-radius:4px">Tu</span>':'')+' </div>'
       + '</div>'
       + '<div style="text-align:right;flex-shrink:0;font-family:Oxanium;font-size:.82rem;font-weight:900;color:'+valueColor+'">$'+Math.round(value).toLocaleString('es-MX')+'</div>'
       + '</div>';
@@ -3488,7 +3488,7 @@ function loadTopLikes(){
           + '<div style="width:30px;text-align:center;font-size:'+(i<3?'1.2rem':'.82rem')+';color:'+medalColor+';font-weight:700;flex-shrink:0">'+medal+'</div>'
           + '<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-size:.72rem;font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+medalColor+'44">'+initial+'</div>'
           + '<div style="flex:1;min-width:0">'
-          + '<div style="font-size:.85rem;font-weight:700;color:#fff">'+item.username+(isMe?' <span style="font-size:.62rem;background:rgba(16,217,138,.15);color:var(--c1);padding:.1rem .35rem;border-radius:4px">Tu</span>':'')+' </div>'
+          + '<div style="font-size:.85rem;font-weight:700;color:#fff">'+item.username+(isMe?' <span style="font-size:.62rem;background:rgba(34,211,238,.15);color:var(--c1);padding:.1rem .35rem;border-radius:4px">Tu</span>':'')+' </div>'
           + '<div style="font-size:.65rem;color:var(--muted);margin-top:.15rem">👍 '+item.likes.toLocaleString('es-MX')+' likes</div>'
           + '</div>'
           + '<div style="text-align:right;flex-shrink:0;font-family:Oxanium;font-size:.82rem;font-weight:900;color:'+(i===0?'#ffd700':'#00e676')+'">$'+item.value.toLocaleString('es-MX')+'</div>'
@@ -3560,7 +3560,7 @@ function loadTopDiamantes(){
           + '<div style="width:30px;text-align:center;font-size:'+(i<3?'1.2rem':'.82rem')+';color:'+medalColor+';font-weight:700;flex-shrink:0">'+medal+'</div>'
           + '<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-size:.72rem;font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+medalColor+'44">'+initial+'</div>'
           + '<div style="flex:1;min-width:0">'
-          + '<div style="font-size:.85rem;font-weight:700;color:#fff">'+item.username+(isMe?' <span style="font-size:.62rem;background:rgba(16,217,138,.15);color:var(--c1);padding:.1rem .35rem;border-radius:4px">Tu</span>':'')+' </div>'
+          + '<div style="font-size:.85rem;font-weight:700;color:#fff">'+item.username+(isMe?' <span style="font-size:.62rem;background:rgba(34,211,238,.15);color:var(--c1);padding:.1rem .35rem;border-radius:4px">Tu</span>':'')+' </div>'
           + '<div style="font-size:.65rem;color:var(--muted);margin-top:.15rem">💎 '+item.diamantes.toLocaleString('es-MX')+' diamantes</div>'
           + '</div>'
           + '<div style="text-align:right;flex-shrink:0;font-family:Oxanium;font-size:.82rem;font-weight:900;color:'+(i===0?'#ffd700':'#00e676')+'">$'+item.value.toLocaleString('es-MX')+'</div>'
@@ -3784,7 +3784,7 @@ function setDiamondPeriod(period){
     var tab = document.getElementById('dtab-'+p);
     if(tab){
       if(p === period){
-        tab.style.background = 'linear-gradient(90deg,#5eeab0,#0b8a58)';
+        tab.style.background = 'linear-gradient(90deg,#67e8f9,#0e7490)';
         tab.style.color = '#fff';
       } else {
         tab.style.background = 'transparent';
@@ -3853,12 +3853,12 @@ function loadDiamondTop(){
 
         html += '<div style="background:'+bg+';border:1px solid '+border+';border-radius:11px;padding:'+(isTop1?'.85rem .9rem':'.65rem .9rem')+';display:flex;align-items:center;gap:.75rem;'+(isTop1?'box-shadow:0 0 18px rgba(255,215,0,.1);':'')+'">'
           + '<div style="width:26px;text-align:center;font-size:'+(i<3?'1.2rem':'.85rem')+';font-weight:900;color:'+rankColor+';flex-shrink:0">'+rank+'</div>'
-          + '<div style="width:'+avSize+';height:'+avSize+';border-radius:11px;background:linear-gradient(135deg,#5eeab0,#0b8a58);display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-size:'+(isTop1?'.9rem':'.78rem')+';font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+rankColor+'44">'+initial+'</div>'
+          + '<div style="width:'+avSize+';height:'+avSize+';border-radius:11px;background:linear-gradient(135deg,#67e8f9,#0e7490);display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-size:'+(isTop1?'.9rem':'.78rem')+';font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+rankColor+'44">'+initial+'</div>'
           + '<div style="flex:1;min-width:0">'
           + '<div style="font-size:'+(isTop1?'1rem':'.85rem')+';font-weight:'+(isTop1?'900':'700')+';color:#fff">'+item.username+'</div>'
           + '<div style="font-size:.62rem;color:var(--muted)">diamantes comprados</div>'
           + '</div>'
-          + '<div style="text-align:right;flex-shrink:0;font-family:Oxanium;font-size:'+(isTop1?'1.05rem':'.88rem')+';font-weight:900;color:'+(isTop1?'#ffd700':'#5eeab0')+'">'+item.diamonds.toLocaleString('es-MX')+' 💎</div>'
+          + '<div style="text-align:right;flex-shrink:0;font-family:Oxanium;font-size:'+(isTop1?'1.05rem':'.88rem')+';font-weight:900;color:'+(isTop1?'#ffd700':'#67e8f9')+'">'+item.diamonds.toLocaleString('es-MX')+' 💎</div>'
           + '</div>';
       });
 
@@ -4654,11 +4654,11 @@ function renderPinesAPI(){
   PINES_API.forEach(function(p){
     html += '<div class="lkpln-wrap"><div class="lkpln">'
       + '<div class="lkpln-l">'
-      + '<div class="lkpln-ico" style="background:rgba(16,217,138,.1);border:1px solid rgba(16,217,138,.28)">\uD83D\uDC8E</div>'
+      + '<div class="lkpln-ico" style="background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.28)">\uD83D\uDC8E</div>'
       + '<div><div class="lkpln-name">'+p.diamantes+' <span>diamantes</span></div><div class="lkpln-meta">Entrega automática por API</div></div>'
       + '</div>'
       + '<div class="lkpln-r" style="display:flex;flex-direction:column;align-items:flex-end;gap:.4rem">'
-      + '<div><div class="lkpln-price" style="color:#10d98a">$'+p.precio+'</div><div class="lkpln-cur">MXN</div></div>'
+      + '<div><div class="lkpln-price" style="color:#22d3ee">$'+p.precio+'</div><div class="lkpln-cur">MXN</div></div>'
       + '<button onclick="comprarPinAPI('+p.product_id+','+p.precio+',\''+p.nombre.replace(/'/g,"")+'\')" style="padding:.35rem .8rem;background:linear-gradient(90deg,#128c3e,#25d366);border:none;border-radius:8px;color:#fff;font-family:Poppins,sans-serif;font-weight:800;font-size:.72rem;cursor:pointer;white-space:nowrap">Comprar</button>'
       + '</div>'
       + '</div></div>';
@@ -5042,7 +5042,7 @@ function _mostrarRetiroEnviado(monto, montoMxn, recibeMxn, metodo, destino){
   ov.appendChild(cont);
 
   cont.innerHTML =
-    '<div style="background:linear-gradient(160deg,#0a0f0c,#0a0f14);border:2px solid rgba(37,211,102,.35);border-radius:18px;padding:1.75rem 1.25rem;text-align:center">'
+    '<div style="background:linear-gradient(160deg,#0a0e14,#0a0f14);border:2px solid rgba(37,211,102,.35);border-radius:18px;padding:1.75rem 1.25rem;text-align:center">'
     + '<div style="font-size:2.8rem;margin-bottom:.5rem">\uD83D\uDCB8</div>'
     + '<div style="font-family:Oxanium;font-weight:900;font-size:1.2rem;color:#25d366;margin-bottom:.35rem;letter-spacing:.5px">SOLICITUD ENVIADA</div>'
     + '<div style="font-size:.8rem;color:var(--muted);margin-bottom:1.35rem">Estamos revisando tu retiro</div>'
@@ -5054,8 +5054,8 @@ function _mostrarRetiroEnviado(monto, montoMxn, recibeMxn, metodo, destino){
     +   _filaRecibo('\uD83D\uDCE7 Destino', destino)
     +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha+' \u00B7 '+hora, true)
     + '</div>'
-    + '<div style="background:rgba(255,180,60,.08);border:1px solid rgba(255,180,60,.25);border-radius:10px;padding:.75rem .9rem;margin-top:1rem;font-size:.73rem;color:#10d98a;line-height:1.55">\u23F3 Procesamos los retiros en <b>24-48 hrs habiles</b>. El saldo se descuenta cuando aprobamos la solicitud.</div>'
-    + '<button onclick="var o=document.getElementById(\'recibo-retiro-ov\'); if(o) o.remove();" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0b6b45,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Entendido</button>'
+    + '<div style="background:rgba(255,180,60,.08);border:1px solid rgba(255,180,60,.25);border-radius:10px;padding:.75rem .9rem;margin-top:1rem;font-size:.73rem;color:#22d3ee;line-height:1.55">\u23F3 Procesamos los retiros en <b>24-48 hrs habiles</b>. El saldo se descuenta cuando aprobamos la solicitud.</div>'
+    + '<button onclick="var o=document.getElementById(\'recibo-retiro-ov\'); if(o) o.remove();" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Entendido</button>'
     + '</div>';
 }
 
@@ -5256,12 +5256,12 @@ function cargarPedidosSeguimiento(){
           var yaEnviado = Math.round((actual/total) * cantNum);
           enviado = '<div style="display:flex;justify-content:space-between;font-size:.72rem;margin-bottom:.5rem"><span style="color:var(--muted)">Likes enviados</span><span style="color:#25d366;font-weight:700">'+yaEnviado.toLocaleString('es-MX')+' / '+cantNum.toLocaleString('es-MX')+'</span></div>';
         } else if(p.tipo === 'honor'){
-          enviado = '<div style="display:flex;justify-content:space-between;font-size:.72rem;margin-bottom:.5rem"><span style="color:var(--muted)">Honor de clan</span><span style="color:#34e89e;font-weight:700">Dia '+actual+' de '+total+'</span></div>';
+          enviado = '<div style="display:flex;justify-content:space-between;font-size:.72rem;margin-bottom:.5rem"><span style="color:var(--muted)">Honor de clan</span><span style="color:#67e8f9;font-weight:700">Dia '+actual+' de '+total+'</span></div>';
         }
 
         html += '<div class="ped-prog-wrap">';
         html += enviado;
-        html += '<div class="ped-prog-head"><span>Progreso de entrega</span><span style="color:#8df0c4;font-weight:700">'+actual+'/'+total+' dias</span></div>';
+        html += '<div class="ped-prog-head"><span>Progreso de entrega</span><span style="color:#a5f3fc;font-weight:700">'+actual+'/'+total+' dias</span></div>';
         html += '<div class="ped-prog-bar"><div class="ped-prog-fill" style="width:'+pct+'%"></div></div>';
         // Puntitos por día
         html += '<div class="ped-prog-dots">';
@@ -5437,8 +5437,8 @@ function renderCreadoresTabla(){
     var bg = (i % 2 === 0) ? 'rgba(255,255,255,.015)' : 'transparent';
     var esUltimo = (i === CREADORES_PREMIOS.length - 1);
     html += '<div style="display:grid;grid-template-columns:1.3fr 1fr;padding:.85rem 1rem;background:'+bg+';'+(esUltimo?'background:rgba(255,207,64,.06);':'')+'border-bottom:'+(esUltimo?'none':'1px solid rgba(255,255,255,.05)')+'">';
-    html += '<div style="font-family:Oxanium;font-weight:700;font-size:.85rem;color:'+(esUltimo?'#34e89e':'#fff')+';display:flex;align-items:center">'+p.label+'</div>';
-    html += '<div style="font-family:Oxanium;font-weight:800;font-size:.92rem;color:'+(esUltimo?'#34e89e':'#10d98a')+';display:flex;align-items:center;gap:.35rem">'+p.diamantes.toLocaleString('es-MX')+' \u{1F48E}</div>';
+    html += '<div style="font-family:Oxanium;font-weight:700;font-size:.85rem;color:'+(esUltimo?'#67e8f9':'#fff')+';display:flex;align-items:center">'+p.label+'</div>';
+    html += '<div style="font-family:Oxanium;font-weight:800;font-size:.92rem;color:'+(esUltimo?'#67e8f9':'#22d3ee')+';display:flex;align-items:center;gap:.35rem">'+p.diamantes.toLocaleString('es-MX')+' \u{1F48E}</div>';
     html += '</div>';
   });
   cont.innerHTML = html;
@@ -5662,7 +5662,7 @@ function enviarVerificacionID(){
     aviso.innerHTML = '<div style="background:linear-gradient(160deg,rgba(37,211,102,.1),rgba(255,255,255,.02));border:1px solid rgba(37,211,102,.35);border-radius:14px;padding:1.15rem;text-align:center">'
       + '<div style="font-size:2rem;margin-bottom:.4rem">\u2705</div>'
       + '<div style="font-family:Oxanium;font-weight:800;font-size:.92rem;color:#25d366;margin-bottom:.4rem">ID ENVIADO A VERIFICAR</div>'
-      + '<div style="font-size:.77rem;color:#e8ecf4;line-height:1.6;margin-bottom:1rem">Tu ID <b style="color:#fff">' + ffId + '</b> fue enviado. <b style="color:#10d98a">Consultanos por WhatsApp</b> si tu cuenta es elegible antes de comprar.</div>'
+      + '<div style="font-size:.77rem;color:#e8ecf4;line-height:1.6;margin-bottom:1rem">Tu ID <b style="color:#fff">' + ffId + '</b> fue enviado. <b style="color:#22d3ee">Consultanos por WhatsApp</b> si tu cuenta es elegible antes de comprar.</div>'
       + '<a href="' + urlWA + '" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:.85rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border-radius:11px;font-family:Poppins;font-weight:700;font-size:.85rem;text-decoration:none;box-sizing:border-box">\uD83D\uDCF1 Consultar disponibilidad por WhatsApp</a>'
       + '</div>';
   }
@@ -5681,7 +5681,7 @@ function renderDiamCatalogo(){
   grid.innerHTML = productos.map(function(p, i){
     var badgeColor = '';
     if(p.badge === 'AUTO') badgeColor = 'background:rgba(37,211,102,.15);border-color:rgba(37,211,102,.4);color:#25d366';
-    else if(p.badge === 'MANUAL') badgeColor = 'background:rgba(255,180,60,.15);border-color:rgba(255,180,60,.4);color:#10d98a';
+    else if(p.badge === 'MANUAL') badgeColor = 'background:rgba(255,180,60,.15);border-color:rgba(255,180,60,.4);color:#22d3ee';
     var badge = p.badge ? '<span class="dcat-badge" style="'+badgeColor+'">'+p.badge+'</span>' : '';
     var visual = p.img
       ? '<div style="width:100%;aspect-ratio:4/3;border-radius:11px;overflow:hidden;margin-bottom:.65rem;background:#0a0f1a"><img src="'+p.img+'" alt="'+p.nombre+'" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.parentNode.innerHTML=\'<div class=&quot;dcat-card-ico&quot;>&#127918;</div>\'"/></div>'
@@ -5730,7 +5730,7 @@ function _mostrarAvisoModal(titulo, texto, color){
     '<div style="font-size:2.4rem;margin-bottom:.6rem">\u26A0\uFE0F</div>'
     + '<div style="font-family:Oxanium;font-weight:800;font-size:1rem;color:'+color+';margin-bottom:.7rem;letter-spacing:.3px">'+titulo+'</div>'
     + '<div style="font-size:.85rem;color:#c5cad6;line-height:1.65;margin-bottom:1.4rem">'+texto+'</div>'
-    + '<button onclick="var o=document.getElementById(\'aviso-entrega-ov\'); if(o) o.remove();" style="width:100%;padding:.85rem;background:rgba(16,217,138,.12);border:1px solid rgba(16,217,138,.4);color:#10d98a;border-radius:12px;font-family:Poppins;font-weight:600;font-size:.9rem;cursor:pointer">Entendido</button>';
+    + '<button onclick="var o=document.getElementById(\'aviso-entrega-ov\'); if(o) o.remove();" style="width:100%;padding:.85rem;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.4);color:#22d3ee;border-radius:12px;font-family:Poppins;font-weight:600;font-size:.9rem;cursor:pointer">Entendido</button>';
   ov.appendChild(c);
 }
 
@@ -5876,12 +5876,12 @@ function _mostrarReciboProceso(p, ffId, ord){
   det.innerHTML =
     '<div style="background:linear-gradient(160deg,rgba(255,180,60,.08),rgba(255,255,255,.02));border:2px solid rgba(255,180,60,.35);border-radius:18px;padding:1.75rem 1.35rem;text-align:center;max-width:420px;margin:0 auto">'
     + '<div style="font-size:2.8rem;margin-bottom:.5rem">\u23F3</div>'
-    + '<div style="font-family:Oxanium;font-weight:900;font-size:1.25rem;color:#10d98a;margin-bottom:.35rem;letter-spacing:.5px">RECARGA EN PROCESO</div>'
+    + '<div style="font-family:Oxanium;font-weight:900;font-size:1.25rem;color:#22d3ee;margin-bottom:.35rem;letter-spacing:.5px">RECARGA EN PROCESO</div>'
     + '<div style="font-size:.8rem;color:var(--muted);margin-bottom:1.35rem">Tu pedido se esta procesando, te lo acreditamos pronto</div>'
 
     // Barra de progreso animada
     + '<div style="background:rgba(0,0,0,.25);border-radius:99px;height:10px;overflow:hidden;margin-bottom:1.5rem">'
-    +   '<div id="recibo-barra" style="height:100%;width:15%;border-radius:99px;background:linear-gradient(90deg,#10d98a,#ff9900,#10d98a);background-size:200% 100%;box-shadow:0 0 12px rgba(255,180,60,.5);transition:width .8s ease"></div>'
+    +   '<div id="recibo-barra" style="height:100%;width:15%;border-radius:99px;background:linear-gradient(90deg,#22d3ee,#ff9900,#22d3ee);background-size:200% 100%;box-shadow:0 0 12px rgba(255,180,60,.5);transition:width .8s ease"></div>'
     + '</div>'
 
     + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
@@ -5892,7 +5892,7 @@ function _mostrarReciboProceso(p, ffId, ord){
     +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' \u00B7 \uD83D\uDD52 ' + hora, true)
     + '</div>'
 
-    + '<button onclick="cerrarDiamDetalle()" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0b6b45,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Volver al catalogo</button>'
+    + '<button onclick="cerrarDiamDetalle()" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Volver al catalogo</button>'
     + '</div>';
 
   det.style.display = '';
@@ -5952,7 +5952,7 @@ function _procesarRecargaAutomatica(p, ffId){
         registrarPedido(p.nombre+' (AUTO - VERIFICAR)', p.diamantes, 'diamantes', ffId, p.precio, 0);
         if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F VERIFICAR - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+(res.error||res.status||'sin confirmar'), p.precio, ord);
         if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
-        if(msg){ msg.className='ddet-msg'; msg.style.color='#10d98a'; msg.style.fontSize='.72rem'; msg.innerHTML='\u23F3 Tu recarga se esta verificando. Si no llega en unos minutos, contacta al admin con tu ID.'; }
+        if(msg){ msg.className='ddet-msg'; msg.style.color='#22d3ee'; msg.style.fontSize='.72rem'; msg.innerHTML='\u23F3 Tu recarga se esta verificando. Si no llega en unos minutos, contacta al admin con tu ID.'; }
         console.error('[RECARGA] Sin confirmar (no reembolsado):', JSON.stringify(res));
         _comprandoDiam = false;
         setTimeout(cerrarDiamDetalle, 4000);
@@ -5962,7 +5962,7 @@ function _procesarRecargaAutomatica(p, ffId){
       registrarPedido(p.nombre+' (AUTO - VERIFICAR)', p.diamantes, 'diamantes', ffId, p.precio, 0);
       if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F VERIFICAR (sin respuesta) - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId, p.precio, ord);
       if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
-      if(msg){ msg.className='ddet-msg'; msg.style.color='#10d98a'; msg.style.fontSize='.72rem'; msg.innerHTML='\u23F3 Tu recarga se esta verificando. Si no llega, contacta al admin.'; }
+      if(msg){ msg.className='ddet-msg'; msg.style.color='#22d3ee'; msg.style.fontSize='.72rem'; msg.innerHTML='\u23F3 Tu recarga se esta verificando. Si no llega, contacta al admin.'; }
       console.error('[RECARGA] catch compra (no reembolsado):', err);
       _comprandoDiam = false;
       setTimeout(cerrarDiamDetalle, 4000);
@@ -6045,7 +6045,7 @@ function verProductosRA(){
   var cont = document.getElementById('ra-productos-lista');
   if(!cont) return;
   cont.style.display = 'block';
-  cont.innerHTML = '<div style="text-align:center;padding:1rem;color:#10d98a">Cargando productos...</div>';
+  cont.innerHTML = '<div style="text-align:center;padding:1rem;color:#22d3ee">Cargando productos...</div>';
 
   fetch(COMPRAR_RECARGA_URL, {
     method: 'POST',
@@ -6060,7 +6060,7 @@ function verProductosRA(){
     if(!prods || !prods.length){
       var dbg = '';
       if(res._debug_respuesta_cruda !== undefined){
-        dbg = '<div style="margin-top:.75rem;padding:.6rem;background:rgba(255,255,255,.03);border-radius:8px;font-size:.65rem;color:#8df0c4;word-break:break-all">HTTP: '+(res._debug_http_status||'?')+'<br>Respuesta cruda:<br>'+JSON.stringify(res._debug_respuesta_cruda)+'</div>';
+        dbg = '<div style="margin-top:.75rem;padding:.6rem;background:rgba(255,255,255,.03);border-radius:8px;font-size:.65rem;color:#a5f3fc;word-break:break-all">HTTP: '+(res._debug_http_status||'?')+'<br>Respuesta cruda:<br>'+JSON.stringify(res._debug_respuesta_cruda)+'</div>';
       }
       cont.innerHTML = '<div style="color:#ff6b6b">No se recibieron productos (lista vacia).</div>'+dbg;
       return;
@@ -6071,7 +6071,7 @@ function verProductosRA(){
     var pins = prods.filter(function(p){ return (p.type||p.tipo)==='pin'; });
     var otros = prods.filter(function(p){ return (p.type||p.tipo)!=='recharge' && (p.type||p.tipo)!=='pin'; });
 
-    var html = '<div style="font-family:Oxanium;font-weight:800;color:#10d98a;margin-bottom:.75rem">'+prods.length+' PRODUCTOS ('+recargas.length+' recargas, '+pins.length+' pins)</div>';
+    var html = '<div style="font-family:Oxanium;font-weight:800;color:#22d3ee;margin-bottom:.75rem">'+prods.length+' PRODUCTOS ('+recargas.length+' recargas, '+pins.length+' pins)</div>';
 
     function pintar(lista, titulo, color){
       if(!lista.length) return '';
@@ -6080,7 +6080,7 @@ function verProductosRA(){
         var tipo = p.type || p.tipo || '?';
         h += '<div style="padding:.6rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:8px;margin-bottom:.5rem">'
           + '<div style="color:#fff;font-weight:700">ID: '+p.id+' &mdash; '+(p.name||p.sku||p.package||'?')+'</div>'
-          + '<div style="color:#10d98a;font-size:.68rem">Tipo: '+tipo+' &middot; SKU: '+(p.sku||'?')+'</div>'
+          + '<div style="color:#22d3ee;font-size:.68rem">Tipo: '+tipo+' &middot; SKU: '+(p.sku||'?')+'</div>'
           + '<div style="color:#25d366;font-size:.72rem">Precio (tu costo): $'+(p.price||'?')+'</div>'
           + '</div>';
       });
@@ -6088,9 +6088,9 @@ function verProductosRA(){
     }
 
     html += pintar(recargas, '\u{1F3AE} RECARGAS DIRECTAS (type=recharge):', '#25d366');
-    html += pintar(pins, '\u{1F39F}\uFE0F PINS (type=pin):', '#10d98a');
-    html += pintar(otros, '\u{2753} OTROS:', '#5eeab0');
-    html += '<div style="margin-top:.75rem;padding:.6rem;background:rgba(16,217,138,.08);border-radius:8px;color:#8df0c4;font-size:.72rem">&#128203; Copia esta lista y pasala para conectar los productos.</div>';
+    html += pintar(pins, '\u{1F39F}\uFE0F PINS (type=pin):', '#22d3ee');
+    html += pintar(otros, '\u{2753} OTROS:', '#67e8f9');
+    html += '<div style="margin-top:.75rem;padding:.6rem;background:rgba(34,211,238,.08);border-radius:8px;color:#a5f3fc;font-size:.72rem">&#128203; Copia esta lista y pasala para conectar los productos.</div>';
     cont.innerHTML = html;
   }).catch(function(err){
     cont.innerHTML = '<div style="color:#ff6b6b">Error de conexion: '+err+'<br>Revisa que la funcion comprar-recarga este montada.</div>';
@@ -6312,7 +6312,7 @@ function _mostrarReciboRecarga(p, ffId, nombreJugador, status){
 
   var esPend = (status === 'PENDING');
   var colorBorde = esPend ? 'rgba(255,180,60,.4)' : 'rgba(37,211,102,.4)';
-  var colorTxt = esPend ? '#10d98a' : '#25d366';
+  var colorTxt = esPend ? '#22d3ee' : '#25d366';
   var titulo = esPend ? '\u23F3 RECARGA EN PROCESO' : '\u2705 RECARGA EXITOSA';
 
   det.innerHTML =
@@ -6329,7 +6329,7 @@ function _mostrarReciboRecarga(p, ffId, nombreJugador, status){
     +   _filaRecibo('\uD83D\uDD52 Hora', hora, true)
     + '</div>'
 
-    + '<button onclick="cerrarDiamDetalle()" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0b6b45,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Volver al catalogo</button>'
+    + '<button onclick="cerrarDiamDetalle()" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Volver al catalogo</button>'
     + '</div>';
 
   det.style.display = '';
@@ -6406,7 +6406,7 @@ function _mostrarReciboScar(ffId, user, ord){
     + '<div style="font-size:3rem;margin-bottom:.5rem">\u2705</div>'
     + '<div style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#25d366;margin-bottom:.35rem;letter-spacing:.5px">PEDIDO CONFIRMADO</div>'
     + '<div style="font-size:.82rem;color:var(--muted);margin-bottom:1.5rem">Tu SCAR Evolutiva esta en proceso</div>'
-    + '<div style="background:rgba(0,0,0,.25);border-radius:99px;height:10px;overflow:hidden;margin-bottom:1.5rem"><div style="height:100%;width:25%;border-radius:99px;background:linear-gradient(90deg,#10d98a,#ff9900);box-shadow:0 0 12px rgba(255,180,60,.5)"></div></div>'
+    + '<div style="background:rgba(0,0,0,.25);border-radius:99px;height:10px;overflow:hidden;margin-bottom:1.5rem"><div style="height:100%;width:25%;border-radius:99px;background:linear-gradient(90deg,#22d3ee,#ff9900);box-shadow:0 0 12px rgba(255,180,60,.5)"></div></div>'
     + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
     +   _filaRecibo('\uD83D\uDCCB Pedido', '#'+ord)
     +   _filaRecibo('\uD83D\uDD2B Producto', 'SCAR Evolutiva Nivel 7')
@@ -6416,8 +6416,8 @@ function _mostrarReciboScar(ffId, user, ord){
     +   _filaRecibo('\u23F3 Entrega', '2 a 3 semanas')
     +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' \u00B7 ' + hora, true)
     + '</div>'
-    + '<div style="font-size:.75rem;color:#10d98a;margin-top:1rem;line-height:1.5">Te contactaremos por WhatsApp. La skin llega en 2-3 semanas al correo de tu cuenta.</div>'
-    + '<button onclick="goPage(\'home\')" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0b6b45,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Volver al inicio</button>'
+    + '<div style="font-size:.75rem;color:#22d3ee;margin-top:1rem;line-height:1.5">Te contactaremos por WhatsApp. La skin llega en 2-3 semanas al correo de tu cuenta.</div>'
+    + '<button onclick="goPage(\'home\')" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Volver al inicio</button>'
     + '</div>';
   wrap.scrollIntoView({ behavior:'smooth', block:'start' });
 }
@@ -6830,7 +6830,7 @@ function _tarjetaEntrega(p, estActual, rechazado){
     _ESTADOS_FLUJO.forEach(function(est){
       var activo = (est === estActual);
       botones += '<button onclick="admSetEstado(\''+p.id+'\',\''+est+'\')" style="flex:1;min-width:70px;padding:.45rem .3rem;border-radius:8px;font-family:Oxanium;font-weight:700;font-size:.65rem;cursor:pointer;border:1px solid '
-        + (activo?'#5eeab0;background:linear-gradient(90deg,#5eeab0,#0b8a58);color:#fff':'rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:var(--muted)')+'">'
+        + (activo?'#67e8f9;background:linear-gradient(90deg,#67e8f9,#0e7490);color:#fff':'rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:var(--muted)')+'">'
         + _ESTADOS_NOMBRE[est].replace(/[^\x00-\x7F ]/g,'').trim() + '</button>';
     });
   }
@@ -6838,7 +6838,7 @@ function _tarjetaEntrega(p, estActual, rechazado){
     + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;margin-bottom:.7rem">'
     +   '<div><div style="font-weight:700;color:#fff;font-size:.85rem">'+_esc(p.producto||'Pedido')+'</div>'
     +   '<div style="font-size:.7rem;color:var(--muted);margin-top:.2rem">'+_esc(p.username||'')+(p.ff_id?(' \u00b7 ID: '+_esc(p.ff_id)):'')+' \u00b7 '+fecha+'</div></div>'
-    +   '<span style="font-size:.68rem;font-weight:700;color:#8df0c4;white-space:nowrap">'+(_ESTADOS_NOMBRE[estActual]||estActual)+'</span>'
+    +   '<span style="font-size:.68rem;font-weight:700;color:#a5f3fc;white-space:nowrap">'+(_ESTADOS_NOMBRE[estActual]||estActual)+'</span>'
     + '</div>'
     + (rechazado ? '<div style="font-size:.72rem;color:#ff6b6b">Pedido rechazado</div>'
        : '<div style="display:flex;gap:.35rem;flex-wrap:wrap">'+botones+'</div>'
@@ -6902,7 +6902,7 @@ function renderResenasFull(){
     var h = '';
     rows.forEach(function(r){
       var inicial = (r.username || 'U').charAt(0).toUpperCase();
-      var color = (typeof _avatarColor==='function') ? _avatarColor(r.username) : '#0b8a58';
+      var color = (typeof _avatarColor==='function') ? _avatarColor(r.username) : '#0e7490';
       var tiempo = (typeof _tiempoRelativo==='function') ? _tiempoRelativo(r.created_at) : '';
       var estrellas = (typeof _estrellasHTML==='function') ? _estrellasHTML(r.stars) : '';
 
@@ -6915,7 +6915,7 @@ function renderResenasFull(){
         +   '</div>'
         + '</div>'
         + '<div style="display:flex;align-items:center;gap:.5rem">'+estrellas+'<span style="font-size:.65rem;color:#25d366;font-weight:700;background:rgba(37,211,102,.1);padding:.1rem .45rem;border-radius:99px">Compra verificada</span></div>'
-        + '<div style="font-size:.68rem;color:#5eeab0;font-weight:600">\uD83D\uDCE6 '+r.servicio+'</div>'
+        + '<div style="font-size:.68rem;color:#67e8f9;font-weight:600">\uD83D\uDCE6 '+r.servicio+'</div>'
         + '<div style="font-size:.8rem;color:#c5cad6;line-height:1.6">\u201c'+r.texto+'\u201d</div>'
         + '</div>';
     });
