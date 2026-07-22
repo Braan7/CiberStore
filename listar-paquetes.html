@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>Paquetes del proveedor · CiberStore</title>
+<style>
+  body{margin:0;background:#000;color:#e8e8ea;font-family:'Segoe UI',system-ui,sans-serif;padding:1.2rem}
+  h1{font-size:1.15rem;color:#22d3ee;margin:0 0 .3rem}
+  p{color:#6b7280;font-size:.8rem;margin:0 0 1rem}
+  input{width:100%;box-sizing:border-box;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:#fff;border-radius:10px;padding:.7rem .9rem;font-size:.9rem;margin-bottom:.8rem}
+  button{width:100%;padding:.85rem;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.42);color:#22d3ee;border-radius:12px;font-weight:600;font-size:.9rem;cursor:pointer;margin-bottom:1rem}
+  .item{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:.8rem .9rem;margin-bottom:.5rem}
+  .pid{color:#22d3ee;font-weight:700;font-size:.95rem}
+  .nom{color:#fff;font-size:.85rem;margin:.15rem 0}
+  .extra{color:#6b7280;font-size:.72rem}
+  #estado{color:#ffb84d;font-size:.82rem;margin-bottom:.8rem}
+  pre{background:#0a0a0a;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:.8rem;font-size:.68rem;overflow-x:auto;color:#9aa3b0;white-space:pre-wrap;word-break:break-all}
+</style>
+</head>
+<body>
+<h1>Paquetes del proveedor</h1>
+<p>Toca el boton para pedir la lista a Recargas America y ver los <b>package_id</b> nuevos. Busca los de Free Fire +20%.</p>
+<button onclick="cargar()">Cargar lista de paquetes</button>
+<button onclick="probarRutas()" style="background:rgba(255,180,60,.1);border-color:rgba(255,180,60,.4);color:#ffb84d">Probar rutas de compra</button>
+<input id="filtro" type="text" placeholder="Filtrar (ej: free fire, 120, bono...)" oninput="pintar()"/>
+<div id="estado"></div>
+<div id="lista"></div>
+<pre id="crudo" style="display:none"></pre>
+
+<script>
+var URL_FN = 'https://pnotsqsudqpwqzssevig.supabase.co/functions/v1/rapid-handler';
+var _productos = [];
+
+function probarRutas(){
+  var est = document.getElementById('estado');
+  est.textContent = 'Probando rutas... (tarda unos segundos)';
+  fetch(URL_FN, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ action:'probar_rutas' })
+  }).then(function(r){ return r.json(); }).then(function(res){
+    var cont = document.getElementById('lista');
+    if(!res || !res.success){
+      est.textContent = 'Error: ' + ((res && res.error) || 'sin respuesta. Deploy la funcion nueva primero.');
+      return;
+    }
+    est.textContent = 'Resultados (las que dicen SI son las rutas que existen):';
+    var h = '';
+    (res.resultados||[]).forEach(function(x){
+      var color = x.existe ? '#25d366' : '#ff6b6b';
+      var tag = x.existe ? 'SI EXISTE' : 'no existe';
+      h += '<div class="item" style="border-color:'+color+'44"><div class="pid" style="color:'+color+'">'+tag+' &middot; '+x.ruta+' (HTTP '+x.http+')</div><div class="extra">'+(x.respuesta||x.error||'')+'</div></div>';
+    });
+    cont.innerHTML = h;
+    document.getElementById('crudo').style.display='none';
+  }).catch(function(e){ est.textContent = 'Error de conexion: ' + e; });
+}
+
+function cargar(){
+  var est = document.getElementById('estado');
+  est.textContent = 'Cargando...';
+  fetch(URL_FN, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ action:'listar' })
+  }).then(function(r){ return r.json(); }).then(function(res){
+    if(!res || !res.success){
+      est.textContent = 'Error: ' + ((res && res.error) || 'sin respuesta');
+      var pre = document.getElementById('crudo');
+      pre.style.display='block';
+      pre.textContent = JSON.stringify(res, null, 2);
+      return;
+    }
+    _productos = res.productos || [];
+    if(!_productos.length && res._debug_respuesta_cruda){
+      // Por si la lista viene en otra propiedad
+      var d = res._debug_respuesta_cruda;
+      _productos = d.products || d.items || d.data || [];
+    }
+    est.textContent = _productos.length + ' productos recibidos. Usa el filtro.';
+    // Mostrar tambien el crudo por si el formato es distinto
+    var pre = document.getElementById('crudo');
+    pre.style.display='block';
+    pre.textContent = JSON.stringify(res._debug_respuesta_cruda || res, null, 2).slice(0, 8000);
+    pintar();
+  }).catch(function(e){
+    est.textContent = 'Error de conexion: ' + e;
+  });
+}
+
+function pintar(){
+  var f = (document.getElementById('filtro').value||'').toLowerCase();
+  var cont = document.getElementById('lista');
+  var arr = _productos.filter(function(p){
+    var texto = JSON.stringify(p).toLowerCase();
+    return !f || texto.indexOf(f) >= 0;
+  });
+  var h = '';
+  arr.slice(0, 120).forEach(function(p){
+    var id = p.id !== undefined ? p.id : (p.package_id !== undefined ? p.package_id : '?');
+    var nombre = p.name || p.nombre || p.title || '(sin nombre)';
+    var precio = p.price !== undefined ? p.price : (p.precio !== undefined ? p.precio : '');
+    var extraKeys = Object.keys(p).filter(function(k){ return ['id','package_id','name','nombre','title','price','precio'].indexOf(k) < 0; }).slice(0,4);
+    var extra = extraKeys.map(function(k){ return k + ': ' + JSON.stringify(p[k]); }).join(' · ');
+    h += '<div class="item"><div class="pid">ID: ' + id + '</div><div class="nom">' + nombre + (precio !== '' ? (' — $' + precio) : '') + '</div>' + (extra ? '<div class="extra">' + extra + '</div>' : '') + '</div>';
+  });
+  cont.innerHTML = h || '<div style="color:#6b7280;font-size:.8rem">Sin resultados con ese filtro.</div>';
+}
+</script>
+</body>
+</html>
