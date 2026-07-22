@@ -709,6 +709,7 @@ function goPage(id){
   if(id==='referidos') setTimeout(renderReferidos,50);
   if(id==='creadores') setTimeout(renderCreadoresTabla,50);
   if(id==='retirar') setTimeout(_updateRetiroSaldo,50);
+  if(typeof _syncBottomNav==='function') _syncBottomNav(id);
   if(id==='home'){setTimeout(renderResenas,50); setTimeout(renderHomeDashboard,60);}
   if(id==='comunidad') setTimeout(renderChat,50);
 }
@@ -5554,7 +5555,7 @@ var _diamSeleccionado = null;
 // ═══════════ RECARGAS AUTOMÁTICAS (Recargas América type=recharge) ═══════════
 // package_id = el ID de Recargas América | precio = costo USD × 20 (redondeado)
 var RECARGAS_AUTO = [
-  { package_id:null, nombre:'Pase Booyah', diamantes:0, costoUSD:0, precio:40, manual:true, esPase:true },
+  { package_id:null, nombre:'Pase Booyah', diamantes:0, costoUSD:0, precio:25, manual:true, esPase:true, img:'img/pase-booyah.png' },
   { package_id:340, nombre:'100 Diamantes + 10 Bono',    diamantes:110,  costoUSD:0.79,  precio:15,  img:'img/diam-100.png'  },
   { package_id:343, nombre:'310 Diamantes + 31 Bono',    diamantes:341,  costoUSD:2.65,  precio:45,  img:'img/diam-310.png'  },
   { package_id:345, nombre:'520 Diamantes + 52 Bono',    diamantes:572,  costoUSD:3.71,  precio:80,  img:'img/diam-520.png'  },
@@ -5593,6 +5594,7 @@ function _getDiamProductos(tipo){
         nombre:r.nombre, diamantes:r.diamantes, precio:r.precio,
         tipo:(r.manual?'manual':'auto'), package_id:r.package_id,
         badge:(r.manual?'MANUAL':'AUTO'),
+        esPase:!!r.esPase,
         img:r.img || _imgPorDiamantes(r.diamantes)
       };
     });
@@ -5694,12 +5696,65 @@ function renderDiamCatalogo(){
   }).join('');
 }
 
+// Aviso de tiempo de entrega segun el tipo de producto
+function _avisoEntrega(p){
+  if(p && p.esPase){
+    return '<div style="background:rgba(255,180,60,.1);border:1px solid rgba(255,180,60,.32);border-radius:11px;padding:.85rem 1rem;margin-bottom:1.25rem;font-size:.79rem;color:#ffb84d;line-height:1.6">'
+      + '\u26A0\uFE0F <b>El pase se manda mediante REGALO.</b><br/>Puede que te llegue de <b>1 a 4 dias</b>. Consulta con el administrador.'
+      + '</div>';
+  }
+  if(p && p.tipo==='bonus'){
+    return '<div style="background:rgba(255,180,60,.1);border:1px solid rgba(255,180,60,.32);border-radius:11px;padding:.85rem 1rem;margin-bottom:1.25rem;font-size:.79rem;color:#ffb84d;line-height:1.6">'
+      + '\u23F3 Las recargas con <b>20% de bonus</b> pueden llegar entre <b>1 y 3 horas</b>.'
+      + '</div>';
+  }
+  if(p && p.tipo==='auto'){
+    return '<div style="background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.25);border-radius:11px;padding:.7rem .9rem;margin-bottom:1.25rem;font-size:.8rem;color:#25d366">\u26A1 Recarga instantanea directa a tu ID</div>';
+  }
+  return '<div style="background:rgba(255,180,60,.08);border:1px solid rgba(255,180,60,.25);border-radius:11px;padding:.7rem .9rem;margin-bottom:1.25rem;font-size:.8rem;color:#ffb84d">\u23F3 Se procesa manualmente (te contactamos)</div>';
+}
+
+// Ventana emergente de advertencia (Pase / Bonus)
+function _mostrarAvisoModal(titulo, texto, color){
+  var ov = document.getElementById('aviso-entrega-ov');
+  if(ov) ov.remove();
+  ov = document.createElement('div');
+  ov.id = 'aviso-entrega-ov';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:1.2rem';
+  ov.onclick = function(e){ if(e.target===ov) ov.remove(); };
+  document.body.appendChild(ov);
+
+  var c = document.createElement('div');
+  c.style.cssText = 'max-width:400px;width:100%;background:#0a0a0a;border:1px solid '+color+'55;border-radius:18px;padding:1.75rem 1.35rem;text-align:center';
+  c.innerHTML =
+    '<div style="font-size:2.4rem;margin-bottom:.6rem">\u26A0\uFE0F</div>'
+    + '<div style="font-family:Oxanium;font-weight:800;font-size:1rem;color:'+color+';margin-bottom:.7rem;letter-spacing:.3px">'+titulo+'</div>'
+    + '<div style="font-size:.85rem;color:#c5cad6;line-height:1.65;margin-bottom:1.4rem">'+texto+'</div>'
+    + '<button onclick="var o=document.getElementById(\'aviso-entrega-ov\'); if(o) o.remove();" style="width:100%;padding:.85rem;background:rgba(16,217,138,.12);border:1px solid rgba(16,217,138,.4);color:#10d98a;border-radius:12px;font-family:Poppins;font-weight:600;font-size:.9rem;cursor:pointer">Entendido</button>';
+  ov.appendChild(c);
+}
+
 function abrirDiamDetalle(idx){
   var productos = _getDiamProductos(_diamTipoActual);
   var p = productos[idx];
   if(!p) return;
   _diamSeleccionado = p;
   _diamMetodoPago = 'saldo';
+
+  // Ventana de advertencia segun el producto
+  if(p.esPase){
+    setTimeout(function(){
+      _mostrarAvisoModal('ENTREGA POR REGALO',
+        'El pase se manda mediante <b style="color:#fff">REGALO</b>.<br/><br/>Puede que te llegue de <b style="color:#fff">1 a 4 dias</b>.<br/>Consulta con el administrador.',
+        '#ffb84d');
+    }, 250);
+  } else if(p.tipo==='bonus'){
+    setTimeout(function(){
+      _mostrarAvisoModal('TIEMPO DE ENTREGA',
+        'Las recargas con <b style="color:#fff">20% de bonus</b> pueden llegar entre <b style="color:#fff">1 y 3 horas</b>.',
+        '#ffb84d');
+    }, 250);
+  }
 
   var saldo = (authSession && authSession.saldo) ? authSession.saldo : 0;
   var alcanza = saldo >= p.precio;
@@ -5711,9 +5766,7 @@ function abrirDiamDetalle(idx){
     + '<div class="ddet-head"><div class="ddet-head-ico">&#127918;</div>'
     + '<div><div class="ddet-head-name">'+p.nombre+'</div><div class="ddet-head-sub">Free Fire</div></div></div>'
     + '<div class="ddet-price">'+fmt(p.precio)+'</div>'
-    + (p.tipo==='auto'
-        ? '<div style="background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.25);border-radius:10px;padding:.6rem .85rem;margin-bottom:1.25rem;font-size:.8rem;color:#25d366">\u26A1 Recarga instantanea directa a tu ID</div>'
-        : '<div style="background:rgba(255,180,60,.08);border:1px solid rgba(255,180,60,.25);border-radius:10px;padding:.6rem .85rem;margin-bottom:1.25rem;font-size:.8rem;color:#10d98a">\u23F3 Se procesa manualmente (te contactamos)</div>')
+    + _avisoEntrega(p)
     + '<div class="ddet-label">Datos de la cuenta</div>'
     + '<label class="flabel">Usuario / ID de jugador *</label>'
     + '<input class="finput" id="diam-ffid" type="text" placeholder="Tu ID de Free Fire"/>'
@@ -6931,4 +6984,29 @@ function _pintarStatsHome(pedidos, diam, likes, gasto){
   if(l) l.textContent = likes.toLocaleString('es-MX');
   var g = document.getElementById('home-st-gasto');
   if(g) g.textContent = fmt(gasto);
+}
+
+
+// Marca la seccion activa en la barra inferior
+function _syncBottomNav(id){
+  // Que pestana se marca segun la pagina (las hijas marcan a su padre)
+  var mapa = {
+    home:'bn-home',
+    tienda:'bn-tienda', diamantes:'bn-tienda', pines:'bn-tienda', honor:'bn-tienda',
+    honorcuenta:'bn-tienda', codigos:'bn-tienda', clanes:'bn-tienda', cajas:'bn-tienda',
+    saldo:'bn-saldo', retirar:'bn-saldo', transferir:'bn-saldo',
+    likes:'bn-likes',
+    menu:'bn-menu', perfil:'bn-menu', miscompras:'bn-menu', api:'bn-menu',
+    creadores:'bn-menu', comunidad:'bn-menu', faq:'bn-menu', ranking:'bn-menu',
+    sobre:'bn-menu', terminos:'bn-menu', referidos:'bn-menu', membresia:'bn-menu'
+  };
+  ['bn-home','bn-tienda','bn-saldo','bn-likes','bn-menu'].forEach(function(b){
+    var el = document.getElementById(b);
+    if(el) el.classList.remove('active');
+  });
+  var activo = mapa[id];
+  if(activo){
+    var el2 = document.getElementById(activo);
+    if(el2) el2.classList.add('active');
+  }
 }

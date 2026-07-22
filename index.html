@@ -1737,6 +1737,66 @@ button[style*="linear-gradient"]{
 ::-webkit-scrollbar-track{ background:#000!important }
 ::selection{ background:rgba(16,217,138,.22);color:#fff }
 ::-moz-selection{ background:rgba(16,217,138,.22);color:#fff }
+
+/* ═══════════ BARRA DE NAVEGACION INFERIOR (flotante) ═══════════ */
+.bottom-nav{
+  position:fixed;left:50%;transform:translateX(-50%);
+  bottom:calc(.65rem + env(safe-area-inset-bottom,0px));
+  z-index:900;
+  width:calc(100% - 1.6rem);max-width:560px;
+  display:flex;align-items:flex-start;justify-content:space-around;
+  background:linear-gradient(180deg,rgba(20,22,24,.92),rgba(10,11,12,.96));
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:26px;
+  padding:.85rem .5rem .7rem;
+  box-shadow:0 12px 40px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.05);
+}
+.bn-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:.3rem;
+  background:none;border:none;padding:0;cursor:pointer;
+  color:#8b93a3;transition:color .25s;position:relative;
+}
+.bn-ico{
+  width:48px;height:44px;display:flex;align-items:center;justify-content:center;
+  border-radius:16px;transition:all .28s cubic-bezier(.34,1.4,.6,1);
+  position:relative;
+}
+.bn-ico svg{width:23px;height:23px;transition:transform .28s}
+.bn-label{
+  font-size:.68rem;font-weight:600;font-family:'Poppins',sans-serif;
+  letter-spacing:.15px;transition:color .25s;
+}
+.bn-dot{
+  width:4px;height:4px;border-radius:50%;background:transparent;
+  transition:background .25s;margin-top:-1px;
+}
+/* Estado activo: circulo con glow */
+.bn-item.active{color:#10d98a}
+.bn-item.active .bn-ico{
+  background:radial-gradient(circle at 50% 40%, rgba(16,217,138,.2), rgba(16,217,138,.06) 70%);
+  border:1px solid rgba(16,217,138,.45);
+  box-shadow:
+    0 0 18px rgba(16,217,138,.35),
+    0 0 44px rgba(16,217,138,.14),
+    inset 0 0 12px rgba(16,217,138,.12);
+  transform:translateY(-3px);
+}
+.bn-item.active .bn-ico svg{transform:scale(1.06)}
+.bn-item.active .bn-label{color:#10d98a;font-weight:700}
+.bn-item.active .bn-dot{background:#10d98a;box-shadow:0 0 8px rgba(16,217,138,.8)}
+/* Hover sutil en desktop */
+@media(hover:hover){
+  .bn-item:not(.active):hover{color:#c9d1d8}
+  .bn-item:not(.active):hover .bn-ico{background:rgba(255,255,255,.05)}
+}
+/* Espacio inferior para el contenido */
+body{padding-bottom:104px!important}
+
+/* Sin menu hamburguesa: navegacion por la barra inferior */
+.hamburger{ display:none!important; }
+.sidebar, #sidebar{ display:none!important; }
+.overlay, #overlay{ display:none!important; }
 </style>
 
 <script>
@@ -1888,13 +1948,13 @@ document.addEventListener('keydown',function(e){
       <div style="font-size:.75rem;color:#6b7280;letter-spacing:1px;margin-bottom:.5rem">DIAMANTES FF</div>
       <div id="home-diam" style="font-family:Oxanium;font-weight:800;font-size:2.1rem;color:#8df0c4;line-height:1.1">0</div>
       <div style="font-size:.85rem;color:#4b5563;margin-top:.3rem">Comprados en total</div>
-      <div onclick="goPage('diamantes')" style="display:inline-flex;align-items:center;gap:.4rem;margin-top:1.1rem;color:#10d98a;font-size:.95rem;font-weight:600;cursor:pointer">Recargar <span style="font-size:1.05rem">&#8594;</span></div>
+      <div onclick="goPage('diamantes')" style="display:inline-flex;align-items:center;gap:.4rem;margin-top:1.1rem;color:#ffb84d;font-size:.95rem;font-weight:600;cursor:pointer">Recargar <span style="font-size:1.05rem">&#8594;</span></div>
     </div>
 
     <!-- Estadisticas -->
     <div style="display:grid;grid-template-columns:repeat(3,1fr);background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:18px;padding:1.2rem .5rem;margin-bottom:1.9rem">
       <div style="text-align:center;border-right:1px solid rgba(255,255,255,.06)">
-        <div style="font-size:.68rem;color:#6b7280;letter-spacing:.8px;margin-bottom:.4rem">PEDIDOS</div>
+        <div style="font-size:.68rem;color:#6b7280;letter-spacing:.8px;margin-bottom:.4rem">PEDIDOS &#128142;</div>
         <div id="home-st-pedidos" style="font-family:Oxanium;font-weight:800;font-size:1.4rem;color:#fff">0</div>
       </div>
       <div style="text-align:center;border-right:1px solid rgba(255,255,255,.06)">
@@ -1908,27 +1968,27 @@ document.addEventListener('keydown',function(e){
     </div>
 
     <!-- Acceso rapido -->
-    <div style="font-size:.75rem;color:#6b7280;letter-spacing:1.2px;margin-bottom:.85rem">ACCESO R&Aacute;PIDO</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:2.2rem">
+    <div style="font-size:.78rem;color:#6b7280;letter-spacing:1.2px;margin-bottom:.9rem">ACCESO R&Aacute;PIDO</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:2.2rem">
 
-      <div onclick="goPage('saldo')" style="display:flex;align-items:center;gap:.8rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:16px;padding:1rem .9rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(16,217,138,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.065)'">
-        <div style="width:40px;height:40px;flex-shrink:0;border-radius:12px;background:rgba(16,217,138,.1);border:1px solid rgba(16,217,138,.22);display:flex;align-items:center;justify-content:center;font-size:1.1rem">&#128176;</div>
-        <div style="font-size:.86rem;color:#e8e8ea;font-weight:500;line-height:1.3">Recargar saldo</div>
+      <div onclick="goPage('saldo')" style="display:flex;align-items:center;gap:.75rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:15px;padding:.85rem .8rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(16,217,138,.28)'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'">
+        <div style="width:36px;height:36px;flex-shrink:0;border-radius:10px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9aa3b0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 8l9 6 9-6-9-6z"/><path d="M3 8v8l9 6 9-6V8"/></svg></div>
+        <div style="font-size:.83rem;color:#e8e8ea;font-weight:500">Recargar saldo</div>
       </div>
 
-      <div onclick="goPage('diamantes')" style="display:flex;align-items:center;gap:.8rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:16px;padding:1rem .9rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(16,217,138,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.065)'">
-        <div style="width:40px;height:40px;flex-shrink:0;border-radius:12px;background:rgba(16,217,138,.1);border:1px solid rgba(16,217,138,.22);display:flex;align-items:center;justify-content:center;font-size:1.1rem">&#128142;</div>
-        <div style="font-size:.86rem;color:#e8e8ea;font-weight:500;line-height:1.3">Diamantes</div>
+      <div onclick="goPage('diamantes')" style="display:flex;align-items:center;gap:.75rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:15px;padding:.85rem .8rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(16,217,138,.28)'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'">
+        <div style="width:36px;height:36px;flex-shrink:0;border-radius:10px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;font-size:.95rem">&#128142;</div>
+        <div style="font-size:.83rem;color:#e8e8ea;font-weight:500">Recargar diamantes</div>
       </div>
 
-      <div onclick="goPage('likes')" style="display:flex;align-items:center;gap:.8rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:16px;padding:1rem .9rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(16,217,138,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.065)'">
-        <div style="width:40px;height:40px;flex-shrink:0;border-radius:12px;background:rgba(16,217,138,.1);border:1px solid rgba(16,217,138,.22);display:flex;align-items:center;justify-content:center;font-size:1.1rem">&#128077;</div>
-        <div style="font-size:.86rem;color:#e8e8ea;font-weight:500;line-height:1.3">Likes</div>
+      <div onclick="goPage('tienda')" style="display:flex;align-items:center;gap:.75rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:15px;padding:.85rem .8rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(16,217,138,.28)'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'">
+        <div style="width:36px;height:36px;flex-shrink:0;border-radius:10px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9aa3b0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 13H6L5 8z"/><path d="M8.5 11V6.5a3.5 3.5 0 0 1 7 0V11"/></svg></div>
+        <div style="font-size:.83rem;color:#e8e8ea;font-weight:500">Nueva orden</div>
       </div>
 
-      <div onclick="goPage('perfil')" style="display:flex;align-items:center;gap:.8rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:16px;padding:1rem .9rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(16,217,138,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.065)'">
-        <div style="width:40px;height:40px;flex-shrink:0;border-radius:12px;background:rgba(16,217,138,.1);border:1px solid rgba(16,217,138,.22);display:flex;align-items:center;justify-content:center;font-size:1.1rem">&#128100;</div>
-        <div style="font-size:.86rem;color:#e8e8ea;font-weight:500;line-height:1.3">Mi cuenta</div>
+      <div onclick="goPage('menu')" style="display:flex;align-items:center;gap:.75rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:15px;padding:.85rem .8rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(16,217,138,.28)'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'">
+        <div style="width:36px;height:36px;flex-shrink:0;border-radius:10px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9aa3b0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h9M17 7h3M4 12h3M11 12h9M4 17h9M17 17h3"/><circle cx="15" cy="7" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="17" r="1.6"/></svg></div>
+        <div style="font-size:.83rem;color:#e8e8ea;font-weight:500">Configuraci&oacute;n</div>
       </div>
 
     </div>
@@ -3312,6 +3372,55 @@ document.addEventListener('keydown',function(e){
       </div>
     </div>
 
+  </div>
+</div>
+
+<div class="page" id="page-tienda">
+  <div style="max-width:640px;margin:0 auto;padding:1.5rem 1.15rem 0">
+    <div style="margin-bottom:1.5rem">
+      <div style="font-family:Oxanium;font-weight:700;font-size:1.7rem;color:#fff;letter-spacing:-.3px">Tienda</div>
+      <div style="font-size:.88rem;color:#6b7280;margin-top:.2rem">Todos nuestros productos</div>
+    </div>
+
+    <div style="font-size:.72rem;color:#6b7280;letter-spacing:1.2px;margin-bottom:.85rem">PRODUCTOS</div>
+    <div style="display:grid;grid-template-columns:1fr;gap:.7rem;margin-bottom:1.6rem">
+      <div onclick="goPage('diamantes')" style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:16px;padding:1.05rem .95rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(16,217,138,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.065)'"><div style="width:42px;height:42px;flex-shrink:0;border-radius:12px;background:rgba(16,217,138,.1);border:1px solid rgba(16,217,138,.22);display:flex;align-items:center;justify-content:center;font-size:1.15rem">&#128142;</div><div style="min-width:0"><div style="font-size:.85rem;color:#e8e8ea;font-weight:600;line-height:1.3">Diamantes FF</div><div style="font-size:.68rem;color:#6b7280;margin-top:.1rem">Recarga directa a tu ID</div></div></div>
+      <div onclick="goPage('pines')" style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:16px;padding:1.05rem .95rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(16,217,138,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.065)'"><div style="width:42px;height:42px;flex-shrink:0;border-radius:12px;background:rgba(16,217,138,.1);border:1px solid rgba(16,217,138,.22);display:flex;align-items:center;justify-content:center;font-size:1.15rem">&#127915;</div><div style="min-width:0"><div style="font-size:.85rem;color:#e8e8ea;font-weight:600;line-height:1.3">Pines de FF</div><div style="font-size:.68rem;color:#6b7280;margin-top:.1rem">Codigos de recarga</div></div></div>
+      <div onclick="goPage('honor')" style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:16px;padding:1.05rem .95rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(16,217,138,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.065)'"><div style="width:42px;height:42px;flex-shrink:0;border-radius:12px;background:rgba(16,217,138,.1);border:1px solid rgba(16,217,138,.22);display:flex;align-items:center;justify-content:center;font-size:1.15rem">&#127942;</div><div style="min-width:0"><div style="font-size:.85rem;color:#e8e8ea;font-weight:600;line-height:1.3">Honor para clan</div><div style="font-size:.68rem;color:#6b7280;margin-top:.1rem">Sube el nivel de tu clan</div></div></div>
+      <div onclick="goPage('honorcuenta')" style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:16px;padding:1.05rem .95rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(16,217,138,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.065)'"><div style="width:42px;height:42px;flex-shrink:0;border-radius:12px;background:rgba(16,217,138,.1);border:1px solid rgba(16,217,138,.22);display:flex;align-items:center;justify-content:center;font-size:1.15rem">&#127869;</div><div style="min-width:0"><div style="font-size:.85rem;color:#e8e8ea;font-weight:600;line-height:1.3">Experiencia para cuentas</div><div style="font-size:.68rem;color:#6b7280;margin-top:.1rem">Sube de nivel tu cuenta FF</div></div></div>
+      <div onclick="goPage('codigos')" style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:16px;padding:1.05rem .95rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(16,217,138,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.065)'"><div style="width:42px;height:42px;flex-shrink:0;border-radius:12px;background:rgba(16,217,138,.1);border:1px solid rgba(16,217,138,.22);display:flex;align-items:center;justify-content:center;font-size:1.15rem">&#128142;</div><div style="min-width:0"><div style="font-size:.85rem;color:#e8e8ea;font-weight:600;line-height:1.3">Codigos FF</div><div style="font-size:.68rem;color:#6b7280;margin-top:.1rem">SCAR Evolutiva y mas</div></div></div>
+      <div onclick="goPage('clanes')" style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:16px;padding:1.05rem .95rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(16,217,138,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.065)'"><div style="width:42px;height:42px;flex-shrink:0;border-radius:12px;background:rgba(16,217,138,.1);border:1px solid rgba(16,217,138,.22);display:flex;align-items:center;justify-content:center;font-size:1.15rem">&#129409;</div><div style="min-width:0"><div style="font-size:.85rem;color:#e8e8ea;font-weight:600;line-height:1.3">Clanes NV7</div><div style="font-size:.68rem;color:#6b7280;margin-top:.1rem">Clanes de alto nivel</div></div></div>
+      <div onclick="goPage('cajas')" style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:16px;padding:1.05rem .95rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(16,217,138,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.065)'"><div style="width:42px;height:42px;flex-shrink:0;border-radius:12px;background:rgba(16,217,138,.1);border:1px solid rgba(16,217,138,.22);display:flex;align-items:center;justify-content:center;font-size:1.15rem">&#128142;</div><div style="min-width:0"><div style="font-size:.85rem;color:#e8e8ea;font-weight:600;line-height:1.3">Fragmentos</div><div style="font-size:.68rem;color:#6b7280;margin-top:.1rem">Fragmentos EVO</div></div></div>
+    </div>
+
+    <div style="font-size:.72rem;color:#6b7280;letter-spacing:1.2px;margin-bottom:.85rem">COMUNIDAD</div>
+    <a href="https://whatsapp.com/channel/0029VbCXQVjJENyAgAoJLJ3g" target="_blank" style="display:flex;align-items:center;gap:.85rem;background:rgba(37,211,102,.07);border:1px solid rgba(37,211,102,.28);border-radius:16px;padding:1.05rem .95rem;text-decoration:none;margin-bottom:2.5rem">
+      <div style="width:42px;height:42px;flex-shrink:0;border-radius:12px;background:rgba(37,211,102,.14);border:1px solid rgba(37,211,102,.3);display:flex;align-items:center;justify-content:center;font-size:1.15rem">&#128227;</div>
+      <div><div style="font-size:.85rem;color:#25d366;font-weight:700;line-height:1.3">Canal de WhatsApp</div>
+      <div style="font-size:.68rem;color:#6b7280;margin-top:.1rem">Unete para ofertas y novedades</div></div>
+    </a>
+  </div>
+</div>
+
+<div class="page" id="page-menu">
+  <div style="max-width:640px;margin:0 auto;padding:1.5rem 1.15rem 0">
+    <div style="margin-bottom:1.5rem">
+      <div id="menu-hola" style="font-family:Oxanium;font-weight:700;font-size:1.7rem;color:#fff;letter-spacing:-.3px">Mi cuenta</div>
+      <div style="font-size:.88rem;color:#6b7280;margin-top:.2rem">Ajustes y accesos</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:2.5rem">
+      <div onclick="goPage('perfil')" style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:16px;padding:1.05rem .95rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(16,217,138,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.065)'"><div style="width:42px;height:42px;flex-shrink:0;border-radius:12px;background:rgba(16,217,138,.1);border:1px solid rgba(16,217,138,.22);display:flex;align-items:center;justify-content:center;font-size:1.15rem">&#128100;</div><div style="min-width:0"><div style="font-size:.85rem;color:#e8e8ea;font-weight:600;line-height:1.3">Mi perfil</div><div style="font-size:.68rem;color:#6b7280;margin-top:.1rem">Tus datos</div></div></div>
+      <div onclick="goPage('saldo')" style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:16px;padding:1.05rem .95rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(16,217,138,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.065)'"><div style="width:42px;height:42px;flex-shrink:0;border-radius:12px;background:rgba(16,217,138,.1);border:1px solid rgba(16,217,138,.22);display:flex;align-items:center;justify-content:center;font-size:1.15rem">&#128176;</div><div style="min-width:0"><div style="font-size:.85rem;color:#e8e8ea;font-weight:600;line-height:1.3">Recargar saldo</div><div style="font-size:.68rem;color:#6b7280;margin-top:.1rem">Agrega fondos</div></div></div>
+      <div onclick="goPage('miscompras')" style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:16px;padding:1.05rem .95rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(16,217,138,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.065)'"><div style="width:42px;height:42px;flex-shrink:0;border-radius:12px;background:rgba(16,217,138,.1);border:1px solid rgba(16,217,138,.22);display:flex;align-items:center;justify-content:center;font-size:1.15rem">&#128230;</div><div style="min-width:0"><div style="font-size:.85rem;color:#e8e8ea;font-weight:600;line-height:1.3">Mis compras</div><div style="font-size:.68rem;color:#6b7280;margin-top:.1rem">Historial</div></div></div>
+      <div onclick="goPage('transferir')" style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:16px;padding:1.05rem .95rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(16,217,138,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.065)'"><div style="width:42px;height:42px;flex-shrink:0;border-radius:12px;background:rgba(16,217,138,.1);border:1px solid rgba(16,217,138,.22);display:flex;align-items:center;justify-content:center;font-size:1.15rem">&#128257;</div><div style="min-width:0"><div style="font-size:.85rem;color:#e8e8ea;font-weight:600;line-height:1.3">Transferir saldo</div><div style="font-size:.68rem;color:#6b7280;margin-top:.1rem">Envia a otro usuario</div></div></div>
+      <div onclick="goPage('api')" style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:16px;padding:1.05rem .95rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(16,217,138,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.065)'"><div style="width:42px;height:42px;flex-shrink:0;border-radius:12px;background:rgba(16,217,138,.1);border:1px solid rgba(16,217,138,.22);display:flex;align-items:center;justify-content:center;font-size:1.15rem">&#128295;</div><div style="min-width:0"><div style="font-size:.85rem;color:#e8e8ea;font-weight:600;line-height:1.3">API</div><div style="font-size:.68rem;color:#6b7280;margin-top:.1rem">Para revendedores</div></div></div>
+      <div onclick="goPage('creadores')" style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:16px;padding:1.05rem .95rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(16,217,138,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.065)'"><div style="width:42px;height:42px;flex-shrink:0;border-radius:12px;background:rgba(16,217,138,.1);border:1px solid rgba(16,217,138,.22);display:flex;align-items:center;justify-content:center;font-size:1.15rem">&#127909;</div><div style="min-width:0"><div style="font-size:.85rem;color:#e8e8ea;font-weight:600;line-height:1.3">Creadores</div><div style="font-size:.68rem;color:#6b7280;margin-top:.1rem">Programa TikTok</div></div></div>
+      <div onclick="goPage('comunidad')" style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:16px;padding:1.05rem .95rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(16,217,138,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.065)'"><div style="width:42px;height:42px;flex-shrink:0;border-radius:12px;background:rgba(16,217,138,.1);border:1px solid rgba(16,217,138,.22);display:flex;align-items:center;justify-content:center;font-size:1.15rem">&#128172;</div><div style="min-width:0"><div style="font-size:.85rem;color:#e8e8ea;font-weight:600;line-height:1.3">Comunidad</div><div style="font-size:.68rem;color:#6b7280;margin-top:.1rem">Chat y grupo</div></div></div>
+      <div onclick="goPage('faq')" style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:16px;padding:1.05rem .95rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(16,217,138,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.065)'"><div style="width:42px;height:42px;flex-shrink:0;border-radius:12px;background:rgba(16,217,138,.1);border:1px solid rgba(16,217,138,.22);display:flex;align-items:center;justify-content:center;font-size:1.15rem">&#10067;</div><div style="min-width:0"><div style="font-size:.85rem;color:#e8e8ea;font-weight:600;line-height:1.3">FAQ / Ayuda</div><div style="font-size:.68rem;color:#6b7280;margin-top:.1rem">Preguntas frecuentes</div></div></div>
+      <div onclick="goPage('ranking')" style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:16px;padding:1.05rem .95rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(16,217,138,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.065)'"><div style="width:42px;height:42px;flex-shrink:0;border-radius:12px;background:rgba(16,217,138,.1);border:1px solid rgba(16,217,138,.22);display:flex;align-items:center;justify-content:center;font-size:1.15rem">&#127942;</div><div style="min-width:0"><div style="font-size:.85rem;color:#e8e8ea;font-weight:600;line-height:1.3">Ranking &amp; Premios</div><div style="font-size:.68rem;color:#6b7280;margin-top:.1rem">Top y recompensas</div></div></div>
+      <div onclick="goPage('sobre')" style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:16px;padding:1.05rem .95rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(16,217,138,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.065)'"><div style="width:42px;height:42px;flex-shrink:0;border-radius:12px;background:rgba(16,217,138,.1);border:1px solid rgba(16,217,138,.22);display:flex;align-items:center;justify-content:center;font-size:1.15rem">&#8505;&#65039;</div><div style="min-width:0"><div style="font-size:.85rem;color:#e8e8ea;font-weight:600;line-height:1.3">Sobre la pagina</div><div style="font-size:.68rem;color:#6b7280;margin-top:.1rem">Resenas y terminos</div></div></div>
+    </div>
   </div>
 </div>
 
@@ -4940,5 +5049,35 @@ document.addEventListener('keydown',function(e){
 <script src="supabase.js"></script>
 <script src="supabase_integration.js"></script>
 <script src="script.js"></script>
+
+<!-- BARRA DE NAVEGACION INFERIOR -->
+<div class="bottom-nav" id="bottom-nav">
+  <button class="bn-item active" id="bn-home" onclick="goPage('home')">
+    <span class="bn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h5v-6h4v6h5V9.5"/></svg></span>
+    <span class="bn-label">Inicio</span>
+    <span class="bn-dot"></span>
+  </button>
+  <button class="bn-item" id="bn-tienda" onclick="goPage('tienda')">
+    <span class="bn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 13H6L5 8z"/><path d="M8.5 11V6.5a3.5 3.5 0 0 1 7 0V11"/></svg></span>
+    <span class="bn-label">Tienda</span>
+    <span class="bn-dot"></span>
+  </button>
+  <button class="bn-item" id="bn-saldo" onclick="goPage('saldo')">
+    <span class="bn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18"/><path d="M16 14.5h2"/></svg></span>
+    <span class="bn-label">Billetera</span>
+    <span class="bn-dot"></span>
+  </button>
+  <button class="bn-item" id="bn-likes" onclick="goPage('likes')">
+    <span class="bn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v10H4a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1h3z"/><path d="M7 11l4.2-7.4A1.8 1.8 0 0 1 14.6 5l-.9 4h5.6a2 2 0 0 1 2 2.4l-1.3 7A2 2 0 0 1 18 20H7"/></svg></span>
+    <span class="bn-label">Likes</span>
+    <span class="bn-dot"></span>
+  </button>
+  <button class="bn-item" id="bn-menu" onclick="goPage('menu')">
+    <span class="bn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7.5" r="3.5"/><path d="M5 20.5c1.2-3.6 3.8-5.5 7-5.5s5.8 1.9 7 5.5"/></svg></span>
+    <span class="bn-label">Perfil</span>
+    <span class="bn-dot"></span>
+  </button>
+</div>
+
 </body>
 </html>
