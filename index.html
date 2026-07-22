@@ -1800,6 +1800,22 @@ body{padding-bottom:104px!important}
 
 /* Social proof desactivado */
 .social-proof{ display:none!important; }
+
+/* ═══ FIX: visibilidad de textos en login/registro ═══ */
+#auth-modal input{ color:#fff!important; -webkit-text-fill-color:#fff!important; }
+#auth-modal input::placeholder{ color:#6b7280!important; -webkit-text-fill-color:#6b7280!important; }
+#btn-do-login, #auth-modal button[onclick*="doRegister"], #auth-register button[onclick*="doRegister"]{
+  background:rgba(34,211,238,.14)!important;
+  border:1px solid rgba(34,211,238,.45)!important;
+  color:#22d3ee!important; -webkit-text-fill-color:#22d3ee!important;
+  box-shadow:none!important; font-weight:700!important;
+}
+#auth-modal a[onclick*="authTab"], #auth-modal span[style*="22d3ee"]{
+  background:none!important;
+  -webkit-text-fill-color:#22d3ee!important; color:#22d3ee!important;
+}
+#auth-modal p, #auth-modal label, #auth-modal .flabel{ color:#8892b0!important; -webkit-text-fill-color:#8892b0!important; }
+#auth-modal button{ -webkit-text-fill-color:currentColor; }
 </style>
 
 <script>
@@ -3988,6 +4004,7 @@ document.addEventListener('keydown',function(e){
         <input class="finput" id="stori-ref" type="text" placeholder="Numero de referencia"/>
         <label class="flabel">Comprobante (foto)</label>
         <input class="finput" id="stori-foto" type="file" accept="image/*" style="padding:.55rem"/>
+        <div style="background:rgba(255,180,60,.1);border:1px solid rgba(255,180,60,.32);border-radius:10px;padding:.7rem .9rem;margin-bottom:.6rem;font-size:.75rem;color:#ffb84d;line-height:1.55">&#9888;&#65039; <b>Envia tu solicitud SOLO 1 VEZ.</b> Presiona el boton una sola vez y espera la confirmacion. Los envios repetidos pueden retrasar tu acreditacion.</div>
         <button onclick="enviarComprobante('stori')" style="width:100%;margin-top:.5rem;padding:.85rem;background:linear-gradient(90deg,#0088cc,#29b6f6);color:#fff;border:none;border-radius:9px;font-family:'Poppins';font-weight:800;font-size:.82rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer">&#9993; Enviar comprobante</button>
 
         <div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.6rem;line-height:1.6">Adjunta la <strong style="color:#fff">foto del comprobante</strong> arriba y presiona enviar. Te acreditaremos pronto.</div>
@@ -4045,6 +4062,7 @@ document.addEventListener('keydown',function(e){
         <input class="finput" id="zelle-nombre" type="text" placeholder="Tu nombre en Zelle"/>
         <label class="flabel">Comprobante (foto)</label>
         <input class="finput" id="zelle-foto" type="file" accept="image/*" style="padding:.55rem"/>
+        <div style="background:rgba(255,180,60,.1);border:1px solid rgba(255,180,60,.32);border-radius:10px;padding:.7rem .9rem;margin-bottom:.6rem;font-size:.75rem;color:#ffb84d;line-height:1.55">&#9888;&#65039; <b>Envia tu solicitud SOLO 1 VEZ.</b> Presiona el boton una sola vez y espera la confirmacion. Los envios repetidos pueden retrasar tu acreditacion.</div>
         <button onclick="enviarComprobante('zelle')" style="width:100%;margin-top:.5rem;padding:.85rem;background:linear-gradient(90deg,#0088cc,#29b6f6);color:#fff;border:none;border-radius:9px;font-family:'Poppins';font-weight:800;font-size:.82rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer">&#9993; Enviar comprobante</button>
 
         <div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.6rem;line-height:1.6">Adjunta la <strong style="color:#fff">foto del comprobante</strong> arriba y presiona enviar. Te acreditaremos pronto.</div>
@@ -4133,7 +4151,8 @@ document.addEventListener('keydown',function(e){
 
       <label class="flabel" style="margin-top:.5rem">Comprobante (foto) *</label>
       <input class="finput" id="binance-foto" type="file" accept="image/*" style="padding:.55rem;margin-bottom:.6rem"/>
-      <button onclick="enviarComprobante('binance')" style="width:100%;margin-bottom:.5rem;padding:.9rem;background:linear-gradient(90deg,#0088cc,#29b6f6);color:#fff;border:none;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.82rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(0,136,204,.3)">&#9993; ENVIAR COMPROBANTE</button>
+      <div style="background:rgba(255,180,60,.1);border:1px solid rgba(255,180,60,.32);border-radius:10px;padding:.7rem .9rem;margin-bottom:.6rem;font-size:.75rem;color:#ffb84d;line-height:1.55">&#9888;&#65039; <b>Envia tu solicitud SOLO 1 VEZ.</b> Presiona el boton una sola vez y espera la confirmacion. Los envios repetidos pueden retrasar tu acreditacion.</div>
+        <button onclick="enviarComprobante('binance')" style="width:100%;margin-bottom:.5rem;padding:.9rem;background:linear-gradient(90deg,#0088cc,#29b6f6);color:#fff;border:none;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.82rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(0,136,204,.3)">&#9993; ENVIAR COMPROBANTE</button>
 
     </div>
   </div>

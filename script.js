@@ -5089,7 +5089,13 @@ function _updateRetiroSaldo(){
 // URL de la Edge Function que reenvía a tu canal de Telegram
 var NOTIF_RECARGA_URL = 'https://pnotsqsudqpwqzssevig.supabase.co/functions/v1/bright-task';
 
+var _enviandoComprobante = false;
 function enviarComprobante(metodo){
+  // Candado: evitar envios dobles/triples
+  if(_enviandoComprobante){
+    showToast('\u23F3 Tu comprobante ya se esta enviando, espera...', 3000);
+    return;
+  }
   var fotoInput, monto, extra, metodoNom;
   var user = (authSession && authSession.username) ? authSession.username : 'Cliente';
 
@@ -5131,6 +5137,17 @@ function enviarComprobante(metodo){
     return;
   }
 
+  _enviandoComprobante = true;
+  // Deshabilitar visualmente los botones de enviar
+  document.querySelectorAll('button[onclick*="enviarComprobante"]').forEach(function(b){
+    b.disabled = true; b.style.opacity = '.5'; b.dataset.txtOriginal = b.textContent; b.textContent = 'Enviando...';
+  });
+  function _liberarEnvio(){
+    _enviandoComprobante = false;
+    document.querySelectorAll('button[onclick*="enviarComprobante"]').forEach(function(b){
+      b.disabled = false; b.style.opacity = ''; if(b.dataset.txtOriginal) b.textContent = b.dataset.txtOriginal;
+    });
+  }
   showToast('Enviando comprobante...', 3000);
 
   // Calcular el monto a ACREDITAR (numero limpio en MXN) segun el metodo
@@ -5161,16 +5178,20 @@ function enviarComprobante(metodo){
         if(metodo==='stori') closeStoriModal();
         else if(metodo==='zelle') closeZelleModal();
         else if(metodo==='binance') closeBinanceModal();
+        // Mantener bloqueado 20s mas para evitar reenvios del mismo comprobante
+        setTimeout(_liberarEnvio, 20000);
       } else {
         showToast('Error al enviar. Usa WhatsApp mejor.', 4000);
         console.error('[NOTIF] ', res);
+        _liberarEnvio();
       }
     }).catch(function(err){
       showToast('Error de conexion. Usa WhatsApp mejor.', 4000);
       console.error('[NOTIF] ', err);
+      _liberarEnvio();
     });
   };
-  reader.onerror = function(){ showToast('No se pudo leer la foto'); };
+  reader.onerror = function(){ showToast('No se pudo leer la foto'); _liberarEnvio(); };
   reader.readAsDataURL(file);
 }
 
