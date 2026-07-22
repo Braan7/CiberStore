@@ -701,6 +701,7 @@ function goPage(id){
   if(id==='codigos') setTimeout(_updateScarSaldo, 100);
   if(id==='clanes') setTimeout(renderClanes, 100);
   if(id==='pase') setTimeout(_updatePasePagina, 100);
+  if(id==='saldo') setTimeout(function(){ recSetMoneda('MXN'); }, 100);
   if(id==='sobre') setTimeout(function(){ sobreTab('resenas'); }, 100);
   if(id==='likes') renderLikes();
   if(id==='membresia'){renderMems();renderWallet();}
@@ -1573,9 +1574,9 @@ function submitHonorCuenta(){
 var _comprandoHC = false;
 
 /* \u2500\u2500 STORI / BINANCE MODALS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-function openStoriModal(){var el=document.getElementById('modal-stori');if(el) el.classList.add('show');}
+function openStoriModal(monto){var el=document.getElementById('modal-stori');if(el) el.classList.add('show'); var mi=document.getElementById('stori-monto'); if(mi && monto) mi.value=monto;}
 function closeStoriModal(){var el=document.getElementById('modal-stori');if(el) el.classList.remove('show');}
-function openBinanceModal(){var el=document.getElementById('modal-binance');if(el) el.classList.add('show');}
+function openBinanceModal(monto){var el=document.getElementById('modal-binance');if(el) el.classList.add('show');}
 function closeBinanceModal(){var el=document.getElementById('modal-binance');if(el) el.classList.remove('show');}
 
 /* \u2500\u2500 BUNDLE \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
@@ -4813,7 +4814,7 @@ function confirmarBinance(){
 
 
 // ═══ MODALES DE PAGO: Zelle + formularios ═══
-function openZelleModal(){var el=document.getElementById('modal-zelle');if(el) el.classList.add('show');}
+function openZelleModal(monto){var el=document.getElementById('modal-zelle');if(el) el.classList.add('show'); var mi=document.getElementById('zelle-monto'); if(mi && monto){ mi.value=monto; if(typeof calcZelleConversion==='function') calcZelleConversion(); }}
 function closeZelleModal(){var el=document.getElementById('modal-zelle');if(el) el.classList.remove('show');}
 
 function copyStoriClabe(){
@@ -7184,3 +7185,167 @@ function admRevocarApiKey(){
     showToast(String(res), 3500);
   }).catch(function(e){ showToast('Error de conexion'); console.error('[APIKEY]', e); });
 }
+
+
+// ═══════════ SHEET DE RECARGA (billetera) ═══════════
+var _rcCur = 'MXN';
+var _rcMetodo = null;
+
+function abrirRecargaSheet(){
+  _rcMetodo = null;
+  var ov = document.getElementById('sheet-recarga');
+  if(ov) ov.classList.add('show');
+  rcSetCur(_rcCur);
+  rcActualizar();
+}
+function cerrarRecargaSheet(){
+  var ov = document.getElementById('sheet-recarga');
+  if(ov) ov.classList.remove('show');
+}
+function abrirMetodoSheet(){
+  var ov = document.getElementById('sheet-metodo');
+  if(ov) ov.classList.add('show');
+}
+function cerrarMetodoSheet(){
+  var ov = document.getElementById('sheet-metodo');
+  if(ov) ov.classList.remove('show');
+}
+
+function rcSetCur(cur){
+  _rcCur = cur;
+  var bm = document.getElementById('rc-cur-mxn');
+  var bu = document.getElementById('rc-cur-usd');
+  if(bm) bm.className = 'rc-cur' + (cur==='MXN'?' sel':'');
+  if(bu) bu.className = 'rc-cur' + (cur==='USD'?' sel':'');
+  var tag = document.getElementById('rc-cur-tag');
+  if(tag) tag.textContent = cur;
+  var minTxt = document.getElementById('rc-min-txt');
+  if(minTxt) minTxt.textContent = cur==='MXN' ? 'Minimo $20 MXN' : 'Minimo $3 USD';
+  // Chips por moneda
+  var chips = cur==='MXN' ? [50,100,200,500,1000] : [3,10,25,50,100];
+  var cont = document.getElementById('rc-chips');
+  if(cont){
+    cont.innerHTML = chips.map(function(c){
+      return '<button class="rc-chip" onclick="rcPonMonto('+c+')">$'+c+'</button>';
+    }).join('');
+  }
+  rcActualizar();
+}
+
+function rcPonMonto(v){
+  var inp = document.getElementById('rc-monto');
+  if(inp) inp.value = v;
+  rcActualizar();
+}
+
+function rcActualizar(){
+  var btn = document.getElementById('rc-continuar');
+  if(!btn) return;
+  var monto = parseFloat((document.getElementById('rc-monto')||{}).value||'0')||0;
+  var min = _rcCur==='MXN' ? 20 : 3;
+  var listo = _rcMetodo && monto >= min;
+  // Binance no exige monto (los paquetes estan en su ventana)
+  if(_rcMetodo === 'binance') listo = true;
+  btn.className = 'rc-continuar' + (listo?' on':'');
+  btn.textContent = !_rcMetodo ? 'Selecciona metodo de pago' : (listo ? 'Continuar' : 'Monto minimo $'+min+' '+_rcCur);
+}
+
+function rcElegirMetodo(m){
+  _rcMetodo = m;
+  cerrarMetodoSheet();
+  var txt = document.getElementById('rc-met-txt');
+  var ico = document.getElementById('rc-met-ico');
+  var nombres = { transferencia:'Transferencia Bancaria', zelle:'Zelle', binance:'Binance Pay' };
+  if(txt){ txt.textContent = nombres[m]||m; txt.className='txt sel'; }
+  if(ico){
+    if(m==='transferencia') ico.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round"><path d="M3 9.5 12 4l9 5.5"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8"/><path d="M3 20h18"/></svg>';
+    else if(m==='zelle') ico.innerHTML = '<span style="font-family:Poppins;font-weight:800;color:#a78bfa;font-size:1.05rem">Z</span>';
+    else ico.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="#f0b90b"><path d="M12 2 8.6 5.4 12 8.8l3.4-3.4L12 2zM5.4 8.6 2 12l3.4 3.4L8.8 12 5.4 8.6zM18.6 8.6 15.2 12l3.4 3.4L22 12l-3.4-3.4zM12 15.2l-3.4 3.4L12 22l3.4-3.4-3.4-3.4zM12 9.7 9.7 12l2.3 2.3 2.3-2.3L12 9.7z"/></svg>';
+  }
+  // Si eligio USD y transferencia (MXN), cambiar a MXN automatico
+  if(m==='transferencia' && _rcCur==='USD') rcSetCur('MXN');
+  if(m==='zelle' && _rcCur==='MXN') rcSetCur('USD');
+  rcActualizar();
+}
+
+function rcContinuar(){
+  if(!_rcMetodo){ abrirMetodoSheet(); return; }
+  var monto = parseFloat((document.getElementById('rc-monto')||{}).value||'0')||0;
+  var min = _rcCur==='MXN' ? 20 : 3;
+
+  if(_rcMetodo === 'binance'){
+    // Binance: abrir su ventana con los paquetes de bono tal cual
+    cerrarRecargaSheet();
+    if(typeof openBinanceModal==='function') openBinanceModal();
+    return;
+  }
+  if(monto < min){ showToast('Monto minimo $'+min+' '+_rcCur); return; }
+
+  cerrarRecargaSheet();
+  if(_rcMetodo === 'transferencia'){
+    if(typeof openStoriModal==='function') openStoriModal();
+    setTimeout(function(){
+      var i = document.getElementById('stori-monto');
+      if(i){ i.value = monto; }
+    }, 150);
+  } else if(_rcMetodo === 'zelle'){
+    if(typeof openZelleModal==='function') openZelleModal();
+    setTimeout(function(){
+      var i = document.getElementById('zelle-monto');
+      if(i){ i.value = monto; if(typeof calcZelleConversion==='function') calcZelleConversion(); }
+    }, 150);
+  }
+}
+
+
+// ═══════════ RECARGAR SALDO (nueva pagina) ═══════════
+var _recMoneda = 'MXN';
+var REC_MONTOS = { MXN:[50,100,250,500,1000,2500], USD:[3,10,25,50,100,250] };
+var REC_MIN = { MXN:50, USD:3 };
+
+function recSetMoneda(m){
+  _recMoneda = m;
+  var bM = document.getElementById('rec-cur-mxn');
+  var bU = document.getElementById('rec-cur-usd');
+  if(bM){ bM.style.background = (m==='MXN')?'#fff':'transparent'; bM.style.color = (m==='MXN')?'#000':'#6b7280'; }
+  if(bU){ bU.style.background = (m==='USD')?'#fff':'transparent'; bU.style.color = (m==='USD')?'#000':'#6b7280'; }
+  var lbl = document.getElementById('rec-cur-label');
+  if(lbl) lbl.textContent = m;
+  var av = document.getElementById('rec-min-aviso');
+  if(av) av.textContent = 'Minimo ' + (m==='MXN'?'$50 MXN':'$3 USD');
+  var inp = document.getElementById('rec-monto');
+  if(inp) inp.value = (m==='MXN') ? 50 : 3;
+  _recPintarMontos();
+}
+
+function _recPintarMontos(){
+  var cont = document.getElementById('rec-montos');
+  if(!cont) return;
+  var montos = REC_MONTOS[_recMoneda] || REC_MONTOS.MXN;
+  cont.innerHTML = montos.map(function(m){
+    return '<button onclick="recSetMonto('+m+')" style="flex:1;min-width:60px;padding:.6rem .3rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);color:#c9d1e0;border-radius:11px;font-family:Poppins;font-weight:600;font-size:.82rem;cursor:pointer">$'+m+'</button>';
+  }).join('');
+}
+
+function recSetMonto(m){
+  var inp = document.getElementById('rec-monto');
+  if(inp) inp.value = m;
+}
+
+function recElegirMetodo(metodo){
+  var inp = document.getElementById('rec-monto');
+  var monto = parseFloat((inp&&inp.value)||'0') || 0;
+  var min = REC_MIN[_recMoneda] || 50;
+  if(monto < min){
+    showToast('El minimo es ' + (_recMoneda==='MXN'?'$50 MXN':'$3 USD'));
+    return;
+  }
+  // Convertir a MXN si el usuario eligio USD
+  var montoMXN = (_recMoneda==='USD') ? Math.round(monto * USD_MXN) : monto;
+  _recMontoElegido = montoMXN;
+
+  if(metodo==='transfer'){ if(typeof openStoriModal==='function') openStoriModal(montoMXN); }
+  else if(metodo==='binance'){ if(typeof openBinanceModal==='function') openBinanceModal(montoMXN); }
+  else if(metodo==='zelle'){ if(typeof openZelleModal==='function') openZelleModal(montoMXN); }
+}
+var _recMontoElegido = 0;
