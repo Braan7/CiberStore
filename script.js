@@ -5654,6 +5654,9 @@ function setDiamTipo(tipo){
   // Mostrar el aviso de verificacion solo en "1 vez por ID"
   var aviso = document.getElementById('diam-1vez-aviso');
   if(aviso) aviso.style.display = (tipo === '1vez') ? 'block' : 'none';
+  // Aviso de region LATAM solo en el tab Bonus (+20%)
+  var avisoLatam = document.getElementById('diam-latam-aviso');
+  if(avisoLatam) avisoLatam.style.display = (tipo === 'ilim') ? 'block' : 'none';
   // Volver al catálogo si estaba en detalle
   document.getElementById('diam-catalogo').style.display='';
   document.getElementById('diam-detalle').style.display='none';
@@ -5748,7 +5751,7 @@ function _avisoEntrega(p){
       + '</div>';
   }
   if(p && p.tipo==='auto'){
-    return '<div style="background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.25);border-radius:11px;padding:.7rem .9rem;margin-bottom:1.25rem;font-size:.8rem;color:#25d366">\u26A1 Recarga instantanea directa a tu ID</div>';
+    return '<div style="background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.25);border-radius:11px;padding:.7rem .9rem;margin-bottom:1.25rem;font-size:.8rem;color:#25d366">\u26A1 Recarga instantanea directa a tu ID<br/><span style="color:#67e8f9;font-size:.74rem">\uD83C\uDF0E Solo cuentas de region LATAM</span></div>';
   }
   return '<div style="background:rgba(255,180,60,.08);border:1px solid rgba(255,180,60,.25);border-radius:11px;padding:.7rem .9rem;margin-bottom:1.25rem;font-size:.8rem;color:#ffb84d">\u23F3 Se procesa manualmente (te contactamos)</div>';
 }
@@ -5995,7 +5998,7 @@ function _procesarRecargaAutomatica(p, ffId){
           registrarPedido(p.nombre+' (AUTO - NO DISPONIBLE, devuelto)', p.diamantes, 'diamantes', ffId, 0, 0);
           if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F NO DISPONIBLE - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\u2705 SALDO DEVUELTO automaticamente ('+fmt(p.precio)+')', p.precio, ord);
           if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
-          if(msg){ msg.className='ddet-msg err'; msg.style.fontSize='.75rem'; msg.innerHTML='\u274C Este paquete no esta disponible para tu ID en este momento (puede que tu cuenta ya haya usado el bono +20% o no haya stock).<br/><b>Tu saldo fue devuelto.</b> Intenta mas tarde o contacta al admin.'; }
+          if(msg){ msg.className='ddet-msg err'; msg.style.fontSize='.75rem'; msg.innerHTML='\u274C Este paquete no esta disponible para tu ID en este momento (puede ser por la region de tu cuenta o stock momentaneo).<br/><b>Tu saldo fue devuelto.</b> Intenta de nuevo en unos minutos o contacta al admin.'; }
           showToast('\u274C No disponible. Saldo devuelto.', 4000);
           _comprandoDiam = false;
         } else {
