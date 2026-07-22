@@ -700,6 +700,7 @@ function goPage(id){
   if(id==='diamantes') setTimeout(function(){ setDiamTipo('bonus'); }, 100);
   if(id==='codigos') setTimeout(_updateScarSaldo, 100);
   if(id==='clanes') setTimeout(renderClanes, 100);
+  if(id==='pase') setTimeout(_updatePasePagina, 100);
   if(id==='sobre') setTimeout(function(){ sobreTab('resenas'); }, 100);
   if(id==='likes') renderLikes();
   if(id==='membresia'){renderMems();renderWallet();}
@@ -5555,7 +5556,6 @@ var _diamSeleccionado = null;
 // ═══════════ RECARGAS AUTOMÁTICAS (Recargas América type=recharge) ═══════════
 // package_id = el ID de Recargas América | precio = costo USD × 20 (redondeado)
 var RECARGAS_AUTO = [
-  { package_id:null, nombre:'Pase Booyah', diamantes:0, costoUSD:0, precio:25, manual:true, esPase:true, img:'img/pase-booyah.png' },
   { package_id:340, nombre:'100 Diamantes + 10 Bono',    diamantes:110,  costoUSD:0.79,  precio:15,  img:'img/diam-100.png'  },
   { package_id:343, nombre:'310 Diamantes + 31 Bono',    diamantes:341,  costoUSD:2.65,  precio:45,  img:'img/diam-310.png'  },
   { package_id:345, nombre:'520 Diamantes + 52 Bono',    diamantes:572,  costoUSD:3.71,  precio:80,  img:'img/diam-520.png'  },
@@ -6992,7 +6992,7 @@ function _syncBottomNav(id){
   // Que pestana se marca segun la pagina (las hijas marcan a su padre)
   var mapa = {
     home:'bn-home',
-    tienda:'bn-tienda', diamantes:'bn-tienda', pines:'bn-tienda', honor:'bn-tienda',
+    tienda:'bn-tienda', pase:'bn-tienda', diamantes:'bn-tienda', pines:'bn-tienda', honor:'bn-tienda',
     honorcuenta:'bn-tienda', codigos:'bn-tienda', clanes:'bn-tienda', cajas:'bn-tienda',
     saldo:'bn-saldo', retirar:'bn-saldo', transferir:'bn-saldo',
     likes:'bn-likes',
@@ -7009,4 +7009,56 @@ function _syncBottomNav(id){
     var el2 = document.getElementById(activo);
     if(el2) el2.classList.add('active');
   }
+}
+
+
+// ═══════════ PASE BOOYAH (producto propio) ═══════════
+var PASE_PRECIO = 25;
+var _comprandoPase = false;
+
+function _updatePasePagina(){
+  var pr = document.getElementById('pase-precio');
+  if(pr) pr.textContent = fmt(PASE_PRECIO);
+  var sa = document.getElementById('pase-saldo');
+  if(sa) sa.textContent = authSession ? fmt(authSession.saldo||0) : fmt(0);
+}
+
+function comprarPase(){
+  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
+  if(_comprandoPase){ return; }
+
+  var err = document.getElementById('pase-err');
+  function showErr(m){ if(err){ err.textContent=m; err.style.display='block'; } }
+
+  var ffId = ((document.getElementById('pase-id')||{}).value||'').trim();
+  var nom = ((document.getElementById('pase-nombre')||{}).value||'').trim();
+  if(!ffId){ showErr('Escribe tu ID de Free Fire.'); return; }
+  if(!nom){ showErr('Escribe tu nombre en el juego.'); return; }
+
+  var saldo = authSession.saldo||0;
+  if(saldo < PASE_PRECIO){ showErr('Saldo insuficiente ('+fmt(saldo)+'). Necesitas '+fmt(PASE_PRECIO)+'.'); return; }
+  if(err) err.style.display='none';
+
+  _comprandoPase = true;
+  var ord = getNextOrder();
+  addSpend(PASE_PRECIO, 'Pase Booyah - ID:'+ffId+' ('+nom+') - Pedido #'+ord);
+  registrarPedido('Pase Booyah', 0, 'diamantes', ffId, PASE_PRECIO, 0);
+  if(typeof tgNotifyPurchase==='function'){
+    tgNotifyPurchase(authSession.username,
+      '\uD83C\uDF9F\uFE0F Pase Booyah\n\uD83C\uDFAE ID: '+ffId+'\n\uD83D\uDC64 Nombre IG: '+nom+'\n\u26A0\uFE0F Entrega por REGALO (1-4 dias)',
+      PASE_PRECIO, ord);
+  }
+
+  if(typeof _mostrarAvisoModal==='function'){
+    _mostrarAvisoModal('PEDIDO #'+ord+' CONFIRMADO',
+      'Tu <b style="color:#fff">Pase Booyah</b> fue pedido.<br/><br/>Se envia mediante <b style="color:#fff">REGALO</b> y puede tardar de <b style="color:#fff">1 a 4 dias</b>.<br/>Consulta con el administrador.',
+      '#22d3ee');
+  }
+  showToast('\u2705 Pedido #'+ord+' confirmado!', 3000);
+
+  var i1=document.getElementById('pase-id'); if(i1) i1.value='';
+  var i2=document.getElementById('pase-nombre'); if(i2) i2.value='';
+  _updatePasePagina();
+
+  setTimeout(function(){ _comprandoPase = false; }, 3000);
 }
