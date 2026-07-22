@@ -2477,6 +2477,18 @@ document.addEventListener('keydown',function(e){
       </div>
     </div>
 
+    <!-- Mi API Key -->
+    <div style="background:rgba(34,211,238,.05);border:1px solid rgba(34,211,238,.3);border-radius:16px;padding:1.4rem 1.2rem;margin-bottom:1.25rem">
+      <div style="font-family:Oxanium;font-size:.95rem;font-weight:900;color:#22d3ee;letter-spacing:.5px;margin-bottom:.6rem">&#128273; MI API KEY</div>
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:.85rem;line-height:1.6">Genera tu llave privada para conectarte. <b style="color:#ffb84d">No la compartas con nadie</b> — quien la tenga puede comprar con tu saldo.</p>
+      <div id="api-key-caja" style="display:none;background:#050505;border:1px solid rgba(34,211,238,.25);border-radius:10px;padding:.8rem;font-family:'Courier New',monospace;font-size:.72rem;color:#25d366;word-break:break-all;-webkit-user-select:all;user-select:all;margin-bottom:.75rem"></div>
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+        <button onclick="generarMiApiKey()" id="btn-gen-key" style="flex:1;min-width:150px;padding:.8rem;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.42);color:#22d3ee;border-radius:12px;font-family:Poppins;font-weight:600;font-size:.85rem;cursor:pointer">Generar mi API Key</button>
+        <button onclick="copiarMiApiKey()" id="btn-copy-key" style="display:none;flex:1;min-width:120px;padding:.8rem;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.35);color:#25d366;border-radius:12px;font-family:Poppins;font-weight:600;font-size:.85rem;cursor:pointer">Copiar</button>
+      </div>
+      <p style="font-size:.7rem;color:var(--muted);margin-top:.6rem">&#9888;&#65039; Si generas una nueva, la anterior deja de funcionar.</p>
+    </div>
+
     <!-- Autenticación -->
     <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.25rem;margin-bottom:1.25rem">
       <div style="font-family:Oxanium;font-size:.85rem;font-weight:900;color:#fff;margin-bottom:.6rem">&#128273; AUTENTICACIÓN</div>
@@ -2487,7 +2499,7 @@ document.addEventListener('keydown',function(e){
     <!-- URL Base -->
     <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.25rem;margin-bottom:1.25rem">
       <div style="font-family:Oxanium;font-size:.85rem;font-weight:900;color:#fff;margin-bottom:.6rem">&#127760; URL BASE</div>
-      <div style="background:#050505;border:1px solid rgba(34,211,238,.2);border-radius:8px;padding:.75rem;font-family:'Courier New',monospace;font-size:.72rem;color:#25d366;word-break:break-all;-webkit-user-select:all;user-select:all">https://pnotsqsudqpwqzssevig.supabase.co/functions/v1/dynamic-action</div>
+      <div style="background:#050505;border:1px solid rgba(34,211,238,.2);border-radius:8px;padding:.75rem;font-family:'Courier New',monospace;font-size:.72rem;color:#25d366;word-break:break-all;-webkit-user-select:all;user-select:all">https://pnotsqsudqpwqzssevig.supabase.co/functions/v1/super-processor</div>
       <p style="font-size:.72rem;color:var(--muted);margin-top:.5rem">Todas las peticiones son POST con cuerpo JSON.</p>
     </div>
 
@@ -2512,10 +2524,10 @@ document.addEventListener('keydown',function(e){
         <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem"><span style="background:#25d366;color:#04120a;font-family:Oxanium;font-weight:900;font-size:.6rem;padding:.15rem .5rem;border-radius:5px">POST</span><span style="font-size:.82rem;color:#fff;font-weight:700">Comprar producto</span></div>
         <div style="background:#050505;border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:.7rem;font-family:'Courier New',monospace;font-size:.72rem;color:var(--text);white-space:pre-wrap;-webkit-user-select:all;user-select:all">{
   "action": "comprar",
-  "sku": "ff_110",
+  "sku": "ff_120",
   "player_id": "123456789"
 }</div>
-        <p style="font-size:.72rem;color:var(--muted);margin-top:.5rem">Devuelve el PIN/código en el campo "entregable".</p>
+        <p style="font-size:.72rem;color:var(--muted);margin-top:.5rem">Recarga directa al ID (no genera PIN). Si falla, el saldo se devuelve solo.</p>
       </div>
     </div>
 

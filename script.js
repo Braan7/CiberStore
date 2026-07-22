@@ -7131,3 +7131,45 @@ function comprarPase(){
 
   setTimeout(function(){ _comprandoPase = false; }, 3000);
 }
+
+
+// ═══════════ MI API KEY (revendedores) ═══════════
+var _miApiKey = null;
+
+function generarMiApiKey(){
+  if(!authSession){ showToast('Inicia sesion primero'); setTimeout(showAuthModal,600); return; }
+  var btn = document.getElementById('btn-gen-key');
+  if(btn){ btn.disabled = true; btn.textContent = 'Generando...'; }
+
+  fetch(SB_URL + '/rest/v1/rpc/generar_api_key', {
+    method: 'POST',
+    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ p_user_id: authSession.id })
+  }).then(function(r){ return r.json(); }).then(function(key){
+    if(btn){ btn.disabled = false; btn.textContent = 'Generar nueva API Key'; }
+    if(typeof key !== 'string' || key.indexOf('cs_live_') !== 0){
+      showToast('No se pudo generar. Corre el SQL API-REVENDEDORES primero.', 4000);
+      console.error('[APIKEY]', key);
+      return;
+    }
+    _miApiKey = key;
+    var caja = document.getElementById('api-key-caja');
+    if(caja){ caja.textContent = key; caja.style.display = 'block'; }
+    var copy = document.getElementById('btn-copy-key');
+    if(copy) copy.style.display = 'block';
+    showToast('\u2705 API Key generada. Guardala bien!', 3500);
+  }).catch(function(e){
+    if(btn){ btn.disabled = false; btn.textContent = 'Generar mi API Key'; }
+    showToast('Error de conexion', 3000);
+    console.error('[APIKEY]', e);
+  });
+}
+
+function copiarMiApiKey(){
+  if(!_miApiKey) return;
+  try {
+    navigator.clipboard.writeText(_miApiKey).then(function(){ showToast('\u2705 Copiada al portapapeles'); });
+  } catch(e) {
+    showToast('Copiala manualmente (manten presionado)');
+  }
+}
