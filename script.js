@@ -7133,43 +7133,54 @@ function comprarPase(){
 }
 
 
-// ═══════════ MI API KEY (revendedores) ═══════════
-var _miApiKey = null;
+// ═══════════ API KEYS (solo admin las genera y entrega) ═══════════
 
-function generarMiApiKey(){
-  if(!authSession){ showToast('Inicia sesion primero'); setTimeout(showAuthModal,600); return; }
-  var btn = document.getElementById('btn-gen-key');
-  if(btn){ btn.disabled = true; btn.textContent = 'Generando...'; }
-
-  fetch(SB_URL + '/rest/v1/rpc/generar_api_key', {
-    method: 'POST',
-    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ p_user_id: authSession.id })
-  }).then(function(r){ return r.json(); }).then(function(key){
-    if(btn){ btn.disabled = false; btn.textContent = 'Generar nueva API Key'; }
-    if(typeof key !== 'string' || key.indexOf('cs_live_') !== 0){
-      showToast('No se pudo generar. Corre el SQL API-REVENDEDORES primero.', 4000);
-      console.error('[APIKEY]', key);
-      return;
-    }
-    _miApiKey = key;
-    var caja = document.getElementById('api-key-caja');
-    if(caja){ caja.textContent = key; caja.style.display = 'block'; }
-    var copy = document.getElementById('btn-copy-key');
-    if(copy) copy.style.display = 'block';
-    showToast('\u2705 API Key generada. Guardala bien!', 3500);
-  }).catch(function(e){
-    if(btn){ btn.disabled = false; btn.textContent = 'Generar mi API Key'; }
-    showToast('Error de conexion', 3000);
-    console.error('[APIKEY]', e);
-  });
+// El revendedor solicita acceso por WhatsApp con mensaje pre-escrito
+function solicitarAccesoAPI(){
+  var quien = authSession ? authSession.username : 'nuevo';
+  var msg = 'Hola! Quiero solicitar acceso a la API de CiberStore.\n'
+    + 'Mi usuario: ' + quien + '\n'
+    + 'Mi proyecto (pagina web / bot de Telegram): \n'
+    + 'Volumen estimado de ventas: ';
+  window.open('https://wa.me/' + WA + '?text=' + encodeURIComponent(msg), '_blank');
 }
 
-function copiarMiApiKey(){
-  if(!_miApiKey) return;
-  try {
-    navigator.clipboard.writeText(_miApiKey).then(function(){ showToast('\u2705 Copiada al portapapeles'); });
-  } catch(e) {
-    showToast('Copiala manualmente (manten presionado)');
-  }
+// ADMIN: generar la key de un revendedor aprobado
+function admGenerarApiKey(){
+  if(!authSession || authSession.role !== 'admin'){ showToast('Solo admin'); return; }
+  var user = ((document.getElementById('adm-api-user')||{}).value||'').trim();
+  if(!user){ showToast('Escribe el username'); return; }
+
+  fetch(SB_URL + '/rest/v1/rpc/admin_generar_api_key', {
+    method: 'POST',
+    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ p_admin_id: authSession.id, p_username: user })
+  }).then(function(r){ return r.json(); }).then(function(res){
+    var caja = document.getElementById('adm-api-result');
+    if(typeof res === 'string' && res.indexOf('cs_live_') === 0){
+      if(caja){ caja.textContent = res; caja.style.display = 'block'; caja.style.color = '#25d366'; }
+      showToast('\u2705 Key generada para ' + user + '. Copiala y mandasela por privado.', 4000);
+    } else {
+      if(caja){ caja.textContent = String(res); caja.style.display = 'block'; caja.style.color = '#ff6b6b'; }
+      showToast('No se pudo: ' + String(res), 4000);
+    }
+  }).catch(function(e){ showToast('Error de conexion'); console.error('[APIKEY]', e); });
+}
+
+// ADMIN: revocar la key de un revendedor
+function admRevocarApiKey(){
+  if(!authSession || authSession.role !== 'admin'){ showToast('Solo admin'); return; }
+  var user = ((document.getElementById('adm-api-user')||{}).value||'').trim();
+  if(!user){ showToast('Escribe el username'); return; }
+  if(!confirm('Revocar la API key de ' + user + '? Dejara de funcionar al instante.')) return;
+
+  fetch(SB_URL + '/rest/v1/rpc/admin_revocar_api_key', {
+    method: 'POST',
+    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ p_admin_id: authSession.id, p_username: user })
+  }).then(function(r){ return r.json(); }).then(function(res){
+    var caja = document.getElementById('adm-api-result');
+    if(caja){ caja.textContent = String(res); caja.style.display = 'block'; caja.style.color = String(res).indexOf('OK') === 0 ? '#25d366' : '#ff6b6b'; }
+    showToast(String(res), 3500);
+  }).catch(function(e){ showToast('Error de conexion'); console.error('[APIKEY]', e); });
 }
