@@ -120,12 +120,12 @@ if(typeof recordPromoUse === 'undefined'){
 
 /* \u2500\u2500 DIAMANTES ILIMITADOS (precios actualizados) \u2500\u2500 */
 var PRODUCTS = [
-  {id:1,  name:'110',    total:110,   bonus:0, region:'LATAM & BR', prices:[16,16,16,16,16],       badge:null,          isPase:false, popular:false},
-  {id:2,  name:'341',    total:341,   bonus:0, region:'LATAM & BR', prices:[55,55,55,55,55],       badge:'POPULAR',     isPase:false, popular:true},
-  {id:3,  name:'572',    total:572,   bonus:0, region:'LATAM & BR', prices:[85,85,85,85,85],       badge:null,          isPase:false, popular:false},
+  {id:1,  name:'110',    total:110,   bonus:0, region:'LATAM & BR', prices:[15,15,15,15,15],       badge:null,          isPase:false, popular:false},
+  {id:2,  name:'341',    total:341,   bonus:0, region:'LATAM & BR', prices:[45,45,45,45,45],       badge:'POPULAR',     isPase:false, popular:true},
+  {id:3,  name:'572',    total:572,   bonus:0, region:'LATAM & BR', prices:[75,75,75,75,75],       badge:null,          isPase:false, popular:false},
   {id:4,  name:'1,166',  total:1166,  bonus:0, region:'LATAM & BR', prices:[160,160,160,160,160],  badge:'OFERTA',      isPase:false, popular:false},
-  {id:5,  name:'2,398',  total:2398,  bonus:0, region:'LATAM & BR', prices:[280,280,280,280,280],  badge:null,          isPase:false, popular:false},
-  {id:6,  name:'6,160',  total:6160,  bonus:0, region:'LATAM & BR', prices:[700,700,700,700,700],  badge:'GRAN VALOR',  isPase:false, popular:false},
+  {id:5,  name:'2,398',  total:2398,  bonus:0, region:'LATAM & BR', prices:[260,260,260,260,260],  badge:null,          isPase:false, popular:false},
+  {id:6,  name:'6,160',  total:6160,  bonus:0, region:'LATAM & BR', prices:[680,680,680,680,680],  badge:'GRAN VALOR',  isPase:false, popular:false},
   {id:7,  name:'12,320', total:12320, bonus:0, region:'LATAM & BR', prices:[1390,1390,1390,1390,1390], badge:'MEGA PACK', isPase:false, popular:false}
 ];
 
@@ -4216,11 +4216,13 @@ function _notifTelegramTexto(metodo){
 
 // ═══ DIAMANTES X ID +20% BONUS ═══
 var BONUS_PLANES = {
-  '624|80':     {diamantes:624,   precio:80,   label:'624 diamantes (+20%)'},
-  '1272|165':   {diamantes:1272,  precio:165,  label:'1,272 diamantes (+20%)'},
-  '2616|290':   {diamantes:2616,  precio:290,  label:'2,616 diamantes (+20%)'},
-  '6720|700':   {diamantes:6720,  precio:700,  label:'6,720 diamantes (+20%)'},
-  '13440|1370': {diamantes:13440, precio:1370, label:'13,440 diamantes (+20%)'}
+  '120|15':     {diamantes:120,   precio:15,   label:'100 + 20% = 120 Diamantes'},
+  '372|50':     {diamantes:372,   precio:50,   label:'310 + 20% = 372 Diamantes'},
+  '624|75':     {diamantes:624,   precio:75,   label:'520 + 20% = 624 Diamantes'},
+  '1272|150':   {diamantes:1272,  precio:150,  label:'1060 + 20% = 1,272 Diamantes'},
+  '2616|270':   {diamantes:2616,  precio:270,  label:'2180 + 20% = 2,616 Diamantes'},
+  '6720|685':   {diamantes:6720,  precio:685,  label:'5600 + 20% = 6,720 Diamantes'},
+  '13440|1370': {diamantes:13440, precio:1370, label:'11200 + 20% = 13,440 Diamantes'}
 };
 
 function submitBonusSaldo(){
@@ -5552,12 +5554,12 @@ var _diamSeleccionado = null;
 // package_id = el ID de Recargas América | precio = costo USD × 20 (redondeado)
 var RECARGAS_AUTO = [
   { package_id:null, nombre:'Pase Booyah', diamantes:0, costoUSD:0, precio:40, manual:true, esPase:true },
-  { package_id:340, nombre:'100 Diamantes + 10 Bono',    diamantes:110,  costoUSD:0.79,  precio:16,  img:'img/diam-100.png'  },
-  { package_id:343, nombre:'310 Diamantes + 31 Bono',    diamantes:341,  costoUSD:2.65,  precio:55,  img:'img/diam-310.png'  },
+  { package_id:340, nombre:'100 Diamantes + 10 Bono',    diamantes:110,  costoUSD:0.79,  precio:15,  img:'img/diam-100.png'  },
+  { package_id:343, nombre:'310 Diamantes + 31 Bono',    diamantes:341,  costoUSD:2.65,  precio:45,  img:'img/diam-310.png'  },
   { package_id:345, nombre:'520 Diamantes + 52 Bono',    diamantes:572,  costoUSD:3.71,  precio:80,  img:'img/diam-520.png'  },
-  { package_id:341, nombre:'1.060 Diamantes + 106 Bono', diamantes:1166, costoUSD:6.90,  precio:170, img:'img/diam-1060.png' },
-  { package_id:342, nombre:'2.180 Diamantes + 218 Bono', diamantes:2398, costoUSD:13.70, precio:270, img:'img/diam-2180.png' },
-  { package_id:344, nombre:'5.600 Diamantes + 560 Bono', diamantes:6160, costoUSD:34.87, precio:690, img:'img/diam-5600.png' },
+  { package_id:341, nombre:'1.060 Diamantes + 106 Bono', diamantes:1166, costoUSD:6.90,  precio:160, img:'img/diam-1060.png' },
+  { package_id:342, nombre:'2.180 Diamantes + 218 Bono', diamantes:2398, costoUSD:13.70, precio:260, img:'img/diam-2180.png' },
+  { package_id:344, nombre:'5.600 Diamantes + 560 Bono', diamantes:6160, costoUSD:34.87, precio:680, img:'img/diam-5600.png' },
   { package_id:null, nombre:'11.200 Diamantes + 1120 Bono', diamantes:12320, costoUSD:69.74, precio:1390, manual:true }
 ];
 
