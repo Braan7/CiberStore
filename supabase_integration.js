@@ -394,6 +394,7 @@ function loginWithProfile(profile){
   updateAuthUI();
   if(typeof refreshUI === 'function') refreshUI();
   if(typeof renderPerfil === 'function') setTimeout(renderPerfil, 100);
+  if(typeof renderHomeDashboard === 'function') setTimeout(renderHomeDashboard, 150);
   /* If admin role — open admin panel automatically */
   if(profile.role === 'admin'){
     adminAuthed = true;
@@ -1017,6 +1018,10 @@ function exportCSV(){
         authSession = u;
         if(typeof updateAuthUI === 'function') updateAuthUI();
         if(typeof renderPerfil === 'function') renderPerfil();
+        /* Repintar dashboard y billetera con el saldo REAL */
+        if(typeof renderHomeDashboard === 'function') renderHomeDashboard();
+        if(typeof cargarWalletPerfil === 'function') cargarWalletPerfil();
+        if(typeof _updatePasePagina === 'function') _updatePasePagina();
         /* Restore admin panel if was open */
         if(u.role === 'admin'){
           adminAuthed = true;

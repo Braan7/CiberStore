@@ -6997,14 +6997,28 @@ function renderHomeDashboard(){
   }
 
   // Saldo + moneda alterna
-  var sal = document.getElementById('home-saldo');
-  var alt = document.getElementById('home-saldo-alt');
-  var saldo = (authSession && authSession.saldo) ? authSession.saldo : 0;
-  if(sal) sal.textContent = fmt(saldo);
-  if(alt){
-    var otra = (CURRENCY === 'MXN') ? 'USD' : 'MXN';
-    var val = saldo * (RATES[otra] || 1);
-    alt.textContent = (CUR_SYM[otra]||'$') + val.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2}) + (CUR_SUF[otra]||'') + '  \u00B7  ' + CURRENCY;
+  function _pintarSaldoHome(saldo){
+    var sal = document.getElementById('home-saldo');
+    var alt = document.getElementById('home-saldo-alt');
+    if(sal){ sal.textContent = fmt(saldo); sal.style.color='#fff'; }
+    if(alt){
+      var otra = (CURRENCY === 'MXN') ? 'USD' : 'MXN';
+      var val = saldo * (RATES[otra] || 1);
+      alt.textContent = (CUR_SYM[otra]||'$') + val.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2}) + (CUR_SUF[otra]||'') + '  \u00B7  ' + CURRENCY;
+    }
+  }
+  _pintarSaldoHome((authSession && authSession.saldo) ? authSession.saldo : 0);
+
+  // Consultar el saldo FRESCO de la base de datos (tiempo real)
+  if(authSession && authSession.id && typeof sbGetById === 'function'){
+    sbGetById(authSession.id).then(function(u){
+      if(u && !u.banned){
+        authSession = u;
+        _pintarSaldoHome(u.saldo || 0);
+        var hola2 = document.getElementById('home-hola');
+        if(hola2) hola2.textContent = 'Hola, ' + (u.username || 'Jugador');
+      }
+    }).catch(function(){});
   }
 
   // Estadisticas del usuario (desde sus movimientos)
