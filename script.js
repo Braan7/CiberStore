@@ -5935,16 +5935,31 @@ function _refrescarDiamPrecios(){
 
 
 // ═══ PANEL BILLETERA (Mi Cuenta) ═══
+// Muestra el saldo en una moneda secundaria (si usa MXN muestra USD, y viceversa)
+function _actualizarSaldoAlterno(saldoMxn){
+  var el = document.getElementById('wallet-saldo-alt');
+  if(!el) return;
+  var otra = (CURRENCY === 'MXN') ? 'USD' : 'MXN';
+  var rate = RATES[otra] || 1;
+  var valor = saldoMxn * rate;
+  var sym = CUR_SYM[otra] || '$';
+  var suf = CUR_SUF[otra] || '';
+  el.textContent = sym + valor.toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2}) + suf;
+}
+
 function cargarWalletPerfil(){
   var sdb = document.getElementById('wallet-saldo');
   var movs = document.getElementById('wallet-movimientos');
   if(!authSession){
     if(sdb) sdb.textContent = fmt(0);
+    var altVacio = document.getElementById('wallet-saldo-alt');
+    if(altVacio) altVacio.innerHTML = '&nbsp;';
     if(movs) movs.innerHTML='<div style="text-align:center;padding:1rem;color:var(--muted);font-size:.78rem">Inicia sesion</div>';
     return;
   }
   var saldo = authSession.saldo || 0;
   if(sdb) sdb.textContent = fmt(saldo);
+  _actualizarSaldoAlterno(saldo);
 
   if(movs && authSession.id && typeof sbGetMovimientos === 'function'){
     sbGetMovimientos(authSession.id).then(function(rows){
