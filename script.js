@@ -6545,7 +6545,8 @@ var CLANES = [
     nivel: 'En proceso de ser Nivel 7',
     honor: '~400,000',
     precio: 500,
-    img: 'img/clan-cjng.jpg'
+    img: 'img/clan-cjng.jpg',
+    vendido: true
   }
 ];
 var _comprandoClan = false;
@@ -6561,8 +6562,9 @@ function renderClanes(){
   cont.innerHTML = CLANES.map(function(c){
     return '<div style="background:linear-gradient(160deg,rgba(255,179,0,.08),rgba(20,15,8,.4));border:1px solid rgba(255,179,0,.3);border-radius:20px;overflow:hidden;margin-bottom:1.5rem">'
       + '<div style="position:relative;background:radial-gradient(circle at center,rgba(255,179,0,.12),transparent);padding:1.5rem 1.5rem 0">'
-      +   '<div style="position:absolute;top:1rem;right:1rem;background:linear-gradient(90deg,#ffb300,#ff8800);color:#fff;font-family:Oxanium;font-weight:800;font-size:.68rem;padding:.35rem .85rem;border-radius:99px;letter-spacing:.5px;z-index:2;box-shadow:0 4px 14px rgba(255,179,0,.4)">NIVEL 7</div>'
-      +   '<img src="'+c.img+'" alt="'+c.nombre+'" style="width:100%;border-radius:14px;display:block" onerror="this.style.display=\'none\'"/>'
+      +   '<div style="position:absolute;top:1rem;right:1rem;background:linear-gradient(90deg,#ffb300,#ff8800);color:#fff;font-family:Oxanium;font-weight:800;font-size:.68rem;padding:.35rem .85rem;border-radius:99px;letter-spacing:.5px;z-index:2;box-shadow:0 4px 14px rgba(255,179,0,.4)">'+(c.vendido?'VENDIDO':'NIVEL 7')+'</div>'
+      +   '<img src="'+c.img+'" alt="'+c.nombre+'" style="width:100%;border-radius:14px;display:block'+(c.vendido?";filter:grayscale(85%) brightness(.55)":"")+'" onerror="this.style.display=\'none\'"/>'
+      +   (c.vendido ? '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-12deg);background:rgba(255,68,68,.92);color:#fff;font-family:Oxanium;font-weight:900;font-size:1.5rem;letter-spacing:4px;padding:.5rem 2rem;border-radius:8px;z-index:3;box-shadow:0 8px 30px rgba(0,0,0,.6)">VENDIDO</div>' : '')
       + '</div>'
       + '<div style="padding:1.5rem">'
       +   '<div style="font-family:Oxanium;font-weight:800;font-size:1.4rem;color:#fff;margin-bottom:.75rem">&#129409; '+c.nombre+'</div>'
@@ -6583,7 +6585,7 @@ function renderClanes(){
       +   '<input class="finput" id="clan-wa-'+c.id+'" type="text" placeholder="Tu numero de WhatsApp"/>'
       +   '<div style="display:flex;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;margin:1rem 0"><span style="font-size:.8rem;color:var(--muted)">Tu saldo</span><span id="clan-saldo-'+c.id+'" style="font-family:Oxanium;font-weight:700;color:#25d366">'+fmt(0)+'</span></div>'
       +   '<div id="clan-err-'+c.id+'" style="display:none;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.3);color:#ff6b6b;border-radius:9px;padding:.7rem .9rem;font-size:.8rem;margin-bottom:.85rem"></div>'
-      +   '<button onclick="comprarClan(\''+c.id+'\')" style="width:100%;padding:1rem;background:linear-gradient(135deg,#ffb300,#ff8800);color:#fff;border:none;border-radius:12px;font-family:Oxanium;font-weight:900;font-size:.95rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(255,179,0,.3)">&#129409; COMPRAR CON SALDO</button>'
+      +   (c.vendido ? '<div style="width:100%;padding:1rem;background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.3);color:#ff6b6b;border-radius:12px;font-family:Oxanium;font-weight:900;font-size:.95rem;letter-spacing:.5px;text-align:center;box-sizing:border-box">VENDIDO - NO DISPONIBLE</div>' : '') + (c.vendido ? '' : '<button onclick="comprarClan(\''+c.id+'\')" style="width:100%;padding:1rem;background:linear-gradient(135deg,#ffb300,#ff8800);color:#fff;border:none;border-radius:12px;font-family:Oxanium;font-weight:900;font-size:.95rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(255,179,0,.3)">&#129409; COMPRAR CON SALDO</button>')
       +   '<div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.85rem;line-height:1.5">Despues de pagar, te contactaremos por WhatsApp (o tu a nosotros) para coordinar la entrega del clan.</div>'
       + '</div>'
       + '</div>';
@@ -6605,6 +6607,7 @@ function comprarClan(clanId){
 
   var c = CLANES.filter(function(x){ return x.id===clanId; })[0];
   if(!c) return;
+  if(c.vendido){ showToast('Este clan ya fue vendido'); return; }
 
   var err = document.getElementById('clan-err-'+clanId);
   function showErr(m){ if(err){ err.textContent=m; err.style.display='block'; } }
