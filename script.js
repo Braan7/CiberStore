@@ -43,7 +43,7 @@ function addSpend(amount, description){
     var sn = Number(saldoNuevo) || 0;
     authSession.saldo = sn;
     _refreshSaldoUI(sn);
-    if(typeof saveSession === 'function') saveSession();
+    if(typeof saveSession === 'function') saveSession(authSession);
 
     // Registrar el movimiento
     if(typeof sbAddMovimiento === 'function'){
@@ -5945,7 +5945,7 @@ function _procesarRecargaAutomatica(p, ffId){
             var sn = Number(saldoNuevo)||0;
             authSession.saldo = sn;
             _refreshSaldoUI(sn);
-            if(typeof saveSession==='function') saveSession();
+            if(typeof saveSession==='function') saveSession(authSession);
             if(typeof sbAddMovimiento==='function') sbAddMovimiento(authSession.id, 'credito', p.precio, 'Devolucion Pedido #'+ord+' - producto no disponible');
           }).catch(function(e){ console.error('[RECARGA] devolucion fallo:', e); });
 

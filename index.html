@@ -4400,6 +4400,7 @@ document.addEventListener('keydown',function(e){
 
     <!-- LOGIN -->
     <div id="auth-login" style="padding:1.5rem">
+    <form onsubmit="doLogin(); return false;" autocomplete="on">
       <div style="text-align:center;margin-bottom:1.25rem">
         <div style="font-family:Oxanium,sans-serif;font-size:1.6rem;font-weight:900;letter-spacing:3px"><span style="color:#ffffff">CIBER</span><span style="color:#22d3ee">STORE</span></div>
       </div>
@@ -4419,9 +4420,10 @@ document.addEventListener('keydown',function(e){
         </label>
         <div id="login-attempts-info" style="font-size:.68rem;color:#ff6b6b;display:none"></div>
       </div>
-      <button onclick="doLogin()" id="btn-do-login" style="width:100%;padding:.76rem;border:none;border-radius:6px;font-family:'Poppins',sans-serif;font-weight:800;font-size:.83rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff">&#128274; Entrar a CiberStore</button>
-      <button onclick="doGuest()" style="width:100%;padding:.55rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:#8892b0;border-radius:6px;font-family:'Poppins',sans-serif;font-weight:700;font-size:.78rem;cursor:pointer;margin-top:.45rem">&#128100; Continuar como invitado</button>
+      <button type="submit" id="btn-do-login" style="width:100%;padding:.76rem;border:none;border-radius:6px;font-family:'Poppins',sans-serif;font-weight:800;font-size:.83rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff">&#128274; Entrar a CiberStore</button>
+      <button type="button" onclick="doGuest()" style="width:100%;padding:.55rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:#8892b0;border-radius:6px;font-family:'Poppins',sans-serif;font-weight:700;font-size:.78rem;cursor:pointer;margin-top:.45rem">&#128100; Continuar como invitado</button>
       <p style="text-align:center;font-size:.78rem;color:#5a6580;margin-top:1rem">No tienes cuenta? <a onclick="authTab('register')" style="color:#22d3ee;cursor:pointer;font-weight:700">Registrate gratis</a></p>
+    </form>
     </div>
 
     <!-- REGISTER -->

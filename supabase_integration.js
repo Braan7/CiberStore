@@ -113,8 +113,16 @@ function hashPass(pass){
 
 /* ── SESSION ────────────────────────────────────────────────── */
 function saveSession(data){
-  if(data) localStorage.setItem('cs_sess', JSON.stringify({id: data.id, username: data.username}));
-  else localStorage.removeItem('cs_sess');
+  if(data){
+    localStorage.setItem('cs_sess', JSON.stringify({
+      id: data.id, username: data.username,
+      saldo: data.saldo || 0, role: data.role || 'user',
+      nombre: data.nombre || '', whatsapp: data.whatsapp || '',
+      ref_code: data.ref_code || '', ts: Date.now()
+    }));
+  } else {
+    localStorage.removeItem('cs_sess');
+  }
 }
 function getSavedSession(){
   try { return JSON.parse(localStorage.getItem('cs_sess') || 'null'); }
@@ -998,7 +1006,9 @@ function exportCSV(){
   if(saved && saved.id){
     /* Show page immediately with local session */
     authSession = { id: saved.id, username: saved.username || 'Usuario',
-                    saldo: 0, role: 'user', nombre: '', whatsapp: '', ref_code: '' };
+                    saldo: saved.saldo || 0, role: saved.role || 'user',
+                    nombre: saved.nombre || '', whatsapp: saved.whatsapp || '',
+                    ref_code: saved.ref_code || '' };
     isGuest = false;
     var elModal = document.getElementById('auth-modal');
     if(elModal) elModal.style.display = 'none';
@@ -1009,13 +1019,32 @@ function exportCSV(){
     /* Verify session from DB in background */
     setTimeout(function(){
       sbGetById(saved.id).then(function(u){
-        if(!u || u.banned){
+        // Solo cerrar sesion si el usuario esta BANEADO (dato confirmado por la DB).
+        // Si u viene vacio puede ser un fallo de red: conservamos la sesion local
+        // y reintentamos mas tarde, para no sacar al cliente sin motivo.
+        if(u && u.banned){
           authSession = null;
           saveSession(null);
           if(typeof showAuthModal === 'function') showAuthModal();
           return;
         }
+        if(!u){
+          console.warn('[SESION] Sin respuesta de la DB, conservando sesion local');
+          setTimeout(function(){
+            sbGetById(saved.id).then(function(u2){
+              if(u2 && !u2.banned){
+                authSession = u2;
+                saveSession(u2);
+                if(typeof updateAuthUI === 'function') updateAuthUI();
+                if(typeof renderHomeDashboard === 'function') renderHomeDashboard();
+                if(typeof cargarWalletPerfil === 'function') cargarWalletPerfil();
+              }
+            }).catch(function(){});
+          }, 4000);
+          return;
+        }
         authSession = u;
+        saveSession(u);
         if(typeof updateAuthUI === 'function') updateAuthUI();
         if(typeof renderPerfil === 'function') renderPerfil();
         /* Repintar dashboard y billetera con el saldo REAL */
@@ -1030,7 +1059,9 @@ function exportCSV(){
             if(typeof admFullLoadStats === 'function') admFullLoadStats();
           }
         }
-      }).catch(function(){});
+      }).catch(function(e){
+        console.warn('[SESION] Error verificando, conservando sesion local', e);
+      });
     }, 800);
   } else {
     /* No session — show login modal */
