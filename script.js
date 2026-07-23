@@ -700,7 +700,7 @@ function goPage(id){
   if(id==='diamantes') setTimeout(function(){ setDiamTipo('ilim'); }, 100);
   if(id==='codigos') setTimeout(_updateScarSaldo, 100);
   if(id==='clanes') setTimeout(renderClanes, 100);
-  if(id==='pase') setTimeout(function(){ _updatePasePagina(); paseCambiarID(); }, 100);
+  if(id==='pase') setTimeout(_paseReiniciar, 100);
   if(id==='saldo') setTimeout(function(){ recSetMoneda('MXN'); }, 100);
   if(id==='sobre') setTimeout(function(){ sobreTab('resenas'); }, 100);
   if(id==='likes') renderLikes();
@@ -7086,42 +7086,92 @@ function _syncBottomNav(id){
 }
 
 
-// ═══════════ PASE BOOYAH (con verificacion de cuenta) ═══════════
+// ═══════════ PASE BOOYAH (asistente de 3 pasos) ═══════════
 var PASE_PRECIO = 25;
 var _comprandoPase = false;
 var _paseIdVerificado = null;
 var _paseNickVerificado = '';
+var _pasePasoActual = 1;
 
 function _updatePasePagina(){
-  var pr = document.getElementById('pase-precio');
-  if(pr) pr.textContent = fmt(PASE_PRECIO);
+  var s = authSession ? (authSession.saldo||0) : 0;
+  ['pase-r-precio','pase-p-precio','pase-p-total'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.textContent = fmt(PASE_PRECIO);
+  });
   var sa = document.getElementById('pase-saldo');
   if(sa){
-    var s = authSession ? (authSession.saldo||0) : 0;
     sa.textContent = fmt(s);
     sa.style.color = (s >= PASE_PRECIO) ? '#22d3ee' : '#ff6b6b';
   }
 }
 
-function _pasePagarActivo(activo){
-  var b = document.getElementById('pase-btn-pagar');
+// Navegar entre pasos
+function paseIrPaso(n){
+  // Validaciones para avanzar
+  if(n >= 2 && !_paseIdVerificado){ showToast('Primero verifica tu ID'); return; }
+
+  _pasePasoActual = n;
+  [1,2,3].forEach(function(p){
+    var sec = document.getElementById('pase-paso-'+p);
+    if(sec) sec.style.display = (p===n) ? 'block' : 'none';
+    var num = document.getElementById('pstep-'+p);
+    var lbl = document.getElementById('pstep-lbl-'+p);
+    if(num){
+      if(p < n){
+        num.style.background = 'rgba(34,211,238,.15)';
+        num.style.color = '#22d3ee';
+        num.innerHTML = '\u2713';
+      } else if(p === n){
+        num.style.background = '#22d3ee';
+        num.style.color = '#021418';
+        num.textContent = p;
+      } else {
+        num.style.background = 'rgba(255,255,255,.06)';
+        num.style.color = '#6b7280';
+        num.textContent = p;
+      }
+    }
+    if(lbl) lbl.style.color = (p <= n) ? '#22d3ee' : '#6b7280';
+  });
+
+  // Llenar el resumen al entrar al paso 2
+  if(n === 2){
+    var av = document.getElementById('pase-r-avatar');
+    if(av) av.textContent = (_paseNickVerificado.charAt(0)||'?').toUpperCase();
+    var nk = document.getElementById('pase-r-nick');
+    if(nk) nk.textContent = _paseNickVerificado || '-';
+    var ud = document.getElementById('pase-r-uid');
+    if(ud) ud.textContent = _paseIdVerificado || '-';
+  }
+  if(n === 3) _updatePasePagina();
+
+  try { window.scrollTo({ top:0, behavior:'smooth' }); } catch(e) { window.scrollTo(0,0); }
+}
+
+function _paseSig1Activo(activo){
+  var b = document.getElementById('pase-btn-sig1');
   if(!b) return;
   if(activo){
     b.style.background = 'rgba(34,211,238,.14)';
     b.style.border = '1px solid rgba(34,211,238,.45)';
     b.style.color = '#22d3ee';
     b.style.cursor = 'pointer';
-    b.innerHTML = 'Pagar <span style="font-size:1.05rem">\u2192</span>';
+    b.innerHTML = 'Continuar <span style="font-size:1.05rem">\u2192</span>';
+    b.style.display = 'flex';
+    b.style.alignItems = 'center';
+    b.style.justifyContent = 'center';
+    b.style.gap = '.5rem';
   } else {
     b.style.background = 'rgba(255,255,255,.04)';
     b.style.border = '1px solid rgba(255,255,255,.1)';
     b.style.color = '#4b5563';
     b.style.cursor = 'not-allowed';
-    b.innerHTML = 'Verifica tu ID primero';
+    b.textContent = 'Verifica tu ID';
   }
 }
 
-// Verificar el ID contra el proveedor y mostrar la cuenta destino
+// Verificar el ID contra el proveedor
 function paseVerificarID(){
   var inp = document.getElementById('pase-id');
   var err = document.getElementById('pase-verif-err');
@@ -7135,7 +7185,6 @@ function paseVerificarID(){
     showErr('Escribe un ID de Free Fire valido.');
     return;
   }
-
   if(btn){ btn.disabled = true; btn.textContent = 'Verificando...'; }
 
   fetch(COMPRAR_RECARGA_URL, {
@@ -7153,12 +7202,12 @@ function paseVerificarID(){
       if(form) form.style.display = 'none';
       if(okBox) okBox.style.display = 'block';
       var av = document.getElementById('pase-avatar');
-      if(av) av.textContent = (_paseNickVerificado.charAt(0) || '?').toUpperCase();
+      if(av) av.textContent = (_paseNickVerificado.charAt(0)||'?').toUpperCase();
       var nk = document.getElementById('pase-nick');
       if(nk) nk.textContent = _paseNickVerificado;
       var ud = document.getElementById('pase-uid');
       if(ud) ud.textContent = ffId;
-      _pasePagarActivo(true);
+      _paseSig1Activo(true);
       showToast('\u2705 Cuenta verificada', 2500);
     } else if(res && res.success && !res.valido){
       showErr('Ese ID no existe o no es valido. Revisalo e intenta de nuevo.');
@@ -7182,7 +7231,15 @@ function paseCambiarID(){
   if(okBox) okBox.style.display = 'none';
   var err = document.getElementById('pase-verif-err');
   if(err) err.style.display = 'none';
-  _pasePagarActivo(false);
+  _paseSig1Activo(false);
+}
+
+function _paseReiniciar(){
+  paseCambiarID();
+  var i1 = document.getElementById('pase-id'); if(i1) i1.value='';
+  var e1 = document.getElementById('pase-err'); if(e1) e1.style.display='none';
+  paseIrPaso(1);
+  _updatePasePagina();
 }
 
 function comprarPase(){
@@ -7192,7 +7249,7 @@ function comprarPase(){
   var err = document.getElementById('pase-err');
   function showErr(m){ if(err){ err.textContent=m; err.style.display='block'; } }
 
-  if(!_paseIdVerificado){ showErr('Primero verifica tu ID de Free Fire.'); return; }
+  if(!_paseIdVerificado){ showErr('Primero verifica tu ID de Free Fire.'); paseIrPaso(1); return; }
 
   var saldo = authSession.saldo||0;
   if(saldo < PASE_PRECIO){ showErr('Saldo insuficiente ('+fmt(saldo)+'). Necesitas '+fmt(PASE_PRECIO)+'.'); return; }
@@ -7218,9 +7275,7 @@ function comprarPase(){
   }
   showToast('\u2705 Pedido #'+ord+' confirmado!', 3000);
 
-  paseCambiarID();
-  var i1=document.getElementById('pase-id'); if(i1) i1.value='';
-  _updatePasePagina();
+  _paseReiniciar();
   setTimeout(function(){ _comprandoPase = false; }, 3000);
 }
 
