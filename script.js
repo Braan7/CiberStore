@@ -6576,7 +6576,8 @@ function renderClanes(){
       +     '<span style="font-size:.75rem;color:var(--muted)">Precio:</span>'
       +     '<span style="font-family:Oxanium;font-weight:900;font-size:1.7rem;color:#ffb300">'+fmt(c.precio)+'</span>'
       +   '</div>'
-      +   '<div style="font-family:Oxanium;font-weight:700;font-size:.95rem;color:#fff;margin-bottom:.85rem">Datos para la entrega</div>'
+      +   (c.vendido ? '' :
+            '<div style="font-family:Oxanium;font-weight:700;font-size:.95rem;color:#fff;margin-bottom:.85rem">Datos para la entrega</div>'
       +   '<label class="flabel">ID de la cuenta a entregar *</label>'
       +   '<input class="finput" id="clan-id-'+c.id+'" type="text" placeholder="ID de tu cuenta de Free Fire"/>'
       +   '<label class="flabel">Usuario del panel *</label>'
@@ -6584,9 +6585,9 @@ function renderClanes(){
       +   '<label class="flabel">WhatsApp *</label>'
       +   '<input class="finput" id="clan-wa-'+c.id+'" type="text" placeholder="Tu numero de WhatsApp"/>'
       +   '<div style="display:flex;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;margin:1rem 0"><span style="font-size:.8rem;color:var(--muted)">Tu saldo</span><span id="clan-saldo-'+c.id+'" style="font-family:Oxanium;font-weight:700;color:#25d366">'+fmt(0)+'</span></div>'
-      +   '<div id="clan-err-'+c.id+'" style="display:none;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.3);color:#ff6b6b;border-radius:9px;padding:.7rem .9rem;font-size:.8rem;margin-bottom:.85rem"></div>'
+      +   '<div id="clan-err-'+c.id+'" style="display:none;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.3);color:#ff6b6b;border-radius:9px;padding:.7rem .9rem;font-size:.8rem;margin-bottom:.85rem"></div>')
       +   (c.vendido ? '<div style="width:100%;padding:1rem;background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.3);color:#ff6b6b;border-radius:12px;font-family:Oxanium;font-weight:900;font-size:.95rem;letter-spacing:.5px;text-align:center;box-sizing:border-box">VENDIDO - NO DISPONIBLE</div>' : '') + (c.vendido ? '' : '<button onclick="comprarClan(\''+c.id+'\')" style="width:100%;padding:1rem;background:linear-gradient(135deg,#ffb300,#ff8800);color:#fff;border:none;border-radius:12px;font-family:Oxanium;font-weight:900;font-size:.95rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(255,179,0,.3)">&#129409; COMPRAR CON SALDO</button>')
-      +   '<div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.85rem;line-height:1.5">Despues de pagar, te contactaremos por WhatsApp (o tu a nosotros) para coordinar la entrega del clan.</div>'
+      +   (c.vendido ? '' : '<div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.85rem;line-height:1.5">Despues de pagar, te contactaremos por WhatsApp (o tu a nosotros) para coordinar la entrega del clan.</div>')
       + '</div>'
       + '</div>';
   }).join('');
