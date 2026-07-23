@@ -700,7 +700,7 @@ function goPage(id){
   if(id==='diamantes') setTimeout(function(){ setDiamTipo('ilim'); }, 100);
   if(id==='codigos') setTimeout(_updateScarSaldo, 100);
   if(id==='clanes') setTimeout(renderClanes, 100);
-  if(id==='pase') setTimeout(_updatePasePagina, 100);
+  if(id==='pase') setTimeout(function(){ _updatePasePagina(); paseCambiarID(); }, 100);
   if(id==='saldo') setTimeout(function(){ recSetMoneda('MXN'); }, 100);
   if(id==='sobre') setTimeout(function(){ sobreTab('resenas'); }, 100);
   if(id==='likes') renderLikes();
@@ -7086,15 +7086,103 @@ function _syncBottomNav(id){
 }
 
 
-// ═══════════ PASE BOOYAH (producto propio) ═══════════
+// ═══════════ PASE BOOYAH (con verificacion de cuenta) ═══════════
 var PASE_PRECIO = 25;
 var _comprandoPase = false;
+var _paseIdVerificado = null;
+var _paseNickVerificado = '';
 
 function _updatePasePagina(){
   var pr = document.getElementById('pase-precio');
   if(pr) pr.textContent = fmt(PASE_PRECIO);
   var sa = document.getElementById('pase-saldo');
-  if(sa) sa.textContent = authSession ? fmt(authSession.saldo||0) : fmt(0);
+  if(sa){
+    var s = authSession ? (authSession.saldo||0) : 0;
+    sa.textContent = fmt(s);
+    sa.style.color = (s >= PASE_PRECIO) ? '#22d3ee' : '#ff6b6b';
+  }
+}
+
+function _pasePagarActivo(activo){
+  var b = document.getElementById('pase-btn-pagar');
+  if(!b) return;
+  if(activo){
+    b.style.background = 'rgba(34,211,238,.14)';
+    b.style.border = '1px solid rgba(34,211,238,.45)';
+    b.style.color = '#22d3ee';
+    b.style.cursor = 'pointer';
+    b.innerHTML = 'Pagar <span style="font-size:1.05rem">\u2192</span>';
+  } else {
+    b.style.background = 'rgba(255,255,255,.04)';
+    b.style.border = '1px solid rgba(255,255,255,.1)';
+    b.style.color = '#4b5563';
+    b.style.cursor = 'not-allowed';
+    b.innerHTML = 'Verifica tu ID primero';
+  }
+}
+
+// Verificar el ID contra el proveedor y mostrar la cuenta destino
+function paseVerificarID(){
+  var inp = document.getElementById('pase-id');
+  var err = document.getElementById('pase-verif-err');
+  var btn = document.getElementById('pase-btn-verif');
+  var ffId = ((inp||{}).value||'').trim();
+
+  function showErr(m){ if(err){ err.innerHTML = m; err.style.display='block'; } }
+  if(err) err.style.display='none';
+
+  if(!ffId || ffId.replace(/\D/g,'').length < 5){
+    showErr('Escribe un ID de Free Fire valido.');
+    return;
+  }
+
+  if(btn){ btn.disabled = true; btn.textContent = 'Verificando...'; }
+
+  fetch(COMPRAR_RECARGA_URL, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ action:'validar', product_id: 351, service_user_id: ffId })
+  }).then(function(r){ return r.json(); }).then(function(res){
+    if(btn){ btn.disabled = false; btn.textContent = 'Verificar'; }
+
+    if(res && res.success && res.valido){
+      _paseIdVerificado = ffId;
+      _paseNickVerificado = res.nombre || 'Jugador';
+      var form = document.getElementById('pase-destino-form');
+      var okBox = document.getElementById('pase-destino-ok');
+      if(form) form.style.display = 'none';
+      if(okBox) okBox.style.display = 'block';
+      var av = document.getElementById('pase-avatar');
+      if(av) av.textContent = (_paseNickVerificado.charAt(0) || '?').toUpperCase();
+      var nk = document.getElementById('pase-nick');
+      if(nk) nk.textContent = _paseNickVerificado;
+      var ud = document.getElementById('pase-uid');
+      if(ud) ud.textContent = ffId;
+      _pasePagarActivo(true);
+      showToast('\u2705 Cuenta verificada', 2500);
+    } else if(res && res.success && !res.valido){
+      showErr('Ese ID no existe o no es valido. Revisalo e intenta de nuevo.');
+    } else {
+      showErr('No pudimos verificar tu ID en este momento.<br/>Escribenos por WhatsApp para ayudarte con tu pedido.');
+      console.error('[PASE-VALIDAR]', res);
+    }
+  }).catch(function(e){
+    if(btn){ btn.disabled = false; btn.textContent = 'Verificar'; }
+    showErr('Error de conexion. Intenta de nuevo en unos segundos.');
+    console.error('[PASE-VALIDAR]', e);
+  });
+}
+
+function paseCambiarID(){
+  _paseIdVerificado = null;
+  _paseNickVerificado = '';
+  var form = document.getElementById('pase-destino-form');
+  var okBox = document.getElementById('pase-destino-ok');
+  if(form) form.style.display = 'block';
+  if(okBox) okBox.style.display = 'none';
+  var err = document.getElementById('pase-verif-err');
+  if(err) err.style.display = 'none';
+  _pasePagarActivo(false);
 }
 
 function comprarPase(){
@@ -7104,36 +7192,35 @@ function comprarPase(){
   var err = document.getElementById('pase-err');
   function showErr(m){ if(err){ err.textContent=m; err.style.display='block'; } }
 
-  var ffId = ((document.getElementById('pase-id')||{}).value||'').trim();
-  var nom = ((document.getElementById('pase-nombre')||{}).value||'').trim();
-  if(!ffId){ showErr('Escribe tu ID de Free Fire.'); return; }
-  if(!nom){ showErr('Escribe tu nombre en el juego.'); return; }
+  if(!_paseIdVerificado){ showErr('Primero verifica tu ID de Free Fire.'); return; }
 
   var saldo = authSession.saldo||0;
   if(saldo < PASE_PRECIO){ showErr('Saldo insuficiente ('+fmt(saldo)+'). Necesitas '+fmt(PASE_PRECIO)+'.'); return; }
   if(err) err.style.display='none';
 
   _comprandoPase = true;
+  var ffId = _paseIdVerificado;
+  var nom = _paseNickVerificado || '-';
   var ord = getNextOrder();
+
   addSpend(PASE_PRECIO, 'Pase Booyah - ID:'+ffId+' ('+nom+') - Pedido #'+ord);
-  registrarPedido('Pase Booyah', 0, 'diamantes', ffId, PASE_PRECIO, 0);
+  registrarPedido('Pase Booyah', 0, 'otro', ffId, PASE_PRECIO, 0);
   if(typeof tgNotifyPurchase==='function'){
     tgNotifyPurchase(authSession.username,
-      '\uD83C\uDF9F\uFE0F Pase Booyah\n\uD83C\uDFAE ID: '+ffId+'\n\uD83D\uDC64 Nombre IG: '+nom+'\n\u26A0\uFE0F Entrega por REGALO (1-4 dias)',
+      '\uD83C\uDF9F\uFE0F Pase Booyah\n\uD83C\uDFAE ID: '+ffId+'\n\uD83D\uDC64 Cuenta: '+nom+' (verificada)\n\u26A0\uFE0F Entrega por REGALO (1-4 dias)',
       PASE_PRECIO, ord);
   }
 
   if(typeof _mostrarAvisoModal==='function'){
     _mostrarAvisoModal('PEDIDO #'+ord+' CONFIRMADO',
-      'Tu <b style="color:#fff">Pase Booyah</b> fue pedido.<br/><br/>Se envia mediante <b style="color:#fff">REGALO</b> y puede tardar de <b style="color:#fff">1 a 4 dias</b>.<br/>Consulta con el administrador.',
+      'Tu <b style="color:#fff">Pase Booyah</b> fue pedido para <b style="color:#fff">'+nom+'</b>.<br/><br/>Se envia mediante <b style="color:#fff">REGALO</b> y puede tardar de <b style="color:#fff">1 a 4 dias</b>.',
       '#22d3ee');
   }
   showToast('\u2705 Pedido #'+ord+' confirmado!', 3000);
 
+  paseCambiarID();
   var i1=document.getElementById('pase-id'); if(i1) i1.value='';
-  var i2=document.getElementById('pase-nombre'); if(i2) i2.value='';
   _updatePasePagina();
-
   setTimeout(function(){ _comprandoPase = false; }, 3000);
 }
 
