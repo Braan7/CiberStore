@@ -2132,49 +2132,38 @@ document.addEventListener('keydown',function(e){
 
 
   <div style="max-width:760px;margin:0 auto;padding:0 5vw 3rem">
-    <!-- Selector de tipo -->
-    <div style="display:flex;gap:.5rem;margin-bottom:1.5rem;background:rgba(0,0,0,.25);padding:.35rem;border-radius:12px">
-      <button id="dtab-ilim" onclick="setDiamTipo('ilim')" class="dtab-btn">&#127873; Bonus (+20%)</button>
-      <button id="dtab-1vez" onclick="setDiamTipo('1vez')" class="dtab-btn">&#127919; 1 vez por ID</button>
+    <!-- Encabezado de la seccion -->
+    <div style="display:flex;align-items:center;gap:.55rem;background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.22);border-radius:12px;padding:.75rem 1rem;margin-bottom:1.25rem">
+      <span style="font-size:1.05rem">&#127873;</span>
+      <div><div style="font-size:.88rem;font-weight:700;color:#22d3ee">Recargas con Bonus +20%</div><div style="font-size:.72rem;color:#6b7280;margin-top:.05rem">Entrega automatica directa a tu ID</div></div>
     </div>
 
     <!-- Catálogo (cuadrícula) -->
     <div id="diam-catalogo">
       <!-- AVISO REGION LATAM (tab Bonus +20%) -->
-      <div id="diam-latam-aviso" style="display:none;margin-bottom:1rem">
+      <div id="diam-latam-aviso" style="margin-bottom:1rem">
         <div style="background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.25);border-radius:12px;padding:.8rem 1rem;font-size:.78rem;color:#67e8f9;line-height:1.6">
           &#127758; Las recargas con bono +20% son <b style="color:#fff">solo para cuentas de region LATAM</b>. Si tu cuenta es de otra region, el pedido sera rechazado y tu saldo devuelto.
         </div>
       </div>
 
       <!-- ADVERTENCIA + VERIFICACION para 1 VEZ POR ID -->
-      <div id="diam-1vez-aviso" style="display:none;margin-bottom:1.15rem">
-        <div style="background:linear-gradient(160deg,rgba(255,80,80,.1),rgba(255,180,60,.05));border:1px solid rgba(255,120,80,.35);border-radius:14px;padding:1.15rem">
-          <div style="display:flex;align-items:center;gap:.55rem;margin-bottom:.7rem">
-            <span style="font-size:1.2rem">&#9888;&#65039;</span>
-            <div style="font-family:Oxanium;font-weight:800;font-size:.9rem;color:#ff9068;letter-spacing:.3px">IMPORTANTE - LEE ANTES DE COMPRAR</div>
-          </div>
-          <div style="font-size:.78rem;color:#e8ecf4;line-height:1.65;margin-bottom:.9rem">
-            Los paquetes <b style="color:#fff">1 vez por ID</b> solo se pueden usar <b style="color:#fff">una vez por cuenta</b>. Antes de comprar, <b style="color:#22d3ee">debes enviar tu ID a verificar</b> para confirmar que tu cuenta es elegible.
-          </div>
-          <div style="background:rgba(255,80,80,.1);border:1px solid rgba(255,80,80,.3);border-radius:10px;padding:.7rem .9rem;margin-bottom:1rem;font-size:.75rem;color:#ff8080;line-height:1.55">
-            &#128683; Si NO envias tu ID a verificar y realizas la compra, <b>el pedido NO sera reembolsado</b>.
-          </div>
-
-          <div style="font-family:Oxanium;font-weight:700;font-size:.8rem;color:#fff;margin-bottom:.5rem">&#128269; Verifica tu ID primero</div>
-          <label class="flabel">Tu ID de Free Fire *</label>
-          <input class="finput" id="diam-verif-id" type="text" inputmode="numeric" placeholder="Ej: 123456789" style="margin-bottom:.7rem"/>
-          <div id="diam-verif-err" style="display:none;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.3);color:#ff6b6b;border-radius:9px;padding:.6rem .8rem;font-size:.76rem;margin-bottom:.7rem"></div>
-          <button onclick="enviarVerificacionID()" style="width:100%;padding:.85rem;background:linear-gradient(135deg,#0e7490,#f0b90b);color:#fff;border:none;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.82rem;letter-spacing:.5px;cursor:pointer">&#128232; ENVIAR ID A VERIFICAR</button>
-          <div style="font-size:.68rem;color:var(--muted);text-align:center;margin-top:.7rem;line-height:1.5">Despues de enviar, te aparecera un boton para consultarnos por WhatsApp si tu cuenta es elegible.</div>
-        </div>
-      </div>
 
       <div class="dcat-head">
         <div class="dcat-head-ico">&#127918;</div>
         <div class="dcat-head-txt">Free Fire <span class="dcat-count" id="diam-count">0</span></div>
       </div>
       <div class="dcat-grid" id="diam-grid"></div>
+
+      <!-- Cotizar otros paquetes -->
+      <div style="margin-top:1.6rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:1.2rem 1.1rem;text-align:center">
+        <div style="font-family:Poppins,sans-serif;font-weight:700;font-size:.95rem;color:#fff;margin-bottom:.35rem">&iquest;Buscas otro paquete?</div>
+        <div style="font-size:.8rem;color:#6b7280;line-height:1.6;margin-bottom:1rem">Tenemos paquetes especiales, promociones por ID y cantidades personalizadas. Escribenos y te cotizamos al momento.</div>
+        <button onclick="cotizarDiamantesWA()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:.55rem;padding:.9rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:13px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.4A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 1 1 12 20zm4.4-5.9c-.2-.1-1.4-.7-1.6-.8s-.4-.1-.6.1-.6.8-.8 1-.3.2-.6.1a6.6 6.6 0 0 1-3.2-2.8c-.2-.4.2-.4.6-1.2a.6.6 0 0 0 0-.6l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 2.9 2.9 0 0 0-.9 2.2 5.1 5.1 0 0 0 1 2.7 11.5 11.5 0 0 0 4.5 4 5 5 0 0 0 3 .7 2.6 2.6 0 0 0 1.7-1.2 2.1 2.1 0 0 0 .1-1.2z"/></svg>
+          Cotizar por WhatsApp
+        </button>
+      </div>
     </div>
 
     <!-- Detalle (oculto hasta seleccionar) -->

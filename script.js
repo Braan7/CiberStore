@@ -5638,80 +5638,33 @@ function _getDiamProductos(tipo){
         img:r.img || _imgPorDiamantes(r.diamantes)
       };
     });
-  } else if(tipo === '1vez'){
-    return PRODUCTS_1VEZ.map(function(p){
-      return { key:'1vez_'+p.id, nombre:p.name+' Diamantes', diamantes:p.total, precio:p.prices[0], tipo:'1vez', badge:p.badge, img:_imgPorDiamantes(p.total) };
-    });
   }
   return [];
 }
 
 function setDiamTipo(tipo){
   _diamTipoActual = tipo;
-  ['ilim','1vez'].forEach(function(t){
+  ['ilim'].forEach(function(t){
     var btn = document.getElementById('dtab-'+t);
     if(btn) btn.classList.toggle('active', t===tipo);
   });
-  // Mostrar el aviso de verificacion solo en "1 vez por ID"
-  var aviso = document.getElementById('diam-1vez-aviso');
-  if(aviso) aviso.style.display = (tipo === '1vez') ? 'block' : 'none';
-  // Aviso de region LATAM solo en el tab Bonus (+20%)
+  // El aviso de region LATAM siempre visible
   var avisoLatam = document.getElementById('diam-latam-aviso');
-  if(avisoLatam) avisoLatam.style.display = (tipo === 'ilim') ? 'block' : 'none';
+  if(avisoLatam) avisoLatam.style.display = 'block';
   // Volver al catálogo si estaba en detalle
   document.getElementById('diam-catalogo').style.display='';
   document.getElementById('diam-detalle').style.display='none';
   renderDiamCatalogo();
 }
 
-// Enviar el ID a verificar (solo pide ID, llega por Telegram)
-var _enviandoVerif = false;
-function enviarVerificacionID(){
-  if(!authSession){ showToast('Inicia sesion primero'); setTimeout(showAuthModal,600); return; }
-  if(_enviandoVerif){ return; }
-
-  var err = document.getElementById('diam-verif-err');
-  function showErr(m){ if(err){ err.textContent=m; err.style.display='block'; } }
-
-  var ffId = ((document.getElementById('diam-verif-id')||{}).value||'').trim();
-  if(!ffId || ffId.replace(/\D/g,'').length < 5){
-    showErr('Escribe un ID de Free Fire valido.');
-    return;
-  }
-  if(err) err.style.display='none';
-
-  _enviandoVerif = true;
-
-  var ahora = new Date();
-  var fecha = ahora.toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'});
-  var hora = ahora.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
-  var linea = '\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501';
-  var msg = linea + '\n'
-    + '\uD83D\uDD0D <b>VERIFICACION DE ID (1 vez x ID)</b>\n'
-    + linea + '\n'
-    + '\uD83D\uDC64 Usuario: <b>' + authSession.username + '</b>\n'
-    + '\uD83C\uDFAE ID Free Fire: <code>' + ffId + '</code>\n'
-    + '\uD83D\uDCC5 ' + fecha + ' \u00B7 \uD83D\uDD52 ' + hora + '\n'
-    + linea + '\n'
-    + '\u2139\uFE0F Verifica si esta cuenta es elegible para paquetes 1 vez.';
-
-  if(typeof tgSend === 'function'){ tgSend(msg); }
-
-  // Mostrar confirmacion en el aviso + boton de WhatsApp con el ID pre-escrito
-  var aviso = document.getElementById('diam-1vez-aviso');
-  if(aviso){
-    var msgWA = 'Hola! Envie mi ID *' + ffId + '* para verificar la oferta *1 vez por ID*. Esta disponible para mi cuenta?';
-    var urlWA = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(msgWA);
-    aviso.innerHTML = '<div style="background:linear-gradient(160deg,rgba(37,211,102,.1),rgba(255,255,255,.02));border:1px solid rgba(37,211,102,.35);border-radius:14px;padding:1.15rem;text-align:center">'
-      + '<div style="font-size:2rem;margin-bottom:.4rem">\u2705</div>'
-      + '<div style="font-family:Oxanium;font-weight:800;font-size:.92rem;color:#25d366;margin-bottom:.4rem">ID ENVIADO A VERIFICAR</div>'
-      + '<div style="font-size:.77rem;color:#e8ecf4;line-height:1.6;margin-bottom:1rem">Tu ID <b style="color:#fff">' + ffId + '</b> fue enviado. <b style="color:#22d3ee">Consultanos por WhatsApp</b> si tu cuenta es elegible antes de comprar.</div>'
-      + '<a href="' + urlWA + '" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:.85rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border-radius:11px;font-family:Poppins;font-weight:700;font-size:.85rem;text-decoration:none;box-sizing:border-box">\uD83D\uDCF1 Consultar disponibilidad por WhatsApp</a>'
-      + '</div>';
-  }
-
-  showToast('\u2705 ID enviado a verificar', 3000);
-  setTimeout(function(){ _enviandoVerif = false; }, 3000);
+// Cotizar paquetes especiales por WhatsApp
+function cotizarDiamantesWA(){
+  var quien = authSession ? authSession.username : '';
+  var msg = 'Hola! Quiero cotizar un paquete de diamantes de Free Fire.\n'
+    + (quien ? ('Mi usuario: ' + quien + '\n') : '')
+    + 'Mi ID de Free Fire: \n'
+    + 'Paquete o cantidad que busco: ';
+  window.open('https://wa.me/' + WA + '?text=' + encodeURIComponent(msg), '_blank');
 }
 
 function renderDiamCatalogo(){
