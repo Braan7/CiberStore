@@ -701,7 +701,7 @@ function goPage(id){
   if(id==='codigos') setTimeout(_updateScarSaldo, 100);
   if(id==='clanes') setTimeout(renderClanes, 100);
   if(id==='pase') setTimeout(_paseReiniciar, 100);
-  if(id==='saldo') setTimeout(function(){ recSetMoneda('MXN'); }, 100);
+  if(id==='saldo') setTimeout(function(){ recSetMoneda('MXN'); _recTipo=null; recLimpiarTipo(); }, 100);
   if(id==='sobre') setTimeout(function(){ sobreTab('resenas'); }, 100);
   if(id==='likes') renderLikes();
   if(id==='membresia'){renderMems();renderWallet();}
@@ -5169,7 +5169,7 @@ function enviarComprobante(metodo){
         metodo: metodoNom,
         monto: monto,
         monto_acreditar: montoAcreditar,
-        extra: extra,
+        extra: (_recTipo ? ('PARA: ' + (REC_TIPO_LABEL[_recTipo]||_recTipo) + (extra ? ' | ' : '')) : '') + extra,
         foto_base64: fotoB64
       })
     }).then(function(r){ return r.json(); }).then(function(res){
@@ -5638,19 +5638,25 @@ function _getDiamProductos(tipo){
         img:r.img || _imgPorDiamantes(r.diamantes)
       };
     });
+  } else if(tipo === '1vez'){
+    return PRODUCTS_1VEZ.map(function(p){
+      return { key:'1vez_'+p.id, nombre:p.name+' Diamantes', diamantes:p.total, precio:p.prices[0], tipo:'1vez', badge:p.badge, img:_imgPorDiamantes(p.total) };
+    });
   }
   return [];
 }
 
 function setDiamTipo(tipo){
   _diamTipoActual = tipo;
-  ['ilim'].forEach(function(t){
+  ['ilim','1vez'].forEach(function(t){
     var btn = document.getElementById('dtab-'+t);
     if(btn) btn.classList.toggle('active', t===tipo);
   });
-  // El aviso de region LATAM siempre visible
+  // Avisos segun el tab
+  var aviso1vez = document.getElementById('diam-1vez-aviso');
+  if(aviso1vez) aviso1vez.style.display = (tipo === '1vez') ? 'block' : 'none';
   var avisoLatam = document.getElementById('diam-latam-aviso');
-  if(avisoLatam) avisoLatam.style.display = 'block';
+  if(avisoLatam) avisoLatam.style.display = (tipo === 'ilim') ? 'block' : 'none';
   // Volver al catálogo si estaba en detalle
   document.getElementById('diam-catalogo').style.display='';
   document.getElementById('diam-detalle').style.display='none';
@@ -5702,6 +5708,11 @@ function _avisoEntrega(p){
   if(p && p.tipo==='bonus'){
     return '<div style="background:rgba(255,180,60,.1);border:1px solid rgba(255,180,60,.32);border-radius:11px;padding:.85rem 1rem;margin-bottom:1.25rem;font-size:.79rem;color:#ffb84d;line-height:1.6">'
       + '\u23F3 Las recargas con <b>bono</b> pueden llegar entre <b>1 y 3 horas</b>.'
+      + '</div>';
+  }
+  if(p && p.tipo==='1vez'){
+    return '<div style="background:rgba(255,180,60,.1);border:1px solid rgba(255,180,60,.32);border-radius:11px;padding:.85rem 1rem;margin-bottom:1.25rem;font-size:.79rem;color:#ffb84d;line-height:1.6">'
+      + '\u26A0\uFE0F <b>Solo una vez por cuenta.</b><br/>Si tu ID ya uso este paquete, el pedido sera rechazado. Se procesa manualmente.'
       + '</div>';
   }
   if(p && p.tipo==='auto'){
@@ -7431,7 +7442,36 @@ function recSetMonto(m){
   if(inp) inp.value = m;
 }
 
+// Tipo de recarga (obligatorio): para que va a usar el saldo
+var _recTipo = null;
+var REC_TIPO_LABEL = { ilim:'Diamantes con Bono', '1vez':'Diamantes 1 vez por ID' };
+
+function recSetTipo(tipo){
+  _recTipo = tipo;
+  [['ilim','rec-tipo-ilim'],['1vez','rec-tipo-1vez']].forEach(function(par){
+    var el = document.getElementById(par[1]);
+    if(!el) return;
+    var activo = (par[0] === tipo);
+    el.style.background = activo ? 'rgba(34,211,238,.08)' : 'rgba(255,255,255,.022)';
+    el.style.borderColor = activo ? 'rgba(34,211,238,.45)' : 'rgba(255,255,255,.08)';
+    var radio = el.querySelector('.rec-radio');
+    if(radio) radio.style.borderColor = activo ? '#22d3ee' : 'rgba(255,255,255,.2)';
+    var dot = el.querySelector('.rec-dot');
+    if(dot) dot.style.background = activo ? '#22d3ee' : 'transparent';
+  });
+  var err = document.getElementById('rec-tipo-err');
+  if(err) err.style.display = 'none';
+}
+
 function recElegirMetodo(metodo){
+  // El tipo es obligatorio
+  if(!_recTipo){
+    var errT = document.getElementById('rec-tipo-err');
+    if(errT) errT.style.display = 'block';
+    showToast('Selecciona para que es tu saldo');
+    try { document.getElementById('rec-tipo-ilim').scrollIntoView({behavior:'smooth', block:'center'}); } catch(e){}
+    return;
+  }
   var inp = document.getElementById('rec-monto');
   var monto = parseFloat((inp&&inp.value)||'0') || 0;
   var min = REC_MIN[_recMoneda] || 50;
@@ -7448,3 +7488,16 @@ function recElegirMetodo(metodo){
   else if(metodo==='zelle'){ if(typeof openZelleModal==='function') openZelleModal(montoMXN); }
 }
 var _recMontoElegido = 0;
+
+function recLimpiarTipo(){
+  ['rec-tipo-ilim','rec-tipo-1vez'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(!el) return;
+    el.style.background = 'rgba(255,255,255,.022)';
+    el.style.borderColor = 'rgba(255,255,255,.08)';
+    var r = el.querySelector('.rec-radio'); if(r) r.style.borderColor = 'rgba(255,255,255,.2)';
+    var d = el.querySelector('.rec-dot');   if(d) d.style.background = 'transparent';
+  });
+  var err = document.getElementById('rec-tipo-err');
+  if(err) err.style.display = 'none';
+}
