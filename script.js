@@ -5948,9 +5948,35 @@ function _procesarRecargaAutomatica(p, ffId){
         _comprandoDiam = false;
       } else {
         var errTxt = String(res.error||res.status||'sin confirmar');
+        // Fondos agotados del proveedor: la recarga NO se hizo, hay que devolver
+        var sinFondos = /saldo insuficiente|insufficient|fondos insuficientes|sin fondos|credito insuficiente|balance too low|no balance|limite excedido|limit exceeded/i.test(errTxt);
         var noDisponible = /no disponible|not available|no encontrado|not found|sin stock|out of stock/i.test(errTxt);
 
-        if(noDisponible){
+        if(sinFondos){
+          // RECARGA RECHAZADA: devolver el saldo y avisar al admin con urgencia
+          _rpcAjustarSaldo(authSession.id, p.precio).then(function(saldoNuevo){
+            var sn = Number(saldoNuevo)||0;
+            authSession.saldo = sn;
+            _refreshSaldoUI(sn);
+            if(typeof saveSession==='function') saveSession(authSession);
+            if(typeof sbAddMovimiento==='function') sbAddMovimiento(authSession.id, 'credito', p.precio, 'Reembolso Pedido #'+ord+' - recarga rechazada');
+            _cancelarMovimientoCompra(authSession.id, ord);
+          }).catch(function(e){ console.error('[RECARGA] reembolso fallo:', e); });
+
+          registrarPedido(p.nombre+' (RECHAZADA - reembolsado)', p.diamantes, 'diamantes', ffId, 0, 0);
+          if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\uD83D\uDEA8 <b>RECARGA RECHAZADA - SIN FONDOS</b>\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\u2705 Saldo reembolsado al cliente ('+fmt(p.precio)+')\n\n\u26A0\uFE0F <b>RECARGA TU CUENTA DEL PROVEEDOR</b>', p.precio, ord);
+
+          if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
+          if(msg){ msg.className='ddet-msg err'; msg.style.fontSize='.75rem'; msg.innerHTML='\u274C <b>RECARGA RECHAZADA</b><br/>Contacta al administrador. Tu saldo sera reembolsado.'; }
+
+          if(typeof _mostrarAvisoModal==='function'){
+            _mostrarAvisoModal('RECARGA RECHAZADA',
+              'No pudimos completar tu recarga en este momento.<br/><br/><b style=\"color:#fff\">Contacta al administrador.</b><br/><br/>\u2705 Tu saldo fue <b style=\"color:#25d366\">reembolsado</b> automaticamente.',
+              '#ff6b6b');
+          }
+          showToast('\u274C Recarga rechazada. Saldo reembolsado.', 5000);
+          _comprandoDiam = false;
+        } else if(noDisponible){
           // La recarga NO se hizo (producto no disponible): DEVOLVER el saldo automatico
           _rpcAjustarSaldo(authSession.id, p.precio).then(function(saldoNuevo){
             var sn = Number(saldoNuevo)||0;
@@ -5958,6 +5984,7 @@ function _procesarRecargaAutomatica(p, ffId){
             _refreshSaldoUI(sn);
             if(typeof saveSession==='function') saveSession(authSession);
             if(typeof sbAddMovimiento==='function') sbAddMovimiento(authSession.id, 'credito', p.precio, 'Devolucion Pedido #'+ord+' - producto no disponible');
+            _cancelarMovimientoCompra(authSession.id, ord);
           }).catch(function(e){ console.error('[RECARGA] devolucion fallo:', e); });
 
           registrarPedido(p.nombre+' (AUTO - NO DISPONIBLE, devuelto)', p.diamantes, 'diamantes', ffId, 0, 0);
@@ -7500,4 +7527,16 @@ function recLimpiarTipo(){
   });
   var err = document.getElementById('rec-tipo-err');
   if(err) err.style.display = 'none';
+}
+
+
+// Marca la compra de un pedido como CANCELADA para que no cuente en el ranking
+function _cancelarMovimientoCompra(userId, ord){
+  if(!userId || !ord || typeof sb === 'undefined' || !sb.patch) return;
+  try {
+    sb.patch('movimientos_saldo',
+      { tipo: 'compra_cancelada' },
+      'user_id=eq.' + userId + '&tipo=eq.compra&descripcion=like.*Pedido%20%23' + ord + '*'
+    ).catch(function(e){ console.warn('[RANKING] no se pudo cancelar el movimiento', e); });
+  } catch(e){ console.warn('[RANKING]', e); }
 }
