@@ -5596,13 +5596,13 @@ var _diamSeleccionado = null;
 // ═══════════ RECARGAS AUTOMÁTICAS (Recargas América type=recharge) ═══════════
 // package_id = el ID de Recargas América | precio = costo USD × 20 (redondeado)
 var RECARGAS_AUTO = [
-  { package_id:351, nombre:'100 Diamantes + 20 Bono',      diamantes:120,   costoUSD:0.71,  precio:16,  img:'img/diam-100.png'  },
-  { package_id:348, nombre:'310 Diamantes + 62 Bono',      diamantes:372,   costoUSD:2.12,  precio:45,  img:'img/diam-310.png'  },
-  { package_id:350, nombre:'520 Diamantes + 104 Bono',     diamantes:624,   costoUSD:3.58,  precio:70,  img:'img/diam-520.png'  },
-  { package_id:347, nombre:'1.060 Diamantes + 212 Bono',   diamantes:1272,  costoUSD:6.65,  precio:135, img:'img/diam-1060.png' },
-  { package_id:346, nombre:'2.180 Diamantes + 436 Bono',   diamantes:2616,  costoUSD:13.21, precio:250, img:'img/diam-2180.png' },
-  { package_id:349, nombre:'5.600 Diamantes + 1.120 Bono', diamantes:6720,  costoUSD:33.61, precio:645, img:'img/diam-5600.png' },
-  { package_id:null, nombre:'11.200 Diamantes + 2.240 Bono', diamantes:13440, costoUSD:67.22, precio:1390, manual:true }
+  { package_id:351, nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.71,  precio:16,  img:'img/diam-100.png'  },
+  { package_id:348, nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:2.12,  precio:45,  img:'img/diam-310.png'  },
+  { package_id:350, nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.58,  precio:70,  img:'img/diam-520.png'  },
+  { package_id:347, nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.65,  precio:135, img:'img/diam-1060.png' },
+  { package_id:346, nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:13.21, precio:250, img:'img/diam-2180.png' },
+  { package_id:349, nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:33.61, precio:645, img:'img/diam-5600.png' },
+  { package_id:null, nombre:'11.200 Diamantes + 1.120 Bono', diamantes:12320, costoUSD:67.22, precio:1390, manual:true }
 ];
 
 
@@ -5701,7 +5701,7 @@ function _avisoEntrega(p){
   }
   if(p && p.tipo==='bonus'){
     return '<div style="background:rgba(255,180,60,.1);border:1px solid rgba(255,180,60,.32);border-radius:11px;padding:.85rem 1rem;margin-bottom:1.25rem;font-size:.79rem;color:#ffb84d;line-height:1.6">'
-      + '\u23F3 Las recargas con <b>20% de bonus</b> pueden llegar entre <b>1 y 3 horas</b>.'
+      + '\u23F3 Las recargas con <b>bono</b> pueden llegar entre <b>1 y 3 horas</b>.'
       + '</div>';
   }
   if(p && p.tipo==='auto'){
@@ -5747,7 +5747,7 @@ function abrirDiamDetalle(idx){
   } else if(p.tipo==='bonus'){
     setTimeout(function(){
       _mostrarAvisoModal('TIEMPO DE ENTREGA',
-        'Las recargas con <b style="color:#fff">20% de bonus</b> pueden llegar entre <b style="color:#fff">1 y 3 horas</b>.',
+        'Las recargas con <b style="color:#fff">bono</b> pueden llegar entre <b style="color:#fff">1 y 3 horas</b>.',
         '#ffb84d');
     }, 250);
   }
