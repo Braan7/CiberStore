@@ -1005,6 +1005,7 @@ function renderPerfil(){
 function renderMisCompras(){
   // Actualizar saldo y movimientos (movidos desde el perfil)
   _cargarSaldoYMovimientos();
+  if(typeof renderResumenRecargas==='function') renderResumenRecargas();
   var hist=getHistory(), spent=getSpent(), tIdx=getTIdx(spent), tier=TIERS[tIdx];
   var o=document.getElementById('mc2-orders');
   var s=document.getElementById('mc2-spent');
@@ -7539,4 +7540,94 @@ function _cancelarMovimientoCompra(userId, ord){
       'user_id=eq.' + userId + '&tipo=eq.compra&descripcion=like.*Pedido%20%23' + ord + '*'
     ).catch(function(e){ console.warn('[RANKING] no se pudo cancelar el movimiento', e); });
   } catch(e){ console.warn('[RANKING]', e); }
+}
+
+
+// ═══════════ RESUMEN DE RECARGAS POR PAQUETE (Mis compras) ═══════════
+// Normaliza los paquetes: los que se registraron como +20% se cuentan
+// como su equivalente del +10% (misma recarga, distinta etiqueta).
+var PAQUETES_RESUMEN = [
+  { base:5600, bono:560,  nombre:'5600 Diamantes + 560 bono',  totales:[6160, 6720] },
+  { base:2180, bono:218,  nombre:'2180 Diamantes + 218 Bono',  totales:[2398, 2616] },
+  { base:1060, bono:106,  nombre:'1060 Diamantes + 106 Bono',  totales:[1166, 1272] },
+  { base:520,  bono:52,   nombre:'520 Diamantes + 52 Bono',    totales:[572, 624] },
+  { base:310,  bono:31,   nombre:'310 Diamantes + 31 Bono',    totales:[341, 372] },
+  { base:100,  bono:10,   nombre:'100 Diamantes + 10 Bono',    totales:[110, 120] },
+  { base:11200,bono:1120, nombre:'11200 Diamantes + 1120 Bono',totales:[12320, 13440] }
+];
+
+// Devuelve el paquete al que pertenece una descripcion, o null
+function _paqueteDeDescripcion(desc){
+  if(!desc) return null;
+  var d = String(desc);
+  // Numeros que aparecen en la descripcion (sin comas ni puntos de miles)
+  var nums = (d.replace(/[.,](?=\d{3}\b)/g, '').match(/\d+/g) || []).map(Number);
+  for(var i=0;i<PAQUETES_RESUMEN.length;i++){
+    var p = PAQUETES_RESUMEN[i];
+    for(var j=0;j<p.totales.length;j++){
+      if(nums.indexOf(p.totales[j]) >= 0) return p;
+    }
+    // Tambien reconoce por la base (ej: "100 Diamantes + 10 Bono")
+    if(nums.indexOf(p.base) >= 0 && nums.indexOf(p.bono) >= 0) return p;
+  }
+  return null;
+}
+
+function renderResumenRecargas(){
+  var lista = document.getElementById('mc-resumen-lista');
+  var totalBox = document.getElementById('mc-resumen-total');
+  if(!lista) return;
+
+  if(!authSession || !authSession.id || typeof sbGetMovimientos !== 'function'){
+    lista.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#6b7280;font-size:.8rem">Inicia sesion para ver tu resumen</div>';
+    if(totalBox) totalBox.style.display = 'none';
+    return;
+  }
+
+  sbGetMovimientos(authSession.id).then(function(rows){
+    if(!rows || !rows.length){
+      lista.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#6b7280;font-size:.8rem">Aun no tienes recargas</div>';
+      if(totalBox) totalBox.style.display = 'none';
+      return;
+    }
+
+    // Contar solo compras reales (las canceladas/reembolsadas no cuentan)
+    var acum = {}, totalN = 0, totalMonto = 0;
+    rows.forEach(function(m){
+      if(m.tipo !== 'compra') return;
+      var p = _paqueteDeDescripcion(m.descripcion);
+      if(!p) return;
+      if(!acum[p.nombre]) acum[p.nombre] = { nombre:p.nombre, n:0, monto:0, base:p.base };
+      acum[p.nombre].n += 1;
+      acum[p.nombre].monto += Number(m.monto) || 0;
+      totalN += 1;
+      totalMonto += Number(m.monto) || 0;
+    });
+
+    var arr = Object.keys(acum).map(function(k){ return acum[k]; });
+    if(!arr.length){
+      lista.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#6b7280;font-size:.8rem">Aun no tienes recargas de diamantes</div>';
+      if(totalBox) totalBox.style.display = 'none';
+      return;
+    }
+    arr.sort(function(a,b){ return b.base - a.base; });
+
+    lista.innerHTML = arr.map(function(x){
+      return '<div style="background:rgba(255,255,255,.03);border-radius:13px;padding:.9rem 1rem">'
+        + '<div style="font-size:.92rem;color:#fff;font-weight:500;line-height:1.35">'+x.nombre+'</div>'
+        + '<div style="font-size:.82rem;color:#6b7280;margin-top:.25rem">'+x.n+' recarga'+(x.n!==1?'s':'')+' &middot; <b style="color:#25d366">'+fmt(x.monto)+'</b></div>'
+        + '</div>';
+    }).join('');
+
+    if(totalBox){
+      totalBox.style.display = 'flex';
+      var n = document.getElementById('mc-res-n');
+      if(n) n.textContent = totalN;
+      var mo = document.getElementById('mc-res-monto');
+      if(mo) mo.textContent = fmt(totalMonto);
+    }
+  }).catch(function(e){
+    lista.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#6b7280;font-size:.8rem">Error al cargar el resumen</div>';
+    console.error('[RESUMEN]', e);
+  });
 }

@@ -2886,6 +2886,23 @@ document.addEventListener('keydown',function(e){
       </div>
     </div>
 
+    <!-- Resumen de recargas por paquete -->
+    <div style="background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:1.35rem 1.2rem;margin-bottom:1.25rem">
+      <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:1.1rem">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="11" rx="4"/><path d="M7 11v3M5.5 12.5h3M16 12h.01M18.5 14h.01"/></svg>
+        <span style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.15rem;color:#fff">Recargas directas</span>
+      </div>
+      <div id="mc-resumen-lista" style="display:flex;flex-direction:column;gap:.5rem">
+        <div style="text-align:center;padding:1.5rem;color:#6b7280;font-size:.8rem">Cargando...</div>
+      </div>
+      <div id="mc-resumen-total" style="border-top:1px solid rgba(255,255,255,.09);margin-top:1rem;padding-top:1rem;display:none;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem">
+        <span style="font-family:Poppins,sans-serif;font-weight:700;font-size:1rem;color:#fff">Total</span>
+        <span style="font-size:.95rem;color:#6b7280;font-weight:600">
+          <span id="mc-res-n">0</span> recargas &middot; <span id="mc-res-monto" style="color:#25d366;font-weight:700">$0</span>
+        </span>
+      </div>
+    </div>
+
     <!-- Saldo + Historial de movimientos (movido desde Perfil) -->
     <div style="background:linear-gradient(160deg,rgba(0,230,118,.06),rgba(255,255,255,.02));border:1px solid rgba(0,230,118,.2);border-radius:16px;padding:1.1rem 1.25rem;margin-bottom:1.25rem">
       <div style="font-family:Oxanium;font-size:.72rem;font-weight:700;color:#00e676;margin-bottom:.75rem;display:flex;align-items:center;gap:.45rem">&#128176; Saldo disponible</div>
