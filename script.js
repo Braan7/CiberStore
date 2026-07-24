@@ -1082,7 +1082,7 @@ function switchPayTab(tab){
   }
 }
 function copyClabe(){
-  navigator.clipboard.writeText('646180402332964686').then(function(){showToast('CLABE copiada',2000);}).catch(function(){showToast('CLABE: 646180402332964686',3000);});
+  navigator.clipboard.writeText('167650000086005710').then(function(){showToast('CLABE copiada',2000);}).catch(function(){showToast('CLABE: 167650000086005710',3000);});
 }
 function copyBinanceID(){
   navigator.clipboard.writeText('1106987175').then(function(){showToast('ID copiado: 1106987175',2000);}).catch(function(){showToast('Binance ID: 1106987175',3000);});
@@ -4819,7 +4819,7 @@ function openZelleModal(monto){var el=document.getElementById('modal-zelle');if(
 function closeZelleModal(){var el=document.getElementById('modal-zelle');if(el) el.classList.remove('show');}
 
 function copyStoriClabe(){
-  _copiarTexto('646180402332964686', 'CLABE copiada');
+  _copiarTexto('167650000086005710', 'CLABE copiada');
 }
 function copyZelle(){
   _copiarTexto('14407050630', 'Numero Zelle copiado');
