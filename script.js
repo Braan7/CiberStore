@@ -5596,13 +5596,13 @@ var _diamSeleccionado = null;
 // ═══════════ RECARGAS AUTOMÁTICAS (Recargas América type=recharge) ═══════════
 // package_id = el ID de Recargas América | precio = costo USD × 20 (redondeado)
 var RECARGAS_AUTO = [
-  { package_id:351, nombre:'100 + 20% = 120 Diamantes',     diamantes:120,   costoUSD:0.71,  precio:16,  img:'img/diam-100.png'  },
-  { package_id:348, nombre:'310 + 20% = 372 Diamantes',     diamantes:372,   costoUSD:2.12,  precio:45,  img:'img/diam-310.png'  },
-  { package_id:350, nombre:'520 + 20% = 624 Diamantes',     diamantes:624,   costoUSD:3.58,  precio:70,  img:'img/diam-520.png'  },
-  { package_id:347, nombre:'1060 + 20% = 1,272 Diamantes',  diamantes:1272,  costoUSD:6.65,  precio:135, img:'img/diam-1060.png' },
-  { package_id:346, nombre:'2180 + 20% = 2,616 Diamantes',  diamantes:2616,  costoUSD:13.21, precio:250, img:'img/diam-2180.png' },
-  { package_id:349, nombre:'5600 + 20% = 6,720 Diamantes',  diamantes:6720,  costoUSD:33.61, precio:645, img:'img/diam-5600.png' },
-  { package_id:null, nombre:'11200 + 20% = 13,440 Diamantes', diamantes:13440, costoUSD:67.22, precio:1390, manual:true }
+  { package_id:351, nombre:'100 Diamantes + 20 Bono',      diamantes:120,   costoUSD:0.71,  precio:16,  img:'img/diam-100.png'  },
+  { package_id:348, nombre:'310 Diamantes + 62 Bono',      diamantes:372,   costoUSD:2.12,  precio:45,  img:'img/diam-310.png'  },
+  { package_id:350, nombre:'520 Diamantes + 104 Bono',     diamantes:624,   costoUSD:3.58,  precio:70,  img:'img/diam-520.png'  },
+  { package_id:347, nombre:'1.060 Diamantes + 212 Bono',   diamantes:1272,  costoUSD:6.65,  precio:135, img:'img/diam-1060.png' },
+  { package_id:346, nombre:'2.180 Diamantes + 436 Bono',   diamantes:2616,  costoUSD:13.21, precio:250, img:'img/diam-2180.png' },
+  { package_id:349, nombre:'5.600 Diamantes + 1.120 Bono', diamantes:6720,  costoUSD:33.61, precio:645, img:'img/diam-5600.png' },
+  { package_id:null, nombre:'11.200 Diamantes + 2.240 Bono', diamantes:13440, costoUSD:67.22, precio:1390, manual:true }
 ];
 
 
