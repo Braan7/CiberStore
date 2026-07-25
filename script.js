@@ -7919,15 +7919,16 @@ function admGenerarCodigoLikes(){
 }
 
 
-// ═══════════ ENVIAR LIKES MANUAL ═══════════
-// La URL de la API se conecta cuando este lista
-var LIKES_ENVIAR_URL = ''; // <-- pega aqui el endpoint de tu API de likes
+// ═══════════ ENVIAR LIKES MANUAL (via Free Fire Services) ═══════════
+var LIKES_ENVIAR_URL = 'https://pnotsqsudqpwqzssevig.supabase.co/functions/v1/likes-sender';
 
 function enviarLikesManual(){
   var inp = document.getElementById('lk-manual-uid');
   var btn = document.getElementById('lk-manual-btn');
   var msg = document.getElementById('lk-manual-msg');
+  var regionSel = document.getElementById('lk-manual-region');
   var uid = ((inp||{}).value||'').trim();
+  var region = (regionSel && regionSel.value) || 'SAC';
 
   function showMsg(texto, tipo){
     if(!msg) return;
@@ -7942,41 +7943,50 @@ function enviarLikesManual(){
   if(!_lkPlan){ showMsg('Necesitas un plan activo.', 'err'); return; }
   if(!uid || uid.replace(/\D/g,'').length < 5){ showMsg('Ingresa un UID valido.', 'err'); return; }
 
-  // Verificar cupo diario
+  // Verificar cupo diario local (la funcion tambien lo valida en el servidor)
   var hoy = new Date().toISOString().slice(0,10);
   var envHoy = (_lkPlan.envios_fecha === hoy) ? (_lkPlan.envios_hoy||0) : 0;
   var disponibles = Math.max(0, (_lkPlan.envios_dia||0) - envHoy);
   if(disponibles <= 0){ showMsg('Ya usaste todos tus envios de hoy. Vuelve manana.', 'err'); return; }
 
-  // Si la API aun no esta conectada
-  if(!LIKES_ENVIAR_URL){
-    showMsg('\u23F3 El envio automatico se esta activando. Tu UID quedo anotado, pronto llegaran los likes.', 'info');
-    // Registrar el intento en el historial local para que se vea el movimiento
-    if(typeof sb !== 'undefined' && sb.post){
-      sb.post('likes_envios', { user_id: authSession.id, ff_id: uid, cantidad: 0, estado: 'ok', detalle: 'Solicitud manual (pendiente API)' }).catch(function(){});
-    }
-    if(inp) inp.value = '';
-    setTimeout(cargarEnviosLikes, 800);
-    return;
-  }
-
   if(btn){ btn.disabled = true; btn.style.opacity = '.5'; }
+  showMsg('\u23F3 Enviando likes...', 'info');
 
   fetch(LIKES_ENVIAR_URL, {
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ uid: uid, user_id: authSession.id, plan: _lkPlan.plan })
+    body: JSON.stringify({ action:'enviar', uid: uid, region: region, user_id: authSession.id })
   }).then(function(r){ return r.json(); }).then(function(res){
     if(btn){ btn.disabled = false; btn.style.opacity = '1'; }
     if(res && res.success){
-      showMsg('\u2705 Likes enviados al UID ' + uid + (res.cantidad ? (' (+' + res.cantidad + ')') : '') + '!', 'ok');
-      if(inp) inp.value = '';
-      // Registrar y refrescar
-      if(typeof sb !== 'undefined' && sb.post){
-        sb.post('likes_envios', { user_id: authSession.id, ff_id: uid, cantidad: (res.cantidad||0), estado:'ok' }).catch(function(){});
+      if(msg) msg.style.display = 'none';
+      var card = document.getElementById('lk-manual-resultado');
+      if(card){
+        var inicial = ((res.nombre||'?').charAt(0)||'?').toUpperCase();
+        card.style.display = 'block';
+        card.innerHTML =
+          '<div style="background:rgba(37,211,102,.06);border:1px solid rgba(37,211,102,.3);border-radius:15px;padding:1.1rem 1rem">'
+          + '<div style="display:flex;align-items:center;gap:.85rem;margin-bottom:1rem">'
+          +   '<div style="width:46px;height:46px;flex-shrink:0;border-radius:12px;background:linear-gradient(135deg,#128c3e,#25d366);display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-weight:800;font-size:1.3rem;color:#fff">'+inicial+'</div>'
+          +   '<div style="flex:1;min-width:0">'
+          +     '<div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1rem;color:#fff;word-break:break-word">'+(res.nombre||'Jugador')+'</div>'
+          +     '<div style="font-size:.72rem;color:#6b7280">UID '+uid+' \u00b7 '+(res.region||region)+'</div>'
+          +   '</div>'
+          +   '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>'
+          + '</div>'
+          + '<div style="display:flex;align-items:center;gap:.5rem">'
+          +   '<div style="flex:1;text-align:center;background:rgba(255,255,255,.03);border-radius:11px;padding:.7rem"><div style="font-size:.62rem;color:#6b7280;letter-spacing:.5px;margin-bottom:.15rem">ANTES</div><div style="font-family:Oxanium;font-weight:800;font-size:1.15rem;color:#9aa3b0">'+(res.antes||'-')+'</div></div>'
+          +   '<div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center"><span style="font-size:.7rem;color:#25d366;font-weight:700">+'+res.enviadas+'</span><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>'
+          +   '<div style="flex:1;text-align:center;background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.25);border-radius:11px;padding:.7rem"><div style="font-size:.62rem;color:#25d366;letter-spacing:.5px;margin-bottom:.15rem">DESPUES</div><div style="font-family:Oxanium;font-weight:800;font-size:1.15rem;color:#25d366">'+(res.despues||'-')+'</div></div>'
+          + '</div>'
+          + '<div style="text-align:center;margin-top:.85rem;font-size:.78rem;color:#25d366;font-weight:600">\u2764\uFE0F '+res.enviadas+' likes enviados con exito</div>'
+          + '</div>';
       }
-      setTimeout(function(){ cargarPanelLikes(); }, 800);
+      if(inp) inp.value = '';
+      setTimeout(function(){ cargarPanelLikes(); }, 1000);
     } else {
+      var card2 = document.getElementById('lk-manual-resultado');
+      if(card2) card2.style.display = 'none';
       showMsg('\u274C ' + ((res && res.error) || 'No se pudieron enviar los likes.'), 'err');
     }
   }).catch(function(e){
