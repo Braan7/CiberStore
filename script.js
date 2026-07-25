@@ -7776,6 +7776,20 @@ function _pintarEstadoPlan(plan){
     el.style.background='rgba(37,211,102,.12)'; el.style.borderColor='rgba(37,211,102,.4)'; el.style.color='#25d366';
   }
 
+  // Etiquetas con el nombre del plan
+  var etiqueta = '\u00b7 ' + nom;
+  if(el=document.getElementById('lk-lbl-envios')) el.textContent = etiqueta;
+  if(el=document.getElementById('lk-lbl-ids'))    el.textContent = etiqueta;
+  if(el=document.getElementById('lk-lbl-dias'))   el.textContent = etiqueta;
+
+  // Dias restantes del plan
+  if(plan.vence_en){
+    var msDia = 24*60*60*1000;
+    var diasRest = Math.max(0, Math.ceil((new Date(plan.vence_en) - new Date()) / msDia));
+    if(el=document.getElementById('lk-dias-txt')) el.textContent = diasRest + (diasRest===1?' dia':' dias');
+    if(el=document.getElementById('lk-dias-bar')) el.style.width = Math.min(100, diasRest/30*100) + '%';
+  }
+
   // Reiniciar contador si cambio el dia
   var hoy = new Date().toISOString().slice(0,10);
   var envHoy = (plan.envios_fecha === hoy) ? (plan.envios_hoy||0) : 0;
