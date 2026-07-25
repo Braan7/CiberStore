@@ -7643,8 +7643,9 @@ var LIKES_PLANES = [
   { id:'estandar', nombre:'ESTANDAR',    ids:'5 IDs / dia',   precio:100, color:'#c9d1e0', icono:'\u2b50' },
   { id:'estandar2',nombre:'ESTANDAR II', ids:'7 IDs / dia',   precio:150, color:'#ffb84d', icono:'\ud83c\udf96\ufe0f' },
   { id:'pro',      nombre:'PRO',         ids:'10 IDs / dia',  precio:200, color:'#ff5050', icono:'\ud83d\udd25' },
-  { id:'elite',    nombre:'ELITE',       ids:'30 IDs / dia',  precio:350, color:'#ffb84d', icono:'\ud83d\udc51' },
-  { id:'ilimitado',nombre:'ILIMITADO',   ids:'Ilimitado',     precio:500, color:'#22d3ee', icono:'\ud83d\udc8e' }
+  { id:'master',   nombre:'MASTER',      ids:'20 IDs / dia',  precio:280, color:'#a78bfa', icono:'\ud83d\udc51' },
+  { id:'elite',    nombre:'ELITE',       ids:'30 IDs / dia',  precio:350, color:'#ffb84d', icono:'\ud83d\udc8e' },
+  { id:'ilimitado',nombre:'ILIMITADO',   ids:'Ilimitado',     precio:500, color:'#22d3ee', icono:'\u267e\ufe0f' }
 ];
 
 function renderLikesPlanes(){
@@ -7871,4 +7872,26 @@ function cargarEnviosLikes(){
           + '</div>';
       }).join('');
     }).catch(function(e){ console.error('[LIKES] envios', e); });
+}
+
+
+// ADMIN: generar codigo de likes desde el panel
+function admGenerarCodigoLikes(){
+  if(!authSession || authSession.role !== 'admin'){ showToast('Solo admin'); return; }
+  var plan = ((document.getElementById('adm-lk-plan')||{}).value||'');
+  var caja = document.getElementById('adm-lk-result');
+
+  fetch(_SB_URL_RPC + '/rest/v1/rpc/admin_generar_codigo_likes', {
+    method:'POST',
+    headers:{ 'apikey': SB_KEY, 'Authorization':'Bearer '+SB_KEY, 'Content-Type':'application/json' },
+    body: JSON.stringify({ p_admin_id: authSession.id, p_plan: plan })
+  }).then(function(r){ return r.json(); }).then(function(res){
+    if(typeof res === 'string' && res.indexOf('CS-') === 0){
+      if(caja){ caja.textContent = res; caja.style.display = 'block'; caja.style.color = '#25d366'; }
+      showToast('\u2705 Codigo generado. Copialo y mandaselo al cliente.', 4000);
+    } else {
+      if(caja){ caja.textContent = String(res); caja.style.display = 'block'; caja.style.color = '#ff6b6b'; }
+      showToast('No se pudo: ' + String(res), 4000);
+    }
+  }).catch(function(e){ showToast('Error de conexion'); console.error('[LIKES-GEN]', e); });
 }

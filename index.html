@@ -2199,7 +2199,7 @@ document.addEventListener('keydown',function(e){
       </div>
       <p style="font-size:.8rem;color:#6b7280;margin-bottom:1rem;line-height:1.5">Ingresa el codigo comprado para activar tu plan de likes.</p>
       <div style="display:flex;gap:.6rem">
-        <input id="lk-codigo" type="text" placeholder="EJ: BS-XXXX-XXXX" oninput="this.value=this.value.toUpperCase()" style="flex:1;min-width:0;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);color:#fff;border-radius:12px;padding:.85rem 1rem;font-family:'Courier New',monospace;font-weight:700;font-size:.95rem;letter-spacing:1px;outline:none;box-sizing:border-box"/>
+        <input id="lk-codigo" type="text" placeholder="EJ: CS-XXXX-XXXX" oninput="this.value=this.value.toUpperCase()" style="flex:1;min-width:0;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);color:#fff;border-radius:12px;padding:.85rem 1rem;font-family:'Courier New',monospace;font-weight:700;font-size:.95rem;letter-spacing:1px;outline:none;box-sizing:border-box"/>
         <button onclick="canjearCodigoLikes()" id="lk-canjear-btn" style="flex-shrink:0;padding:.85rem 1.5rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:12px;font-family:Poppins,sans-serif;font-weight:700;font-size:.9rem;cursor:pointer">Canjear</button>
       </div>
       <div id="lk-canjear-msg" style="display:none;margin-top:.85rem;border-radius:10px;padding:.75rem .9rem;font-size:.8rem;line-height:1.5"></div>
@@ -5200,6 +5200,25 @@ document.addEventListener('keydown',function(e){
 
   <!-- ══ CONFIG ══ -->
   <div class="adm-section" id="adms-config">
+    <div class="adm-card">
+      <div class="adm-card-title">&#127918; Generar codigos de Likes</div>
+      <p style="font-size:.78rem;color:var(--muted);margin-bottom:.8rem;line-height:1.6">Elige el plan y genera un codigo. Copialo y mandaselo al cliente para que lo canjee en la web.</p>
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:.7rem">
+        <select class="admin-inp" id="adm-lk-plan" style="flex:2;min-width:150px">
+          <option value="basico">Basico (1 ID)</option>
+          <option value="estandar">Estandar (5 IDs)</option>
+          <option value="estandar2">Estandar II (7 IDs)</option>
+          <option value="pro">Pro (10 IDs)</option>
+          <option value="master">Master (20 IDs)</option>
+          <option value="elite">Elite (30 IDs)</option>
+          <option value="ilimitado">Ilimitado</option>
+        </select>
+        <button class="adm-action-btn" onclick="admGenerarCodigoLikes()" style="flex:1;min-width:130px;border-color:rgba(37,211,102,.4);color:#25d366">Generar codigo</button>
+      </div>
+      <div id="adm-lk-result" style="display:none;background:#050505;border:1px solid rgba(37,211,102,.25);border-radius:10px;padding:.85rem;font-family:'Courier New',monospace;font-size:.9rem;color:#25d366;word-break:break-all;-webkit-user-select:all;user-select:all;margin-bottom:.4rem;text-align:center;letter-spacing:1px"></div>
+      <div style="font-size:.7rem;color:var(--muted)">Manten presionado el codigo para copiarlo.</div>
+    </div>
+
     <div class="adm-card">
       <div class="adm-card-title">&#128273; API Keys de revendedores</div>
       <p style="font-size:.78rem;color:var(--muted);margin-bottom:.8rem;line-height:1.6">Genera la llave de un revendedor aprobado y entregasela por privado. Si generas una nueva, la anterior deja de servir.</p>
