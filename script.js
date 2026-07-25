@@ -3784,7 +3784,8 @@ function quoteLikesInstant(){
 var _origGoPageLikes = goPage;
 goPage = function(id){
   _origGoPageLikes(id);
-  if(id === 'likes'){
+  if(id === 'likes'){ if(typeof renderLikesPlanes==='function') renderLikesPlanes(); if(typeof cargarPanelLikes==='function') cargarPanelLikes(); }
+  if(id === '__likes_old__'){
     setTimeout(updateLikesSaldo, 300);
   }
 };
@@ -7632,4 +7633,242 @@ function renderResumenRecargas(){
     lista.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#6b7280;font-size:.8rem">Error al cargar el resumen</div>';
     console.error('[RESUMEN]', e);
   });
+}
+
+
+// ═══════════ LIKES POR CODIGO (nuevo sistema) ═══════════
+// Planes segun el poster (renta de bot, cada mes)
+var LIKES_PLANES = [
+  { id:'basico',   nombre:'BASICO',      ids:'1 ID',          precio:30,  color:'#ff5050', icono:'\u2b50' },
+  { id:'estandar', nombre:'ESTANDAR',    ids:'5 IDs / dia',   precio:100, color:'#c9d1e0', icono:'\u2b50' },
+  { id:'estandar2',nombre:'ESTANDAR II', ids:'7 IDs / dia',   precio:150, color:'#ffb84d', icono:'\ud83c\udf96\ufe0f' },
+  { id:'pro',      nombre:'PRO',         ids:'10 IDs / dia',  precio:200, color:'#ff5050', icono:'\ud83d\udd25' },
+  { id:'elite',    nombre:'ELITE',       ids:'30 IDs / dia',  precio:350, color:'#ffb84d', icono:'\ud83d\udc51' },
+  { id:'ilimitado',nombre:'ILIMITADO',   ids:'Ilimitado',     precio:500, color:'#22d3ee', icono:'\ud83d\udc8e' }
+];
+
+function renderLikesPlanes(){
+  var cont = document.getElementById('lk-planes');
+  if(!cont) return;
+  cont.innerHTML = LIKES_PLANES.map(function(p){
+    return '<div style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:.9rem 1rem">'
+      + '<div style="width:42px;height:42px;flex-shrink:0;border-radius:11px;background:'+p.color+'1a;border:1px solid '+p.color+'44;display:flex;align-items:center;justify-content:center;font-size:1.2rem">'+p.icono+'</div>'
+      + '<div style="flex:1;min-width:0"><div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:1rem;color:'+p.color+';letter-spacing:.5px">'+p.nombre+'</div><div style="font-size:.74rem;color:#6b7280">'+p.ids+'</div></div>'
+      + '<div style="text-align:right;flex-shrink:0"><div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.25rem;color:#fff;line-height:1">$'+p.precio+'</div><div style="font-size:.6rem;color:#6b7280;letter-spacing:.5px">MXN / MES</div></div>'
+      + '<button onclick="comprarPlanLikesWA(\''+p.id+'\')" style="flex-shrink:0;width:38px;height:38px;border-radius:10px;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.35);color:#25d366;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="#25d366"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.4A10 10 0 1 0 12 2zm4.4 12.1c-.2-.1-1.4-.7-1.6-.8s-.4-.1-.6.1-.6.8-.8 1-.3.2-.6.1a6.6 6.6 0 0 1-3.2-2.8c-.2-.4.2-.4.6-1.2a.6.6 0 0 0 0-.6l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 2.9 2.9 0 0 0-.9 2.2 5.1 5.1 0 0 0 1 2.7 11.5 11.5 0 0 0 4.5 4 5 5 0 0 0 3 .7 2.6 2.6 0 0 0 1.7-1.2 2.1 2.1 0 0 0 .1-1.2z"/></svg></button>'
+      + '</div>';
+  }).join('');
+}
+
+function comprarPlanLikesWA(planId){
+  var p = LIKES_PLANES.filter(function(x){ return x.id===planId; })[0];
+  if(!p) return;
+  var quien = authSession ? authSession.username : '';
+  var msg = 'Hola! Quiero comprar el plan de likes:\n'
+    + 'Plan: ' + p.nombre + ' (' + p.ids + ')\n'
+    + 'Precio: $' + p.precio + ' MXN/mes\n'
+    + (quien ? ('Mi usuario: ' + quien + '\n') : '')
+    + 'Mi ID de Free Fire: ';
+  window.open('https://wa.me/' + WA + '?text=' + encodeURIComponent(msg), '_blank');
+}
+
+
+
+// ═══════════ PANEL DE GESTION DE LIKES (datos en Supabase) ═══════════
+var _lkPlan = null;   // plan activo del usuario
+var _lkIds = [];      // IDs registrados
+
+// Llamar la RPC de canje (reemplaza la version stub anterior)
+function canjearCodigoLikes(){
+  var inp = document.getElementById('lk-codigo');
+  var btn = document.getElementById('lk-canjear-btn');
+  var msg = document.getElementById('lk-canjear-msg');
+  var codigo = ((inp||{}).value||'').trim().toUpperCase();
+
+  function showMsg(texto, tipo){
+    if(!msg) return;
+    msg.style.display = 'block';
+    if(tipo==='ok'){ msg.style.background='rgba(37,211,102,.1)'; msg.style.border='1px solid rgba(37,211,102,.3)'; msg.style.color='#25d366'; }
+    else if(tipo==='err'){ msg.style.background='rgba(255,60,60,.1)'; msg.style.border='1px solid rgba(255,60,60,.3)'; msg.style.color='#ff6b6b'; }
+    else { msg.style.background='rgba(34,211,238,.08)'; msg.style.border='1px solid rgba(34,211,238,.3)'; msg.style.color='#22d3ee'; }
+    msg.innerHTML = texto;
+  }
+
+  if(!authSession){ showMsg('Inicia sesion para canjear tu codigo.', 'err'); setTimeout(showAuthModal, 800); return; }
+  if(!codigo || codigo.length < 6){ showMsg('Ingresa un codigo valido (ej: BS-XXXX-XXXX).', 'err'); return; }
+
+  if(btn){ btn.disabled = true; btn.textContent = 'Canjeando...'; }
+
+  fetch(_SB_URL_RPC + '/rest/v1/rpc/canjear_codigo_likes', {
+    method:'POST',
+    headers:{ 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ p_user_id: authSession.id, p_codigo: codigo })
+  }).then(function(r){ return r.json(); }).then(function(res){
+    if(btn){ btn.disabled = false; btn.textContent = 'Canjear'; }
+    if(res && res.success){
+      var nom = _lkNombrePlan(res.plan);
+      showMsg('\u2705 <b>Codigo activado!</b><br/>Tu plan <b>'+nom+'</b> esta activo por 30 dias.', 'ok');
+      if(inp) inp.value = '';
+      cargarPanelLikes();
+      setTimeout(function(){ document.getElementById('lk-panel').scrollIntoView({behavior:'smooth'}); }, 600);
+    } else {
+      showMsg('\u274C ' + ((res && res.error) || 'Codigo invalido o ya usado.'), 'err');
+    }
+  }).catch(function(e){
+    if(btn){ btn.disabled = false; btn.textContent = 'Canjear'; }
+    showMsg('Error de conexion. Intenta de nuevo o escribenos por WhatsApp.', 'err');
+    console.error('[CANJE]', e);
+  });
+}
+
+function _lkNombrePlan(id){
+  var p = LIKES_PLANES.filter(function(x){ return x.id===id; })[0];
+  return p ? p.nombre : (id||'').toUpperCase();
+}
+
+// Cargar plan + IDs + envios y pintar el panel
+function cargarPanelLikes(){
+  var panel = document.getElementById('lk-panel');
+  var sinPlan = document.getElementById('lk-sin-plan');
+  if(!authSession){
+    if(panel) panel.style.display = 'none';
+    if(sinPlan) sinPlan.style.display = 'block';
+    return;
+  }
+
+  sb.get('likes_planes_activos', 'user_id=eq.' + encodeURIComponent(authSession.id) + '&limit=1')
+    .then(function(rows){
+      var plan = (rows && rows[0]) || null;
+      // Verificar que no este vencido
+      if(plan && plan.vence_en && new Date(plan.vence_en) < new Date()) plan = null;
+      _lkPlan = plan;
+
+      if(!plan){
+        if(panel) panel.style.display = 'none';
+        if(sinPlan) sinPlan.style.display = 'block';
+        return;
+      }
+      if(panel) panel.style.display = 'block';
+      if(sinPlan) sinPlan.style.display = 'none';
+      _pintarEstadoPlan(plan);
+      cargarIdsLikes();
+      cargarEnviosLikes();
+    }).catch(function(e){
+      console.error('[LIKES] plan', e);
+      if(panel) panel.style.display = 'none';
+      if(sinPlan) sinPlan.style.display = 'block';
+    });
+}
+
+function _pintarEstadoPlan(plan){
+  var nom = _lkNombrePlan(plan.plan);
+  var el;
+  if(el=document.getElementById('lk-plan-nombre')) el.textContent = 'Plan ' + nom;
+  var vence = plan.vence_en ? new Date(plan.vence_en).toLocaleDateString('es-MX',{day:'2-digit',month:'short'}) : '';
+  if(el=document.getElementById('lk-plan-sub')) el.textContent = plan.plan==='ilimitado' ? ('Ilimitado \u00b7 vence '+vence) : ('Activo \u00b7 vence '+vence);
+  if(el=document.getElementById('lk-plan-badge')){
+    el.textContent = 'ACTIVO';
+    el.style.background='rgba(37,211,102,.12)'; el.style.borderColor='rgba(37,211,102,.4)'; el.style.color='#25d366';
+  }
+
+  // Reiniciar contador si cambio el dia
+  var hoy = new Date().toISOString().slice(0,10);
+  var envHoy = (plan.envios_fecha === hoy) ? (plan.envios_hoy||0) : 0;
+  var envMax = plan.envios_dia||0;
+  if(el=document.getElementById('lk-envios-txt')) el.textContent = envHoy+'/'+envMax;
+  if(el=document.getElementById('lk-envios-bar')) el.style.width = (envMax? Math.min(100,envHoy/envMax*100):0)+'%';
+  if(el=document.getElementById('lk-disp')) el.textContent = Math.max(0, envMax-envHoy);
+  if(el=document.getElementById('lk-total')) el.textContent = (plan.total_enviados||0).toLocaleString('es-MX');
+}
+
+// IDs registrados
+function cargarIdsLikes(){
+  if(!authSession) return;
+  sb.get('likes_ids', 'user_id=eq.' + encodeURIComponent(authSession.id) + '&order=creado_en.desc')
+    .then(function(rows){
+      _lkIds = rows || [];
+      _pintarIdsLikes();
+    }).catch(function(e){ console.error('[LIKES] ids', e); });
+}
+
+function _pintarIdsLikes(){
+  var cont = document.getElementById('lk-ids-lista');
+  var maxIds = _lkPlan ? (_lkPlan.max_ids||0) : 0;
+  var el;
+  if(el=document.getElementById('lk-ids-txt')) el.textContent = _lkIds.length+'/'+maxIds+' IDs';
+  if(el=document.getElementById('lk-ids-bar')) el.style.width = (maxIds? Math.min(100,_lkIds.length/maxIds*100):0)+'%';
+
+  var addBtn = document.getElementById('lk-add-btn');
+  if(addBtn){
+    var lleno = _lkIds.length >= maxIds;
+    addBtn.style.opacity = lleno ? '.4' : '1';
+    addBtn.style.cursor = lleno ? 'not-allowed' : 'pointer';
+  }
+
+  if(!cont) return;
+  if(!_lkIds.length){
+    cont.innerHTML = '<div style="border:1px dashed rgba(255,255,255,.12);border-radius:14px;padding:2rem 1rem;text-align:center">'
+      + '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ffb84d" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:.5rem"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg>'
+      + '<div style="font-family:Poppins;font-weight:600;color:#9aa3b0;font-size:.9rem">Sin IDs registrados</div>'
+      + '<div style="font-size:.76rem;color:#6b7280;margin-top:.2rem">Toca "Agregar ID" para comenzar</div></div>';
+    return;
+  }
+  cont.innerHTML = _lkIds.map(function(x){
+    var ult = x.ultimo_envio ? new Date(x.ultimo_envio).toLocaleDateString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : 'Aun sin envios';
+    return '<div style="display:flex;align-items:center;gap:.8rem;background:rgba(255,255,255,.03);border-radius:12px;padding:.8rem .9rem;margin-bottom:.5rem">'
+      + '<div style="width:38px;height:38px;flex-shrink:0;border-radius:10px;background:rgba(37,211,102,.1);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="#25d366"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 5.5 6 5.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.5 0 5 3.5 3.5 6.5C19 16.5 12 21 12 21z"/></svg></div>'
+      + '<div style="flex:1;min-width:0"><div style="font-family:Oxanium;font-weight:700;color:#fff;font-size:.92rem">'+(x.ff_nombre||'ID '+x.ff_id)+'</div><div style="font-size:.7rem;color:#6b7280">ID '+x.ff_id+' \u00b7 '+ult+'</div></div>'
+      + '<button onclick="quitarIdLikes('+x.id+')" style="flex-shrink:0;width:32px;height:32px;border-radius:9px;background:rgba(255,60,60,.08);border:1px solid rgba(255,60,60,.22);color:#ff6b6b;cursor:pointer;font-size:1rem">\u00d7</button>'
+      + '</div>';
+  }).join('');
+}
+
+function agregarIdLikes(){
+  if(!authSession){ showToast('Inicia sesion'); return; }
+  if(!_lkPlan){ showToast('Necesitas un plan activo'); return; }
+  if(_lkIds.length >= (_lkPlan.max_ids||0)){ showToast('Alcanzaste el limite de IDs de tu plan ('+_lkPlan.max_ids+')'); return; }
+
+  var ffId = prompt('ID de Free Fire:');
+  if(!ffId) return;
+  ffId = String(ffId).trim();
+  if(ffId.replace(/\D/g,'').length < 5){ showToast('ID invalido'); return; }
+  var ffNom = prompt('Nombre en el juego (opcional):') || '';
+
+  sb.post('likes_ids', { user_id: authSession.id, ff_id: ffId, ff_nombre: ffNom.trim() })
+    .then(function(){ showToast('\u2705 ID agregado'); cargarIdsLikes(); })
+    .catch(function(e){
+      if(String(e).indexOf('duplicate')>=0 || String(e).indexOf('unique')>=0) showToast('Ese ID ya esta registrado');
+      else showToast('No se pudo agregar el ID');
+      console.error('[LIKES] add', e);
+    });
+}
+
+function quitarIdLikes(rowId){
+  if(!confirm('Quitar este ID de la lista?')) return;
+  sb.del('likes_ids', 'id=eq.'+rowId)
+    .then(function(){ showToast('ID eliminado'); cargarIdsLikes(); })
+    .catch(function(e){ showToast('No se pudo quitar'); console.error('[LIKES] del', e); });
+}
+
+// Ultimos envios automaticos
+function cargarEnviosLikes(){
+  if(!authSession) return;
+  sb.get('likes_envios', 'user_id=eq.' + encodeURIComponent(authSession.id) + '&order=enviado_en.desc&limit=10')
+    .then(function(rows){
+      var cont = document.getElementById('lk-envios-lista');
+      if(!cont) return;
+      if(!rows || !rows.length){
+        cont.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#6b7280;font-size:.8rem">Aun no hay envios registrados</div>';
+        return;
+      }
+      cont.innerHTML = rows.map(function(x){
+        var cuando = x.enviado_en ? new Date(x.enviado_en).toLocaleDateString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+        var ok = (x.estado||'ok')==='ok';
+        return '<div style="display:flex;align-items:center;gap:.7rem;padding:.6rem 0;border-bottom:1px solid rgba(255,255,255,.05)">'
+          + '<div style="width:8px;height:8px;border-radius:50%;background:'+(ok?'#25d366':'#ff6b6b')+';flex-shrink:0"></div>'
+          + '<div style="flex:1;min-width:0"><div style="font-size:.82rem;color:#fff">ID '+x.ff_id+'</div><div style="font-size:.68rem;color:#6b7280">'+cuando+'</div></div>'
+          + '<div style="font-size:.78rem;color:'+(ok?'#25d366':'#ff6b6b')+';font-weight:600">'+(ok?('+'+(x.cantidad||0)):'Error')+'</div>'
+          + '</div>';
+      }).join('');
+    }).catch(function(e){ console.error('[LIKES] envios', e); });
 }
