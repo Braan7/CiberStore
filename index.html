@@ -2240,6 +2240,23 @@ document.addEventListener('keydown',function(e){
         </div>
       </div>
 
+      <!-- Enviar Likes (manual) -->
+      <div style="background:rgba(37,211,102,.04);border:1px solid rgba(37,211,102,.22);border-radius:18px;padding:1.3rem 1.2rem;margin-bottom:1.1rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin-bottom:.9rem">
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="#25d366"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 5.5 6 5.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.5 0 5 3.5 3.5 6.5C19 16.5 12 21 12 21z"/></svg>
+            <span style="font-family:Poppins,sans-serif;font-weight:700;font-size:1rem;color:#fff">Enviar Likes</span>
+          </div>
+          <span style="flex-shrink:0;font-size:.68rem;color:#25d366;border:1px solid rgba(37,211,102,.3);border-radius:99px;padding:.25rem .7rem;font-weight:600">Disponibles: <span id="lk-manual-disp">0</span></span>
+        </div>
+        <div style="font-size:.68rem;color:#6b7280;letter-spacing:1px;margin-bottom:.5rem">UID DE FREE FIRE</div>
+        <div style="display:flex;gap:.6rem">
+          <input id="lk-manual-uid" type="text" inputmode="numeric" placeholder="Ej: 273968086" style="flex:1;min-width:0;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);color:#fff;border-radius:12px;padding:.85rem 1rem;font-family:Poppins,sans-serif;font-size:.95rem;outline:none;box-sizing:border-box"/>
+          <button onclick="enviarLikesManual()" id="lk-manual-btn" style="flex-shrink:0;width:56px;border-radius:12px;background:linear-gradient(135deg,#128c3e,#25d366);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
+        </div>
+        <div id="lk-manual-msg" style="display:none;margin-top:.75rem;border-radius:10px;padding:.7rem .85rem;font-size:.78rem;line-height:1.5"></div>
+      </div>
+
       <!-- IDs registrados -->
       <div style="background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:1.3rem 1.2rem;margin-bottom:1.1rem">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin-bottom:.7rem;flex-wrap:wrap">
@@ -2283,8 +2300,10 @@ document.addEventListener('keydown',function(e){
     </div>
 
     <!-- ═══ PLANES ═══ -->
+    <div id="lk-planes-seccion">
     <div style="font-size:.72rem;color:#6b7280;letter-spacing:1.2px;margin-bottom:.75rem;font-weight:600">PLANES DISPONIBLES &middot; CADA MES</div>
     <div id="lk-planes" style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.5rem"></div>
+    </div>
 
     <!-- ═══ COMO FUNCIONA ═══ -->
     <div style="background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:1.2rem">

@@ -7747,10 +7747,14 @@ function cargarPanelLikes(){
       if(!plan){
         if(panel) panel.style.display = 'none';
         if(sinPlan) sinPlan.style.display = 'block';
+        var secP = document.getElementById('lk-planes-seccion');
+        if(secP) secP.style.display = 'block';
         return;
       }
       if(panel) panel.style.display = 'block';
       if(sinPlan) sinPlan.style.display = 'none';
+      var secPlanes = document.getElementById('lk-planes-seccion');
+      if(secPlanes) secPlanes.style.display = 'none'; // con plan activo, ocultar la venta
       _pintarEstadoPlan(plan);
       cargarIdsLikes();
       cargarEnviosLikes();
@@ -7778,7 +7782,9 @@ function _pintarEstadoPlan(plan){
   var envMax = plan.envios_dia||0;
   if(el=document.getElementById('lk-envios-txt')) el.textContent = envHoy+'/'+envMax;
   if(el=document.getElementById('lk-envios-bar')) el.style.width = (envMax? Math.min(100,envHoy/envMax*100):0)+'%';
-  if(el=document.getElementById('lk-disp')) el.textContent = Math.max(0, envMax-envHoy);
+  var disponibles = Math.max(0, envMax-envHoy);
+  if(el=document.getElementById('lk-disp')) el.textContent = disponibles;
+  if(el=document.getElementById('lk-manual-disp')) el.textContent = disponibles;
   if(el=document.getElementById('lk-total')) el.textContent = (plan.total_enviados||0).toLocaleString('es-MX');
 }
 
@@ -7894,4 +7900,72 @@ function admGenerarCodigoLikes(){
       showToast('No se pudo: ' + String(res), 4000);
     }
   }).catch(function(e){ showToast('Error de conexion'); console.error('[LIKES-GEN]', e); });
+}
+
+
+// ═══════════ ENVIAR LIKES MANUAL ═══════════
+// La URL de la API se conecta cuando este lista
+var LIKES_ENVIAR_URL = ''; // <-- pega aqui el endpoint de tu API de likes
+
+function enviarLikesManual(){
+  var inp = document.getElementById('lk-manual-uid');
+  var btn = document.getElementById('lk-manual-btn');
+  var msg = document.getElementById('lk-manual-msg');
+  var uid = ((inp||{}).value||'').trim();
+
+  function showMsg(texto, tipo){
+    if(!msg) return;
+    msg.style.display = 'block';
+    if(tipo==='ok'){ msg.style.background='rgba(37,211,102,.1)'; msg.style.border='1px solid rgba(37,211,102,.3)'; msg.style.color='#25d366'; }
+    else if(tipo==='err'){ msg.style.background='rgba(255,60,60,.1)'; msg.style.border='1px solid rgba(255,60,60,.3)'; msg.style.color='#ff6b6b'; }
+    else { msg.style.background='rgba(34,211,238,.08)'; msg.style.border='1px solid rgba(34,211,238,.3)'; msg.style.color='#22d3ee'; }
+    msg.innerHTML = texto;
+  }
+
+  if(!authSession){ showMsg('Inicia sesion.', 'err'); return; }
+  if(!_lkPlan){ showMsg('Necesitas un plan activo.', 'err'); return; }
+  if(!uid || uid.replace(/\D/g,'').length < 5){ showMsg('Ingresa un UID valido.', 'err'); return; }
+
+  // Verificar cupo diario
+  var hoy = new Date().toISOString().slice(0,10);
+  var envHoy = (_lkPlan.envios_fecha === hoy) ? (_lkPlan.envios_hoy||0) : 0;
+  var disponibles = Math.max(0, (_lkPlan.envios_dia||0) - envHoy);
+  if(disponibles <= 0){ showMsg('Ya usaste todos tus envios de hoy. Vuelve manana.', 'err'); return; }
+
+  // Si la API aun no esta conectada
+  if(!LIKES_ENVIAR_URL){
+    showMsg('\u23F3 El envio automatico se esta activando. Tu UID quedo anotado, pronto llegaran los likes.', 'info');
+    // Registrar el intento en el historial local para que se vea el movimiento
+    if(typeof sb !== 'undefined' && sb.post){
+      sb.post('likes_envios', { user_id: authSession.id, ff_id: uid, cantidad: 0, estado: 'ok', detalle: 'Solicitud manual (pendiente API)' }).catch(function(){});
+    }
+    if(inp) inp.value = '';
+    setTimeout(cargarEnviosLikes, 800);
+    return;
+  }
+
+  if(btn){ btn.disabled = true; btn.style.opacity = '.5'; }
+
+  fetch(LIKES_ENVIAR_URL, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ uid: uid, user_id: authSession.id, plan: _lkPlan.plan })
+  }).then(function(r){ return r.json(); }).then(function(res){
+    if(btn){ btn.disabled = false; btn.style.opacity = '1'; }
+    if(res && res.success){
+      showMsg('\u2705 Likes enviados al UID ' + uid + (res.cantidad ? (' (+' + res.cantidad + ')') : '') + '!', 'ok');
+      if(inp) inp.value = '';
+      // Registrar y refrescar
+      if(typeof sb !== 'undefined' && sb.post){
+        sb.post('likes_envios', { user_id: authSession.id, ff_id: uid, cantidad: (res.cantidad||0), estado:'ok' }).catch(function(){});
+      }
+      setTimeout(function(){ cargarPanelLikes(); }, 800);
+    } else {
+      showMsg('\u274C ' + ((res && res.error) || 'No se pudieron enviar los likes.'), 'err');
+    }
+  }).catch(function(e){
+    if(btn){ btn.disabled = false; btn.style.opacity = '1'; }
+    showMsg('Error de conexion. Intenta de nuevo.', 'err');
+    console.error('[LIKES-ENVIAR]', e);
+  });
 }
