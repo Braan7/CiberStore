@@ -3448,7 +3448,7 @@ document.addEventListener('keydown',function(e){
     </div>
 
     <!-- ═══ PASOS ═══ -->
-    <div style="display:flex;align-items:flex-start;margin:1.6rem 0 1.5rem">
+    <div id="pase-pasos-nav" style="display:none;align-items:flex-start;margin:1.6rem 0 1.5rem">
       <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:.45rem">
         <div id="pstep-1" class="pase-step-num" style="width:32px;height:32px;border-radius:50%;background:#22d3ee;color:#021418;display:flex;align-items:center;justify-content:center;font-family:Poppins;font-weight:700;font-size:.85rem">1</div>
         <div id="pstep-lbl-1" style="font-size:.68rem;font-weight:700;color:#22d3ee;letter-spacing:.8px">DESTINO</div>
@@ -3465,8 +3465,16 @@ document.addEventListener('keydown',function(e){
       </div>
     </div>
 
+    <!-- ═══ MANTENIMIENTO ═══ -->
+    <div id="pase-mantenimiento" style="background:linear-gradient(160deg,rgba(255,180,60,.08),rgba(255,255,255,.01));border:1px solid rgba(255,180,60,.28);border-radius:18px;padding:2.2rem 1.5rem;text-align:center;margin-top:1.2rem">
+      <div style="font-size:3rem;margin-bottom:.7rem">&#128679;</div>
+      <div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.2rem;color:#ffb84d;margin-bottom:.5rem">Fuera de servicio</div>
+      <div style="font-size:.85rem;color:#9aa3b0;line-height:1.6;max-width:320px;margin:0 auto 1.3rem">El Pase Booyah esta temporalmente fuera de servicio. Escribenos por WhatsApp si necesitas ayuda con tu pedido.</div>
+      <button onclick="goPage('tienda')" style="padding:.8rem 1.8rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:12px;font-family:Poppins;font-weight:600;font-size:.88rem;cursor:pointer">Volver a la tienda</button>
+    </div>
+
     <!-- ═══════════ PASO 1: DESTINO ═══════════ -->
-    <div id="pase-paso-1">
+    <div id="pase-paso-1" style="display:none">
       <div style="background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.07);border-radius:16px;overflow:hidden;margin-bottom:1.3rem">
         <div style="display:flex;align-items:center;gap:.5rem;padding:.8rem 1rem;border-bottom:1px solid rgba(255,255,255,.06)">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ff8a4d" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="11" rx="4"/><path d="M7 11v3M5.5 12.5h3M16 12h.01M18.5 14h.01"/></svg>

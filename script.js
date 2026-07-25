@@ -700,7 +700,7 @@ function goPage(id){
   if(id==='diamantes') setTimeout(function(){ setDiamTipo('ilim'); }, 100);
   if(id==='codigos') setTimeout(_updateScarSaldo, 100);
   if(id==='clanes') setTimeout(renderClanes, 100);
-  if(id==='pase') setTimeout(_paseReiniciar, 100);
+  if(id==='pase'){ /* fuera de servicio: no iniciar el asistente */ }
   if(id==='saldo') setTimeout(function(){ recSetMoneda('MXN'); _recTipo=null; recLimpiarTipo(); }, 100);
   if(id==='sobre') setTimeout(function(){ sobreTab('resenas'); }, 100);
   if(id==='likes') renderLikes();
@@ -7238,6 +7238,8 @@ function _paseReiniciar(){
 }
 
 function comprarPase(){
+  showToast('\u26A0\uFE0F El Pase Booyah esta fuera de servicio temporalmente', 3500);
+  return;
   if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
   if(_comprandoPase){ return; }
 
