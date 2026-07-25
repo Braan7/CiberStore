@@ -7760,6 +7760,7 @@ function cargarPanelLikes(){
       _pintarEstadoPlan(plan);
       cargarIdsLikes();
       cargarEnviosLikes();
+      _lkInitVerif();
     }).catch(function(e){
       console.error('[LIKES] plan', e);
       if(panel) panel.style.display = 'none';
@@ -7993,5 +7994,61 @@ function enviarLikesManual(){
     if(btn){ btn.disabled = false; btn.style.opacity = '1'; }
     showMsg('Error de conexion. Intenta de nuevo.', 'err');
     console.error('[LIKES-ENVIAR]', e);
+  });
+}
+
+
+// ═══════════ VERIFICAR PERFIL AL ESCRIBIR UID ═══════════
+var _lkVerifTimer = null;
+var _lkPerfilOk = false;
+
+function _lkInitVerif(){
+  var inp = document.getElementById('lk-manual-uid');
+  if(!inp || inp._verifHooked) return;
+  inp._verifHooked = true;
+  inp.addEventListener('input', function(){
+    _lkPerfilOk = false;
+    var perfil = document.getElementById('lk-manual-perfil');
+    if(perfil) perfil.style.display = 'none';
+    clearTimeout(_lkVerifTimer);
+    var uid = (inp.value||'').trim();
+    if(uid.replace(/\D/g,'').length < 5) return;
+    _lkVerifTimer = setTimeout(function(){ _lkVerificarPerfil(uid); }, 700);
+  });
+}
+
+function _lkVerificarPerfil(uid){
+  var perfil = document.getElementById('lk-manual-perfil');
+  if(!perfil) return;
+  perfil.style.display = 'block';
+  perfil.innerHTML = '<div style="font-size:.75rem;color:#6b7280;padding:.5rem">\u23F3 Buscando jugador...</div>';
+
+  fetch(LIKES_ENVIAR_URL, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ action:'verificar', uid: uid })
+  }).then(function(r){ return r.json(); }).then(function(res){
+    if(res && res.success && res.valido){
+      _lkPerfilOk = true;
+      // Guardar la region detectada en el campo oculto
+      var regEl = document.getElementById('lk-manual-region');
+      if(regEl) regEl.value = res.region || 'AUTO';
+      var ini = ((res.nombre||'?').charAt(0)||'?').toUpperCase();
+      perfil.innerHTML =
+        '<div style="display:flex;align-items:center;gap:.8rem;background:rgba(37,211,102,.05);border:1px solid rgba(37,211,102,.25);border-radius:12px;padding:.8rem .9rem">'
+        + '<div style="width:42px;height:42px;flex-shrink:0;border-radius:11px;background:linear-gradient(135deg,#0e7490,#22d3ee);display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-weight:800;font-size:1.2rem;color:#fff">'+ini+'</div>'
+        + '<div style="flex:1;min-width:0">'
+        +   '<div style="font-family:Poppins,sans-serif;font-weight:700;font-size:.95rem;color:#fff;word-break:break-word">'+(res.nombre||'Jugador')+'</div>'
+        +   '<div style="font-size:.72rem;color:#6b7280">'+(res.nivel?('Nivel '+res.nivel+' \u00b7 '):'')+'Region '+(res.region||'?')+'</div>'
+        + '</div>'
+        + '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>'
+        + '</div>';
+    } else {
+      _lkPerfilOk = false;
+      perfil.innerHTML = '<div style="font-size:.76rem;color:#ff6b6b;background:rgba(255,60,60,.08);border:1px solid rgba(255,60,60,.22);border-radius:10px;padding:.6rem .85rem">\u274C No encontramos ese UID. Revisalo.</div>';
+    }
+  }).catch(function(e){
+    perfil.innerHTML = '<div style="font-size:.75rem;color:#6b7280;padding:.5rem">No se pudo verificar ahora.</div>';
+    console.error('[LIKES-VERIF]', e);
   });
 }

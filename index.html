@@ -2259,24 +2259,9 @@ document.addEventListener('keydown',function(e){
           <input id="lk-manual-uid" type="text" inputmode="numeric" placeholder="Ej: 273968086" style="flex:1;min-width:0;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);color:#fff;border-radius:12px;padding:.85rem 1rem;font-family:Poppins,sans-serif;font-size:.95rem;outline:none;box-sizing:border-box"/>
           <button onclick="enviarLikesManual()" id="lk-manual-btn" style="flex-shrink:0;width:56px;border-radius:12px;background:linear-gradient(135deg,#128c3e,#25d366);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
         </div>
-        <div style="font-size:.68rem;color:#6b7280;letter-spacing:1px;margin-bottom:.4rem">REGION</div>
-        <select id="lk-manual-region" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);color:#fff;border-radius:12px;padding:.75rem 1rem;font-family:Poppins,sans-serif;font-size:.88rem;outline:none">
-          <option value="SAC">SAC &middot; Sudamerica</option>
-          <option value="NA">NA &middot; Norteamerica</option>
-          <option value="US">US &middot; Estados Unidos</option>
-          <option value="BR">BR &middot; Brasil</option>
-          <option value="EU">EU &middot; Europa</option>
-          <option value="IND">IND &middot; India</option>
-          <option value="ID">ID &middot; Indonesia</option>
-          <option value="ME">ME &middot; Medio Oriente</option>
-          <option value="VN">VN &middot; Vietnam</option>
-          <option value="TH">TH &middot; Tailandia</option>
-          <option value="PK">PK &middot; Pakistan</option>
-          <option value="BD">BD &middot; Bangladesh</option>
-          <option value="SG">SG &middot; Singapur</option>
-          <option value="TW">TW &middot; Taiwan</option>
-          <option value="CIS">CIS</option>
-        </select>
+        <div style="font-size:.7rem;color:#6b7280;margin-bottom:.2rem">La region se detecta automaticamente.</div>
+        <input type="hidden" id="lk-manual-region" value="AUTO"/>
+        <div id="lk-manual-perfil" style="display:none;margin-top:.7rem"></div>
         <div id="lk-manual-msg" style="display:none;margin-top:.75rem;border-radius:10px;padding:.7rem .85rem;font-size:.78rem;line-height:1.5"></div>
         <div id="lk-manual-resultado" style="display:none;margin-top:.85rem"></div>
       </div>
