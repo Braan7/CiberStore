@@ -35,23 +35,27 @@ var _productos = [];
 
 function probarRutas(){
   var est = document.getElementById('estado');
-  est.textContent = 'Probando rutas... (tarda unos segundos)';
+  var pid = prompt('Product ID a probar (ej: 345 para 520 diamantes):', '345');
+  if(!pid) return;
+  var uid = prompt('ID de Free Fire para la prueba:', '437193377');
+  if(!uid) return;
+  est.textContent = 'Probando compra del producto '+pid+' en varias rutas...';
   fetch(URL_FN, {
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ action:'probar_rutas' })
+    body: JSON.stringify({ action:'probar_rutas', product_id: parseInt(pid), player_id: uid })
   }).then(function(r){ return r.json(); }).then(function(res){
     var cont = document.getElementById('lista');
     if(!res || !res.success){
       est.textContent = 'Error: ' + ((res && res.error) || 'sin respuesta. Deploy la funcion nueva primero.');
       return;
     }
-    est.textContent = 'Resultados (las que dicen SI son las rutas que existen):';
+    est.textContent = 'Producto '+res.product_id+' · ID '+res.player_id+' — busca la ruta con success:true (verde):';
     var h = '';
     (res.resultados||[]).forEach(function(x){
-      var color = x.existe ? '#25d366' : '#ff6b6b';
-      var tag = x.existe ? 'SI EXISTE' : 'no existe';
-      h += '<div class="item" style="border-color:'+color+'44"><div class="pid" style="color:'+color+'">'+tag+' &middot; '+x.ruta+' (HTTP '+x.http+')</div><div class="extra">'+(x.respuesta||x.error||'')+'</div></div>';
+      var color = x.success ? '#25d366' : '#ff6b6b';
+      var tag = x.success ? 'FUNCIONA' : 'falla';
+      h += '<div class="item" style="border-color:'+color+'44"><div class="pid" style="color:'+color+'">'+tag+' &middot; '+x.ruta+' (HTTP '+x.http+')</div><div class="extra" style="word-break:break-all">'+(x.respuesta||x.error||'')+'</div></div>';
     });
     cont.innerHTML = h;
     document.getElementById('crudo').style.display='none';
