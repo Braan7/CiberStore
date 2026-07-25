@@ -3262,6 +3262,8 @@ function submitLk2kSaldo(){
 }
 
 function submitLk200Saldo(){
+  showToast('\u26A0\uFE0F Los likes basicos estan en mantenimiento temporal', 3500);
+  return;
   if(!authSession){ showToast('Inicia sesion para comprar'); return; }
   var planKey = ((document.getElementById('lk200-plan')||{}).value||'');
   var ffId    = ((document.getElementById('lk200-id')||{}).value||'').trim();
@@ -6190,8 +6192,8 @@ function _calcularTotalPin(idx, cant){
 
 function _updatePinTotal(){
   var idx = parseInt((document.getElementById('pin-plan')||{}).value);
-  var cant = parseInt((document.getElementById('pin-cantidad')||{}).value)||1;
-  if(cant < 1) cant = 1;
+  var cant = parseInt((document.getElementById('pin-cantidad')||{}).value)||3;
+  if(cant < 3){ cant = 3; var inpMin=document.getElementById('pin-cantidad'); if(inpMin) inpMin.value=3; }
   if(cant > 10){ cant = 10; var inp=document.getElementById('pin-cantidad'); if(inp) inp.value=10; }
 
   var el = document.getElementById('pin-total-val');
@@ -6217,8 +6219,8 @@ function _updatePinTotal(){
 function _cambiarCantPin(delta){
   var inp = document.getElementById('pin-cantidad');
   if(!inp) return;
-  var v = (parseInt(inp.value)||1) + delta;
-  if(v < 1) v = 1;
+  var v = (parseInt(inp.value)||3) + delta;
+  if(v < 3) v = 3;
   if(v > 10) v = 10;
   inp.value = v;
   _updatePinTotal();
@@ -6234,8 +6236,8 @@ function submitPinSaldo(){
   function showErr(m){ if(err){err.textContent=m;err.style.display='block';} }
 
   var idx = parseInt((document.getElementById('pin-plan')||{}).value);
-  var cant = parseInt((document.getElementById('pin-cantidad')||{}).value)||1;
-  if(cant < 1) cant = 1;
+  var cant = parseInt((document.getElementById('pin-cantidad')||{}).value)||3;
+  if(cant < 3){ showErr('La compra de pines al mayoreo es minimo 3 pines.'); var inpc=document.getElementById('pin-cantidad'); if(inpc) inpc.value=3; _updatePinTotal(); return; }
   if(cant > 10) cant = 10;
 
   if(isNaN(idx) || !PINES_API[idx]){ showErr('Elige un producto.'); return; }

@@ -2198,11 +2198,17 @@ document.addEventListener('keydown',function(e){
           <span style="font-size:1.1rem">🟢</span>
           <div>
             <div style="font-family:Oxanium;font-size:.9rem;font-weight:900;color:#00e676;letter-spacing:1px">LIKES BÁSICOS</div>
-            <div style="font-size:.65rem;color:var(--muted)">~180-220 likes por día</div>
+            <div style="font-size:.65rem;color:#ffb84d">&#9888;&#65039; En mantenimiento temporal</div>
           </div>
         </div>
       </div>
-      <div style="background:#0b0b0b;border:1px solid rgba(0,230,118,.25);border-top:none;border-radius:0 0 8px 8px;padding:1rem;margin-bottom:1.5rem">
+      <div style="position:relative;background:#0b0b0b;border:1px solid rgba(0,230,118,.25);border-top:none;border-radius:0 0 8px 8px;padding:1rem;margin-bottom:1.5rem">
+        <!-- OVERLAY MANTENIMIENTO -->
+        <div style="position:absolute;inset:0;z-index:5;background:rgba(5,5,5,.86);backdrop-filter:blur(3px);border-radius:0 0 8px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem 1.5rem">
+          <div style="font-size:2.5rem;margin-bottom:.6rem">&#128679;</div>
+          <div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.05rem;color:#ffb84d;margin-bottom:.4rem">En mantenimiento</div>
+          <div style="font-size:.8rem;color:#9aa3b0;line-height:1.6;max-width:280px">Los likes basicos estan temporalmente fuera de servicio. Escribenos por WhatsApp si necesitas ayuda.</div>
+        </div>
         <div class="lkpln-grid">
           <div class="lkpln-wrap"><div class="lkpln">
             <div class="lkpln-l">
@@ -2454,10 +2460,10 @@ document.addEventListener('keydown',function(e){
           <select id="pin-plan" onchange="_updatePinTotal()" style="width:100%;background:#1a1408;border:1px solid rgba(255,204,0,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Poppins,sans-serif;font-size:.88rem;margin-bottom:.65rem;box-sizing:border-box">
             <option value="">Cargando...</option>
           </select>
-          <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Cantidad</label>
+          <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Cantidad <span style="color:#ffb84d">(minimo 3)</span></label>
           <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.65rem">
             <button onclick="_cambiarCantPin(-1)" style="width:38px;height:38px;background:rgba(255,204,0,.1);border:1px solid rgba(255,204,0,.25);color:#ffcc00;border-radius:9px;font-size:1.2rem;font-weight:700;cursor:pointer">&minus;</button>
-            <input id="pin-cantidad" type="number" value="1" min="1" onchange="_updatePinTotal()" style="flex:1;text-align:center;background:#1a1408;border:1px solid rgba(255,204,0,.25);color:#fff;border-radius:9px;padding:.6rem;font-family:Oxanium;font-weight:700;font-size:1rem;box-sizing:border-box"/>
+            <input id="pin-cantidad" type="number" value="3" min="3" onchange="_updatePinTotal()" style="flex:1;text-align:center;background:#1a1408;border:1px solid rgba(255,204,0,.25);color:#fff;border-radius:9px;padding:.6rem;font-family:Oxanium;font-weight:700;font-size:1rem;box-sizing:border-box"/>
             <button onclick="_cambiarCantPin(1)" style="width:38px;height:38px;background:rgba(255,204,0,.1);border:1px solid rgba(255,204,0,.25);color:#ffcc00;border-radius:9px;font-size:1.2rem;font-weight:700;cursor:pointer">+</button>
           </div>
           <div style="font-size:.64rem;color:var(--muted);text-align:center;margin-bottom:.65rem;line-height:1.6">&#127881; Descuentos: <b style="color:#25d366">3-4</b>=1% &middot; <b style="color:#25d366">5-6</b>=2% &middot; <b style="color:#25d366">7</b>=3% &middot; <b style="color:#25d366">8-9</b>=4% &middot; <b style="color:#25d366">10</b>=5%</div>
@@ -4457,7 +4463,11 @@ document.addEventListener('keydown',function(e){
       <div style="text-align:center;margin-bottom:1.25rem">
         <div style="font-family:Oxanium,sans-serif;font-size:1.6rem;font-weight:900;letter-spacing:3px"><span style="color:#ffffff">CIBER</span><span style="color:#22d3ee">STORE</span></div>
       </div>
-      <p style="color:#8892b0;font-size:.82rem;text-align:center;margin-bottom:1.25rem">Inicia sesion para acceder a todos los servicios</p>
+      <p style="color:#8892b0;font-size:.82rem;text-align:center;margin-bottom:1rem">Inicia sesion para acceder a todos los servicios</p>
+      <div style="display:flex;align-items:center;gap:.6rem;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.28);border-radius:11px;padding:.7rem .85rem;margin-bottom:1.25rem">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M12 11c0 3-1 5-1 5m5-6.5c0 3.5-1 6.5-1 6.5M7 13c0-.5 0-1 .1-1.5M12 7a5 5 0 0 1 5 5M4.5 10a8 8 0 0 1 13-2.5M9 4.5a8 8 0 0 1 6.5.3M8 20c-1.5-2-2-4-2-6a6 6 0 0 1 .2-1.5"/></svg>
+        <div style="font-size:.73rem;color:#c9d1e0;line-height:1.5"><b style="color:#22d3ee">Guarda tu contrasena</b> cuando el telefono te lo pregunte, y la proxima vez entra con tu <b style="color:#fff">huella</b>.</div>
+      </div>
       <div id="login-err" style="background:rgba(255,80,80,.12);border:1px solid rgba(255,80,80,.3);color:#ff6b6b;border-radius:6px;padding:.52rem .78rem;font-size:.78rem;margin-bottom:.78rem;display:none"></div>
       <label style="display:block;font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#5a6580;margin-bottom:.25rem">Usuario</label>
       <input id="login-user" type="text" placeholder="Tu nombre de usuario" autocomplete="username" style="width:100%;background:#10131f;border:1px solid rgba(0,150,255,.2);color:#ffffff;border-radius:5px;padding:.52rem .78rem;font-family:'Poppins',sans-serif;font-size:.86rem;margin-bottom:.78rem;box-sizing:border-box"/>
@@ -4474,14 +4484,6 @@ document.addEventListener('keydown',function(e){
         <div id="login-attempts-info" style="font-size:.68rem;color:#ff6b6b;display:none"></div>
       </div>
       <button type="submit" id="btn-do-login" style="width:100%;padding:.76rem;border:none;border-radius:6px;font-family:'Poppins',sans-serif;font-weight:800;font-size:.83rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff">&#128274; Entrar a CiberStore</button>
-
-      <!-- Aviso: entrar con huella -->
-      <div style="margin-top:.9rem;background:rgba(34,211,238,.05);border:1px solid rgba(34,211,238,.2);border-radius:11px;padding:.75rem .85rem;display:flex;gap:.6rem;align-items:flex-start">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:.05rem"><path d="M12 11c0 3-1 5-1 5m5-6.5c0 3.5-1 6.5-1 6.5M7 13c0-.5 0-1 .1-1.5M12 7a5 5 0 0 1 5 5M4.5 10a8 8 0 0 1 13-2.5M9 4.5a8 8 0 0 1 6.5.3M8 20c-1.5-2-2-4-2-6a6 6 0 0 1 .2-1.5"/></svg>
-        <div style="font-size:.72rem;color:#9aa3b0;line-height:1.55">
-          <b style="color:#22d3ee">Entra con tu huella la proxima vez.</b> Cuando tu telefono te pregunte <b style="color:#fff">"&iquest;Guardar contrasena?"</b>, toca <b style="color:#fff">Guardar</b>. Despues podras entrar solo con tu huella o Face ID.
-        </div>
-      </div>
       <button type="button" onclick="doGuest()" style="width:100%;padding:.55rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:#8892b0;border-radius:6px;font-family:'Poppins',sans-serif;font-weight:700;font-size:.78rem;cursor:pointer;margin-top:.45rem">&#128100; Continuar como invitado</button>
       <p style="text-align:center;font-size:.78rem;color:#5a6580;margin-top:1rem">No tienes cuenta? <a onclick="authTab('register')" style="color:#22d3ee;cursor:pointer;font-weight:700">Registrate gratis</a></p>
     </form>
