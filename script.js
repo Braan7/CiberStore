@@ -689,6 +689,7 @@ function enviarComprobanteWA(){
 }
 
 function goPage(id){
+  setTimeout(function(){ if(window._hookPasteAll) window._hookPasteAll(); }, 300);
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
   var pg=document.getElementById('page-'+id);
@@ -8170,125 +8171,106 @@ function _lkGenerarCanvas(callback){
   function noGlow(){ ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; }
 
   function dibujar(logoImg){
-    // ── Fondo negro con leve degradado ──
-    var bg = ctx.createLinearGradient(0, 0, W, H);
-    bg.addColorStop(0, '#04070c');
-    bg.addColorStop(0.5, '#060a10');
-    bg.addColorStop(1, '#04090c');
-    ctx.fillStyle = bg;
+    // ── Fondo negro ──
+    ctx.fillStyle = '#050a0e';
     ctx.fillRect(0, 0, W, H);
 
-    // ── Marco exterior con brillo verde→azul ──
+    // ── Marco con brillo verde ──
     var marco = ctx.createLinearGradient(0, 0, W, H);
     marco.addColorStop(0, '#25d366');
     marco.addColorStop(1, '#22a7f0');
     ctx.strokeStyle = marco; ctx.lineWidth = 6;
-    glow('#25d366', 25);
-    _roundRect(ctx, 30, 30, W-60, H-60, 40); ctx.stroke();
+    glow('#25d366', 22);
+    _roundRect(ctx, 28, 28, W-56, H-56, 40); ctx.stroke();
     noGlow();
 
-    // ── LOGO / titulo CIBERSTORE ──
+    // ═══ 1) LOGO (arriba, solo, centrado) ═══
+    var y = 130;
     if(logoImg){
-      var lw = 620, lh = lw * (logoImg.height/logoImg.width);
-      ctx.drawImage(logoImg, (W-lw)/2, 70, lw, lh);
+      var lw = 560, lh = lw * (logoImg.height/logoImg.width);
+      // limitar altura del logo
+      if(lh > 150){ lh = 150; lw = lh * (logoImg.width/logoImg.height); }
+      ctx.drawImage(logoImg, (W-lw)/2, y - lh/2, lw, lh);
+      y += lh/2 + 45;
     } else {
       glow('#22a7f0', 15);
-      texto('CIBER', W/2 - 110, 175, '900 96px Arial', '#fff', 'center');
-      texto('STORE', W/2 + 155, 175, '900 96px Arial', '#22a7f0', 'center');
+      texto('CIBER', W/2 - 100, y, '900 88px Arial', '#fff', 'center');
+      texto('STORE', W/2 + 145, y, '900 88px Arial', '#22a7f0', 'center');
       noGlow();
+      y += 90;
     }
 
-    var baseY = logoImg ? 300 : 230;
-
-    // ── ❤️ LIKES ENVIADOS ──
-    glow('#25d366', 20);
-    texto('\u2764\uFE0F LIKES ENVIADOS', W/2, baseY, '900 78px Arial', '#25d366', 'center');
+    // LIKES ENVIADOS
+    y += 25;
+    glow('#25d366', 18);
+    texto('\u2764\uFE0F LIKES ENVIADOS', W/2, y, '900 72px Arial', '#25d366', 'center');
     noGlow();
 
-    // ── VG | CIBERPY (nombre del jugador) ──
-    texto(r.nombre.toUpperCase(), W/2, baseY + 90, '800 62px Arial', '#e8f0f0', 'center');
+    // Nombre
+    y += 68;
+    var nombreCorto = r.nombre.length > 16 ? r.nombre.slice(0,16) : r.nombre;
+    texto(nombreCorto.toUpperCase(), W/2, y, '800 54px Arial', '#e8f0f0', 'center');
 
-    // ── Caja UID | region ──
-    var cajaY = baseY + 130, cajaW = 760, cajaX = (W-cajaW)/2, cajaH = 110;
+    // ═══ 4) Caja UID | region ═══
+    y += 35;
+    var cajaW = 780, cajaX = (W-cajaW)/2, cajaH = 105;
     ctx.fillStyle = 'rgba(37,211,102,.05)';
     ctx.strokeStyle = 'rgba(37,211,102,.4)'; ctx.lineWidth = 2;
-    _roundRect(ctx, cajaX, cajaY, cajaW, cajaH, 26); ctx.fill(); ctx.stroke();
-    // divisor
+    _roundRect(ctx, cajaX, y, cajaW, cajaH, 26); ctx.fill(); ctx.stroke();
     ctx.strokeStyle = 'rgba(255,255,255,.15)'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(W/2, cajaY+25); ctx.lineTo(W/2, cajaY+cajaH-25); ctx.stroke();
-    // UID
-    texto('\ud83d\udc64  UID', cajaX + 180, cajaY + 45, '700 30px Arial', '#25d366', 'center');
-    texto(r.uid, cajaX + 180, cajaY + 85, '800 40px Arial', '#fff', 'center');
-    // region
-    texto('\ud83d\udee1\ufe0f  ' + r.region, W/2 + 190, cajaY + 68, '800 44px Arial', '#fff', 'center');
+    ctx.beginPath(); ctx.moveTo(W/2, y+28); ctx.lineTo(W/2, y+cajaH-28); ctx.stroke();
+    texto('\ud83d\udc64  UID', cajaX + cajaW/4, y + 45, '700 28px Arial', '#25d366', 'center');
+    texto(r.uid, cajaX + cajaW/4, y + 88, '800 42px Arial', '#fff', 'center');
+    texto('\ud83d\udee1\ufe0f  ' + r.region, cajaX + cajaW*3/4, y + 72, '800 46px Arial', '#fff', 'center');
 
-    // ── Cajas ANTES / DESPUES ──
-    var boxY = cajaY + cajaH + 60, boxW = 440, boxH = 300, gap = 40;
+    // ═══ 5) Cajas ANTES / DESPUES ═══
+    y += cajaH + 40;
+    var boxW = 430, boxH = 255, gap = 50;
     var x1 = (W - boxW*2 - gap)/2, x2 = x1 + boxW + gap;
 
-    // ANTES
     ctx.fillStyle = 'rgba(255,255,255,.03)';
     ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = 2;
-    _roundRect(ctx, x1, boxY, boxW, boxH, 32); ctx.fill(); ctx.stroke();
-    texto('ANTES', x1 + boxW/2, boxY + 70, '700 40px Arial', '#9aa3b0', 'center');
-    texto(String(r.antes), x1 + boxW/2, boxY + 190, '900 110px Arial', '#c9d1e0', 'center');
+    _roundRect(ctx, x1, y, boxW, boxH, 32); ctx.fill(); ctx.stroke();
+    texto('ANTES', x1 + boxW/2, y + 70, '700 38px Arial', '#9aa3b0', 'center');
+    texto(String(r.antes), x1 + boxW/2, y + 175, '900 84px Arial', '#c9d1e0', 'center');
 
-    // DESPUES
     ctx.fillStyle = 'rgba(37,211,102,.08)';
+    glow('#25d366', 18);
+    _roundRect(ctx, x2, y, boxW, boxH, 32); ctx.fill();
+    noGlow();
     ctx.strokeStyle = 'rgba(37,211,102,.5)'; ctx.lineWidth = 3;
-    glow('#25d366', 20);
-    _roundRect(ctx, x2, boxY, boxW, boxH, 32); ctx.fill();
-    noGlow();
-    _roundRect(ctx, x2, boxY, boxW, boxH, 32); ctx.stroke();
-    texto('DESPUES', x2 + boxW/2, boxY + 70, '700 40px Arial', '#25d366', 'center');
-    glow('#25d366', 15);
-    texto(String(r.despues), x2 + boxW/2, boxY + 190, '900 110px Arial', '#25d366', 'center');
+    _roundRect(ctx, x2, y, boxW, boxH, 32); ctx.stroke();
+    texto('DESPUES', x2 + boxW/2, y + 70, '700 38px Arial', '#25d366', 'center');
+    glow('#25d366', 12);
+    texto(String(r.despues), x2 + boxW/2, y + 175, '900 84px Arial', '#25d366', 'center');
     noGlow();
 
-    // +N en circulo central
-    var cx = W/2, cy = boxY + boxH/2;
-    ctx.fillStyle = '#0a0e14';
+    // +N circulo (encima, en el centro entre las cajas)
+    var cx = W/2, cy = y + boxH/2;
+    ctx.fillStyle = '#050a0e';
+    glow('#25d366', 18);
+    ctx.beginPath(); ctx.arc(cx, cy, 72, 0, Math.PI*2); ctx.fill();
+    noGlow();
     ctx.strokeStyle = '#25d366'; ctx.lineWidth = 4;
-    glow('#25d366', 20);
-    ctx.beginPath(); ctx.arc(cx, cy, 75, 0, Math.PI*2); ctx.fill();
-    noGlow();
-    ctx.beginPath(); ctx.arc(cx, cy, 75, 0, Math.PI*2); ctx.stroke();
-    texto('+' + r.enviadas, cx, cy - 5, '900 56px Arial', '#25d366', 'center');
-    texto('\u00bb\u00bb\u00bb', cx, cy + 40, '700 28px Arial', '#25d366', 'center');
+    ctx.beginPath(); ctx.arc(cx, cy, 72, 0, Math.PI*2); ctx.stroke();
+    texto('+' + r.enviadas, cx, cy - 2, '900 52px Arial', '#25d366', 'center');
+    texto('\u00bb\u00bb\u00bb', cx, cy + 38, '700 26px Arial', '#25d366', 'center');
 
-    // ── Barra web | WhatsApp ──
-    var barY = boxY + boxH + 55, barH = 130;
+    // ═══ 6) Barra web | WhatsApp ═══
+    y += boxH + 40;
+    var barH = 125;
     ctx.fillStyle = 'rgba(37,211,102,.06)';
     ctx.strokeStyle = 'rgba(37,211,102,.35)'; ctx.lineWidth = 2;
-    _roundRect(ctx, 60, barY, W-120, barH, 28); ctx.fill(); ctx.stroke();
+    _roundRect(ctx, 70, y, W-140, barH, 28); ctx.fill(); ctx.stroke();
     ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(W/2, barY+30); ctx.lineTo(W/2, barY+barH-30); ctx.stroke();
-    // web
-    texto('\ud83c\udf10  ciberstore.lat', W/4 + 30, barY + 60, '800 44px Arial', '#25d366', 'center');
-    texto('Compra tu plan de likes ahora', W/4 + 30, barY + 100, '400 26px Arial', '#8a94a6', 'center');
-    // whatsapp
-    texto('\ud83d\udcf2  WHATSAPP', W*3/4 - 20, barY + 55, '800 38px Arial', '#25d366', 'center');
-    texto('+1 (289) 427-3983', W*3/4 - 20, barY + 100, '800 40px Arial', '#fff', 'center');
+    ctx.beginPath(); ctx.moveTo(W/2, y+32); ctx.lineTo(W/2, y+barH-32); ctx.stroke();
+    texto('\ud83c\udf10 ciberstore.lat', W/4 + 35, y + 62, '800 40px Arial', '#25d366', 'center');
+    texto('Compra tu plan de likes', W/4 + 35, y + 100, '400 26px Arial', '#8a94a6', 'center');
+    texto('\ud83d\udcf2 WHATSAPP', W*3/4 - 35, y + 58, '800 36px Arial', '#25d366', 'center');
+    texto('+1 (289) 427-3983', W*3/4 - 35, y + 100, '800 38px Arial', '#fff', 'center');
 
-    // ── Features abajo ──
-    var featY = barY + barH + 70;
-    var feats = [
-      ['\u26a1', 'ENTREGA', 'RAPIDA'],
-      ['\ud83d\udee1\ufe0f', 'SEGURO Y', 'CONFIABLE'],
-      ['\ud83d\udcc8', 'RESULTADOS', 'REALES'],
-      ['\ud83c\udfa7', 'SOPORTE', '24/7'],
-      ['\ud83c\udfc5', 'SERVICIO', 'PREMIUM']
-    ];
-    var fw = (W - 120) / 5;
-    feats.forEach(function(f, i){
-      var fx = 60 + fw*i + fw/2;
-      texto(f[0], fx, featY, '48px Arial', '#25d366', 'center');
-      texto(f[1], fx, featY + 45, '800 22px Arial', '#fff', 'center');
-      texto(f[2], fx, featY + 72, '800 22px Arial', '#fff', 'center');
-    });
-
-    // ── Slogan final ──
-    texto('\ud83d\udee1\ufe0f  TU EXITO, NUESTRA MISION', W/2, H - 60, '800 32px Arial', '#22a7f0', 'center');
+    // ═══ 7) Slogan final (bien abajo, sin encimar) ═══
+    texto('\ud83d\udee1\ufe0f  TU EXITO, NUESTRA MISION', W/2, H - 55, '800 30px Arial', '#22a7f0', 'center');
 
     callback(canvas);
   }
@@ -8344,3 +8326,54 @@ function compartirImagenLikes(){
     }, 'image/png');
   });
 }
+
+
+// ═══════════ ARREGLO: PERMITIR PEGAR IDs ═══════════
+// Algunos teclados numericos en Android rechazan el texto pegado.
+// Este parche fuerza que todos los campos de ID acepten el pegado
+// (limpiando espacios y caracteres raros, dejando solo lo necesario).
+document.addEventListener('DOMContentLoaded', function(){
+  // IDs de campos donde el cliente pega su ID de Free Fire / clan / UID
+  var camposId = ['f1','f2','bundle-id','pase-id','lk-manual-uid','hcff-token',
+                  'v1-id','ilim-id','bonus-id','lk200-id','lk2k-id','ff-id',
+                  'clan-nombre','clan-id','m-clan-id'];
+
+  function limpiarId(txt){
+    // Quitar espacios, saltos de linea y todo lo que no sea numero
+    return String(txt||'').replace(/\s/g,'').replace(/[^0-9]/g,'');
+  }
+
+  function hookPaste(el){
+    if(!el || el._pasteHooked) return;
+    el._pasteHooked = true;
+    el.addEventListener('paste', function(e){
+      try {
+        var pegado = (e.clipboardData || window.clipboardData).getData('text');
+        if(pegado){
+          e.preventDefault();
+          var limpio = limpiarId(pegado);
+          // Insertar el texto limpio en la posicion del cursor
+          var ini = el.selectionStart || 0;
+          var fin = el.selectionEnd || 0;
+          var val = el.value || '';
+          el.value = val.slice(0, ini) + limpio + val.slice(fin);
+          // Disparar el evento input por si hay validaciones
+          el.dispatchEvent(new Event('input', { bubbles:true }));
+        }
+      } catch(err){ /* si falla, dejar el pegado normal */ }
+    });
+  }
+
+  camposId.forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) hookPaste(el);
+  });
+
+  // Tambien enganchar cualquier campo futuro con clase .finput cuando se abra un modal
+  window._hookPasteAll = function(){
+    document.querySelectorAll('input.finput, #lk-manual-uid').forEach(function(el){
+      if(el.type === 'text' || el.type === 'tel' || el.inputMode === 'numeric') hookPaste(el);
+    });
+  };
+  window._hookPasteAll();
+});

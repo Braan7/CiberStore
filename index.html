@@ -326,7 +326,7 @@ body{
 .modal-h h3{font-family:"Oxanium";font-size:.8rem;font-weight:700;color:#fff;letter-spacing:.5px}
 .modal-close{background:none;border:none;color:var(--muted);font-size:1.6rem;cursor:pointer;line-height:1;padding:0 .28rem;transition:color .18s}
 .modal-close:hover{color:#ff5252}
-.modal-b{padding:1.2rem}
+.modal-b{padding:1.2rem;padding-bottom:calc(2rem + env(safe-area-inset-bottom, 0px) + 90px)}
 .m-prod-card{display:flex;align-items:center;gap:.85rem;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.85rem;margin-bottom:.9rem;transition:border-color .3s}
 .m-prod-ico{width:60px;height:60px;border-radius:7px;background:linear-gradient(135deg,#0a1020,#0d1830);display:flex;align-items:center;justify-content:center;font-size:1.85rem;flex-shrink:0;border:1px solid var(--border)}
 .m-prod-name{font-family:"Oxanium";font-size:.74rem;font-weight:700;color:#fff;margin-bottom:.2rem}
@@ -1729,7 +1729,7 @@ button[style*="linear-gradient"]{
 }
 
 /* ---------- Mas aire entre secciones ---------- */
-.page{ padding-bottom:3rem!important; }
+.page{ padding-bottom:calc(6.5rem + env(safe-area-inset-bottom,0px))!important; }
 
 /* ---------- Scroll y seleccion ---------- */
 ::-webkit-scrollbar{ width:6px;height:6px }
@@ -2275,7 +2275,7 @@ document.addEventListener('keydown',function(e){
         </div>
 
         <div style="position:relative;margin-bottom:.7rem">
-          <input id="lk-manual-uid" type="text" inputmode="numeric" placeholder="Escribe el UID de Free Fire" style="width:100%;box-sizing:border-box;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.1);color:#fff;border-radius:14px;padding:1rem 3.6rem 1rem 1rem;font-family:Poppins,sans-serif;font-size:1rem;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='rgba(37,211,102,.5)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'"/>
+          <input id="lk-manual-uid" type="text" placeholder="Escribe el UID de Free Fire" style="width:100%;box-sizing:border-box;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.1);color:#fff;border-radius:14px;padding:1rem 3.6rem 1rem 1rem;font-family:Poppins,sans-serif;font-size:1rem;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='rgba(37,211,102,.5)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'"/>
           <button onclick="enviarLikesManual()" id="lk-manual-btn" style="position:absolute;right:6px;top:6px;bottom:6px;width:48px;border-radius:11px;background:linear-gradient(135deg,#128c3e,#25d366);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(37,211,102,.35)"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
         </div>
 
@@ -3513,7 +3513,7 @@ document.addEventListener('keydown',function(e){
           <div id="pase-destino-form">
             <label class="flabel">Tu ID de Free Fire *</label>
             <div style="display:flex;gap:.5rem">
-              <input class="finput" id="pase-id" type="text" inputmode="numeric" placeholder="Ej: 11655323248" style="flex:1;margin-bottom:0"/>
+              <input class="finput" id="pase-id" type="text" placeholder="Ej: 11655323248" style="flex:1;margin-bottom:0"/>
               <button onclick="paseVerificarID()" id="pase-btn-verif" style="flex-shrink:0;padding:.75rem 1.1rem;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.4);color:#22d3ee;border-radius:12px;font-family:Poppins;font-weight:600;font-size:.82rem;cursor:pointer">Verificar</button>
             </div>
             <div style="font-size:.7rem;color:#6b7280;margin-top:.5rem;line-height:1.5">Verificamos tu ID para confirmar que el pase llegue a la cuenta correcta.</div>
