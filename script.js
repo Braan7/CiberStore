@@ -7997,7 +7997,13 @@ function enviarLikesManual(){
           +   '<div style="flex:1;text-align:center;background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.25);border-radius:11px;padding:.7rem"><div style="font-size:.62rem;color:#25d366;letter-spacing:.5px;margin-bottom:.15rem">DESPUES</div><div style="font-family:Oxanium;font-weight:800;font-size:1.15rem;color:#25d366">'+(res.despues||'-')+'</div></div>'
           + '</div>'
           + '<div style="text-align:center;margin-top:.85rem;font-size:.78rem;color:#25d366;font-weight:600">\u2764\uFE0F '+res.enviadas+' likes enviados con exito</div>'
+          + '<div style="display:flex;gap:.6rem;margin-top:1rem">'
+          +   '<button onclick="descargarImagenLikes()" style="flex:1;padding:.7rem;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.35);color:#25d366;border-radius:11px;font-family:Poppins,sans-serif;font-weight:700;font-size:.78rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.4rem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Descargar</button>'
+          +   '<button onclick="compartirImagenLikes()" style="flex:1;padding:.7rem;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.35);color:#22d3ee;border-radius:11px;font-family:Poppins,sans-serif;font-weight:700;font-size:.78rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.4rem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Compartir</button>'
+          + '</div>'
           + '</div>';
+        // Guardar datos para generar la imagen
+        _lkUltimoResultado = { nombre: (res.nombre||'Jugador'), uid: uid, region: (res.region||region), antes: (res.antes||'-'), despues: (res.despues||'-'), enviadas: res.enviadas };
       }
       if(inp) inp.value = '';
       setTimeout(function(){ cargarPanelLikes(); }, 1000);
@@ -8142,4 +8148,141 @@ function _pintarTopLikes(arr, nombres){
       + '<div style="text-align:right;flex-shrink:0"><div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:1.15rem;color:#25d366;line-height:1">'+x.total.toLocaleString('es-MX')+'</div><div style="font-size:.58rem;color:#6b7280;letter-spacing:.5px">LIKES ENVIADOS</div></div>'
       + '</div>';
   }).join('');
+}
+
+
+// ═══════════ GENERAR IMAGEN DEL RESULTADO DE LIKES ═══════════
+var _lkUltimoResultado = null;
+
+function _lkGenerarCanvas(callback){
+  if(!_lkUltimoResultado){ return; }
+  var r = _lkUltimoResultado;
+  var W = 1080, H = 1080;
+  var canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  var ctx = canvas.getContext('2d');
+
+  // Fondo degradado oscuro
+  var bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, '#0a0e14');
+  bg.addColorStop(0.5, '#0d1520');
+  bg.addColorStop(1, '#08120c');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // Brillo verde arriba
+  var glow = ctx.createRadialGradient(W/2, 250, 50, W/2, 250, 500);
+  glow.addColorStop(0, 'rgba(37,211,102,.15)');
+  glow.addColorStop(1, 'rgba(37,211,102,0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, W, 700);
+
+  function texto(t, x, y, font, color, align){
+    ctx.font = font; ctx.fillStyle = color; ctx.textAlign = align || 'center';
+    ctx.fillText(t, x, y);
+  }
+
+  function dibujarContenido(logoImg){
+    // Logo (si cargo) o texto CIBERSTORE
+    if(logoImg){
+      var lw = 520, lh = 520 * (logoImg.height/logoImg.width);
+      ctx.drawImage(logoImg, (W-lw)/2, 60, lw, lh);
+    } else {
+      texto('CIBER', W/2 - 90, 180, '900 90px Arial', '#fff', 'center');
+      texto('STORE', W/2 + 130, 180, '900 90px Arial', '#22d3ee', 'center');
+    }
+
+    var topY = logoImg ? 380 : 300;
+
+    // Corazon + titulo
+    texto('\u2764\uFE0F  LIKES ENVIADOS', W/2, topY, '800 46px Arial', '#25d366', 'center');
+
+    // Nombre del jugador
+    texto(r.nombre, W/2, topY + 90, '700 62px Arial', '#fff', 'center');
+    texto('UID ' + r.uid + '  \u00b7  ' + r.region, W/2, topY + 140, '400 34px Arial', '#8a94a6', 'center');
+
+    // Cajas ANTES / DESPUES
+    var boxY = topY + 210, boxW = 380, boxH = 220, gap = 40;
+    var x1 = W/2 - boxW - gap/2, x2 = W/2 + gap/2;
+
+    // Caja ANTES
+    ctx.fillStyle = 'rgba(255,255,255,.04)';
+    _roundRect(ctx, x1, boxY, boxW, boxH, 28); ctx.fill();
+    texto('ANTES', x1 + boxW/2, boxY + 60, '600 30px Arial', '#8a94a6', 'center');
+    texto(String(r.antes), x1 + boxW/2, boxY + 150, '900 76px Arial', '#c9d1e0', 'center');
+
+    // Caja DESPUES
+    ctx.fillStyle = 'rgba(37,211,102,.1)';
+    _roundRect(ctx, x2, boxY, boxW, boxH, 28); ctx.fill();
+    ctx.strokeStyle = 'rgba(37,211,102,.4)'; ctx.lineWidth = 2;
+    _roundRect(ctx, x2, boxY, boxW, boxH, 28); ctx.stroke();
+    texto('DESPUES', x2 + boxW/2, boxY + 60, '600 30px Arial', '#25d366', 'center');
+    texto(String(r.despues), x2 + boxW/2, boxY + 150, '900 76px Arial', '#25d366', 'center');
+
+    // +N en el centro
+    ctx.fillStyle = '#25d366';
+    _roundRect(ctx, W/2 - 70, boxY + boxH/2 - 35, 140, 70, 35); ctx.fill();
+    texto('+' + r.enviadas, W/2, boxY + boxH/2 + 22, '900 48px Arial', '#0a0e14', 'center');
+
+    // Franja inferior con la pagina
+    var fY = boxY + boxH + 120;
+    ctx.fillStyle = 'rgba(37,211,102,.08)';
+    _roundRect(ctx, 100, fY, W - 200, 130, 24); ctx.fill();
+    texto('ciberstore.lat', W/2, fY + 60, '800 52px Arial', '#25d366', 'center');
+    texto('Compra tu plan de likes ahora', W/2, fY + 105, '400 32px Arial', '#8a94a6', 'center');
+
+    callback(canvas);
+  }
+
+  // Intentar cargar el logo
+  var logo = new Image();
+  logo.crossOrigin = 'anonymous';
+  logo.onload = function(){ dibujarContenido(logo); };
+  logo.onerror = function(){ dibujarContenido(null); };
+  logo.src = 'img/logo-ciberstore.png';
+}
+
+function _roundRect(ctx, x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function descargarImagenLikes(){
+  _lkGenerarCanvas(function(canvas){
+    try {
+      var link = document.createElement('a');
+      link.download = 'ciberstore-likes-' + Date.now() + '.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      showToast('\u2705 Imagen descargada');
+    } catch(e){ showToast('No se pudo descargar'); console.error(e); }
+  });
+}
+
+function compartirImagenLikes(){
+  _lkGenerarCanvas(function(canvas){
+    canvas.toBlob(function(blob){
+      if(!blob){ showToast('No se pudo generar la imagen'); return; }
+      var file = new File([blob], 'ciberstore-likes.png', { type:'image/png' });
+      if(navigator.share && navigator.canShare && navigator.canShare({ files:[file] })){
+        navigator.share({
+          files: [file],
+          title: 'Mis likes en CiberStore',
+          text: 'Consegui likes en ciberstore.lat \ud83d\udd25'
+        }).catch(function(){});
+      } else {
+        // Fallback: descargar
+        var link = document.createElement('a');
+        link.download = 'ciberstore-likes.png';
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        showToast('Imagen lista para compartir');
+      }
+    }, 'image/png');
+  });
 }
