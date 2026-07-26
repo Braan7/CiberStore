@@ -8162,83 +8162,141 @@ function _lkGenerarCanvas(callback){
   canvas.width = W; canvas.height = H;
   var ctx = canvas.getContext('2d');
 
-  // Fondo degradado oscuro
-  var bg = ctx.createLinearGradient(0, 0, W, H);
-  bg.addColorStop(0, '#0a0e14');
-  bg.addColorStop(0.5, '#0d1520');
-  bg.addColorStop(1, '#08120c');
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, W, H);
-
-  // Brillo verde arriba
-  var glow = ctx.createRadialGradient(W/2, 250, 50, W/2, 250, 500);
-  glow.addColorStop(0, 'rgba(37,211,102,.15)');
-  glow.addColorStop(1, 'rgba(37,211,102,0)');
-  ctx.fillStyle = glow;
-  ctx.fillRect(0, 0, W, 700);
-
   function texto(t, x, y, font, color, align){
     ctx.font = font; ctx.fillStyle = color; ctx.textAlign = align || 'center';
     ctx.fillText(t, x, y);
   }
+  function glow(color, blur){ ctx.shadowColor = color; ctx.shadowBlur = blur; }
+  function noGlow(){ ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; }
 
-  function dibujarContenido(logoImg){
-    // Logo (si cargo) o texto CIBERSTORE
+  function dibujar(logoImg){
+    // ── Fondo negro con leve degradado ──
+    var bg = ctx.createLinearGradient(0, 0, W, H);
+    bg.addColorStop(0, '#04070c');
+    bg.addColorStop(0.5, '#060a10');
+    bg.addColorStop(1, '#04090c');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // ── Marco exterior con brillo verde→azul ──
+    var marco = ctx.createLinearGradient(0, 0, W, H);
+    marco.addColorStop(0, '#25d366');
+    marco.addColorStop(1, '#22a7f0');
+    ctx.strokeStyle = marco; ctx.lineWidth = 6;
+    glow('#25d366', 25);
+    _roundRect(ctx, 30, 30, W-60, H-60, 40); ctx.stroke();
+    noGlow();
+
+    // ── LOGO / titulo CIBERSTORE ──
     if(logoImg){
-      var lw = 520, lh = 520 * (logoImg.height/logoImg.width);
-      ctx.drawImage(logoImg, (W-lw)/2, 60, lw, lh);
+      var lw = 620, lh = lw * (logoImg.height/logoImg.width);
+      ctx.drawImage(logoImg, (W-lw)/2, 70, lw, lh);
     } else {
-      texto('CIBER', W/2 - 90, 180, '900 90px Arial', '#fff', 'center');
-      texto('STORE', W/2 + 130, 180, '900 90px Arial', '#22d3ee', 'center');
+      glow('#22a7f0', 15);
+      texto('CIBER', W/2 - 110, 175, '900 96px Arial', '#fff', 'center');
+      texto('STORE', W/2 + 155, 175, '900 96px Arial', '#22a7f0', 'center');
+      noGlow();
     }
 
-    var topY = logoImg ? 380 : 300;
+    var baseY = logoImg ? 300 : 230;
 
-    // Corazon + titulo
-    texto('\u2764\uFE0F  LIKES ENVIADOS', W/2, topY, '800 46px Arial', '#25d366', 'center');
+    // ── ❤️ LIKES ENVIADOS ──
+    glow('#25d366', 20);
+    texto('\u2764\uFE0F LIKES ENVIADOS', W/2, baseY, '900 78px Arial', '#25d366', 'center');
+    noGlow();
 
-    // Nombre del jugador
-    texto(r.nombre, W/2, topY + 90, '700 62px Arial', '#fff', 'center');
-    texto('UID ' + r.uid + '  \u00b7  ' + r.region, W/2, topY + 140, '400 34px Arial', '#8a94a6', 'center');
+    // ── VG | CIBERPY (nombre del jugador) ──
+    texto(r.nombre.toUpperCase(), W/2, baseY + 90, '800 62px Arial', '#e8f0f0', 'center');
 
-    // Cajas ANTES / DESPUES
-    var boxY = topY + 210, boxW = 380, boxH = 220, gap = 40;
-    var x1 = W/2 - boxW - gap/2, x2 = W/2 + gap/2;
-
-    // Caja ANTES
-    ctx.fillStyle = 'rgba(255,255,255,.04)';
-    _roundRect(ctx, x1, boxY, boxW, boxH, 28); ctx.fill();
-    texto('ANTES', x1 + boxW/2, boxY + 60, '600 30px Arial', '#8a94a6', 'center');
-    texto(String(r.antes), x1 + boxW/2, boxY + 150, '900 76px Arial', '#c9d1e0', 'center');
-
-    // Caja DESPUES
-    ctx.fillStyle = 'rgba(37,211,102,.1)';
-    _roundRect(ctx, x2, boxY, boxW, boxH, 28); ctx.fill();
+    // ── Caja UID | region ──
+    var cajaY = baseY + 130, cajaW = 760, cajaX = (W-cajaW)/2, cajaH = 110;
+    ctx.fillStyle = 'rgba(37,211,102,.05)';
     ctx.strokeStyle = 'rgba(37,211,102,.4)'; ctx.lineWidth = 2;
-    _roundRect(ctx, x2, boxY, boxW, boxH, 28); ctx.stroke();
-    texto('DESPUES', x2 + boxW/2, boxY + 60, '600 30px Arial', '#25d366', 'center');
-    texto(String(r.despues), x2 + boxW/2, boxY + 150, '900 76px Arial', '#25d366', 'center');
+    _roundRect(ctx, cajaX, cajaY, cajaW, cajaH, 26); ctx.fill(); ctx.stroke();
+    // divisor
+    ctx.strokeStyle = 'rgba(255,255,255,.15)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(W/2, cajaY+25); ctx.lineTo(W/2, cajaY+cajaH-25); ctx.stroke();
+    // UID
+    texto('\ud83d\udc64  UID', cajaX + 180, cajaY + 45, '700 30px Arial', '#25d366', 'center');
+    texto(r.uid, cajaX + 180, cajaY + 85, '800 40px Arial', '#fff', 'center');
+    // region
+    texto('\ud83d\udee1\ufe0f  ' + r.region, W/2 + 190, cajaY + 68, '800 44px Arial', '#fff', 'center');
 
-    // +N en el centro
-    ctx.fillStyle = '#25d366';
-    _roundRect(ctx, W/2 - 70, boxY + boxH/2 - 35, 140, 70, 35); ctx.fill();
-    texto('+' + r.enviadas, W/2, boxY + boxH/2 + 22, '900 48px Arial', '#0a0e14', 'center');
+    // ── Cajas ANTES / DESPUES ──
+    var boxY = cajaY + cajaH + 60, boxW = 440, boxH = 300, gap = 40;
+    var x1 = (W - boxW*2 - gap)/2, x2 = x1 + boxW + gap;
 
-    // Franja inferior con la pagina
-    var fY = boxY + boxH + 120;
+    // ANTES
+    ctx.fillStyle = 'rgba(255,255,255,.03)';
+    ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = 2;
+    _roundRect(ctx, x1, boxY, boxW, boxH, 32); ctx.fill(); ctx.stroke();
+    texto('ANTES', x1 + boxW/2, boxY + 70, '700 40px Arial', '#9aa3b0', 'center');
+    texto(String(r.antes), x1 + boxW/2, boxY + 190, '900 110px Arial', '#c9d1e0', 'center');
+
+    // DESPUES
     ctx.fillStyle = 'rgba(37,211,102,.08)';
-    _roundRect(ctx, 100, fY, W - 200, 130, 24); ctx.fill();
-    texto('ciberstore.lat', W/2, fY + 60, '800 52px Arial', '#25d366', 'center');
-    texto('Compra tu plan de likes ahora', W/2, fY + 105, '400 32px Arial', '#8a94a6', 'center');
+    ctx.strokeStyle = 'rgba(37,211,102,.5)'; ctx.lineWidth = 3;
+    glow('#25d366', 20);
+    _roundRect(ctx, x2, boxY, boxW, boxH, 32); ctx.fill();
+    noGlow();
+    _roundRect(ctx, x2, boxY, boxW, boxH, 32); ctx.stroke();
+    texto('DESPUES', x2 + boxW/2, boxY + 70, '700 40px Arial', '#25d366', 'center');
+    glow('#25d366', 15);
+    texto(String(r.despues), x2 + boxW/2, boxY + 190, '900 110px Arial', '#25d366', 'center');
+    noGlow();
+
+    // +N en circulo central
+    var cx = W/2, cy = boxY + boxH/2;
+    ctx.fillStyle = '#0a0e14';
+    ctx.strokeStyle = '#25d366'; ctx.lineWidth = 4;
+    glow('#25d366', 20);
+    ctx.beginPath(); ctx.arc(cx, cy, 75, 0, Math.PI*2); ctx.fill();
+    noGlow();
+    ctx.beginPath(); ctx.arc(cx, cy, 75, 0, Math.PI*2); ctx.stroke();
+    texto('+' + r.enviadas, cx, cy - 5, '900 56px Arial', '#25d366', 'center');
+    texto('\u00bb\u00bb\u00bb', cx, cy + 40, '700 28px Arial', '#25d366', 'center');
+
+    // ── Barra web | WhatsApp ──
+    var barY = boxY + boxH + 55, barH = 130;
+    ctx.fillStyle = 'rgba(37,211,102,.06)';
+    ctx.strokeStyle = 'rgba(37,211,102,.35)'; ctx.lineWidth = 2;
+    _roundRect(ctx, 60, barY, W-120, barH, 28); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(W/2, barY+30); ctx.lineTo(W/2, barY+barH-30); ctx.stroke();
+    // web
+    texto('\ud83c\udf10  ciberstore.lat', W/4 + 30, barY + 60, '800 44px Arial', '#25d366', 'center');
+    texto('Compra tu plan de likes ahora', W/4 + 30, barY + 100, '400 26px Arial', '#8a94a6', 'center');
+    // whatsapp
+    texto('\ud83d\udcf2  WHATSAPP', W*3/4 - 20, barY + 55, '800 38px Arial', '#25d366', 'center');
+    texto('+1 (289) 427-3983', W*3/4 - 20, barY + 100, '800 40px Arial', '#fff', 'center');
+
+    // ── Features abajo ──
+    var featY = barY + barH + 70;
+    var feats = [
+      ['\u26a1', 'ENTREGA', 'RAPIDA'],
+      ['\ud83d\udee1\ufe0f', 'SEGURO Y', 'CONFIABLE'],
+      ['\ud83d\udcc8', 'RESULTADOS', 'REALES'],
+      ['\ud83c\udfa7', 'SOPORTE', '24/7'],
+      ['\ud83c\udfc5', 'SERVICIO', 'PREMIUM']
+    ];
+    var fw = (W - 120) / 5;
+    feats.forEach(function(f, i){
+      var fx = 60 + fw*i + fw/2;
+      texto(f[0], fx, featY, '48px Arial', '#25d366', 'center');
+      texto(f[1], fx, featY + 45, '800 22px Arial', '#fff', 'center');
+      texto(f[2], fx, featY + 72, '800 22px Arial', '#fff', 'center');
+    });
+
+    // ── Slogan final ──
+    texto('\ud83d\udee1\ufe0f  TU EXITO, NUESTRA MISION', W/2, H - 60, '800 32px Arial', '#22a7f0', 'center');
 
     callback(canvas);
   }
 
-  // Intentar cargar el logo
   var logo = new Image();
   logo.crossOrigin = 'anonymous';
-  logo.onload = function(){ dibujarContenido(logo); };
-  logo.onerror = function(){ dibujarContenido(null); };
+  logo.onload = function(){ dibujar(logo); };
+  logo.onerror = function(){ dibujar(null); };
   logo.src = 'img/logo-ciberstore.png';
 }
 
