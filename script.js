@@ -7710,10 +7710,21 @@ function canjearCodigoLikes(){
     if(btn){ btn.disabled = false; btn.textContent = 'Canjear'; }
     if(res && res.success){
       var nom = _lkNombrePlan(res.plan);
-      showMsg('\u2705 <b>Codigo activado!</b><br/>Tu plan <b>'+nom+'</b> esta activo por 30 dias.', 'ok');
+      showMsg('\u2705 <b>Codigo activado!</b><br/>Tu plan <b>'+nom+'</b> ya esta activo. Actualizando...', 'ok');
       if(inp) inp.value = '';
+      // Ocultar los planes de venta al instante (ya tiene plan)
+      var secP = document.getElementById('lk-planes-seccion');
+      if(secP) secP.style.display = 'none';
+      var sinP = document.getElementById('lk-sin-plan');
+      if(sinP) sinP.style.display = 'none';
+      // Cargar el panel varias veces por si la DB tarda en reflejar el plan
       cargarPanelLikes();
-      setTimeout(function(){ document.getElementById('lk-panel').scrollIntoView({behavior:'smooth'}); }, 600);
+      setTimeout(cargarPanelLikes, 700);
+      setTimeout(cargarPanelLikes, 1800);
+      setTimeout(function(){
+        var pan = document.getElementById('lk-panel');
+        if(pan) pan.scrollIntoView({behavior:'smooth', block:'start'});
+      }, 900);
     } else {
       showMsg('\u274C ' + ((res && res.error) || 'Codigo invalido o ya usado.'), 'err');
     }
