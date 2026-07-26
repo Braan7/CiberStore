@@ -730,7 +730,6 @@ function refreshUI(){
     if(id==='membresia') renderWallet();
     if(id==='perfil') renderPerfil();
     if(id==='miscompras') renderMisCompras();
-  if(id==='toplikes' && typeof renderTopLikes==='function') renderTopLikes();
     if(id==='home') setTimeout(renderResenas,100);
   }
 }
@@ -3818,6 +3817,7 @@ function setDiamondPeriod(period){
     }
   });
   loadDiamondTop();
+  if(typeof renderTopLikes==='function') setTimeout(renderTopLikes, 500);
 }
 
 function loadDiamondTop(){
@@ -3899,6 +3899,7 @@ var _origGoPageDiamond = goPage;
 goPage = function(id){
   _origGoPageDiamond(id);
   if(id === 'home') setTimeout(loadDiamondTop, 400);
+  if(id === 'home') setTimeout(renderTopLikes, 600);
 };
 
 document.addEventListener('DOMContentLoaded', function(){
@@ -3912,6 +3913,7 @@ setInterval(function(){
   var el = document.getElementById('diamond-top-list');
   var home = document.getElementById('page-home');
   if(el && home && home.classList.contains('active')) loadDiamondTop();
+  if(document.getElementById('toplikes-lista') && home && home.classList.contains('active') && typeof renderTopLikes==='function') renderTopLikes();
 }, 20000);
 
 
