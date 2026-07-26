@@ -7961,6 +7961,8 @@ function enviarLikesManual(){
     if(btn){ btn.disabled = false; btn.style.opacity = '1'; }
     if(res && res.success){
       if(msg) msg.style.display = 'none';
+      var pf = document.getElementById('lk-manual-perfil');
+      if(pf) pf.style.display = 'none';
       var card = document.getElementById('lk-manual-resultado');
       if(card){
         var inicial = ((res.nombre||'?').charAt(0)||'?').toUpperCase();
@@ -8012,7 +8014,8 @@ function _lkInitVerif(){
     if(perfil) perfil.style.display = 'none';
     clearTimeout(_lkVerifTimer);
     var uid = (inp.value||'').trim();
-    if(uid.replace(/\D/g,'').length < 5) return;
+    var perfil2 = document.getElementById('lk-manual-perfil');
+    if(uid.replace(/\D/g,'').length < 5){ if(perfil2) perfil2.style.display='none'; return; }
     _lkVerifTimer = setTimeout(function(){ _lkVerificarPerfil(uid); }, 700);
   });
 }
