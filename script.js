@@ -690,6 +690,7 @@ function enviarComprobanteWA(){
 
 function goPage(id){
   setTimeout(function(){ if(window._hookPasteAll) window._hookPasteAll(); }, 300);
+  if(id==='biolarga') setTimeout(_refreshBioLargaSaldo, 100);
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
   var pg=document.getElementById('page-'+id);
@@ -8395,3 +8396,85 @@ document.addEventListener('DOMContentLoaded', function(){
   };
   window._hookPasteAll();
 });
+
+
+// ═══════════ BIO LARGA (servicio con saldo + entrega link) ═══════════
+var BIOLARGA_PRECIO = 100;
+var BIOLARGA_LINK = 'https://hyperbioff.com/';
+var _biolargaBusy = false;
+
+function _refreshBioLargaSaldo(){
+  var el = document.getElementById('biolarga-saldo');
+  if(el) el.textContent = authSession ? ('$' + (authSession.saldo||0) + ' MX') : '$0 MX';
+}
+
+function comprarBioLarga(){
+  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal, 600); return; }
+  if(_biolargaBusy){ return; }
+
+  var saldo = authSession.saldo || 0;
+  if(saldo < BIOLARGA_PRECIO){
+    showToast('Saldo insuficiente. Necesitas $' + BIOLARGA_PRECIO + ' MX', 3500);
+    setTimeout(function(){ goPage('saldo'); }, 900);
+    return;
+  }
+
+  if(!confirm('Comprar BIO LARGA por $' + BIOLARGA_PRECIO + ' MX?\n\nSe descontara de tu saldo y recibiras el enlace.')) return;
+
+  _biolargaBusy = true;
+  var btn = document.getElementById('biolarga-btn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Procesando...'; btn.style.opacity = '.6'; }
+
+  var ord = (typeof getNextOrder === 'function') ? getNextOrder() : Math.floor(Math.random()*9000+1000);
+
+  // Descontar saldo (atomico)
+  addSpend(BIOLARGA_PRECIO, 'BIO LARGA - Pedido #' + ord);
+
+  // Notificar a Telegram
+  if(typeof tgNotifyPurchase === 'function'){
+    tgNotifyPurchase(authSession.username, 'BIO LARGA (5 usos/dia)', BIOLARGA_PRECIO, ord);
+  }
+
+  // Entregar el link
+  setTimeout(function(){
+    _biolargaBusy = false;
+    if(btn){ btn.disabled = false; btn.textContent = 'Comprar ahora'; btn.style.opacity = '1'; }
+    _refreshBioLargaSaldo();
+    _mostrarBioLargaLink(ord);
+  }, 600);
+}
+
+function _mostrarBioLargaLink(ord){
+  var ov = document.getElementById('biolarga-modal');
+  if(!ov){
+    ov = document.createElement('div');
+    ov.id = 'biolarga-modal';
+    ov.className = 'modal-ov';
+    document.body.appendChild(ov);
+  }
+  ov.innerHTML = '<div class="modal" style="max-width:420px">'
+    + '<div style="padding:1.8rem 1.5rem;text-align:center">'
+    +   '<div style="width:64px;height:64px;margin:0 auto 1rem;border-radius:18px;background:linear-gradient(160deg,#25d366,#0d7a35);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(37,211,102,.4)"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>'
+    +   '<div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.2rem;color:#fff;margin-bottom:.4rem">Compra exitosa!</div>'
+    +   '<div style="font-size:.82rem;color:#9aa3b0;line-height:1.5;margin-bottom:1.3rem">Aqui esta tu enlace para BIO LARGA. Uselo hasta 5 veces al dia.</div>'
+    +   '<div style="background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.3);border-radius:12px;padding:1rem;margin-bottom:1rem">'
+    +     '<a href="' + BIOLARGA_LINK + '" target="_blank" style="font-family:monospace;font-size:.95rem;color:#25d366;word-break:break-all;text-decoration:none;font-weight:700">' + BIOLARGA_LINK + '</a>'
+    +   '</div>'
+    +   '<div style="display:flex;gap:.6rem">'
+    +     '<button onclick="_copiarBioLink()" style="flex:1;padding:.85rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:11px;font-family:Poppins;font-weight:700;font-size:.85rem;cursor:pointer">Copiar</button>'
+    +     '<button onclick="window.open(BIOLARGA_LINK,\'_blank\')" style="flex:1;padding:.85rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:11px;font-family:Poppins;font-weight:700;font-size:.85rem;cursor:pointer">Abrir enlace</button>'
+    +   '</div>'
+    +   '<button onclick="document.getElementById(\'biolarga-modal\').classList.remove(\'show\')" style="width:100%;margin-top:.7rem;padding:.7rem;background:none;border:none;color:#6b7280;font-family:Poppins;font-size:.8rem;cursor:pointer">Cerrar</button>'
+    +   '<div style="font-size:.68rem;color:#4a5568;margin-top:.8rem">Pedido #' + ord + '</div>'
+    + '</div></div>';
+  ov.classList.add('show');
+}
+
+function _copiarBioLink(){
+  var tmp = document.createElement('input');
+  tmp.value = BIOLARGA_LINK;
+  document.body.appendChild(tmp);
+  tmp.select();
+  try { document.execCommand('copy'); showToast('\u2705 Enlace copiado'); } catch(e){ showToast('Copia manual: ' + BIOLARGA_LINK); }
+  document.body.removeChild(tmp);
+}
