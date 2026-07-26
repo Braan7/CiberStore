@@ -730,6 +730,7 @@ function refreshUI(){
     if(id==='membresia') renderWallet();
     if(id==='perfil') renderPerfil();
     if(id==='miscompras') renderMisCompras();
+  if(id==='toplikes' && typeof renderTopLikes==='function') renderTopLikes();
     if(id==='home') setTimeout(renderResenas,100);
   }
 }
@@ -8067,4 +8068,76 @@ function _lkVerificarPerfil(uid){
     if(perfil) perfil.style.display = 'none';
     console.error('[LIKES-VERIF]', e);
   });
+}
+
+
+// ═══════════ TOP LIKES (clasificacion de envios) ═══════════
+function renderTopLikes(){
+  var cont = document.getElementById('toplikes-lista');
+  if(!cont) return;
+  cont.innerHTML = '<div style="text-align:center;padding:2rem;color:#6b7280;font-size:.85rem">Cargando...</div>';
+
+  if(typeof sb === 'undefined' || !sb.get){
+    cont.innerHTML = '<div style="text-align:center;padding:2rem;color:#6b7280;font-size:.85rem">No disponible</div>';
+    return;
+  }
+
+  // Traer todos los envios y sumar por usuario
+  sb.get('likes_envios', 'select=user_id,cantidad&estado=eq.ok&limit=5000')
+    .then(function(rows){
+      if(!rows || !rows.length){
+        cont.innerHTML = '<div style="text-align:center;padding:2rem;color:#6b7280;font-size:.85rem">Aun no hay envios registrados</div>';
+        return;
+      }
+      var acum = {};
+      rows.forEach(function(r){
+        if(!r.user_id) return;
+        acum[r.user_id] = (acum[r.user_id]||0) + (Number(r.cantidad)||0);
+      });
+      var arr = Object.keys(acum).map(function(uid){ return { user_id:uid, total:acum[uid] }; });
+      arr.sort(function(a,b){ return b.total - a.total; });
+      arr = arr.slice(0, 15);
+
+      // Obtener los usernames de esos user_id
+      var ids = arr.map(function(x){ return x.user_id; });
+      var q = 'select=id,username&id=in.(' + ids.join(',') + ')';
+      sb.get('profiles', q).then(function(perfiles){
+        var nombres = {};
+        (perfiles||[]).forEach(function(p){ nombres[p.id] = p.username; });
+        _pintarTopLikes(arr, nombres);
+      }).catch(function(){
+        _pintarTopLikes(arr, {});
+      });
+    }).catch(function(e){
+      cont.innerHTML = '<div style="text-align:center;padding:2rem;color:#6b7280;font-size:.85rem">Error al cargar</div>';
+      console.error('[TOPLIKES]', e);
+    });
+}
+
+function _pintarTopLikes(arr, nombres){
+  var cont = document.getElementById('toplikes-lista');
+  if(!cont) return;
+  var yo = authSession ? authSession.id : null;
+
+  cont.innerHTML = arr.map(function(x, i){
+    var pos = i + 1;
+    var nombre = nombres[x.user_id] || 'Usuario';
+    var esYo = (x.user_id === yo);
+    // Medalla para los 3 primeros
+    var medalla = '';
+    if(pos === 1) medalla = '<svg width="20" height="20" viewBox="0 0 24 24" fill="#ffd700" style="flex-shrink:0"><path d="M13 2 L15.5 8 L22 8.5 L17 13 L18.5 20 L13 16.5 L7.5 20 L9 13 L4 8.5 L10.5 8 Z"/></svg>';
+    else if(pos === 2) medalla = '<svg width="18" height="18" viewBox="0 0 24 24" fill="#c0c0c0" style="flex-shrink:0"><circle cx="12" cy="12" r="9"/></svg>';
+    else if(pos === 3) medalla = '<svg width="18" height="18" viewBox="0 0 24 24" fill="#cd7f32" style="flex-shrink:0"><circle cx="12" cy="12" r="9"/></svg>';
+
+    var borde = esYo ? 'rgba(37,211,102,.4)' : 'rgba(255,255,255,.06)';
+    var fondo = esYo ? 'rgba(37,211,102,.05)' : 'rgba(255,255,255,.02)';
+
+    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:.8rem;background:'+fondo+';border:1px solid '+borde+';border-radius:14px;padding:1rem 1.05rem">'
+      + '<div style="display:flex;align-items:center;gap:.7rem;min-width:0">'
+      +   (medalla || '<span style="width:20px;flex-shrink:0"></span>')
+      +   '<span style="font-family:Poppins,sans-serif;font-weight:600;font-size:1rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+pos+'. '+nombre+(esYo?' <span style=\'font-size:.62rem;color:#25d366\'>(tu)</span>':'')+'</span>'
+      + '</div>'
+      + '<div style="text-align:right;flex-shrink:0"><div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:1.15rem;color:#25d366;line-height:1">'+x.total.toLocaleString('es-MX')+'</div><div style="font-size:.58rem;color:#6b7280;letter-spacing:.5px">LIKES ENVIADOS</div></div>'
+      + '</div>';
+  }).join('');
 }
