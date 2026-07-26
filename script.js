@@ -7921,7 +7921,7 @@ function admGenerarCodigoLikes(){
 
 
 // ═══════════ ENVIAR LIKES MANUAL (via Free Fire Services) ═══════════
-var LIKES_ENVIAR_URL = 'https://pnotsqsudqpwqzssevig.supabase.co/functions/v1/likes-sender';
+var LIKES_ENVIAR_URL = 'https://pnotsqsudqpwqzssevig.supabase.co/functions/v1/likes-sender-';
 
 function enviarLikesManual(){
   var inp = document.getElementById('lk-manual-uid');
