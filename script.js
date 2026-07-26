@@ -8024,7 +8024,7 @@ function _lkVerificarPerfil(uid){
   var perfil = document.getElementById('lk-manual-perfil');
   if(!perfil) return;
   perfil.style.display = 'block';
-  perfil.innerHTML = '<div style="font-size:.75rem;color:#6b7280;padding:.5rem">\u23F3 Buscando jugador...</div>';
+  perfil.innerHTML = '<div style="display:flex;align-items:center;gap:.5rem;font-size:.78rem;color:#67e8f9;background:rgba(34,211,238,.05);border:1px solid rgba(34,211,238,.2);border-radius:12px;padding:.7rem .9rem"><span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(103,232,249,.3);border-top-color:#67e8f9;border-radius:50%;animation:lkspin .7s linear infinite"></span>Buscando jugador...</div>';
 
   fetch(LIKES_ENVIAR_URL, {
     method:'POST',
@@ -8038,20 +8038,22 @@ function _lkVerificarPerfil(uid){
       if(regEl) regEl.value = res.region || 'AUTO';
       var ini = ((res.nombre||'?').charAt(0)||'?').toUpperCase();
       perfil.innerHTML =
-        '<div style="display:flex;align-items:center;gap:.8rem;background:rgba(37,211,102,.05);border:1px solid rgba(37,211,102,.25);border-radius:12px;padding:.8rem .9rem">'
-        + '<div style="width:42px;height:42px;flex-shrink:0;border-radius:11px;background:linear-gradient(135deg,#0e7490,#22d3ee);display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-weight:800;font-size:1.2rem;color:#fff">'+ini+'</div>'
+        '<div style="display:flex;align-items:center;gap:.8rem;background:linear-gradient(135deg,rgba(37,211,102,.1),rgba(34,211,238,.04));border:1px solid rgba(37,211,102,.3);border-radius:14px;padding:.85rem .95rem">'
+        + '<div style="width:44px;height:44px;flex-shrink:0;border-radius:12px;background:linear-gradient(135deg,#0e7490,#22d3ee);display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-weight:800;font-size:1.3rem;color:#fff;box-shadow:0 3px 12px rgba(34,211,238,.3)">'+ini+'</div>'
         + '<div style="flex:1;min-width:0">'
-        +   '<div style="font-family:Poppins,sans-serif;font-weight:700;font-size:.95rem;color:#fff;word-break:break-word">'+(res.nombre||'Jugador')+'</div>'
-        +   '<div style="font-size:.72rem;color:#6b7280">'+(res.nivel?('Nivel '+res.nivel+' \u00b7 '):'')+'Region '+(res.region||'?')+'</div>'
+        +   '<div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1rem;color:#fff;word-break:break-word">'+(res.nombre||'Jugador')+'</div>'
+        +   '<div style="display:flex;align-items:center;gap:.4rem;margin-top:.15rem"><span style="font-size:.65rem;color:#9aa3b0;border:1px solid rgba(255,255,255,.14);border-radius:6px;padding:.1rem .45rem;font-weight:600">'+(res.region||'?')+'</span>'+(res.nivel?('<span style="font-size:.7rem;color:#6b7280">Nivel '+res.nivel+'</span>'):'')+'</div>'
         + '</div>'
-        + '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>'
+        + '<div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:.15rem"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg><span style="font-size:.58rem;color:#25d366;font-weight:700">LISTO</span></div>'
         + '</div>';
     } else {
+      // Verificacion silenciosa: si no lo encuentra al escribir, solo ocultamos
+      // el perfil (no molestamos con error rojo). El error real sale al ENVIAR.
       _lkPerfilOk = false;
-      perfil.innerHTML = '<div style="font-size:.76rem;color:#ff6b6b;background:rgba(255,60,60,.08);border:1px solid rgba(255,60,60,.22);border-radius:10px;padding:.6rem .85rem">\u274C No encontramos ese UID. Revisalo.</div>';
+      perfil.style.display = 'none';
     }
   }).catch(function(e){
-    perfil.innerHTML = '<div style="font-size:.75rem;color:#6b7280;padding:.5rem">No se pudo verificar ahora.</div>';
+    if(perfil) perfil.style.display = 'none';
     console.error('[LIKES-VERIF]', e);
   });
 }

@@ -1855,7 +1855,7 @@ body{padding-bottom:104px!important}
 .met-badge{font-size:.6rem;font-weight:700;padding:.16rem .5rem;border-radius:7px;letter-spacing:.2px}
 .met-card .sub{font-size:.76rem;color:#6b7280}
 .sheet-back{background:none;border:none;color:#8b93a3;font-size:.9rem;cursor:pointer;display:flex;align-items:center;gap:.3rem;padding:0}
-</style>
+@keyframes lkspin{to{transform:rotate(360deg)}}</style>
 
 <script>
 /* Block devtools */
@@ -2246,25 +2246,33 @@ document.addEventListener('keydown',function(e){
       </div>
 
       <!-- Enviar Likes (manual) -->
-      <div style="background:rgba(37,211,102,.04);border:1px solid rgba(37,211,102,.22);border-radius:18px;padding:1.3rem 1.2rem;margin-bottom:1.1rem">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin-bottom:.9rem">
-          <div style="display:flex;align-items:center;gap:.5rem">
-            <svg width="19" height="19" viewBox="0 0 24 24" fill="#25d366"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 5.5 6 5.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.5 0 5 3.5 3.5 6.5C19 16.5 12 21 12 21z"/></svg>
-            <span style="font-family:Poppins,sans-serif;font-weight:700;font-size:1rem;color:#fff">Enviar Likes</span>
+      <div style="position:relative;background:linear-gradient(160deg,rgba(37,211,102,.06),rgba(34,211,238,.02));border:1px solid rgba(37,211,102,.2);border-radius:20px;padding:1.4rem 1.25rem;margin-bottom:1.1rem;overflow:hidden">
+        <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:radial-gradient(circle,rgba(37,211,102,.12),transparent 70%);pointer-events:none"></div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin-bottom:1.1rem;position:relative">
+          <div style="display:flex;align-items:center;gap:.6rem">
+            <div style="width:36px;height:36px;border-radius:11px;background:rgba(37,211,102,.14);border:1px solid rgba(37,211,102,.3);display:flex;align-items:center;justify-content:center"><svg width="19" height="19" viewBox="0 0 24 24" fill="#25d366"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 5.5 6 5.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.5 0 5 3.5 3.5 6.5C19 16.5 12 21 12 21z"/></svg></div>
+            <div><div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.05rem;color:#fff;line-height:1.1">Enviar Likes</div><div style="font-size:.68rem;color:#6b7280">Directo al UID del jugador</div></div>
           </div>
-          <span style="flex-shrink:0;font-size:.68rem;color:#25d366;border:1px solid rgba(37,211,102,.3);border-radius:99px;padding:.25rem .7rem;font-weight:600">Disponibles: <span id="lk-manual-disp">0</span></span>
+          <span style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);border-radius:12px;padding:.35rem .7rem"><span id="lk-manual-disp" style="font-family:Oxanium;font-weight:800;font-size:1.1rem;color:#25d366;line-height:1">0</span><span style="font-size:.55rem;color:#6b7280;letter-spacing:.5px">DISPONIBLES</span></span>
         </div>
-        <div style="font-size:.68rem;color:#6b7280;letter-spacing:1px;margin-bottom:.5rem">UID DE FREE FIRE</div>
-        <div style="display:flex;gap:.6rem;margin-bottom:.6rem">
-          <input id="lk-manual-uid" type="text" inputmode="numeric" placeholder="Ej: 273968086" style="flex:1;min-width:0;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);color:#fff;border-radius:12px;padding:.85rem 1rem;font-family:Poppins,sans-serif;font-size:.95rem;outline:none;box-sizing:border-box"/>
-          <button onclick="enviarLikesManual()" id="lk-manual-btn" style="flex-shrink:0;width:56px;border-radius:12px;background:linear-gradient(135deg,#128c3e,#25d366);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
+
+        <div style="position:relative;margin-bottom:.7rem">
+          <input id="lk-manual-uid" type="text" inputmode="numeric" placeholder="Escribe el UID de Free Fire" style="width:100%;box-sizing:border-box;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.1);color:#fff;border-radius:14px;padding:1rem 3.6rem 1rem 1rem;font-family:Poppins,sans-serif;font-size:1rem;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='rgba(37,211,102,.5)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'"/>
+          <button onclick="enviarLikesManual()" id="lk-manual-btn" style="position:absolute;right:6px;top:6px;bottom:6px;width:48px;border-radius:11px;background:linear-gradient(135deg,#128c3e,#25d366);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(37,211,102,.35)"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
         </div>
-        <div style="font-size:.7rem;color:#6b7280;margin-bottom:.2rem">La region se detecta automaticamente.</div>
+
+        <div style="display:flex;align-items:center;gap:.4rem;font-size:.7rem;color:#6b7280;position:relative">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg>
+          La region se detecta sola &middot; llegan 180-220 likes
+        </div>
+
         <input type="hidden" id="lk-manual-region" value="AUTO"/>
-        <div id="lk-manual-perfil" style="display:none;margin-top:.7rem"></div>
-        <div id="lk-manual-msg" style="display:none;margin-top:.75rem;border-radius:10px;padding:.7rem .85rem;font-size:.78rem;line-height:1.5"></div>
-        <div id="lk-manual-resultado" style="display:none;margin-top:.85rem"></div>
+        <div id="lk-manual-perfil" style="display:none;margin-top:.8rem;position:relative"></div>
+        <div id="lk-manual-msg" style="display:none;margin-top:.8rem;border-radius:12px;padding:.75rem .9rem;font-size:.78rem;line-height:1.5;position:relative"></div>
+        <div id="lk-manual-resultado" style="display:none;margin-top:.9rem;position:relative"></div>
       </div>
+
 
       <!-- IDs registrados -->
       <div style="background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:1.3rem 1.2rem;margin-bottom:1.1rem">
