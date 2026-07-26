@@ -2236,7 +2236,7 @@ document.addEventListener('keydown',function(e){
         </div>
 
         <div style="margin-bottom:.9rem">
-          <div style="display:flex;justify-content:space-between;font-size:.72rem;letter-spacing:.8px;margin-bottom:.4rem"><span style="color:#6b7280">ENVIOS HOY <span id="lk-lbl-envios" style="color:#25d366"></span></span><span id="lk-envios-txt" style="color:#25d366;font-weight:700">0/0</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.72rem;letter-spacing:.8px;margin-bottom:.4rem"><span style="color:#6b7280">ENVIOS HOY <span style="color:#4a5568;font-size:.65rem">(auto + manual)</span> <span id="lk-lbl-envios" style="color:#25d366"></span></span><span id="lk-envios-txt" style="color:#25d366;font-weight:700">0/0</span></div>
           <div style="height:6px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden"><div id="lk-envios-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#128c3e,#25d366);border-radius:99px;transition:width .4s"></div></div>
         </div>
 
@@ -2300,7 +2300,7 @@ document.addEventListener('keydown',function(e){
           </div>
           <button onclick="agregarIdLikes()" id="lk-add-btn" style="padding:.6rem 1.1rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:10px;font-family:Poppins;font-weight:700;font-size:.82rem;cursor:pointer">+ Agregar ID</button>
         </div>
-        <div style="display:flex;align-items:center;gap:.4rem;font-size:.75rem;color:#6b7280;margin-bottom:1rem"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> El sistema enviara likes automaticamente cada 24h.</div>
+        <div style="display:flex;align-items:flex-start;gap:.4rem;font-size:.72rem;color:#6b7280;margin-bottom:1rem;line-height:1.5"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:.15rem"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Estos IDs reciben likes <b style="color:#9aa3b0">automaticamente cada 24h</b>. Comparten el mismo cupo diario que el envio manual.</span></div>
         <div id="lk-ids-lista"></div>
       </div>
 

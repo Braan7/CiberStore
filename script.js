@@ -7869,17 +7869,35 @@ function agregarIdLikes(){
 
   var ffId = prompt('ID de Free Fire:');
   if(!ffId) return;
-  ffId = String(ffId).trim();
-  if(ffId.replace(/\D/g,'').length < 5){ showToast('ID invalido'); return; }
-  var ffNom = prompt('Nombre en el juego (opcional):') || '';
+  ffId = String(ffId).replace(/\s/g,'').replace(/[^0-9]/g,'');
+  if(ffId.length < 5){ showToast('ID invalido'); return; }
 
-  sb.post('likes_ids', { user_id: authSession.id, ff_id: ffId, ff_nombre: ffNom.trim() })
-    .then(function(){ showToast('\u2705 ID agregado'); cargarIdsLikes(); })
-    .catch(function(e){
-      if(String(e).indexOf('duplicate')>=0 || String(e).indexOf('unique')>=0) showToast('Ese ID ya esta registrado');
-      else showToast('No se pudo agregar el ID');
-      console.error('[LIKES] add', e);
-    });
+  showToast('\u23F3 Buscando jugador...');
+
+  // Detectar el nombre del jugador automaticamente antes de guardar
+  fetch(LIKES_ENVIAR_URL, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ action:'verificar', uid: ffId })
+  }).then(function(r){ return r.json(); }).then(function(res){
+    var nombre = (res && res.valido && res.nombre) ? res.nombre : '';
+    if(!res || !res.valido){
+      showToast('\u26A0\uFE0F No encontramos ese jugador, revisa el ID');
+      return;
+    }
+    sb.post('likes_ids', { user_id: authSession.id, ff_id: ffId, ff_nombre: nombre })
+      .then(function(){ showToast('\u2705 ' + nombre + ' agregado'); cargarIdsLikes(); })
+      .catch(function(e){
+        if(String(e).indexOf('duplicate')>=0 || String(e).indexOf('unique')>=0) showToast('Ese ID ya esta registrado');
+        else showToast('No se pudo agregar el ID');
+        console.error('[LIKES] add', e);
+      });
+  }).catch(function(e){
+    // Si falla la verificacion, guardar igual sin nombre
+    sb.post('likes_ids', { user_id: authSession.id, ff_id: ffId, ff_nombre: '' })
+      .then(function(){ showToast('\u2705 ID agregado'); cargarIdsLikes(); })
+      .catch(function(){ showToast('No se pudo agregar el ID'); });
+  });
 }
 
 function quitarIdLikes(rowId){
