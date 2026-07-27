@@ -691,6 +691,7 @@ function enviarComprobanteWA(){
 function goPage(id){
   setTimeout(function(){ if(window._hookPasteAll) window._hookPasteAll(); }, 300);
   if(id==='biolarga') setTimeout(_refreshBioLargaSaldo, 100);
+  if(id==='likes2k') setTimeout(function(){ renderLikes2k(); _refreshL2kSaldo(); }, 100);
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
   var pg=document.getElementById('page-'+id);
@@ -8477,4 +8478,79 @@ function _copiarBioLink(){
   tmp.select();
   try { document.execCommand('copy'); showToast('\u2705 Enlace copiado'); } catch(e){ showToast('Copia manual: ' + BIOLARGA_LINK); }
   document.body.removeChild(tmp);
+}
+
+
+// ═══════════ LIKES 2K (paquetes grandes, entrega en la manana) ═══════════
+// Precios: [likes, USD, MXN, COP, ARS, EUR]
+var LIKES2K_PAQUETES = [
+  { likes:'2K',   usd:5,   mxn:88,   cop:'4.400',   ars:'6.100',   eur:'4,65'   },
+  { likes:'5K',   usd:10,  mxn:180,  cop:'9.000',   ars:'12.300',  eur:'9,30'   },
+  { likes:'10K',  usd:15,  mxn:260,  cop:'12.900',  ars:'17.500',  eur:'13,95'  },
+  { likes:'20K',  usd:26,  mxn:450,  cop:'22.400',  ars:'30.400',  eur:'24,20'  },
+  { likes:'30K',  usd:38,  mxn:660,  cop:'32.900',  ars:'44.700',  eur:'35,80'  },
+  { likes:'40K',  usd:47,  mxn:835,  cop:'41.700',  ars:'56.700',  eur:'45,35'  },
+  { likes:'50K',  usd:57,  mxn:1010, cop:'50.500',  ars:'68.700',  eur:'55,10'  },
+  { likes:'60K',  usd:80,  mxn:1400, cop:'69.900',  ars:'95.100',  eur:'76,40'  },
+  { likes:'70K',  usd:99,  mxn:1735, cop:'86.500',  ars:'117.800', eur:'94,60'  },
+  { likes:'80K',  usd:109, mxn:1910, cop:'95.400',  ars:'129.900', eur:'104,55' },
+  { likes:'100K', usd:141, mxn:2485, cop:'124.200', ars:'169.200', eur:'136,00' }
+];
+
+var _l2kBusy = false;
+
+function _refreshL2kSaldo(){
+  var el = document.getElementById('l2k-saldo');
+  if(el) el.textContent = authSession ? ('$' + (authSession.saldo||0) + ' MX') : '$0 MX';
+}
+
+function renderLikes2k(){
+  var cont = document.getElementById('l2k-paquetes');
+  if(!cont) return;
+  cont.innerHTML = LIKES2K_PAQUETES.map(function(p, i){
+    return '<div onclick="comprarLikes2k('+i+')" style="display:flex;align-items:center;justify-content:space-between;gap:.7rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:.95rem 1.1rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor=\'rgba(255,180,60,.4)\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.08)\'">'
+      + '<div style="display:flex;align-items:center;gap:.8rem">'
+      +   '<div style="width:44px;height:44px;flex-shrink:0;border-radius:12px;background:rgba(255,180,60,.12);border:1px solid rgba(255,180,60,.3);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="#ffb84d"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 5.5 6 5.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.5 0 5 3.5 3.5 6.5C19 16.5 12 21 12 21z"/></svg></div>'
+      +   '<div><div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:1.2rem;color:#fff;line-height:1">'+p.likes+' <span style="font-size:.72rem;color:#ffb84d">LIKES</span></div><div style="font-size:.64rem;color:#6b7280;margin-top:.15rem">US $'+p.usd+' \u00b7 COP '+p.cop+' \u00b7 ARS '+p.ars+' \u00b7 \u20ac'+p.eur+'</div></div>'
+      + '</div>'
+      + '<div style="text-align:right;flex-shrink:0"><div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.2rem;color:#25d366;line-height:1">$'+p.mxn+'</div><div style="font-size:.58rem;color:#6b7280;letter-spacing:.5px">MXN</div></div>'
+      + '</div>';
+  }).join('');
+}
+
+function comprarLikes2k(i){
+  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal, 600); return; }
+  if(_l2kBusy) return;
+
+  var p = LIKES2K_PAQUETES[i];
+  if(!p) return;
+
+  var ffId = ((document.getElementById('l2k-id')||{}).value||'').replace(/\s/g,'').replace(/[^0-9]/g,'');
+  if(ffId.length < 5){ showToast('\u26A0\uFE0F Ingresa tu ID de Free Fire primero'); document.getElementById('l2k-id').focus(); return; }
+
+  var saldo = authSession.saldo || 0;
+  if(saldo < p.mxn){
+    showToast('Saldo insuficiente. Necesitas $' + p.mxn + ' MX', 3500);
+    setTimeout(function(){ goPage('saldo'); }, 900);
+    return;
+  }
+
+  if(!confirm('Comprar ' + p.likes + ' LIKES por $' + p.mxn + ' MX?\n\nID: ' + ffId + '\nSe entregan en la manana (8-11am).')) return;
+
+  _l2kBusy = true;
+  var ord = (typeof getNextOrder === 'function') ? getNextOrder() : Math.floor(Math.random()*9000+1000);
+
+  addSpend(p.mxn, p.likes + ' Likes 2K (ID ' + ffId + ') - Pedido #' + ord);
+
+  if(typeof tgNotifyPurchase === 'function'){
+    tgNotifyPurchase(authSession.username, p.likes + ' LIKES 2K \u2192 ID ' + ffId + ' (entrega 8-11am)', p.mxn, ord);
+  }
+
+  setTimeout(function(){
+    _l2kBusy = false;
+    _refreshL2kSaldo();
+    showToast('\u2705 Pedido #' + ord + ' confirmado! Tus ' + p.likes + ' likes llegan en la manana (8-11am).', 5000);
+    var inp = document.getElementById('l2k-id');
+    if(inp) inp.value = '';
+  }, 600);
 }
