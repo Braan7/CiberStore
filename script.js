@@ -7214,14 +7214,34 @@ function paseVerificarID(){
     } else if(res && res.success && !res.valido){
       showErr('Ese ID no existe o no es valido. Revisalo e intenta de nuevo.');
     } else {
-      showErr('No pudimos verificar tu ID en este momento.<br/>Escribenos por WhatsApp para ayudarte con tu pedido.');
-      console.error('[PASE-VALIDAR]', res);
+      // El proveedor no respondio (mantenimiento u otro). Dejamos continuar
+      // igual con el ID que puso el cliente, sin bloquear la compra.
+      _paseContinuarSinVerificar(ffId);
     }
   }).catch(function(e){
     if(btn){ btn.disabled = false; btn.textContent = 'Verificar'; }
-    showErr('Error de conexion. Intenta de nuevo en unos segundos.');
+    // Error de conexion: continuar igual con el ID que puso
+    _paseContinuarSinVerificar(ffId);
     console.error('[PASE-VALIDAR]', e);
   });
+}
+
+// Continuar sin verificacion cuando el proveedor no responde
+function _paseContinuarSinVerificar(ffId){
+  _paseIdVerificado = ffId;
+  _paseNickVerificado = 'Jugador';
+  var form = document.getElementById('pase-destino-form');
+  var okBox = document.getElementById('pase-destino-ok');
+  if(form) form.style.display = 'none';
+  if(okBox) okBox.style.display = 'block';
+  var av = document.getElementById('pase-avatar');
+  if(av) av.textContent = '#';
+  var nk = document.getElementById('pase-nick');
+  if(nk) nk.textContent = 'ID ' + ffId;
+  var ud = document.getElementById('pase-uid');
+  if(ud) ud.textContent = ffId;
+  _paseSig1Activo(true);
+  showToast('\u2705 ID registrado. Continua con tu pedido.', 2800);
 }
 
 function paseCambiarID(){
