@@ -197,8 +197,27 @@ function doRegister(){
   if(!/^[a-z0-9_]+$/.test(username))       { showAuthMsg('reg-err', 'Solo letras, numeros y _'); return; }
   if(!nombre || nombre.length < 2)          { showAuthMsg('reg-err', 'Ingresa tu nombre'); return; }
   if(!sexo)                                 { showAuthMsg('reg-err', 'Selecciona tu sexo'); return; }
-  if(!waRaw || waRaw.length < 7)            { showAuthMsg('reg-err', 'Numero de WhatsApp invalido (muy corto)'); return; }
-  if(waRaw.length > 11)                     { showAuthMsg('reg-err', 'Numero de WhatsApp invalido (muy largo)'); return; }
+
+  // ── VALIDACION DE WHATSAPP POR PAIS ──
+  // Longitud correcta del numero local (sin lada) segun el pais
+  var largoPorLada = {
+    '52':10, '1':10, '57':10, '593':9, '51':9, '56':9, '54':10, '55':11,
+    '58':10, '502':8, '503':8, '504':8, '505':8, '506':8, '507':8, '34':9
+  };
+  var largoEsperado = largoPorLada[lada] || null;
+
+  if(!waRaw){ showAuthMsg('reg-err', 'Ingresa tu numero de WhatsApp'); return; }
+  if(largoEsperado && waRaw.length !== largoEsperado){
+    showAuthMsg('reg-err', 'El numero debe tener ' + largoEsperado + ' digitos para esa lada');
+    return;
+  }
+  if(!largoEsperado && (waRaw.length < 7 || waRaw.length > 12)){
+    showAuthMsg('reg-err', 'Numero de WhatsApp invalido');
+    return;
+  }
+  // Rechazar numeros obviamente falsos
+  if(/^(\d)\1+$/.test(waRaw)){ showAuthMsg('reg-err', 'Ese numero no es valido (digitos repetidos)'); return; }
+  if(/^0123456789|1234567890|0987654321/.test(waRaw)){ showAuthMsg('reg-err', 'Ese numero no es valido'); return; }
   if(!pass || pass.length < 6)              { showAuthMsg('reg-err', 'Contrasena minimo 6 caracteres'); return; }
   if(pass !== pass2)                        { showAuthMsg('reg-err', 'Las contrasenas no coinciden'); return; }
 
