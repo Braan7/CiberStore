@@ -692,6 +692,7 @@ function goPage(id){
   setTimeout(function(){ if(window._hookPasteAll) window._hookPasteAll(); }, 300);
   if(id==='biolarga') setTimeout(_refreshBioLargaSaldo, 100);
   if(id==='likes2k') setTimeout(function(){ renderLikes2k(); _refreshL2kSaldo(); }, 100);
+  if(id==='cajas') setTimeout(_fraguActualizar, 100);
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
   var pg=document.getElementById('page-'+id);
@@ -703,7 +704,7 @@ function goPage(id){
   if(id==='diamantes') setTimeout(function(){ setDiamTipo('ilim'); }, 100);
   if(id==='codigos') setTimeout(_updateScarSaldo, 100);
   if(id==='clanes') setTimeout(renderClanes, 100);
-  if(id==='pase'){ /* fuera de servicio: no iniciar el asistente */ }
+  if(id==='pase') setTimeout(_paseReiniciar, 100);
   if(id==='saldo') setTimeout(function(){ recSetMoneda('MXN'); _recTipo=null; recLimpiarTipo(); }, 100);
   if(id==='sobre') setTimeout(function(){ sobreTab('resenas'); }, 100);
   if(id==='likes') renderLikes();
@@ -7244,8 +7245,6 @@ function _paseReiniciar(){
 }
 
 function comprarPase(){
-  showToast('\u26A0\uFE0F El Pase Booyah esta fuera de servicio temporalmente', 3500);
-  return;
   if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
   if(_comprandoPase){ return; }
 
@@ -8572,4 +8571,79 @@ function _regSetSexo(val, btn){
       b.style.background='#10131f'; b.style.borderColor='rgba(0,150,255,.2)'; b.style.color='#9aa3b0';
     }
   });
+}
+
+
+// ═══════════ FRAGMENTOS UNIVERSALES (sueltos, con saldo) ═══════════
+var FRAGU_PRECIO_CAJA = 5;
+var FRAGU_PRECIO_FRAG = 0.85;
+var _fraguCant = { caja:0, frag:0 };
+var _fraguBusy = false;
+
+function fraguCant(tipo, delta){
+  _fraguCant[tipo] = Math.max(0, (_fraguCant[tipo]||0) + delta);
+  var inp = document.getElementById('fragu-'+tipo+'-cant');
+  if(inp) inp.value = _fraguCant[tipo];
+  _fraguActualizar();
+}
+
+function _fraguActualizar(){
+  var subCaja = _fraguCant.caja * FRAGU_PRECIO_CAJA;
+  var subFrag = _fraguCant.frag * FRAGU_PRECIO_FRAG;
+  var total = subCaja + subFrag;
+  var el;
+  if(el=document.getElementById('fragu-caja-sub')) el.textContent = '$' + subCaja.toFixed(2).replace('.00','');
+  if(el=document.getElementById('fragu-frag-sub')) el.textContent = '$' + subFrag.toFixed(2).replace('.00','');
+  if(el=document.getElementById('fragu-total')) el.textContent = '$' + total.toFixed(2).replace('.00','');
+  if(el=document.getElementById('fragu-saldo')) el.textContent = authSession ? ('$' + (authSession.saldo||0) + ' MX') : '$0 MX';
+}
+
+function comprarFragU(){
+  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal, 600); return; }
+  if(_fraguBusy) return;
+
+  var ffId = ((document.getElementById('fragu-id')||{}).value||'').replace(/\s/g,'').replace(/[^0-9]/g,'');
+  if(ffId.length < 5){ showToast('\u26A0\uFE0F Ingresa tu ID de Free Fire'); var f=document.getElementById('fragu-id'); if(f) f.focus(); return; }
+
+  if(_fraguCant.caja === 0 && _fraguCant.frag === 0){ showToast('Elige al menos 1 producto'); return; }
+
+  var total = _fraguCant.caja * FRAGU_PRECIO_CAJA + _fraguCant.frag * FRAGU_PRECIO_FRAG;
+  var totalRedondeado = Math.round(total * 100) / 100;
+
+  var saldo = authSession.saldo || 0;
+  if(saldo < totalRedondeado){
+    showToast('Saldo insuficiente. Necesitas $' + totalRedondeado + ' MX', 3500);
+    setTimeout(function(){ goPage('saldo'); }, 900);
+    return;
+  }
+
+  var detalle = [];
+  if(_fraguCant.caja > 0) detalle.push(_fraguCant.caja + 'x Caja de Fragmentos');
+  if(_fraguCant.frag > 0) detalle.push(_fraguCant.frag + 'x Fragmento Universal');
+  var detalleTxt = detalle.join(' + ');
+
+  if(!confirm('Comprar:\n' + detalleTxt + '\n\nTotal: $' + totalRedondeado + ' MX\nID: ' + ffId)) return;
+
+  _fraguBusy = true;
+  var btn = document.getElementById('fragu-btn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Procesando...'; btn.style.opacity = '.6'; }
+
+  var ord = (typeof getNextOrder === 'function') ? getNextOrder() : Math.floor(Math.random()*9000+1000);
+
+  addSpend(totalRedondeado, detalleTxt + ' (ID ' + ffId + ') - Pedido #' + ord);
+
+  if(typeof tgNotifyPurchase === 'function'){
+    tgNotifyPurchase(authSession.username, '\uD83E\uDDEC ' + detalleTxt + ' \u2192 ID ' + ffId, totalRedondeado, ord);
+  }
+
+  setTimeout(function(){
+    _fraguBusy = false;
+    if(btn){ btn.disabled = false; btn.textContent = 'Comprar con saldo'; btn.style.opacity = '1'; }
+    _fraguCant = { caja:0, frag:0 };
+    var c1=document.getElementById('fragu-caja-cant'); if(c1) c1.value='0';
+    var c2=document.getElementById('fragu-frag-cant'); if(c2) c2.value='0';
+    var fi=document.getElementById('fragu-id'); if(fi) fi.value='';
+    _fraguActualizar();
+    showToast('\u2705 Pedido #' + ord + ' confirmado! Te llegara pronto.', 5000);
+  }, 600);
 }
