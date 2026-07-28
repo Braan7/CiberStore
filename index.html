@@ -4562,6 +4562,13 @@ document.addEventListener('keydown',function(e){
       <input id="reg-user" type="text" placeholder="Ej: roberto123" autocomplete="username" style="width:100%;background:#10131f;border:1px solid rgba(0,150,255,.2);color:#fff;border-radius:5px;padding:.52rem .78rem;font-family:'Poppins',sans-serif;font-size:.86rem;margin-bottom:.78rem;box-sizing:border-box"/>
       <label style="display:block;font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#5a6580;margin-bottom:.25rem">Nombre completo</label>
       <input id="reg-nombre" type="text" placeholder="Ej: Roberto Gomez" style="width:100%;background:#10131f;border:1px solid rgba(0,150,255,.2);color:#fff;border-radius:5px;padding:.52rem .78rem;font-family:'Poppins',sans-serif;font-size:.86rem;margin-bottom:.78rem;box-sizing:border-box"/>
+      <label style="display:block;font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#5a6580;margin-bottom:.25rem">Sexo</label>
+      <div style="display:flex;gap:.4rem;margin-bottom:.78rem">
+        <button type="button" onclick="_regSetSexo('mujer',this)" class="reg-sexo-btn" data-sexo="mujer" style="flex:1;background:#10131f;border:1px solid rgba(0,150,255,.2);color:#9aa3b0;border-radius:5px;padding:.52rem;font-family:'Poppins',sans-serif;font-size:.8rem;cursor:pointer">Mujer</button>
+        <button type="button" onclick="_regSetSexo('hombre',this)" class="reg-sexo-btn" data-sexo="hombre" style="flex:1;background:#10131f;border:1px solid rgba(0,150,255,.2);color:#9aa3b0;border-radius:5px;padding:.52rem;font-family:'Poppins',sans-serif;font-size:.8rem;cursor:pointer">Hombre</button>
+        <button type="button" onclick="_regSetSexo('otro',this)" class="reg-sexo-btn" data-sexo="otro" style="flex:1;background:#10131f;border:1px solid rgba(0,150,255,.2);color:#9aa3b0;border-radius:5px;padding:.52rem;font-family:'Poppins',sans-serif;font-size:.8rem;cursor:pointer">Otro</button>
+      </div>
+      <input type="hidden" id="reg-sexo" value=""/>
       <label style="display:block;font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#5a6580;margin-bottom:.25rem">WhatsApp</label>
       <div style="display:flex;gap:.4rem;margin-bottom:.78rem">
         <select id="reg-lada" style="background:#10131f;border:1px solid rgba(0,150,255,.2);color:#fff;border-radius:5px;padding:.52rem .5rem;font-family:'Poppins',sans-serif;font-size:.82rem;flex-shrink:0;cursor:pointer;width:120px">

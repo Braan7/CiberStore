@@ -143,6 +143,15 @@ function sbGetByUsername(username){
            });
 }
 
+/* Buscar si un numero de WhatsApp ya esta registrado */
+function sbGetByWhatsapp(whatsapp){
+  return sb.get('profiles', 'whatsapp=eq.' + encodeURIComponent(whatsapp) + '&limit=1&select=id,whatsapp')
+           .then(function(r){
+             if(!r || !Array.isArray(r)) return null;
+             return r[0] || null;
+           }).catch(function(){ return null; });
+}
+
 function sbGetByUsernameWithCache(username){
   /* Try Supabase first, fallback to cache */
   return sbGetByUsername(username).catch(function(){
@@ -177,6 +186,7 @@ function doRegister(){
   var whatsapp  = lada + waRaw;
   var pass      = ((document.getElementById('reg-pass') || {}).value || '');
   var pass2     = ((document.getElementById('reg-pass2') || {}).value || '');
+  var sexo      = ((document.getElementById('reg-sexo') || {}).value || '').trim();
   var err       = document.getElementById('reg-err');
   var ok        = document.getElementById('reg-ok');
   if(err) err.style.display = 'none';
@@ -185,6 +195,7 @@ function doRegister(){
   if(!username || username.length < 3)     { showAuthMsg('reg-err', 'Usuario muy corto (min 3)'); return; }
   if(!/^[a-z0-9_]+$/.test(username))       { showAuthMsg('reg-err', 'Solo letras, numeros y _'); return; }
   if(!nombre || nombre.length < 2)          { showAuthMsg('reg-err', 'Ingresa tu nombre'); return; }
+  if(!sexo)                                 { showAuthMsg('reg-err', 'Selecciona tu sexo'); return; }
   if(!waRaw || waRaw.length < 7)            { showAuthMsg('reg-err', 'Numero de WhatsApp invalido (muy corto)'); return; }
   if(waRaw.length > 11)                     { showAuthMsg('reg-err', 'Numero de WhatsApp invalido (muy largo)'); return; }
   if(!pass || pass.length < 6)              { showAuthMsg('reg-err', 'Contrasena minimo 6 caracteres'); return; }
@@ -202,15 +213,23 @@ function doRegister(){
       if(ok) ok.style.display = 'none';
       return;
     }
-    return sbCreateProfile({
-      username:      username,
-      nombre:        nombre,
-      whatsapp:      whatsapp,
-      password_hash: hashPass(pass),
-      role:          'user',
-      saldo:         0,
-      ref_code:      rc
-    }).then(function(profile){
+    // Verificar que el WhatsApp no este ya registrado
+    return sbGetByWhatsapp(whatsapp).then(function(waExiste){
+      if(waExiste){
+        showAuthMsg('reg-err', 'Ese numero de WhatsApp ya esta registrado');
+        if(ok) ok.style.display = 'none';
+        return;
+      }
+      return sbCreateProfile({
+        username:      username,
+        nombre:        nombre,
+        whatsapp:      whatsapp,
+        sexo:          sexo,
+        password_hash: hashPass(pass),
+        role:          'user',
+        saldo:         0,
+        ref_code:      rc
+      }).then(function(profile){
       if(!profile || (Array.isArray(profile) && !profile.length)){
         showAuthMsg('reg-err', 'Error: Corre el SQL en Supabase primero (setup_supabase.sql)');
         if(ok) ok.style.display = 'none';
@@ -227,6 +246,7 @@ function doRegister(){
         localStorage.setItem(notifKey, admUrl);
       } catch(e){}
       setTimeout(function(){ loginWithProfile(p); }, 800);
+    });
     });
   }).catch(function(e){
     var msg = e && e.message ? e.message : 'error desconocido';

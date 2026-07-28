@@ -8554,3 +8554,17 @@ function comprarLikes2k(i){
     if(inp) inp.value = '';
   }, 600);
 }
+
+
+// Seleccionar sexo en el registro
+function _regSetSexo(val, btn){
+  var el = document.getElementById('reg-sexo');
+  if(el) el.value = val;
+  document.querySelectorAll('.reg-sexo-btn').forEach(function(b){
+    if(b.getAttribute('data-sexo')===val){
+      b.style.background='rgba(34,211,238,.15)'; b.style.borderColor='rgba(34,211,238,.5)'; b.style.color='#22d3ee';
+    } else {
+      b.style.background='#10131f'; b.style.borderColor='rgba(0,150,255,.2)'; b.style.color='#9aa3b0';
+    }
+  });
+}
