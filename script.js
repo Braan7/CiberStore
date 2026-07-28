@@ -5606,12 +5606,12 @@ var _diamSeleccionado = null;
 // ═══════════ RECARGAS AUTOMÁTICAS (Recargas América type=recharge) ═══════════
 // package_id = el ID de Recargas América | precio = costo USD × 20 (redondeado)
 var RECARGAS_AUTO = [
-  { package_id:340, sku:'FFCH100R',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.70,  precio:16,  img:'img/diam-100.png'  },
-  { package_id:343, sku:'FFCH310R',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:2.09,  precio:45,  img:'img/diam-310.png'  },
+  { package_id:340, sku:'FFCH100R',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.70,  precio:15,  img:'img/diam-100.png'  },
+  { package_id:343, sku:'FFCH310R',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:2.09,  precio:40,  img:'img/diam-310.png'  },
   { package_id:345, sku:'FFCH520R',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.53,  precio:70,  img:'img/diam-520.png'  },
-  { package_id:341, sku:'FFCH1060R', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.57,  precio:135, img:'img/diam-1060.png' },
-  { package_id:342, sku:'FFCH2180R', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:13.03, precio:250, img:'img/diam-2180.png' },
-  { package_id:344, sku:'FFCH5600R', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:33.16, precio:645, img:'img/diam-5600.png' },
+  { package_id:341, sku:'FFCH1060R', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.57,  precio:125, img:'img/diam-1060.png' },
+  { package_id:342, sku:'FFCH2180R', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:13.03, precio:245, img:'img/diam-2180.png' },
+  { package_id:344, sku:'FFCH5600R', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:33.16, precio:620, img:'img/diam-5600.png' },
   { package_id:null, nombre:'11.200 Diamantes + 1.120 Bono', diamantes:12320, costoUSD:66.32, precio:1390, manual:true }
 ];
 
@@ -8356,7 +8356,8 @@ document.addEventListener('DOMContentLoaded', function(){
   // IDs de campos donde el cliente pega su ID de Free Fire / clan / UID
   var camposId = ['f1','f2','bundle-id','pase-id','lk-manual-uid','hcff-token',
                   'v1-id','ilim-id','bonus-id','lk200-id','lk2k-id','ff-id',
-                  'clan-nombre','clan-id','m-clan-id'];
+                  'clan-nombre','clan-id','m-clan-id',
+                  'cart-ff-id','cart-ff-id2','ac80-id','frag-id','l2k-id','m-ff-id'];
 
   function limpiarId(txt){
     // Quitar espacios, saltos de linea y todo lo que no sea numero
@@ -8370,14 +8371,16 @@ document.addEventListener('DOMContentLoaded', function(){
       try {
         var pegado = (e.clipboardData || window.clipboardData).getData('text');
         if(pegado){
+          // Decidir si limpiar a solo numeros: campos de ID/tel/numericos
+          var esNumerico = (el.type === 'tel') || (el.inputMode === 'numeric') ||
+                           (el.getAttribute && el.getAttribute('inputmode') === 'numeric') ||
+                           (camposId.indexOf(el.id) >= 0);
+          var limpio = esNumerico ? limpiarId(pegado) : pegado.trim();
           e.preventDefault();
-          var limpio = limpiarId(pegado);
-          // Insertar el texto limpio en la posicion del cursor
           var ini = el.selectionStart || 0;
           var fin = el.selectionEnd || 0;
           var val = el.value || '';
           el.value = val.slice(0, ini) + limpio + val.slice(fin);
-          // Disparar el evento input por si hay validaciones
           el.dispatchEvent(new Event('input', { bubbles:true }));
         }
       } catch(err){ /* si falla, dejar el pegado normal */ }
@@ -8391,8 +8394,10 @@ document.addEventListener('DOMContentLoaded', function(){
 
   // Tambien enganchar cualquier campo futuro con clase .finput cuando se abra un modal
   window._hookPasteAll = function(){
-    document.querySelectorAll('input.finput, #lk-manual-uid').forEach(function(el){
-      if(el.type === 'text' || el.type === 'tel' || el.inputMode === 'numeric') hookPaste(el);
+    // Enganchar TODOS los inputs de texto/tel/numerico de la app
+    // para que dejen pegar IDs sin problema
+    document.querySelectorAll('input[type="text"], input[type="tel"], input[inputmode="numeric"], input.finput').forEach(function(el){
+      hookPaste(el);
     });
   };
   window._hookPasteAll();
