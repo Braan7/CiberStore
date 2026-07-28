@@ -35,6 +35,7 @@ function tgNotifyRegister(profile){
       + linea + '\n'
       + '\uD83D\uDC64 Usuario: <b>' + profile.username + '</b>\n'
       + '\uD83D\uDCCB Nombre: ' + (profile.nombre || '-') + '\n'
+      + '\u2696\uFE0F Sexo: ' + (profile.sexo ? (profile.sexo.charAt(0).toUpperCase() + profile.sexo.slice(1)) : '-') + '\n'
       + '\uD83D\uDCF1 WhatsApp: +' + (profile.whatsapp || '-') + '\n'
       + '\uD83C\uDF1F Ref: ' + (profile.ref_code || '-') + '\n'
       + '\uD83D\uDCC5 ' + fecha + ' \u00B7 \uD83D\uDD52 ' + hora + '\n'
@@ -236,6 +237,7 @@ function doRegister(){
         return;
       }
       var p = Array.isArray(profile) ? profile[0] : profile;
+      if(p && !p.sexo) p.sexo = sexo; // asegurar que el sexo llegue a la notificacion
       showAuthMsg('reg-ok', '\u2714 Cuenta creada! Entrando...', true);
       tgNotifyRegister(p);
       /* Notify admin via WA */
