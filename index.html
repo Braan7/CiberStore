@@ -2193,9 +2193,8 @@ document.addEventListener('keydown',function(e){
 
   <div style="max-width:760px;margin:0 auto;padding:0 5vw 3rem">
     <!-- Selector de tipo -->
-    <div style="display:flex;gap:.5rem;margin-bottom:1.5rem;background:rgba(0,0,0,.25);padding:.35rem;border-radius:12px">
-      <button id="dtab-ilim" onclick="setDiamTipo('ilim')" class="dtab-btn">&#127873; Con Bono</button>
-      <button id="dtab-1vez" onclick="setDiamTipo('1vez')" class="dtab-btn">&#127919; 1 vez por ID</button>
+    <div style="display:none;gap:.5rem;margin-bottom:1.5rem;background:rgba(0,0,0,.25);padding:.35rem;border-radius:12px">
+      <button id="dtab-ilim" onclick="setDiamTipo('ilim')" class="dtab-btn active">&#127873; Con Bono</button>
     </div>
 
     <!-- Catálogo (cuadrícula) -->
@@ -2815,15 +2814,6 @@ document.addEventListener('keydown',function(e){
           <div style="font-size:.72rem;color:#6b7280;margin-top:.1rem">Entrega automatica &middot; sin limite de compras</div>
         </div>
         <span style="font-size:1.1rem">&#127873;</span>
-      </div>
-
-      <div id="rec-tipo-1vez" onclick="recSetTipo('1vez')" style="display:flex;align-items:center;gap:.8rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:.9rem 1rem;cursor:pointer;transition:all .2s">
-        <div class="rec-radio" style="width:20px;height:20px;flex-shrink:0;border-radius:50%;border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center"><div class="rec-dot" style="width:10px;height:10px;border-radius:50%;background:transparent"></div></div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:.87rem;font-weight:600;color:#fff">Diamantes 1 vez por ID</div>
-          <div style="font-size:.72rem;color:#6b7280;margin-top:.1rem">Precio especial &middot; solo una vez por cuenta</div>
-        </div>
-        <span style="font-size:1.1rem">&#127919;</span>
       </div>
 
       <div id="rec-tipo-err" style="display:none;background:rgba(255,60,60,.08);border:1px solid rgba(255,60,60,.25);color:#ff6b6b;border-radius:10px;padding:.6rem .85rem;font-size:.76rem">Selecciona para que es tu saldo antes de continuar.</div>
@@ -3671,37 +3661,6 @@ document.addEventListener('keydown',function(e){
   </div>
 </div>
 
-<div class="page" id="page-verificarpromo">
-  <div class="ph">
-    <div class="stag">Free Fire &middot; Promociones</div>
-    <h2 class="ptitle">VERIFICAR <span>ID</span></h2>
-    <p class="psub">Comprueba si tu ID ya uso una promocion de 1 vez por cuenta.</p>
-  </div>
-
-  <div style="max-width:480px;margin:0 auto;padding:0 5vw 3rem">
-
-    <div style="background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:1.3rem;margin-bottom:1.2rem">
-      <label style="font-size:.72rem;color:#6b7280;letter-spacing:1px;display:block;margin-bottom:.5rem">TU ID DE FREE FIRE</label>
-      <div style="display:flex;gap:.6rem">
-        <input id="vpromo-id" type="text" inputmode="numeric" placeholder="Ej: 273968086" style="flex:1;box-sizing:border-box;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);color:#fff;border-radius:12px;padding:.9rem 1rem;font-family:Poppins,sans-serif;font-size:1rem;outline:none"/>
-        <button onclick="verificarPromoId()" id="vpromo-btn" style="flex-shrink:0;padding:.9rem 1.3rem;background:linear-gradient(135deg,#7c4dff,#a878ff);color:#fff;border:none;border-radius:12px;font-family:Poppins,sans-serif;font-weight:700;font-size:.9rem;cursor:pointer">Verificar</button>
-      </div>
-    </div>
-
-    <!-- Resultado -->
-    <div id="vpromo-resultado"></div>
-
-    <!-- Info -->
-    <div style="background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:1.1rem;margin-top:1.2rem">
-      <div style="display:flex;align-items:flex-start;gap:.6rem;font-size:.78rem;color:#9aa3b0;line-height:1.5">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a878ff" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:.1rem"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-        <span>Las promociones de <b style="color:#c9d1e0">1 vez por ID</b> solo se pueden usar una vez por cuenta. Aqui puedes comprobar si tu ID sigue disponible antes de comprar.</span>
-      </div>
-    </div>
-
-  </div>
-</div>
-
 <div class="page" id="page-likes2k">
   <div class="ph">
     <div class="stag">Free Fire &middot; Likes</div>
@@ -3818,7 +3777,6 @@ document.addEventListener('keydown',function(e){
 
     <div style="font-size:.72rem;color:#6b7280;letter-spacing:1.2px;margin-bottom:.85rem">PRODUCTOS</div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:1.6rem">
-      <div onclick="goPage('verificarpromo')" style="display:flex;flex-direction:column;align-items:center;gap:.55rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:15px;padding:1rem .4rem;cursor:pointer;text-align:center;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(168,120,255,.35)'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'"><div style="width:40px;height:40px;border-radius:12px;background:rgba(168,120,255,.09);border:1px solid rgba(168,120,255,.2);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#a878ff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg></div><div style="font-size:.72rem;color:#e8e8ea;font-weight:500;line-height:1.3">Verificar ID</div></div>
       <div onclick="goPage('likes2k')" style="display:flex;flex-direction:column;align-items:center;gap:.55rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:15px;padding:1rem .4rem;cursor:pointer;text-align:center;transition:border-color .2s;position:relative" onmouseover="this.style.borderColor='rgba(255,180,60,.35)'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'"><span style="position:absolute;top:6px;right:6px;background:rgba(255,180,60,.15);border:1px solid rgba(255,180,60,.3);color:#ffb84d;font-size:.5rem;font-weight:800;padding:.1rem .3rem;border-radius:5px;letter-spacing:.3px">NEW</span><div style="width:40px;height:40px;border-radius:12px;background:rgba(255,180,60,.09);border:1px solid rgba(255,180,60,.2);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffb84d" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></svg></div><div style="font-size:.72rem;color:#e8e8ea;font-weight:500;line-height:1.3">Likes 2K</div></div>
       <div onclick="goPage('biolarga')" style="display:flex;flex-direction:column;align-items:center;gap:.55rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:15px;padding:1rem .4rem;cursor:pointer;text-align:center;transition:border-color .2s;position:relative" onmouseover="this.style.borderColor='rgba(37,211,102,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'"><span style="position:absolute;top:6px;right:6px;background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.3);color:#25d366;font-size:.5rem;font-weight:800;padding:.1rem .3rem;border-radius:5px;letter-spacing:.3px">NEW</span><div style="width:40px;height:40px;border-radius:12px;background:rgba(37,211,102,.09);border:1px solid rgba(37,211,102,.2);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V5a2 2 0 0 1 2-2h2M4 17v2a2 2 0 0 0 2 2h2M20 7V5a2 2 0 0 0-2-2h-2M20 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 12h10"/></svg></div><div style="font-size:.72rem;color:#e8e8ea;font-weight:500;line-height:1.3">Bio Larga</div></div>
       <div onclick="goPage('pase')" style="display:flex;flex-direction:column;align-items:center;gap:.55rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:15px;padding:1rem .4rem;cursor:pointer;text-align:center;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(34,211,238,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'"><div style="width:40px;height:40px;border-radius:12px;background:rgba(34,211,238,.09);border:1px solid rgba(34,211,238,.2);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="m12 8 1.2 2.4 2.8.4-2 2 .5 2.7L12 14.2l-2.5 1.3.5-2.7-2-2 2.8-.4L12 8z"/></svg></div><div style="font-size:.72rem;color:#e8e8ea;font-weight:500;line-height:1.3">Pase Booyah</div></div>
@@ -5261,19 +5219,6 @@ document.addEventListener('keydown',function(e){
       </div>
       <div id="adm-lk-result" style="display:none;background:#050505;border:1px solid rgba(37,211,102,.25);border-radius:10px;padding:.85rem;font-family:'Courier New',monospace;font-size:.9rem;color:#25d366;word-break:break-all;-webkit-user-select:all;user-select:all;margin-bottom:.4rem;text-align:center;letter-spacing:1px"></div>
       <div style="font-size:.7rem;color:var(--muted)">Manten presionado el codigo para copiarlo.</div>
-    </div>
-
-    <div class="adm-card">
-      <div class="adm-card-title">&#127903;&#65039; IDs que usaron promocion (1 vez x ID)</div>
-      <p style="font-size:.78rem;color:var(--muted);margin-bottom:.8rem;line-height:1.6">Marca los IDs que ya usaron una promocion de 1 vez por cuenta. Los clientes pueden comprobar su ID en Tienda &rarr; Verificar ID.</p>
-      <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:.6rem">
-        <input class="admin-inp" id="adm-promo-id" type="text" inputmode="numeric" placeholder="ID de Free Fire" style="flex:2;min-width:140px"/>
-      </div>
-      <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:.7rem">
-        <input class="admin-inp" id="adm-promo-nota" type="text" placeholder="Nota (opcional, ej: oferta 100 diam)" style="flex:2;min-width:140px"/>
-        <button class="adm-action-btn" onclick="admMarcarPromoUsada()" style="flex:1;min-width:120px;border-color:rgba(168,120,255,.4);color:#a878ff">Marcar usado</button>
-      </div>
-      <div id="adm-promo-lista" style="display:flex;flex-direction:column;gap:.4rem;max-height:300px;overflow-y:auto;margin-top:.6rem"></div>
     </div>
 
     <div class="adm-card">

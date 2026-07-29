@@ -137,12 +137,6 @@ var PRODUCTS = [
 
 /* \u2500\u2500 DIAMANTES 1 VEZ x ID (precios especiales) \u2500\u2500 */
 var PRODUCTS_1VEZ = [
-  {id:21, name:'110',   total:110,  bonus:0, region:'LATAM & BR', prices:[13,13,13,13,13],  badge:null,        isPase:false, popular:false, is1vez:true},
-  {id:22, name:'341',   total:341,  bonus:0, region:'LATAM & BR', prices:[45,45,45,45,45],  badge:'POPULAR',   isPase:false, popular:true,  is1vez:true},
-  {id:23, name:'572',   total:572,  bonus:0, region:'LATAM & BR', prices:[65,65,65,65,65],  badge:null,        isPase:false, popular:false, is1vez:true},
-  {id:24, name:'1,166', total:1166, bonus:0, region:'LATAM & BR', prices:[120,120,120,120,120], badge:'OFERTA',isPase:false, popular:false, is1vez:true},
-  {id:25, name:'2,398', total:2398, bonus:0, region:'LATAM & BR', prices:[220,220,220,220,220], badge:null,    isPase:false, popular:false, is1vez:true},
-  {id:26, name:'6,160', total:6160, bonus:0, region:'LATAM & BR', prices:[520,520,520,520,520], badge:'MEJOR PRECIO',isPase:false, popular:false, is1vez:true}
 ];
 
 var LIKES = [
@@ -699,7 +693,6 @@ function goPage(id){
   if(id==='biolarga') setTimeout(_refreshBioLargaSaldo, 100);
   if(id==='likes2k') setTimeout(function(){ renderLikes2k(); _refreshL2kSaldo(); }, 100);
   if(id==='cajas') setTimeout(_fraguActualizar, 100);
-  if(id==='verificarpromo'){ var vr=document.getElementById('vpromo-resultado'); if(vr) vr.innerHTML=''; }
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
   var pg=document.getElementById('page-'+id);
@@ -2321,7 +2314,6 @@ function admFullTab(tab){
   if(tab==='codigos'){ renderAdminCodes();renderAdminStats(); }
   if(tab==='chat')    admLoadChat();
   if(tab==='resenas') admLoadResenas();
-  if(tab==='config')  { if(typeof admListarPromo==='function') admListarPromo(); }
 }
 
 /* \u2500\u2500 DASHBOARD \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
