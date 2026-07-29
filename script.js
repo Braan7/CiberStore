@@ -7089,22 +7089,41 @@ function _syncBottomNav(id){
 
 
 // ═══════════ PASE BOOYAH (asistente de 3 pasos) ═══════════
-var PASE_PRECIO = 25;
+var PASE_PRECIO = 14;
 var _comprandoPase = false;
 var _paseIdVerificado = null;
 var _paseNickVerificado = '';
 var _pasePasoActual = 1;
+var _paseCantidad = 1;
+
+function paseCant(delta){
+  _paseCantidad = Math.max(1, Math.min(99, (_paseCantidad||1) + delta));
+  var inp = document.getElementById('pase-cant');
+  if(inp) inp.value = _paseCantidad;
+  _updatePasePagina();
+}
+function paseSetCant(valor){
+  var n = parseInt(String(valor).replace(/[^0-9]/g,'')) || 1;
+  _paseCantidad = Math.max(1, Math.min(99, n));
+  _updatePasePagina();
+}
 
 function _updatePasePagina(){
   var s = authSession ? (authSession.saldo||0) : 0;
-  ['pase-r-precio','pase-p-precio','pase-p-total'].forEach(function(id){
-    var el = document.getElementById(id);
-    if(el) el.textContent = fmt(PASE_PRECIO);
-  });
+  var cant = _paseCantidad || 1;
+  var total = PASE_PRECIO * cant;
+  // precio unitario en el resumen
+  var elPrecio = document.getElementById('pase-r-precio');
+  if(elPrecio) elPrecio.textContent = fmt(PASE_PRECIO);
+  // en el paso de pago: mostrar cantidad x precio y el total
+  var elPP = document.getElementById('pase-p-precio');
+  if(elPP) elPP.textContent = cant > 1 ? (cant + ' x ' + fmt(PASE_PRECIO)) : fmt(PASE_PRECIO);
+  var elPT = document.getElementById('pase-p-total');
+  if(elPT) elPT.textContent = fmt(total);
   var sa = document.getElementById('pase-saldo');
   if(sa){
     sa.textContent = fmt(s);
-    sa.style.color = (s >= PASE_PRECIO) ? '#22d3ee' : '#ff6b6b';
+    sa.style.color = (s >= total) ? '#22d3ee' : '#ff6b6b';
   }
 }
 
@@ -7260,6 +7279,8 @@ function _paseReiniciar(){
   paseCambiarID();
   var i1 = document.getElementById('pase-id'); if(i1) i1.value='';
   var e1 = document.getElementById('pase-err'); if(e1) e1.style.display='none';
+  _paseCantidad = 1;
+  var pc = document.getElementById('pase-cant'); if(pc) pc.value='1';
   paseIrPaso(1);
   _updatePasePagina();
 }
@@ -7273,8 +7294,10 @@ function comprarPase(){
 
   if(!_paseIdVerificado){ showErr('Primero verifica tu ID de Free Fire.'); paseIrPaso(1); return; }
 
+  var cant = _paseCantidad || 1;
+  var totalPase = PASE_PRECIO * cant;
   var saldo = authSession.saldo||0;
-  if(saldo < PASE_PRECIO){ showErr('Saldo insuficiente ('+fmt(saldo)+'). Necesitas '+fmt(PASE_PRECIO)+'.'); return; }
+  if(saldo < totalPase){ showErr('Saldo insuficiente ('+fmt(saldo)+'). Necesitas '+fmt(totalPase)+'.'); return; }
   if(err) err.style.display='none';
 
   _comprandoPase = true;
@@ -7282,17 +7305,18 @@ function comprarPase(){
   var nom = _paseNickVerificado || '-';
   var ord = getNextOrder();
 
-  addSpend(PASE_PRECIO, 'Pase Booyah - ID:'+ffId+' ('+nom+') - Pedido #'+ord);
-  registrarPedido('Pase Booyah', 0, 'otro', ffId, PASE_PRECIO, 0);
+  var txtCant = cant > 1 ? (cant + 'x Pase Booyah') : 'Pase Booyah';
+  addSpend(totalPase, txtCant + ' - ID:'+ffId+' ('+nom+') - Pedido #'+ord);
+  registrarPedido(txtCant, 0, 'otro', ffId, totalPase, 0);
   if(typeof tgNotifyPurchase==='function'){
     tgNotifyPurchase(authSession.username,
-      '\uD83C\uDF9F\uFE0F Pase Booyah\n\uD83C\uDFAE ID: '+ffId+'\n\uD83D\uDC64 Cuenta: '+nom+' (verificada)\n\u26A0\uFE0F Entrega por REGALO (1-4 dias)',
-      PASE_PRECIO, ord);
+      '\uD83C\uDF9F\uFE0F '+txtCant+'\n\uD83C\uDFAE ID: '+ffId+'\n\uD83D\uDC64 Cuenta: '+nom+' (verificada)\n\u26A0\uFE0F Entrega por REGALO (1 dia)',
+      totalPase, ord);
   }
 
   if(typeof _mostrarAvisoModal==='function'){
     _mostrarAvisoModal('PEDIDO #'+ord+' CONFIRMADO',
-      'Tu <b style="color:#fff">Pase Booyah</b> fue pedido para <b style="color:#fff">'+nom+'</b>.<br/><br/>Se envia mediante <b style="color:#fff">REGALO</b> y puede tardar de <b style="color:#fff">1 a 4 dias</b>.',
+      'Tu <b style="color:#fff">'+txtCant+'</b> fue pedido para <b style="color:#fff">'+nom+'</b>.<br/><br/>Se envia mediante <b style="color:#fff">REGALO</b> y puede tardar <b style="color:#fff">1 dia</b>.',
       '#22d3ee');
   }
   showToast('\u2705 Pedido #'+ord+' confirmado!', 3000);
@@ -8607,6 +8631,14 @@ function fraguCant(tipo, delta){
   _fraguActualizar();
 }
 
+// Cuando el cliente escribe la cantidad directo
+function fraguSet(tipo, valor){
+  var n = parseInt(String(valor).replace(/[^0-9]/g,'')) || 0;
+  n = Math.max(0, Math.min(9999, n));
+  _fraguCant[tipo] = n;
+  _fraguActualizar();
+}
+
 function _fraguActualizar(){
   var subCaja = _fraguCant.caja * FRAGU_PRECIO_CAJA;
   var subFrag = _fraguCant.frag * FRAGU_PRECIO_FRAG;
@@ -8626,6 +8658,12 @@ function comprarFragU(){
   if(ffId.length < 5){ showToast('\u26A0\uFE0F Ingresa tu ID de Free Fire'); var f=document.getElementById('fragu-id'); if(f) f.focus(); return; }
 
   if(_fraguCant.caja === 0 && _fraguCant.frag === 0){ showToast('Elige al menos 1 producto'); return; }
+
+  // Minimo de fragmentos sueltos: 35 (si pidio fragmentos)
+  if(_fraguCant.frag > 0 && _fraguCant.frag < 35){
+    showToast('\u26A0\uFE0F El minimo de fragmentos sueltos es 35', 3500);
+    return;
+  }
 
   var total = _fraguCant.caja * FRAGU_PRECIO_CAJA + _fraguCant.frag * FRAGU_PRECIO_FRAG;
   var totalRedondeado = Math.round(total * 100) / 100;

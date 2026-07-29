@@ -3616,7 +3616,16 @@ document.addEventListener('keydown',function(e){
             <div style="font-family:Poppins,sans-serif;font-weight:700;font-size:.98rem;color:#fff">Pase Booyah</div>
             <div style="font-size:.74rem;color:#6b7280;margin-top:.15rem">Recompensas de la temporada</div>
           </div>
-          <div id="pase-r-precio" style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.25rem;color:#fff;flex-shrink:0">$25</div>
+          <div id="pase-r-precio" style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.25rem;color:#fff;flex-shrink:0">$14</div>
+        </div>
+        <!-- Selector de cantidad -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,.06)">
+          <span style="font-size:.8rem;color:#9aa3b0;font-weight:600">Cantidad de pases</span>
+          <div style="display:flex;align-items:center;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);border-radius:11px;overflow:hidden">
+            <button onclick="paseCant(-1)" style="width:40px;height:42px;background:none;border:none;color:#22d3ee;font-size:1.3rem;cursor:pointer">&#8722;</button>
+            <input id="pase-cant" type="text" inputmode="numeric" value="1" oninput="paseSetCant(this.value)" style="width:48px;height:42px;text-align:center;background:none;border:none;color:#fff;font-family:Oxanium;font-weight:800;font-size:1.1rem;outline:none"/>
+            <button onclick="paseCant(1)" style="width:40px;height:42px;background:none;border:none;color:#22d3ee;font-size:1.3rem;cursor:pointer">+</button>
+          </div>
         </div>
       </div>
 
@@ -3642,9 +3651,9 @@ document.addEventListener('keydown',function(e){
     <div id="pase-paso-3" style="display:none">
       <div style="background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:1.2rem;margin-bottom:.85rem">
         <div style="font-size:.65rem;color:#6b7280;letter-spacing:1.2px;font-weight:600;margin-bottom:.85rem">RESUMEN DE PAGO</div>
-        <div style="display:flex;justify-content:space-between;font-size:.85rem;padding:.4rem 0"><span style="color:#6b7280">Pase Booyah</span><span id="pase-p-precio" style="color:#fff;font-weight:600">$25</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:.85rem;padding:.4rem 0"><span style="color:#6b7280">Pase Booyah</span><span id="pase-p-precio" style="color:#fff;font-weight:600">$14</span></div>
         <div style="display:flex;justify-content:space-between;font-size:.85rem;padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:.7rem"><span style="color:#6b7280">Comision</span><span style="color:#25d366;font-weight:600">Sin comision</span></div>
-        <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:.9rem;color:#fff;font-weight:600">Total</span><span id="pase-p-total" style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.5rem;color:#fff">$25</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:.9rem;color:#fff;font-weight:600">Total</span><span id="pase-p-total" style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.5rem;color:#fff">$14</span></div>
       </div>
 
       <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(34,211,238,.05);border:1px solid rgba(34,211,238,.15);border-radius:13px;padding:.9rem 1.1rem;margin-bottom:.85rem">
@@ -4015,7 +4024,7 @@ document.addEventListener('keydown',function(e){
       <div style="display:flex;align-items:center;gap:.7rem">
         <div style="display:flex;align-items:center;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);border-radius:11px;overflow:hidden">
           <button onclick="fraguCant('caja',-1)" style="width:42px;height:44px;background:none;border:none;color:#00e5ff;font-size:1.3rem;cursor:pointer">&#8722;</button>
-          <input id="fragu-caja-cant" type="text" inputmode="numeric" value="0" readonly style="width:52px;height:44px;text-align:center;background:none;border:none;color:#fff;font-family:Oxanium;font-weight:800;font-size:1.1rem;outline:none"/>
+          <input id="fragu-caja-cant" type="text" inputmode="numeric" value="0" oninput="fraguSet('caja',this.value)" style="width:52px;height:44px;text-align:center;background:none;border:none;color:#fff;font-family:Oxanium;font-weight:800;font-size:1.1rem;outline:none"/>
           <button onclick="fraguCant('caja',1)" style="width:42px;height:44px;background:none;border:none;color:#00e5ff;font-size:1.3rem;cursor:pointer">+</button>
         </div>
         <div style="flex:1;text-align:right"><span style="font-size:.68rem;color:#6b7280">Subtotal</span><div id="fragu-caja-sub" style="font-family:Poppins;font-weight:700;font-size:1.15rem;color:#00e5ff">$0</div></div>
@@ -4028,13 +4037,13 @@ document.addEventListener('keydown',function(e){
         <img src="img/fragmento-universal.png" alt="Fragmento" style="width:56px;height:56px;flex-shrink:0;object-fit:contain"/>
         <div style="flex:1;min-width:0">
           <div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:1.05rem;color:#fff;line-height:1.1">Fragmento Universal</div>
-          <div style="font-size:.72rem;color:#25d366;margin-top:.15rem">Suelto &middot; $0.85 MXN c/u</div>
+          <div style="font-size:.72rem;color:#25d366;margin-top:.15rem">Suelto &middot; $0.85 MXN c/u &middot; <span style="color:#ffb84d">min. 35</span></div>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:.7rem">
         <div style="display:flex;align-items:center;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);border-radius:11px;overflow:hidden">
           <button onclick="fraguCant('frag',-1)" style="width:42px;height:44px;background:none;border:none;color:#25d366;font-size:1.3rem;cursor:pointer">&#8722;</button>
-          <input id="fragu-frag-cant" type="text" inputmode="numeric" value="0" readonly style="width:52px;height:44px;text-align:center;background:none;border:none;color:#fff;font-family:Oxanium;font-weight:800;font-size:1.1rem;outline:none"/>
+          <input id="fragu-frag-cant" type="text" inputmode="numeric" value="0" oninput="fraguSet('frag',this.value)" style="width:52px;height:44px;text-align:center;background:none;border:none;color:#fff;font-family:Oxanium;font-weight:800;font-size:1.1rem;outline:none"/>
           <button onclick="fraguCant('frag',1)" style="width:42px;height:44px;background:none;border:none;color:#25d366;font-size:1.3rem;cursor:pointer">+</button>
         </div>
         <div style="flex:1;text-align:right"><span style="font-size:.68rem;color:#6b7280">Subtotal</span><div id="fragu-frag-sub" style="font-family:Poppins;font-weight:700;font-size:1.15rem;color:#25d366">$0</div></div>
