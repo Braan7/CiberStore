@@ -3821,7 +3821,7 @@ function setDiamondPeriod(period){
     }
   });
   loadDiamondTop();
-  if(typeof renderTopLikes==='function') setTimeout(renderTopLikes, 500);
+  if(typeof renderTopsCompras==='function') setTimeout(renderTopsCompras, 600);
 }
 
 function loadDiamondTop(){
@@ -3903,7 +3903,7 @@ var _origGoPageDiamond = goPage;
 goPage = function(id){
   _origGoPageDiamond(id);
   if(id === 'home') setTimeout(loadDiamondTop, 400);
-  if(id === 'home') setTimeout(renderTopLikes, 600);
+  if(id === 'home') setTimeout(renderTopsCompras, 700);
 };
 
 document.addEventListener('DOMContentLoaded', function(){
@@ -8619,8 +8619,6 @@ function _fraguActualizar(){
 }
 
 function comprarFragU(){
-  showToast('\u26A0\uFE0F Los fragmentos estan fuera de servicio temporalmente', 3500);
-  return;
   if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal, 600); return; }
   if(_fraguBusy) return;
 
@@ -8668,4 +8666,99 @@ function comprarFragU(){
     _fraguActualizar();
     showToast('\u2705 Pedido #' + ord + ' confirmado! Te llegara pronto.', 5000);
   }, 600);
+}
+
+
+// ═══════════ TOPS DE COMPRAS (pases, fragmentos, cajas) ═══════════
+// Cuenta cuantas compras de cada tipo hizo cada usuario, leyendo movimientos_saldo.
+// filtro: funcion que decide si un movimiento cuenta y cuanto suma.
+function _renderTopCompras(listaId, filtro, colorHex, unidad){
+  var cont = document.getElementById(listaId);
+  if(!cont) return;
+  if(typeof sb === 'undefined' || !sb.get){
+    cont.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#6b7280;font-size:.8rem">No disponible</div>';
+    return;
+  }
+  cont.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#6b7280;font-size:.8rem">Cargando...</div>';
+
+  sb.get('movimientos_saldo', 'select=user_id,descripcion,tipo&tipo=eq.compra&limit=5000')
+    .then(function(rows){
+      if(!rows || !rows.length){ cont.innerHTML = _topVacio(); return; }
+      var acum = {};
+      rows.forEach(function(m){
+        var desc = String(m.descripcion||'');
+        var cant = filtro(desc);
+        if(cant > 0 && m.user_id){ acum[m.user_id] = (acum[m.user_id]||0) + cant; }
+      });
+      var arr = Object.keys(acum).map(function(uid){ return { user_id:uid, total:acum[uid] }; });
+      if(!arr.length){ cont.innerHTML = _topVacio(); return; }
+      arr.sort(function(a,b){ return b.total - a.total; });
+      arr = arr.slice(0, 10);
+
+      var ids = arr.map(function(x){ return x.user_id; });
+      sb.get('profiles', 'select=id,username&id=in.(' + ids.join(',') + ')').then(function(perfiles){
+        var nombres = {};
+        (perfiles||[]).forEach(function(p){ nombres[p.id] = p.username; });
+        _pintarTopCompras(cont, arr, nombres, colorHex, unidad);
+      }).catch(function(){ _pintarTopCompras(cont, arr, {}, colorHex, unidad); });
+    }).catch(function(e){
+      cont.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#6b7280;font-size:.8rem">Error al cargar</div>';
+      console.error('[TOP-COMPRAS]', e);
+    });
+}
+
+function _topVacio(){
+  return '<div style="text-align:center;padding:1.5rem;color:#6b7280;font-size:.78rem">Aun no hay compras registradas</div>';
+}
+
+function _pintarTopCompras(cont, arr, nombres, colorHex, unidad){
+  var yo = authSession ? authSession.id : null;
+  cont.innerHTML = arr.map(function(x, i){
+    var pos = i + 1;
+    var nombre = nombres[x.user_id] || 'Usuario';
+    var esYo = (x.user_id === yo);
+    var medalla = '';
+    if(pos === 1) medalla = '<svg width="18" height="18" viewBox="0 0 24 24" fill="#ffd700" style="flex-shrink:0"><path d="M13 2 L15.5 8 L22 8.5 L17 13 L18.5 20 L13 16.5 L7.5 20 L9 13 L4 8.5 L10.5 8 Z"/></svg>';
+    else if(pos === 2) medalla = '<svg width="16" height="16" viewBox="0 0 24 24" fill="#c0c0c0" style="flex-shrink:0"><circle cx="12" cy="12" r="9"/></svg>';
+    else if(pos === 3) medalla = '<svg width="16" height="16" viewBox="0 0 24 24" fill="#cd7f32" style="flex-shrink:0"><circle cx="12" cy="12" r="9"/></svg>';
+    else medalla = '<span style="width:18px;flex-shrink:0;text-align:center;font-family:Oxanium;font-weight:700;color:#6b7280;font-size:.8rem">'+pos+'</span>';
+
+    var borde = esYo ? colorHex+'66' : 'rgba(255,255,255,.06)';
+    var fondo = esYo ? colorHex+'12' : 'rgba(255,255,255,.02)';
+
+    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;background:'+fondo+';border:1px solid '+borde+';border-radius:11px;padding:.65rem .8rem">'
+      + '<div style="display:flex;align-items:center;gap:.55rem;min-width:0">'
+      +   medalla
+      +   '<span style="font-family:Poppins,sans-serif;font-weight:600;font-size:.85rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+nombre+(esYo?' <span style=\'font-size:.6rem;color:'+colorHex+'\'>(tu)</span>':'')+'</span>'
+      + '</div>'
+      + '<div style="text-align:right;flex-shrink:0"><span style="font-family:Oxanium,sans-serif;font-weight:800;font-size:.95rem;color:'+colorHex+'">'+x.total+'</span> <span style="font-size:.58rem;color:#6b7280">'+unidad+'</span></div>'
+      + '</div>';
+  }).join('');
+}
+
+// Filtros por tipo (leen la descripcion del movimiento)
+function renderTopPases(){
+  _renderTopCompras('top-pases-lista', function(desc){
+    return /pase booyah/i.test(desc) ? 1 : 0;
+  }, '#22d3ee', 'pases');
+}
+function renderTopFragmentos(){
+  _renderTopCompras('top-frag-lista', function(desc){
+    var m = desc.match(/(\d+)x\s*Fragmento Universal/i);
+    return m ? parseInt(m[1]) : 0;
+  }, '#25d366', 'frags');
+}
+function renderTopCajas(){
+  _renderTopCompras('top-cajas-lista', function(desc){
+    var m = desc.match(/(\d+)x\s*Caja de Fragmentos/i);
+    return m ? parseInt(m[1]) : 0;
+  }, '#00e5ff', 'cajas');
+}
+
+// Renderizar los 4 tops juntos
+function renderTopsCompras(){
+  if(typeof renderTopPases==='function') renderTopPases();
+  if(typeof renderTopFragmentos==='function') renderTopFragmentos();
+  if(typeof renderTopCajas==='function') renderTopCajas();
+  if(typeof renderTopLikes==='function') renderTopLikes();
 }
