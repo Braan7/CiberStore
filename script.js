@@ -45,9 +45,15 @@ function addSpend(amount, description){
     _refreshSaldoUI(sn);
     if(typeof saveSession === 'function') saveSession(authSession);
 
-    // Registrar el movimiento
+    // Registrar el movimiento (y avisar su ID por si hay que cancelarlo)
     if(typeof sbAddMovimiento === 'function'){
-      sbAddMovimiento(userId, 'compra', amount, description);
+      sbAddMovimiento(userId, 'compra', amount, description).then(function(r){
+        var movId = (r && r[0] && r[0].id) ? r[0].id : null;
+        if(movId && typeof addSpend._onMovId === 'function'){
+          var cb = addSpend._onMovId; addSpend._onMovId = null;
+          cb(movId);
+        }
+      });
     }
     console.log('[ADDSPEND] OK. Saldo real ahora: $'+sn);
     showToast('\u2713 Compra registrada. Saldo: '+fmt(sn));
@@ -693,6 +699,7 @@ function goPage(id){
   if(id==='biolarga') setTimeout(_refreshBioLargaSaldo, 100);
   if(id==='likes2k') setTimeout(function(){ renderLikes2k(); _refreshL2kSaldo(); }, 100);
   if(id==='cajas') setTimeout(_fraguActualizar, 100);
+  if(id==='verificarpromo'){ var vr=document.getElementById('vpromo-resultado'); if(vr) vr.innerHTML=''; }
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
   var pg=document.getElementById('page-'+id);
@@ -2314,7 +2321,7 @@ function admFullTab(tab){
   if(tab==='codigos'){ renderAdminCodes();renderAdminStats(); }
   if(tab==='chat')    admLoadChat();
   if(tab==='resenas') admLoadResenas();
-  /* config tab has no load function - static content */
+  if(tab==='config')  { if(typeof admListarPromo==='function') admListarPromo(); }
 }
 
 /* \u2500\u2500 DASHBOARD \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
@@ -5943,6 +5950,13 @@ function _procesarRecargaAutomatica(p, ffId){
 
     // Paso 2: cobrar el saldo AHORA (antes de recargar)
     var ord=getNextOrder();
+    var _movCompraId = null;              // ID del movimiento (para cancelarlo si falla)
+    var _cancelarPendiente = false;       // si la recarga falla antes de tener el ID
+    addSpend._onMovId = function(id){
+      _movCompraId = id;
+      // Si la recarga ya habia fallado, cancelar ahora que tenemos el ID
+      if(_cancelarPendiente) _cancelarMovPorId(id);
+    };
     addSpend(p.precio, p.diamantes+' Diamantes (Recarga AUTO '+p.nombre+') - ID:'+ffId+' ('+nombre+') - Pedido #'+ord);
 
     // Paso 3: hacer la recarga automática
@@ -5971,7 +5985,7 @@ function _procesarRecargaAutomatica(p, ffId){
             _refreshSaldoUI(sn);
             if(typeof saveSession==='function') saveSession(authSession);
             if(typeof sbAddMovimiento==='function') sbAddMovimiento(authSession.id, 'credito', p.precio, 'Reembolso Pedido #'+ord+' - recarga rechazada');
-            _cancelarMovimientoCompra(authSession.id, ord);
+            if(_movCompraId) _cancelarMovPorId(_movCompraId); else { _cancelarPendiente = true; _cancelarMovimientoCompra(authSession.id, ord); }
           }).catch(function(e){ console.error('[RECARGA] reembolso fallo:', e); });
 
           registrarPedido(p.nombre+' (RECHAZADA - reembolsado)', p.diamantes, 'diamantes', ffId, 0, 0);
@@ -5995,7 +6009,7 @@ function _procesarRecargaAutomatica(p, ffId){
             _refreshSaldoUI(sn);
             if(typeof saveSession==='function') saveSession(authSession);
             if(typeof sbAddMovimiento==='function') sbAddMovimiento(authSession.id, 'credito', p.precio, 'Devolucion Pedido #'+ord+' - producto no disponible');
-            _cancelarMovimientoCompra(authSession.id, ord);
+            if(_movCompraId) _cancelarMovPorId(_movCompraId); else { _cancelarPendiente = true; _cancelarMovimientoCompra(authSession.id, ord); }
           }).catch(function(e){ console.error('[RECARGA] devolucion fallo:', e); });
 
           registrarPedido(p.nombre+' (AUTO - NO DISPONIBLE, devuelto)', p.diamantes, 'diamantes', ffId, 0, 0);
@@ -7586,40 +7600,53 @@ function recLimpiarTipo(){
 
 
 // Marca la compra de un pedido como CANCELADA para que no cuente en el ranking
+// Cancelar un movimiento por su ID exacto (metodo confiable)
+// Lo pasa a 'compra_cancelada' para que NINGUN ranking lo cuente.
+function _cancelarMovPorId(movId){
+  if(!movId || typeof sb === 'undefined' || !sb.patch) return;
+  sb.patch('movimientos_saldo', { tipo: 'compra_cancelada' }, 'id=eq.' + movId)
+    .then(function(){
+      console.log('[RANKING] Movimiento ' + movId + ' cancelado (no cuenta en ranking)');
+    })
+    .catch(function(e){ console.warn('[RANKING] no se pudo cancelar por ID', e); });
+}
+
 function _cancelarMovimientoCompra(userId, ord){
   if(!userId || !ord || typeof sb === 'undefined' || !sb.patch) return;
 
   // El movimiento de compra se guarda de forma asincrona en addSpend,
   // asi que puede no existir aun cuando la recarga falla rapido.
-  // Reintentamos varias veces con retraso para asegurar que se cancele.
+  // Reintentamos con retraso hasta encontrarlo y cancelarlo.
   var intentos = 0;
+  var maxIntentos = 8;
   function intentarCancelar(){
     intentos++;
-    // Primero verificar que el movimiento exista
+    // Buscar el movimiento por el numero de pedido (ilike = sin importar mayusculas)
     sb.get('movimientos_saldo',
-      'user_id=eq.' + userId + '&tipo=eq.compra&descripcion=like.*Pedido%20%23' + ord + '*&select=id'
+      'user_id=eq.' + encodeURIComponent(userId) + '&tipo=eq.compra&descripcion=ilike.*Pedido*23' + ord + '*&select=id,descripcion'
     ).then(function(rows){
       if(rows && rows.length){
-        // Existe: cancelarlo para que el ranking no lo cuente
+        // Encontrado: marcar TODOS los que coincidan como cancelados
         sb.patch('movimientos_saldo',
           { tipo: 'compra_cancelada' },
-          'user_id=eq.' + userId + '&tipo=eq.compra&descripcion=like.*Pedido%20%23' + ord + '*'
+          'user_id=eq.' + encodeURIComponent(userId) + '&tipo=eq.compra&descripcion=ilike.*Pedido*23' + ord + '*'
         ).then(function(){
-          console.log('[RANKING] Movimiento del pedido #' + ord + ' cancelado (no cuenta en ranking)');
-        }).catch(function(e){ console.warn('[RANKING] no se pudo cancelar', e); });
-      } else if(intentos < 5){
-        // Todavia no se ha guardado: reintentar
+          console.log('[RANKING] Pedido #' + ord + ' cancelado (ya no cuenta en ranking)');
+        }).catch(function(e){
+          if(intentos < maxIntentos) setTimeout(intentarCancelar, 1500);
+          else console.warn('[RANKING] patch fallo', e);
+        });
+      } else if(intentos < maxIntentos){
         setTimeout(intentarCancelar, 1500);
       } else {
-        console.warn('[RANKING] no se encontro el movimiento del pedido #' + ord + ' tras varios intentos');
+        console.warn('[RANKING] no se encontro el movimiento del pedido #' + ord);
       }
     }).catch(function(e){
-      if(intentos < 5) setTimeout(intentarCancelar, 1500);
+      if(intentos < maxIntentos) setTimeout(intentarCancelar, 1500);
       else console.warn('[RANKING]', e);
     });
   }
-  // Esperar un poco antes del primer intento (que addSpend termine de guardar)
-  setTimeout(intentarCancelar, 2000);
+  setTimeout(intentarCancelar, 2500);
 }
 
 
@@ -8825,4 +8852,91 @@ function renderTopsCompras(){
   if(typeof renderTopFragmentos==='function') renderTopFragmentos();
   if(typeof renderTopCajas==='function') renderTopCajas();
   if(typeof renderTopLikes==='function') renderTopLikes();
+}
+
+
+// ═══════════ VERIFICADOR DE PROMOCION POR ID ═══════════
+function verificarPromoId(){
+  var ffId = ((document.getElementById('vpromo-id')||{}).value||'').replace(/\s/g,'').replace(/[^0-9]/g,'');
+  var cont = document.getElementById('vpromo-resultado');
+  if(!cont) return;
+
+  if(ffId.length < 5){ showToast('\u26A0\uFE0F Ingresa un ID valido'); return; }
+
+  var btn = document.getElementById('vpromo-btn');
+  if(btn){ btn.disabled = true; btn.textContent = '...'; }
+  cont.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#6b7280;font-size:.85rem">Verificando...</div>';
+
+  sb.get('ids_promo_usada', 'ff_id=eq.' + encodeURIComponent(ffId) + '&select=promo,nota,created_at')
+    .then(function(rows){
+      if(btn){ btn.disabled = false; btn.textContent = 'Verificar'; }
+      if(rows && rows.length){
+        // Ya uso promocion
+        var fecha = '';
+        try { fecha = new Date(rows[0].created_at).toLocaleDateString('es-MX'); } catch(e){}
+        cont.innerHTML = '<div style="background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.3);border-radius:16px;padding:1.5rem;text-align:center">'
+          + '<div style="width:60px;height:60px;margin:0 auto 1rem;border-radius:50%;background:rgba(255,107,107,.15);display:flex;align-items:center;justify-content:center"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></div>'
+          + '<div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.1rem;color:#ff6b6b;margin-bottom:.4rem">Ya uso promocion</div>'
+          + '<div style="font-size:.85rem;color:#9aa3b0;line-height:1.5">El ID <b style="color:#fff">' + ffId + '</b> ya utilizo una promocion de 1 vez por cuenta' + (fecha ? ' el ' + fecha : '') + '.</div>'
+          + '</div>';
+      } else {
+        // Disponible
+        cont.innerHTML = '<div style="background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.3);border-radius:16px;padding:1.5rem;text-align:center">'
+          + '<div style="width:60px;height:60px;margin:0 auto 1rem;border-radius:50%;background:rgba(37,211,102,.15);display:flex;align-items:center;justify-content:center"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>'
+          + '<div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.1rem;color:#25d366;margin-bottom:.4rem">Disponible!</div>'
+          + '<div style="font-size:.85rem;color:#9aa3b0;line-height:1.5">El ID <b style="color:#fff">' + ffId + '</b> aun puede usar promociones de 1 vez por cuenta.</div>'
+          + '<button onclick="goPage(\'tienda\')" style="margin-top:1.1rem;padding:.7rem 1.6rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:11px;font-family:Poppins;font-weight:700;font-size:.85rem;cursor:pointer">Ver ofertas</button>'
+          + '</div>';
+      }
+    }).catch(function(e){
+      if(btn){ btn.disabled = false; btn.textContent = 'Verificar'; }
+      cont.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#6b7280;font-size:.85rem">No se pudo verificar. Intenta de nuevo.</div>';
+      console.error('[VPROMO]', e);
+    });
+}
+
+// ── ADMIN: marcar un ID como que ya uso promocion ──
+function admMarcarPromoUsada(){
+  if(!authSession || authSession.role !== 'admin'){ showToast('Solo admin'); return; }
+  var ffId = ((document.getElementById('adm-promo-id')||{}).value||'').replace(/\s/g,'').replace(/[^0-9]/g,'');
+  var nota = ((document.getElementById('adm-promo-nota')||{}).value||'').trim();
+  if(ffId.length < 5){ showToast('ID invalido'); return; }
+
+  sb.post('ids_promo_usada', { ff_id: ffId, promo: 'general', nota: nota, marcado_por: authSession.username })
+    .then(function(){
+      showToast('\u2705 ID ' + ffId + ' marcado como usado');
+      var i=document.getElementById('adm-promo-id'); if(i) i.value='';
+      var n=document.getElementById('adm-promo-nota'); if(n) n.value='';
+      if(typeof admListarPromo==='function') admListarPromo();
+    }).catch(function(e){
+      if(String(e).indexOf('duplicate')>=0 || String(e).indexOf('unique')>=0) showToast('Ese ID ya estaba marcado');
+      else showToast('No se pudo marcar');
+      console.error('[VPROMO-ADM]', e);
+    });
+}
+
+// ── ADMIN: quitar un ID de la lista ──
+function admQuitarPromo(ffId){
+  if(!authSession || authSession.role !== 'admin'){ showToast('Solo admin'); return; }
+  if(!confirm('Quitar el ID ' + ffId + ' de la lista? Podra usar la promo de nuevo.')) return;
+  sb.del('ids_promo_usada', 'ff_id=eq.' + encodeURIComponent(ffId))
+    .then(function(){ showToast('\u2705 ID liberado'); if(typeof admListarPromo==='function') admListarPromo(); })
+    .catch(function(e){ showToast('No se pudo quitar'); console.error('[VPROMO-ADM]', e); });
+}
+
+// ── ADMIN: listar los IDs marcados ──
+function admListarPromo(){
+  var cont = document.getElementById('adm-promo-lista');
+  if(!cont) return;
+  sb.get('ids_promo_usada', 'select=ff_id,nota,created_at&order=created_at.desc&limit=100')
+    .then(function(rows){
+      if(!rows || !rows.length){ cont.innerHTML = '<div style="text-align:center;padding:1rem;color:#6b7280;font-size:.8rem">Aun no hay IDs marcados</div>'; return; }
+      cont.innerHTML = rows.map(function(r){
+        var fecha=''; try{ fecha=new Date(r.created_at).toLocaleDateString('es-MX'); }catch(e){}
+        return '<div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:.6rem .8rem">'
+          + '<div style="min-width:0"><div style="font-family:Oxanium;font-weight:700;color:#fff;font-size:.9rem">' + r.ff_id + '</div>' + (r.nota?'<div style="font-size:.68rem;color:#6b7280">'+r.nota+'</div>':'') + (fecha?'<div style="font-size:.6rem;color:#4a5568">'+fecha+'</div>':'') + '</div>'
+          + '<button onclick="admQuitarPromo(\'' + r.ff_id + '\')" style="flex-shrink:0;width:30px;height:30px;border-radius:8px;background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.3);color:#ff6b6b;cursor:pointer">&times;</button>'
+          + '</div>';
+      }).join('');
+    }).catch(function(e){ console.error('[VPROMO-ADM]', e); });
 }

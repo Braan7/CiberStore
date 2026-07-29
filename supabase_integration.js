@@ -513,12 +513,23 @@ function addSpend(amt, descripcion){
   }
 }
 
+var _ultimoMovimientoId = null;
 function sbAddMovimiento(userId, tipo, monto, descripcion){
   return sb.post('movimientos_saldo', {
     user_id:     userId,
     tipo:        tipo,
     monto:       monto,
     descripcion: descripcion
+  }).then(function(r){
+    // Guardar el ID del movimiento creado (para poder cancelarlo si la recarga falla)
+    if(r && r[0] && r[0].id){ _ultimoMovimientoId = r[0].id; return r; }
+    // Si el post no devolvio el registro, buscarlo por descripcion (para tener su ID)
+    return sb.get('movimientos_saldo',
+      'user_id=eq.' + userId + '&descripcion=eq.' + encodeURIComponent(descripcion) + '&order=created_at.desc&limit=1&select=id'
+    ).then(function(rows){
+      if(rows && rows[0] && rows[0].id){ _ultimoMovimientoId = rows[0].id; return [{ id: rows[0].id }]; }
+      return r;
+    }).catch(function(){ return r; });
   }).catch(function(){});
 }
 
