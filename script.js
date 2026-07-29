@@ -7588,12 +7588,38 @@ function recLimpiarTipo(){
 // Marca la compra de un pedido como CANCELADA para que no cuente en el ranking
 function _cancelarMovimientoCompra(userId, ord){
   if(!userId || !ord || typeof sb === 'undefined' || !sb.patch) return;
-  try {
-    sb.patch('movimientos_saldo',
-      { tipo: 'compra_cancelada' },
-      'user_id=eq.' + userId + '&tipo=eq.compra&descripcion=like.*Pedido%20%23' + ord + '*'
-    ).catch(function(e){ console.warn('[RANKING] no se pudo cancelar el movimiento', e); });
-  } catch(e){ console.warn('[RANKING]', e); }
+
+  // El movimiento de compra se guarda de forma asincrona en addSpend,
+  // asi que puede no existir aun cuando la recarga falla rapido.
+  // Reintentamos varias veces con retraso para asegurar que se cancele.
+  var intentos = 0;
+  function intentarCancelar(){
+    intentos++;
+    // Primero verificar que el movimiento exista
+    sb.get('movimientos_saldo',
+      'user_id=eq.' + userId + '&tipo=eq.compra&descripcion=like.*Pedido%20%23' + ord + '*&select=id'
+    ).then(function(rows){
+      if(rows && rows.length){
+        // Existe: cancelarlo para que el ranking no lo cuente
+        sb.patch('movimientos_saldo',
+          { tipo: 'compra_cancelada' },
+          'user_id=eq.' + userId + '&tipo=eq.compra&descripcion=like.*Pedido%20%23' + ord + '*'
+        ).then(function(){
+          console.log('[RANKING] Movimiento del pedido #' + ord + ' cancelado (no cuenta en ranking)');
+        }).catch(function(e){ console.warn('[RANKING] no se pudo cancelar', e); });
+      } else if(intentos < 5){
+        // Todavia no se ha guardado: reintentar
+        setTimeout(intentarCancelar, 1500);
+      } else {
+        console.warn('[RANKING] no se encontro el movimiento del pedido #' + ord + ' tras varios intentos');
+      }
+    }).catch(function(e){
+      if(intentos < 5) setTimeout(intentarCancelar, 1500);
+      else console.warn('[RANKING]', e);
+    });
+  }
+  // Esperar un poco antes del primer intento (que addSpend termine de guardar)
+  setTimeout(intentarCancelar, 2000);
 }
 
 
