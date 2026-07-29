@@ -8817,12 +8817,12 @@ function _pintarTopCompras(cont, arr, nombres, colorHex, unidad){
     var borde = esYo ? colorHex+'66' : 'rgba(255,255,255,.06)';
     var fondo = esYo ? colorHex+'12' : 'rgba(255,255,255,.02)';
 
-    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;background:'+fondo+';border:1px solid '+borde+';border-radius:11px;padding:.65rem .8rem">'
+    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;background:'+fondo+';border:1px solid '+borde+';border-radius:12px;padding:.8rem 1rem">'
       + '<div style="display:flex;align-items:center;gap:.55rem;min-width:0">'
       +   medalla
-      +   '<span style="font-family:Poppins,sans-serif;font-weight:600;font-size:.85rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+nombre+(esYo?' <span style=\'font-size:.6rem;color:'+colorHex+'\'>(tu)</span>':'')+'</span>'
+      +   '<span style="font-family:Poppins,sans-serif;font-weight:600;font-size:.92rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+nombre+(esYo?' <span style=\'font-size:.6rem;color:'+colorHex+'\'>(tu)</span>':'')+'</span>'
       + '</div>'
-      + '<div style="text-align:right;flex-shrink:0"><span style="font-family:Oxanium,sans-serif;font-weight:800;font-size:.95rem;color:'+colorHex+'">'+x.total+'</span> <span style="font-size:.58rem;color:#6b7280">'+unidad+'</span></div>'
+      + '<div style="text-align:right;flex-shrink:0"><span style="font-family:Oxanium,sans-serif;font-weight:800;font-size:1.1rem;color:'+colorHex+'">'+x.total+'</span> <span style="font-size:.58rem;color:#6b7280">'+unidad+'</span></div>'
       + '</div>';
   }).join('');
 }
