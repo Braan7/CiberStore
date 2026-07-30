@@ -5611,7 +5611,7 @@ var RECARGAS_AUTO = [
   { package_id:345, sku:'FFCH520R',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.53,  precio:70,  img:'img/diam-520.png'  },
   { package_id:341, sku:'FFCH1060R', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.57,  precio:125, img:'img/diam-1060.png' },
   { package_id:342, sku:'FFCH2180R', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:13.03, precio:245, img:'img/diam-2180.png' },
-  { package_id:344, sku:'FFCH5600R', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:33.16, precio:620, img:'img/diam-5600.png' },
+  { package_id:344, sku:'FFCH5600R', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:33.16, precio:630, img:'img/diam-5600.png' },
   { package_id:null, nombre:'11.200 Diamantes + 1.120 Bono', diamantes:12320, costoUSD:66.32, precio:1390, manual:true }
 ];
 
