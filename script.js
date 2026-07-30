@@ -222,7 +222,9 @@ function fmt(mxn){
   if(!mxn&&mxn!==0) return '';
   var rate=RATES[CURRENCY]||1, sym=CUR_SYM[CURRENCY]||'$', suf=CUR_SUF[CURRENCY]||'';
   var val=mxn*rate, str;
-  if(CURRENCY==='MXN') str=sym+Math.round(val).toLocaleString('es-MX');
+  // Si el monto en MXN tiene decimales (ej: 13.50), mostrarlos
+  var tieneDecimal = (Math.round(mxn*100) % 100) !== 0;
+  if(CURRENCY==='MXN') str=sym+(tieneDecimal ? val.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2}) : Math.round(val).toLocaleString('es-MX'));
   else if(CURRENCY==='ARS') str=sym+Math.round(val).toLocaleString('es-AR');
   else str=sym+val.toFixed(2);
   return str+suf;
@@ -7095,7 +7097,7 @@ function _syncBottomNav(id){
 
 
 // ═══════════ PASE BOOYAH (asistente de 3 pasos) ═══════════
-var PASE_PRECIO = 14;
+var PASE_PRECIO = 13.50;
 var _comprandoPase = false;
 var _paseIdVerificado = null;
 var _paseNickVerificado = '';
