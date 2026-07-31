@@ -691,6 +691,7 @@ function enviarComprobanteWA(){
 }
 
 function goPage(id){
+  if(id==='likes') id='likes2k'; // el sistema viejo de likes fue reemplazado por Likes 2K
   setTimeout(function(){ if(window._hookPasteAll) window._hookPasteAll(); }, 300);
   if(id==='biolarga') setTimeout(_refreshBioLargaSaldo, 100);
   if(id==='likes2k') setTimeout(function(){ renderLikes2k(); _refreshL2kSaldo(); }, 100);

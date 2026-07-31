@@ -1907,13 +1907,13 @@ document.addEventListener('keydown',function(e){
     <div class="nav-item active" id="ni-home" onclick="goPage('home')"><div class="nav-ico">&#127968;</div> Inicio</div>
     <div class="sb-section">Servicios</div>
     <div class="nav-item" id="ni-diamantes" onclick="goPage('diamantes')"><div class="nav-ico">&#128142;</div> Diamantes FF</div>
-    <div class="nav-item" id="ni-likes" onclick="goPage('likes')"><div class="nav-ico">&#128077;</div> Likes Perfil</div>
+    <div class="nav-item" id="ni-likes" onclick="goPage('likes2k')"><div class="nav-ico">&#128077;</div> Likes</div>
     <div class="nav-item" id="ni-pines" onclick="goPage('pines')"><div class="nav-ico">&#127915;</div> Pines de Free Fire <span class="nb" style="background:rgba(255,204,0,.15);border:1px solid rgba(255,204,0,.3);color:#ffcc00">NEW</span></div>
     <div class="nav-item" id="ni-api" onclick="goPage('api')"><div class="nav-ico">&#128268;</div> API Revendedores <span class="nb" style="background:rgba(34,211,238,.15);border:1px solid rgba(34,211,238,.3);color:#22d3ee">API</span></div>
     <div class="nav-item" id="ni-creadores" onclick="goPage('creadores')"><div class="nav-ico">&#127909;</div> Creadores <span class="nb" style="background:rgba(255,77,166,.15);border:1px solid rgba(255,77,166,.35);color:#ff4da6">TIKTOK</span></div>
     <div class="nav-item" id="ni-honor" onclick="goPage('honor')"><div class="nav-ico">&#127942;</div> Honor de Clan</div>
     <div class="nav-item" id="ni-honor-cuenta" onclick="goPage('honorcuenta')"><div class="nav-ico">&#127869;</div> Experiencia Cuenta FF <span class="nb" style="background:rgba(0,245,255,.15);border:1px solid rgba(0,245,255,.3);color:#00f5ff">NEW</span></div>
-    <div class="nav-item" id="ni-comunidad" onclick="goPage('comunidad')"><div class="nav-ico">&#128172;</div> Comunidad</div>
+    
     <div class="nav-item" id="ni-faq" onclick="goPage('faq')"><div class="nav-ico">&#10067;</div> FAQ / Ayuda</div>
     <div class="nav-item" id="ni-ranking" onclick="goPage('ranking')"><div class="nav-ico">&#128081;</div> Ranking &amp; Premios <span class="nb" style="background:linear-gradient(90deg,#ff6600,#ff9900);color:#fff;border:none">TOP</span></div>
     <div class="nav-item" id="ni-codigos" onclick="goPage('codigos')"><div class="nav-ico">&#128142;</div> SCAR Evolutiva <span class="nb" style="background:linear-gradient(90deg,#ff0028,#ff4444);color:#fff;border:none">SKIN</span></div>
@@ -3670,6 +3670,12 @@ document.addEventListener('keydown',function(e){
 
   <div style="max-width:560px;margin:0 auto;padding:0 5vw 3rem">
 
+    <!-- Advertencia envios lentos -->
+    <div style="display:flex;align-items:flex-start;gap:.7rem;background:rgba(255,107,107,.07);border:1px solid rgba(255,107,107,.3);border-radius:14px;padding:1rem 1.1rem;margin-bottom:1rem">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:.1rem"><path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+      <div style="font-size:.8rem;color:#ffd0d0;line-height:1.5"><b style="color:#ff6b6b">Aviso:</b> por la actualizacion de manana, los likes pueden tardar mas de lo normal en llegar. Gracias por tu paciencia.</div>
+    </div>
+
     <!-- Aviso de entrega -->
     <div style="display:flex;align-items:flex-start;gap:.7rem;background:rgba(255,180,60,.06);border:1px solid rgba(255,180,60,.25);border-radius:14px;padding:1rem 1.1rem;margin-bottom:1.4rem">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffb84d" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:.1rem"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
@@ -3812,7 +3818,7 @@ document.addEventListener('keydown',function(e){
       <div onclick="goPage('transferir')" style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:16px;padding:1.05rem .95rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(34,211,238,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.065)'"><div style="width:42px;height:42px;flex-shrink:0;border-radius:12px;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.22);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8h11M15 5l3 3-3 3"/><path d="M17 16H6M9 13l-3 3 3 3"/></svg></div><div style="min-width:0"><div style="font-size:.85rem;color:#e8e8ea;font-weight:600;line-height:1.3">Transferir saldo</div><div style="font-size:.68rem;color:#6b7280;margin-top:.1rem">Envia a otro usuario</div></div></div>
       <div onclick="goPage('api')" style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:16px;padding:1.05rem .95rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(34,211,238,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.065)'"><div style="width:42px;height:42px;flex-shrink:0;border-radius:12px;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.22);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m9 7 -5 5 3 3 5-5"/><path d="M14.5 4.5a4 4 0 0 1 5 5L17 12l-5-5 2.5-2.5z"/><path d="m12 15 5 5"/></svg></div><div style="min-width:0"><div style="font-size:.85rem;color:#e8e8ea;font-weight:600;line-height:1.3">API</div><div style="font-size:.68rem;color:#6b7280;margin-top:.1rem">Para revendedores</div></div></div>
       <div onclick="goPage('creadores')" style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:16px;padding:1.05rem .95rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(34,211,238,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.065)'"><div style="width:42px;height:42px;flex-shrink:0;border-radius:12px;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.22);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2.5"/><path d="m16 10 5-3v10l-5-3"/></svg></div><div style="min-width:0"><div style="font-size:.85rem;color:#e8e8ea;font-weight:600;line-height:1.3">Creadores</div><div style="font-size:.68rem;color:#6b7280;margin-top:.1rem">Programa TikTok</div></div></div>
-      <div onclick="goPage('comunidad')" style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:16px;padding:1.05rem .95rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(34,211,238,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.065)'"><div style="width:42px;height:42px;flex-shrink:0;border-radius:12px;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.22);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 21l1.9-5.4A8 8 0 1 1 21 12z"/></svg></div><div style="min-width:0"><div style="font-size:.85rem;color:#e8e8ea;font-weight:600;line-height:1.3">Comunidad</div><div style="font-size:.68rem;color:#6b7280;margin-top:.1rem">Chat y grupo</div></div></div>
+      
       <div onclick="goPage('faq')" style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:16px;padding:1.05rem .95rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(34,211,238,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.065)'"><div style="width:42px;height:42px;flex-shrink:0;border-radius:12px;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.22);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 0 1 4.9.7c0 1.6-2.4 2-2.4 3.3M12 17h.01"/></svg></div><div style="min-width:0"><div style="font-size:.85rem;color:#e8e8ea;font-weight:600;line-height:1.3">FAQ / Ayuda</div><div style="font-size:.68rem;color:#6b7280;margin-top:.1rem">Preguntas frecuentes</div></div></div>
       <div onclick="goPage('ranking')" style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:16px;padding:1.05rem .95rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(34,211,238,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.065)'"><div style="width:42px;height:42px;flex-shrink:0;border-radius:12px;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.22);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/><path d="M12 14v3M8 21h8M10 17h4v4h-4z"/></svg></div><div style="min-width:0"><div style="font-size:.85rem;color:#e8e8ea;font-weight:600;line-height:1.3">Ranking &amp; Premios</div><div style="font-size:.68rem;color:#6b7280;margin-top:.1rem">Top y recompensas</div></div></div>
       <div onclick="goPage('sobre')" style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:16px;padding:1.05rem .95rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(34,211,238,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.065)'"><div style="width:42px;height:42px;flex-shrink:0;border-radius:12px;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.22);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M12 11v5"/></svg></div><div style="min-width:0"><div style="font-size:.85rem;color:#e8e8ea;font-weight:600;line-height:1.3">Sobre la pagina</div><div style="font-size:.68rem;color:#6b7280;margin-top:.1rem">Resenas y terminos</div></div></div>
@@ -3894,23 +3900,6 @@ document.addEventListener('keydown',function(e){
 
 
 <!-- COMUNIDAD -->
-<div class="page" id="page-comunidad">
-  <div class="ph"><div class="stag">Comunidad</div><h2 class="ptitle">&#128172; CHAT DE <span>COMUNIDAD</span></h2><p class="psub">Comparte tu experiencia con otros jugadores.</p></div>
-  <div style="max-width:680px;margin:0 auto;padding:0 5vw 3rem">
-    <!-- Post form -->
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:13px;padding:1rem;margin-bottom:1.1rem">
-      <div style="display:flex;gap:.65rem;align-items:flex-start">
-        <div id="chat-av" style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-size:.8rem;font-weight:700;color:#fff;flex-shrink:0">?</div>
-        <div style="flex:1">
-          <textarea id="chat-input" class="finput" rows="2" placeholder="Comparte tu experiencia, pregunta algo..." style="resize:none;margin-bottom:.5rem;height:60px"></textarea>
-          <button onclick="postChatMsg()" style="padding:.4rem 1rem;background:linear-gradient(90deg,var(--c2),var(--c1));color:#fff;border:none;border-radius:6px;font-family:'Poppins';font-weight:800;font-size:.75rem;cursor:pointer;letter-spacing:1px">Publicar</button>
-        </div>
-      </div>
-    </div>
-    <!-- Feed -->
-    <div id="chat-feed" style="display:flex;flex-direction:column;gap:.65rem"></div>
-  </div>
-</div>
 <div class="page" id="page-codigos">
   <div class="ph">
     <div class="stag">Skin Exclusiva</div>
@@ -5299,7 +5288,7 @@ document.addEventListener('keydown',function(e){
     <span class="bn-label">Billetera</span>
     <span class="bn-dot"></span>
   </button>
-  <button class="bn-item" id="bn-likes" onclick="goPage('likes')">
+  <button class="bn-item" id="bn-likes" onclick="goPage('likes2k')">
     <span class="bn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v10H4a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1h3z"/><path d="M7 11l4.2-7.4A1.8 1.8 0 0 1 14.6 5l-.9 4h5.6a2 2 0 0 1 2 2.4l-1.3 7A2 2 0 0 1 18 20H7"/></svg></span>
     <span class="bn-label">Likes</span>
     <span class="bn-dot"></span>
