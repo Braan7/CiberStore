@@ -2712,7 +2712,13 @@ function admLoadResenas(){
 
 function admDelResena(id){
   if(!confirm('Eliminar esta resena?')) return;
-  sb.del('resenas','id=eq.'+id).then(function(){admLoadResenas();showToast('Resena eliminada');});
+  sb.del('resenas','id=eq.'+id).then(function(){
+    admLoadResenas();
+    showToast('\u2705 Resena eliminada');
+  }).catch(function(e){
+    console.error('[RESENA] error al eliminar', e);
+    showToast('\u26A0\uFE0F No se pudo eliminar (revisa permisos en Supabase)', 4000);
+  });
 }
 
 /* \u2500\u2500 REPORTE WA \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
