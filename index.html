@@ -4096,36 +4096,35 @@ document.addEventListener('keydown',function(e){
       </div>
 
       <!-- Datos bancarios: 3 cuentas -->
-      <div style="font-family:Oxanium;font-size:.68rem;font-weight:700;color:#25d366;letter-spacing:1px;margin-bottom:.6rem">DATOS PARA TRANSFERIR &middot; elige una cuenta</div>
+      <div style="font-family:Oxanium;font-size:.68rem;font-weight:700;color:#25d366;letter-spacing:1px;margin-bottom:.7rem">DATOS PARA TRANSFERIR</div>
 
-      <!-- Cuenta 1: Rafael (HEY BANCO) -->
-      <div style="background:rgba(0,230,118,.05);border:1px solid rgba(0,230,118,.2);border-radius:12px;padding:.9rem;margin-bottom:.7rem">
-        <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.55rem"><span style="width:7px;height:7px;border-radius:50%;background:#25d366;flex-shrink:0"></span><span style="font-size:.72rem;font-weight:700;color:#25d366">HEY BANCO</span></div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem .65rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;margin-bottom:.4rem">
-          <div style="text-align:left;min-width:0"><div style="font-size:.58rem;color:var(--muted);text-transform:uppercase">CLABE</div><div style="font-family:Oxanium;font-size:.76rem;font-weight:700;color:#fff;letter-spacing:.3px">167650000086005710</div></div>
-          <button onclick="_copiarTexto('167650000086005710','CLABE copiada')" style="flex-shrink:0;background:none;border:1px solid rgba(0,230,118,.3);color:#25d366;border-radius:6px;padding:.35rem .7rem;font-size:.66rem;cursor:pointer;font-family:'Poppins';font-weight:700">Copiar</button>
+      <!-- Cuenta ACTIVA: Vanessa (Banorte) -->
+      <div style="background:linear-gradient(160deg,rgba(37,211,102,.09),rgba(255,255,255,.015));border:1px solid rgba(37,211,102,.4);border-radius:14px;padding:1.1rem;margin-bottom:.9rem;position:relative">
+        <span style="position:absolute;top:-9px;left:14px;background:#25d366;color:#04110a;font-size:.6rem;font-weight:800;padding:.15rem .55rem;border-radius:99px;letter-spacing:.5px">&#9679; ACTIVA</span>
+        <div style="display:flex;align-items:center;gap:.55rem;margin-bottom:.8rem;margin-top:.2rem">
+          <div style="width:36px;height:36px;flex-shrink:0;border-radius:10px;background:rgba(237,28,36,.12);border:1px solid rgba(237,28,36,.3);display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-weight:900;font-size:.7rem;color:#ff5a5f">BNT</div>
+          <div><div style="font-size:.9rem;font-weight:700;color:#fff;line-height:1.1">Banorte</div><div style="font-size:.68rem;color:#25d366">Recibe pagos ahora</div></div>
         </div>
-        <div style="padding:.5rem .65rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px"><div style="font-size:.58rem;color:var(--muted);text-transform:uppercase">Titular</div><div style="font-size:.8rem;font-weight:700;color:#fff">RAFAEL &Ntilde;U&Ntilde;EZ FERN&Aacute;NDEZ</div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem .75rem;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.06);border-radius:10px;margin-bottom:.5rem">
+          <div style="text-align:left;min-width:0"><div style="font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Tarjeta</div><div style="font-family:Oxanium;font-size:.82rem;font-weight:700;color:#fff;letter-spacing:.5px">072580013786124758</div></div>
+          <button onclick="_copiarTexto('072580013786124758','Numero copiado')" style="flex-shrink:0;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.35);color:#25d366;border-radius:8px;padding:.45rem .8rem;font-size:.68rem;cursor:pointer;font-family:'Poppins';font-weight:700">Copiar</button>
+        </div>
+        <div style="padding:.6rem .75rem;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.06);border-radius:10px"><div style="font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Titular</div><div style="font-size:.82rem;font-weight:700;color:#fff">VANESSA ARLETE</div></div>
       </div>
 
-      <!-- Cuenta 2: Matiana (STORI) -->
-      <div style="background:rgba(0,230,118,.05);border:1px solid rgba(0,230,118,.2);border-radius:12px;padding:.9rem;margin-bottom:.7rem">
-        <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.55rem"><span style="width:7px;height:7px;border-radius:50%;background:#25d366;flex-shrink:0"></span><span style="font-size:.72rem;font-weight:700;color:#25d366">STORI / STP</span></div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem .65rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;margin-bottom:.4rem">
-          <div style="text-align:left;min-width:0"><div style="font-size:.58rem;color:var(--muted);text-transform:uppercase">CLABE</div><div style="font-family:Oxanium;font-size:.76rem;font-weight:700;color:#fff;letter-spacing:.3px">646180402332964686</div></div>
-          <button onclick="_copiarTexto('646180402332964686','CLABE copiada')" style="flex-shrink:0;background:none;border:1px solid rgba(0,230,118,.3);color:#25d366;border-radius:6px;padding:.35rem .7rem;font-size:.66rem;cursor:pointer;font-family:'Poppins';font-weight:700">Copiar</button>
-        </div>
-        <div style="padding:.5rem .65rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px"><div style="font-size:.58rem;color:var(--muted);text-transform:uppercase">Titular</div><div style="font-size:.8rem;font-weight:700;color:#fff">MATIANA RUBI HERNANDEZ</div></div>
+      <!-- Cuentas en pausa -->
+      <div style="font-size:.66rem;color:#6b7280;letter-spacing:.5px;margin:1rem 0 .5rem;text-transform:uppercase">Disponibles al reinicio de mes</div>
+
+      <div style="display:flex;align-items:center;gap:.7rem;background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.05);border-radius:12px;padding:.85rem 1rem;margin-bottom:.55rem;opacity:.5">
+        <div style="width:32px;height:32px;flex-shrink:0;border-radius:9px;background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-weight:900;font-size:.6rem;color:#9aa3b0">HEY</div>
+        <div style="flex:1;min-width:0"><div style="font-size:.82rem;font-weight:600;color:#c9d1e0">HEY Banco &middot; Rafael</div><div style="font-size:.66rem;color:#6b7280">En pausa este mes</div></div>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
       </div>
 
-      <!-- Cuenta 3: Vanessa (Banorte) -->
-      <div style="background:rgba(0,230,118,.05);border:1px solid rgba(0,230,118,.2);border-radius:12px;padding:.9rem;margin-bottom:1rem">
-        <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.55rem"><span style="width:7px;height:7px;border-radius:50%;background:#25d366;flex-shrink:0"></span><span style="font-size:.72rem;font-weight:700;color:#25d366">BANORTE</span></div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem .65rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;margin-bottom:.4rem">
-          <div style="text-align:left;min-width:0"><div style="font-size:.58rem;color:var(--muted);text-transform:uppercase">Tarjeta</div><div style="font-family:Oxanium;font-size:.76rem;font-weight:700;color:#fff;letter-spacing:.3px">072580013786124758</div></div>
-          <button onclick="_copiarTexto('072580013786124758','Numero copiado')" style="flex-shrink:0;background:none;border:1px solid rgba(0,230,118,.3);color:#25d366;border-radius:6px;padding:.35rem .7rem;font-size:.66rem;cursor:pointer;font-family:'Poppins';font-weight:700">Copiar</button>
-        </div>
-        <div style="padding:.5rem .65rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px"><div style="font-size:.58rem;color:var(--muted);text-transform:uppercase">Titular</div><div style="font-size:.8rem;font-weight:700;color:#fff">VANESSA ARLETE</div></div>
+      <div style="display:flex;align-items:center;gap:.7rem;background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.05);border-radius:12px;padding:.85rem 1rem;margin-bottom:1rem;opacity:.5">
+        <div style="width:32px;height:32px;flex-shrink:0;border-radius:9px;background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-weight:900;font-size:.6rem;color:#9aa3b0">STP</div>
+        <div style="flex:1;min-width:0"><div style="font-size:.82rem;font-weight:600;color:#c9d1e0">Stori &middot; Matiana</div><div style="font-size:.66rem;color:#6b7280">En pausa este mes</div></div>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
       </div>
 
       <button onclick="mostrarFormPago('stori')" id="stori-show-form-btn" style="width:100%;padding:.85rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.82rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(37,211,102,.3)">&#9989; YA TRANSFERI, ENVIAR COMPROBANTE</button>
