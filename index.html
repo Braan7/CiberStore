@@ -3509,14 +3509,14 @@ document.addEventListener('keydown',function(e){
       <button onclick="goPage('tienda')" style="width:42px;height:42px;flex-shrink:0;border-radius:50%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#9aa3b0;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center">&#10005;</button>
     </div>
 
-    <!-- ═══ AVISO DISPONIBLE ═══ -->
-    <div style="display:flex;align-items:center;gap:.7rem;background:rgba(37,211,102,.06);border:1px solid rgba(37,211,102,.28);border-radius:14px;padding:.9rem 1.1rem;margin-top:1rem">
-      <span style="display:inline-flex;width:9px;height:9px;border-radius:50%;background:#25d366;box-shadow:0 0 8px #25d366;flex-shrink:0"></span>
-      <div style="font-size:.82rem;color:#c9d1e0;line-height:1.4"><b style="color:#25d366">YA HAY DISPONIBLES</b> &middot; Entrega en <b style="color:#fff">1 dia</b></div>
+    <!-- ═══ AVISO SIN STOCK ═══ -->
+    <div style="display:flex;align-items:center;gap:.7rem;background:rgba(255,107,107,.07);border:1px solid rgba(255,107,107,.3);border-radius:14px;padding:.9rem 1.1rem;margin-top:1rem">
+      <span style="display:inline-flex;width:9px;height:9px;border-radius:50%;background:#ff6b6b;box-shadow:0 0 8px #ff6b6b;flex-shrink:0"></span>
+      <div style="font-size:.82rem;color:#ffd0d0;line-height:1.4"><b style="color:#ff6b6b">SIN STOCK POR AHORA</b> &middot; Vuelve pronto</div>
     </div>
 
     <!-- ═══ PASOS ═══ -->
-    <div id="pase-pasos-nav" style="display:flex;align-items:flex-start;margin:1.6rem 0 1.5rem">
+    <div id="pase-pasos-nav" style="display:none;align-items:flex-start;margin:1.6rem 0 1.5rem">
       <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:.45rem">
         <div id="pstep-1" class="pase-step-num" style="width:32px;height:32px;border-radius:50%;background:#22d3ee;color:#021418;display:flex;align-items:center;justify-content:center;font-family:Poppins;font-weight:700;font-size:.85rem">1</div>
         <div id="pstep-lbl-1" style="font-size:.68rem;font-weight:700;color:#22d3ee;letter-spacing:.8px">DESTINO</div>
@@ -3534,15 +3534,15 @@ document.addEventListener('keydown',function(e){
     </div>
 
     <!-- ═══ MANTENIMIENTO ═══ -->
-    <div id="pase-mantenimiento" style="display:none">
-      <div style="font-size:3rem;margin-bottom:.7rem">&#128679;</div>
-      <div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.2rem;color:#ffb84d;margin-bottom:.5rem">Fuera de servicio</div>
-      <div style="font-size:.85rem;color:#9aa3b0;line-height:1.6;max-width:320px;margin:0 auto 1.3rem">El Pase Booyah esta temporalmente fuera de servicio. Escribenos por WhatsApp si necesitas ayuda con tu pedido.</div>
+    <div id="pase-mantenimiento" style="background:linear-gradient(160deg,rgba(255,180,60,.08),rgba(255,255,255,.01));border:1px solid rgba(255,180,60,.28);border-radius:18px;padding:2.2rem 1.5rem;text-align:center;margin-top:1.2rem">
+      <div style="font-size:3rem;margin-bottom:.7rem">&#128230;</div>
+      <div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.2rem;color:#ffb84d;margin-bottom:.5rem">Sin stock por ahora</div>
+      <div style="font-size:.85rem;color:#9aa3b0;line-height:1.6;max-width:320px;margin:0 auto 1.3rem">Se nos agotaron los Pases Booyah. Estamos reponiendo stock, vuelve pronto o escribenos por WhatsApp para avisarte cuando lleguen.</div>
       <button onclick="goPage('tienda')" style="padding:.8rem 1.8rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:12px;font-family:Poppins;font-weight:600;font-size:.88rem;cursor:pointer">Volver a la tienda</button>
     </div>
 
     <!-- ═══════════ PASO 1: DESTINO ═══════════ -->
-    <div id="pase-paso-1">
+    <div id="pase-paso-1" style="display:none">
       <div style="background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.07);border-radius:16px;overflow:hidden;margin-bottom:1.3rem">
         <div style="display:flex;align-items:center;gap:.5rem;padding:.8rem 1rem;border-bottom:1px solid rgba(255,255,255,.06)">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ff8a4d" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="11" rx="4"/><path d="M7 11v3M5.5 12.5h3M16 12h.01M18.5 14h.01"/></svg>
@@ -4094,7 +4094,7 @@ document.addEventListener('keydown',function(e){
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem .75rem;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.06);border-radius:10px;margin-bottom:.5rem">
           <div style="text-align:left;min-width:0"><div style="font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Tarjeta</div><div style="font-family:Oxanium;font-size:.82rem;font-weight:700;color:#fff;letter-spacing:.5px">072580013786124758</div></div>
-          <button onclick="_copiarTexto('""" + numero + """','""" + msg_copia + """')" style="flex-shrink:0;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.35);color:#25d366;border-radius:8px;padding:.45rem .8rem;font-size:.68rem;cursor:pointer;font-family:'Poppins';font-weight:700">Copiar</button>
+          <button onclick="_copiarTexto('072580013786124758','Numero copiado')" style="flex-shrink:0;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.35);color:#25d366;border-radius:8px;padding:.45rem .8rem;font-size:.68rem;cursor:pointer;font-family:'Poppins';font-weight:700">Copiar</button>
         </div>
         <div style="padding:.6rem .75rem;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.06);border-radius:10px"><div style="font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Titular</div><div style="font-size:.82rem;font-weight:700;color:#fff">VANESSA ARLETE</div></div>
       </div>
@@ -4106,7 +4106,7 @@ document.addEventListener('keydown',function(e){
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem .75rem;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.06);border-radius:10px;margin-bottom:.5rem">
           <div style="text-align:left;min-width:0"><div style="font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">CLABE</div><div style="font-family:Oxanium;font-size:.82rem;font-weight:700;color:#fff;letter-spacing:.5px">167650000086005710</div></div>
-          <button onclick="_copiarTexto('""" + numero + """','""" + msg_copia + """')" style="flex-shrink:0;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.35);color:#25d366;border-radius:8px;padding:.45rem .8rem;font-size:.68rem;cursor:pointer;font-family:'Poppins';font-weight:700">Copiar</button>
+          <button onclick="_copiarTexto('167650000086005710','CLABE copiada')" style="flex-shrink:0;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.35);color:#25d366;border-radius:8px;padding:.45rem .8rem;font-size:.68rem;cursor:pointer;font-family:'Poppins';font-weight:700">Copiar</button>
         </div>
         <div style="padding:.6rem .75rem;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.06);border-radius:10px"><div style="font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Titular</div><div style="font-size:.82rem;font-weight:700;color:#fff">RAFAEL &Ntilde;U&Ntilde;EZ FERN&Aacute;NDEZ</div></div>
       </div>
@@ -4118,9 +4118,26 @@ document.addEventListener('keydown',function(e){
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem .75rem;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.06);border-radius:10px;margin-bottom:.5rem">
           <div style="text-align:left;min-width:0"><div style="font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">CLABE</div><div style="font-family:Oxanium;font-size:.82rem;font-weight:700;color:#fff;letter-spacing:.5px">646180402332964686</div></div>
-          <button onclick="_copiarTexto('""" + numero + """','""" + msg_copia + """')" style="flex-shrink:0;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.35);color:#25d366;border-radius:8px;padding:.45rem .8rem;font-size:.68rem;cursor:pointer;font-family:'Poppins';font-weight:700">Copiar</button>
+          <button onclick="_copiarTexto('646180402332964686','CLABE copiada')" style="flex-shrink:0;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.35);color:#25d366;border-radius:8px;padding:.45rem .8rem;font-size:.68rem;cursor:pointer;font-family:'Poppins';font-weight:700">Copiar</button>
         </div>
         <div style="padding:.6rem .75rem;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.06);border-radius:10px"><div style="font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Titular</div><div style="font-size:.82rem;font-weight:700;color:#fff">MATIANA RUBI HERNANDEZ</div></div>
+      </div>
+
+      <!-- Subir comprobante -->
+      <div style="border-top:1px solid rgba(255,255,255,.08);margin-top:1.2rem;padding-top:1.2rem">
+        <div style="background:rgba(255,180,60,.1);border:1px solid rgba(255,180,60,.3);border-radius:10px;padding:.7rem .9rem;margin-bottom:.9rem;font-size:.75rem;color:#ffb84d;line-height:1.5">&#9888; <b>Importante:</b> escribe el monto exacto que transferiste y adjunta la foto del comprobante para acreditar tu saldo.</div>
+
+        <label class="flabel">Monto transferido (MXN) *</label>
+        <input class="finput" id="stori-monto" type="number" inputmode="numeric" placeholder="Ej: 125" style="margin-bottom:.7rem"/>
+
+        <label class="flabel">Referencia (opcional)</label>
+        <input class="finput" id="stori-ref" type="text" placeholder="Numero de referencia" style="margin-bottom:.7rem"/>
+
+        <label class="flabel">Comprobante (foto) *</label>
+        <input class="finput" id="stori-foto" type="file" accept="image/*" style="padding:.55rem;margin-bottom:.8rem"/>
+
+        <button onclick="enviarComprobante('stori')" style="width:100%;padding:.9rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.82rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(37,211,102,.3)">&#9993; ENVIAR COMPROBANTE</button>
+        <div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.6rem;line-height:1.6">Adjunta la foto arriba y presiona enviar. Te acreditaremos pronto.</div>
       </div>
 
     </div>
