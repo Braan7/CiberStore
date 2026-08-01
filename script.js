@@ -5615,12 +5615,12 @@ var _diamSeleccionado = null;
 // ═══════════ RECARGAS AUTOMÁTICAS (Recargas América type=recharge) ═══════════
 // package_id = el ID de Recargas América | precio = costo USD × 20 (redondeado)
 var RECARGAS_AUTO = [
-  { package_id:340, sku:'FFCH100R',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.70,  precio:15,  img:'img/diam-100.png'  },
-  { package_id:343, sku:'FFCH310R',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:2.09,  precio:40,  img:'img/diam-310.png'  },
-  { package_id:345, sku:'FFCH520R',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.53,  precio:70,  img:'img/diam-520.png'  },
-  { package_id:341, sku:'FFCH1060R', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.57,  precio:125, img:'img/diam-1060.png' },
-  { package_id:342, sku:'FFCH2180R', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:13.03, precio:245, img:'img/diam-2180.png' },
-  { package_id:344, sku:'FFCH5600R', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:33.16, precio:630, img:'img/diam-5600.png' },
+  { package_id:351, sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.70,  precio:15,  img:'img/diam-100.png'  },
+  { package_id:348, sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:2.09,  precio:40,  img:'img/diam-310.png'  },
+  { package_id:350, sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.53,  precio:70,  img:'img/diam-520.png'  },
+  { package_id:347, sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.57,  precio:125, img:'img/diam-1060.png' },
+  { package_id:346, sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:13.03, precio:245, img:'img/diam-2180.png' },
+  { package_id:349, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:33.16, precio:630, img:'img/diam-5600.png' },
   { package_id:null, nombre:'11.200 Diamantes + 1.120 Bono', diamantes:12320, costoUSD:66.32, precio:1390, manual:true }
 ];
 
