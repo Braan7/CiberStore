@@ -4678,12 +4678,12 @@ function comprarPinAPI(productId, precioLocal, nombreProducto){
 // ═══ PRODUCTOS PIN POR API (Recargas América) ═══
 // product_id = ID en Recargas América | precio = tu precio de venta en MXN
 var PINES_API = [
-  {product_id:5, nombre:'Free Fire 100 Diamantes +10 Bono',  precio:15,  diamantes:'110'},
-  {product_id:3, nombre:'Free Fire 310 Diamantes +31 Bono',  precio:55,  diamantes:'341'},
-  {product_id:6, nombre:'Free Fire 520 Diamantes +52 Bono',  precio:75,  diamantes:'572'},
-  {product_id:1, nombre:'Free Fire 1060 Diamantes +106 Bono', precio:140, diamantes:'1,166'},
-  {product_id:2, nombre:'Free Fire 2180 Diamantes +218 Bono', precio:270, diamantes:'2,398'},
-  {product_id:4, nombre:'Free Fire 5600 Diamantes +560 Bono', precio:665, diamantes:'6,160'}
+  {product_id:5, sku:'FFCH100',  nombre:'Free Fire 100 Diamantes +10 Bono',  precio:17,  diamantes:'110'},
+  {product_id:3, sku:'FFCH310',  nombre:'Free Fire 310 Diamantes +31 Bono',  precio:60,  diamantes:'341'},
+  {product_id:6, sku:'FFCH520',  nombre:'Free Fire 520 Diamantes +52 Bono',  precio:80,  diamantes:'572'},
+  {product_id:1, sku:'FFCH1060', nombre:'Free Fire 1060 Diamantes +106 Bono', precio:150, diamantes:'1,166'},
+  {product_id:2, sku:'FFCH2180', nombre:'Free Fire 2180 Diamantes +218 Bono', precio:275, diamantes:'2,398'},
+  {product_id:4, sku:'FFCH5600', nombre:'Free Fire 5600 Diamantes +560 Bono', precio:670, diamantes:'6,160'}
 ];
 
 function renderPinesAPI(){
@@ -5616,11 +5616,11 @@ var _diamSeleccionado = null;
 // package_id = el ID de Recargas América | precio = costo USD × 20 (redondeado)
 var RECARGAS_AUTO = [
   { package_id:351, sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.70,  precio:15,  img:'img/diam-100.png'  },
-  { package_id:348, sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:2.09,  precio:40,  img:'img/diam-310.png'  },
-  { package_id:350, sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.53,  precio:70,  img:'img/diam-520.png'  },
-  { package_id:347, sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.57,  precio:125, img:'img/diam-1060.png' },
-  { package_id:346, sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:13.03, precio:245, img:'img/diam-2180.png' },
-  { package_id:349, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:33.16, precio:630, img:'img/diam-5600.png' },
+  { package_id:348, sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:2.09,  precio:45,  img:'img/diam-310.png'  },
+  { package_id:350, sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.53,  precio:75,  img:'img/diam-520.png'  },
+  { package_id:347, sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.57,  precio:130, img:'img/diam-1060.png' },
+  { package_id:346, sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:13.03, precio:250, img:'img/diam-2180.png' },
+  { package_id:349, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:33.16, precio:650, img:'img/diam-5600.png' },
   { package_id:null, nombre:'11.200 Diamantes + 1.120 Bono', diamantes:12320, costoUSD:66.32, precio:1390, manual:true }
 ];
 
@@ -6283,7 +6283,7 @@ function submitPinSaldo(){
 
   fetch(PORTERO_URL, {
     method:'POST', headers:_headers,
-    body: JSON.stringify({ product_id: prod.product_id, quantity: cant })
+    body: JSON.stringify({ product_id: prod.product_id, sku: prod.sku, quantity: cant })
   }).then(function(r){ return r.json(); }).then(function(res){
     _comprandoPin = false;
     if(btn){ btn.disabled=false; btn.innerHTML='\uD83D\uDD12 Comprar y recibir PIN'; }
