@@ -9302,6 +9302,34 @@ function admExportarSaldos(formato){
         if(log){ log.style.display='block'; log.textContent=txt2; }
         showToast('Copia manual desde el cuadro');
       }
+
+    } else if(formato === 'whatsapp'){
+      var fechaWA = new Date().toLocaleDateString('es-MX');
+      var encabezado = '*SALDOS CIBERSTORE*\n' + fechaWA + '\n' + clientes.length + ' clientes \u00b7 Total: $' + Math.round(totalSaldo).toLocaleString('es-MX') + ' MX\n\n';
+      var lineasWA = clientes.map(function(r){
+        return (r.username||'') + ': $' + (Number(r.saldo)||0);
+      }).join('\n');
+      var mensajeWA = encabezado + lineasWA;
+
+      // WhatsApp tiene limite (~2000 chars util en URL). Si es muy largo, avisar.
+      if(mensajeWA.length > 1900){
+        // Copiar al portapapeles y abrir WhatsApp vacio para que peguen
+        if(navigator.clipboard && navigator.clipboard.writeText){
+          navigator.clipboard.writeText(mensajeWA).then(function(){
+            showToast('\u2705 Lista copiada (muchos clientes). Pegala en WhatsApp.', 5000);
+            window.open('https://wa.me/', '_blank');
+          }).catch(function(){
+            if(log){ log.style.display='block'; log.textContent=mensajeWA; }
+            showToast('Lista muy larga: copiala del cuadro y pegala en WhatsApp', 5000);
+          });
+        } else {
+          if(log){ log.style.display='block'; log.textContent=mensajeWA; }
+          showToast('Lista muy larga: copiala del cuadro', 5000);
+        }
+      } else {
+        window.open('https://wa.me/?text=' + encodeURIComponent(mensajeWA), '_blank');
+        showToast('\u2705 Abriendo WhatsApp...');
+      }
     }
   }).catch(function(e){
     if(info) info.textContent = 'Error al cargar los saldos.';
