@@ -7123,10 +7123,26 @@ function paseSetCant(valor){
   _updatePasePagina();
 }
 
+var _paseMsgActivo = false;
+function paseToggleMsg(){
+  _paseMsgActivo = !_paseMsgActivo;
+  var box = document.getElementById('pase-msg-box');
+  var check = document.getElementById('pase-msg-check');
+  var tick = document.getElementById('pase-msg-tick');
+  if(box) box.style.display = _paseMsgActivo ? 'block' : 'none';
+  if(check){
+    check.style.background = _paseMsgActivo ? '#25d366' : 'transparent';
+    check.style.borderColor = _paseMsgActivo ? '#25d366' : 'rgba(255,255,255,.25)';
+  }
+  if(tick) tick.style.display = _paseMsgActivo ? 'block' : 'none';
+  _updatePasePagina();
+}
+
 function _updatePasePagina(){
   var s = authSession ? (authSession.saldo||0) : 0;
   var cant = _paseCantidad || 1;
-  var total = PASE_PRECIO * cant;
+  var extraMsg = _paseMsgActivo ? 1 : 0;
+  var total = PASE_PRECIO * cant + extraMsg;
   // precio unitario en el resumen
   var elPrecio = document.getElementById('pase-r-precio');
   if(elPrecio) elPrecio.textContent = fmt(PASE_PRECIO);
@@ -7296,6 +7312,11 @@ function _paseReiniciar(){
   var e1 = document.getElementById('pase-err'); if(e1) e1.style.display='none';
   _paseCantidad = 1;
   var pc = document.getElementById('pase-cant'); if(pc) pc.value='1';
+  _paseMsgActivo = false;
+  var mb = document.getElementById('pase-msg-box'); if(mb) mb.style.display='none';
+  var mc = document.getElementById('pase-msg-check'); if(mc){ mc.style.background='transparent'; mc.style.borderColor='rgba(255,255,255,.25)'; }
+  var mt = document.getElementById('pase-msg-tick'); if(mt) mt.style.display='none';
+  var mtx = document.getElementById('pase-msg-texto'); if(mtx) mtx.value='';
   paseIrPaso(1);
   _updatePasePagina();
 }
@@ -7310,7 +7331,13 @@ function comprarPase(){
   if(!_paseIdVerificado){ showErr('Primero verifica tu ID de Free Fire.'); paseIrPaso(1); return; }
 
   var cant = _paseCantidad || 1;
-  var totalPase = PASE_PRECIO * cant;
+  var extraMsg = _paseMsgActivo ? 1 : 0;
+  var mensajePerso = '';
+  if(_paseMsgActivo){
+    mensajePerso = ((document.getElementById('pase-msg-texto')||{}).value||'').trim();
+    if(!mensajePerso){ showErr('Escribe tu mensaje personalizado o desactiva la opcion.'); return; }
+  }
+  var totalPase = PASE_PRECIO * cant + extraMsg;
   var saldo = authSession.saldo||0;
   if(saldo < totalPase){ showErr('Saldo insuficiente ('+fmt(saldo)+'). Necesitas '+fmt(totalPase)+'.'); return; }
   if(err) err.style.display='none';
@@ -7321,11 +7348,14 @@ function comprarPase(){
   var ord = getNextOrder();
 
   var txtCant = cant > 1 ? (cant + 'x Pase Booyah') : 'Pase Booyah';
-  addSpend(totalPase, txtCant + ' - ID:'+ffId+' ('+nom+') - Pedido #'+ord);
+  var detMsg = mensajePerso ? (' + Mensaje: "'+mensajePerso+'"') : '';
+  addSpend(totalPase, txtCant + detMsg + ' - ID:'+ffId+' ('+nom+') - Pedido #'+ord);
   registrarPedido(txtCant, 0, 'otro', ffId, totalPase, 0);
   if(typeof tgNotifyPurchase==='function'){
     tgNotifyPurchase(authSession.username,
-      '\uD83C\uDF9F\uFE0F '+txtCant+'\n\uD83C\uDFAE ID: '+ffId+'\n\uD83D\uDC64 Cuenta: '+nom+' (verificada)\n\u26A0\uFE0F Entrega por REGALO (1 dia)',
+      '\uD83C\uDF9F\uFE0F '+txtCant+'\n\uD83C\uDFAE ID: '+ffId+'\n\uD83D\uDC64 Cuenta: '+nom+' (verificada)'+
+      (mensajePerso ? '\n\uD83D\uDCAC Mensaje: '+mensajePerso : '')+
+      '\n\u26A0\uFE0F Entrega por REGALO (1 dia)',
       totalPase, ord);
   }
 
@@ -7507,8 +7537,8 @@ function rcContinuar(){
 
 // ═══════════ RECARGAR SALDO (nueva pagina) ═══════════
 var _recMoneda = 'MXN';
-var REC_MONTOS = { MXN:[50,100,250,500,1000,2500], USD:[3,10,25,50,100,250] };
-var REC_MIN = { MXN:50, USD:3 };
+var REC_MONTOS = { MXN:[100,200,300,500,1000,2500], USD:[6,10,25,50,100,250] };
+var REC_MIN = { MXN:100, USD:6 };
 
 function recSetMoneda(m){
   _recMoneda = m;
@@ -7521,7 +7551,7 @@ function recSetMoneda(m){
   var av = document.getElementById('rec-min-aviso');
   if(av) av.textContent = 'Minimo ' + (m==='MXN'?'$50 MXN':'$3 USD');
   var inp = document.getElementById('rec-monto');
-  if(inp) inp.value = (m==='MXN') ? 50 : 3;
+  if(inp) inp.value = (m==='MXN') ? 100 : 6;
   _recPintarMontos();
 }
 
@@ -7541,11 +7571,11 @@ function recSetMonto(m){
 
 // Tipo de recarga (obligatorio): para que va a usar el saldo
 var _recTipo = null;
-var REC_TIPO_LABEL = { ilim:'Diamantes con Bono', '1vez':'Diamantes 1 vez por ID' };
+var REC_TIPO_LABEL = { ilim:'Diamantes con Bono', pase:'Pase Booyah', '1vez':'Diamantes 1 vez por ID' };
 
 function recSetTipo(tipo){
   _recTipo = tipo;
-  [['ilim','rec-tipo-ilim'],['1vez','rec-tipo-1vez']].forEach(function(par){
+  [['ilim','rec-tipo-ilim'],['pase','rec-tipo-pase'],['1vez','rec-tipo-1vez']].forEach(function(par){
     var el = document.getElementById(par[1]);
     if(!el) return;
     var activo = (par[0] === tipo);

@@ -2795,10 +2795,10 @@ document.addEventListener('keydown',function(e){
     <!-- Input de monto -->
     <div style="display:flex;align-items:center;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:13px;padding:.5rem 1rem;margin-bottom:.5rem">
       <span style="font-size:1.4rem;color:#6b7280;font-weight:600">$</span>
-      <input id="rec-monto" type="number" inputmode="decimal" value="50" style="flex:1;background:none;border:none;color:#fff;font-family:Poppins;font-weight:600;font-size:1.5rem;padding:.4rem .5rem;outline:none;min-width:0"/>
+      <input id="rec-monto" type="number" inputmode="decimal" value="100" style="flex:1;background:none;border:none;color:#fff;font-family:Poppins;font-weight:600;font-size:1.5rem;padding:.4rem .5rem;outline:none;min-width:0"/>
       <span id="rec-cur-label" style="font-size:.85rem;color:#6b7280">MXN</span>
     </div>
-    <div id="rec-min-aviso" style="font-size:.72rem;color:#6b7280;margin-bottom:1rem">M&iacute;nimo $50 MXN</div>
+    <div id="rec-min-aviso" style="font-size:.72rem;color:#6b7280;margin-bottom:1rem">M&iacute;nimo $100 MXN</div>
 
     <!-- Montos rapidos -->
     <div id="rec-montos" style="display:flex;gap:.45rem;flex-wrap:wrap;margin-bottom:1.75rem"></div>
@@ -2814,6 +2814,15 @@ document.addEventListener('keydown',function(e){
           <div style="font-size:.72rem;color:#6b7280;margin-top:.1rem">Entrega automatica &middot; sin limite de compras</div>
         </div>
         <span style="font-size:1.1rem">&#127873;</span>
+      </div>
+
+      <div id="rec-tipo-pase" onclick="recSetTipo('pase')" style="display:flex;align-items:center;gap:.8rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:.9rem 1rem;cursor:pointer;transition:all .2s">
+        <div class="rec-radio" style="width:20px;height:20px;flex-shrink:0;border-radius:50%;border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center"><div class="rec-dot" style="width:10px;height:10px;border-radius:50%;background:transparent"></div></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.87rem;font-weight:600;color:#fff">Pase Booyah</div>
+          <div style="font-size:.72rem;color:#6b7280;margin-top:.1rem">Para comprar tu Pase Booyah</div>
+        </div>
+        <span style="font-size:1.1rem">&#127903;&#65039;</span>
       </div>
 
       <div id="rec-tipo-err" style="display:none;background:rgba(255,60,60,.08);border:1px solid rgba(255,60,60,.25);color:#ff6b6b;border-radius:10px;padding:.6rem .85rem;font-size:.76rem">Selecciona para que es tu saldo antes de continuar.</div>
@@ -3611,6 +3620,24 @@ document.addEventListener('keydown',function(e){
             <button onclick="paseCant(-1)" style="width:40px;height:42px;background:none;border:none;color:#22d3ee;font-size:1.3rem;cursor:pointer">&#8722;</button>
             <input id="pase-cant" type="text" inputmode="numeric" value="1" oninput="paseSetCant(this.value)" style="width:48px;height:42px;text-align:center;background:none;border:none;color:#fff;font-family:Oxanium;font-weight:800;font-size:1.1rem;outline:none"/>
             <button onclick="paseCant(1)" style="width:40px;height:42px;background:none;border:none;color:#22d3ee;font-size:1.3rem;cursor:pointer">+</button>
+          </div>
+        </div>
+
+        <!-- Mensaje personalizado (+$1) -->
+        <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,.06)">
+          <div onclick="paseToggleMsg()" id="pase-msg-toggle" style="display:flex;align-items:center;gap:.7rem;cursor:pointer">
+            <div id="pase-msg-check" style="width:22px;height:22px;flex-shrink:0;border-radius:6px;border:2px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;transition:all .2s"><svg id="pase-msg-tick" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#04110a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M20 6 9 17l-5-5"/></svg></div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:.82rem;font-weight:600;color:#fff">Agregar un mensaje personalizado</div>
+              <div style="font-size:.7rem;color:#ffb84d;margin-top:.1rem">+$1 MXN &middot; se cobra extra</div>
+            </div>
+          </div>
+          <div id="pase-msg-box" style="display:none;margin-top:.7rem">
+            <textarea id="pase-msg-texto" maxlength="120" placeholder="Escribe tu mensaje (ej: Feliz cumple crack!)" oninput="_updatePasePagina()" style="width:100%;box-sizing:border-box;background:rgba(0,0,0,.3);border:1px solid rgba(255,180,60,.3);color:#fff;border-radius:10px;padding:.7rem .85rem;font-family:Poppins;font-size:.85rem;outline:none;resize:none;min-height:60px"></textarea>
+            <div style="display:flex;align-items:flex-start;gap:.5rem;margin-top:.5rem;background:rgba(255,180,60,.08);border:1px solid rgba(255,180,60,.25);border-radius:9px;padding:.55rem .7rem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffb84d" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:.1rem"><path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+              <span style="font-size:.7rem;color:#ffd8a0;line-height:1.4">Advertencia: agregar un mensaje personalizado cuesta <b>$1 MXN extra</b> que se suma al total.</span>
+            </div>
           </div>
         </div>
       </div>
