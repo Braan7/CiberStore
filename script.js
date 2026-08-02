@@ -8705,6 +8705,8 @@ function _fraguActualizar(){
 }
 
 function comprarFragU(){
+  showToast('\u26A0\uFE0F Fragmentos en mantenimiento por ahora', 3500);
+  return;
   if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal, 600); return; }
   if(_fraguBusy) return;
 
