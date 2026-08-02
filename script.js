@@ -9226,3 +9226,85 @@ function comprarArchivo(plan){
     showToast('\u2705 Pedido #' + ord + ' confirmado! Te contactaremos para activar tu Proxy iOS VIP.', 5000);
   }, 600);
 }
+
+
+/* ═══════════════════════════════════════════════════════════
+   EXPORTAR SALDOS DE CLIENTES (panel admin)
+   Descarga usuario + saldo de todos los clientes.
+   ═══════════════════════════════════════════════════════════ */
+function admExportarSaldos(formato){
+  var info = document.getElementById('export-saldos-info');
+  var log = document.getElementById('export-saldos-log');
+  if(info) info.textContent = 'Cargando clientes...';
+
+  if(typeof sb === 'undefined' || !sb.get){
+    if(info) info.textContent = 'No disponible.';
+    return;
+  }
+
+  sb.get('profiles', 'select=username,nombre,saldo,role&order=saldo.desc&limit=5000').then(function(rows){
+    if(!rows || !rows.length){
+      if(info) info.textContent = 'No hay clientes.';
+      return;
+    }
+
+    // Filtrar solo clientes (opcional: incluir todos)
+    var clientes = rows.filter(function(r){ return r.username; });
+    var totalSaldo = clientes.reduce(function(s,r){ return s + (Number(r.saldo)||0); }, 0);
+
+    if(info){
+      info.innerHTML = '<b style="color:#25d366">' + clientes.length + ' clientes</b> &middot; Saldo total: <b style="color:#fff">$' + Math.round(totalSaldo).toLocaleString('es-MX') + ' MX</b>';
+    }
+
+    if(formato === 'csv'){
+      var csv = 'Usuario,Nombre,Saldo MXN,Rol\n';
+      clientes.forEach(function(r){
+        var u = '"' + String(r.username||'').replace(/"/g,'""') + '"';
+        var n = '"' + String(r.nombre||'').replace(/"/g,'""') + '"';
+        var s = Number(r.saldo)||0;
+        var rol = r.role || 'user';
+        csv += u + ',' + n + ',' + s + ',' + rol + '\n';
+      });
+      var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      var fecha = new Date().toISOString().slice(0,10);
+      a.download = 'saldos-ciberstore-' + fecha + '.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      if(log) log.style.display = 'none';
+      showToast('\u2705 CSV descargado (' + clientes.length + ' clientes)');
+
+    } else if(formato === 'texto'){
+      var txt = clientes.map(function(r){
+        return (r.username||'') + ' \u2192 $' + (Number(r.saldo)||0) + ' MX';
+      }).join('\n');
+      if(log){
+        log.style.display = 'block';
+        log.textContent = txt;
+      }
+
+    } else if(formato === 'copiar'){
+      var txt2 = clientes.map(function(r){
+        return (r.username||'') + ' \u2192 $' + (Number(r.saldo)||0) + ' MX';
+      }).join('\n');
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(txt2).then(function(){
+          showToast('\u2705 Copiado! (' + clientes.length + ' clientes)');
+        }).catch(function(){
+          if(log){ log.style.display='block'; log.textContent=txt2; }
+          showToast('Copia manual desde el cuadro');
+        });
+      } else {
+        if(log){ log.style.display='block'; log.textContent=txt2; }
+        showToast('Copia manual desde el cuadro');
+      }
+    }
+  }).catch(function(e){
+    if(info) info.textContent = 'Error al cargar los saldos.';
+    console.error('[EXPORT-SALDOS]', e);
+  });
+}

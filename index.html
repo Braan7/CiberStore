@@ -5223,6 +5223,18 @@ document.addEventListener('keydown',function(e){
       <button onclick="admRecargaMasiva()" style="padding:.75rem 1.5rem;background:linear-gradient(90deg,#a07800,var(--c4));color:#020a0a;border:none;border-radius:8px;font-family:'Poppins';font-weight:900;font-size:.85rem;cursor:pointer">&#128167; Aplicar recarga masiva</button>
       <div id="masiva-log" style="margin-top:.85rem;font-size:.75rem;color:var(--muted);line-height:1.8;display:none;max-height:200px;overflow-y:auto"></div>
     </div>
+
+    <div class="adm-card">
+      <div class="adm-card-title" style="color:#25d366">&#128229; Exportar saldos de clientes</div>
+      <p style="font-size:.78rem;color:var(--muted);margin-bottom:1rem">Descarga la lista de todos los clientes con su usuario y saldo actual.</p>
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+        <button onclick="admExportarSaldos('csv')" style="padding:.75rem 1.3rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:8px;font-family:'Poppins';font-weight:900;font-size:.82rem;cursor:pointer">&#128190; Descargar CSV (Excel)</button>
+        <button onclick="admExportarSaldos('texto')" style="padding:.75rem 1.3rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:8px;font-family:'Poppins';font-weight:700;font-size:.82rem;cursor:pointer">&#128203; Ver en texto</button>
+        <button onclick="admExportarSaldos('copiar')" style="padding:.75rem 1.3rem;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.3);color:#22d3ee;border-radius:8px;font-family:'Poppins';font-weight:700;font-size:.82rem;cursor:pointer">&#128203; Copiar todo</button>
+      </div>
+      <div id="export-saldos-info" style="margin-top:.85rem;font-size:.75rem;color:var(--muted)"></div>
+      <div id="export-saldos-log" style="margin-top:.6rem;font-size:.72rem;color:#c9d1e0;line-height:1.7;display:none;max-height:280px;overflow-y:auto;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:.8rem 1rem;font-family:monospace"></div>
+    </div>
   </div>
 
   <!-- ══ ESTADISTICAS AVANZADAS ══ -->
