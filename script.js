@@ -13,7 +13,7 @@ var _addSpendBusy = false; // Lock para evitar descuentos simultaneos/dobles
 
 function _refreshSaldoUI(saldo){
   var s = '$' + Math.round(saldo).toLocaleString('es-MX') + ' MX';
-  ['saldo-page-balance','modal-saldo-amt','frag-saldo-disp','lk200-saldo-val','lk2k-saldo-val','renta-bot-saldo','bonus-saldo-val','ilim-saldo-val','v1-saldo-val','pin-saldo-val','pin-api-saldo'].forEach(function(id){
+  ['saldo-page-balance','modal-saldo-amt','frag-saldo-disp','lk200-saldo-val','lk2k-saldo-val','renta-bot-saldo','bonus-saldo-val','ilim-saldo-val','v1-saldo-val','pin-saldo-val','pin-api-saldo','archivos-saldo-val'].forEach(function(id){
     var el = document.getElementById(id);
     if(el) el.textContent = s;
   });
@@ -694,6 +694,7 @@ function goPage(id){
   if(id==='likes') id='likes2k'; // el sistema viejo de likes fue reemplazado por Likes 2K
   setTimeout(function(){ if(window._hookPasteAll) window._hookPasteAll(); }, 300);
   if(id==='biolarga') setTimeout(_refreshBioLargaSaldo, 100);
+  if(id==='archivos') setTimeout(_refreshArchivosSaldo, 100);
   if(id==='likes2k') setTimeout(function(){ renderLikes2k(); _refreshL2kSaldo(); }, 100);
   if(id==='cajas') setTimeout(_fraguActualizar, 100);
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
@@ -9176,4 +9177,52 @@ function autoLimpiarRankings(){
       console.log('[RANKING] auto-limpieza: ' + pedidosReembolsados.length + ' pedidos con reembolso revisados');
     }
   }).catch(function(e){ console.warn('[RANKING] auto-limpieza fallo', e); });
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   ARCHIVOS FF - Proxy iOS VIP (GARCITA STORE)
+   Se paga con saldo. Aviso a Telegram para activar.
+   ═══════════════════════════════════════════════════════════ */
+var ARCHIVOS_PRECIOS = { semana: 400, mes: 700 };
+var _archivoBusy = false;
+
+function _refreshArchivosSaldo(){
+  var el = document.getElementById('archivos-saldo-val');
+  if(el && authSession) el.textContent = '$' + Math.round(authSession.saldo||0).toLocaleString('es-MX') + ' MX';
+}
+
+function comprarArchivo(plan){
+  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal, 600); return; }
+  if(_archivoBusy) return;
+
+  var precio = ARCHIVOS_PRECIOS[plan];
+  if(!precio) return;
+  var planTxt = plan === 'mes' ? 'Mensual (30 dias)' : 'Semanal (7 dias)';
+
+  var saldo = authSession.saldo || 0;
+  if(saldo < precio){
+    showToast('Saldo insuficiente. Necesitas $' + precio + ' MX', 3500);
+    setTimeout(function(){ goPage('saldo'); }, 900);
+    return;
+  }
+
+  if(!confirm('Comprar PROXY iOS VIP - ' + planTxt + ' por $' + precio + ' MX?\n\nSe descontara de tu saldo y coordinaremos la activacion contigo.\n\nRecuerda: no nos hacemos responsables de cuentas baneadas o suspendidas.')) return;
+
+  _archivoBusy = true;
+  var ord = (typeof getNextOrder === 'function') ? getNextOrder() : Math.floor(Math.random()*9000+1000);
+
+  addSpend(precio, 'PROXY iOS VIP ' + planTxt + ' (Garcita) - Pedido #' + ord);
+
+  if(typeof tgNotifyPurchase === 'function'){
+    tgNotifyPurchase(authSession.username,
+      '\uD83D\uDCC1 ARCHIVOS FF - PROXY iOS VIP\n\uD83D\uDD10 Plan: ' + planTxt + '\n\u26A0\uFE0F ACTIVAR MANUALMENTE (coordinar con cliente)',
+      precio, ord);
+  }
+
+  setTimeout(function(){
+    _archivoBusy = false;
+    _refreshArchivosSaldo();
+    showToast('\u2705 Pedido #' + ord + ' confirmado! Te contactaremos para activar tu Proxy iOS VIP.', 5000);
+  }, 600);
 }

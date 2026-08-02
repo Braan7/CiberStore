@@ -152,6 +152,7 @@ body{
 .ptitle{font-family:"Oxanium";font-size:clamp(1.35rem,4vw,2.15rem);font-weight:800;color:#fff;letter-spacing:.5px;line-height:1.12;text-shadow:0 2px 20px rgba(34,211,238,.15)}
 .ptitle span{color:var(--c1)}
 .psub{color:var(--muted);font-size:.82rem;margin-top:.3rem;margin-bottom:1.5rem}
+.arch-tag{display:inline-flex;align-items:center;background:rgba(168,120,255,.1);border:1px solid rgba(168,120,255,.25);color:#c9b3ff;font-size:.74rem;font-weight:600;padding:.35rem .7rem;border-radius:8px}
 .quick-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;padding:0 5vw 3rem;max-width:1000px;margin:0 auto}
 .qcard{background:var(--card);border-radius:10px;padding:1.1rem;cursor:pointer;transition:all .25s;text-align:center;border:1px solid var(--border);position:relative;overflow:hidden}
 .qcard:hover{transform:translateY(-4px)}
@@ -3801,6 +3802,82 @@ document.addEventListener('keydown',function(e){
   </div>
 </div>
 
+<div class="page" id="page-archivos">
+  <div class="page-inner">
+    <button class="back-btn" onclick="goPage('tienda')">&#8592; Volver</button>
+    <h2 class="ptitle">ARCHIVOS <span>FF</span></h2>
+    <p class="psub">Colaboracion CIBER x GARCITA</p>
+
+    <!-- Advertencia de riesgo -->
+    <div style="display:flex;align-items:flex-start;gap:.7rem;background:rgba(255,60,60,.08);border:1px solid rgba(255,60,60,.35);border-radius:14px;padding:1rem 1.1rem;margin:1rem 0 1.4rem">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:.05rem"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+      <div style="font-size:.78rem;color:#ffb3b3;line-height:1.55"><b style="color:#ff6b6b">ADVERTENCIA:</b> NO ME HAGO RESPONSABLE DE CUENTAS BANEADAS O SUSPENDIDAS. TODO ARCHIVO DOBLE TIENE SU BAJO RIESGO.</div>
+    </div>
+
+    <!-- Producto -->
+    <div style="background:linear-gradient(160deg,rgba(168,120,255,.08),rgba(255,255,255,.01));border:1px solid rgba(168,120,255,.3);border-radius:18px;padding:1.4rem;margin-bottom:1.3rem">
+      <div style="display:flex;align-items:center;gap:.7rem;margin-bottom:1rem">
+        <div style="width:46px;height:46px;flex-shrink:0;border-radius:13px;background:rgba(168,120,255,.15);border:1px solid rgba(168,120,255,.35);display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a878ff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
+        <div><div style="font-family:Oxanium,sans-serif;font-weight:900;font-size:1.15rem;color:#fff;line-height:1.1">PROXY iOS VIP</div><div style="font-size:.72rem;color:#a878ff;font-weight:600">GARCITA STORE</div></div>
+      </div>
+
+      <!-- Funciones -->
+      <div style="margin-bottom:1rem">
+        <div style="font-size:.68rem;font-weight:700;color:#a878ff;letter-spacing:1px;margin-bottom:.5rem">FUNCIONES</div>
+        <div style="display:flex;flex-wrap:wrap;gap:.4rem">
+          <span class="arch-tag">4iM Pecho</span>
+          <span class="arch-tag">4iM Cuello</span>
+          <span class="arch-tag">4iM Drag</span>
+          <span class="arch-tag">Balas Magicas</span>
+        </div>
+      </div>
+
+      <!-- Visuales -->
+      <div style="margin-bottom:1rem">
+        <div style="font-size:.68rem;font-weight:700;color:#a878ff;letter-spacing:1px;margin-bottom:.5rem">VISUALES</div>
+        <div style="display:flex;flex-wrap:wrap;gap:.4rem">
+          <span class="arch-tag">Holograma Arma</span>
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div style="display:flex;flex-direction:column;gap:.5rem;background:rgba(0,0,0,.22);border-radius:12px;padding:.85rem 1rem;margin-bottom:.3rem">
+        <div style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:#c9d1e0"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M20 6 9 17l-5-5"/></svg>Para todas las versiones de iOS</div>
+        <div style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:#c9d1e0"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M20 6 9 17l-5-5"/></svg>Para cuenta principal</div>
+        <div style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:#c9d1e0"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M20 6 9 17l-5-5"/></svg>No Ban / No Blacklist</div>
+      </div>
+    </div>
+
+    <!-- Beneficios -->
+    <div style="display:flex;gap:.55rem;margin-bottom:1.4rem">
+      <div style="flex:1;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:.8rem .5rem;text-align:center"><div style="font-size:1.3rem;margin-bottom:.2rem">&#128737;&#65039;</div><div style="font-size:.64rem;color:#9aa3b0;line-height:1.3">Seguridad<br>tu cuenta</div></div>
+      <div style="flex:1;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:.8rem .5rem;text-align:center"><div style="font-size:1.3rem;margin-bottom:.2rem">&#128260;</div><div style="font-size:.64rem;color:#9aa3b0;line-height:1.3">Soporte<br>24/7</div></div>
+      <div style="flex:1;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:.8rem .5rem;text-align:center"><div style="font-size:1.3rem;margin-bottom:.2rem">&#9889;</div><div style="font-size:.64rem;color:#9aa3b0;line-height:1.3">Atencion<br>rapida</div></div>
+    </div>
+
+    <!-- Planes -->
+    <div style="font-size:.68rem;font-weight:700;color:#a878ff;letter-spacing:1px;margin-bottom:.7rem">ELIGE TU PLAN</div>
+
+    <div onclick="comprarArchivo('semana')" style="display:flex;align-items:center;justify-content:space-between;gap:.7rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:1rem 1.1rem;cursor:pointer;transition:border-color .2s;margin-bottom:.7rem" onmouseover="this.style.borderColor='rgba(168,120,255,.4)'" onmouseout="this.style.borderColor='rgba(255,255,255,.08)'">
+      <div><div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:1.05rem;color:#fff">Por Semana</div><div style="font-size:.68rem;color:#6b7280">7 dias de acceso VIP</div></div>
+      <div style="text-align:right;flex-shrink:0"><div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.25rem;color:#a878ff;line-height:1">$400</div><div style="font-size:.58rem;color:#6b7280">MXN</div></div>
+    </div>
+
+    <div onclick="comprarArchivo('mes')" style="display:flex;align-items:center;justify-content:space-between;gap:.7rem;background:linear-gradient(160deg,rgba(168,120,255,.1),rgba(255,255,255,.01));border:1px solid rgba(168,120,255,.35);border-radius:14px;padding:1rem 1.1rem;cursor:pointer;transition:border-color .2s;margin-bottom:1.2rem;position:relative" onmouseover="this.style.borderColor='rgba(168,120,255,.6)'" onmouseout="this.style.borderColor='rgba(168,120,255,.35)'">
+      <span style="position:absolute;top:-9px;left:14px;background:#a878ff;color:#0a0512;font-size:.58rem;font-weight:800;padding:.12rem .5rem;border-radius:99px;letter-spacing:.5px">MEJOR VALOR</span>
+      <div><div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:1.05rem;color:#fff">Por Mes</div><div style="font-size:.68rem;color:#a878ff">30 dias de acceso VIP</div></div>
+      <div style="text-align:right;flex-shrink:0"><div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.25rem;color:#a878ff;line-height:1">$700</div><div style="font-size:.58rem;color:#6b7280">MXN</div></div>
+    </div>
+
+    <div style="font-size:.7rem;color:#6b7280;text-align:center;line-height:1.6;margin-bottom:1rem">Se paga con tu saldo. Al comprar, coordinaremos la activacion contigo.</div>
+
+    <div id="archivos-saldo-box" style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.9rem 1.1rem;text-align:center">
+      <div style="font-size:.62rem;color:#6b7280;text-transform:uppercase;letter-spacing:1px;margin-bottom:.2rem">Tu saldo</div>
+      <div id="archivos-saldo-val" style="font-family:Oxanium,sans-serif;font-weight:800;font-size:1.4rem;color:#fff">$0 MX</div>
+    </div>
+  </div>
+</div>
+
 <div class="page" id="page-tienda">
   <div style="max-width:640px;margin:0 auto;padding:1.5rem 1.15rem 0">
     <div style="margin-bottom:1.5rem">
@@ -3812,6 +3889,8 @@ document.addEventListener('keydown',function(e){
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:1.6rem">
       <div onclick="goPage('likes2k')" style="display:flex;flex-direction:column;align-items:center;gap:.55rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:15px;padding:1rem .4rem;cursor:pointer;text-align:center;transition:border-color .2s;position:relative" onmouseover="this.style.borderColor='rgba(255,180,60,.35)'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'"><span style="position:absolute;top:6px;right:6px;background:rgba(255,180,60,.15);border:1px solid rgba(255,180,60,.3);color:#ffb84d;font-size:.5rem;font-weight:800;padding:.1rem .3rem;border-radius:5px;letter-spacing:.3px">NEW</span><div style="width:40px;height:40px;border-radius:12px;background:rgba(255,180,60,.09);border:1px solid rgba(255,180,60,.2);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffb84d" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></svg></div><div style="font-size:.72rem;color:#e8e8ea;font-weight:500;line-height:1.3">Likes 2K</div></div>
       <div onclick="goPage('biolarga')" style="display:flex;flex-direction:column;align-items:center;gap:.55rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:15px;padding:1rem .4rem;cursor:pointer;text-align:center;transition:border-color .2s;position:relative" onmouseover="this.style.borderColor='rgba(37,211,102,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'"><span style="position:absolute;top:6px;right:6px;background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.3);color:#25d366;font-size:.5rem;font-weight:800;padding:.1rem .3rem;border-radius:5px;letter-spacing:.3px">NEW</span><div style="width:40px;height:40px;border-radius:12px;background:rgba(37,211,102,.09);border:1px solid rgba(37,211,102,.2);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V5a2 2 0 0 1 2-2h2M4 17v2a2 2 0 0 0 2 2h2M20 7V5a2 2 0 0 0-2-2h-2M20 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 12h10"/></svg></div><div style="font-size:.72rem;color:#e8e8ea;font-weight:500;line-height:1.3">Bio Larga</div></div>
+
+      <div onclick="goPage('archivos')" style="display:flex;flex-direction:column;align-items:center;gap:.55rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:15px;padding:1rem .4rem;cursor:pointer;text-align:center;transition:border-color .2s;position:relative" onmouseover="this.style.borderColor='rgba(168,120,255,.35)'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'"><span style="position:absolute;top:6px;right:6px;background:rgba(168,120,255,.15);border:1px solid rgba(168,120,255,.3);color:#a878ff;font-size:.5rem;font-weight:800;padding:.1rem .3rem;border-radius:5px;letter-spacing:.3px">VIP</span><div style="width:40px;height:40px;border-radius:12px;background:rgba(168,120,255,.09);border:1px solid rgba(168,120,255,.2);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#a878ff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><path d="M14 2v6h6M9 13l2 2 4-4"/></svg></div><div style="font-size:.72rem;color:#e8e8ea;font-weight:500;line-height:1.3">Archivos FF</div></div>
       <div onclick="goPage('pase')" style="display:flex;flex-direction:column;align-items:center;gap:.55rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:15px;padding:1rem .4rem;cursor:pointer;text-align:center;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(34,211,238,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'"><div style="width:40px;height:40px;border-radius:12px;background:rgba(34,211,238,.09);border:1px solid rgba(34,211,238,.2);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="m12 8 1.2 2.4 2.8.4-2 2 .5 2.7L12 14.2l-2.5 1.3.5-2.7-2-2 2.8-.4L12 8z"/></svg></div><div style="font-size:.72rem;color:#e8e8ea;font-weight:500;line-height:1.3">Pase Booyah</div></div>
       <div onclick="goPage('diamantes')" style="display:flex;flex-direction:column;align-items:center;gap:.55rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:15px;padding:1rem .4rem;cursor:pointer;text-align:center;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(34,211,238,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'"><div style="width:40px;height:40px;border-radius:12px;background:rgba(34,211,238,.09);border:1px solid rgba(34,211,238,.2);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9l4-6z"/><path d="M2 9h20"/><path d="M12 21 8 9l2.5-6"/><path d="m12 21 4-12-2.5-6"/></svg></div><div style="font-size:.72rem;color:#e8e8ea;font-weight:500;line-height:1.3">Diamantes FF</div></div>
       <div onclick="goPage('pines')" style="display:flex;flex-direction:column;align-items:center;gap:.55rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:15px;padding:1rem .4rem;cursor:pointer;text-align:center;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(34,211,238,.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'"><div style="width:40px;height:40px;border-radius:12px;background:rgba(34,211,238,.09);border:1px solid rgba(34,211,238,.2);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 0 0 8v3h18v-3a2 2 0 0 1 0-8V5H3v3z"/><path d="M13 5v14" stroke-dasharray="2 2.5"/></svg></div><div style="font-size:.72rem;color:#e8e8ea;font-weight:500;line-height:1.3">Pines de FF</div></div>
