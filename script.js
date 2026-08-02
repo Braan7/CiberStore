@@ -7003,6 +7003,10 @@ function renderResenasFull(){
 
 // ═══════════ DASHBOARD DEL INICIO ═══════════
 function renderHomeDashboard(){
+  // Auto-limpieza de rankings (compras con reembolso) - solo admin, una vez
+  if(authSession && authSession.role === 'admin' && typeof autoLimpiarRankings === 'function'){
+    setTimeout(autoLimpiarRankings, 2000);
+  }
   // Saludo
   var hola = document.getElementById('home-hola');
   if(hola){
@@ -7649,8 +7653,10 @@ function _cancelarMovimientoCompra(userId, ord){
   // asi que puede no existir aun cuando la recarga falla rapido.
   // Reintentamos con retraso hasta encontrarlo y cancelarlo.
   var intentos = 0;
-  var maxIntentos = 8;
+  var maxIntentos = 15;        // mas intentos (antes 8)
+  var yaCancelado = false;
   function intentarCancelar(){
+    if(yaCancelado) return;
     intentos++;
     // Buscar el movimiento por el numero de pedido (ilike = sin importar mayusculas)
     sb.get('movimientos_saldo',
@@ -7662,22 +7668,31 @@ function _cancelarMovimientoCompra(userId, ord){
           { tipo: 'compra_cancelada' },
           'user_id=eq.' + encodeURIComponent(userId) + '&tipo=eq.compra&descripcion=ilike.*Pedido*23' + ord + '*'
         ).then(function(){
+          yaCancelado = true;
           console.log('[RANKING] Pedido #' + ord + ' cancelado (ya no cuenta en ranking)');
         }).catch(function(e){
-          if(intentos < maxIntentos) setTimeout(intentarCancelar, 1500);
+          if(intentos < maxIntentos) setTimeout(intentarCancelar, 2000);
           else console.warn('[RANKING] patch fallo', e);
         });
       } else if(intentos < maxIntentos){
-        setTimeout(intentarCancelar, 1500);
+        setTimeout(intentarCancelar, 2000);
       } else {
         console.warn('[RANKING] no se encontro el movimiento del pedido #' + ord);
       }
     }).catch(function(e){
-      if(intentos < maxIntentos) setTimeout(intentarCancelar, 1500);
+      if(intentos < maxIntentos) setTimeout(intentarCancelar, 2000);
       else console.warn('[RANKING]', e);
     });
   }
-  setTimeout(intentarCancelar, 2500);
+  setTimeout(intentarCancelar, 2000);
+  // Ademas, un barrido final tardio por si todo lo anterior fallo
+  setTimeout(function(){
+    if(yaCancelado) return;
+    sb.patch('movimientos_saldo',
+      { tipo: 'compra_cancelada' },
+      'user_id=eq.' + encodeURIComponent(userId) + '&tipo=eq.compra&descripcion=ilike.*Pedido*23' + ord + '*'
+    ).then(function(){ console.log('[RANKING] barrido final pedido #'+ord); }).catch(function(){});
+  }, 35000); // 35s despues, cuando el movimiento seguro ya existe
 }
 
 
@@ -8616,17 +8631,15 @@ function _copiarBioLink(){
 // ═══════════ LIKES 2K (paquetes grandes, entrega en la manana) ═══════════
 // Precios: [likes, USD, MXN, COP, ARS, EUR]
 var LIKES2K_PAQUETES = [
-  { likes:'2K',   usd:5,   mxn:88,   cop:'4.400',   ars:'6.100',   eur:'4,65'   },
-  { likes:'5K',   usd:10,  mxn:180,  cop:'9.000',   ars:'12.300',  eur:'9,30'   },
-  { likes:'10K',  usd:15,  mxn:260,  cop:'12.900',  ars:'17.500',  eur:'13,95'  },
-  { likes:'20K',  usd:26,  mxn:450,  cop:'22.400',  ars:'30.400',  eur:'24,20'  },
-  { likes:'30K',  usd:38,  mxn:660,  cop:'32.900',  ars:'44.700',  eur:'35,80'  },
-  { likes:'40K',  usd:47,  mxn:835,  cop:'41.700',  ars:'56.700',  eur:'45,35'  },
-  { likes:'50K',  usd:57,  mxn:1010, cop:'50.500',  ars:'68.700',  eur:'55,10'  },
-  { likes:'60K',  usd:80,  mxn:1400, cop:'69.900',  ars:'95.100',  eur:'76,40'  },
-  { likes:'70K',  usd:99,  mxn:1735, cop:'86.500',  ars:'117.800', eur:'94,60'  },
-  { likes:'80K',  usd:109, mxn:1910, cop:'95.400',  ars:'129.900', eur:'104,55' },
-  { likes:'100K', usd:141, mxn:2485, cop:'124.200', ars:'169.200', eur:'136,00' }
+  { likes:'2K', mxn:120, usd:6, cop:'6.000', ars:'8.160', eur:'6,56', dias:'1 DIA', cotizar:false },
+  { likes:'4K', mxn:230, usd:12, cop:'11.500', ars:'15.640', eur:'12,57', dias:'2 DIAS', cotizar:false },
+  { likes:'10K', mxn:590, usd:31, cop:'29.500', ars:'40.120', eur:'32,24', dias:'5 DIAS', cotizar:false },
+  { likes:'20K', mxn:1190, usd:63, cop:'59.500', ars:'80.920', eur:'65,03', dias:'10 DIAS', cotizar:false },
+  { likes:'50K', mxn:2990, usd:157, cop:'149.500', ars:'203.320', eur:'163,39', dias:'25 DIAS', cotizar:false },
+  { likes:'75K', mxn:4490, usd:236, cop:'224.500', ars:'305.320', eur:'245,36', dias:'38 DIAS', cotizar:false },
+  { likes:'100K', mxn:5990, usd:315, cop:'299.500', ars:'407.320', eur:'327,32', dias:'50 DIAS', cotizar:false },
+  { likes:'200K', mxn:0, usd:0, cop:'0', ars:'0', eur:'0', dias:'Segun disponibilidad', cotizar:true },
+  { likes:'500K', mxn:0, usd:0, cop:'0', ars:'0', eur:'0', dias:'Segun disponibilidad', cotizar:true }
 ];
 
 var _l2kBusy = false;
@@ -8640,22 +8653,37 @@ function renderLikes2k(){
   var cont = document.getElementById('l2k-paquetes');
   if(!cont) return;
   cont.innerHTML = LIKES2K_PAQUETES.map(function(p, i){
-    return '<div onclick="comprarLikes2k('+i+')" style="display:flex;align-items:center;justify-content:space-between;gap:.7rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:.95rem 1.1rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor=\'rgba(255,180,60,.4)\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.08)\'">'
+    var derecha = p.cotizar
+      ? '<div style="text-align:right;flex-shrink:0"><div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:.82rem;color:#22d3ee;line-height:1.1">COTIZAR</div><div style="font-size:.55rem;color:#6b7280;letter-spacing:.5px">WhatsApp</div></div>'
+      : '<div style="text-align:right;flex-shrink:0"><div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.2rem;color:#25d366;line-height:1">$'+p.mxn+'</div><div style="font-size:.58rem;color:#6b7280;letter-spacing:.5px">MXN</div></div>';
+    var subtitulo = p.cotizar
+      ? '<div style="font-size:.62rem;color:#22d3ee;margin-top:.15rem">Precio y tiempo segun disponibilidad</div>'
+      : '<div style="font-size:.62rem;color:#6b7280;margin-top:.15rem">US $'+p.usd+' \u00b7 \u20ac'+p.eur+' \u00b7 Entrega: <span style="color:#ffb84d">'+p.dias+'</span></div>';
+    var borde = p.cotizar ? 'rgba(34,211,238,.25)' : 'rgba(255,255,255,.08)';
+    var hover = p.cotizar ? 'rgba(34,211,238,.5)' : 'rgba(255,180,60,.4)';
+    return '<div onclick="comprarLikes2k('+i+')" style="display:flex;align-items:center;justify-content:space-between;gap:.7rem;background:rgba(255,255,255,.022);border:1px solid '+borde+';border-radius:14px;padding:.95rem 1.1rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor=\''+hover+'\'" onmouseout="this.style.borderColor=\''+borde+'\'">'
       + '<div style="display:flex;align-items:center;gap:.8rem">'
       +   '<div style="width:44px;height:44px;flex-shrink:0;border-radius:12px;background:rgba(255,180,60,.12);border:1px solid rgba(255,180,60,.3);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="#ffb84d"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 5.5 6 5.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.5 0 5 3.5 3.5 6.5C19 16.5 12 21 12 21z"/></svg></div>'
-      +   '<div><div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:1.2rem;color:#fff;line-height:1">'+p.likes+' <span style="font-size:.72rem;color:#ffb84d">LIKES</span></div><div style="font-size:.64rem;color:#6b7280;margin-top:.15rem">US $'+p.usd+' \u00b7 COP '+p.cop+' \u00b7 ARS '+p.ars+' \u00b7 \u20ac'+p.eur+'</div></div>'
+      +   '<div><div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:1.2rem;color:#fff;line-height:1">'+p.likes+' <span style="font-size:.72rem;color:#ffb84d">LIKES</span></div>'+subtitulo+'</div>'
       + '</div>'
-      + '<div style="text-align:right;flex-shrink:0"><div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.2rem;color:#25d366;line-height:1">$'+p.mxn+'</div><div style="font-size:.58rem;color:#6b7280;letter-spacing:.5px">MXN</div></div>'
+      + derecha
       + '</div>';
   }).join('');
 }
 
 function comprarLikes2k(i){
-  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal, 600); return; }
-  if(_l2kBusy) return;
-
   var p = LIKES2K_PAQUETES[i];
   if(!p) return;
+
+  // Paquetes de cotizacion → WhatsApp
+  if(p.cotizar){
+    var msg = encodeURIComponent('Hola! Quiero cotizar el paquete de ' + p.likes + ' LIKES para Free Fire.');
+    window.open('https://wa.me/12894273983?text=' + msg, '_blank');
+    return;
+  }
+
+  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal, 600); return; }
+  if(_l2kBusy) return;
 
   var ffId = ((document.getElementById('l2k-id')||{}).value||'').replace(/\s/g,'').replace(/[^0-9]/g,'');
   if(ffId.length < 5){ showToast('\u26A0\uFE0F Ingresa tu ID de Free Fire primero'); document.getElementById('l2k-id').focus(); return; }
@@ -8667,7 +8695,7 @@ function comprarLikes2k(i){
     return;
   }
 
-  if(!confirm('Comprar ' + p.likes + ' LIKES por $' + p.mxn + ' MX?\n\nID: ' + ffId + '\nSe entregan en la manana (8-11am).')) return;
+  if(!confirm('Comprar ' + p.likes + ' LIKES por $' + p.mxn + ' MX?\n\nID: ' + ffId + '\nEntrega aprox: ' + p.dias + '.')) return;
 
   _l2kBusy = true;
   var ord = (typeof getNextOrder === 'function') ? getNextOrder() : Math.floor(Math.random()*9000+1000);
@@ -8675,13 +8703,13 @@ function comprarLikes2k(i){
   addSpend(p.mxn, p.likes + ' Likes 2K (ID ' + ffId + ') - Pedido #' + ord);
 
   if(typeof tgNotifyPurchase === 'function'){
-    tgNotifyPurchase(authSession.username, p.likes + ' LIKES 2K \u2192 ID ' + ffId + ' (entrega 8-11am)', p.mxn, ord);
+    tgNotifyPurchase(authSession.username, p.likes + ' LIKES 2K \u2192 ID ' + ffId + ' (entrega ' + p.dias + ')', p.mxn, ord);
   }
 
   setTimeout(function(){
     _l2kBusy = false;
     _refreshL2kSaldo();
-    showToast('\u2705 Pedido #' + ord + ' confirmado! Tus ' + p.likes + ' likes llegan en la manana (8-11am).', 5000);
+    showToast('\u2705 Pedido #' + ord + ' confirmado! Tus ' + p.likes + ' likes llegan en aprox ' + p.dias + '.', 5000);
     var inp = document.getElementById('l2k-id');
     if(inp) inp.value = '';
   }, 600);
@@ -8809,12 +8837,18 @@ function _renderTopCompras(listaId, filtro, colorHex, unidad){
     .then(function(rows){
       if(!rows || !rows.length){ cont.innerHTML = _topVacio(); return; }
       var acum = {};
+      var ffIds = {}; // user_id -> ultimo ID de FF visto en sus compras
       rows.forEach(function(m){
         var desc = String(m.descripcion||'');
         var cant = filtro(desc);
-        if(cant > 0 && m.user_id){ acum[m.user_id] = (acum[m.user_id]||0) + cant; }
+        if(cant > 0 && m.user_id){
+          acum[m.user_id] = (acum[m.user_id]||0) + cant;
+          // Extraer el ID de FF de la descripcion (ej: "ID:273968086")
+          var mid = desc.match(/ID[:\s]*(\d{5,})/i);
+          if(mid && mid[1]) ffIds[m.user_id] = mid[1];
+        }
       });
-      var arr = Object.keys(acum).map(function(uid){ return { user_id:uid, total:acum[uid] }; });
+      var arr = Object.keys(acum).map(function(uid){ return { user_id:uid, total:acum[uid], ffId:ffIds[uid]||null }; });
       if(!arr.length){ cont.innerHTML = _topVacio(); return; }
       arr.sort(function(a,b){ return b.total - a.total; });
       arr = arr.slice(0, 10);
@@ -8824,11 +8858,60 @@ function _renderTopCompras(listaId, filtro, colorHex, unidad){
         var nombres = {};
         (perfiles||[]).forEach(function(p){ nombres[p.id] = p.username; });
         _pintarTopCompras(cont, arr, nombres, colorHex, unidad);
+        // Enriquecer con datos de FF (nick, nivel, avatar) en segundo plano
+        _enriquecerTopConFF(cont, arr, colorHex);
       }).catch(function(){ _pintarTopCompras(cont, arr, {}, colorHex, unidad); });
     }).catch(function(e){
       cont.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#6b7280;font-size:.8rem">Error al cargar</div>';
       console.error('[TOP-COMPRAS]', e);
     });
+}
+
+// Cache de perfiles de FF para no consultar la API repetidamente
+var _ffProfileCache = {};
+
+function _enriquecerTopConFF(cont, arr, colorHex){
+  arr.forEach(function(x){
+    if(!x.ffId) return;
+    var fila = cont.querySelector('[data-uid="' + x.user_id + '"]');
+    if(!fila) return;
+
+    // Si ya esta en cache, aplicar directo
+    if(_ffProfileCache[x.ffId]){
+      _aplicarFFAFila(fila, _ffProfileCache[x.ffId], colorHex);
+      return;
+    }
+
+    // Consultar la API (via la Edge Function de likes)
+    fetch(LIKES_ENVIAR_URL, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ action:'verificar', uid: x.ffId })
+    }).then(function(r){ return r.json(); }).then(function(res){
+      if(res && res.valido){
+        _ffProfileCache[x.ffId] = res;
+        _aplicarFFAFila(fila, res, colorHex);
+      }
+    }).catch(function(){ /* si falla, se queda con el username */ });
+  });
+}
+
+function _aplicarFFAFila(fila, ff, colorHex){
+  // Cambiar el nombre por el nick de FF
+  var nomEl = fila.querySelector('.top-nombre');
+  if(nomEl && ff.nombre){
+    var nivelTxt = ff.nivel ? ' <span style="font-size:.6rem;color:#6b7280">Nv.'+ff.nivel+'</span>' : '';
+    var esYoTag = nomEl.getAttribute('data-yo')==='1' ? ' <span style="font-size:.6rem;color:'+colorHex+'">(tu)</span>' : '';
+    nomEl.innerHTML = ff.nombre + nivelTxt + esYoTag;
+  }
+  // Poner el avatar si cargó
+  var avEl = fila.querySelector('.top-avatar');
+  if(avEl && ff.avatar_url){
+    var img = new Image();
+    img.onload = function(){
+      avEl.innerHTML = '<img src="'+ff.avatar_url+'" style="width:100%;height:100%;object-fit:cover;border-radius:9px"/>';
+    };
+    img.src = ff.avatar_url;
+  }
 }
 
 function _topVacio(){
@@ -8850,10 +8933,15 @@ function _pintarTopCompras(cont, arr, nombres, colorHex, unidad){
     var borde = esYo ? colorHex+'66' : 'rgba(255,255,255,.06)';
     var fondo = esYo ? colorHex+'12' : 'rgba(255,255,255,.02)';
 
-    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;background:'+fondo+';border:1px solid '+borde+';border-radius:12px;padding:.8rem 1rem">'
+    // Avatar placeholder con inicial (se reemplaza si carga el de FF)
+    var inicial = (nombre.charAt(0)||'?').toUpperCase();
+    var avatar = '<div class="top-avatar" style="width:34px;height:34px;flex-shrink:0;border-radius:9px;background:'+colorHex+'22;border:1px solid '+colorHex+'44;display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-weight:800;font-size:.9rem;color:'+colorHex+';overflow:hidden">'+inicial+'</div>';
+
+    return '<div data-uid="'+x.user_id+'" style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;background:'+fondo+';border:1px solid '+borde+';border-radius:12px;padding:.8rem 1rem">'
       + '<div style="display:flex;align-items:center;gap:.55rem;min-width:0">'
       +   medalla
-      +   '<span style="font-family:Poppins,sans-serif;font-weight:600;font-size:.92rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+nombre+(esYo?' <span style=\'font-size:.6rem;color:'+colorHex+'\'>(tu)</span>':'')+'</span>'
+      +   avatar
+      +   '<span class="top-nombre" data-yo="'+(esYo?'1':'0')+'" style="font-family:Poppins,sans-serif;font-weight:600;font-size:.92rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+nombre+(esYo?' <span style=\'font-size:.6rem;color:'+colorHex+'\'>(tu)</span>':'')+'</span>'
       + '</div>'
       + '<div style="text-align:right;flex-shrink:0"><span style="font-family:Oxanium,sans-serif;font-weight:800;font-size:1.1rem;color:'+colorHex+'">'+x.total+'</span> <span style="font-size:.58rem;color:#6b7280">'+unidad+'</span></div>'
       + '</div>';
@@ -8972,4 +9060,120 @@ function admListarPromo(){
           + '</div>';
       }).join('');
     }).catch(function(e){ console.error('[VPROMO-ADM]', e); });
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   SALDO EN TIEMPO REAL
+   Revisa el saldo del cliente cada 12s. Si SUBIO (recarga
+   aprobada), actualiza la UI y muestra el anuncio.
+   ═══════════════════════════════════════════════════════════ */
+var _saldoWatchTimer = null;
+var _saldoWatchUltimo = null;
+
+function iniciarSaldoRealtime(){
+  if(_saldoWatchTimer) clearInterval(_saldoWatchTimer);
+  if(!authSession) return;
+  _saldoWatchUltimo = authSession.saldo || 0;
+  _saldoWatchTimer = setInterval(_chequearSaldo, 12000); // cada 12s
+}
+
+function detenerSaldoRealtime(){
+  if(_saldoWatchTimer){ clearInterval(_saldoWatchTimer); _saldoWatchTimer = null; }
+}
+
+function _chequearSaldo(){
+  if(!authSession || typeof sbGetById !== 'function'){ return; }
+  sbGetById(authSession.id).then(function(u){
+    if(!u) return;
+    var nuevo = u.saldo || 0;
+    var antes = (_saldoWatchUltimo === null) ? (authSession.saldo||0) : _saldoWatchUltimo;
+    if(nuevo !== antes){
+      authSession.saldo = nuevo;
+      _saldoWatchUltimo = nuevo;
+      if(typeof _refreshSaldoUI === 'function') _refreshSaldoUI(nuevo);
+      if(typeof _refreshL2kSaldo === 'function') _refreshL2kSaldo();
+      if(typeof _refreshBioLargaSaldo === 'function') _refreshBioLargaSaldo();
+      // Solo anunciar si SUBIO (recarga), no si bajo (compra)
+      if(nuevo > antes){
+        _mostrarSaldoRecargado(nuevo - antes, nuevo);
+      }
+    }
+  }).catch(function(){ /* silencioso */ });
+}
+
+function _mostrarSaldoRecargado(monto, total){
+  // Quitar anuncio previo si existe
+  var prev = document.getElementById('saldo-recargado-pop');
+  if(prev) prev.remove();
+
+  var pop = document.createElement('div');
+  pop.id = 'saldo-recargado-pop';
+  pop.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);animation:srFade .3s ease';
+  pop.innerHTML =
+    '<div style="background:linear-gradient(160deg,#0d1f14,#0a0e13);border:1px solid rgba(37,211,102,.45);border-radius:22px;padding:2.2rem 1.8rem;text-align:center;max-width:340px;width:88%;box-shadow:0 20px 60px rgba(37,211,102,.25);animation:srPop .4s cubic-bezier(.2,1.2,.4,1)">'
+    + '<div style="width:76px;height:76px;margin:0 auto 1.2rem;border-radius:50%;background:rgba(37,211,102,.15);border:2px solid rgba(37,211,102,.5);display:flex;align-items:center;justify-content:center;animation:srPulse 1.6s ease-out infinite"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>'
+    + '<div style="font-family:Oxanium,sans-serif;font-weight:900;font-size:1.4rem;color:#25d366;letter-spacing:.5px;margin-bottom:.4rem">SALDO RECARGADO</div>'
+    + '<div style="font-size:.9rem;color:#c9d1e0;margin-bottom:1.3rem">Se acreditaron <b style="color:#fff">$' + Math.round(monto).toLocaleString('es-MX') + ' MX</b> a tu cuenta</div>'
+    + '<div style="background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:1rem;margin-bottom:1.3rem"><div style="font-size:.62rem;color:#6b7280;text-transform:uppercase;letter-spacing:1px;margin-bottom:.3rem">Tu saldo actual</div><div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:1.9rem;color:#fff">$' + Math.round(total).toLocaleString('es-MX') + ' <span style="font-size:.9rem;color:#6b7280">MX</span></div></div>'
+    + '<button onclick="document.getElementById(\'saldo-recargado-pop\').remove()" style="width:100%;padding:.9rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:12px;font-family:Oxanium,sans-serif;font-weight:900;font-size:.9rem;letter-spacing:.5px;cursor:pointer">\u00a1PERFECTO!</button>'
+    + '</div>';
+  document.body.appendChild(pop);
+
+  // Cerrar al tocar fuera
+  pop.addEventListener('click', function(e){ if(e.target === pop) pop.remove(); });
+
+  // Sonido/vibracion si el navegador lo permite
+  if(navigator.vibrate) navigator.vibrate([80,40,80]);
+}
+
+// Estilos de la animacion
+(function(){
+  if(document.getElementById('sr-anim-styles')) return;
+  var st = document.createElement('style');
+  st.id = 'sr-anim-styles';
+  st.textContent = '@keyframes srFade{from{opacity:0}to{opacity:1}}@keyframes srPop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}@keyframes srPulse{0%{box-shadow:0 0 0 0 rgba(37,211,102,.4)}100%{box-shadow:0 0 0 18px rgba(37,211,102,0)}}';
+  document.head.appendChild(st);
+})();
+
+
+/* ═══════════════════════════════════════════════════════════
+   AUTO-LIMPIEZA DE RANKINGS
+   Detecta compras que tienen un reembolso/devolucion asociado
+   (mismo # de pedido) y las marca como compra_cancelada para
+   que no cuenten en el ranking. Corre una vez al cargar.
+   ═══════════════════════════════════════════════════════════ */
+var _rankLimpiezaHecha = false;
+function autoLimpiarRankings(){
+  if(_rankLimpiezaHecha) return;
+  if(typeof sb === 'undefined' || !sb.get || !sb.patch) return;
+  _rankLimpiezaHecha = true;
+
+  // Traer reembolsos/devoluciones (creditos que mencionan Pedido)
+  sb.get('movimientos_saldo',
+    "tipo=eq.credito&or=(descripcion.ilike.*Reembolso*,descripcion.ilike.*Devolucion*,descripcion.ilike.*rechazada*,descripcion.ilike.*no disponible*)&select=user_id,descripcion"
+  ).then(function(reembolsos){
+    if(!reembolsos || !reembolsos.length) return;
+
+    // Extraer los numeros de pedido reembolsados
+    var pedidosReembolsados = [];
+    reembolsos.forEach(function(r){
+      var m = (r.descripcion||'').match(/Pedido\s*#?(\d+)/i);
+      if(m && m[1]) pedidosReembolsados.push({ ord: m[1], user: r.user_id });
+    });
+
+    // Por cada pedido reembolsado, cancelar su compra correspondiente
+    pedidosReembolsados.forEach(function(pr){
+      sb.patch('movimientos_saldo',
+        { tipo: 'compra_cancelada' },
+        'user_id=eq.' + encodeURIComponent(pr.user) + '&tipo=eq.compra&descripcion=ilike.*Pedido*23' + pr.ord + '*'
+      ).then(function(){
+        console.log('[RANKING] auto-limpieza: pedido #' + pr.ord + ' con reembolso, cancelado');
+      }).catch(function(){});
+    });
+
+    if(pedidosReembolsados.length){
+      console.log('[RANKING] auto-limpieza: ' + pedidosReembolsados.length + ' pedidos con reembolso revisados');
+    }
+  }).catch(function(e){ console.warn('[RANKING] auto-limpieza fallo', e); });
 }

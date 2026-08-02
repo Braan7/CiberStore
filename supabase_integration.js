@@ -444,6 +444,7 @@ function loginWithProfile(profile){
   if(typeof refreshUI === 'function') refreshUI();
   if(typeof renderPerfil === 'function') setTimeout(renderPerfil, 100);
   if(typeof renderHomeDashboard === 'function') setTimeout(renderHomeDashboard, 150);
+  if(typeof iniciarSaldoRealtime === 'function') setTimeout(iniciarSaldoRealtime, 500);
   /* If admin role — open admin panel automatically */
   if(profile.role === 'admin'){
     adminAuthed = true;
@@ -464,6 +465,7 @@ function doGuest(){
 }
 
 function doLogout(){
+  if(typeof detenerSaldoRealtime === 'function') detenerSaldoRealtime();
   authSession = null;
   isGuest     = false;
   saveSession(null);
@@ -1103,6 +1105,7 @@ function exportCSV(){
         if(typeof renderHomeDashboard === 'function') renderHomeDashboard();
         if(typeof cargarWalletPerfil === 'function') cargarWalletPerfil();
         if(typeof _updatePasePagina === 'function') _updatePasePagina();
+        if(typeof iniciarSaldoRealtime === 'function') iniciarSaldoRealtime();
         /* Restore admin panel if was open */
         if(u.role === 'admin'){
           adminAuthed = true;
