@@ -7457,7 +7457,7 @@ function rcSetCur(cur){
   var tag = document.getElementById('rc-cur-tag');
   if(tag) tag.textContent = cur;
   var minTxt = document.getElementById('rc-min-txt');
-  if(minTxt) minTxt.textContent = cur==='MXN' ? 'Minimo $20 MXN' : 'Minimo $3 USD';
+  if(minTxt) minTxt.textContent = cur==='MXN' ? 'Minimo $100 MXN' : 'Minimo $5 USD';
   // Chips por moneda
   var chips = cur==='MXN' ? [50,100,200,500,1000] : [3,10,25,50,100];
   var cont = document.getElementById('rc-chips');
@@ -7537,8 +7537,8 @@ function rcContinuar(){
 
 // ═══════════ RECARGAR SALDO (nueva pagina) ═══════════
 var _recMoneda = 'MXN';
-var REC_MONTOS = { MXN:[100,200,300,500,1000,2500], USD:[6,10,25,50,100,250] };
-var REC_MIN = { MXN:100, USD:6 };
+var REC_MONTOS = { MXN:[100,200,300,500,1000,2500], USD:[5,10,25,50,100,250] };
+var REC_MIN = { MXN:100, USD:5 };
 
 function recSetMoneda(m){
   _recMoneda = m;
@@ -7549,9 +7549,9 @@ function recSetMoneda(m){
   var lbl = document.getElementById('rec-cur-label');
   if(lbl) lbl.textContent = m;
   var av = document.getElementById('rec-min-aviso');
-  if(av) av.textContent = 'Minimo ' + (m==='MXN'?'$50 MXN':'$3 USD');
+  if(av) av.textContent = 'Minimo ' + (m==='MXN'?'$100 MXN':'$5 USD');
   var inp = document.getElementById('rec-monto');
-  if(inp) inp.value = (m==='MXN') ? 100 : 6;
+  if(inp) inp.value = (m==='MXN') ? 100 : 5;
   _recPintarMontos();
 }
 
@@ -7603,7 +7603,7 @@ function recElegirMetodo(metodo){
   var monto = parseFloat((inp&&inp.value)||'0') || 0;
   var min = REC_MIN[_recMoneda] || 50;
   if(monto < min){
-    showToast('El minimo es ' + (_recMoneda==='MXN'?'$50 MXN':'$3 USD'));
+    showToast('El minimo es ' + (_recMoneda==='MXN'?'$100 MXN':'$5 USD'));
     return;
   }
   // Convertir a MXN si el usuario eligio USD
@@ -8532,7 +8532,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
 
 // ═══════════ BIO LARGA (servicio con saldo + entrega link) ═══════════
-var BIOLARGA_PRECIO = 100;
+var BIOLARGA_PRECIO = 25;
 var BIOLARGA_LINK = 'https://hyperbioff.com/';
 var _biolargaBusy = false;
 
