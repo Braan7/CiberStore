@@ -296,12 +296,32 @@ function changeCurrency(cur){
   var page=document.querySelector('.page.active');
   if(page){
     var id=page.id.replace('page-','');
-    if(id==='diamantes') setTimeout(function(){ renderDiamCatalogo(); if(document.getElementById('diam-detalle').style.display!=='none' && _diamSeleccionado) _refrescarDiamPrecios(); }, 100);
+    if(id==='diamantes') setTimeout(function(){ renderDiamCatalogo(); if(document.getElementById('diam-detalle') && document.getElementById('diam-detalle').style.display!=='none' && _diamSeleccionado) _refrescarDiamPrecios(); }, 100);
     if(id==='likes') renderLikes();
     if(id==='membresia'){renderMems();renderWallet();}
   }
   var cart=document.getElementById('modal-cart');
   if(cart&&cart.classList.contains('show')) renderCartModal();
+
+  // Actualizar TODAS las secciones nuevas con precios (aunque no esten activas,
+  // para que al entrar ya esten en la moneda correcta)
+  setTimeout(function(){
+    try { if(typeof renderDiamCatalogo === 'function') renderDiamCatalogo(); } catch(e){}
+    try { if(typeof renderLikes2k === 'function') renderLikes2k(); } catch(e){}
+    try { if(typeof renderPinesAPI === 'function') renderPinesAPI(); } catch(e){}
+    try { if(typeof renderHonorPrecios === 'function') renderHonorPrecios(); } catch(e){}
+    try { if(typeof _refrescarPreciosMoneda === 'function') _refrescarPreciosMoneda(); } catch(e){}
+  }, 120);
+}
+
+/* Actualiza precios de secciones que usan texto fijo (bio larga, archivos, pase) */
+function _refrescarPreciosMoneda(){
+  // Bio Larga
+  var bioEl = document.querySelector('#page-biolarga .bio-precio-val');
+  if(bioEl && typeof BIOLARGA_PRECIO !== 'undefined') bioEl.textContent = fmt(BIOLARGA_PRECIO);
+  // Archivos (semana/mes) y Pase se actualizan con sus funciones si existen
+  if(typeof _refreshArchivosSaldo === 'function') _refreshArchivosSaldo();
+  if(typeof _updatePasePagina === 'function') try { _updatePasePagina(); } catch(e){}
 }
 
 function t(k){
@@ -1370,112 +1390,80 @@ function updateModalBalance(){
   }, 50);
 }
 function openHonorModal(idx){
-  if(!authSession){showToast('Inicia sesion para comprar');setTimeout(showAuthModal,600);return;}
-  var h=HONOR[idx];
+  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
+  var h = HONOR[idx];
   if(!h) return;
-  curId='honor_'+idx;
-  updateModalBalance();
-  var mico=document.getElementById('m-ico');
-  var mname=document.getElementById('m-name');
-  var mprice=document.getElementById('m-price');
-  var msub=document.getElementById('m-sub');
-  var morder=document.getElementById('m-order');
-  var mdisk=document.getElementById('m-disc');
-  if(mico) mico.textContent=h.flag;
-  if(mname) mname.textContent='Honor de Clan - '+h.region;
+  _honorIdxActual = idx;
   var precioHonor = honorPrecioMXN(idx);
-  if(mprice) mprice.textContent=fmt(precioHonor);
-  if(msub) msub.textContent='Region '+h.region+' - Entrega menos de 24hrs';
-  if(morder) morder.textContent='PEDIDO #'+peekOrder();
-  if(mdisk) mdisk.style.display='none';
-  var f1=document.getElementById('f1'),f2=document.getElementById('f2'),f3=document.getElementById('f3'),f4=document.getElementById('f4');
-  if(f1) f1.value=''; if(f2) f2.value=''; if(f3) f3.value=''; if(f4) f4.value='';
-  var lbl1=document.getElementById('lbl1');
-  var lbl2=document.getElementById('lbl2');
-  if(lbl1) lbl1.textContent='Nombre del Clan';
-  if(lbl2) lbl2.textContent='ID del Clan';
-  activePromo=null;
-  // Mostrar instrucciones OBLIGATORIAS de configuracion del clan
-  var instr=document.getElementById('honor-instr');
-  if(instr) instr.style.display='';
-  var chk=document.getElementById('honor-confirmo');
-  if(chk) chk.checked=false;
-  var el=document.getElementById('modal');
-  if(el) el.classList.add('show');
-  switchPayTab('stori');
-  document.getElementById('btn-submit').onclick=submitHonor;
+
+  // Rellenar el modal simple
+  var ov = document.getElementById('modal-honor');
+  if(!ov){ showToast('Error al abrir, recarga la pagina'); return; }
+  var setTxt = function(id,txt){ var e=document.getElementById(id); if(e) e.textContent=txt; };
+  setTxt('honor-m-flag', h.flag);
+  setTxt('honor-m-region', 'Honor de Clan - ' + h.region);
+  setTxt('honor-m-price', fmt(precioHonor));
+  setTxt('honor-m-saldo', fmt(authSession.saldo||0));
+  // Limpiar campos
+  ['honor-m-clan','honor-m-idclan'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+  var chk = document.getElementById('honor-m-confirmo'); if(chk) chk.checked=false;
+  ov.classList.add('show');
 }
+
+function closeHonorModal(){
+  var ov = document.getElementById('modal-honor');
+  if(ov) ov.classList.remove('show');
+}
+
+var _honorIdxActual = null;
 function submitHonor(){
-  var f1=((document.getElementById('f1')||{}).value||'').trim();
-  var f2=((document.getElementById('f2')||{}).value||'').trim();
-  var nombre=((document.getElementById('f3')||{}).value||'').trim();
-  var wa=((document.getElementById('f4')||{}).value||'').trim();
-  // OBLIGATORIO: debe confirmar que configuro el clan
-  var chk=document.getElementById('honor-confirmo');
-  if(chk && !chk.checked){
-    showToast('\u26A0 Debes confirmar que ya configuraste tu clan');
-    var instr=document.getElementById('honor-instr');
-    if(instr){
-      instr.scrollIntoView({behavior:'smooth', block:'center'});
-      instr.style.borderColor='#ff6b6b';
-      setTimeout(function(){ instr.style.borderColor='rgba(255,180,60,.3)'; }, 2500);
-    }
-    return;
-  }
-  if(!f1){showToast('Ingresa el nombre del clan');return;}
-  if(!f2){showToast('Ingresa el ID del clan');return;}
-  if(!nombre){showToast('Ingresa tu nombre');return;}
-  if(!wa||wa.replace(/\D/g,'').length<8){showToast('Ingresa tu WhatsApp');return;}
-
-  var hIdx=parseInt(curId.replace('honor_',''));
-  var h=HONOR[hIdx];
+  if(_honorIdxActual === null) return;
+  var idx = _honorIdxActual;
+  var h = HONOR[idx];
   if(!h) return;
-  var precioHonor = honorPrecioMXN(hIdx);
 
-  // Anti doble compra
-  if(_comprandoHonor){ return; }
+  var clan = ((document.getElementById('honor-m-clan')||{}).value||'').trim();
+  var idClan = ((document.getElementById('honor-m-idclan')||{}).value||'').trim();
+  var chk = document.getElementById('honor-m-confirmo');
 
-  // Validar saldo suficiente
-  var saldo=(authSession&&authSession.saldo)?authSession.saldo:0;
+  if(!clan){ showToast('Ingresa el nombre del clan'); return; }
+  if(!idClan){ showToast('Ingresa el ID del clan'); return; }
+  if(chk && !chk.checked){ showToast('\u26A0 Confirma que ya configuraste tu clan'); return; }
+
+  var precioHonor = honorPrecioMXN(idx);
+  var saldo = (authSession && authSession.saldo) ? authSession.saldo : 0;
   if(saldo < precioHonor){
-    showToast('Saldo insuficiente. Tienes '+fmt(saldo)+' y necesitas '+fmt(precioHonor));
+    showToast('Saldo insuficiente. Tienes ' + fmt(saldo) + ' y necesitas ' + fmt(precioHonor), 3500);
+    setTimeout(function(){ closeHonorModal(); goPage('saldo'); }, 1200);
     return;
   }
+
+  if(_comprandoHonor) return;
+  if(!confirm('Comprar Honor de Clan ' + h.region + ' por ' + fmt(precioHonor) + '?\n\nClan: ' + clan + '\nID: ' + idClan)) return;
 
   _comprandoHonor = true;
-  var btnH=document.getElementById('btn-submit');
-  if(btnH){ btnH.disabled=true; }
+  var ord = getNextOrder();
 
-  var ord=getNextOrder();
+  addSpend(precioHonor, 'Honor de Clan ' + h.region + ' - Clan:' + clan + ' - ID:' + idClan + ' - Pedido #' + ord);
 
-  // COBRAR CON SALDO (con descripcion completa para historial/ranking)
-  addSpend(precioHonor, 'Honor de Clan '+h.region+' - Clan:'+f1+' - ID:'+f2+' - Pedido #'+ord);
-
-  addToHistoryLocal({name:'Honor '+h.region,price:precioHonor,icon:h.flag,
-    date:new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),order:ord});
-
-  // Registrar pedido con progreso (Honor de Clan se entrega en 7 dias)
-  registrarPedidoHonor('Honor de Clan - '+h.region, f2, precioHonor, f1);
-
-  // NOTIFICAR SOLO POR TELEGRAM
-  if(typeof tgNotifyPurchase==='function'){
-    tgNotifyPurchase(authSession.username,
-      'HONOR DE CLAN '+h.region+' | Clan: '+f1+' | ID: '+f2+' | Nombre: '+nombre+' | WA: '+wa,
-      h.price, ord);
+  if(typeof registrarPedidoHonor === 'function'){
+    try { registrarPedidoHonor('Honor de Clan - ' + h.region, idClan, precioHonor, clan); } catch(e){}
   }
 
-  _mostrarReciboHonor(h, f1, f2, ord);
-  showToast('\u2705 Pedido #'+ord+' confirmado!', 3000);
+  if(typeof tgNotifyPurchase === 'function'){
+    tgNotifyPurchase(authSession.username,
+      'HONOR DE CLAN ' + h.region + '\n\uD83D\uDEE1\uFE0F Clan: ' + clan + '\n\uD83C\uDD94 ID Clan: ' + idClan + '\n\u23F0 Entrega: fin de semana',
+      precioHonor, ord);
+  }
 
   setTimeout(function(){
     _comprandoHonor = false;
-    if(btnH){ btnH.disabled=false; }
-  }, 3000);
+    closeHonorModal();
+    if(typeof _refreshSaldoUI === 'function') _refreshSaldoUI(authSession.saldo||0);
+    showToast('\u2705 Pedido #' + ord + ' confirmado! Tu Honor de Clan se procesa el fin de semana.', 5000);
+  }, 600);
 }
 
-var _comprandoHonor = false;
-
-// Recibo de compra de Honor de Clan
 function _mostrarReciboHonor(h, nombreClan, idClan, ord){
   var ahora = new Date();
   var fecha = ahora.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' });
@@ -8714,10 +8702,10 @@ function renderLikes2k(){
   cont.innerHTML = LIKES2K_PAQUETES.map(function(p, i){
     var derecha = p.cotizar
       ? '<div style="text-align:right;flex-shrink:0"><div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:.82rem;color:#22d3ee;line-height:1.1">COTIZAR</div><div style="font-size:.55rem;color:#6b7280;letter-spacing:.5px">WhatsApp</div></div>'
-      : '<div style="text-align:right;flex-shrink:0"><div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.2rem;color:#25d366;line-height:1">$'+p.mxn+'</div><div style="font-size:.58rem;color:#6b7280;letter-spacing:.5px">MXN</div></div>';
+      : '<div style="text-align:right;flex-shrink:0"><div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.2rem;color:#25d366;line-height:1">'+fmt(p.mxn)+'</div></div>';
     var subtitulo = p.cotizar
       ? '<div style="font-size:.62rem;color:#22d3ee;margin-top:.15rem">Precio y tiempo segun disponibilidad</div>'
-      : '<div style="font-size:.62rem;color:#6b7280;margin-top:.15rem">US $'+p.usd+' \u00b7 \u20ac'+p.eur+' \u00b7 Entrega: <span style="color:#ffb84d">'+p.dias+'</span></div>';
+      : '<div style="font-size:.62rem;color:#6b7280;margin-top:.15rem">Entrega: <span style="color:#ffb84d">'+p.dias+'</span></div>';
     var borde = p.cotizar ? 'rgba(34,211,238,.25)' : 'rgba(255,255,255,.08)';
     var hover = p.cotizar ? 'rgba(34,211,238,.5)' : 'rgba(255,180,60,.4)';
     return '<div onclick="comprarLikes2k('+i+')" style="display:flex;align-items:center;justify-content:space-between;gap:.7rem;background:rgba(255,255,255,.022);border:1px solid '+borde+';border-radius:14px;padding:.95rem 1.1rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor=\''+hover+'\'" onmouseout="this.style.borderColor=\''+borde+'\'">'

@@ -3044,6 +3044,47 @@ document.addEventListener('keydown',function(e){
   </div>
 </div>
 
+<div class="modal-ov" id="modal-honor">
+  <div class="modal">
+    <div class="modal-h">
+      <h3 style="color:#ffd000">&#127942; Honor de Clan</h3>
+      <button class="modal-close" onclick="closeHonorModal()">&#215;</button>
+    </div>
+    <div class="modal-b">
+      <div class="m-prod-card" style="border-color:rgba(255,208,0,.2)">
+        <div class="m-prod-ico" style="background:linear-gradient(135deg,#221a00,#443300);font-size:1.6rem;display:flex;align-items:center;justify-content:center" id="honor-m-flag">&#127942;</div>
+        <div>
+          <div class="m-prod-name" id="honor-m-region">Honor de Clan</div>
+          <div class="m-prod-price" style="color:#ffd000" id="honor-m-price">$238 MX</div>
+          <div class="m-prod-sub">Entrega el fin de semana</div>
+        </div>
+      </div>
+
+      <div style="background:rgba(255,208,0,.06);border:1px solid rgba(255,208,0,.25);border-radius:9px;padding:.75rem .9rem;margin-bottom:1rem;font-size:.74rem;color:#ffd88a;line-height:1.6">
+        &#9881;&#65039; <b>Antes de comprar:</b> los pedidos se toman los sabados y domingos. Se uniran 4 cuentas bots a tu clan en la madrugada. Honor garantizado de 380,000 a 420,000 por semana. No se necesita contrasena.
+      </div>
+
+      <label class="flabel">Nombre del Clan *</label>
+      <input class="finput" id="honor-m-clan" type="text" placeholder="Nombre exacto de tu clan" style="margin-bottom:.7rem"/>
+
+      <label class="flabel">ID del Clan *</label>
+      <input class="finput" id="honor-m-idclan" type="text" inputmode="numeric" placeholder="ID de tu clan" style="margin-bottom:.9rem"/>
+
+      <label style="display:flex;align-items:flex-start;gap:.6rem;cursor:pointer;margin-bottom:1rem">
+        <input type="checkbox" id="honor-m-confirmo" style="margin-top:.2rem;width:18px;height:18px;flex-shrink:0;accent-color:#ffd000"/>
+        <span style="font-size:.76rem;color:#c9d1e0;line-height:1.5">Confirmo que mi clan esta configurado y acepto que la entrega es el fin de semana.</span>
+      </label>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:.7rem .9rem;margin-bottom:1rem">
+        <span style="font-size:.72rem;color:#6b7280">Tu saldo</span>
+        <span style="font-family:Oxanium;font-weight:800;font-size:1rem;color:#fff" id="honor-m-saldo">$0 MX</span>
+      </div>
+
+      <button onclick="submitHonor()" style="width:100%;padding:.95rem;background:linear-gradient(135deg,#a07800,#ffd000);color:#020a0a;border:none;border-radius:12px;font-family:Oxanium;font-weight:900;font-size:.9rem;letter-spacing:.5px;cursor:pointer">&#127942; COMPRAR CON SALDO</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-ov" id="modal-honor-cuenta">
   <div class="modal">
     <div class="modal-h">
