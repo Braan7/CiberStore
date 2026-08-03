@@ -152,11 +152,17 @@ var LIKES = [
 ];
 
 var HONOR = [
-  {region:'Norteamerica',flag:'\uD83C\uDDE8\uD83C\uDDE6',color:'#ffd000',price:340,paises:'Canada, Rep. Dominicana'},
-  {region:'Estados Unidos',flag:'\uD83C\uDDFA\uD83C\uDDF8',color:'#4dabf7',price:290,paises:'Mexico'},
-  {region:'Sudamerica',flag:'\uD83C\uDDE7\uD83C\uDDF7',color:'#40c057',price:340,paises:'Peru, Chile'},
-  {region:'Europa',flag:'\uD83C\uDDEA\uD83C\uDDFA',color:'#b39ddb',price:340,paises:'Espana'}
+  {region:'Norteamerica',flag:'\uD83C\uDDE8\uD83C\uDDE6',color:'#ffd000',priceUSD:14,paises:'Canada, Rep. Dominicana'},
+  {region:'Estados Unidos',flag:'\uD83C\uDDFA\uD83C\uDDF8',color:'#4dabf7',priceUSD:14,paises:'Mexico'},
+  {region:'Sudamerica',flag:'\uD83C\uDDE7\uD83C\uDDF7',color:'#40c057',priceUSD:14,paises:'Peru, Chile'},
+  {region:'Europa',flag:'\uD83C\uDDEA\uD83C\uDDFA',color:'#b39ddb',priceUSD:14,paises:'Espana'}
 ];
+// Devuelve el precio en MXN de un honor, usando el tipo de cambio real del momento
+function honorPrecioMXN(i){
+  var h = HONOR[i]; if(!h) return 0;
+  var tc = (typeof USD_MXN === 'number' && USD_MXN > 0) ? USD_MXN : 17;
+  return Math.round(h.priceUSD * tc);
+}
 
 var TIERS = [
   {id:'free', name:'Cliente', color:'#22d3ee', colorBg:'rgba(34,211,238,.1)', threshold:0, perks:['Precio fijo'], disc:0, icon:'\uD83D\uDC64'}
@@ -193,6 +199,56 @@ var RETIRO_COMISION = 0.15; // 15% de comision por retiro
 var RATES    = {MXN:1, USD:(1/USD_MXN), EUR:0.047, ARS:50.2, PEN:0.19};
 var CUR_SYM  = {MXN:'$', USD:'$', EUR:'\u20AC', ARS:'$', PEN:'S/'};
 var CUR_SUF  = {MXN:' MX', USD:' USD', EUR:' EUR', ARS:' ARS', PEN:' PEN'};
+
+/* ── TIPO DE CAMBIO EN TIEMPO REAL ──
+   Consulta las tasas reales del dolar/monedas desde una API gratuita.
+   La base de todo es MXN (1). Las tasas se guardan como: 1 MXN = X moneda. */
+function actualizarTiposDeCambio(){
+  // API gratuita sin key. Base MXN.
+  fetch('https://open.er-api.com/v6/latest/MXN')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(!d || !d.rates) return;
+      var r = d.rates;
+      // r.USD = cuantos USD es 1 MXN (ej: 0.058). Guardamos igual formato que RATES.
+      if(r.USD) RATES.USD = r.USD;
+      if(r.EUR) RATES.EUR = r.EUR;
+      if(r.ARS) RATES.ARS = r.ARS;
+      if(r.PEN) RATES.PEN = r.PEN;
+      // USD_MXN = cuantos MXN es 1 USD (para conversiones internas de USDT)
+      if(r.USD) USD_MXN = 1 / r.USD;
+      // Guardar en cache local con fecha
+      try {
+        localStorage.setItem('cs_rates', JSON.stringify({ rates: RATES, usd_mxn: USD_MXN, ts: Date.now() }));
+      } catch(e){}
+      // Refrescar la UI si hay precios mostrandose
+      if(typeof renderDiamCatalogo === 'function') try { renderDiamCatalogo(); } catch(e){}
+      if(typeof renderLikes2k === 'function') try { renderLikes2k(); } catch(e){}
+      if(typeof renderHonorPrecios === 'function') try { renderHonorPrecios(); } catch(e){}
+      console.log('[TC] Tipos de cambio actualizados. 1 USD =', USD_MXN.toFixed(2), 'MXN');
+    })
+    .catch(function(e){ console.warn('[TC] No se pudo actualizar el tipo de cambio, usando el ultimo conocido', e); });
+}
+
+// Cargar el ultimo TC guardado (para no arrancar con el fijo) y luego actualizar
+(function _cargarTCGuardado(){
+  try {
+    var cache = JSON.parse(localStorage.getItem('cs_rates') || 'null');
+    if(cache && cache.rates){
+      // Usar cache solo si tiene menos de 12 horas
+      if(Date.now() - (cache.ts||0) < 12*3600*1000){
+        RATES = cache.rates;
+        if(cache.usd_mxn) USD_MXN = cache.usd_mxn;
+      }
+    }
+  } catch(e){}
+})();
+
+// Actualizar al cargar y cada 6 horas
+if(typeof window !== 'undefined'){
+  setTimeout(actualizarTiposDeCambio, 1500);
+  setInterval(actualizarTiposDeCambio, 6*3600*1000);
+}
 
 // Calcula el inicio real del periodo (dia = hoy 00:00, semana = lunes 00:00, mes = dia 1)
 function _inicioPeriodo(period){
@@ -1327,7 +1383,8 @@ function openHonorModal(idx){
   var mdisk=document.getElementById('m-disc');
   if(mico) mico.textContent=h.flag;
   if(mname) mname.textContent='Honor de Clan - '+h.region;
-  if(mprice) mprice.textContent=fmt(h.price);
+  var precioHonor = honorPrecioMXN(idx);
+  if(mprice) mprice.textContent=fmt(precioHonor);
   if(msub) msub.textContent='Region '+h.region+' - Entrega menos de 24hrs';
   if(morder) morder.textContent='PEDIDO #'+peekOrder();
   if(mdisk) mdisk.style.display='none';
@@ -1373,14 +1430,15 @@ function submitHonor(){
   var hIdx=parseInt(curId.replace('honor_',''));
   var h=HONOR[hIdx];
   if(!h) return;
+  var precioHonor = honorPrecioMXN(hIdx);
 
   // Anti doble compra
   if(_comprandoHonor){ return; }
 
   // Validar saldo suficiente
   var saldo=(authSession&&authSession.saldo)?authSession.saldo:0;
-  if(saldo < h.price){
-    showToast('Saldo insuficiente. Tienes '+fmt(saldo)+' y necesitas '+fmt(h.price));
+  if(saldo < precioHonor){
+    showToast('Saldo insuficiente. Tienes '+fmt(saldo)+' y necesitas '+fmt(precioHonor));
     return;
   }
 
@@ -1391,13 +1449,13 @@ function submitHonor(){
   var ord=getNextOrder();
 
   // COBRAR CON SALDO (con descripcion completa para historial/ranking)
-  addSpend(h.price, 'Honor de Clan '+h.region+' - Clan:'+f1+' - ID:'+f2+' - Pedido #'+ord);
+  addSpend(precioHonor, 'Honor de Clan '+h.region+' - Clan:'+f1+' - ID:'+f2+' - Pedido #'+ord);
 
-  addToHistoryLocal({name:'Honor '+h.region,price:h.price,icon:h.flag,
+  addToHistoryLocal({name:'Honor '+h.region,price:precioHonor,icon:h.flag,
     date:new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),order:ord});
 
   // Registrar pedido con progreso (Honor de Clan se entrega en 7 dias)
-  registrarPedidoHonor('Honor de Clan - '+h.region, f2, h.price, f1);
+  registrarPedidoHonor('Honor de Clan - '+h.region, f2, precioHonor, f1);
 
   // NOTIFICAR SOLO POR TELEGRAM
   if(typeof tgNotifyPurchase==='function'){
@@ -5616,11 +5674,11 @@ var _diamSeleccionado = null;
 // ═══════════ RECARGAS AUTOMÁTICAS (Recargas América type=recharge) ═══════════
 // package_id = el ID de Recargas América | precio = costo USD × 20 (redondeado)
 var RECARGAS_AUTO = [
-  { package_id:351, sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.70,  precio:15,  img:'img/diam-100.png'  },
+  { package_id:351, sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.70,  precio:16,  img:'img/diam-100.png'  },
   { package_id:348, sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:2.09,  precio:45,  img:'img/diam-310.png'  },
   { package_id:350, sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.53,  precio:75,  img:'img/diam-520.png'  },
-  { package_id:347, sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.57,  precio:130, img:'img/diam-1060.png' },
-  { package_id:346, sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:13.03, precio:250, img:'img/diam-2180.png' },
+  { package_id:347, sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.57,  precio:135, img:'img/diam-1060.png' },
+  { package_id:346, sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:13.03, precio:255, img:'img/diam-2180.png' },
   { package_id:349, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:33.16, precio:650, img:'img/diam-5600.png' },
   { package_id:null, nombre:'11.200 Diamantes + 1.120 Bono', diamantes:12320, costoUSD:66.32, precio:1390, manual:true }
 ];
@@ -9248,12 +9306,15 @@ function admExportarSaldos(formato){
       return;
     }
 
-    // Filtrar solo clientes (opcional: incluir todos)
+    // Filtrar solo clientes (con username)
     var clientes = rows.filter(function(r){ return r.username; });
-    var totalSaldo = clientes.reduce(function(s,r){ return s + (Number(r.saldo)||0); }, 0);
+    // Total SIN las cuentas admin (como "ciber"), solo saldo de clientes reales
+    var esAdmin = function(r){ return r.role === 'admin' || String(r.username||'').toLowerCase() === 'ciber'; };
+    var totalSaldo = clientes.reduce(function(s,r){ return esAdmin(r) ? s : s + (Number(r.saldo)||0); }, 0);
+    var clientesReales = clientes.filter(function(r){ return !esAdmin(r); }).length;
 
     if(info){
-      info.innerHTML = '<b style="color:#25d366">' + clientes.length + ' clientes</b> &middot; Saldo total: <b style="color:#fff">$' + Math.round(totalSaldo).toLocaleString('es-MX') + ' MX</b>';
+      info.innerHTML = '<b style="color:#25d366">' + clientesReales + ' clientes</b> &middot; Saldo total (sin admin): <b style="color:#fff">$' + Math.round(totalSaldo).toLocaleString('es-MX') + ' MX</b>';
     }
 
     if(formato === 'csv'){
@@ -9305,7 +9366,7 @@ function admExportarSaldos(formato){
 
     } else if(formato === 'whatsapp'){
       var fechaWA = new Date().toLocaleDateString('es-MX');
-      var encabezado = '*SALDOS CIBERSTORE*\n' + fechaWA + '\n' + clientes.length + ' clientes \u00b7 Total: $' + Math.round(totalSaldo).toLocaleString('es-MX') + ' MX\n\n';
+      var encabezado = '*SALDOS CIBERSTORE*\n' + fechaWA + '\n' + clientesReales + ' clientes \u00b7 Total: $' + Math.round(totalSaldo).toLocaleString('es-MX') + ' MX\n\n';
       var lineasWA = clientes.map(function(r){
         return (r.username||'') + ': $' + (Number(r.saldo)||0);
       }).join('\n');
@@ -9335,4 +9396,19 @@ function admExportarSaldos(formato){
     if(info) info.textContent = 'Error al cargar los saldos.';
     console.error('[EXPORT-SALDOS]', e);
   });
+}
+
+
+/* Actualiza los precios de Honor de Clan en pantalla con el TC real */
+function renderHonorPrecios(){
+  for(var i=0;i<HONOR.length;i++){
+    var el = document.getElementById('honor-price-'+i);
+    if(el){
+      var mxn = honorPrecioMXN(i);
+      el.innerHTML = '$'+mxn+' <span style="font-size:.95rem;opacity:.65">MX</span>';
+    }
+  }
+}
+if(typeof window !== 'undefined'){
+  setTimeout(renderHonorPrecios, 2000);
 }
