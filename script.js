@@ -6465,59 +6465,113 @@ function _filaRecibo(label, valor, ultimo){
 }
 
 
-// ═══════════ SCAR EVOLUTIVA NIVEL 7 ═══════════
+// ═══════════ CODIGOS FF — SKINS Y TRAJES (grid 2 columnas + modal) ═══════════
+// Compatibilidad: se conserva SCAR_PRECIO para referencias viejas.
 var SCAR_PRECIO = 1150; // MXN
-var _comprandoScar = false;
 
-// ═══ PRODUCTOS DE LA SECCION CODIGOS FF (skins por encargo) ═══
-// Para agregar otro producto: copia una card en index.html usando el prefijo
-// nuevo (ids: <prefijo>-id, -user, -wa, -saldo, -err, -precio) y añade una
-// entrada aqui. La compra la maneja comprarProductoCodigos() de forma generica.
-// 'prefijo' = ids del formulario en la card (puede compartirse entre 2 productos
-// de la misma card, ej. los dos trajes con un solo formulario y dos botones).
-var PRODUCTOS_CODIGOS = {
-  thompson:  { prefijo:'thompson', nombre:'Thompson - Cibergarras', precio:515, comprando:false },
-  dibujo:    { prefijo:'dibujo',  nombre:'Dibujo Arte (masculino)',    precio:280, comprando:false },
-  moda:      { prefijo:'dibujo',  nombre:'Moda Grafica (femenino)',    precio:280, comprando:false },
-  sombra:    { prefijo:'sombra',  nombre:'Sombra del Camino (masculino)', precio:280, comprando:false },
-  corredora: { prefijo:'sombra',  nombre:'Corredora Sombria (femenino)',  precio:280, comprando:false }
-};
+// Lista de productos de la seccion Codigos FF.
+// Para agregar otro: copia un objeto aqui con su img, nombre, precio y desc.
+var CODIGOS_PRODUCTOS = [
+  { id:'megalodon', nombre:'Scarh Megalodon Alfa', precio:1150, img:'1002733332.jpg',
+    desc:'La legendaria SCAR evolutiva al maximo nivel, directo al correo de tu cuenta.', badge:'SKIN' },
+  { id:'thompson', nombre:'Thompson - Cibergarras', precio:515, img:'1002761135.jpg',
+    desc:'La Thompson Cibergarras, una de las skins mas llamativas de Free Fire.', badge:'SKIN' },
+  { id:'dibujo', nombre:'Dibujo Arte (masculino)', precio:280, img:'1002761142.jpg',
+    desc:'Traje Dibujo Arte estilo boceto (personaje masculino).', badge:'TRAJE' },
+  { id:'moda', nombre:'Moda Grafica (femenino)', precio:280, img:'1002761142.jpg',
+    desc:'Traje Moda Grafica estilo boceto (personaje femenino).', badge:'TRAJE' },
+  { id:'sombra', nombre:'Sombra del Camino (masculino)', precio:280, img:'1002761161.jpg',
+    desc:'Traje Sombra del Camino, estilo oscuro (personaje masculino).', badge:'TRAJE' },
+  { id:'corredora', nombre:'Corredora Sombria (femenino)', precio:280, img:'1002761161.jpg',
+    desc:'Traje Corredora Sombria, estilo oscuro (personaje femenino).', badge:'TRAJE' }
+];
 
-function comprarDibujoArte(){ comprarProductoCodigos('dibujo'); }
-function comprarModaGrafica(){ comprarProductoCodigos('moda'); }
-function comprarSombraCamino(){ comprarProductoCodigos('sombra'); }
-function comprarCorredoraSombria(){ comprarProductoCodigos('corredora'); }
+var _codigoSel = null;      // producto seleccionado en el modal
+var _comprandoCodigo = false;
 
-function _updateScarSaldo(){
-  var el = document.getElementById('scar-saldo');
-  var precioEl = document.getElementById('scar-precio');
-  if(el) el.textContent = authSession ? fmt(authSession.saldo||0) : fmt(0);
-  if(precioEl) precioEl.textContent = fmt(SCAR_PRECIO);
-  // refrescar saldo/precio de los demas productos de la seccion
-  for(var k in PRODUCTOS_CODIGOS){ if(PRODUCTOS_CODIGOS.hasOwnProperty(k)) _updateProductoSaldo(PRODUCTOS_CODIGOS[k]); }
+// Se llama al abrir la pagina 'codigos' (ver goPage)
+function _updateScarSaldo(){ renderCodigosGrid(); }
+
+function renderCodigosGrid(){
+  var grid = document.getElementById('codigos-grid');
+  if(!grid) return;
+  grid.innerHTML = CODIGOS_PRODUCTOS.map(function(p, i){
+    var badge = p.badge
+      ? '<span class="dcat-badge" style="background:rgba(255,40,60,.15);border-color:rgba(255,40,60,.4);color:#ff5d6c">'+p.badge+'</span>'
+      : '';
+    var visual = '<div style="width:100%;aspect-ratio:4/3;border-radius:11px;overflow:hidden;margin-bottom:.65rem;background:#0a0f1a">'
+      + '<img src="'+p.img+'" alt="'+p.nombre+'" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.parentNode.innerHTML=\'<div class=&quot;dcat-card-ico&quot;>&#128142;</div>\'"/></div>';
+    return '<div class="dcat-card" onclick="abrirCodigoModal('+i+')">'
+      + badge + visual
+      + '<div class="dcat-card-name">'+p.nombre+'</div>'
+      + '<div class="dcat-card-sub">Free Fire</div>'
+      + '<div class="dcat-card-price">'+fmt(p.precio)+'</div>'
+      + '</div>';
+  }).join('');
 }
 
-function _updateProductoSaldo(p){
-  var el = document.getElementById(p.prefijo+'-saldo');
-  var precioEl = document.getElementById(p.prefijo+'-precio');
-  if(el) el.textContent = authSession ? fmt(authSession.saldo||0) : fmt(0);
-  if(precioEl) precioEl.textContent = fmt(p.precio);
-}
-
-function comprarThompson(){ comprarProductoCodigos('thompson'); }
-
-function comprarProductoCodigos(key){
-  var p = PRODUCTOS_CODIGOS[key];
+// Abrir modal de compra de un producto
+function abrirCodigoModal(idx){
+  var p = CODIGOS_PRODUCTOS[idx];
   if(!p) return;
-  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
-  if(p.comprando){ return; }
+  _codigoSel = p;
 
-  var err = document.getElementById(p.prefijo+'-err');
+  var ov = document.getElementById('codigo-modal-ov');
+  if(ov) ov.remove();
+  ov = document.createElement('div');
+  ov.id = 'codigo-modal-ov';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:1.2rem;overflow-y:auto';
+  ov.onclick = function(e){ if(e.target===ov) cerrarCodigoModal(); };
+  document.body.appendChild(ov);
+
+  var saldo = authSession ? (authSession.saldo||0) : 0;
+
+  var c = document.createElement('div');
+  c.style.cssText = 'max-width:440px;width:100%;background:#0a0a0a;border:1px solid rgba(255,40,60,.35);border-radius:18px;overflow:hidden;margin:auto';
+  c.innerHTML =
+      '<div style="position:relative;background:radial-gradient(circle at center,rgba(255,40,60,.15),transparent);padding:1.2rem 1.2rem 0">'
+    +   '<button onclick="cerrarCodigoModal()" style="position:absolute;top:.8rem;right:.8rem;z-index:3;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:1.1rem;cursor:pointer;line-height:1">\u00D7</button>'
+    +   '<img src="'+p.img+'" alt="'+p.nombre+'" style="width:100%;border-radius:12px;display:block" onerror="this.style.display=\'none\'"/>'
+    + '</div>'
+    + '<div style="padding:1.35rem">'
+    +   '<div style="font-family:Oxanium;font-weight:800;font-size:1.2rem;color:#fff;margin-bottom:.35rem">'+p.nombre+'</div>'
+    +   '<div style="font-size:.83rem;color:var(--muted);line-height:1.6;margin-bottom:1rem">'+p.desc+'</div>'
+    +   '<div style="display:flex;align-items:center;gap:.6rem;font-size:.8rem;color:#22d3ee;margin-bottom:1rem"><span>\u23F3</span> Entrega: 2 a 3 semanas al correo de tu cuenta</div>'
+    +   '<div style="display:flex;align-items:baseline;gap:.5rem;margin-bottom:1.2rem;padding:.85rem 1rem;background:rgba(255,40,60,.06);border:1px solid rgba(255,40,60,.2);border-radius:12px">'
+    +     '<span style="font-size:.72rem;color:var(--muted)">Precio:</span>'
+    +     '<span style="font-family:Oxanium;font-weight:900;font-size:1.5rem;color:#ff4444">'+fmt(p.precio)+'</span>'
+    +   '</div>'
+    +   '<label class="flabel">ID de Free Fire *</label>'
+    +   '<input class="finput" id="cod-id" type="text" placeholder="Tu ID de jugador"/>'
+    +   '<label class="flabel">Nombre de usuario *</label>'
+    +   '<input class="finput" id="cod-user" type="text" placeholder="Tu nombre en el juego"/>'
+    +   '<label class="flabel">WhatsApp *</label>'
+    +   '<input class="finput" id="cod-wa" type="text" placeholder="Tu numero de WhatsApp"/>'
+    +   '<div style="display:flex;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;margin:1rem 0"><span style="font-size:.8rem;color:var(--muted)">Tu saldo</span><span style="font-family:Oxanium;font-weight:700;color:#25d366">'+fmt(saldo)+'</span></div>'
+    +   '<div id="cod-err" style="display:none;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.3);color:#ff6b6b;border-radius:9px;padding:.7rem .9rem;font-size:.8rem;margin-bottom:.85rem"></div>'
+    +   '<button id="cod-btn" onclick="comprarCodigoSel()" style="width:100%;padding:1rem;background:linear-gradient(135deg,#ff0028,#ff4444);color:#fff;border:none;border-radius:12px;font-family:Oxanium;font-weight:900;font-size:.95rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(255,0,40,.3)">\uD83D\uDC8E COMPRAR CON SALDO</button>'
+    + '</div>';
+  ov.appendChild(c);
+}
+
+function cerrarCodigoModal(){
+  var ov = document.getElementById('codigo-modal-ov');
+  if(ov) ov.remove();
+  _codigoSel = null;
+}
+
+function comprarCodigoSel(){
+  var p = _codigoSel;
+  if(!p) return;
+  if(!authSession){ showToast('Inicia sesion para comprar'); cerrarCodigoModal(); setTimeout(showAuthModal,500); return; }
+  if(_comprandoCodigo){ return; }
+
+  var err = document.getElementById('cod-err');
   function showErr(m){ if(err){ err.textContent=m; err.style.display='block'; } }
 
-  var ffId = ((document.getElementById(p.prefijo+'-id')||{}).value||'').trim();
-  var user = ((document.getElementById(p.prefijo+'-user')||{}).value||'').trim();
-  var wa   = ((document.getElementById(p.prefijo+'-wa')||{}).value||'').trim();
+  var ffId = ((document.getElementById('cod-id')||{}).value||'').trim();
+  var user = ((document.getElementById('cod-user')||{}).value||'').trim();
+  var wa   = ((document.getElementById('cod-wa')||{}).value||'').trim();
 
   if(!ffId){ showErr('Escribe tu ID de Free Fire.'); return; }
   if(!user){ showErr('Escribe tu nombre de usuario.'); return; }
@@ -6527,8 +6581,8 @@ function comprarProductoCodigos(key){
   if(saldo < p.precio){ showErr('Saldo insuficiente ('+fmt(saldo)+'). Necesitas '+fmt(p.precio)+'. Recarga tu cuenta.'); return; }
   if(err) err.style.display='none';
 
-  p.comprando = true;
-  var btn = event && event.target ? event.target : null;
+  _comprandoCodigo = true;
+  var btn = document.getElementById('cod-btn');
   if(btn){ btn.disabled=true; btn.innerHTML='Procesando...'; }
 
   var ord = getNextOrder();
@@ -6536,32 +6590,35 @@ function comprarProductoCodigos(key){
   registrarPedido(p.nombre+' (2-3 semanas)', 0, 'skin', ffId, p.precio, 0);
   if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, p.nombre+' - ID:'+ffId+' - User:'+user+' - WA:'+wa, p.precio, ord);
 
-  _mostrarReciboProducto(p, ffId, user, ord);
+  cerrarCodigoModal();
+  _mostrarReciboCodigo(p, ffId, user, ord);
   showToast('\u2705 Pedido #'+ord+' realizado!', 3000);
 
-  setTimeout(function(){ p.comprando = false; if(btn){ btn.disabled=false; btn.innerHTML='\uD83D\uDC8E COMPRAR CON SALDO'; } }, 3000);
+  setTimeout(function(){ _comprandoCodigo = false; }, 3000);
 }
 
-// Recibo generico para productos de la seccion Codigos FF
-function _mostrarReciboProducto(p, ffId, user, ord){
+// Recibo tras comprar un producto de Codigos FF
+function _mostrarReciboCodigo(p, ffId, user, ord){
   var ahora = new Date();
   var fecha = ahora.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' });
   var hora = ahora.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' });
 
-  var cont = document.getElementById('page-codigos');
-  if(!cont) return;
-  var wrap = cont.querySelector('div[style*="max-width:620px"]');
-  if(!wrap) return;
+  var ov = document.createElement('div');
+  ov.id = 'codigo-recibo-ov';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:1.2rem;overflow-y:auto';
+  ov.onclick = function(e){ if(e.target===ov) ov.remove(); };
+  document.body.appendChild(ov);
 
-  wrap.innerHTML =
-    '<div style="background:linear-gradient(160deg,rgba(255,180,60,.08),rgba(255,255,255,.02));border:2px solid rgba(255,180,60,.35);border-radius:18px;padding:2rem 1.35rem;text-align:center;max-width:440px;margin:2rem auto">'
-    + '<div style="font-size:3rem;margin-bottom:.5rem">\u2705</div>'
+  var c = document.createElement('div');
+  c.style.cssText = 'background:linear-gradient(160deg,rgba(255,180,60,.08),rgba(255,255,255,.02));border:2px solid rgba(255,180,60,.35);border-radius:18px;padding:2rem 1.35rem;text-align:center;max-width:440px;width:100%;margin:auto';
+  c.innerHTML =
+      '<div style="font-size:3rem;margin-bottom:.5rem">\u2705</div>'
     + '<div style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#25d366;margin-bottom:.35rem;letter-spacing:.5px">PEDIDO CONFIRMADO</div>'
     + '<div style="font-size:.82rem;color:var(--muted);margin-bottom:1.5rem">Tu '+p.nombre+' esta en proceso</div>'
     + '<div style="background:rgba(0,0,0,.25);border-radius:99px;height:10px;overflow:hidden;margin-bottom:1.5rem"><div style="height:100%;width:25%;border-radius:99px;background:linear-gradient(90deg,#22d3ee,#ff9900);box-shadow:0 0 12px rgba(255,180,60,.5)"></div></div>'
     + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
     +   _filaRecibo('\uD83D\uDCCB Pedido', '#'+ord)
-    +   _filaRecibo('\uD83D\uDD2B Producto', p.nombre)
+    +   _filaRecibo('\uD83C\uDFAF Producto', p.nombre)
     +   _filaRecibo('\uD83C\uDFAE ID', ffId)
     +   _filaRecibo('\uD83D\uDC64 Usuario', user)
     +   _filaRecibo('\uD83D\uDCB5 Precio', fmt(p.precio))
@@ -6569,76 +6626,10 @@ function _mostrarReciboProducto(p, ffId, user, ord){
     +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' \u00B7 ' + hora, true)
     + '</div>'
     + '<div style="font-size:.75rem;color:#22d3ee;margin-top:1rem;line-height:1.5">Te contactaremos por WhatsApp. La skin llega en 2-3 semanas al correo de tu cuenta.</div>'
-    + '<button onclick="goPage(\'home\')" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Volver al inicio</button>'
-    + '</div>';
-  wrap.scrollIntoView({ behavior:'smooth', block:'start' });
+    + '<button onclick="var o=document.getElementById(\'codigo-recibo-ov\'); if(o) o.remove();" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Cerrar</button>';
+  ov.appendChild(c);
 }
 
-function comprarScar(){
-  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
-  if(_comprandoScar){ return; }
-
-  var err = document.getElementById('scar-err');
-  function showErr(m){ if(err){ err.textContent=m; err.style.display='block'; } }
-
-  var ffId = ((document.getElementById('scar-id')||{}).value||'').trim();
-  var user = ((document.getElementById('scar-user')||{}).value||'').trim();
-  var wa = ((document.getElementById('scar-wa')||{}).value||'').trim();
-
-  if(!ffId){ showErr('Escribe tu ID de Free Fire.'); return; }
-  if(!user){ showErr('Escribe tu nombre de usuario.'); return; }
-  if(!wa){ showErr('Escribe tu WhatsApp.'); return; }
-
-  var saldo = authSession.saldo||0;
-  if(saldo < SCAR_PRECIO){ showErr('Saldo insuficiente ('+fmt(saldo)+'). Necesitas '+fmt(SCAR_PRECIO)+'. Recarga tu cuenta.'); return; }
-  if(err) err.style.display='none';
-
-  _comprandoScar = true;
-  var btn = event && event.target ? event.target : null;
-  if(btn){ btn.disabled=true; btn.innerHTML='Procesando...'; }
-
-  var ord = getNextOrder();
-  addSpend(SCAR_PRECIO, 'SCAR Evolutiva Nivel 7 - ID:'+ffId+' - User:'+user+' - WA:'+wa+' - Pedido #'+ord);
-  registrarPedido('SCAR Evolutiva Nivel 7 (2-3 semanas)', 0, 'skin', ffId, SCAR_PRECIO, 0);
-  if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, 'SCAR EVOLUTIVA N7 - ID:'+ffId+' - User:'+user+' - WA:'+wa, SCAR_PRECIO, ord);
-
-  _mostrarReciboScar(ffId, user, ord);
-  showToast('\u2705 Pedido #'+ord+' realizado!', 3000);
-
-  setTimeout(function(){ _comprandoScar = false; if(btn){ btn.disabled=false; btn.innerHTML='\uD83D\uDC8E COMPRAR CON SALDO'; } }, 3000);
-}
-
-// Recibo de la compra de SCAR
-function _mostrarReciboScar(ffId, user, ord){
-  var ahora = new Date();
-  var fecha = ahora.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' });
-  var hora = ahora.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' });
-
-  var cont = document.getElementById('page-codigos');
-  if(!cont) return;
-  var wrap = cont.querySelector('div[style*="max-width:620px"]');
-  if(!wrap) return;
-
-  wrap.innerHTML =
-    '<div style="background:linear-gradient(160deg,rgba(255,180,60,.08),rgba(255,255,255,.02));border:2px solid rgba(255,180,60,.35);border-radius:18px;padding:2rem 1.35rem;text-align:center;max-width:440px;margin:2rem auto">'
-    + '<div style="font-size:3rem;margin-bottom:.5rem">\u2705</div>'
-    + '<div style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#25d366;margin-bottom:.35rem;letter-spacing:.5px">PEDIDO CONFIRMADO</div>'
-    + '<div style="font-size:.82rem;color:var(--muted);margin-bottom:1.5rem">Tu SCAR Evolutiva esta en proceso</div>'
-    + '<div style="background:rgba(0,0,0,.25);border-radius:99px;height:10px;overflow:hidden;margin-bottom:1.5rem"><div style="height:100%;width:25%;border-radius:99px;background:linear-gradient(90deg,#22d3ee,#ff9900);box-shadow:0 0 12px rgba(255,180,60,.5)"></div></div>'
-    + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
-    +   _filaRecibo('\uD83D\uDCCB Pedido', '#'+ord)
-    +   _filaRecibo('\uD83D\uDD2B Producto', 'SCAR Evolutiva Nivel 7')
-    +   _filaRecibo('\uD83C\uDFAE ID', ffId)
-    +   _filaRecibo('\uD83D\uDC64 Usuario', user)
-    +   _filaRecibo('\uD83D\uDCB5 Precio', fmt(SCAR_PRECIO))
-    +   _filaRecibo('\u23F3 Entrega', '2 a 3 semanas')
-    +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' \u00B7 ' + hora, true)
-    + '</div>'
-    + '<div style="font-size:.75rem;color:#22d3ee;margin-top:1rem;line-height:1.5">Te contactaremos por WhatsApp. La skin llega en 2-3 semanas al correo de tu cuenta.</div>'
-    + '<button onclick="goPage(\'home\')" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Volver al inicio</button>'
-    + '</div>';
-  wrap.scrollIntoView({ behavior:'smooth', block:'start' });
-}
 
 
 // ═══ Botón de WhatsApp ARRASTRABLE ═══
