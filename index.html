@@ -4081,7 +4081,7 @@ document.addEventListener('keydown',function(e){
         <!-- Precio -->
         <div style="display:flex;align-items:baseline;gap:.5rem;margin-bottom:1.5rem;padding:1rem;background:rgba(255,40,60,.06);border:1px solid rgba(255,40,60,.2);border-radius:12px">
           <span style="font-size:.75rem;color:var(--muted)">Precio:</span>
-          <span id="scar-precio" style="font-family:Oxanium;font-weight:900;font-size:1.8rem;color:#ff4444">$1,500 MX</span>
+          <span id="scar-precio" style="font-family:Oxanium;font-weight:900;font-size:1.8rem;color:#ff4444">$1,150 MX</span>
         </div>
 
         <!-- Formulario -->
@@ -4104,6 +4104,122 @@ document.addEventListener('keydown',function(e){
         <button onclick="comprarScar()" style="width:100%;padding:1rem;background:linear-gradient(135deg,#ff0028,#ff4444);color:#fff;border:none;border-radius:12px;font-family:Oxanium;font-weight:900;font-size:.95rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(255,0,40,.3)">&#128142; COMPRAR CON SALDO</button>
 
         <div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.85rem;line-height:1.5">Al comprar, procesaremos tu skin y te contactaremos por WhatsApp. Entrega en 2-3 semanas al correo de tu cuenta.</div>
+      </div>
+    </div>
+
+    <!-- Card: Thompson Cibergarras -->
+    <div style="background:linear-gradient(160deg,rgba(255,0,40,.1),rgba(20,10,15,.4));border:1px solid rgba(255,40,60,.3);border-radius:20px;overflow:hidden;margin-bottom:1.5rem">
+
+      <!-- Imagen de la skin -->
+      <div style="position:relative;background:radial-gradient(circle at center,rgba(255,40,60,.15),transparent);padding:1.5rem 1.5rem 0">
+        <div style="position:absolute;top:1rem;right:1rem;background:linear-gradient(90deg,#ff0028,#ff4444);color:#fff;font-family:Oxanium;font-weight:800;font-size:.68rem;padding:.35rem .85rem;border-radius:99px;letter-spacing:.5px;z-index:2;box-shadow:0 4px 14px rgba(255,0,40,.4)">SKIN EPICA</div>
+        <img src="1002761135.jpg" alt="Thompson Cibergarras" style="width:100%;border-radius:14px;display:block" onerror="this.style.display='none'"/>
+      </div>
+
+      <!-- Info -->
+      <div style="padding:1.5rem">
+        <div style="font-family:Oxanium;font-weight:800;font-size:1.3rem;color:#fff;margin-bottom:.4rem">Thompson - Cibergarras</div>
+        <div style="font-size:.85rem;color:var(--muted);line-height:1.6;margin-bottom:1.25rem">La Thompson <b style="color:#ff4444">Cibergarras</b>, una de las skins mas llamativas de Free Fire, directo al correo de tu cuenta.</div>
+
+        <!-- Caracteristicas -->
+        <div style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.5rem">
+          <div style="display:flex;align-items:center;gap:.65rem;font-size:.82rem;color:#e8ecf4"><span style="color:#25d366">&#10004;</span> Skin Cibergarras original</div>
+          <div style="display:flex;align-items:center;gap:.65rem;font-size:.82rem;color:#e8ecf4"><span style="color:#25d366">&#10004;</span> Entrega al correo de tu cuenta</div>
+          <div style="display:flex;align-items:center;gap:.65rem;font-size:.82rem;color:#22d3ee"><span>&#9203;</span> Tiempo de entrega: 2 a 3 semanas</div>
+        </div>
+
+        <!-- Precio -->
+        <div style="display:flex;align-items:baseline;gap:.5rem;margin-bottom:1.5rem;padding:1rem;background:rgba(255,40,60,.06);border:1px solid rgba(255,40,60,.2);border-radius:12px">
+          <span style="font-size:.75rem;color:var(--muted)">Precio:</span>
+          <span id="thompson-precio" style="font-family:Oxanium;font-weight:900;font-size:1.8rem;color:#ff4444">$515 MX</span>
+        </div>
+
+        <!-- Formulario -->
+        <div style="font-family:Oxanium;font-weight:700;font-size:.95rem;color:#fff;margin-bottom:.85rem">Datos para la entrega</div>
+
+        <label class="flabel">ID de Free Fire *</label>
+        <input class="finput" id="thompson-id" type="text" placeholder="Tu ID de jugador"/>
+
+        <label class="flabel">Nombre de usuario *</label>
+        <input class="finput" id="thompson-user" type="text" placeholder="Tu nombre en el juego"/>
+
+        <label class="flabel">WhatsApp *</label>
+        <input class="finput" id="thompson-wa" type="text" placeholder="Tu numero de WhatsApp"/>
+
+        <!-- Saldo -->
+        <div style="display:flex;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;margin:1rem 0"><span style="font-size:.8rem;color:var(--muted)">Tu saldo</span><span id="thompson-saldo" style="font-family:Oxanium;font-weight:700;color:#25d366">$0 MX</span></div>
+
+        <div id="thompson-err" style="display:none;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.3);color:#ff6b6b;border-radius:9px;padding:.7rem .9rem;font-size:.8rem;margin-bottom:.85rem"></div>
+
+        <button onclick="comprarThompson()" style="width:100%;padding:1rem;background:linear-gradient(135deg,#ff0028,#ff4444);color:#fff;border:none;border-radius:12px;font-family:Oxanium;font-weight:900;font-size:.95rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(255,0,40,.3)">&#128142; COMPRAR CON SALDO</button>
+
+        <div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.85rem;line-height:1.5">Al comprar, procesaremos tu skin y te contactaremos por WhatsApp. Entrega en 2-3 semanas al correo de tu cuenta.</div>
+      </div>
+    </div>
+
+    <!-- Card: Trajes Dibujo Arte / Moda Grafica -->
+    <div style="background:linear-gradient(160deg,rgba(255,0,40,.1),rgba(20,10,15,.4));border:1px solid rgba(255,40,60,.3);border-radius:20px;overflow:hidden;margin-bottom:1.5rem">
+      <div style="position:relative;background:radial-gradient(circle at center,rgba(255,40,60,.15),transparent);padding:1.5rem 1.5rem 0">
+        <div style="position:absolute;top:1rem;right:1rem;background:linear-gradient(90deg,#ff0028,#ff4444);color:#fff;font-family:Oxanium;font-weight:800;font-size:.68rem;padding:.35rem .85rem;border-radius:99px;letter-spacing:.5px;z-index:2;box-shadow:0 4px 14px rgba(255,0,40,.4)">TRAJES</div>
+        <img src="1002761142.jpg" alt="Dibujo Arte y Moda Grafica" style="width:100%;border-radius:14px;display:block" onerror="this.style.display='none'"/>
+      </div>
+      <div style="padding:1.5rem">
+        <div style="font-family:Oxanium;font-weight:800;font-size:1.3rem;color:#fff;margin-bottom:.4rem">Dibujo Arte &amp; Moda Grafica</div>
+        <div style="font-size:.85rem;color:var(--muted);line-height:1.6;margin-bottom:1.25rem">Dos trajes al estilo boceto. Elige el que quieras: <b style="color:#ff4444">Dibujo Arte</b> (masculino) o <b style="color:#ff4444">Moda Grafica</b> (femenino). <b style="color:#25d366">$280 c/u</b>.</div>
+
+        <div style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.5rem">
+          <div style="display:flex;align-items:center;gap:.65rem;font-size:.82rem;color:#e8ecf4"><span style="color:#25d366">&#10004;</span> Entrega al correo de tu cuenta</div>
+          <div style="display:flex;align-items:center;gap:.65rem;font-size:.82rem;color:#22d3ee"><span>&#9203;</span> Tiempo de entrega: 2 a 3 semanas</div>
+        </div>
+
+        <div style="font-family:Oxanium;font-weight:700;font-size:.95rem;color:#fff;margin-bottom:.85rem">Datos para la entrega</div>
+        <label class="flabel">ID de Free Fire *</label>
+        <input class="finput" id="dibujo-id" type="text" placeholder="Tu ID de jugador"/>
+        <label class="flabel">Nombre de usuario *</label>
+        <input class="finput" id="dibujo-user" type="text" placeholder="Tu nombre en el juego"/>
+        <label class="flabel">WhatsApp *</label>
+        <input class="finput" id="dibujo-wa" type="text" placeholder="Tu numero de WhatsApp"/>
+
+        <div style="display:flex;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;margin:1rem 0"><span style="font-size:.8rem;color:var(--muted)">Tu saldo</span><span id="dibujo-saldo" style="font-family:Oxanium;font-weight:700;color:#25d366">$0 MX</span></div>
+        <div id="dibujo-err" style="display:none;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.3);color:#ff6b6b;border-radius:9px;padding:.7rem .9rem;font-size:.8rem;margin-bottom:.85rem"></div>
+
+        <button onclick="comprarDibujoArte()" style="width:100%;padding:1rem;background:linear-gradient(135deg,#ff0028,#ff4444);color:#fff;border:none;border-radius:12px;font-family:Oxanium;font-weight:900;font-size:.9rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(255,0,40,.3);margin-bottom:.7rem">&#128142; DIBUJO ARTE (MASC) - $280</button>
+        <button onclick="comprarModaGrafica()" style="width:100%;padding:1rem;background:linear-gradient(135deg,#ff0028,#ff4444);color:#fff;border:none;border-radius:12px;font-family:Oxanium;font-weight:900;font-size:.9rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(255,0,40,.3)">&#128142; MODA GRAFICA (FEM) - $280</button>
+
+        <div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.85rem;line-height:1.5">Al comprar, procesaremos tu traje y te contactaremos por WhatsApp. Entrega en 2-3 semanas al correo de tu cuenta.</div>
+      </div>
+    </div>
+
+    <!-- Card: Trajes Sombra del Camino / Corredora Sombria -->
+    <div style="background:linear-gradient(160deg,rgba(255,0,40,.1),rgba(20,10,15,.4));border:1px solid rgba(255,40,60,.3);border-radius:20px;overflow:hidden;margin-bottom:1.5rem">
+      <div style="position:relative;background:radial-gradient(circle at center,rgba(255,40,60,.15),transparent);padding:1.5rem 1.5rem 0">
+        <div style="position:absolute;top:1rem;right:1rem;background:linear-gradient(90deg,#ff0028,#ff4444);color:#fff;font-family:Oxanium;font-weight:800;font-size:.68rem;padding:.35rem .85rem;border-radius:99px;letter-spacing:.5px;z-index:2;box-shadow:0 4px 14px rgba(255,0,40,.4)">TRAJES</div>
+        <img src="1002761161.jpg" alt="Sombra del Camino y Corredora Sombria" style="width:100%;border-radius:14px;display:block" onerror="this.style.display='none'"/>
+      </div>
+      <div style="padding:1.5rem">
+        <div style="font-family:Oxanium;font-weight:800;font-size:1.3rem;color:#fff;margin-bottom:.4rem">Sombra del Camino &amp; Corredora Sombria</div>
+        <div style="font-size:.85rem;color:var(--muted);line-height:1.6;margin-bottom:1.25rem">Dos trajes con estilo oscuro. Elige el que quieras: <b style="color:#ff4444">Sombra del Camino</b> (masculino) o <b style="color:#ff4444">Corredora Sombria</b> (femenino). <b style="color:#25d366">$280 c/u</b>.</div>
+
+        <div style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.5rem">
+          <div style="display:flex;align-items:center;gap:.65rem;font-size:.82rem;color:#e8ecf4"><span style="color:#25d366">&#10004;</span> Entrega al correo de tu cuenta</div>
+          <div style="display:flex;align-items:center;gap:.65rem;font-size:.82rem;color:#22d3ee"><span>&#9203;</span> Tiempo de entrega: 2 a 3 semanas</div>
+        </div>
+
+        <div style="font-family:Oxanium;font-weight:700;font-size:.95rem;color:#fff;margin-bottom:.85rem">Datos para la entrega</div>
+        <label class="flabel">ID de Free Fire *</label>
+        <input class="finput" id="sombra-id" type="text" placeholder="Tu ID de jugador"/>
+        <label class="flabel">Nombre de usuario *</label>
+        <input class="finput" id="sombra-user" type="text" placeholder="Tu nombre en el juego"/>
+        <label class="flabel">WhatsApp *</label>
+        <input class="finput" id="sombra-wa" type="text" placeholder="Tu numero de WhatsApp"/>
+
+        <div style="display:flex;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;margin:1rem 0"><span style="font-size:.8rem;color:var(--muted)">Tu saldo</span><span id="sombra-saldo" style="font-family:Oxanium;font-weight:700;color:#25d366">$0 MX</span></div>
+        <div id="sombra-err" style="display:none;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.3);color:#ff6b6b;border-radius:9px;padding:.7rem .9rem;font-size:.8rem;margin-bottom:.85rem"></div>
+
+        <button onclick="comprarSombraCamino()" style="width:100%;padding:1rem;background:linear-gradient(135deg,#ff0028,#ff4444);color:#fff;border:none;border-radius:12px;font-family:Oxanium;font-weight:900;font-size:.9rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(255,0,40,.3);margin-bottom:.7rem">&#128142; SOMBRA DEL CAMINO (MASC) - $280</button>
+        <button onclick="comprarCorredoraSombria()" style="width:100%;padding:1rem;background:linear-gradient(135deg,#ff0028,#ff4444);color:#fff;border:none;border-radius:12px;font-family:Oxanium;font-weight:900;font-size:.9rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(255,0,40,.3)">&#128142; CORREDORA SOMBRIA (FEM) - $280</button>
+
+        <div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.85rem;line-height:1.5">Al comprar, procesaremos tu traje y te contactaremos por WhatsApp. Entrega en 2-3 semanas al correo de tu cuenta.</div>
       </div>
     </div>
 
