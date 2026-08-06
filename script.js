@@ -4497,6 +4497,8 @@ function loadPines(){
 function _updatePinSaldo(){
   var s = authSession ? fmt(authSession.saldo||0) : fmt(0);
   ['pin-saldo-val','pin-api-saldo'].forEach(function(id){ var el=document.getElementById(id); if(el) el.textContent=s; });
+  // Re-evaluar el bloqueo de la zona de revendedores por si el saldo cambio
+  if(typeof renderPinesAPI === 'function') { try { renderPinesAPI(); } catch(e){} }
 }
 
 // Muestra los pines comprados en lista, cada uno con botón de copiar
@@ -4725,23 +4727,30 @@ function comprarPinAPI(productId, precioLocal, nombreProducto){
 // ═══ PRODUCTOS PIN POR API (Recargas América) ═══
 // product_id = ID en Recargas América | precio = tu precio de venta en MXN
 var PINES_API = [
-  {product_id:5, sku:'FFCH100',  nombre:'Free Fire 100 Diamantes +10 Bono',  precio:17,  diamantes:'110'},
-  {product_id:3, sku:'FFCH310',  nombre:'Free Fire 310 Diamantes +31 Bono',  precio:60,  diamantes:'341'},
-  {product_id:6, sku:'FFCH520',  nombre:'Free Fire 520 Diamantes +52 Bono',  precio:80,  diamantes:'572'},
-  {product_id:1, sku:'FFCH1060', nombre:'Free Fire 1060 Diamantes +106 Bono', precio:150, diamantes:'1,166'},
-  {product_id:2, sku:'FFCH2180', nombre:'Free Fire 2180 Diamantes +218 Bono', precio:275, diamantes:'2,398'},
-  {product_id:4, sku:'FFCH5600', nombre:'Free Fire 5600 Diamantes +560 Bono', precio:670, diamantes:'6,160'}
+  {product_id:5, sku:'FFCH100',  nombre:'Free Fire 100 Diamantes +10 Bono',  precio:13,  diamantes:'110'},
+  {product_id:3, sku:'FFCH310',  nombre:'Free Fire 310 Diamantes +31 Bono',  precio:40,  diamantes:'341'},
+  {product_id:6, sku:'FFCH520',  nombre:'Free Fire 520 Diamantes +52 Bono',  precio:69,  diamantes:'572'},
+  {product_id:1, sku:'FFCH1060', nombre:'Free Fire 1060 Diamantes +106 Bono', precio:125, diamantes:'1,166'},
+  {product_id:2, sku:'FFCH2180', nombre:'Free Fire 2180 Diamantes +218 Bono', precio:245, diamantes:'2,398'},
+  {product_id:4, sku:'FFCH5600', nombre:'Free Fire 5600 Diamantes +560 Bono', precio:615, diamantes:'6,160'}
 ];
+
+// Saldo minimo (MXN) para desbloquear precios de revendedor (~$10 USD)
+var PINES_MIN_SALDO = 200;
 
 function renderPinesAPI(){
   var cont = document.getElementById('pines-api-grid');
   if(!cont) return;
+
+  var saldo = (authSession && authSession.saldo) ? authSession.saldo : 0;
+  var desbloqueado = saldo >= PINES_MIN_SALDO;
+
   var html = '';
   PINES_API.forEach(function(p){
     html += '<div class="lkpln-wrap"><div class="lkpln">'
       + '<div class="lkpln-l">'
       + '<div class="lkpln-ico" style="background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.28)">\uD83D\uDC8E</div>'
-      + '<div><div class="lkpln-name">'+p.diamantes+' <span>diamantes</span></div><div class="lkpln-meta">Entrega automática por API</div></div>'
+      + '<div><div class="lkpln-name">'+p.diamantes+' <span>diamantes</span></div><div class="lkpln-meta">Precio revendedor · entrega por API</div></div>'
       + '</div>'
       + '<div class="lkpln-r" style="display:flex;flex-direction:column;align-items:flex-end;gap:.4rem">'
       + '<div><div class="lkpln-price" style="color:#22d3ee">$'+p.precio+'</div><div class="lkpln-cur">MXN</div></div>'
@@ -4749,7 +4758,44 @@ function renderPinesAPI(){
       + '</div>'
       + '</div></div>';
   });
-  cont.innerHTML = html;
+
+  if(desbloqueado){
+    cont.innerHTML = html;
+    return;
+  }
+
+  // BLOQUEADO: vista previa difuminada + overlay con requisito y boton
+  cont.innerHTML =
+      '<div style="position:relative;border-radius:12px;overflow:hidden">'
+    +   '<div style="filter:blur(5px);pointer-events:none;user-select:none;opacity:.55;display:flex;flex-direction:column;gap:.6rem">'+html+'</div>'
+    +   '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:1.5rem 1.2rem;background:rgba(7,7,7,.55)">'
+    +     '<div style="font-size:2.4rem;margin-bottom:.6rem">\uD83D\uDD12</div>'
+    +     '<div style="font-family:Oxanium;font-weight:900;font-size:1.05rem;color:#fff;margin-bottom:.4rem;letter-spacing:.5px">ZONA DE REVENDEDORES</div>'
+    +     '<div style="font-size:.82rem;color:#c9d1e0;line-height:1.6;margin-bottom:.35rem;max-width:320px">Precios especiales de reventa. Para desbloquear necesitas un saldo minimo de <b style="color:#22d3ee">$'+PINES_MIN_SALDO+' MXN</b> (aprox. $10 USD) en tu cuenta.</div>'
+    +     '<div style="font-size:.75rem;color:var(--muted);margin-bottom:1rem">Tu saldo actual: <b style="color:'+(saldo>0?'#25d366':'#ff6b6b')+'">$'+saldo+' MXN</b></div>'
+    +     '<button onclick="solicitarAccesoRevendedor()" style="padding:.7rem 1.6rem;background:linear-gradient(90deg,#22d3ee,#0891b2);border:none;border-radius:10px;color:#070707;font-family:Oxanium,sans-serif;font-weight:900;font-size:.82rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 18px rgba(34,211,238,.3)">\uD83D\uDD13 SOLICITAR ACCESO</button>'
+    +     '<div style="font-size:.68rem;color:var(--muted);margin-top:.8rem;line-height:1.5;max-width:300px">Recarga saldo para desbloquear al instante, o contactanos si tienes dudas.</div>'
+    +   '</div>'
+    + '</div>';
+}
+
+// Boton SOLICITAR ACCESO de la zona de revendedores
+function solicitarAccesoRevendedor(){
+  // Si ya tiene sesion, lo llevamos a recargar saldo; si no, a iniciar sesion.
+  if(!authSession){
+    showToast('Inicia sesion para solicitar acceso');
+    if(typeof showAuthModal==='function') setTimeout(showAuthModal, 500);
+    return;
+  }
+  var user = authSession.username || 'Cliente';
+  var saldo = authSession.saldo || 0;
+  var msg = 'Hola CiberStore! Quiero acceso a la ZONA DE REVENDEDORES (pines a precio de reventa).%0A%0A'
+    + '\uD83D\uDC64 Usuario: ' + encodeURIComponent(user) + '%0A'
+    + '\uD83D\uDCB0 Saldo actual: $' + saldo + ' MXN%0A'
+    + '\uD83C\uDFAF Requisito: $' + PINES_MIN_SALDO + ' MXN minimo%0A%0A'
+    + 'Quiero recargar para desbloquear los precios de revendedor. Gracias!';
+  window.open('https://wa.me/12894273983?text=' + msg, '_blank');
+  showToast('Abriendo WhatsApp...', 2000);
 }
 
 
@@ -5699,12 +5745,12 @@ var _diamSeleccionado = null;
 // ═══════════ RECARGAS AUTOMÁTICAS (Recargas América type=recharge) ═══════════
 // package_id = el ID de Recargas América | precio = costo USD × 20 (redondeado)
 var RECARGAS_AUTO = [
-  { package_id:351, sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.70,  precio:16,  img:'img/diam-100.png'  },
-  { package_id:348, sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:2.09,  precio:45,  img:'img/diam-310.png'  },
-  { package_id:350, sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.53,  precio:75,  img:'img/diam-520.png'  },
-  { package_id:347, sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.57,  precio:135, img:'img/diam-1060.png' },
-  { package_id:346, sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:13.03, precio:255, img:'img/diam-2180.png' },
-  { package_id:349, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:33.16, precio:650, img:'img/diam-5600.png' },
+  { package_id:351, sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.70,  precio:17,  img:'img/diam-100.png'  },
+  { package_id:348, sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:2.09,  precio:50,  img:'img/diam-310.png'  },
+  { package_id:350, sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.53,  precio:80,  img:'img/diam-520.png'  },
+  { package_id:347, sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.57,  precio:155, img:'img/diam-1060.png' },
+  { package_id:346, sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:13.03, precio:285, img:'img/diam-2180.png' },
+  { package_id:349, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:33.16, precio:700, img:'img/diam-5600.png' },
   { package_id:null, nombre:'11.200 Diamantes + 1.120 Bono', diamantes:12320, costoUSD:66.32, precio:1390, manual:true }
 ];
 
