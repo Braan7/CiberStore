@@ -4499,6 +4499,7 @@ function _updatePinSaldo(){
   ['pin-saldo-val','pin-api-saldo'].forEach(function(id){ var el=document.getElementById(id); if(el) el.textContent=s; });
   // Re-evaluar el bloqueo de la zona de revendedores por si el saldo cambio
   if(typeof renderPinesAPI === 'function') { try { renderPinesAPI(); } catch(e){} }
+  if(typeof loadPinesMayoreo === 'function') { try { loadPinesMayoreo(); } catch(e){} }
 }
 
 // Muestra los pines comprados en lista, cada uno con botón de copiar
@@ -4672,6 +4673,12 @@ function _extraerPin(data){
 
 function comprarPinAPI(productId, precioLocal, nombreProducto){
   if(!authSession){ showToast('Inicia sesion'); setTimeout(showAuthModal,600); return; }
+
+  if((authSession.saldo||0) < PINES_MIN_SALDO){
+    showToast('Necesitas un saldo minimo de $'+PINES_MIN_SALDO+' MXN para la zona de revendedores');
+    if(typeof renderPinesAPI==='function') renderPinesAPI();
+    return;
+  }
 
   var saldo = authSession.saldo || 0;
   if(saldo < precioLocal){
@@ -6306,7 +6313,33 @@ function verProductosRA(){
 function loadPinesMayoreo(){
   var sel = document.getElementById('pin-plan');
   var grid = document.getElementById('pines-grid');
+  var form = document.getElementById('pin-mayoreo-form');
   if(!sel) return;
+
+  var saldo = (authSession && authSession.saldo) ? authSession.saldo : 0;
+  var desbloqueado = saldo >= PINES_MIN_SALDO;
+
+  // Si no cumple el minimo: vista previa bloqueada + ocultar formulario
+  if(!desbloqueado){
+    if(form) form.style.display = 'none';
+    if(grid){
+      grid.innerHTML =
+          '<div style="position:relative;border-radius:12px;overflow:hidden">'
+        +   '<div style="filter:blur(4px);opacity:.5;pointer-events:none;user-select:none;padding:1.2rem;text-align:center;color:#ffcc00;font-size:.85rem">\uD83C\uDF9F Pines al por mayor con descuentos por volumen (3 a 10 pines) a precio de revendedor.</div>'
+        +   '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:1.5rem 1.2rem;background:rgba(7,7,7,.5)">'
+        +     '<div style="font-size:2.2rem;margin-bottom:.5rem">\uD83D\uDD12</div>'
+        +     '<div style="font-family:Oxanium;font-weight:900;font-size:1rem;color:#fff;margin-bottom:.35rem;letter-spacing:.5px">ZONA DE REVENDEDORES</div>'
+        +     '<div style="font-size:.8rem;color:#c9d1e0;line-height:1.6;margin-bottom:.35rem;max-width:320px">Requiere saldo minimo de <b style="color:#ffcc00">$'+PINES_MIN_SALDO+' MXN</b> (aprox. $10 USD) para comprar al por mayor.</div>'
+        +     '<div style="font-size:.74rem;color:var(--muted);margin-bottom:1rem">Tu saldo actual: <b style="color:'+(saldo>0?'#25d366':'#ff6b6b')+'">$'+saldo+' MXN</b></div>'
+        +     '<button onclick="solicitarAccesoRevendedor()" style="padding:.7rem 1.6rem;background:linear-gradient(90deg,#ffcc00,#e0a800);border:none;border-radius:10px;color:#070707;font-family:Oxanium,sans-serif;font-weight:900;font-size:.82rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 18px rgba(255,204,0,.3)">\uD83D\uDD13 SOLICITAR ACCESO</button>'
+        +   '</div>'
+        + '</div>';
+    }
+    return;
+  }
+
+  // Desbloqueado: mostrar formulario y llenar selector
+  if(form) form.style.display = 'block';
 
   // Llenar el selector con los productos de PINES_API
   var opts = '';
@@ -6384,6 +6417,11 @@ var _comprandoPin = false; // candado anti-doble-compra de pines
 
 function submitPinSaldo(){
   if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
+  if((authSession.saldo||0) < PINES_MIN_SALDO){
+    showToast('Necesitas un saldo minimo de $'+PINES_MIN_SALDO+' MXN para la zona de revendedores');
+    if(typeof loadPinesMayoreo==='function') loadPinesMayoreo();
+    return;
+  }
   if(_comprandoPin){ return; }
   var err = document.getElementById('pin-err');
   function showErr(m){ if(err){err.textContent=m;err.style.display='block';} }
