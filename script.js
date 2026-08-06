@@ -1631,7 +1631,7 @@ var _comprandoHC = false;
 /* \u2500\u2500 STORI / BINANCE MODALS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 function openStoriModal(monto){var el=document.getElementById('modal-stori');if(el) el.classList.add('show'); var mi=document.getElementById('stori-monto'); if(mi && monto) mi.value=monto;}
 function closeStoriModal(){var el=document.getElementById('modal-stori');if(el) el.classList.remove('show');}
-function openBinanceModal(monto){var el=document.getElementById('modal-binance');if(el) el.classList.add('show');}
+function openBinanceModal(monto){var el=document.getElementById('modal-binance');if(el) el.classList.add('show'); if(typeof renderBinanceMontos==='function') renderBinanceMontos(); _bncSel=null; var r=document.getElementById('bnc-resumen'); if(r) r.style.display='none';}
 function closeBinanceModal(){var el=document.getElementById('modal-binance');if(el) el.classList.remove('show');}
 
 /* \u2500\u2500 BUNDLE \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
@@ -4806,10 +4806,47 @@ function solicitarAccesoAPI(){
 
 
 // ═══ MODAL RECARGA BINANCE ═══
-var _bncSel = null; // {paga, recibe}
+var _bncSel = null; // {paga (USDT), recibe (MXN), custom, bonoUsdt}
 
-function selBinance(paga, recibe, el){
-  _bncSel = { paga: paga, recibe: recibe, custom: false };
+// Paquetes: cada uno paga X USDT y da un BONO en USDT (no en MXN),
+// para que el "recibe" se calcule con la tasa real en vivo:
+//   recibe = (paga + bonoUsdt) * USD_MXN
+// El bono en USDT se derivo del bono original a tasa 17:
+//   $5/17, $10/17, $15/17, $50/17
+var BNC_PAQUETES = [
+  { paga:10,  bonoUsdt:5/17  },
+  { paga:30,  bonoUsdt:10/17 },
+  { paga:60,  bonoUsdt:15/17 },
+  { paga:120, bonoUsdt:50/17 }
+];
+
+// Recalcula el "recibe" en MXN de un paquete con la tasa actual
+function _bncRecibe(paga, bonoUsdt){
+  return Math.round((paga + (bonoUsdt||0)) * USD_MXN);
+}
+
+// Renderiza las tarjetas de Binance usando la tasa en vivo (USD_MXN)
+function renderBinanceMontos(){
+  var cont = document.getElementById('binance-montos');
+  var tasaTxt = document.getElementById('bnc-tasa-txt');
+  if(tasaTxt) tasaTxt.textContent = '1 USDT = $' + USD_MXN.toFixed(2) + ' MXN';
+  if(!cont) return;
+  cont.innerHTML = BNC_PAQUETES.map(function(p, i){
+    var recibe = _bncRecibe(p.paga, p.bonoUsdt);
+    var bonoMxn = Math.round(p.bonoUsdt * USD_MXN);
+    return '<div class="bnc-card" onclick="selBinance('+i+',this)">'
+      + '<div class="bnc-amt">'+p.paga+' USDT</div>'
+      + '<div class="bnc-line">Pagas: '+p.paga+' USDT</div>'
+      + '<div class="bnc-recibe">Recibes: '+fmt(recibe)+'</div>'
+      + '<div class="bnc-badge">+'+fmt(bonoMxn)+' BONO</div>'
+      + '</div>';
+  }).join('');
+}
+
+function selBinance(idx, el){
+  var p = BNC_PAQUETES[idx];
+  if(!p) return;
+  _bncSel = { paga: p.paga, recibe: _bncRecibe(p.paga, p.bonoUsdt), custom: false, bonoUsdt: p.bonoUsdt };
   document.querySelectorAll('.bnc-card').forEach(function(c){ c.classList.remove('sel'); });
   if(el) el.classList.add('sel');
   var inp = document.getElementById('bnc-custom-input'); if(inp) inp.value = '';
@@ -4823,7 +4860,7 @@ function selBinanceCustom(el){
   if(el) el.classList.add('sel');
   if(val > 0){
     // paga = USDT, recibe = USDT * USD_MXN en MXN (sin bono)
-    _bncSel = { paga: val, recibe: Math.round(val * USD_MXN), custom: true };
+    _bncSel = { paga: val, recibe: Math.round(val * USD_MXN), custom: true, bonoUsdt: 0 };
     _bncMostrarResumen();
   } else {
     if(inp) inp.focus();
@@ -4837,7 +4874,7 @@ function onBncCustom(){
   var card = document.getElementById('bnc-custom-card');
   if(card) card.classList.add('sel');
   if(val > 0){
-    _bncSel = { paga: val, recibe: Math.round(val * USD_MXN), custom: true };
+    _bncSel = { paga: val, recibe: Math.round(val * USD_MXN), custom: true, bonoUsdt: 0 };
     _bncMostrarResumen();
   } else {
     _bncSel = null;
@@ -4870,7 +4907,7 @@ function confirmarBinance(){
   var user = (authSession && authSession.username) ? authSession.username : 'Cliente';
   var msg = 'Hola CiberStore! Quiero RECARGAR SALDO por Binance Pay.%0A%0A'
     + 'Usuario: ' + encodeURIComponent(user) + '%0A'
-    + 'Pago: $' + _bncSel.paga.toLocaleString('es-MX') + ' MXN%0A'
+    + 'Pago: ' + _bncSel.paga.toLocaleString('es-MX',{maximumFractionDigits:2}) + ' USDT%0A'
     + 'Recibo: $' + _bncSel.recibe.toLocaleString('es-MX') + ' MXN'
     + (_bncSel.custom ? '' : ' (con bono)') + '%0A%0A'
     + 'Ya transferi a Binance ID 1106987175. Adjunto mi comprobante.';
