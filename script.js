@@ -784,6 +784,7 @@ function goPage(id){
   if(id==='diamantes') setTimeout(function(){ setDiamTipo('ilim'); }, 100);
   if(id==='codigos') setTimeout(_updateScarSaldo, 100);
   if(id==='actas') setTimeout(_updateActaSaldo, 100);
+  if(id==='monedas') setTimeout(function(){ renderMonedasGrid(); _updateMonedasSaldo(); }, 100);
   if(id==='clanes') setTimeout(renderClanes, 100);
   if(id==='pase') setTimeout(_paseReiniciar, 100);
   if(id==='saldo') setTimeout(function(){ recSetMoneda('MXN'); _recTipo=null; recLimpiarTipo(); }, 100);
@@ -5759,7 +5760,9 @@ var RECARGAS_AUTO = [
   { package_id:347, sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.57,  precio:155, img:'img/diam-1060.png' },
   { package_id:346, sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:13.03, precio:285, img:'img/diam-2180.png' },
   { package_id:349, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:33.16, precio:700, img:'img/diam-5600.png' },
-  { package_id:null, nombre:'11.200 Diamantes + 1.120 Bono', diamantes:12320, costoUSD:66.32, precio:1390, manual:true }
+  { package_id:null, nombre:'11.200 Diamantes + 1.120 Bono', diamantes:12320, costoUSD:66.32, precio:1390, manual:true },
+  { package_id:null, sku:'TARJSEM', nombre:'Tarjeta Semanal', diamantes:0, costoUSD:0, precio:37,  manual:true, esTarjeta:true, img:'tarjeta-semanal.png' },
+  { package_id:null, sku:'TARJMEN', nombre:'Tarjeta Mensual', diamantes:0, costoUSD:0, precio:150, manual:true, esTarjeta:true, img:'tarjeta-mensual.jpg' }
 ];
 
 
@@ -5787,11 +5790,11 @@ function _getDiamProductos(tipo){
     // Ilimitado = recargas automáticas (Recargas América, directo al ID)
     return RECARGAS_AUTO.map(function(r){
       return {
-        key:(r.manual?'man_':'auto_')+(r.package_id||r.diamantes),
+        key:(r.manual?'man_':'auto_')+(r.package_id||r.sku||r.diamantes),
         nombre:r.nombre, diamantes:r.diamantes, precio:r.precio,
         tipo:(r.manual?'manual':'auto'), package_id:r.package_id,
-        badge:(r.manual?'MANUAL':'AUTO'),
-        esPase:!!r.esPase,
+        badge:(r.esTarjeta?'TARJETA':(r.manual?'MANUAL':'AUTO')),
+        esPase:!!r.esPase, esTarjeta:!!r.esTarjeta,
         img:r.img || _imgPorDiamantes(r.diamantes)
       };
     });
@@ -5841,6 +5844,7 @@ function renderDiamCatalogo(){
     var badgeColor = '';
     if(p.badge === 'AUTO') badgeColor = 'background:rgba(37,211,102,.15);border-color:rgba(37,211,102,.4);color:#25d366';
     else if(p.badge === 'MANUAL') badgeColor = 'background:rgba(255,180,60,.15);border-color:rgba(255,180,60,.4);color:#22d3ee';
+    else if(p.badge === 'TARJETA') badgeColor = 'background:rgba(167,139,250,.18);border-color:rgba(167,139,250,.45);color:#c4b5fd';
     var badge = p.badge ? '<span class="dcat-badge" style="'+badgeColor+'">'+p.badge+'</span>' : '';
     var visual = p.img
       ? '<div style="width:100%;aspect-ratio:4/3;border-radius:11px;overflow:hidden;margin-bottom:.65rem;background:#0a0f1a"><img src="'+p.img+'" alt="'+p.nombre+'" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.parentNode.innerHTML=\'<div class=&quot;dcat-card-ico&quot;>&#127918;</div>\'"/></div>'
@@ -5857,6 +5861,11 @@ function renderDiamCatalogo(){
 
 // Aviso de tiempo de entrega segun el tipo de producto
 function _avisoEntrega(p){
+  if(p && p.esTarjeta){
+    return '<div style="background:rgba(255,180,60,.1);border:1px solid rgba(255,180,60,.32);border-radius:11px;padding:.85rem 1rem;margin-bottom:1.25rem;font-size:.79rem;color:#ffb84d;line-height:1.6">'
+      + '\uD83D\uDCC5 <b>Tarjeta de suscripcion Free Fire.</b><br/>Se activa directo en tu cuenta. Puede tardar de <b>1 a 24 horas</b>. Se procesa manualmente.'
+      + '</div>';
+  }
   if(p && p.esPase){
     return '<div style="background:rgba(255,180,60,.1);border:1px solid rgba(255,180,60,.32);border-radius:11px;padding:.85rem 1rem;margin-bottom:1.25rem;font-size:.79rem;color:#ffb84d;line-height:1.6">'
       + '\u26A0\uFE0F <b>El pase se manda mediante REGALO.</b><br/>Puede que te llegue de <b>1 a 4 dias</b>. Consulta con el administrador.'
@@ -6009,10 +6018,12 @@ function confirmarDiamCompra(){
   var btn = document.getElementById('diam-btn');
   if(btn){ btn.className='ddet-btn off'; btn.innerHTML='Procesando...'; }
 
-  // Compra normal (ilimitados / 1vez): pedido manual
+  // Compra normal (ilimitados / 1vez / tarjetas): pedido manual
   var ord=getNextOrder();
-  addSpend(p.precio, p.diamantes+' Diamantes ('+p.tipo+') - ID:'+ffId+' - Pedido #'+ord);
-  registrarPedido(p.nombre, p.diamantes, 'diamantes', ffId, p.precio, 0);
+  var descGasto = p.esTarjeta ? (p.nombre+' - ID:'+ffId+' - Pedido #'+ord)
+                              : (p.diamantes+' Diamantes ('+p.tipo+') - ID:'+ffId+' - Pedido #'+ord);
+  addSpend(p.precio, descGasto);
+  registrarPedido(p.nombre, p.esTarjeta?0:p.diamantes, p.esTarjeta?'tarjeta':'diamantes', ffId, p.precio, 0);
   if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, p.nombre+' - ID:'+ffId, p.precio, ord);
   _mostrarReciboProceso(p, ffId, ord);
   showToast('\u2705 Pedido #'+ord+' realizado!', 3000);
@@ -6878,6 +6889,167 @@ function _mostrarReciboActa(tipo, curp, wa, ord){
     + '</div>'
     + '<div style="font-size:.75rem;color:#25d366;margin-top:1rem;line-height:1.5">Te enviaremos tu acta por WhatsApp lo antes posible. Revisa que tu numero sea correcto.</div>'
     + '<button onclick="var o=document.getElementById(\'acta-recibo-ov\'); if(o) o.remove();" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Cerrar</button>';
+  ov.appendChild(c);
+}
+
+
+// ═══════════ MONEDAS TIKTOK ═══════════
+var MONEDAS_TIKTOK = [
+  { monedas:30,     precio:10   },
+  { monedas:40,     precio:12   },
+  { monedas:50,     precio:14   },
+  { monedas:70,     precio:18   },
+  { monedas:100,    precio:30   },
+  { monedas:500,    precio:125  },
+  { monedas:1000,   precio:235  },
+  { monedas:10000,  precio:2250 }
+];
+var _comprandoMoneda = false;
+
+function _updateMonedasSaldo(){
+  var el = document.getElementById('monedas-saldo');
+  if(el) el.textContent = authSession ? fmt(authSession.saldo||0) : fmt(0);
+}
+
+function _fmtMonedas(n){ return n.toLocaleString('es-MX'); }
+
+function renderMonedasGrid(){
+  var grid = document.getElementById('monedas-grid');
+  if(!grid) return;
+  var html = MONEDAS_TIKTOK.map(function(m, i){
+    return '<div class="mon-card" onclick="abrirMonedaModal('+i+')">'
+      + '<div class="mon-card-amt">\uD83C\uDFB5 '+_fmtMonedas(m.monedas)+'</div>'
+      + '<div class="mon-card-lbl">monedas</div>'
+      + '<div class="mon-card-price">'+fmt(m.precio)+'</div>'
+      + '</div>';
+  }).join('');
+  html += '<div class="mon-card custom" onclick="monedasPersonalizado()">'
+    + '<div class="mon-card-amt">\u270F\uFE0F Personalizar</div>'
+    + '<div class="mon-card-lbl">Otra cantidad</div>'
+    + '<div class="mon-card-price" style="color:#00f2ea">Por WhatsApp</div>'
+    + '</div>';
+  grid.innerHTML = html;
+}
+
+function monedasPersonalizado(){
+  var quien = authSession ? authSession.username : '';
+  var msg = 'Hola! Quiero comprar MONEDAS DE TIKTOK (cantidad personalizada).%0A%0A'
+    + (quien ? ('\uD83D\uDC64 Mi usuario: ' + encodeURIComponent(quien) + '%0A') : '')
+    + '\uD83C\uDFB5 Cantidad de monedas que quiero: %0A'
+    + '\uD83D\uDCF1 Mi usuario de TikTok: ';
+  window.open('https://wa.me/12894273983?text=' + msg, '_blank');
+  showToast('Abriendo WhatsApp...', 2000);
+}
+
+function abrirMonedaModal(idx){
+  var m = MONEDAS_TIKTOK[idx];
+  if(!m) return;
+
+  var ov = document.getElementById('moneda-modal-ov');
+  if(ov) ov.remove();
+  ov = document.createElement('div');
+  ov.id = 'moneda-modal-ov';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:1.2rem;overflow-y:auto';
+  ov.onclick = function(e){ if(e.target===ov) cerrarMonedaModal(); };
+  document.body.appendChild(ov);
+
+  var saldo = authSession ? (authSession.saldo||0) : 0;
+
+  var c = document.createElement('div');
+  c.style.cssText = 'max-width:420px;width:100%;background:#0a0a0a;border:1px solid rgba(255,0,80,.35);border-radius:18px;overflow:hidden;margin:auto';
+  c.innerHTML =
+      '<div style="position:relative;background:linear-gradient(135deg,rgba(255,0,80,.15),rgba(0,242,234,.08));padding:1.6rem 1.3rem;text-align:center">'
+    +   '<button onclick="cerrarMonedaModal()" style="position:absolute;top:.8rem;right:.8rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:1.1rem;cursor:pointer;line-height:1">\u00D7</button>'
+    +   '<div style="font-size:2.6rem;margin-bottom:.3rem">\uD83C\uDFB5</div>'
+    +   '<div style="font-family:Oxanium;font-weight:900;font-size:1.6rem;color:#fff">'+_fmtMonedas(m.monedas)+' Monedas</div>'
+    +   '<div style="font-size:.8rem;color:rgba(255,255,255,.7)">TikTok</div>'
+    + '</div>'
+    + '<div style="padding:1.35rem">'
+    +   '<div style="display:flex;align-items:baseline;gap:.5rem;margin-bottom:1.2rem;padding:.9rem 1rem;background:rgba(37,211,102,.06);border:1px solid rgba(37,211,102,.2);border-radius:12px">'
+    +     '<span style="font-size:.72rem;color:var(--muted)">Precio:</span>'
+    +     '<span style="font-family:Oxanium;font-weight:900;font-size:1.6rem;color:#25d366">'+fmt(m.precio)+'</span>'
+    +   '</div>'
+    +   '<label class="flabel">Usuario de TikTok *</label>'
+    +   '<input class="finput" id="mon-user" type="text" placeholder="Ej: @tu_usuario"/>'
+    +   '<label class="flabel">WhatsApp de contacto *</label>'
+    +   '<input class="finput" id="mon-wa" type="text" placeholder="Tu numero de WhatsApp"/>'
+    +   '<div style="display:flex;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;margin:1rem 0"><span style="font-size:.8rem;color:var(--muted)">Tu saldo</span><span style="font-family:Oxanium;font-weight:700;color:#25d366">'+fmt(saldo)+'</span></div>'
+    +   '<div id="mon-err" style="display:none;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.3);color:#ff6b6b;border-radius:9px;padding:.7rem .9rem;font-size:.8rem;margin-bottom:.85rem"></div>'
+    +   '<button id="mon-btn" onclick="comprarMoneda('+idx+')" style="width:100%;padding:1rem;background:linear-gradient(135deg,#ff0050,#ff4d8d);color:#fff;border:none;border-radius:12px;font-family:Oxanium;font-weight:900;font-size:.95rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(255,0,80,.3)">\uD83C\uDFB5 COMPRAR CON SALDO</button>'
+    +   '<div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.85rem;line-height:1.5">Te contactaremos por WhatsApp para acreditar tus monedas.</div>'
+    + '</div>';
+  ov.appendChild(c);
+}
+
+function cerrarMonedaModal(){
+  var ov = document.getElementById('moneda-modal-ov');
+  if(ov) ov.remove();
+}
+
+function comprarMoneda(idx){
+  var m = MONEDAS_TIKTOK[idx];
+  if(!m) return;
+  if(!authSession){ showToast('Inicia sesion para comprar'); cerrarMonedaModal(); setTimeout(showAuthModal,500); return; }
+  if(_comprandoMoneda){ return; }
+
+  var err = document.getElementById('mon-err');
+  function showErr(t){ if(err){ err.textContent=t; err.style.display='block'; } }
+
+  var user = ((document.getElementById('mon-user')||{}).value||'').trim();
+  var wa   = ((document.getElementById('mon-wa')||{}).value||'').trim();
+
+  if(!user){ showErr('Escribe tu usuario de TikTok.'); return; }
+  if(!wa){ showErr('Escribe tu WhatsApp de contacto.'); return; }
+
+  var saldo = authSession.saldo||0;
+  if(saldo < m.precio){ showErr('Saldo insuficiente ('+fmt(saldo)+'). Necesitas '+fmt(m.precio)+'. Recarga tu cuenta.'); return; }
+  if(err) err.style.display='none';
+
+  _comprandoMoneda = true;
+  var btn = document.getElementById('mon-btn');
+  if(btn){ btn.disabled=true; btn.innerHTML='Procesando...'; }
+
+  var ord = getNextOrder();
+  var nombre = _fmtMonedas(m.monedas)+' Monedas TikTok';
+  var detalle = nombre + ' - TikTok:' + user + ' - WA:' + wa;
+  addSpend(m.precio, detalle + ' - Pedido #' + ord);
+  registrarPedido(nombre + ' (' + user + ')', m.monedas, 'monedas_tiktok', user, m.precio, 0);
+  if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, detalle, m.precio, ord);
+
+  cerrarMonedaModal();
+  _mostrarReciboMoneda(m, user, ord);
+  showToast('\u2705 Pedido #'+ord+' realizado!', 3000);
+
+  setTimeout(function(){ _comprandoMoneda = false; }, 3000);
+  _updateMonedasSaldo();
+}
+
+function _mostrarReciboMoneda(m, user, ord){
+  var ahora = new Date();
+  var fecha = ahora.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' });
+  var hora = ahora.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' });
+
+  var ov = document.createElement('div');
+  ov.id = 'moneda-recibo-ov';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:1.2rem;overflow-y:auto';
+  ov.onclick = function(e){ if(e.target===ov) ov.remove(); };
+  document.body.appendChild(ov);
+
+  var c = document.createElement('div');
+  c.style.cssText = 'background:linear-gradient(160deg,rgba(255,0,80,.1),rgba(255,255,255,.02));border:2px solid rgba(255,0,80,.35);border-radius:18px;padding:2rem 1.35rem;text-align:center;max-width:420px;width:100%;margin:auto';
+  c.innerHTML =
+      '<div style="font-size:3rem;margin-bottom:.5rem">\u2705</div>'
+    + '<div style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#ff4d8d;margin-bottom:.35rem;letter-spacing:.5px">PEDIDO CONFIRMADO</div>'
+    + '<div style="font-size:.82rem;color:var(--muted);margin-bottom:1.5rem">Tus monedas estan en proceso</div>'
+    + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
+    +   _filaRecibo('\uD83D\uDCCB Pedido', '#'+ord)
+    +   _filaRecibo('\uD83C\uDFB5 Monedas', _fmtMonedas(m.monedas))
+    +   _filaRecibo('\uD83D\uDCF1 TikTok', user)
+    +   _filaRecibo('\uD83D\uDCB5 Precio', fmt(m.precio))
+    +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' \u00B7 ' + hora, true)
+    + '</div>'
+    + '<div style="font-size:.75rem;color:#ff6b9d;margin-top:1rem;line-height:1.5">Te contactaremos por WhatsApp para acreditar tus monedas de TikTok.</div>'
+    + '<button onclick="var o=document.getElementById(\'moneda-recibo-ov\'); if(o) o.remove();" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#ff0050,#ff4d8d);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Cerrar</button>';
   ov.appendChild(c);
 }
 
