@@ -783,6 +783,7 @@ function goPage(id){
   window.scrollTo(0,0);
   if(id==='diamantes') setTimeout(function(){ setDiamTipo('ilim'); }, 100);
   if(id==='codigos') setTimeout(_updateScarSaldo, 100);
+  if(id==='actas') setTimeout(_updateActaSaldo, 100);
   if(id==='clanes') setTimeout(renderClanes, 100);
   if(id==='pase') setTimeout(_paseReiniciar, 100);
   if(id==='saldo') setTimeout(function(){ recSetMoneda('MXN'); _recTipo=null; recLimpiarTipo(); }, 100);
@@ -6753,7 +6754,134 @@ function _mostrarReciboCodigo(p, ffId, user, ord){
 
 
 
-// ═══ Botón de WhatsApp ARRASTRABLE ═══
+// ═══════════ ACTAS OFICIALES ═══════════
+var ACTA_PRECIO = 10; // MXN
+var _actaTipo = 'Acta de Nacimiento';
+var _comprandoActa = false;
+
+function _updateActaSaldo(){
+  var el = document.getElementById('acta-saldo');
+  if(el) el.textContent = authSession ? fmt(authSession.saldo||0) : fmt(0);
+}
+
+function selActaTipo(el){
+  if(!el) return;
+  _actaTipo = el.getAttribute('data-tipo') || 'Acta de Nacimiento';
+  document.querySelectorAll('.acta-tipo').forEach(function(c){ c.classList.remove('sel'); });
+  el.classList.add('sel');
+}
+
+// Validacion REAL de CURP mexicana (18 caracteres, estructura oficial)
+// Estructura: 4 letras + 6 digitos (fecha) + H/M + 5 letras (estado+consonantes) + 1 alfanumerico + 1 digito
+function validarCURP(curp){
+  if(!curp) return { ok:false, motivo:'Escribe la CURP.' };
+  curp = curp.toUpperCase().trim();
+  if(curp.length < 18) return { ok:false, motivo:'La CURP tiene menos de 18 caracteres ('+curp.length+'). Debe tener exactamente 18.' };
+  if(curp.length > 18) return { ok:false, motivo:'La CURP tiene mas de 18 caracteres ('+curp.length+'). Debe tener exactamente 18.' };
+
+  // Patron oficial de CURP
+  var re = /^[A-Z][AEIOUX][A-Z]{2}\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])[HM](AS|BC|BS|CC|CS|CH|CL|CM|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QT|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS|NE)[B-DF-HJ-NP-TV-Z]{3}[A-Z\d]\d$/;
+  if(!re.test(curp)){
+    return { ok:false, motivo:'La CURP no tiene un formato valido. Revisa que este bien escrita.' };
+  }
+  return { ok:true, curp:curp };
+}
+
+// Validacion en vivo mientras escribe
+function validarCurpVivo(){
+  var inp = document.getElementById('acta-curp');
+  var msg = document.getElementById('acta-curp-msg');
+  if(!inp || !msg) return;
+  var val = (inp.value||'').toUpperCase();
+  inp.value = val;
+  if(val.length === 0){ msg.textContent=''; return; }
+
+  if(val.length < 18){
+    msg.style.color = '#ffb84d';
+    msg.textContent = val.length + '/18 caracteres...';
+    return;
+  }
+  var r = validarCURP(val);
+  if(r.ok){
+    msg.style.color = '#25d366';
+    msg.textContent = '\u2713 CURP valida';
+  } else {
+    msg.style.color = '#ff6b6b';
+    msg.textContent = '\u2717 ' + r.motivo;
+  }
+}
+
+function comprarActa(){
+  if(!authSession){ showToast('Inicia sesion para solicitar'); setTimeout(showAuthModal,600); return; }
+  if(_comprandoActa){ return; }
+
+  var err = document.getElementById('acta-err');
+  function showErr(m){ if(err){ err.textContent=m; err.style.display='block'; } }
+
+  var curp = ((document.getElementById('acta-curp')||{}).value||'').toUpperCase().trim();
+  var wa   = ((document.getElementById('acta-wa')||{}).value||'').trim();
+
+  // Validacion de CURP — rechaza si no es real / tiene mas o menos digitos
+  var vc = validarCURP(curp);
+  if(!vc.ok){ showErr(vc.motivo); return; }
+  if(!wa){ showErr('Escribe tu WhatsApp de contacto.'); return; }
+
+  var saldo = authSession.saldo||0;
+  if(saldo < ACTA_PRECIO){ showErr('Saldo insuficiente ('+fmt(saldo)+'). Necesitas '+fmt(ACTA_PRECIO)+'. Recarga tu cuenta.'); return; }
+  if(err) err.style.display='none';
+
+  _comprandoActa = true;
+  var btn = event && event.target ? event.target : null;
+  if(btn){ btn.disabled=true; btn.innerHTML='Procesando...'; }
+
+  var ord = getNextOrder();
+  var detalle = _actaTipo + ' - CURP:' + curp + ' - WA:' + wa;
+  addSpend(ACTA_PRECIO, detalle + ' - Pedido #' + ord);
+  registrarPedido(_actaTipo + ' (CURP: ' + curp + ')', 0, 'acta', curp, ACTA_PRECIO, 0);
+  if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, detalle, ACTA_PRECIO, ord);
+
+  _mostrarReciboActa(_actaTipo, curp, wa, ord);
+  showToast('\u2705 Solicitud #'+ord+' realizada!', 3000);
+
+  setTimeout(function(){ _comprandoActa = false; if(btn){ btn.disabled=false; btn.innerHTML='\uD83D\uDCC4 SOLICITAR ACTA - $10'; } }, 3000);
+
+  // limpiar campos
+  var ic=document.getElementById('acta-curp'); if(ic) ic.value='';
+  var iw=document.getElementById('acta-wa'); if(iw) iw.value='';
+  var im=document.getElementById('acta-curp-msg'); if(im) im.textContent='';
+  _updateActaSaldo();
+}
+
+function _mostrarReciboActa(tipo, curp, wa, ord){
+  var ahora = new Date();
+  var fecha = ahora.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' });
+  var hora = ahora.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' });
+
+  var ov = document.createElement('div');
+  ov.id = 'acta-recibo-ov';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:1.2rem;overflow-y:auto';
+  ov.onclick = function(e){ if(e.target===ov) ov.remove(); };
+  document.body.appendChild(ov);
+
+  var c = document.createElement('div');
+  c.style.cssText = 'background:linear-gradient(160deg,rgba(37,211,102,.1),rgba(255,255,255,.02));border:2px solid rgba(37,211,102,.35);border-radius:18px;padding:2rem 1.35rem;text-align:center;max-width:440px;width:100%;margin:auto';
+  c.innerHTML =
+      '<div style="font-size:3rem;margin-bottom:.5rem">\u2705</div>'
+    + '<div style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#25d366;margin-bottom:.35rem;letter-spacing:.5px">SOLICITUD CONFIRMADA</div>'
+    + '<div style="font-size:.82rem;color:var(--muted);margin-bottom:1.5rem">Tu '+tipo+' esta en proceso</div>'
+    + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
+    +   _filaRecibo('\uD83D\uDCCB Solicitud', '#'+ord)
+    +   _filaRecibo('\uD83D\uDCC4 Documento', tipo)
+    +   _filaRecibo('\uD83C\uDD94 CURP', curp)
+    +   _filaRecibo('\uD83D\uDCB5 Precio', fmt(ACTA_PRECIO))
+    +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' \u00B7 ' + hora, true)
+    + '</div>'
+    + '<div style="font-size:.75rem;color:#25d366;margin-top:1rem;line-height:1.5">Te enviaremos tu acta por WhatsApp lo antes posible. Revisa que tu numero sea correcto.</div>'
+    + '<button onclick="var o=document.getElementById(\'acta-recibo-ov\'); if(o) o.remove();" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Cerrar</button>';
+  ov.appendChild(c);
+}
+
+
 var _waDragged = false;
 (function initWaDrag(){
   function setup(){
