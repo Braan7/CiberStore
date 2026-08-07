@@ -7493,7 +7493,7 @@ function _syncBottomNav(id){
 
 
 // ═══════════ PASE BOOYAH (asistente de 3 pasos) ═══════════
-var PASE_PRECIO = 17;
+var PASE_PRECIO = 30;
 var _comprandoPase = false;
 var _paseIdVerificado = null;
 var _paseNickVerificado = '';
