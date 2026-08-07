@@ -5762,7 +5762,7 @@ var RECARGAS_AUTO = [
   { package_id:349, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:33.16, precio:700, img:'img/diam-5600.png' },
   { package_id:null, nombre:'11.200 Diamantes + 1.120 Bono', diamantes:12320, costoUSD:66.32, precio:1390, manual:true },
   { package_id:null, sku:'TARJSEM', nombre:'Tarjeta Semanal', diamantes:0, costoUSD:0, precio:37,  manual:true, esTarjeta:true, img:'tarjeta-semanal.png' },
-  { package_id:null, sku:'TARJMEN', nombre:'Tarjeta Mensual', diamantes:0, costoUSD:0, precio:150, manual:true, esTarjeta:true, img:'tarjeta-mensual.jpg' }
+  { package_id:null, sku:'TARJMEN', nombre:'Tarjeta Mensual', diamantes:0, costoUSD:0, precio:150, manual:true, esTarjeta:true, img:'tarjeta-mensual.png' }
 ];
 
 
