@@ -785,6 +785,7 @@ function goPage(id){
   if(id==='codigos') setTimeout(_updateScarSaldo, 100);
   if(id==='actas') setTimeout(_updateActaSaldo, 100);
   if(id==='monedas') setTimeout(function(){ renderMonedasGrid(); _updateMonedasSaldo(); }, 100);
+  if(id==='robux') setTimeout(function(){ renderRobuxGrid(); _updateRobuxSaldo(); }, 100);
   if(id==='clanes') setTimeout(renderClanes, 100);
   if(id==='pase') setTimeout(_paseReiniciar, 100);
   if(id==='saldo') setTimeout(function(){ recSetMoneda('MXN'); _recTipo=null; recLimpiarTipo(); }, 100);
@@ -7050,6 +7051,180 @@ function _mostrarReciboMoneda(m, user, ord){
     + '</div>'
     + '<div style="font-size:.75rem;color:#ff6b9d;margin-top:1rem;line-height:1.5">Te contactaremos por WhatsApp para acreditar tus monedas de TikTok.</div>'
     + '<button onclick="var o=document.getElementById(\'moneda-recibo-ov\'); if(o) o.remove();" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#ff0050,#ff4d8d);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Cerrar</button>';
+  ov.appendChild(c);
+}
+
+
+// ═══════════ ROBUX (ROBLOX) ═══════════
+var ROBUX_PRODUCTOS = [
+  { robux:100,   precio:0,   stock:false },
+  { robux:200,   precio:0,   stock:false },
+  { robux:400,   precio:0,   stock:false },
+  { robux:470,   precio:95,  stock:true  },
+  { robux:800,   precio:175, stock:true  },
+  { robux:1000,  precio:210, stock:false }
+];
+var _comprandoRobux = false;
+
+function _updateRobuxSaldo(){
+  var el = document.getElementById('robux-saldo');
+  if(el) el.textContent = authSession ? fmt(authSession.saldo||0) : fmt(0);
+}
+
+function renderRobuxGrid(){
+  var grid = document.getElementById('robux-grid');
+  if(!grid) return;
+  grid.innerHTML = ROBUX_PRODUCTOS.map(function(r, i){
+    if(!r.stock){
+      return '<div class="mon-card nostock">'
+        + '<div class="mon-card-amt">\uD83D\uDCB5 '+r.robux.toLocaleString('es-MX')+'</div>'
+        + '<div class="mon-card-lbl">Robux</div>'
+        + '<div class="mon-card-nostock-lbl">SIN STOCK</div>'
+        + '</div>';
+    }
+    return '<div class="mon-card" onclick="abrirRobuxModal('+i+')">'
+      + '<div class="mon-card-amt">\uD83D\uDCB5 '+r.robux.toLocaleString('es-MX')+'</div>'
+      + '<div class="mon-card-lbl">Robux</div>'
+      + '<div class="mon-card-price">'+fmt(r.precio)+'</div>'
+      + '</div>';
+  }).join('');
+}
+
+// Modal del videotutorial
+function abrirVideoRobux(){
+  var ov = document.getElementById('robux-video-ov');
+  if(ov) ov.remove();
+  ov = document.createElement('div');
+  ov.id = 'robux-video-ov';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;padding:1.2rem';
+  ov.onclick = function(e){ if(e.target===ov){ var v=ov.querySelector('video'); if(v) v.pause(); ov.remove(); } };
+  document.body.appendChild(ov);
+
+  var c = document.createElement('div');
+  c.style.cssText = 'max-width:420px;width:100%;background:#0a0a0a;border:1px solid rgba(255,255,255,.15);border-radius:16px;overflow:hidden;margin:auto';
+  c.innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08)">'
+    +   '<div style="font-family:Oxanium;font-weight:800;font-size:.95rem;color:#fff">\u25B6\uFE0F Videotutorial Robux</div>'
+    +   '<button onclick="var o=document.getElementById(\'robux-video-ov\'); if(o){var v=o.querySelector(\'video\'); if(v) v.pause(); o.remove();}" style="width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.1);border:none;color:#fff;font-size:1.1rem;cursor:pointer;line-height:1">\u00D7</button>'
+    + '</div>'
+    + '<video controls autoplay playsinline style="width:100%;display:block;background:#000;max-height:70vh">'
+    +   '<source src="robux-tutorial.mp4" type="video/mp4"/>'
+    +   'Tu navegador no soporta el video.'
+    + '</video>'
+    + '<div style="padding:1rem;font-size:.78rem;color:var(--muted);line-height:1.6;text-align:center">Sigue estos pasos para canjear tus Robux en <b style="color:#fff">roblox.com/redeem</b> desde un navegador web.</div>';
+  ov.appendChild(c);
+}
+
+function abrirRobuxModal(idx){
+  var r = ROBUX_PRODUCTOS[idx];
+  if(!r || !r.stock) return;
+
+  var ov = document.getElementById('robux-modal-ov');
+  if(ov) ov.remove();
+  ov = document.createElement('div');
+  ov.id = 'robux-modal-ov';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:1.2rem;overflow-y:auto';
+  ov.onclick = function(e){ if(e.target===ov) cerrarRobuxModal(); };
+  document.body.appendChild(ov);
+
+  var saldo = authSession ? (authSession.saldo||0) : 0;
+
+  var c = document.createElement('div');
+  c.style.cssText = 'max-width:420px;width:100%;background:#0a0a0a;border:1px solid rgba(255,255,255,.25);border-radius:18px;overflow:hidden;margin:auto';
+  c.innerHTML =
+      '<div style="position:relative;background:linear-gradient(135deg,#1a1a1a,#333);padding:1.6rem 1.3rem;text-align:center">'
+    +   '<button onclick="cerrarRobuxModal()" style="position:absolute;top:.8rem;right:.8rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:1.1rem;cursor:pointer;line-height:1">\u00D7</button>'
+    +   '<div style="font-size:2.6rem;margin-bottom:.3rem">\uD83D\uDCB5</div>'
+    +   '<div style="font-family:Oxanium;font-weight:900;font-size:1.6rem;color:#fff">'+r.robux.toLocaleString('es-MX')+' Robux</div>'
+    +   '<div style="font-size:.8rem;color:rgba(255,255,255,.6)">Roblox &middot; Codigo digital global</div>'
+    + '</div>'
+    + '<div style="padding:1.35rem">'
+    +   '<div style="display:flex;align-items:baseline;gap:.5rem;margin-bottom:1.2rem;padding:.9rem 1rem;background:rgba(37,211,102,.06);border:1px solid rgba(37,211,102,.2);border-radius:12px">'
+    +     '<span style="font-size:.72rem;color:var(--muted)">Precio:</span>'
+    +     '<span style="font-family:Oxanium;font-weight:900;font-size:1.6rem;color:#25d366">'+fmt(r.precio)+'</span>'
+    +   '</div>'
+    +   '<div style="background:rgba(255,180,60,.08);border:1px solid rgba(255,180,60,.28);border-radius:10px;padding:.7rem .85rem;margin-bottom:1rem;font-size:.74rem;color:#ffcf8a;line-height:1.5">\u26A0\uFE0F Canjea en un navegador web (roblox.com/redeem), NO dentro del juego.</div>'
+    +   '<label class="flabel">Usuario de Roblox *</label>'
+    +   '<input class="finput" id="robux-user" type="text" placeholder="Tu usuario de Roblox"/>'
+    +   '<label class="flabel">WhatsApp de contacto *</label>'
+    +   '<input class="finput" id="robux-wa" type="text" placeholder="Tu numero de WhatsApp"/>'
+    +   '<div style="display:flex;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;margin:1rem 0"><span style="font-size:.8rem;color:var(--muted)">Tu saldo</span><span style="font-family:Oxanium;font-weight:700;color:#25d366">'+fmt(saldo)+'</span></div>'
+    +   '<div id="robux-err" style="display:none;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.3);color:#ff6b6b;border-radius:9px;padding:.7rem .9rem;font-size:.8rem;margin-bottom:.85rem"></div>'
+    +   '<button id="robux-btn" onclick="comprarRobux('+idx+')" style="width:100%;padding:1rem;background:linear-gradient(135deg,#00a2ff,#0066ff);color:#fff;border:none;border-radius:12px;font-family:Oxanium;font-weight:900;font-size:.95rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(0,120,255,.3)">\uD83D\uDCB5 COMPRAR CON SALDO</button>'
+    +   '<div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.85rem;line-height:1.5">Te enviaremos tu codigo digital por WhatsApp. Sigue el videotutorial para canjearlo.</div>'
+    + '</div>';
+  ov.appendChild(c);
+}
+
+function cerrarRobuxModal(){
+  var ov = document.getElementById('robux-modal-ov');
+  if(ov) ov.remove();
+}
+
+function comprarRobux(idx){
+  var r = ROBUX_PRODUCTOS[idx];
+  if(!r || !r.stock) return;
+  if(!authSession){ showToast('Inicia sesion para comprar'); cerrarRobuxModal(); setTimeout(showAuthModal,500); return; }
+  if(_comprandoRobux){ return; }
+
+  var err = document.getElementById('robux-err');
+  function showErr(t){ if(err){ err.textContent=t; err.style.display='block'; } }
+
+  var user = ((document.getElementById('robux-user')||{}).value||'').trim();
+  var wa   = ((document.getElementById('robux-wa')||{}).value||'').trim();
+
+  if(!user){ showErr('Escribe tu usuario de Roblox.'); return; }
+  if(!wa){ showErr('Escribe tu WhatsApp de contacto.'); return; }
+
+  var saldo = authSession.saldo||0;
+  if(saldo < r.precio){ showErr('Saldo insuficiente ('+fmt(saldo)+'). Necesitas '+fmt(r.precio)+'. Recarga tu cuenta.'); return; }
+  if(err) err.style.display='none';
+
+  _comprandoRobux = true;
+  var btn = document.getElementById('robux-btn');
+  if(btn){ btn.disabled=true; btn.innerHTML='Procesando...'; }
+
+  var ord = getNextOrder();
+  var nombre = r.robux.toLocaleString('es-MX')+' Robux';
+  var detalle = nombre + ' - Roblox:' + user + ' - WA:' + wa;
+  addSpend(r.precio, detalle + ' - Pedido #' + ord);
+  registrarPedido(nombre + ' (' + user + ')', r.robux, 'robux', user, r.precio, 0);
+  if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, detalle, r.precio, ord);
+
+  cerrarRobuxModal();
+  _mostrarReciboRobux(r, user, ord);
+  showToast('\u2705 Pedido #'+ord+' realizado!', 3000);
+
+  setTimeout(function(){ _comprandoRobux = false; }, 3000);
+  _updateRobuxSaldo();
+}
+
+function _mostrarReciboRobux(r, user, ord){
+  var ahora = new Date();
+  var fecha = ahora.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' });
+  var hora = ahora.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' });
+
+  var ov = document.createElement('div');
+  ov.id = 'robux-recibo-ov';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:1.2rem;overflow-y:auto';
+  ov.onclick = function(e){ if(e.target===ov) ov.remove(); };
+  document.body.appendChild(ov);
+
+  var c = document.createElement('div');
+  c.style.cssText = 'background:linear-gradient(160deg,rgba(0,120,255,.1),rgba(255,255,255,.02));border:2px solid rgba(0,120,255,.35);border-radius:18px;padding:2rem 1.35rem;text-align:center;max-width:420px;width:100%;margin:auto';
+  c.innerHTML =
+      '<div style="font-size:3rem;margin-bottom:.5rem">\u2705</div>'
+    + '<div style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#4da6ff;margin-bottom:.35rem;letter-spacing:.5px">PEDIDO CONFIRMADO</div>'
+    + '<div style="font-size:.82rem;color:var(--muted);margin-bottom:1.5rem">Tu codigo de Robux esta en proceso</div>'
+    + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
+    +   _filaRecibo('\uD83D\uDCCB Pedido', '#'+ord)
+    +   _filaRecibo('\uD83D\uDCB5 Robux', r.robux.toLocaleString('es-MX'))
+    +   _filaRecibo('\uD83C\uDFAE Roblox', user)
+    +   _filaRecibo('\uD83D\uDCB5 Precio', fmt(r.precio))
+    +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' \u00B7 ' + hora, true)
+    + '</div>'
+    + '<div style="font-size:.75rem;color:#4da6ff;margin-top:1rem;line-height:1.5">Te enviaremos tu codigo por WhatsApp. Recuerda canjearlo en un navegador web (roblox.com/redeem), NO dentro del juego.</div>'
+    + '<button onclick="var o=document.getElementById(\'robux-recibo-ov\'); if(o) o.remove();" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#00a2ff,#0066ff);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Cerrar</button>';
   ov.appendChild(c);
 }
 
