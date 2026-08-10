@@ -1760,29 +1760,30 @@ button[style*="linear-gradient"]{
   position:fixed;left:50%;transform:translateX(-50%);
   bottom:calc(.65rem + env(safe-area-inset-bottom,0px));
   z-index:900;
-  width:calc(100% - 1.6rem);max-width:560px;
+  width:calc(100% - 1.6rem);max-width:600px;
   display:flex;align-items:flex-start;justify-content:space-around;
   background:linear-gradient(180deg,rgba(20,22,24,.92),rgba(10,11,12,.96));
   backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
   border:1px solid rgba(255,255,255,.07);
   border-radius:26px;
-  padding:.85rem .5rem .7rem;
+  padding:.85rem .35rem .7rem;
   box-shadow:0 12px 40px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.05);
 }
 .bn-item{
-  flex:1;display:flex;flex-direction:column;align-items:center;gap:.3rem;
+  flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:.3rem;
   background:none;border:none;padding:0;cursor:pointer;
   color:#8b93a3;transition:color .25s;position:relative;
 }
 .bn-ico{
-  width:48px;height:44px;display:flex;align-items:center;justify-content:center;
-  border-radius:16px;transition:all .28s cubic-bezier(.34,1.4,.6,1);
+  width:44px;height:42px;display:flex;align-items:center;justify-content:center;
+  border-radius:15px;transition:all .28s cubic-bezier(.34,1.4,.6,1);
   position:relative;
 }
-.bn-ico svg{width:23px;height:23px;transition:transform .28s}
+.bn-ico svg{width:22px;height:22px;transition:transform .28s}
 .bn-label{
-  font-size:.68rem;font-weight:600;font-family:'Poppins',sans-serif;
-  letter-spacing:.15px;transition:color .25s;
+  font-size:.6rem;font-weight:600;font-family:'Poppins',sans-serif;
+  letter-spacing:.1px;transition:color .25s;
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
 .bn-dot{
   width:4px;height:4px;border-radius:50%;background:transparent;
@@ -1925,7 +1926,7 @@ document.addEventListener('keydown',function(e){
     <div class="sb-section">Servicios</div>
     <div class="nav-item" id="ni-diamantes" onclick="goPage('diamantes')"><div class="nav-ico">&#128142;</div> Diamantes FF</div>
     <div class="nav-item" id="ni-likes" onclick="goPage('likes2k')"><div class="nav-ico">&#128077;</div> Likes</div>
-    <div class="nav-item" id="ni-pines" onclick="goPage('pines')"><div class="nav-ico">&#127915;</div> Pines de Free Fire <span class="nb" style="background:rgba(255,204,0,.15);border:1px solid rgba(255,204,0,.3);color:#ffcc00">NEW</span></div>
+    <div class="nav-item" id="ni-pines" onclick="goPage('pines')"><div class="nav-ico">&#127991;&#65039;</div> Revendedores <span class="nb" style="background:rgba(255,204,0,.15);border:1px solid rgba(255,204,0,.3);color:#ffcc00">NEW</span></div>
     <div class="nav-item" id="ni-actas" onclick="goPage('actas')"><div class="nav-ico">&#128196;</div> Actas <span class="nb" style="background:linear-gradient(90deg,#25d366,#128c3e);color:#fff;border:none">NUEVO</span></div>
     <div class="nav-item" id="ni-monedas" onclick="goPage('monedas')"><div class="nav-ico">&#127877;</div> Monedas TikTok <span class="nb" style="background:linear-gradient(90deg,#ff0050,#00f2ea);color:#fff;border:none">NUEVO</span></div>
     <div class="nav-item" id="ni-robux" onclick="goPage('robux')"><div class="nav-ico">&#128181;</div> Robux <span class="nb" style="background:#fff;color:#000;border:none">NUEVO</span></div>
@@ -2430,8 +2431,8 @@ document.addEventListener('keydown',function(e){
 </div><div class="page" id="page-pines">
   <div class="ph">
     <div class="stag">Zona de Revendedores</div>
-    <h2 class="ptitle">&#127915; PINES DE <span>FREE FIRE</span></h2>
-    <p class="psub">Precios de reventa. Requiere saldo minimo de $200 MXN (~$10 USD) para desbloquear. Entrega automatica 24/7.</p>
+    <h2 class="ptitle">&#127991;&#65039; ZONA <span>REVENDEDORES</span></h2>
+    <p class="psub">Precios de reventa. Requiere saldo minimo de $300 MXN para desbloquear. Entrega automatica 24/7.</p>
   </div>
 
   <div style="max-width:680px;margin:0 auto;padding:0 5vw 2.5rem">
@@ -5536,6 +5537,11 @@ document.addEventListener('keydown',function(e){
   <button class="bn-item" id="bn-likes" onclick="goPage('likes2k')">
     <span class="bn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v10H4a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1h3z"/><path d="M7 11l4.2-7.4A1.8 1.8 0 0 1 14.6 5l-.9 4h5.6a2 2 0 0 1 2 2.4l-1.3 7A2 2 0 0 1 18 20H7"/></svg></span>
     <span class="bn-label">Likes</span>
+    <span class="bn-dot"></span>
+  </button>
+  <button class="bn-item" id="bn-revend" onclick="goPage('pines')">
+    <span class="bn-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 13.5 13 21a2 2 0 0 1-2.8 0l-6.7-6.7A2 2 0 0 1 3 12.8V5a2 2 0 0 1 2-2h7.8a2 2 0 0 1 1.4.6l6.3 6.3a2 2 0 0 1 0 2.8z"/><circle cx="8" cy="8" r="1.3"/></svg></span>
+    <span class="bn-label">Revendedores</span>
     <span class="bn-dot"></span>
   </button>
   <button class="bn-item" id="bn-menu" onclick="goPage('menu')">

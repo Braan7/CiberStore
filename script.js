@@ -4746,7 +4746,7 @@ var PINES_API = [
 ];
 
 // Saldo minimo (MXN) para desbloquear precios de revendedor (~$10 USD)
-var PINES_MIN_SALDO = 200;
+var PINES_MIN_SALDO = 300;
 
 function renderPinesAPI(){
   var cont = document.getElementById('pines-api-grid');
@@ -4781,7 +4781,7 @@ function renderPinesAPI(){
     +   '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:1.5rem 1.2rem;background:rgba(7,7,7,.55)">'
     +     '<div style="font-size:2.4rem;margin-bottom:.6rem">\uD83D\uDD12</div>'
     +     '<div style="font-family:Oxanium;font-weight:900;font-size:1.05rem;color:#fff;margin-bottom:.4rem;letter-spacing:.5px">ZONA DE REVENDEDORES</div>'
-    +     '<div style="font-size:.82rem;color:#c9d1e0;line-height:1.6;margin-bottom:.35rem;max-width:320px">Precios especiales de reventa. Para desbloquear necesitas un saldo minimo de <b style="color:#22d3ee">$'+PINES_MIN_SALDO+' MXN</b> (aprox. $10 USD) en tu cuenta.</div>'
+    +     '<div style="font-size:.82rem;color:#c9d1e0;line-height:1.6;margin-bottom:.35rem;max-width:320px">Precios especiales de reventa. Para desbloquear necesitas un saldo minimo de <b style="color:#22d3ee">$'+PINES_MIN_SALDO+' MXN</b> en tu cuenta.</div>'
     +     '<div style="font-size:.75rem;color:var(--muted);margin-bottom:1rem">Tu saldo actual: <b style="color:'+(saldo>0?'#25d366':'#ff6b6b')+'">$'+saldo+' MXN</b></div>'
     +     '<button onclick="solicitarAccesoRevendedor()" style="padding:.7rem 1.6rem;background:linear-gradient(90deg,#22d3ee,#0891b2);border:none;border-radius:10px;color:#070707;font-family:Oxanium,sans-serif;font-weight:900;font-size:.82rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 18px rgba(34,211,238,.3)">\uD83D\uDD13 SOLICITAR ACCESO</button>'
     +     '<div style="font-size:.68rem;color:var(--muted);margin-top:.8rem;line-height:1.5;max-width:300px">Recarga saldo para desbloquear al instante, o contactanos si tienes dudas.</div>'
@@ -6342,7 +6342,7 @@ function loadPinesMayoreo(){
         +   '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:1.5rem 1.2rem;background:rgba(7,7,7,.5)">'
         +     '<div style="font-size:2.2rem;margin-bottom:.5rem">\uD83D\uDD12</div>'
         +     '<div style="font-family:Oxanium;font-weight:900;font-size:1rem;color:#fff;margin-bottom:.35rem;letter-spacing:.5px">ZONA DE REVENDEDORES</div>'
-        +     '<div style="font-size:.8rem;color:#c9d1e0;line-height:1.6;margin-bottom:.35rem;max-width:320px">Requiere saldo minimo de <b style="color:#ffcc00">$'+PINES_MIN_SALDO+' MXN</b> (aprox. $10 USD) para comprar al por mayor.</div>'
+        +     '<div style="font-size:.8rem;color:#c9d1e0;line-height:1.6;margin-bottom:.35rem;max-width:320px">Requiere saldo minimo de <b style="color:#ffcc00">$'+PINES_MIN_SALDO+' MXN</b> para comprar al por mayor.</div>'
         +     '<div style="font-size:.74rem;color:var(--muted);margin-bottom:1rem">Tu saldo actual: <b style="color:'+(saldo>0?'#25d366':'#ff6b6b')+'">$'+saldo+' MXN</b></div>'
         +     '<button onclick="solicitarAccesoRevendedor()" style="padding:.7rem 1.6rem;background:linear-gradient(90deg,#ffcc00,#e0a800);border:none;border-radius:10px;color:#070707;font-family:Oxanium,sans-serif;font-weight:900;font-size:.82rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 18px rgba(255,204,0,.3)">\uD83D\uDD13 SOLICITAR ACCESO</button>'
         +   '</div>'
@@ -7819,15 +7819,17 @@ function _syncBottomNav(id){
   // Que pestana se marca segun la pagina (las hijas marcan a su padre)
   var mapa = {
     home:'bn-home',
-    tienda:'bn-tienda', pase:'bn-tienda', diamantes:'bn-tienda', pines:'bn-tienda', honor:'bn-tienda',
+    tienda:'bn-tienda', pase:'bn-tienda', diamantes:'bn-tienda', honor:'bn-tienda',
     honorcuenta:'bn-tienda', codigos:'bn-tienda', clanes:'bn-tienda', cajas:'bn-tienda',
+    actas:'bn-tienda', monedas:'bn-tienda', robux:'bn-tienda',
+    pines:'bn-revend',
     saldo:'bn-saldo', retirar:'bn-saldo', transferir:'bn-saldo',
-    likes:'bn-likes',
+    likes:'bn-likes', likes2k:'bn-likes',
     menu:'bn-menu', perfil:'bn-menu', miscompras:'bn-menu', api:'bn-menu',
     creadores:'bn-menu', comunidad:'bn-menu', faq:'bn-menu', ranking:'bn-menu',
     sobre:'bn-menu', terminos:'bn-menu', referidos:'bn-menu', membresia:'bn-menu'
   };
-  ['bn-home','bn-tienda','bn-saldo','bn-likes','bn-menu'].forEach(function(b){
+  ['bn-home','bn-tienda','bn-saldo','bn-likes','bn-revend','bn-menu'].forEach(function(b){
     var el = document.getElementById(b);
     if(el) el.classList.remove('active');
   });
