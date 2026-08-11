@@ -5573,6 +5573,19 @@ function notificarPedidoTelegram(titulo, detalles, precio, ord){
   } catch(e){ console.warn('[TG PEDIDO] ', e); }
 }
 
+// Alias: varias secciones llaman a tgNotifyPurchase(usuario, detalle, precio, ord).
+// Lo redirigimos a notificarPedidoTelegram para que la notificacion SI llegue.
+function tgNotifyPurchase(usuario, detalle, precio, ord){
+  var titulo = 'Compra';
+  // Intentar sacar un titulo corto del detalle (antes del primer " - ")
+  if(detalle && detalle.indexOf(' - ') > 0){
+    titulo = detalle.split(' - ')[0];
+  } else if(detalle){
+    titulo = detalle;
+  }
+  notificarPedidoTelegram(titulo, detalle || '', precio || 0, ord || '');
+}
+
 
 // ═══ Cargar saldo + movimientos (para Mis Compras) ═══
 function _cargarSaldoYMovimientos(){
