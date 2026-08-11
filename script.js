@@ -5573,6 +5573,17 @@ function notificarPedidoTelegram(titulo, detalles, precio, ord){
   } catch(e){ console.warn('[TG PEDIDO] ', e); }
 }
 
+// Alias: varias secciones (Actas, Robux, Monedas, Codigos, diamantes...) llaman
+// a tgNotifyPurchase. Lo redirigimos a notificarPedidoTelegram para que la
+// notificacion llegue. El webhook las muestra como PEDIDO (sin botones).
+function tgNotifyPurchase(usuario, detalle, precio, ord){
+  var titulo = 'Compra';
+  if(detalle && detalle.indexOf(' - ') > 0) titulo = detalle.split(' - ')[0];
+  else if(detalle && detalle.indexOf('\n') > 0) titulo = detalle.split('\n')[0];
+  else if(detalle) titulo = detalle;
+  notificarPedidoTelegram(titulo, detalle || '', precio || 0, ord || '');
+}
+
 
 // ═══ Cargar saldo + movimientos (para Mis Compras) ═══
 function _cargarSaldoYMovimientos(){
