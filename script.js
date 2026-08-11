@@ -6209,7 +6209,7 @@ function _procesarRecargaAutomatica(p, ffId){
           }).catch(function(e){ console.error('[RECARGA] reembolso fallo:', e); });
 
           registrarPedido(p.nombre+' (RECHAZADA - reembolsado)', p.diamantes, 'diamantes', ffId, 0, 0);
-          if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\uD83D\uDEA8 <b>RECARGA RECHAZADA - SIN FONDOS</b>\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\u2705 Saldo reembolsado al cliente ('+fmt(p.precio)+')\n\n\u26A0\uFE0F <b>RECARGA TU CUENTA DEL PROVEEDOR</b>', p.precio, ord);
+          if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, 'RECARGA RECHAZADA - SIN FONDOS DEL PROVEEDOR | Paquete: '+p.nombre+' | ID: '+ffId+' | Motivo: '+errTxt+' | Saldo reembolsado al cliente: $'+p.precio+' MXN | ACCION: recargar la cuenta del proveedor', p.precio, ord);
 
           if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
           if(msg){ msg.className='ddet-msg err'; msg.style.fontSize='.75rem'; msg.innerHTML='\u274C <b>RECARGA RECHAZADA</b><br/>Contacta al administrador. Tu saldo sera reembolsado.'; }
@@ -6233,7 +6233,7 @@ function _procesarRecargaAutomatica(p, ffId){
           }).catch(function(e){ console.error('[RECARGA] devolucion fallo:', e); });
 
           registrarPedido(p.nombre+' (AUTO - NO DISPONIBLE, devuelto)', p.diamantes, 'diamantes', ffId, 0, 0);
-          if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F NO DISPONIBLE - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\u2705 SALDO DEVUELTO automaticamente ('+fmt(p.precio)+')', p.precio, ord);
+          if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, 'NO DISPONIBLE - Recarga AUTO | Paquete: '+p.nombre+' | ID: '+ffId+' | Motivo: '+errTxt+' | Saldo devuelto automaticamente: $'+p.precio+' MXN', p.precio, ord);
           if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
           if(msg){ msg.className='ddet-msg err'; msg.style.fontSize='.75rem'; msg.innerHTML='\u274C Este paquete no esta disponible para tu ID en este momento (puede ser por la region de tu cuenta o stock momentaneo).<br/><b>Tu saldo fue devuelto.</b> Intenta de nuevo en unos minutos o contacta al admin.'; }
           showToast('\u274C No disponible. Saldo devuelto.', 4000);
