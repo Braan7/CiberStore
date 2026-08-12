@@ -3634,7 +3634,7 @@ document.addEventListener('keydown',function(e){
     </div>
 
     <!-- ═══ MANTENIMIENTO ═══ -->
-    <div id="pase-mantenimiento" style="display:none">
+    <div id="pase-mantenimiento" style="display:block;text-align:center;padding:2rem 1rem">
       <div style="font-size:3rem;margin-bottom:.7rem">&#128230;</div>
       <div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.2rem;color:#ffb84d;margin-bottom:.5rem">Sin stock por ahora</div>
       <div style="font-size:.85rem;color:#9aa3b0;line-height:1.6;max-width:320px;margin:0 auto 1.3rem">Se nos agotaron los Pases Booyah. Estamos reponiendo stock, vuelve pronto o escribenos por WhatsApp para avisarte cuando lleguen.</div>
@@ -3642,7 +3642,7 @@ document.addEventListener('keydown',function(e){
     </div>
 
     <!-- ═══════════ PASO 1: DESTINO ═══════════ -->
-    <div id="pase-paso-1">
+    <div id="pase-paso-1" style="display:none">
       <div style="background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.07);border-radius:16px;overflow:hidden;margin-bottom:1.3rem">
         <div style="display:flex;align-items:center;gap:.5rem;padding:.8rem 1rem;border-bottom:1px solid rgba(255,255,255,.06)">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ff8a4d" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="11" rx="4"/><path d="M7 11v3M5.5 12.5h3M16 12h.01M18.5 14h.01"/></svg>
@@ -4237,14 +4237,14 @@ document.addEventListener('keydown',function(e){
   <div style="max-width:520px;margin:0 auto;padding:0 5vw 3rem">
 
     <!-- FUERA DE SERVICIO -->
-    <div id="fragu-mantenimiento" style="display:none;background:linear-gradient(160deg,rgba(255,180,60,.08),rgba(255,255,255,.01));border:1px solid rgba(255,180,60,.28);border-radius:18px;padding:2.2rem 1.5rem;text-align:center;margin-top:1.2rem">
+    <div id="fragu-mantenimiento" style="display:block;background:linear-gradient(160deg,rgba(255,180,60,.08),rgba(255,255,255,.01));border:1px solid rgba(255,180,60,.28);border-radius:18px;padding:2.2rem 1.5rem;text-align:center;margin-top:1.2rem">
       <div style="font-size:3rem;margin-bottom:.7rem">&#128679;</div>
       <div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.2rem;color:#ffb84d;margin-bottom:.5rem">Fuera de servicio</div>
       <div style="font-size:.85rem;color:#9aa3b0;line-height:1.6;max-width:320px;margin:0 auto 1.3rem">Los fragmentos y cajas estan temporalmente fuera de servicio. Escribenos por WhatsApp si necesitas ayuda con tu pedido.</div>
       <button onclick="goPage('tienda')" style="padding:.8rem 1.8rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:12px;font-family:Poppins;font-weight:600;font-size:.88rem;cursor:pointer">Volver a la tienda</button>
     </div>
 
-    <div id="fragu-contenido" style="display:block">
+    <div id="fragu-contenido" style="display:none">
     <!-- TU ID -->
     <div style="background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:1.2rem;margin-bottom:1.3rem">
       <label style="font-size:.72rem;color:#6b7280;letter-spacing:1px;display:block;margin-bottom:.5rem">TU ID DE FREE FIRE</label>

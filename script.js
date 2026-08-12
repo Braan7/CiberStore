@@ -5776,44 +5776,44 @@ var RECARGAS_AUTO = [
   { package_id:null, sku:'DIAM11200', nombre:'11.200 Diamantes + 1.120 Bono', diamantes:12320, costoUSD:66.32, precio:1390, manual:true },
 
   // ─── COMBOS (manuales) ───
-  { package_id:null, nombre:'452 Diamantes',   diamantes:452,  costoUSD:3.83,  precio:67,   manual:true, combo:true },
-  { package_id:null, nombre:'682 Diamantes',   diamantes:682,  costoUSD:5.83,  precio:102,  manual:true, combo:true },
-  { package_id:null, nombre:'792 Diamantes',   diamantes:792,  costoUSD:6.69,  precio:117,  manual:true, combo:true },
-  { package_id:null, nombre:'913 Diamantes',   diamantes:913,  costoUSD:7.71,  precio:135,  manual:true, combo:true },
-  { package_id:null, nombre:'1.507 Diamantes', diamantes:1507, costoUSD:12.00, precio:210,  manual:true, combo:true },
-  { package_id:null, nombre:'1.738 Diamantes', diamantes:1738, costoUSD:14.00, precio:245,  manual:true, combo:true },
-  { package_id:null, nombre:'2.079 Diamantes', diamantes:2079, costoUSD:15.43, precio:270,  manual:true, combo:true },
-  { package_id:null, nombre:'3.080 Diamantes', diamantes:3080, costoUSD:22.97, precio:402,  manual:true, combo:true },
-  { package_id:null, nombre:'3.564 Diamantes', diamantes:3564, costoUSD:26.29, precio:460,  manual:true, combo:true },
-  { package_id:null, nombre:'4.136 Diamantes', diamantes:4136, costoUSD:31.14, precio:545,  manual:true, combo:true },
-  { package_id:null, nombre:'4.796 Diamantes', diamantes:4796, costoUSD:34.29, precio:600,  manual:true, combo:true },
-  { package_id:null, nombre:'5.137 Diamantes', diamantes:5137, costoUSD:37.14, precio:650,  manual:true, combo:true },
-  { package_id:null, nombre:'6.732 Diamantes', diamantes:6732, costoUSD:44.86, precio:785,  manual:true, combo:true },
-  { package_id:null, nombre:'7.326 Diamantes', diamantes:7326, costoUSD:49.14, precio:860,  manual:true, combo:true },
-  { package_id:null, nombre:'8.558 Diamantes', diamantes:8558, costoUSD:57.14, precio:1000, manual:true, combo:true },
-  { package_id:null, nombre:'9.130 Diamantes', diamantes:9130, costoUSD:62.00, precio:1085, manual:true, combo:true },
+  { package_id:null, nombre:'452 Diamantes',   diamantes:452,  costoUSD:3.83,  precio:67,   manual:true, combo:true , pausado:true },
+  { package_id:null, nombre:'682 Diamantes',   diamantes:682,  costoUSD:5.83,  precio:102,  manual:true, combo:true , pausado:true },
+  { package_id:null, nombre:'792 Diamantes',   diamantes:792,  costoUSD:6.69,  precio:117,  manual:true, combo:true , pausado:true },
+  { package_id:null, nombre:'913 Diamantes',   diamantes:913,  costoUSD:7.71,  precio:135,  manual:true, combo:true , pausado:true },
+  { package_id:null, nombre:'1.507 Diamantes', diamantes:1507, costoUSD:12.00, precio:210,  manual:true, combo:true , pausado:true },
+  { package_id:null, nombre:'1.738 Diamantes', diamantes:1738, costoUSD:14.00, precio:245,  manual:true, combo:true , pausado:true },
+  { package_id:null, nombre:'2.079 Diamantes', diamantes:2079, costoUSD:15.43, precio:270,  manual:true, combo:true , pausado:true },
+  { package_id:null, nombre:'3.080 Diamantes', diamantes:3080, costoUSD:22.97, precio:402,  manual:true, combo:true , pausado:true },
+  { package_id:null, nombre:'3.564 Diamantes', diamantes:3564, costoUSD:26.29, precio:460,  manual:true, combo:true , pausado:true },
+  { package_id:null, nombre:'4.136 Diamantes', diamantes:4136, costoUSD:31.14, precio:545,  manual:true, combo:true , pausado:true },
+  { package_id:null, nombre:'4.796 Diamantes', diamantes:4796, costoUSD:34.29, precio:600,  manual:true, combo:true , pausado:true },
+  { package_id:null, nombre:'5.137 Diamantes', diamantes:5137, costoUSD:37.14, precio:650,  manual:true, combo:true , pausado:true },
+  { package_id:null, nombre:'6.732 Diamantes', diamantes:6732, costoUSD:44.86, precio:785,  manual:true, combo:true , pausado:true },
+  { package_id:null, nombre:'7.326 Diamantes', diamantes:7326, costoUSD:49.14, precio:860,  manual:true, combo:true , pausado:true },
+  { package_id:null, nombre:'8.558 Diamantes', diamantes:8558, costoUSD:57.14, precio:1000, manual:true, combo:true , pausado:true },
+  { package_id:null, nombre:'9.130 Diamantes', diamantes:9130, costoUSD:62.00, precio:1085, manual:true, combo:true , pausado:true },
 
   // ─── MEGA COMBOS (manuales) ───
-  { package_id:null, nombre:'10.065 Diamantes',  diamantes:10065,  costoUSD:69.14,  precio:1210,  manual:true, combo:true, mega:true },
-  { package_id:null, nombre:'10.956 Diamantes',  diamantes:10956,  costoUSD:74.29,  precio:1300,  manual:true, combo:true, mega:true },
-  { package_id:null, sku:'MEGA12320', nombre:'12.320 Diamantes',  diamantes:12320,  costoUSD:80.00,  precio:1400,  manual:true, combo:true, mega:true },
-  { package_id:null, nombre:'15.059 Diamantes',  diamantes:15059,  costoUSD:100.00, precio:1750,  manual:true, combo:true, mega:true },
-  { package_id:null, nombre:'18.480 Diamantes',  diamantes:18480,  costoUSD:120.00, precio:2100,  manual:true, combo:true, mega:true },
-  { package_id:null, nombre:'20.878 Diamantes',  diamantes:20878,  costoUSD:137.14, precio:2400,  manual:true, combo:true, mega:true },
-  { package_id:null, nombre:'24.640 Diamantes',  diamantes:24640,  costoUSD:160.00, precio:2800,  manual:true, combo:true, mega:true },
-  { package_id:null, nombre:'25.212 Diamantes',  diamantes:25212,  costoUSD:164.86, precio:2885,  manual:true, combo:true, mega:true },
-  { package_id:null, nombre:'30.800 Diamantes',  diamantes:30800,  costoUSD:200.00, precio:3500,  manual:true, combo:true, mega:true },
-  { package_id:null, nombre:'40.524 Diamantes',  diamantes:40524,  costoUSD:266.29, precio:4660,  manual:true, combo:true, mega:true },
-  { package_id:null, nombre:'50.446 Diamantes',  diamantes:50446,  costoUSD:329.14, precio:5760,  manual:true, combo:true, mega:true },
-  { package_id:null, nombre:'60.236 Diamantes',  diamantes:60236,  costoUSD:394.29, precio:6900,  manual:true, combo:true, mega:true },
-  { package_id:null, nombre:'70.158 Diamantes',  diamantes:70158,  costoUSD:457.14, precio:8000,  manual:true, combo:true, mega:true },
-  { package_id:null, nombre:'80.080 Diamantes',  diamantes:80080,  costoUSD:520.00, precio:9100,  manual:true, combo:true, mega:true },
-  { package_id:null, nombre:'90.145 Diamantes',  diamantes:90145,  costoUSD:589.14, precio:10310, manual:true, combo:true, mega:true },
-  { package_id:null, nombre:'100.958 Diamantes', diamantes:100958, costoUSD:657.14, precio:11500, manual:true, combo:true, mega:true },
+  { package_id:null, nombre:'10.065 Diamantes',  diamantes:10065,  costoUSD:69.14,  precio:1210,  manual:true, combo:true, mega:true , pausado:true },
+  { package_id:null, nombre:'10.956 Diamantes',  diamantes:10956,  costoUSD:74.29,  precio:1300,  manual:true, combo:true, mega:true , pausado:true },
+  { package_id:null, sku:'MEGA12320', nombre:'12.320 Diamantes',  diamantes:12320,  costoUSD:80.00,  precio:1400,  manual:true, combo:true, mega:true , pausado:true },
+  { package_id:null, nombre:'15.059 Diamantes',  diamantes:15059,  costoUSD:100.00, precio:1750,  manual:true, combo:true, mega:true , pausado:true },
+  { package_id:null, nombre:'18.480 Diamantes',  diamantes:18480,  costoUSD:120.00, precio:2100,  manual:true, combo:true, mega:true , pausado:true },
+  { package_id:null, nombre:'20.878 Diamantes',  diamantes:20878,  costoUSD:137.14, precio:2400,  manual:true, combo:true, mega:true , pausado:true },
+  { package_id:null, nombre:'24.640 Diamantes',  diamantes:24640,  costoUSD:160.00, precio:2800,  manual:true, combo:true, mega:true , pausado:true },
+  { package_id:null, nombre:'25.212 Diamantes',  diamantes:25212,  costoUSD:164.86, precio:2885,  manual:true, combo:true, mega:true , pausado:true },
+  { package_id:null, nombre:'30.800 Diamantes',  diamantes:30800,  costoUSD:200.00, precio:3500,  manual:true, combo:true, mega:true , pausado:true },
+  { package_id:null, nombre:'40.524 Diamantes',  diamantes:40524,  costoUSD:266.29, precio:4660,  manual:true, combo:true, mega:true , pausado:true },
+  { package_id:null, nombre:'50.446 Diamantes',  diamantes:50446,  costoUSD:329.14, precio:5760,  manual:true, combo:true, mega:true , pausado:true },
+  { package_id:null, nombre:'60.236 Diamantes',  diamantes:60236,  costoUSD:394.29, precio:6900,  manual:true, combo:true, mega:true , pausado:true },
+  { package_id:null, nombre:'70.158 Diamantes',  diamantes:70158,  costoUSD:457.14, precio:8000,  manual:true, combo:true, mega:true , pausado:true },
+  { package_id:null, nombre:'80.080 Diamantes',  diamantes:80080,  costoUSD:520.00, precio:9100,  manual:true, combo:true, mega:true , pausado:true },
+  { package_id:null, nombre:'90.145 Diamantes',  diamantes:90145,  costoUSD:589.14, precio:10310, manual:true, combo:true, mega:true , pausado:true },
+  { package_id:null, nombre:'100.958 Diamantes', diamantes:100958, costoUSD:657.14, precio:11500, manual:true, combo:true, mega:true , pausado:true },
 
   // ─── TARJETAS (manuales) ───
-  { package_id:null, sku:'TARJSEM', nombre:'Tarjeta Semanal', diamantes:0, costoUSD:0, precio:37,  manual:true, esTarjeta:true, img:'tarjeta-semanal.png' },
-  { package_id:null, sku:'TARJMEN', nombre:'Tarjeta Mensual', diamantes:0, costoUSD:0, precio:150, manual:true, esTarjeta:true, img:'tarjeta-mensual.png' }
+  { package_id:null, sku:'TARJSEM', nombre:'Tarjeta Semanal', diamantes:0, costoUSD:0, precio:37,  manual:true, esTarjeta:true, img:'tarjeta-semanal.png' , pausado:true },
+  { package_id:null, sku:'TARJMEN', nombre:'Tarjeta Mensual', diamantes:0, costoUSD:0, precio:150, manual:true, esTarjeta:true, img:'tarjeta-mensual.png' , pausado:true }
 ];
 
 
@@ -5839,7 +5839,7 @@ function _getDiamProductos(tipo){
     return arr;
   } else if(tipo === 'ilim'){
     // Ilimitado = recargas automáticas (Recargas América, directo al ID)
-    return RECARGAS_AUTO.map(function(r){
+    return RECARGAS_AUTO.filter(function(r){ return !r.pausado; }).map(function(r){
       var badge = 'AUTO';
       if(r.esTarjeta) badge = 'TARJETA';
       else if(r.mega) badge = 'MEGA';
@@ -6673,18 +6673,8 @@ var SCAR_PRECIO = 1150; // MXN
 // Lista de productos de la seccion Codigos FF.
 // Para agregar otro: copia un objeto aqui con su img, nombre, precio y desc.
 var CODIGOS_PRODUCTOS = [
-  { id:'megalodon', nombre:'Scarh Megalodon Alfa', precio:1150, img:'1002733332.jpg',
-    desc:'La legendaria SCAR evolutiva al maximo nivel, directo al correo de tu cuenta.', badge:'SKIN' },
-  { id:'thompson', nombre:'Thompson - Cibergarras', precio:515, img:'1002761135.jpg',
-    desc:'La Thompson Cibergarras, una de las skins mas llamativas de Free Fire.', badge:'SKIN' },
-  { id:'dibujo', nombre:'Dibujo Arte (masculino)', precio:280, img:'1002761142.jpg',
-    desc:'Traje Dibujo Arte estilo boceto (personaje masculino).', badge:'TRAJE' },
-  { id:'moda', nombre:'Moda Grafica (femenino)', precio:280, img:'1002761142.jpg',
-    desc:'Traje Moda Grafica estilo boceto (personaje femenino).', badge:'TRAJE' },
-  { id:'sombra', nombre:'Sombra del Camino (masculino)', precio:280, img:'1002761161.jpg',
-    desc:'Traje Sombra del Camino, estilo oscuro (personaje masculino).', badge:'TRAJE' },
-  { id:'corredora', nombre:'Corredora Sombria (femenino)', precio:280, img:'1002761161.jpg',
-    desc:'Traje Corredora Sombria, estilo oscuro (personaje femenino).', badge:'TRAJE' }
+  // (vacio) Agrega aqui nuevos productos cuando los tengas, por ejemplo:
+  // { id:'ejemplo', nombre:'Nombre', precio:100, img:'imagen.jpg', desc:'Descripcion.', badge:'SKIN' },
 ];
 
 var _codigoSel = null;      // producto seleccionado en el modal
@@ -6696,6 +6686,14 @@ function _updateScarSaldo(){ renderCodigosGrid(); }
 function renderCodigosGrid(){
   var grid = document.getElementById('codigos-grid');
   if(!grid) return;
+  if(!CODIGOS_PRODUCTOS || CODIGOS_PRODUCTOS.length === 0){
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2.5rem 1rem;color:var(--muted)">'
+      + '<div style="font-size:2.4rem;margin-bottom:.6rem">\uD83D\uDD0D</div>'
+      + '<div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:1rem;color:#fff;margin-bottom:.35rem">Proximamente</div>'
+      + '<div style="font-size:.82rem;line-height:1.5">Estamos preparando nuevas skins y trajes. Vuelve pronto.</div>'
+      + '</div>';
+    return;
+  }
   grid.innerHTML = CODIGOS_PRODUCTOS.map(function(p, i){
     var badge = p.badge
       ? '<span class="dcat-badge" style="background:rgba(255,40,60,.15);border-color:rgba(255,40,60,.4);color:#ff5d6c">'+p.badge+'</span>'
@@ -8111,7 +8109,16 @@ function paseCambiarID(){
   _paseSig1Activo(false);
 }
 
+var PASE_PAUSADO = true; // Poner en false para reactivar la compra de pases
+
 function _paseReiniciar(){
+  // Si el pase esta pausado, mostrar solo el mantenimiento
+  if(PASE_PAUSADO){
+    var mant = document.getElementById('pase-mantenimiento'); if(mant) mant.style.display='block';
+    ['pase-paso-1','pase-paso-2','pase-paso-3'].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display='none'; });
+    var stepper = document.getElementById('pase-stepper'); if(stepper) stepper.style.display='none';
+    return;
+  }
   paseCambiarID();
   var i1 = document.getElementById('pase-id'); if(i1) i1.value='';
   var e1 = document.getElementById('pase-err'); if(e1) e1.style.display='none';
