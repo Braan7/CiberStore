@@ -114,7 +114,7 @@ body{
 .selbar{display:flex;align-items:center;gap:.6rem;padding:.28rem .85rem;background:rgba(0,0,0,.25);border-bottom:1px solid rgba(255,255,255,.05);flex-wrap:wrap}
 .sel-grp{display:flex;align-items:center;gap:.25rem;font-size:.65rem;color:var(--muted)}
 .top-sel{background:#0d0f1a;border:1px solid rgba(255,255,255,.1);color:#fff;border-radius:6px;padding:.18rem .45rem;font-family:"Poppins";font-size:.65rem;cursor:pointer;outline:none}
-.banner{background:linear-gradient(90deg,#020818,var(--c2),var(--c1),var(--c2),#020818);background-size:300% 100%;animation:bscroll 5s linear infinite;padding:.42rem 1rem;text-align:center;font-size:.7rem;font-weight:700;letter-spacing:1.5px;color:#fff;position:relative;z-index:2}
+.banner{background:linear-gradient(90deg,#0a0820,#1a1145,#0d2440,#1a1145,#0a0820);background-size:300% 100%;animation:bscroll 8s linear infinite;padding:.35rem 1rem;text-align:center;font-size:.62rem;font-weight:700;letter-spacing:2px;color:#a5b4d4;position:relative;z-index:2;border-bottom:1px solid rgba(139,92,246,.12)}
 @keyframes bscroll{0%{background-position:0%}100%{background-position:300%}}
 .ticker{height:28px;background:rgba(34,211,238,.04);border-bottom:1px solid rgba(34,211,238,.08);overflow:hidden;display:flex;align-items:center;position:relative;z-index:2}
 .ticker-inner{display:flex;white-space:nowrap;animation:ticker 22s linear infinite}
@@ -552,8 +552,10 @@ body{
 .faq-a-inner{padding:.1rem 1.1rem 1rem}
 
 /* SEARCH */
-.search-bar-wrap{position:relative;max-width:460px;margin:0 auto 1.5rem}
-.search-bar{width:100%;background:var(--card);border:1px solid var(--border2);color:#fff;border-radius:10px;padding:.65rem 1rem .65rem 2.6rem;font-family:'Poppins';font-size:.88rem}
+.search-bar-wrap{position:relative;max-width:460px;margin:0 auto 1.2rem}
+.search-bar{width:100%;background:rgba(255,255,255,.03);border:1px solid rgba(139,92,246,.2);color:#fff;border-radius:12px;padding:.6rem 1rem .6rem 2.5rem;font-family:'Poppins';font-size:.85rem;transition:border-color .25s,box-shadow .25s,background .25s}
+.search-bar:focus{outline:none;border-color:rgba(34,211,238,.55);background:rgba(255,255,255,.05);box-shadow:0 0 0 3px rgba(34,211,238,.1),0 0 20px rgba(34,211,238,.15)}
+.search-bar::placeholder{color:#5a6478}
 .search-bar:focus{outline:none;border-color:var(--c1);box-shadow:0 0 8px var(--glow)}
 .search-bar::placeholder{color:var(--muted)}
 .search-ico{position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:1rem;pointer-events:none}
@@ -1815,6 +1817,7 @@ button[style*="linear-gradient"]{
 body{padding-bottom:8px!important}
 
 /* Menu hamburguesa + sidebar lateral REACTIVADOS (la barra inferior fue eliminada) */
+html,body{max-width:100%;overflow-x:hidden}
 
 /* Social proof desactivado */
 .social-proof{ display:none!important; }
@@ -1907,8 +1910,11 @@ body{padding-bottom:8px!important}
   background:linear-gradient(90deg,#22d3ee 0%,#8b5cf6 60%,#c026d3 100%);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
   filter:drop-shadow(0 2px 16px rgba(139,92,246,.5));animation:shimmer 4s linear infinite}
 .gm-chip{display:flex;align-items:center;gap:.35rem;font-size:.7rem;font-weight:600;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);padding:.32rem .6rem;border-radius:99px}
-.gm-btn-primary{padding:.95rem 1.4rem;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;border:none;border-radius:14px;font-family:Oxanium,sans-serif;font-weight:900;font-size:.9rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 10px 30px rgba(88,28,235,.5);transition:transform .2s,box-shadow .2s}
+.gm-btn-primary{padding:.95rem 1.4rem;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;border:none;border-radius:14px;font-family:Oxanium,sans-serif;font-weight:900;font-size:.9rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 10px 30px rgba(88,28,235,.5);transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden}
+.gm-btn-primary::after{content:"";position:absolute;top:0;left:-80%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);transform:skewX(-20deg);animation:shine 3.5s ease-in-out infinite}
+@keyframes shine{0%,100%{left:-80%}45%,55%{left:130%}}
 .gm-btn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 38px rgba(88,28,235,.65)}
+.gm-btn-primary:active{transform:translateY(0) scale(.97)}
 .gm-btn-wa{padding:.95rem 1.2rem;background:rgba(37,211,102,.15);color:#25d366;border:1px solid rgba(37,211,102,.4);border-radius:14px;font-family:Oxanium,sans-serif;font-weight:800;font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:.45rem;transition:background .2s}
 .gm-btn-wa:hover{background:rgba(37,211,102,.25)}
 
@@ -1940,8 +1946,10 @@ body{padding-bottom:8px!important}
 .gm-prod-img{width:100%;aspect-ratio:1;object-fit:contain;margin:.4rem 0;filter:drop-shadow(0 6px 16px rgba(34,211,238,.4))}
 .gm-prod-imgbox{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:3rem;margin:.2rem 0}
 .gm-prod-price{font-family:Oxanium,sans-serif;font-weight:900;font-size:1.3rem;color:#22d3ee;margin:.3rem 0 .6rem}
-.gm-prod-btn{width:100%;padding:.6rem;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;border:none;border-radius:10px;font-family:Oxanium,sans-serif;font-weight:800;font-size:.75rem;letter-spacing:.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.35rem;transition:filter .2s}
+.gm-prod-btn{width:100%;padding:.6rem;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;border:none;border-radius:10px;font-family:Oxanium,sans-serif;font-weight:800;font-size:.75rem;letter-spacing:.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.35rem;transition:filter .2s,transform .15s}
 .gm-prod-btn:hover{filter:brightness(1.15)}
+.gm-prod-btn:active{transform:scale(.95)}
+.gm-prod:active{transform:scale(.98)}
 
 /* BENEFICIOS */
 .gm-benefit{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:1.15rem;transition:transform .25s,border-color .25s}
@@ -2087,15 +2095,15 @@ document.addEventListener('keydown',function(e){
   <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Cambiar tema">&#127763;</button>
   <a href="https://wa.me/12894273983" target="_blank" class="btn-wa">&#128222; WhatsApp</a>
 </div>
-<div style="padding:.5rem 5vw;max-width:1050px;margin:0 auto;position:relative" id="search-wrap">
-  <div class="search-bar-wrap">
+<div style="padding:.4rem 5vw;max-width:1050px;margin:0 auto;position:relative" id="search-wrap">
+  <div class="search-bar-wrap" style="margin-bottom:0">
     <span class="search-ico">&#128269;</span>
-    <input class="search-bar" id="global-search" type="text" placeholder="Buscar servicio..." oninput="doSearch(this.value)" onblur="setTimeout(closeSearch,200)"/>
+    <input class="search-bar" id="global-search" type="text" placeholder="Buscar diamantes, pases o servicios..." oninput="doSearch(this.value)" onblur="setTimeout(closeSearch,200)"/>
     <div class="search-results" id="search-results"></div>
   </div>
 </div>
 <div class="selbar">
-  <div style="display:flex;align-items:center;gap:.3rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:.15rem .35rem"><select class="top-sel" id="lang-select" onchange="changeLang(this.value)" style="border:none;background:none;padding:.1rem .15rem"><option value="es">ES</option><option value="en">EN</option></select><span style="color:rgba(255,255,255,.2);font-size:.7rem">|</span><select class="top-sel" id="currency-select" onchange="changeCurrency(this.value)" style="border:none;background:none;padding:.1rem .15rem"><option value="MXN">MXN</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="ARS">ARS</option><option value="PEN">PEN</option></select></div>
+  <div style="display:flex;align-items:center;gap:.3rem;background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.22);border-radius:9px;padding:.15rem .4rem"><select class="top-sel" id="lang-select" onchange="changeLang(this.value)" style="border:none;background:none;padding:.1rem .15rem;color:#c4b5fd;font-weight:700;font-size:.7rem"><option value="es">ES</option><option value="en">EN</option></select><span style="color:rgba(139,92,246,.35);font-size:.7rem">|</span><select class="top-sel" id="currency-select" onchange="changeCurrency(this.value)" style="border:none;background:none;padding:.1rem .15rem;color:#67e8f9;font-weight:700;font-size:.7rem"><option value="MXN">MXN</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="ARS">ARS</option><option value="PEN">PEN</option></select></div>
 </div>
 <div class="banner" id="banner-txt">&#9889; ENTREGA AUTOMATICA 24/7 &nbsp;|&nbsp; MAS COMPRAS = MAS DESCUENTOS &nbsp;|&nbsp; PAGOS SEGUROS</div>
 <div class="ticker"><div class="ticker-inner" id="ticker-inner">
@@ -2117,10 +2125,13 @@ document.addEventListener('keydown',function(e){
   <div style="max-width:680px;margin:0 auto;padding:1.2rem 1.1rem 0">
 
     <!-- Saludo -->
-    <div class="gm-reveal" style="margin-bottom:1.2rem">
-      <div id="home-hola" style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.5rem;color:#fff;letter-spacing:-.2px;line-height:1.2">Hola</div>
-      <div style="font-size:.85rem;color:#6b7280;margin-top:.15rem">Tienda de Free Fire</div>
-      <div id="home-fecha" style="font-size:.78rem;color:#4b5563;margin-top:.1rem">&nbsp;</div>
+    <div class="gm-reveal" style="margin-bottom:1.3rem">
+      <div id="home-hola" style="font-family:Poppins,sans-serif;font-weight:800;font-size:1.55rem;color:#fff;letter-spacing:-.3px;line-height:1.15">Hola</div>
+      <div style="display:flex;align-items:center;gap:.5rem;margin-top:.3rem">
+        <span style="font-size:.82rem;color:#8b93a3;font-weight:600">Tienda de Free Fire</span>
+        <span style="width:4px;height:4px;border-radius:50%;background:#3b4252"></span>
+        <span id="home-fecha" style="font-size:.78rem;color:#5a6478">&nbsp;</span>
+      </div>
     </div>
 
     <!-- ═══ HERO ═══ -->
@@ -2207,6 +2218,7 @@ document.addEventListener('keydown',function(e){
 
     <!-- ═══ PRODUCTOS DIAMANTES ═══ -->
     <div class="gm-sec-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9l4-6z"/><path d="M2 9h20"/></svg> DIAMANTES FREE FIRE <span class="line"></span> <span onclick="goPage('diamantes')" style="font-size:.68rem;color:#22d3ee;cursor:pointer;flex-shrink:0">VER TODOS &#8594;</span></div>
+    <div style="font-size:.72rem;color:var(--muted);margin:-.6rem 0 1rem;display:flex;align-items:center;gap:.4rem"><span style="color:#25d366">&#9679;</span> Entrega automatica &middot; 1 vez por ID</div>
     <div class="gm-prod-grid" id="home-diam-grid" style="margin-bottom:2rem"></div>
 
     <!-- ═══ BENEFICIOS ═══ -->

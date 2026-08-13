@@ -7838,7 +7838,7 @@ function renderHomeDashboard(){
   var hola = document.getElementById('home-hola');
   if(hola){
     var nom = authSession ? (authSession.username || 'Jugador') : 'Bienvenido';
-    hola.textContent = authSession ? ('Hola, ' + nom) : 'Bienvenido';
+    hola.innerHTML = authSession ? ('Hola, ' + nom + ' \uD83D\uDC4B') : 'Bienvenido \uD83D\uDC4B';
   }
 
   // Fecha en espanol
