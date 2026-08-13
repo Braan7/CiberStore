@@ -526,14 +526,18 @@ function ffAddCart(id){
 function toggleSB(){
   var sb=document.getElementById('sidebar');
   var ov=document.getElementById('overlay');
+  var abierto = sb && sb.classList.contains('open');
   if(sb){sb.classList.toggle('open');}
   if(ov){ov.classList.toggle('open');}
+  // Bloquear/desbloquear scroll del body
+  document.body.style.overflow = abierto ? '' : 'hidden';
 }
 function closeSB(){
   var sb=document.getElementById('sidebar');
   var ov=document.getElementById('overlay');
   if(sb) sb.classList.remove('open');
   if(ov) ov.classList.remove('open');
+  document.body.style.overflow = '';
 }
 function updateSidebarUser(){
   var spent=getSpent();
