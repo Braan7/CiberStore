@@ -799,7 +799,7 @@ function goPage(id){
   if(id==='creadores') setTimeout(renderCreadoresTabla,50);
   if(id==='retirar') setTimeout(_updateRetiroSaldo,50);
   if(typeof _syncBottomNav==='function') _syncBottomNav(id);
-  if(id==='home'){setTimeout(renderResenas,50); setTimeout(renderHomeDashboard,60);}
+  if(id==='home'){setTimeout(renderResenas,50); setTimeout(renderHomeDashboard,60); setTimeout(renderHomeDiamGrid,70);}
   if(id==='comunidad') setTimeout(renderChat,50);
 }
 
@@ -5887,6 +5887,32 @@ function cotizarDiamantesWA(){
     + 'Mi ID de Free Fire: \n'
     + 'Paquete o cantidad que busco: ';
   window.open('https://wa.me/' + WA + '?text=' + encodeURIComponent(msg), '_blank');
+}
+
+// Grid de diamantes destacados en el HOME (solo las 6 recargas principales visibles)
+function renderHomeDiamGrid(){
+  var grid = document.getElementById('home-diam-grid');
+  if(!grid) return;
+  var productos = (typeof _getDiamProductos==='function') ? _getDiamProductos('ilim') : [];
+  var destacados = productos.filter(function(p){ return !p.combo && !p.mega && !p.esTarjeta; }).slice(0,6);
+  grid.innerHTML = destacados.map(function(p, i){
+    var idxReal = productos.indexOf(p);
+    var pop = (i===3) ? ' gm-prod-pop' : '';
+    var tag = (i===3) ? '<div class="gm-prod-tag">MAS POPULAR</div>' : '';
+    // Numero de diamantes (sin "+bono")
+    var num = (''+p.diamantes).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    var visual = p.img
+      ? '<img class="gm-prod-img" src="'+p.img+'" alt="'+p.nombre+'" onerror="this.outerHTML=\'<div class=&quot;gm-prod-imgbox&quot;>&#128142;</div>\'"/>'
+      : '<div class="gm-prod-imgbox">&#128142;</div>';
+    return '<div class="gm-prod'+pop+'" onclick="goPage(\'diamantes\'); setTimeout(function(){ if(typeof abrirDiamDetalle===\'function\') abrirDiamDetalle('+idxReal+'); }, 350)">'
+      + tag
+      + '<div class="gm-prod-qty">&#128142; '+num+'</div>'
+      + visual
+      + '<div style="font-size:.72rem;color:var(--muted);margin-bottom:.2rem">'+p.nombre+'</div>'
+      + '<div class="gm-prod-price">'+fmt(p.precio)+'</div>'
+      + '<button class="gm-prod-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> COMPRAR</button>'
+      + '</div>';
+  }).join('');
 }
 
 function renderDiamCatalogo(){

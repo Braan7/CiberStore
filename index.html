@@ -57,8 +57,9 @@ html{scroll-behavior:smooth}
 body{
   background:
     radial-gradient(900px 600px at 15% -5%,rgba(34,211,238,.10) 0%,transparent 50%) fixed,
-    radial-gradient(800px 600px at 90% 10%,rgba(34,211,238,.10) 0%,transparent 50%) fixed,
-    linear-gradient(180deg,#070a15 0%,var(--bg) 100%) fixed,
+    radial-gradient(800px 600px at 90% 10%,rgba(139,92,246,.12) 0%,transparent 50%) fixed,
+    radial-gradient(700px 500px at 50% 100%,rgba(139,92,246,.06) 0%,transparent 55%) fixed,
+    linear-gradient(180deg,#0a0818 0%,var(--bg) 100%) fixed,
     var(--bg);
   color:var(--text);
   font-family:"Poppins",sans-serif;
@@ -84,7 +85,7 @@ body{
 .sb-uspent{font-size:.62rem;color:var(--muted)}
 .sb-prog{height:4px;background:rgba(255,255,255,.08);border-radius:2px;margin-top:.3rem;overflow:hidden}
 .sb-prog-fill{height:100%;background:linear-gradient(90deg,var(--c2),var(--c1));border-radius:2px;transition:width .8s}
-.sb-section{padding:.75rem 1rem .25rem;font-size:.58rem;color:#444;letter-spacing:3px;text-transform:uppercase;font-weight:800}
+.sb-section{padding:1rem 1rem .35rem;font-size:.6rem;color:#22d3ee;letter-spacing:2.5px;text-transform:uppercase;font-weight:800;opacity:.7}
 .sb-nav{flex:1;overflow-y:auto;padding:.4rem .6rem;display:flex;flex-direction:column;gap:.3rem}
 .sb-nav::-webkit-scrollbar{width:0}
 .nav-item{display:flex;align-items:center;gap:.75rem;padding:.7rem .85rem;color:#777;font-size:.82rem;font-weight:600;border-radius:12px;cursor:pointer;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.04);transition:all .2s;position:relative}
@@ -151,7 +152,7 @@ body{
 .ph{padding:1.75rem 5vw 0;text-align:center;max-width:1050px;margin:0 auto}
 .stag{display:inline-block;padding:.28rem .85rem;border-radius:999px;background:linear-gradient(90deg,rgba(34,211,238,.12),rgba(167,139,250,.12));border:1px solid rgba(120,170,255,.22);color:var(--c1);font-size:.62rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:.6rem;backdrop-filter:blur(6px)}
 .ptitle{font-family:"Oxanium";font-size:clamp(1.35rem,4vw,2.15rem);font-weight:800;color:#fff;letter-spacing:.5px;line-height:1.12;text-shadow:0 2px 20px rgba(34,211,238,.15)}
-.ptitle span{color:var(--c1)}
+.ptitle span{background:linear-gradient(90deg,#22d3ee,#8b5cf6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 10px rgba(139,92,246,.3))}
 .psub{color:var(--muted);font-size:.82rem;margin-top:.3rem;margin-bottom:1.5rem}
 .arch-tag{display:inline-flex;align-items:center;background:rgba(168,120,255,.1);border:1px solid rgba(168,120,255,.25);color:#c9b3ff;font-size:.74rem;font-weight:600;padding:.35rem .7rem;border-radius:8px}
 .quick-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;padding:0 5vw 3rem;max-width:1000px;margin:0 auto}
@@ -1873,7 +1874,101 @@ body{padding-bottom:104px!important}
 .met-badge{font-size:.6rem;font-weight:700;padding:.16rem .5rem;border-radius:7px;letter-spacing:.2px}
 .met-card .sub{font-size:.76rem;color:#6b7280}
 .sheet-back{background:none;border:none;color:#8b93a3;font-size:.9rem;cursor:pointer;display:flex;align-items:center;gap:.3rem;padding:0}
-@keyframes lkspin{to{transform:rotate(360deg)}}</style>
+@keyframes lkspin{to{transform:rotate(360deg)}}
+
+/* ═══════════════ HOME GAMING REDISEÑO ═══════════════ */
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes glowpulse{0%,100%{opacity:.5}50%{opacity:1}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes fadeup{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes borderflow{0%,100%{border-color:rgba(139,92,246,.35)}50%{border-color:rgba(34,211,238,.6)}}
+
+.gm-reveal{animation:fadeup .6s cubic-bezier(.2,.7,.3,1) both}
+.gm-reveal-2{animation:fadeup .6s .1s cubic-bezier(.2,.7,.3,1) both}
+.gm-reveal-3{animation:fadeup .6s .2s cubic-bezier(.2,.7,.3,1) both}
+
+/* HERO */
+.gm-hero{position:relative;overflow:hidden;border-radius:26px;padding:2.2rem 1.6rem;margin-bottom:1.5rem;
+  background:linear-gradient(135deg,#1e0f4a 0%,#130b36 40%,#0a0820 75%,#0d0a2e 100%);
+  border:1px solid rgba(139,92,246,.3);box-shadow:0 24px 70px rgba(88,28,235,.3),inset 0 1px 0 rgba(255,255,255,.06)}
+.gm-hero::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(circle at 82% 18%,rgba(139,92,246,.4),transparent 45%),
+  radial-gradient(circle at 12% 88%,rgba(34,211,238,.28),transparent 45%);pointer-events:none}
+.gm-hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(139,92,246,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,.06) 1px,transparent 1px);background-size:28px 28px;pointer-events:none;mask-image:radial-gradient(circle at 70% 30%,#000,transparent 70%)}
+.gm-hero-char{position:absolute;right:-10px;bottom:-10px;width:190px;max-width:42%;pointer-events:none;filter:drop-shadow(0 10px 30px rgba(139,92,246,.5));animation:floaty 5s ease-in-out infinite;z-index:1}
+.gm-badge-ff{display:inline-block;background:rgba(139,92,246,.22);border:1px solid rgba(139,92,246,.5);color:#c4b5fd;font-family:Oxanium,sans-serif;font-weight:800;font-size:.6rem;letter-spacing:2px;padding:.3rem .8rem;border-radius:99px;margin-bottom:1rem}
+.gm-hero h1{font-family:Poppins,sans-serif;font-weight:800;font-size:1.2rem;color:#fff;line-height:1.05;letter-spacing:-.3px}
+.gm-hero .grad{font-family:Oxanium,sans-serif;font-weight:900;font-size:2.5rem;line-height:1;margin:.15rem 0 .6rem;
+  background:linear-gradient(90deg,#22d3ee 0%,#8b5cf6 60%,#c026d3 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 2px 12px rgba(139,92,246,.4))}
+.gm-chip{display:flex;align-items:center;gap:.35rem;font-size:.7rem;font-weight:600;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);padding:.32rem .6rem;border-radius:99px}
+.gm-btn-primary{padding:.95rem 1.4rem;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;border:none;border-radius:14px;font-family:Oxanium,sans-serif;font-weight:900;font-size:.9rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 10px 30px rgba(88,28,235,.5);transition:transform .2s,box-shadow .2s}
+.gm-btn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 38px rgba(88,28,235,.65)}
+.gm-btn-wa{padding:.95rem 1.2rem;background:rgba(37,211,102,.15);color:#25d366;border:1px solid rgba(37,211,102,.4);border-radius:14px;font-family:Oxanium,sans-serif;font-weight:800;font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:.45rem;transition:background .2s}
+.gm-btn-wa:hover{background:rgba(37,211,102,.25)}
+
+/* PROMO / SOPORTE cards */
+.gm-info-card{position:relative;overflow:hidden;border-radius:18px;padding:1.2rem;cursor:pointer;transition:transform .25s,border-color .25s}
+.gm-info-card:hover{transform:translateY(-3px)}
+.gm-promo{background:linear-gradient(150deg,rgba(139,92,246,.14),rgba(255,255,255,.02));border:1px solid rgba(139,92,246,.3)}
+.gm-promo:hover{border-color:rgba(139,92,246,.55)}
+.gm-support{background:linear-gradient(150deg,rgba(37,211,102,.12),rgba(255,255,255,.02));border:1px solid rgba(37,211,102,.3)}
+.gm-support:hover{border-color:rgba(37,211,102,.55)}
+
+/* CATEGORIAS grandes */
+.gm-cat{position:relative;overflow:hidden;border-radius:20px;padding:1.4rem 1.2rem;cursor:pointer;transition:transform .28s,box-shadow .28s;min-height:130px;display:flex;flex-direction:column;justify-content:space-between}
+.gm-cat::after{content:"";position:absolute;top:-40%;right:-30%;width:150px;height:150px;border-radius:50%;filter:blur(30px);opacity:.5;transition:opacity .3s}
+.gm-cat:hover{transform:translateY(-5px)}
+.gm-cat-ico{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;position:relative;z-index:2}
+.gm-cat-name{font-family:Oxanium,sans-serif;font-weight:900;font-size:1.05rem;position:relative;z-index:2}
+.gm-cat-desc{font-size:.72rem;color:var(--muted);line-height:1.4;position:relative;z-index:2}
+.gm-cat-arrow{position:absolute;bottom:1.2rem;right:1.2rem;z-index:2;opacity:.7;transition:transform .25s}
+.gm-cat:hover .gm-cat-arrow{transform:translateX(4px)}
+
+/* PRODUCTOS modernos */
+.gm-prod-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.8rem}
+.gm-prod{position:relative;overflow:hidden;background:linear-gradient(165deg,rgba(34,211,238,.06),rgba(20,18,40,.5));border:1px solid rgba(34,211,238,.2);border-radius:18px;padding:1.1rem;cursor:pointer;transition:transform .25s,border-color .25s,box-shadow .25s;text-align:center}
+.gm-prod:hover{transform:translateY(-4px);border-color:rgba(34,211,238,.5);box-shadow:0 14px 34px rgba(34,211,238,.2)}
+.gm-prod-pop{border-color:rgba(139,92,246,.5);box-shadow:0 10px 30px rgba(139,92,246,.2)}
+.gm-prod-tag{position:absolute;top:0;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#8b5cf6,#c026d3);color:#fff;font-family:Oxanium,sans-serif;font-weight:800;font-size:.55rem;letter-spacing:.5px;padding:.2rem .7rem;border-radius:0 0 8px 8px}
+.gm-prod-qty{display:flex;align-items:center;justify-content:center;gap:.35rem;font-family:Oxanium,sans-serif;font-weight:900;font-size:1.35rem;color:#fff;margin-bottom:.2rem}
+.gm-prod-img{width:100%;aspect-ratio:1;object-fit:contain;margin:.4rem 0;filter:drop-shadow(0 6px 16px rgba(34,211,238,.4))}
+.gm-prod-imgbox{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:3rem;margin:.2rem 0}
+.gm-prod-price{font-family:Oxanium,sans-serif;font-weight:900;font-size:1.3rem;color:#22d3ee;margin:.3rem 0 .6rem}
+.gm-prod-btn{width:100%;padding:.6rem;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;border:none;border-radius:10px;font-family:Oxanium,sans-serif;font-weight:800;font-size:.75rem;letter-spacing:.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.35rem;transition:filter .2s}
+.gm-prod-btn:hover{filter:brightness(1.15)}
+
+/* BENEFICIOS */
+.gm-benefit{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:1.15rem;transition:transform .25s,border-color .25s}
+.gm-benefit:hover{transform:translateY(-3px)}
+.gm-benefit-ico{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:.6rem}
+
+/* RESEÑAS */
+.gm-review{background:linear-gradient(160deg,rgba(255,255,255,.03),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:1.15rem;transition:transform .25s,border-color .25s}
+.gm-review:hover{transform:translateY(-3px);border-color:rgba(34,211,238,.3)}
+.gm-verified{display:inline-flex;align-items:center;gap:.3rem;font-size:.62rem;color:#25d366;font-weight:700;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.25);padding:.2rem .5rem;border-radius:99px}
+
+/* WHATSAPP CTA */
+.gm-wa-cta{position:relative;overflow:hidden;border-radius:22px;padding:1.6rem 1.4rem;background:linear-gradient(135deg,#075e54,#128c3e);border:1px solid rgba(37,211,102,.4);box-shadow:0 16px 44px rgba(37,211,102,.28)}
+
+/* SECTION TITLE */
+.gm-sec-title{display:flex;align-items:center;gap:.5rem;font-family:Oxanium,sans-serif;font-size:1.1rem;font-weight:900;color:#fff;letter-spacing:.5px;margin-bottom:1rem}
+.gm-sec-title .line{flex:1;height:1px;background:linear-gradient(90deg,rgba(34,211,238,.4),transparent)}
+
+/* Header extras */
+.gm-cart-btn,.gm-theme-btn{background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:11px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:background .2s;position:relative}
+.gm-cart-btn:hover,.gm-theme-btn:hover{background:rgba(34,211,238,.12)}
+.gm-cart-count{position:absolute;top:-6px;right:-6px;background:linear-gradient(135deg,#8b5cf6,#c026d3);color:#fff;font-size:.58rem;font-weight:800;min-width:17px;height:17px;border-radius:99px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+
+/* Barra inferior 6 items (ajuste) */
+@media(max-width:520px){
+  .gm-hero .grad{font-size:2.1rem}
+  .gm-hero-char{width:150px}
+}
+@media(min-width:900px){
+  .gm-prod-grid{grid-template-columns:repeat(3,1fr)}
+}
+</style>
 
 <script>
 /* Block devtools */
@@ -1923,34 +2018,45 @@ document.addEventListener('keydown',function(e){
   <div class="sb-nav">
     <div class="sb-section">Principal</div>
     <div class="nav-item active" id="ni-home" onclick="goPage('home')"><div class="nav-ico">&#127968;</div> Inicio</div>
-    <div class="sb-section">Servicios</div>
+
+    <div class="sb-section">Tienda</div>
     <div class="nav-item" id="ni-diamantes" onclick="goPage('diamantes')"><div class="nav-ico">&#128142;</div> Diamantes FF</div>
-    <div class="nav-item" id="ni-likes" onclick="goPage('likes2k')"><div class="nav-ico">&#128077;</div> Likes</div>
-    <div class="nav-item" id="ni-pines" onclick="goPage('pines')"><div class="nav-ico">&#127991;&#65039;</div> Revendedores <span class="nb" style="background:rgba(255,204,0,.15);border:1px solid rgba(255,204,0,.3);color:#ffcc00">NEW</span></div>
+    <div class="nav-item" id="ni-pase" onclick="goPage('pase')"><div class="nav-ico">&#127915;</div> Pases Booyah</div>
+    <div class="nav-item" id="ni-codigos" onclick="goPage('codigos')"><div class="nav-ico">&#127920;</div> Eventos &amp; Skins</div>
+    <div class="nav-item" id="ni-likes" onclick="goPage('likes2k')"><div class="nav-ico">&#10084;&#65039;</div> Likes</div>
+
+    <div class="sb-section">Servicios</div>
     <div class="nav-item" id="ni-actas" onclick="goPage('actas')"><div class="nav-ico">&#128196;</div> Actas <span class="nb" style="background:linear-gradient(90deg,#25d366,#128c3e);color:#fff;border:none">NUEVO</span></div>
-    <div class="nav-item" id="ni-monedas" onclick="goPage('monedas')"><div class="nav-ico">&#127877;</div> Monedas TikTok <span class="nb" style="background:linear-gradient(90deg,#ff0050,#00f2ea);color:#fff;border:none">NUEVO</span></div>
-    <div class="nav-item" id="ni-robux" onclick="goPage('robux')"><div class="nav-ico">&#128181;</div> Robux <span class="nb" style="background:#fff;color:#000;border:none">NUEVO</span></div>
-    <div class="nav-item" id="ni-api" onclick="goPage('api')"><div class="nav-ico">&#128268;</div> API Revendedores <span class="nb" style="background:rgba(34,211,238,.15);border:1px solid rgba(34,211,238,.3);color:#22d3ee">API</span></div>
-    <div class="nav-item" id="ni-creadores" onclick="goPage('creadores')"><div class="nav-ico">&#127909;</div> Creadores <span class="nb" style="background:rgba(255,77,166,.15);border:1px solid rgba(255,77,166,.35);color:#ff4da6">TIKTOK</span></div>
+    <div class="nav-item" id="ni-monedas" onclick="goPage('monedas')"><div class="nav-ico">&#127877;</div> Monedas TikTok <span class="nb" style="background:linear-gradient(90deg,#ff0050,#00f2ea);color:#fff;border:none">NEW</span></div>
+    <div class="nav-item" id="ni-robux" onclick="goPage('robux')"><div class="nav-ico">&#128181;</div> Robux <span class="nb" style="background:#fff;color:#000;border:none">NEW</span></div>
     <div class="nav-item" id="ni-honor" onclick="goPage('honor')"><div class="nav-ico">&#127942;</div> Honor de Clan</div>
     <div class="nav-item" id="ni-honor-cuenta" onclick="goPage('honorcuenta')"><div class="nav-ico">&#127869;</div> Experiencia Cuenta FF <span class="nb" style="background:rgba(0,245,255,.15);border:1px solid rgba(0,245,255,.3);color:#00f5ff">NEW</span></div>
-    
-    <div class="nav-item" id="ni-faq" onclick="goPage('faq')"><div class="nav-ico">&#10067;</div> FAQ / Ayuda</div>
-    <div class="nav-item" id="ni-ranking" onclick="goPage('ranking')"><div class="nav-ico">&#128081;</div> Ranking &amp; Premios <span class="nb" style="background:linear-gradient(90deg,#ff6600,#ff9900);color:#fff;border:none">TOP</span></div>
-    <div class="nav-item" id="ni-codigos" onclick="goPage('codigos')"><div class="nav-ico">&#128142;</div> SCAR Evolutiva <span class="nb" style="background:linear-gradient(90deg,#ff0028,#ff4444);color:#fff;border:none">SKIN</span></div>
     <div class="nav-item" id="ni-clanes" onclick="goPage('clanes')"><div class="nav-ico">&#129409;</div> Venta de Clanes <span class="nb" style="background:linear-gradient(90deg,#ffb300,#ff8800);color:#fff;border:none">NV7</span></div>
-    <div class="nav-item" id="ni-cajas" onclick="goPage('cajas')"><div class="nav-ico">&#127873;</div> Regalo <span class="nb" style="background:linear-gradient(90deg,#ff4400,#ff8800);color:#fff;border:none">NUEVO</span></div>
-    <div class="nav-item" onclick="window.open('https://whatsapp.com/channel/0029VbCXQVjJENyAgAoJLJ3g','_blank');closeSB()"><div class="nav-ico">&#128172;</div> Canal WhatsApp <span class="nb nb-new">NUEVO</span></div>
-    <div class="nav-item" onclick="window.open('https://www.tiktok.com/@ciberstore.lat','_blank');closeSB()"><div class="nav-ico">&#127925;</div> TikTok</div>
-    <div class="nav-item" onclick="window.open('https://www.instagram.com/ciberstore.lat','_blank');closeSB()"><div class="nav-ico">&#128247;</div> Instagram</div>
+    <div class="nav-item" id="ni-cajas" onclick="goPage('cajas')"><div class="nav-ico">&#127873;</div> Regalo</div>
+
+    <div class="sb-section">Revendedores</div>
+    <div class="nav-item" id="ni-pines" onclick="goPage('pines')"><div class="nav-ico">&#127991;&#65039;</div> Zona Revendedores <span class="nb" style="background:rgba(255,204,0,.15);border:1px solid rgba(255,204,0,.3);color:#ffcc00">NEW</span></div>
+    <div class="nav-item" id="ni-api" onclick="goPage('api')"><div class="nav-ico">&#128268;</div> API Revendedores <span class="nb" style="background:rgba(34,211,238,.15);border:1px solid rgba(34,211,238,.3);color:#22d3ee">API</span></div>
+    <div class="nav-item" id="ni-creadores" onclick="goPage('creadores')"><div class="nav-ico">&#127909;</div> Creadores <span class="nb" style="background:rgba(255,77,166,.15);border:1px solid rgba(255,77,166,.35);color:#ff4da6">TIKTOK</span></div>
+
     <div class="sb-section">Mi cuenta</div>
-    <div class="nav-item" id="ni-referidos" onclick="goPage('referidos')"><div class="nav-ico">&#127381;</div> Programa Referidos <span class="nb" style="background:rgba(255,208,0,.2);border:1px solid rgba(255,208,0,.4);color:#ffd000">NUEVO</span></div>
     <div class="nav-item" id="ni-perfil" onclick="goPage('perfil')"><div class="nav-ico">&#128100;</div> Mi Perfil</div>
     <div class="nav-item" id="ni-saldo" onclick="goPage('saldo')"><div class="nav-ico">&#128176;</div> Recargar Saldo</div>
     <div class="nav-item" id="ni-miscompras" onclick="goPage('miscompras')"><div class="nav-ico">&#128722;</div> Mis Compras</div>
     <div class="nav-item" id="ni-transferir" onclick="goPage('transferir')"><div class="nav-ico">&#8646;</div> Transferir Saldo</div>
     <div class="nav-item" id="ni-retirar" onclick="goPage('retirar')"><div class="nav-ico">&#127974;</div> Retirar Fondos <span class="nb" style="background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.35);color:#25d366">$</span></div>
+    <div class="nav-item" id="ni-referidos" onclick="goPage('referidos')"><div class="nav-ico">&#127381;</div> Programa Referidos <span class="nb" style="background:rgba(255,208,0,.2);border:1px solid rgba(255,208,0,.4);color:#ffd000">NEW</span></div>
+
+    <div class="sb-section">Soporte &amp; Info</div>
+    <div class="nav-item" onclick="window.open('https://wa.me/12894273983','_blank');closeSB()"><div class="nav-ico">&#128172;</div> Soporte WhatsApp</div>
+    <div class="nav-item" id="ni-faq" onclick="goPage('faq')"><div class="nav-ico">&#10067;</div> FAQ / Ayuda</div>
+    <div class="nav-item" id="ni-ranking" onclick="goPage('ranking')"><div class="nav-ico">&#128081;</div> Ranking &amp; Premios <span class="nb" style="background:linear-gradient(90deg,#ff6600,#ff9900);color:#fff;border:none">TOP</span></div>
     <div class="nav-item" id="ni-sobre" onclick="goPage('sobre')"><div class="nav-ico">&#8505;&#65039;</div> Sobre la pagina</div>
+
+    <div class="sb-section">Redes</div>
+    <div class="nav-item" onclick="window.open('https://whatsapp.com/channel/0029VbCXQVjJENyAgAoJLJ3g','_blank');closeSB()"><div class="nav-ico">&#128241;</div> Canal WhatsApp <span class="nb nb-new">NEW</span></div>
+    <div class="nav-item" onclick="window.open('https://www.tiktok.com/@ciberstore.lat','_blank');closeSB()"><div class="nav-ico">&#127925;</div> TikTok</div>
+    <div class="nav-item" onclick="window.open('https://www.instagram.com/ciberstore.lat','_blank');closeSB()"><div class="nav-ico">&#128247;</div> Instagram</div>
   </div>
   <div class="sb-footer"><div class="ftitle"><span class="l1">CIBER</span><span class="l2">STORE</span></div><div style="font-size:.65rem;color:#4a4a52;line-height:1.6;margin-bottom:.5rem">La tienda definitiva de Free Fire.<br/>Diamantes, likes y honor de clan.</div>
     <div style="display:flex;gap:.5rem;margin-bottom:.5rem">
@@ -2003,230 +2109,157 @@ document.addEventListener('keydown',function(e){
 </div></div>
 <div class="page active" id="page-home">
 
-  <!-- ═══════════ DASHBOARD INICIO ═══════════ -->
-  <div style="max-width:640px;margin:0 auto;padding:1.5rem 1.15rem 0">
+  <div style="max-width:680px;margin:0 auto;padding:1.2rem 1.1rem 0">
 
     <!-- Saludo -->
-    <div style="margin-bottom:1.5rem">
-      <div id="home-hola" style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.7rem;color:#fff;letter-spacing:-.2px;line-height:1.2">Hola</div>
-      <div style="font-size:.92rem;color:#6b7280;margin-top:.25rem">Tienda de Free Fire</div>
-      <div id="home-fecha" style="font-size:.85rem;color:#4b5563;margin-top:.15rem">&nbsp;</div>
+    <div class="gm-reveal" style="margin-bottom:1.2rem">
+      <div id="home-hola" style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.5rem;color:#fff;letter-spacing:-.2px;line-height:1.2">Hola</div>
+      <div style="font-size:.85rem;color:#6b7280;margin-top:.15rem">Tienda de Free Fire</div>
+      <div id="home-fecha" style="font-size:.78rem;color:#4b5563;margin-top:.1rem">&nbsp;</div>
     </div>
 
-    <!-- ═══ BANNER CANAL WHATSAPP ═══ -->
-    <div onclick="window.open('https://whatsapp.com/channel/0029VbCXQVjJENyAgAoJLJ3g','_blank')" style="position:relative;overflow:hidden;background:linear-gradient(135deg,#128c3e,#25d366);border-radius:18px;padding:1.4rem 1.3rem;margin-bottom:1.5rem;cursor:pointer;box-shadow:0 10px 30px rgba(37,211,102,.35);animation:wachan-pulse 2.2s ease-in-out infinite">
-      <div style="position:absolute;top:-40%;right:-10%;width:220px;height:220px;background:radial-gradient(circle,rgba(255,255,255,.18) 0%,transparent 70%);pointer-events:none"></div>
+    <!-- ═══ HERO ═══ -->
+    <div class="gm-hero gm-reveal">
+      <div class="gm-hero-grid"></div>
+      <img class="gm-hero-char" src="hero-ff.png" alt="" onerror="this.style.display='none'"/>
+      <div style="position:relative;z-index:2;max-width:70%">
+        <span class="gm-badge-ff">FREE FIRE</span>
+        <h1>RECARGA TUS</h1>
+        <div class="grad">DIAMANTES</div>
+        <div style="font-size:.85rem;color:#b8c0d0;line-height:1.5;margin-bottom:1.1rem">Los mejores precios, entrega rapida y segura.</div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.3rem">
+          <span class="gm-chip" style="color:#c4b5fd">&#9889; Entrega inmediata</span>
+          <span class="gm-chip" style="color:#67e8f9">&#128274; 100% Seguro</span>
+          <span class="gm-chip" style="color:#7dd3fc">&#128337; 24/7</span>
+        </div>
+        <button class="gm-btn-primary" onclick="goPage('diamantes')">&#9889; RECARGAR AHORA</button>
+      </div>
+    </div>
+
+    <!-- ═══ PROMO + SOPORTE ═══ -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:1.5rem">
+      <div class="gm-info-card gm-promo gm-reveal-2" onclick="goPage('diamantes')">
+        <div style="font-size:1.6rem;margin-bottom:.4rem">&#127873;</div>
+        <div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:.9rem;color:#fff;margin-bottom:.2rem">Primera vez aqui?</div>
+        <div style="font-size:.72rem;color:#c4b5fd;line-height:1.4;margin-bottom:.6rem">Obten un 5% OFF en tu primera compra</div>
+        <div style="display:inline-block;background:rgba(139,92,246,.2);border:1px dashed rgba(139,92,246,.5);color:#ddd6fe;font-family:Oxanium,sans-serif;font-weight:800;font-size:.62rem;letter-spacing:1px;padding:.3rem .6rem;border-radius:8px">CUPON: BIENVENIDOS</div>
+      </div>
+      <div class="gm-info-card gm-support gm-reveal-2" onclick="window.open('https://wa.me/12894273983','_blank')">
+        <div style="font-size:1.6rem;margin-bottom:.4rem">&#127911;</div>
+        <div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:.9rem;color:#fff;margin-bottom:.2rem">Soporte 24/7</div>
+        <div style="font-size:.72rem;color:#86efac;line-height:1.4;margin-bottom:.6rem">Tienes dudas? Escribenos por WhatsApp</div>
+        <div style="display:inline-flex;align-items:center;gap:.35rem;background:rgba(37,211,102,.2);color:#25d366;font-family:Oxanium,sans-serif;font-weight:800;font-size:.68rem;padding:.35rem .7rem;border-radius:8px">Chatear ahora &#8594;</div>
+      </div>
+    </div>
+
+    <!-- ═══ CATEGORIAS ═══ -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.8rem">
+      <div class="gm-cat gm-reveal-2" style="background:linear-gradient(160deg,rgba(34,211,238,.12),rgba(255,255,255,.015));border:1px solid rgba(34,211,238,.3)" onclick="goPage('diamantes')">
+        <div class="gm-cat-ico" style="background:rgba(34,211,238,.15)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9l4-6z"/><path d="M2 9h20"/></svg></div>
+        <div><div class="gm-cat-name" style="color:#22d3ee">DIAMANTES</div><div class="gm-cat-desc">Recarga al mejor precio</div></div>
+        <span class="gm-cat-arrow" style="color:#22d3ee">&#8594;</span>
+      </div>
+      <div class="gm-cat gm-reveal-2" style="background:linear-gradient(160deg,rgba(139,92,246,.12),rgba(255,255,255,.015));border:1px solid rgba(139,92,246,.3)" onclick="goPage('pase')">
+        <div class="gm-cat-ico" style="background:rgba(139,92,246,.15)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="m8 12 1 2 1.5-3 1.5 4 1-3h3"/></svg></div>
+        <div><div class="gm-cat-name" style="color:#a78bfa">PASES BOOYAH</div><div class="gm-cat-desc">Pase de la temporada</div></div>
+        <span class="gm-cat-arrow" style="color:#a78bfa">&#8594;</span>
+      </div>
+      <div class="gm-cat gm-reveal-3" style="background:linear-gradient(160deg,rgba(255,136,0,.12),rgba(255,255,255,.015));border:1px solid rgba(255,136,0,.3)" onclick="goPage('codigos')">
+        <div class="gm-cat-ico" style="background:rgba(255,136,0,.15)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ff8800" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
+        <div><div class="gm-cat-name" style="color:#ff8800">EVENTOS</div><div class="gm-cat-desc">Skins exclusivas</div></div>
+        <span class="gm-cat-arrow" style="color:#ff8800">&#8594;</span>
+      </div>
+      <div class="gm-cat gm-reveal-3" style="background:linear-gradient(160deg,rgba(255,0,80,.12),rgba(255,255,255,.015));border:1px solid rgba(255,0,80,.3)" onclick="goPage('likes2k')">
+        <div class="gm-cat-ico" style="background:rgba(255,0,80,.15)"><svg width="26" height="26" viewBox="0 0 24 24" fill="#ff0050"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 5.5 6 5.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.5 0 5 3.5 3.5 6.5C19 16.5 12 21 12 21z"/></svg></div>
+        <div><div class="gm-cat-name" style="color:#ff4d8d">LIKES</div><div class="gm-cat-desc">Para redes sociales</div></div>
+        <span class="gm-cat-arrow" style="color:#ff4d8d">&#8594;</span>
+      </div>
+    </div>
+
+    <!-- ═══ SALDO COMPACTO ═══ -->
+    <div style="display:flex;gap:.7rem;margin-bottom:1.8rem">
+      <div style="flex:1;background:rgba(255,255,255,.022);border:1px solid rgba(34,211,238,.18);border-radius:16px;padding:1rem 1.1rem">
+        <div style="font-size:.62rem;color:#6b7280;letter-spacing:1px;margin-bottom:.3rem">TU SALDO</div>
+        <div id="home-saldo" style="font-family:Oxanium,sans-serif;font-weight:900;font-size:1.45rem;color:#fff!important;-webkit-text-fill-color:#fff;line-height:1.1">$0</div>
+        <div id="home-saldo-alt" style="font-size:.68rem;color:#4b5563;margin-top:.1rem">&nbsp;</div>
+        <div onclick="abrirRecargaSheet()" style="display:inline-flex;align-items:center;gap:.3rem;margin-top:.5rem;color:#22d3ee;font-size:.75rem;font-weight:700;cursor:pointer">Depositar &#8594;</div>
+      </div>
+      <div style="flex:1;background:rgba(255,255,255,.022);border:1px solid rgba(139,92,246,.18);border-radius:16px;padding:1rem 1.1rem">
+        <div style="font-size:.62rem;color:#6b7280;letter-spacing:1px;margin-bottom:.3rem">DIAMANTES FF</div>
+        <div id="home-diam" style="font-family:Oxanium,sans-serif;font-weight:900;font-size:1.45rem;color:#fff!important;-webkit-text-fill-color:#fff;line-height:1.1">0</div>
+        <div style="font-size:.68rem;color:#4b5563;margin-top:.1rem">Comprados</div>
+        <div onclick="goPage('diamantes')" style="display:inline-flex;align-items:center;gap:.3rem;margin-top:.5rem;color:#a78bfa;font-size:.75rem;font-weight:700;cursor:pointer">Recargar &#8594;</div>
+      </div>
+    </div>
+    <div style="display:none"><span id="home-st-pedidos">0</span><span id="home-st-likes">0</span><span id="home-st-gasto">$0</span></div>
+
+    <!-- ═══ PRODUCTOS DIAMANTES ═══ -->
+    <div class="gm-sec-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9l4-6z"/><path d="M2 9h20"/></svg> DIAMANTES FREE FIRE <span class="line"></span> <span onclick="goPage('diamantes')" style="font-size:.68rem;color:#22d3ee;cursor:pointer;flex-shrink:0">VER TODOS &#8594;</span></div>
+    <div class="gm-prod-grid" id="home-diam-grid" style="margin-bottom:2rem"></div>
+
+    <!-- ═══ BENEFICIOS ═══ -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:2rem">
+      <div class="gm-benefit"><div class="gm-benefit-ico" style="background:rgba(34,211,238,.12)">&#9889;</div><div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:.85rem;color:#fff;margin-bottom:.15rem">Entrega rapida</div><div style="font-size:.68rem;color:var(--muted);line-height:1.4">Tu compra en segundos</div></div>
+      <div class="gm-benefit"><div class="gm-benefit-ico" style="background:rgba(139,92,246,.12)">&#128737;&#65039;</div><div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:.85rem;color:#fff;margin-bottom:.15rem">Compra segura</div><div style="font-size:.68rem;color:var(--muted);line-height:1.4">Sitio 100% confiable</div></div>
+      <div class="gm-benefit"><div class="gm-benefit-ico" style="background:rgba(255,136,0,.12)">&#127911;</div><div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:.85rem;color:#fff;margin-bottom:.15rem">Soporte 24/7</div><div style="font-size:.68rem;color:var(--muted);line-height:1.4">Siempre disponible</div></div>
+      <div class="gm-benefit"><div class="gm-benefit-ico" style="background:rgba(255,0,80,.12)">&#127942;</div><div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:.85rem;color:#fff;margin-bottom:.15rem">Mejores precios</div><div style="font-size:.68rem;color:var(--muted);line-height:1.4">Garantizados</div></div>
+    </div>
+
+    <!-- ═══ WHATSAPP CTA ═══ -->
+    <div class="gm-wa-cta gm-reveal" style="margin-bottom:2rem;cursor:pointer" onclick="window.open('https://whatsapp.com/channel/0029VbCXQVjJENyAgAoJLJ3g','_blank')">
+      <div style="position:absolute;top:-30%;right:-10%;width:200px;height:200px;background:radial-gradient(circle,rgba(255,255,255,.15),transparent 70%);pointer-events:none"></div>
       <div style="position:relative;z-index:2;display:flex;align-items:center;gap:1rem">
-        <div style="flex-shrink:0;width:58px;height:58px;border-radius:16px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(255,255,255,.35)">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.247-.694.247-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-        </div>
-        <div style="min-width:0;flex:1">
-          <div style="font-family:Oxanium,sans-serif;font-weight:900;font-size:1.15rem;color:#fff;line-height:1.2;letter-spacing:.3px">&#128276; &iexcl;UNETE AL CANAL!</div>
-          <div style="font-size:.82rem;color:rgba(255,255,255,.92);margin-top:.3rem;line-height:1.4;font-weight:600">Necesitas unirte a nuestro canal de WhatsApp para recibir <b>TODAS las notificaciones</b>, ofertas y novedades.</div>
-        </div>
+        <div style="flex-shrink:0;width:54px;height:54px;border-radius:15px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.3)"><svg width="30" height="30" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.247-.694.247-1.289.173-1.413-.074-.124-.272-.198-.57-.347M12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></div>
+        <div style="flex:1;min-width:0"><div style="font-family:Oxanium,sans-serif;font-weight:900;font-size:1.05rem;color:#fff">UNETE A NUESTRO CANAL</div><div style="font-size:.75rem;color:rgba(255,255,255,.9);margin-top:.2rem;line-height:1.4">Ofertas exclusivas, novedades y codigos de descuento</div></div>
       </div>
-      <div style="position:relative;z-index:2;margin-top:1rem;text-align:center;background:rgba(255,255,255,.95);color:#128c3e;font-family:Oxanium,sans-serif;font-weight:900;font-size:.9rem;letter-spacing:.5px;padding:.7rem;border-radius:11px">&#128241; UNIRME AHORA &#8594;</div>
+      <div style="position:relative;z-index:2;margin-top:1rem;text-align:center;background:rgba(255,255,255,.95);color:#128c3e;font-family:Oxanium,sans-serif;font-weight:900;font-size:.85rem;padding:.7rem;border-radius:11px">&#128241; UNIRME AHORA &#8594;</div>
     </div>
 
-    <!-- ═══ BANNER GRUPO RECARGAS DIRECTAS ═══ -->
-    <div onclick="window.open('https://chat.whatsapp.com/GH6ZsDuTGVw2SsDba3ZJXS?s=cl&p=a&ilr=1','_blank')" style="position:relative;overflow:hidden;background:linear-gradient(135deg,#0b3d2e,#075e54);border:1px solid rgba(37,211,102,.35);border-radius:18px;padding:1.3rem;margin-bottom:1.5rem;cursor:pointer">
-      <div style="display:flex;align-items:center;gap:.9rem">
-        <div style="flex-shrink:0;width:52px;height:52px;border-radius:14px;background:rgba(37,211,102,.15);display:flex;align-items:center;justify-content:center;border:1px solid rgba(37,211,102,.35)">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="#25d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.247-.694.247-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-        </div>
-        <div style="min-width:0;flex:1">
-          <div style="font-size:.9rem;color:#fff;font-weight:700;line-height:1.4;font-style:italic">Recargas directas de FREE FIRE sin esperar saldos ni nada.</div>
-          <div style="font-size:.78rem;color:#ffcf8a;margin-top:.4rem;font-style:italic">&#9888;&#65039; compra minima de $200 MX</div>
-        </div>
-      </div>
-      <div style="margin-top:.9rem;text-align:center;background:rgba(37,211,102,.9);color:#053b30;font-family:Oxanium,sans-serif;font-weight:900;font-size:.85rem;letter-spacing:.3px;padding:.65rem;border-radius:10px">&#128172; UNIRME AL GRUPO &#8594;</div>
-    </div>
-
-    <!-- Tarjeta saldo -->
-    <div style="background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:18px;padding:1.35rem 1.3rem;margin-bottom:.9rem">
-      <div style="font-size:.75rem;color:#6b7280;letter-spacing:1px;margin-bottom:.5rem">TU SALDO</div>
-      <div id="home-saldo" style="font-family:Poppins,sans-serif;font-weight:700;font-size:2.05rem;color:#fff!important;-webkit-text-fill-color:#fff;line-height:1.15">$0</div>
-      <div id="home-saldo-alt" style="font-size:.85rem;color:#4b5563;margin-top:.3rem">&nbsp;</div>
-      <div onclick="abrirRecargaSheet()" style="display:inline-flex;align-items:center;gap:.4rem;margin-top:1.1rem;color:#22d3ee;font-size:.95rem;font-weight:600;cursor:pointer">Depositar <span style="font-size:1.05rem">&#8594;</span></div>
-    </div>
-
-    <!-- Tarjeta diamantes -->
-    <div style="background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:18px;padding:1.35rem 1.3rem;margin-bottom:.9rem;position:relative">
-      <div style="position:absolute;top:1.35rem;right:1.3rem"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9l4-6z"/><path d="M2 9h20"/><path d="M12 21 8 9l2.5-6"/><path d="m12 21 4-12-2.5-6"/></svg></div>
-      <div style="font-size:.75rem;color:#6b7280;letter-spacing:1px;margin-bottom:.5rem">DIAMANTES FF</div>
-      <div id="home-diam" style="font-family:Poppins,sans-serif;font-weight:700;font-size:2.05rem;color:#fff!important;-webkit-text-fill-color:#fff;line-height:1.15">0</div>
-      <div style="font-size:.85rem;color:#4b5563;margin-top:.3rem">Comprados en total</div>
-      <div onclick="goPage('diamantes')" style="display:inline-flex;align-items:center;gap:.4rem;margin-top:1.1rem;color:#ffb84d;font-size:.95rem;font-weight:600;cursor:pointer">Recargar <span style="font-size:1.05rem">&#8594;</span></div>
-    </div>
-
-    <!-- Estadisticas -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:18px;padding:1.2rem .5rem;margin-bottom:1.9rem">
-      <div style="text-align:center;border-right:1px solid rgba(255,255,255,.06)">
-        <div style="font-size:.68rem;color:#6b7280;letter-spacing:.8px;margin-bottom:.4rem">PEDIDOS</div>
-        <div id="home-st-pedidos" style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.35rem;color:#fff!important;-webkit-text-fill-color:#fff">0</div>
-      </div>
-      <div style="text-align:center;border-right:1px solid rgba(255,255,255,.06)">
-        <div style="font-size:.68rem;color:#6b7280;letter-spacing:.8px;margin-bottom:.4rem">LIKES</div>
-        <div id="home-st-likes" style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.35rem;color:#fff!important;-webkit-text-fill-color:#fff">0</div>
-      </div>
-      <div style="text-align:center">
-        <div style="font-size:.68rem;color:#6b7280;letter-spacing:.8px;margin-bottom:.4rem">GASTADO</div>
-        <div id="home-st-gasto" style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.35rem;color:#fff!important;-webkit-text-fill-color:#fff">$0</div>
-      </div>
-    </div>
-
-    <!-- Acceso rapido -->
-    <div style="font-size:.78rem;color:#6b7280;letter-spacing:1.2px;margin-bottom:.9rem">ACCESO R&Aacute;PIDO</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:2.2rem">
-
-      <div onclick="goPage('saldo')" style="display:flex;align-items:center;gap:.75rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:15px;padding:.85rem .8rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(34,211,238,.28)'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'">
-        <div style="width:36px;height:36px;flex-shrink:0;border-radius:10px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9aa3b0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 8l9 6 9-6-9-6z"/><path d="M3 8v8l9 6 9-6V8"/></svg></div>
-        <div style="font-size:.83rem;color:#e8e8ea;font-weight:500">Recargar saldo</div>
-      </div>
-
-      <div onclick="goPage('diamantes')" style="display:flex;align-items:center;gap:.75rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:15px;padding:.85rem .8rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(34,211,238,.28)'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'">
-        <div style="width:36px;height:36px;flex-shrink:0;border-radius:10px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9aa3b0" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9l4-6z"/><path d="M2 9h20"/><path d="M12 21 8 9l2.5-6"/><path d="m12 21 4-12-2.5-6"/></svg></div>
-        <div style="font-size:.83rem;color:#e8e8ea;font-weight:500">Recargar diamantes</div>
-      </div>
-
-      <div onclick="goPage('tienda')" style="display:flex;align-items:center;gap:.75rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:15px;padding:.85rem .8rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(34,211,238,.28)'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'">
-        <div style="width:36px;height:36px;flex-shrink:0;border-radius:10px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9aa3b0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 13H6L5 8z"/><path d="M8.5 11V6.5a3.5 3.5 0 0 1 7 0V11"/></svg></div>
-        <div style="font-size:.83rem;color:#e8e8ea;font-weight:500">Nueva orden</div>
-      </div>
-
-      <div onclick="goPage('menu')" style="display:flex;align-items:center;gap:.75rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:15px;padding:.85rem .8rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(34,211,238,.28)'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'">
-        <div style="width:36px;height:36px;flex-shrink:0;border-radius:10px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9aa3b0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h9M17 7h3M4 12h3M11 12h9M4 17h9M17 17h3"/><circle cx="15" cy="7" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="17" r="1.6"/></svg></div>
-        <div style="font-size:.83rem;color:#e8e8ea;font-weight:500">Configuraci&oacute;n</div>
-      </div>
-
-    </div>
   </div>
 
-  <!-- 💎 TOP RECARGUEROS (premium) -->
-  <div style="max-width:760px;margin:0 auto;padding:0 5vw 2.5rem">
-    <div style="background:linear-gradient(160deg,#1a1230,#0d0818 55%,#0a0713);border:1px solid rgba(167,139,250,.25);border-radius:24px;padding:0;position:relative;overflow:hidden;box-shadow:0 20px 50px rgba(34,211,238,.12)">
-
-      <!-- Barra superior con brillo -->
-      <div style="height:3px;background:linear-gradient(90deg,transparent,#67e8f9,#0e7490,#67e8f9,transparent)"></div>
-
-      <!-- Glows -->
-      <div style="position:absolute;top:-30%;right:-15%;width:360px;height:360px;background:radial-gradient(circle,rgba(167,139,250,.18) 0%,transparent 65%);pointer-events:none"></div>
-      <div style="position:absolute;bottom:-35%;left:-20%;width:320px;height:320px;background:radial-gradient(circle,rgba(34,211,238,.12) 0%,transparent 65%);pointer-events:none"></div>
-
-      <div style="padding:1.6rem 1.4rem;position:relative;z-index:2">
-
-        <!-- Header -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.4rem">
-          <div style="display:flex;align-items:center;gap:.85rem">
-            <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(160deg,#67e8f9,#0e7490);display:flex;align-items:center;justify-content:center;font-size:1.4rem;box-shadow:0 6px 20px rgba(34,211,238,.45),inset 0 1px 2px rgba(255,255,255,.3)">&#128142;</div>
-            <div>
-              <div style="font-family:Oxanium;font-size:1.15rem;font-weight:900;color:#fff;letter-spacing:.5px;line-height:1;display:flex;align-items:center;gap:.5rem">TOP RECARGUEROS</div>
-              <div style="font-size:.68rem;color:#67e8f9;margin-top:.25rem;font-weight:600">&#127942; Los reyes de los diamantes</div>
-            </div>
-          </div>
-          <!-- Botón V (colapsar a top 3) -->
-          <button onclick="toggleTabla('diamond-top-list',this)" style="display:flex;align-items:center;gap:.4rem;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3);color:#a5f3fc;border-radius:10px;padding:.4rem .7rem;font-family:Oxanium;font-size:.65rem;font-weight:800;letter-spacing:1px;cursor:pointer">TOP 10 <span class="tabla-arrow" style="transition:transform .3s">&#9662;</span></button>
-        </div>
-
-        <!-- Tabs de período -->
-        <div style="display:flex;gap:.35rem;margin-bottom:1.35rem;background:rgba(0,0,0,.4);padding:.32rem;border-radius:13px;border:1px solid rgba(255,255,255,.04)">
-          <button onclick="setDiamondPeriod('historico')" id="dtab-historico" class="dperiod-tab dperiod-active" style="flex:1;padding:.58rem;background:linear-gradient(90deg,#67e8f9,#0e7490);border:none;color:#fff;border-radius:10px;font-family:Poppins,sans-serif;font-weight:800;font-size:.7rem;cursor:pointer;letter-spacing:.5px">HISTÓRICO</button>
-          <button onclick="setDiamondPeriod('mes')" id="dtab-mes" class="dperiod-tab" style="flex:1;padding:.58rem;background:transparent;border:none;color:var(--muted);border-radius:10px;font-family:Poppins,sans-serif;font-weight:800;font-size:.7rem;cursor:pointer;letter-spacing:.5px">MES</button>
-          <button onclick="setDiamondPeriod('semana')" id="dtab-semana" class="dperiod-tab" style="flex:1;padding:.58rem;background:transparent;border:none;color:var(--muted);border-radius:10px;font-family:Poppins,sans-serif;font-weight:800;font-size:.7rem;cursor:pointer;letter-spacing:.5px">SEMANA</button>
-          <button onclick="setDiamondPeriod('dia')" id="dtab-dia" class="dperiod-tab" style="flex:1;padding:.58rem;background:transparent;border:none;color:var(--muted);border-radius:10px;font-family:Poppins,sans-serif;font-weight:800;font-size:.7rem;cursor:pointer;letter-spacing:.5px">DÍA</button>
-        </div>
-
-        <!-- Lista Top 10 -->
-        <div id="diamond-top-list" style="display:flex;flex-direction:column;gap:.55rem">
-          <div style="text-align:center;padding:2rem;color:var(--muted);font-size:.82rem">Cargando...</div>
-        </div>
-
-        <!-- Ver ranking completo -->
-        <div style="text-align:center;margin-top:1.3rem">
-          <button onclick="goPage('ranking')" style="background:linear-gradient(90deg,#67e8f9,#0e7490);border:none;color:#fff;border-radius:12px;padding:.7rem 1.5rem;font-family:Oxanium;font-weight:800;font-size:.78rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(34,211,238,.35)">Ver Top &amp; Premios &#8594;</button>
-        </div>
-
-      </div>
+  <!-- ═══ RESEÑAS ═══ -->
+  <div id="section-resenas" style="max-width:680px;margin:0 auto;padding:0 1.1rem 2rem">
+    <div class="gm-sec-title"><span style="font-size:1.1rem">&#11088;</span> LO QUE DICEN NUESTROS CLIENTES <span class="line"></span></div>
+    <div style="font-size:.72rem;color:var(--muted);margin-bottom:1rem" id="resenas-summary">Se el primero en opinar</div>
+    <div id="resenas-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.75rem;margin-bottom:1.2rem">
+      <div style="text-align:center;padding:2rem;color:var(--muted);font-size:.82rem;grid-column:1/-1;background:var(--card);border:1px solid var(--border);border-radius:14px">Aun no hay resenas. Se el primero!</div>
     </div>
-
-    <!-- ═══ TOPS DE COMPRAS (4 en 2 filas) ═══ -->
-    <div style="margin-top:1.5rem">
-      <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1rem">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffb84d" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v5a5 5 0 0 1-10 0V4zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4M12 14v3M8 21h8M10 17h4v4h-4z"/></svg>
-        <span style="font-family:Oxanium;font-size:1.05rem;font-weight:900;color:#fff;letter-spacing:.5px">TOP COMPRADORES</span>
-      </div>
-      <!-- TOP PASES -->
-      <div style="background:linear-gradient(160deg,#22d3ee0d,rgba(255,255,255,.015));border:1px solid #22d3ee30;border-radius:16px;padding:1rem 1.1rem;margin-bottom:.7rem">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.9rem">
-          <div style="display:flex;align-items:center;gap:.6rem;min-width:0">
-            <div style="width:38px;height:38px;flex-shrink:0;border-radius:11px;background:#22d3ee1a;border:1px solid #22d3ee33;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="m12 8 1.2 2.4 2.8.4-2 2 .5 2.7L12 14.2l-2.5 1.3.5-2.7-2-2 2.8-.4L12 8z"/></svg></div>
-            <div style="min-width:0"><div style="font-family:Oxanium;font-size:.95rem;font-weight:900;color:#fff;letter-spacing:.4px">TOP PASES</div><div style="font-size:.62rem;color:#22d3ee;font-weight:600">Pase Booyah</div></div>
-          </div>
-          <button onclick="toggleTabla('top-pases-lista',this);renderTopPases()" style="width:30px;height:30px;flex-shrink:0;border-radius:9px;background:#22d3ee1a;border:1px solid #22d3ee33;color:#22d3ee;cursor:pointer;display:flex;align-items:center;justify-content:center"><span class="tabla-arrow rot" style="transition:transform .3s;font-size:.75rem">&#9662;</span></button>
-        </div>
-        <div id="top-pases-lista" class="top3only" style="display:flex;flex-direction:column;gap:.45rem">
-          <div style="text-align:center;padding:1rem;color:#6b7280;font-size:.75rem">Cargando...</div>
-        </div>
-      </div>
-      <!-- TOP FRAGMENTOS -->
-      <div style="background:linear-gradient(160deg,#25d3660d,rgba(255,255,255,.015));border:1px solid #25d36630;border-radius:16px;padding:1rem 1.1rem;margin-bottom:.7rem">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.9rem">
-          <div style="display:flex;align-items:center;gap:.6rem;min-width:0">
-            <div style="width:38px;height:38px;flex-shrink:0;border-radius:11px;background:#25d3661a;border:1px solid #25d36633;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
-            <div style="min-width:0"><div style="font-family:Oxanium;font-size:.95rem;font-weight:900;color:#fff;letter-spacing:.4px">TOP FRAGMENTOS</div><div style="font-size:.62rem;color:#25d366;font-weight:600">Fragmentos universales</div></div>
-          </div>
-          <button onclick="toggleTabla('top-frag-lista',this);renderTopFragmentos()" style="width:30px;height:30px;flex-shrink:0;border-radius:9px;background:#25d3661a;border:1px solid #25d36633;color:#25d366;cursor:pointer;display:flex;align-items:center;justify-content:center"><span class="tabla-arrow rot" style="transition:transform .3s;font-size:.75rem">&#9662;</span></button>
-        </div>
-        <div id="top-frag-lista" class="top3only" style="display:flex;flex-direction:column;gap:.45rem">
-          <div style="text-align:center;padding:1rem;color:#6b7280;font-size:.75rem">Cargando...</div>
-        </div>
-      </div>
-      <!-- TOP CAJAS -->
-      <div style="background:linear-gradient(160deg,#00e5ff0d,rgba(255,255,255,.015));border:1px solid #00e5ff30;border-radius:16px;padding:1rem 1.1rem;margin-bottom:.7rem">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.9rem">
-          <div style="display:flex;align-items:center;gap:.6rem;min-width:0">
-            <div style="width:38px;height:38px;flex-shrink:0;border-radius:11px;background:#00e5ff1a;border:1px solid #00e5ff33;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8V21H3V8M1 3h22v5H1zM12 3v18"/></svg></div>
-            <div style="min-width:0"><div style="font-family:Oxanium;font-size:.95rem;font-weight:900;color:#fff;letter-spacing:.4px">TOP CAJAS</div><div style="font-size:.62rem;color:#00e5ff;font-weight:600">Cajas de fragmentos</div></div>
-          </div>
-          <button onclick="toggleTabla('top-cajas-lista',this);renderTopCajas()" style="width:30px;height:30px;flex-shrink:0;border-radius:9px;background:#00e5ff1a;border:1px solid #00e5ff33;color:#00e5ff;cursor:pointer;display:flex;align-items:center;justify-content:center"><span class="tabla-arrow rot" style="transition:transform .3s;font-size:.75rem">&#9662;</span></button>
-        </div>
-        <div id="top-cajas-lista" class="top3only" style="display:flex;flex-direction:column;gap:.45rem">
-          <div style="text-align:center;padding:1rem;color:#6b7280;font-size:.75rem">Cargando...</div>
-        </div>
-      </div>
-      <!-- TOP LIKES -->
-      <div style="background:linear-gradient(160deg,#25d3660d,rgba(255,255,255,.015));border:1px solid #25d36630;border-radius:16px;padding:1rem 1.1rem;margin-bottom:.7rem">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.9rem">
-          <div style="display:flex;align-items:center;gap:.6rem;min-width:0">
-            <div style="width:38px;height:38px;flex-shrink:0;border-radius:11px;background:#25d3661a;border:1px solid #25d36633;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="#25d366"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 5.5 6 5.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.5 0 5 3.5 3.5 6.5C19 16.5 12 21 12 21z"/></svg></div>
-            <div style="min-width:0"><div style="font-family:Oxanium;font-size:.95rem;font-weight:900;color:#fff;letter-spacing:.4px">TOP LIKES</div><div style="font-size:.62rem;color:#25d366;font-weight:600">Likes enviados</div></div>
-          </div>
-          <button onclick="toggleTabla('toplikes-lista',this);renderTopLikes()" style="width:30px;height:30px;flex-shrink:0;border-radius:9px;background:#25d3661a;border:1px solid #25d36633;color:#25d366;cursor:pointer;display:flex;align-items:center;justify-content:center"><span class="tabla-arrow rot" style="transition:transform .3s;font-size:.75rem">&#9662;</span></button>
-        </div>
-        <div id="toplikes-lista" class="top3only" style="display:flex;flex-direction:column;gap:.45rem">
-          <div style="text-align:center;padding:1rem;color:#6b7280;font-size:.75rem">Cargando...</div>
-        </div>
-      </div>
-    </div>
+    <div style="text-align:center"><button onclick="openResenaModal()" style="padding:.6rem 1.4rem;background:linear-gradient(90deg,#0891b2,#22d3ee);color:#fff;border:none;border-radius:10px;font-family:Oxanium,sans-serif;font-weight:800;font-size:.78rem;letter-spacing:.5px;cursor:pointer">+ Dejar resena</button></div>
   </div>
 
-  <!-- RESENAS -->
-  <div id="section-resenas" style="max-width:1000px;margin:0 auto;padding:0 5vw 3rem">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem;flex-wrap:wrap;gap:.75rem">
+  <!-- ═══ FOOTER ═══ -->
+  <div style="border-top:1px solid rgba(255,255,255,.06);padding:2rem 1.1rem 6rem;max-width:680px;margin:0 auto">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem 1rem;margin-bottom:1.5rem">
+      <div style="grid-column:1/-1">
+        <div style="font-family:Oxanium,sans-serif;font-weight:900;font-size:1.15rem;letter-spacing:2px;margin-bottom:.5rem"><span style="color:#fff">CIBER</span><span style="color:#22d3ee">STORE</span></div>
+        <div style="font-size:.74rem;color:var(--muted);line-height:1.6;max-width:290px">Tu tienda online de confianza para recargas de diamantes, pases y servicios digitales.</div>
+      </div>
       <div>
-        <div style="font-family:Oxanium;font-size:.95rem;font-weight:800;color:#fff;margin-bottom:.18rem;display:flex;align-items:center;gap:.5rem">&#11088; Resenas de clientes</div>
-        <div style="font-size:.72rem;color:var(--muted)" id="resenas-summary">Se el primero en opinar</div>
+        <div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:.75rem;color:#fff;letter-spacing:.5px;margin-bottom:.7rem">ENLACES</div>
+        <div onclick="goPage('home')" style="font-size:.75rem;color:var(--muted);margin-bottom:.5rem;cursor:pointer">Inicio</div>
+        <div onclick="goPage('diamantes')" style="font-size:.75rem;color:var(--muted);margin-bottom:.5rem;cursor:pointer">Diamantes</div>
+        <div onclick="goPage('pase')" style="font-size:.75rem;color:var(--muted);margin-bottom:.5rem;cursor:pointer">Pases Booyah</div>
+        <div onclick="goPage('likes2k')" style="font-size:.75rem;color:var(--muted);cursor:pointer">Likes</div>
       </div>
-      <button onclick="openResenaModal()" style="padding:.45rem 1rem;background:linear-gradient(90deg,var(--c2),var(--c1));color:#fff;border:none;border-radius:7px;font-family:'Poppins';font-weight:800;font-size:.75rem;letter-spacing:1px;cursor:pointer">+ Dejar resena</button>
+      <div>
+        <div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:.75rem;color:#fff;letter-spacing:.5px;margin-bottom:.7rem">SOPORTE</div>
+        <div onclick="window.open('https://wa.me/12894273983','_blank')" style="font-size:.75rem;color:var(--muted);margin-bottom:.5rem;cursor:pointer">WhatsApp</div>
+        <div onclick="goPage('faq')" style="font-size:.75rem;color:var(--muted);margin-bottom:.5rem;cursor:pointer">Preguntas frecuentes</div>
+        <div onclick="goPage('terminos')" style="font-size:.75rem;color:var(--muted);cursor:pointer">Terminos</div>
+      </div>
     </div>
-    <div id="resenas-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.75rem">
-      <div style="text-align:center;padding:2rem;color:var(--muted);font-size:.82rem;grid-column:1/-1;background:var(--card);border:1px solid var(--border);border-radius:11px">Aun no hay resenas. Se el primero!</div>
+    <div style="display:flex;gap:.6rem;margin-bottom:1.3rem">
+      <div onclick="window.open('https://whatsapp.com/channel/0029VbCXQVjJENyAgAoJLJ3g','_blank')" style="width:38px;height:38px;border-radius:10px;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.3);display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="#25d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.247-.694.247-1.289.173-1.413-.074-.124-.272-.198-.57-.347M12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></div>
+      <div onclick="window.open('https://instagram.com','_blank')" style="width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e8e8ea" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5.5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></div>
     </div>
-  </div>
-
-  <!-- ORDERS BADGE -->
-  <div style="text-align:center;padding:0 5vw 2rem">
-    <div class="orders-badge">&#128722; Mas de <span id="total-orders-badge">1,200</span> pedidos completados</div>
+    <div style="display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:1.2rem">
+      <div style="background:rgba(255,255,255,.05);border-radius:7px;padding:.35rem .7rem;font-size:.66rem;font-weight:800;color:#fff;letter-spacing:.5px">VISA</div>
+      <div style="background:rgba(255,255,255,.05);border-radius:7px;padding:.35rem .7rem;font-size:.66rem;font-weight:800;color:#fff;letter-spacing:.5px">Mastercard</div>
+      <div style="background:rgba(255,255,255,.05);border-radius:7px;padding:.35rem .7rem;font-size:.66rem;font-weight:800;color:#ff6a00;letter-spacing:.5px">OXXO</div>
+      <div style="background:rgba(255,255,255,.05);border-radius:7px;padding:.35rem .7rem;font-size:.66rem;font-weight:800;color:#22d3ee;letter-spacing:.5px">PayPal</div>
+    </div>
+    <div style="font-size:.66rem;color:#4b5563;line-height:1.5">&#169; 2026 CiberStore. Todos los derechos reservados. &middot; &#128274; Sitio 100% seguro</div>
+    <div style="display:none"><span id="total-orders-badge">1200</span></div>
   </div>
 
 </div>
