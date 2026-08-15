@@ -8522,14 +8522,21 @@ function recSetMonto(m){
 
 // Tipo de recarga (obligatorio): para que va a usar el saldo
 var _recTipo = null;
-var REC_TIPO_LABEL = { ilim:'Diamantes con Bono', pase:'Pase Booyah', '1vez':'Diamantes 1 vez por ID' };
+var REC_TIPO_LABEL = { ilim:'Diamantes con Bonus', revend:'Zona de Revendedores', '1vez':'Diamantes 1 vez por ID' };
 
 function recSetTipo(tipo){
   _recTipo = tipo;
-  [['ilim','rec-tipo-ilim'],['pase','rec-tipo-pase'],['1vez','rec-tipo-1vez']].forEach(function(par){
+  [['ilim','rec-tipo-ilim'],['revend','rec-tipo-revend'],['1vez','rec-tipo-1vez']].forEach(function(par){
     var el = document.getElementById(par[1]);
     if(!el) return;
-    el.classList.toggle('on', par[0] === tipo);
+    var activo = (par[0] === tipo);
+    el.classList.toggle('on', activo);
+    el.style.background = activo ? 'linear-gradient(135deg,rgba(34,211,238,.1),rgba(139,92,246,.08))' : 'rgba(255,255,255,.022)';
+    el.style.borderColor = activo ? 'rgba(34,211,238,.5)' : 'rgba(255,255,255,.08)';
+    var radio = el.querySelector('.rec-radio');
+    if(radio) radio.style.borderColor = activo ? '#22d3ee' : 'rgba(255,255,255,.2)';
+    var dot = el.querySelector('.rec-dot');
+    if(dot) dot.style.background = activo ? 'linear-gradient(135deg,#22d3ee,#8b5cf6)' : 'transparent';
   });
   var err = document.getElementById('rec-tipo-err');
   if(err) err.style.display = 'none';
@@ -8562,9 +8569,10 @@ function recElegirMetodo(metodo){
 var _recMontoElegido = 0;
 
 function recLimpiarTipo(){
-  ['rec-tipo-ilim','rec-tipo-1vez'].forEach(function(id){
+  ['rec-tipo-ilim','rec-tipo-revend','rec-tipo-1vez'].forEach(function(id){
     var el = document.getElementById(id);
     if(!el) return;
+    el.classList.remove('on');
     el.style.background = 'rgba(255,255,255,.022)';
     el.style.borderColor = 'rgba(255,255,255,.08)';
     var r = el.querySelector('.rec-radio'); if(r) r.style.borderColor = 'rgba(255,255,255,.2)';
