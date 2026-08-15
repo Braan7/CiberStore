@@ -1981,6 +1981,47 @@ html,body{max-width:100%;overflow-x:hidden}
 @media(min-width:900px){
   .gm-prod-grid{grid-template-columns:repeat(3,1fr)}
 }
+
+/* ═══════════ RECARGA PREMIUM (recibo de éxito) ═══════════ */
+@keyframes rcpop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+@keyframes rccheck{0%{stroke-dashoffset:60}100%{stroke-dashoffset:0}}
+@keyframes rcring{0%{transform:scale(.6);opacity:0}50%{opacity:.5}100%{transform:scale(1.6);opacity:0}}
+@keyframes rcgemfloat{0%{transform:translateY(0) rotate(0);opacity:0}15%{opacity:1}100%{transform:translateY(-90px) rotate(35deg);opacity:0}}
+@keyframes rcglow{0%,100%{box-shadow:0 0 40px rgba(37,211,102,.25),inset 0 0 30px rgba(37,211,102,.06)}50%{box-shadow:0 0 60px rgba(37,211,102,.4),inset 0 0 40px rgba(37,211,102,.1)}}
+@keyframes rcbounce{0%{transform:scale(.5) translateY(20px);opacity:0}60%{transform:scale(1.05)}100%{transform:scale(1) translateY(0);opacity:1}}
+.rc-wrap{position:relative;overflow:hidden;border-radius:22px;padding:2rem 1.4rem;text-align:center;max-width:430px;margin:0 auto;
+  background:linear-gradient(165deg,rgba(20,40,32,.6),rgba(12,18,28,.75));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:1px solid rgba(37,211,102,.35);animation:rcglow 3s ease-in-out infinite,rcbounce .5s cubic-bezier(.2,.8,.3,1.1) both}
+.rc-wrap.pend{background:linear-gradient(165deg,rgba(45,38,20,.6),rgba(18,16,28,.75));border-color:rgba(255,184,77,.4)}
+.rc-wrap.fail{background:linear-gradient(165deg,rgba(45,20,24,.6),rgba(20,14,18,.75));border-color:rgba(255,90,90,.4);animation:rcbounce .5s cubic-bezier(.2,.8,.3,1.1) both}
+.rc-gems{position:absolute;inset:0;pointer-events:none;z-index:1}
+.rc-gems span{position:absolute;bottom:38%;font-size:1.1rem;filter:drop-shadow(0 0 8px rgba(34,211,238,.8));animation:rcgemfloat 2.4s ease-out infinite}
+.rc-check-ring{position:relative;width:88px;height:88px;margin:0 auto .9rem;z-index:2}
+.rc-check-ring::before,.rc-check-ring::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid rgba(37,211,102,.5);animation:rcring 2s ease-out infinite}
+.rc-check-ring::after{animation-delay:1s}
+.rc-check-circle{width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,#25d366,#0e9e4f);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 30px rgba(37,211,102,.5);animation:rcpop .5s cubic-bezier(.2,.8,.3,1.3) both;position:relative;z-index:3}
+.rc-check-circle.pend{background:linear-gradient(135deg,#ffb84d,#f59e0b);box-shadow:0 8px 30px rgba(255,184,77,.5)}
+.rc-check-circle.fail{background:linear-gradient(135deg,#ff5a5a,#dc2626);box-shadow:0 8px 30px rgba(255,90,90,.5)}
+.rc-check-svg{width:44px;height:44px}
+.rc-check-svg path{stroke-dasharray:60;stroke-dashoffset:60;animation:rccheck .5s .35s ease-out forwards}
+.rc-amount{font-family:Oxanium,sans-serif;font-weight:900;font-size:2rem;line-height:1;margin:.3rem 0 .1rem;
+  background:linear-gradient(90deg,#22d3ee,#25d366);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 2px 10px rgba(37,211,102,.4));animation:rcbounce .5s .2s both}
+.rc-title{font-family:Oxanium,sans-serif;font-weight:900;font-size:1.15rem;letter-spacing:.5px;margin-bottom:.25rem}
+.rc-sub{font-size:.78rem;color:var(--muted);margin-bottom:1.3rem}
+.rc-detail{background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:.4rem 1rem;text-align:left;animation:rcbounce .5s .3s both}
+.rc-badge-status{display:inline-flex;align-items:center;gap:.4rem;font-family:Oxanium,sans-serif;font-weight:800;font-size:.72rem;letter-spacing:.5px;padding:.35rem .9rem;border-radius:99px;margin-bottom:1.1rem}
+.rc-btn{width:100%;margin-top:1.2rem;padding:.9rem;color:#fff;border:none;border-radius:13px;font-family:Oxanium,sans-serif;font-weight:800;font-size:.88rem;letter-spacing:.5px;cursor:pointer;transition:transform .15s,filter .2s}
+.rc-btn:hover{filter:brightness(1.12)}.rc-btn:active{transform:scale(.97)}
+
+/* Procesamiento premium */
+@keyframes rcspin{to{transform:rotate(360deg)}}
+@keyframes rcpulse{0%,100%{opacity:.4;transform:scale(.9)}50%{opacity:1;transform:scale(1.1)}}
+.rc-proc{text-align:center;padding:2rem 1rem;animation:rcbounce .4s both}
+.rc-proc-ring{width:70px;height:70px;margin:0 auto 1rem;border-radius:50%;border:3px solid rgba(34,211,238,.15);border-top-color:#22d3ee;animation:rcspin .9s linear infinite;position:relative}
+.rc-proc-gem{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.6rem;animation:rcpulse 1.2s ease-in-out infinite}
+.rc-proc-txt{font-family:Oxanium,sans-serif;font-weight:800;font-size:1rem;color:#22d3ee;letter-spacing:.5px}
+.rc-proc-sub{font-size:.75rem;color:var(--muted);margin-top:.35rem}
 </style>
 
 <script>

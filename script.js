@@ -6196,6 +6196,21 @@ function _procesarRecargaAutomatica(p, ffId){
     if(msg){ msg.className='ddet-msg'; msg.style.color='#25d366'; msg.innerHTML='\u2705 Cuenta encontrada: <b>'+nombre+'</b><br>Procesando recarga...'; }
     if(btn){ btn.innerHTML='Recargando...'; }
 
+    // Animacion de procesamiento premium en el area de detalle
+    var _detProc = document.getElementById('diam-detalle');
+    if(_detProc){
+      _detProc.innerHTML =
+        '<div class="rc-proc">'
+        + '<div class="rc-proc-ring"><div class="rc-proc-gem">\uD83D\uDC8E</div></div>'
+        + '<div class="rc-proc-txt">Procesando recarga...</div>'
+        + '<div class="rc-proc-sub">Cuenta: <b style="color:#fff">'+nombre+'</b> \u00B7 Enviando '+p.nombre+'</div>'
+        + '<div class="rc-proc-sub" style="margin-top:.6rem;color:#25d366">\uD83D\uDD10 No cierres esta ventana</div>'
+        + '</div>';
+      _detProc.style.display = '';
+      var _catProc = document.getElementById('diam-catalogo');
+      if(_catProc) _catProc.style.display = 'none';
+    }
+
     // Paso 2: cobrar el saldo AHORA (antes de recargar)
     var ord=getNextOrder();
     var _movCompraId = null;              // ID del movimiento (para cancelarlo si falla)
@@ -6243,6 +6258,7 @@ function _procesarRecargaAutomatica(p, ffId){
 
           if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
           if(msg){ msg.className='ddet-msg err'; msg.style.fontSize='.75rem'; msg.innerHTML='\u274C <b>RECARGA RECHAZADA</b><br/>Contacta al administrador. Tu saldo sera reembolsado.'; }
+          _mostrarEstadoRecarga('fail', 'RECARGA RECHAZADA', 'No se pudo completar. Tu saldo fue reembolsado automaticamente.', p, ffId);
 
           if(typeof _mostrarAvisoModal==='function'){
             _mostrarAvisoModal('RECARGA RECHAZADA',
@@ -6250,6 +6266,7 @@ function _procesarRecargaAutomatica(p, ffId){
               '#ff6b6b');
           }
           showToast('\u274C Recarga rechazada. Saldo reembolsado.', 5000);
+          _mostrarEstadoRecarga('fail', 'RECARGA RECHAZADA', 'No pudimos completar tu recarga. Tu saldo fue reembolsado automaticamente.', p, ffId);
           _comprandoDiam = false;
         } else if(enMantenimiento){
           // Proveedor en mantenimiento: la recarga NO se hizo, DEVOLVER el saldo
@@ -6266,6 +6283,7 @@ function _procesarRecargaAutomatica(p, ffId){
           if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u2699\uFE0F PROVEEDOR EN MANTENIMIENTO - Recarga AUTO | Paquete: '+p.nombre+' | ID: '+ffId+' | '+errTxt+' | Saldo devuelto al cliente: $'+p.precio+' MXN', p.precio, ord);
           if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
           if(msg){ msg.className='ddet-msg err'; msg.style.fontSize='.75rem'; msg.innerHTML='\u2699\uFE0F Las recargas automaticas estan en <b>mantenimiento del proveedor</b> por unos minutos.<br/><b style="color:#25d366">Tu saldo NO se gasto.</b> Intenta mas tarde o escribenos por WhatsApp.'; }
+          _mostrarEstadoRecarga('maint', 'EN MANTENIMIENTO', 'El proveedor esta en mantenimiento. Tu saldo NO se gasto, sigue intacto.', p, ffId);
           if(typeof _mostrarAvisoModal==='function'){
             _mostrarAvisoModal('\u2699\uFE0F EN MANTENIMIENTO',
               'Las recargas automaticas estan <b style="color:#fff">temporalmente en mantenimiento</b> del proveedor.<br/><br/>\u2705 Tu saldo <b style="color:#25d366">no se gasto</b>, sigue intacto.<br/><br/>Intenta de nuevo en unos minutos, o escribenos por WhatsApp si es urgente.',
@@ -6288,6 +6306,7 @@ function _procesarRecargaAutomatica(p, ffId){
           if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F NO DISPONIBLE - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\u2705 SALDO DEVUELTO automaticamente ('+fmt(p.precio)+')', p.precio, ord);
           if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
           if(msg){ msg.className='ddet-msg err'; msg.style.fontSize='.75rem'; msg.innerHTML='\u274C Este paquete no esta disponible para tu ID en este momento (puede ser por la region de tu cuenta o stock momentaneo).<br/><b>Tu saldo fue devuelto.</b> Intenta de nuevo en unos minutos o contacta al admin.'; }
+          _mostrarEstadoRecarga('maint', 'NO DISPONIBLE', 'Este paquete no esta disponible para tu ID ahora. Tu saldo fue devuelto.', p, ffId);
           showToast('\u274C No disponible. Saldo devuelto.', 4000);
           _comprandoDiam = false;
         } else {
@@ -6296,9 +6315,9 @@ function _procesarRecargaAutomatica(p, ffId){
           if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F VERIFICAR - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt, p.precio, ord);
           if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
           if(msg){ msg.className='ddet-msg'; msg.style.color='#22d3ee'; msg.style.fontSize='.72rem'; msg.innerHTML='\u23F3 Tu recarga se esta verificando. Si no llega en unos minutos, contacta al admin con tu ID.'; }
+          _mostrarEstadoRecarga('pend', 'RECARGA EN VERIFICACION', 'Tu recarga se esta verificando. Si no llega en unos minutos, contacta al admin con tu ID.', p, ffId);
           console.error('[RECARGA] Sin confirmar (no reembolsado):', JSON.stringify(res));
           _comprandoDiam = false;
-          setTimeout(cerrarDiamDetalle, 4000);
         }
       }
     }).catch(function(err){
@@ -6307,9 +6326,9 @@ function _procesarRecargaAutomatica(p, ffId){
       if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F VERIFICAR (sin respuesta) - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId, p.precio, ord);
       if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
       if(msg){ msg.className='ddet-msg'; msg.style.color='#22d3ee'; msg.style.fontSize='.72rem'; msg.innerHTML='\u23F3 Tu recarga se esta verificando. Si no llega, contacta al admin.'; }
+      _mostrarEstadoRecarga('pend', 'RECARGA EN VERIFICACION', 'Tu recarga se esta verificando. Si no llega en unos minutos, contacta al admin con tu ID.', p, ffId);
       console.error('[RECARGA] catch compra (no reembolsado):', err);
       _comprandoDiam = false;
-      setTimeout(cerrarDiamDetalle, 4000);
     });
 
   }).catch(function(err){
@@ -6686,29 +6705,89 @@ function _mostrarReciboRecarga(p, ffId, nombreJugador, status){
   dia = dia.charAt(0).toUpperCase() + dia.slice(1);
 
   var esPend = (status === 'PENDING');
-  var colorBorde = esPend ? 'rgba(255,180,60,.4)' : 'rgba(37,211,102,.4)';
-  var colorTxt = esPend ? '#22d3ee' : '#25d366';
-  var titulo = esPend ? '\u23F3 RECARGA EN PROCESO' : '\u2705 RECARGA EXITOSA';
+
+  // Numero de diamantes formateado
+  var numDiam = (''+(p.diamantes||'')).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+  var wrapCls = esPend ? 'rc-wrap pend' : 'rc-wrap';
+  var circleCls = esPend ? 'rc-check-circle pend' : 'rc-check-circle';
+  var titulo = esPend ? 'RECARGA EN PROCESO' : '\u00A1RECARGA COMPLETADA!';
+  var tituloColor = esPend ? '#ffb84d' : '#25d366';
+  var sub = esPend ? 'Tu recarga se acreditara en breve' : 'Los diamantes ya estan en tu cuenta';
+
+  // Icono central: check (exito) o reloj (pendiente)
+  var icono = esPend
+    ? '<div class="'+circleCls+'"><svg class="rc-check-svg" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>'
+    : '<div class="'+circleCls+'"><svg class="rc-check-svg" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>';
+
+  // Badge de estado
+  var badge = esPend
+    ? '<div class="rc-badge-status" style="background:rgba(255,184,77,.15);border:1px solid rgba(255,184,77,.4);color:#ffb84d"><span style="width:7px;height:7px;border-radius:50%;background:#ffb84d;box-shadow:0 0 6px #ffb84d"></span> PENDIENTE</div>'
+    : '<div class="rc-badge-status" style="background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.4);color:#25d366"><span style="width:7px;height:7px;border-radius:50%;background:#25d366;box-shadow:0 0 6px #25d366"></span> \u2713 EXITOSA</div>';
+
+  // Diamantes flotantes decorativos (solo en exito)
+  var gems = esPend ? '' :
+    '<div class="rc-gems">'
+    + '<span style="left:18%;animation-delay:0s">\uD83D\uDC8E</span>'
+    + '<span style="left:34%;animation-delay:.4s">\uD83D\uDC8E</span>'
+    + '<span style="left:52%;animation-delay:.8s">\uD83D\uDC8E</span>'
+    + '<span style="left:68%;animation-delay:.3s">\uD83D\uDC8E</span>'
+    + '<span style="left:82%;animation-delay:.6s">\uD83D\uDC8E</span>'
+    + '</div>';
 
   det.innerHTML =
-    '<div style="background:linear-gradient(160deg,rgba(37,211,102,.08),rgba(255,255,255,.02));border:2px solid '+colorBorde+';border-radius:18px;padding:1.75rem 1.35rem;text-align:center;max-width:420px;margin:0 auto">'
-    + '<div style="font-size:2.8rem;margin-bottom:.5rem">'+(esPend?'\u23F3':'\u2705')+'</div>'
-    + '<div style="font-family:Oxanium;font-weight:900;font-size:1.25rem;color:'+colorTxt+';margin-bottom:.35rem;letter-spacing:.5px">'+titulo+'</div>'
-    + '<div style="font-size:.8rem;color:var(--muted);margin-bottom:1.5rem">'+(esPend?'Tu recarga se acreditara en breve':'Los diamantes ya estan en tu cuenta')+'</div>'
-
-    + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
-    +   _filaRecibo('\uD83D\uDC8E Cantidad', p.nombre)
-    +   _filaRecibo('\uD83C\uDFAE ID Free Fire', ffId + (nombreJugador ? ' ('+nombreJugador+')' : ''))
-    +   _filaRecibo('\uD83D\uDCB5 Precio', fmt(p.precio))
-    +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' - ' + dia)
-    +   _filaRecibo('\uD83D\uDD52 Hora', hora, true)
+    '<div class="'+wrapCls+'">'
+    + gems
+    + '<div style="position:relative;z-index:2">'
+    +   '<div class="rc-check-ring">' + icono + '</div>'
+    +   '<div class="rc-title" style="color:'+tituloColor+'">'+titulo+'</div>'
+    +   (numDiam ? '<div class="rc-amount">+'+numDiam+' \uD83D\uDC8E</div>' : '')
+    +   '<div class="rc-sub">'+sub+'</div>'
+    +   badge
+    +   '<div class="rc-detail">'
+    +     _filaRecibo('\uD83D\uDC8E Diamantes', p.nombre)
+    +     _filaRecibo('\uD83C\uDFAE Cuenta', ffId + (nombreJugador ? ' ('+nombreJugador+')' : ''))
+    +     _filaRecibo('\uD83D\uDCB0 Precio pagado', fmt(p.precio))
+    +     _filaRecibo('\uD83D\uDCC5 Fecha', fecha)
+    +     _filaRecibo('\uD83D\uDD52 Hora', hora, true)
+    +   '</div>'
+    +   '<button class="rc-btn" onclick="cerrarDiamDetalle()" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6)">Seguir comprando \uD83D\uDED2</button>'
     + '</div>'
-
-    + '<button onclick="cerrarDiamDetalle()" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Volver al catalogo</button>'
     + '</div>';
 
   det.style.display = '';
   document.getElementById('diam-catalogo').style.display = 'none';
+  det.scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+// Pantalla premium para estados que NO son exito (fallida, mantenimiento, no disponible, verificar)
+// tipo: 'fail' | 'pend' | 'maint'  — reutiliza el area diam-detalle sin tocar la logica
+function _mostrarEstadoRecarga(tipo, titulo, sub, p, ffId){
+  var det = document.getElementById('diam-detalle');
+  if(!det) return;
+  var conf = {
+    fail:  { cls:'fail', color:'#ff6b6b', ico:'<path d="M18 6L6 18M6 6l12 12"/>', badge:'FALLIDA',    bg:'rgba(255,90,90,.15)',  bd:'rgba(255,90,90,.4)' },
+    maint: { cls:'pend', color:'#ffb84d', ico:'<path d="M12 8v4M12 16h.01"/><circle cx="12" cy="12" r="9"/>', badge:'MANTENIMIENTO', bg:'rgba(255,184,77,.15)', bd:'rgba(255,184,77,.4)' },
+    pend:  { cls:'pend', color:'#ffb84d', ico:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', badge:'PENDIENTE', bg:'rgba(255,184,77,.15)', bd:'rgba(255,184,77,.4)' }
+  }[tipo] || {};
+  det.innerHTML =
+    '<div class="rc-wrap '+conf.cls+'">'
+    + '<div style="position:relative;z-index:2">'
+    +   '<div class="rc-check-ring"><div class="rc-check-circle '+conf.cls+'"><svg class="rc-check-svg" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">'+conf.ico+'</svg></div></div>'
+    +   '<div class="rc-title" style="color:'+conf.color+'">'+titulo+'</div>'
+    +   '<div class="rc-sub">'+sub+'</div>'
+    +   '<div class="rc-badge-status" style="background:'+conf.bg+';border:1px solid '+conf.bd+';color:'+conf.color+'"><span style="width:7px;height:7px;border-radius:50%;background:'+conf.color+';box-shadow:0 0 6px '+conf.color+'"></span> '+conf.badge+'</div>'
+    +   (p ? '<div class="rc-detail">'
+    +     _filaRecibo('\uD83D\uDC8E Paquete', p.nombre)
+    +     _filaRecibo('\uD83C\uDFAE Cuenta', ffId||'-')
+    +     _filaRecibo('\uD83D\uDCB0 Monto', fmt(p.precio), true)
+    +   '</div>' : '')
+    +   '<button class="rc-btn" onclick="cerrarDiamDetalle()" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6)">Volver al catalogo</button>'
+    +   '<button class="rc-btn" onclick="window.open(\'https://wa.me/12894273983\',\'_blank\')" style="background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.4);color:#25d366;margin-top:.6rem">\uD83D\uDCAC Contactar soporte</button>'
+    + '</div>'
+    + '</div>';
+  det.style.display = '';
+  var cat = document.getElementById('diam-catalogo'); if(cat) cat.style.display = 'none';
   det.scrollIntoView({ behavior:'smooth', block:'center' });
 }
 
