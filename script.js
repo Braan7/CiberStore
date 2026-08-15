@@ -6223,6 +6223,8 @@ function _procesarRecargaAutomatica(p, ffId){
         var errTxt = String(res.error||res.status||'sin confirmar');
         // Fondos agotados del proveedor: la recarga NO se hizo, hay que devolver
         var sinFondos = /saldo insuficiente|insufficient|fondos insuficientes|sin fondos|credito insuficiente|balance too low|no balance|limite excedido|limit exceeded/i.test(errTxt);
+        // Proveedor en mantenimiento / SKU no en catalogo / API caida
+        var enMantenimiento = /no esta en el catalogo|no catalogo|mantenimiento|maintenance|could not be found|route .* not|502|503|504|bad gateway|gateway timeout|service unavailable|temporarily|temporalmente|catalogo del proveedor/i.test(errTxt);
         var noDisponible = /no disponible|not available|no encontrado|not found|sin stock|out of stock/i.test(errTxt);
 
         if(sinFondos){
@@ -6248,6 +6250,28 @@ function _procesarRecargaAutomatica(p, ffId){
               '#ff6b6b');
           }
           showToast('\u274C Recarga rechazada. Saldo reembolsado.', 5000);
+          _comprandoDiam = false;
+        } else if(enMantenimiento){
+          // Proveedor en mantenimiento: la recarga NO se hizo, DEVOLVER el saldo
+          _rpcAjustarSaldo(authSession.id, p.precio).then(function(saldoNuevo){
+            var sn = Number(saldoNuevo)||0;
+            authSession.saldo = sn;
+            _refreshSaldoUI(sn);
+            if(typeof saveSession==='function') saveSession(authSession);
+            if(typeof sbAddMovimiento==='function') sbAddMovimiento(authSession.id, 'credito', p.precio, 'Devolucion Pedido #'+ord+' - proveedor en mantenimiento');
+            if(_movCompraId) _cancelarMovPorId(_movCompraId); else { _cancelarPendiente = true; _cancelarMovimientoCompra(authSession.id, ord); }
+          }).catch(function(e){ console.error('[RECARGA] devolucion mantenimiento fallo:', e); });
+
+          registrarPedido(p.nombre+' (AUTO - MANTENIMIENTO, devuelto)', p.diamantes, 'diamantes', ffId, 0, 0);
+          if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u2699\uFE0F PROVEEDOR EN MANTENIMIENTO - Recarga AUTO | Paquete: '+p.nombre+' | ID: '+ffId+' | '+errTxt+' | Saldo devuelto al cliente: $'+p.precio+' MXN', p.precio, ord);
+          if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
+          if(msg){ msg.className='ddet-msg err'; msg.style.fontSize='.75rem'; msg.innerHTML='\u2699\uFE0F Las recargas automaticas estan en <b>mantenimiento del proveedor</b> por unos minutos.<br/><b style="color:#25d366">Tu saldo NO se gasto.</b> Intenta mas tarde o escribenos por WhatsApp.'; }
+          if(typeof _mostrarAvisoModal==='function'){
+            _mostrarAvisoModal('\u2699\uFE0F EN MANTENIMIENTO',
+              'Las recargas automaticas estan <b style="color:#fff">temporalmente en mantenimiento</b> del proveedor.<br/><br/>\u2705 Tu saldo <b style="color:#25d366">no se gasto</b>, sigue intacto.<br/><br/>Intenta de nuevo en unos minutos, o escribenos por WhatsApp si es urgente.',
+              '#ffb84d');
+          }
+          showToast('\u2699\uFE0F En mantenimiento. Tu saldo esta intacto.', 5000);
           _comprandoDiam = false;
         } else if(noDisponible){
           // La recarga NO se hizo (producto no disponible): DEVOLVER el saldo automatico
