@@ -2022,6 +2022,42 @@ html,body{max-width:100%;overflow-x:hidden}
 .rc-proc-gem{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.6rem;animation:rcpulse 1.2s ease-in-out infinite}
 .rc-proc-txt{font-family:Oxanium,sans-serif;font-weight:800;font-size:1rem;color:#22d3ee;letter-spacing:.5px}
 .rc-proc-sub{font-size:.75rem;color:var(--muted);margin-top:.35rem}
+
+/* ═══════════ RECARGAR SALDO — dashboard premium ═══════════ */
+.rs-balance{position:relative;overflow:hidden;border-radius:20px;padding:1.4rem 1.3rem;margin-bottom:1.6rem;
+  background:linear-gradient(135deg,rgba(34,211,238,.14),rgba(139,92,246,.1) 60%,rgba(20,18,40,.4));
+  border:1px solid rgba(34,211,238,.25);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  box-shadow:0 14px 40px rgba(14,116,144,.2),inset 0 1px 0 rgba(255,255,255,.08)}
+.rs-balance::before{content:"";position:absolute;top:-50%;right:-20%;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(34,211,238,.3),transparent 65%);pointer-events:none}
+.rs-label{font-size:.66rem;color:#8b93a3;letter-spacing:1.5px;font-weight:700;text-transform:uppercase}
+.rs-cur-tabs{display:flex;gap:.35rem;background:rgba(0,0,0,.4);padding:.3rem;border-radius:14px;margin-bottom:.9rem;border:1px solid rgba(255,255,255,.05)}
+.rs-cur-tab{flex:1;padding:.7rem;background:transparent;border:none;color:#6b7280;border-radius:11px;font-family:Oxanium,sans-serif;font-weight:800;font-size:.8rem;letter-spacing:.5px;cursor:pointer;transition:all .25s}
+.rs-cur-tab.on{background:linear-gradient(135deg,#22d3ee,#0891b2);color:#04222b;box-shadow:0 6px 18px rgba(34,211,238,.35)}
+.rs-input-wrap{display:flex;align-items:center;background:rgba(255,255,255,.03);border:1.5px solid rgba(139,92,246,.25);border-radius:15px;padding:.55rem 1.1rem;margin-bottom:.5rem;transition:border-color .25s,box-shadow .25s}
+.rs-input-wrap:focus-within{border-color:rgba(34,211,238,.5);box-shadow:0 0 0 3px rgba(34,211,238,.1),0 0 22px rgba(34,211,238,.12)}
+.rs-quick{padding:.7rem .4rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09);border-radius:12px;color:#c9d1d8;font-family:Oxanium,sans-serif;font-weight:800;font-size:.82rem;cursor:pointer;transition:all .2s;flex:1;min-width:60px;text-align:center}
+.rs-quick:hover{border-color:rgba(34,211,238,.4);transform:translateY(-2px)}
+.rs-quick:active{transform:scale(.95)}
+.rs-quick.on{background:linear-gradient(135deg,rgba(34,211,238,.2),rgba(139,92,246,.15));border-color:rgba(34,211,238,.5);color:#fff;box-shadow:0 6px 18px rgba(34,211,238,.2)}
+.rs-opt{position:relative;overflow:hidden;display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.022);border:1.5px solid rgba(255,255,255,.08);border-radius:16px;padding:1rem;cursor:pointer;transition:all .25s}
+.rs-opt:hover{border-color:rgba(139,92,246,.3);transform:translateY(-2px)}
+.rs-opt:active{transform:scale(.99)}
+.rs-opt.on{background:linear-gradient(135deg,rgba(34,211,238,.1),rgba(139,92,246,.08));border-color:rgba(34,211,238,.5);box-shadow:0 8px 24px rgba(14,116,144,.2)}
+.rs-opt-ico{width:46px;height:46px;flex-shrink:0;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;transition:transform .25s}
+.rs-opt:hover .rs-opt-ico{transform:scale(1.08)}
+.rs-radio{width:22px;height:22px;flex-shrink:0;border-radius:50%;border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;transition:border-color .25s}
+.rs-opt.on .rs-radio{border-color:#22d3ee}
+.rs-dot{width:11px;height:11px;border-radius:50%;background:transparent;transition:background .25s}
+.rs-opt.on .rs-dot{background:linear-gradient(135deg,#22d3ee,#8b5cf6);box-shadow:0 0 8px rgba(34,211,238,.6)}
+.rs-pay{position:relative;overflow:hidden;display:flex;align-items:center;gap:.9rem;background:rgba(255,255,255,.022);border:1.5px solid rgba(255,255,255,.08);border-radius:16px;padding:1rem;cursor:pointer;transition:all .25s}
+.rs-pay:hover{transform:translateY(-2px)}
+.rs-pay:active{transform:scale(.99)}
+.rs-pay-ico{width:48px;height:48px;flex-shrink:0;border-radius:13px;display:flex;align-items:center;justify-content:center;transition:transform .25s}
+.rs-pay:hover .rs-pay-ico{transform:scale(1.08)}
+.rs-tag{font-size:.58rem;padding:.15rem .55rem;border-radius:99px;font-weight:800;letter-spacing:.3px}
+.rs-arrow{color:#5a6478;font-size:1.3rem;transition:transform .25s}
+.rs-pay:hover .rs-arrow{transform:translateX(3px);color:#22d3ee}
+.rs-sec-label{font-size:.68rem;color:#8b93a3;letter-spacing:1.5px;margin-bottom:.7rem;font-weight:700;text-transform:uppercase}
 </style>
 
 <script>

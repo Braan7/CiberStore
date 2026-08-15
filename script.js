@@ -8489,12 +8489,12 @@ function recSetMoneda(m){
   _recMoneda = m;
   var bM = document.getElementById('rec-cur-mxn');
   var bU = document.getElementById('rec-cur-usd');
-  if(bM){ bM.style.background = (m==='MXN')?'#fff':'transparent'; bM.style.color = (m==='MXN')?'#000':'#6b7280'; }
-  if(bU){ bU.style.background = (m==='USD')?'#fff':'transparent'; bU.style.color = (m==='USD')?'#000':'#6b7280'; }
+  if(bM){ bM.classList.toggle('on', m==='MXN'); }
+  if(bU){ bU.classList.toggle('on', m==='USD'); }
   var lbl = document.getElementById('rec-cur-label');
   if(lbl) lbl.textContent = m;
   var av = document.getElementById('rec-min-aviso');
-  if(av) av.textContent = 'Minimo ' + (m==='MXN'?'$100 MXN':'$5 USD');
+  if(av) av.innerHTML = '<span style="color:#22d3ee">&#9432;</span> Minimo ' + (m==='MXN'?'$100 MXN':'$5 USD');
   var inp = document.getElementById('rec-monto');
   if(inp) inp.value = (m==='MXN') ? 100 : 5;
   _recPintarMontos();
@@ -8505,13 +8505,19 @@ function _recPintarMontos(){
   if(!cont) return;
   var montos = REC_MONTOS[_recMoneda] || REC_MONTOS.MXN;
   cont.innerHTML = montos.map(function(m){
-    return '<button onclick="recSetMonto('+m+')" style="flex:1;min-width:60px;padding:.6rem .3rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);color:#c9d1e0;border-radius:11px;font-family:Poppins;font-weight:600;font-size:.82rem;cursor:pointer">$'+m+'</button>';
+    return '<button onclick="recSetMonto('+m+')" class="rs-quick">$'+m+'</button>';
   }).join('');
 }
 
 function recSetMonto(m){
   var inp = document.getElementById('rec-monto');
   if(inp) inp.value = m;
+  // Marcar el boton activo
+  var cont = document.getElementById('rec-montos');
+  if(cont){
+    var btns = cont.querySelectorAll('.rs-quick');
+    btns.forEach(function(b){ b.classList.toggle('on', b.textContent === '$'+m); });
+  }
 }
 
 // Tipo de recarga (obligatorio): para que va a usar el saldo
@@ -8523,13 +8529,7 @@ function recSetTipo(tipo){
   [['ilim','rec-tipo-ilim'],['pase','rec-tipo-pase'],['1vez','rec-tipo-1vez']].forEach(function(par){
     var el = document.getElementById(par[1]);
     if(!el) return;
-    var activo = (par[0] === tipo);
-    el.style.background = activo ? 'rgba(34,211,238,.08)' : 'rgba(255,255,255,.022)';
-    el.style.borderColor = activo ? 'rgba(34,211,238,.45)' : 'rgba(255,255,255,.08)';
-    var radio = el.querySelector('.rec-radio');
-    if(radio) radio.style.borderColor = activo ? '#22d3ee' : 'rgba(255,255,255,.2)';
-    var dot = el.querySelector('.rec-dot');
-    if(dot) dot.style.background = activo ? '#22d3ee' : 'transparent';
+    el.classList.toggle('on', par[0] === tipo);
   });
   var err = document.getElementById('rec-tipo-err');
   if(err) err.style.display = 'none';
