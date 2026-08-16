@@ -5615,10 +5615,12 @@ function _cargarSaldoYMovimientos(){
         var isC=m.tipo==='credito'||m.tipo==='ajuste'||m.tipo==='recarga';
         var color=isC?'#00e676':'#ff6b6b';
         var signo=isC?'+':'-';
-        h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:.42rem .55rem;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px">'
-          +'<div style="min-width:0;flex:1"><div style="font-size:.75rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis">'+(m.descripcion||m.tipo)+'</div>'
-          +'<div style="font-size:.62rem;color:var(--muted)">'+f2+'</div></div>'
-          +'<div style="font-family:Oxanium;font-size:.75rem;font-weight:700;color:'+color+';flex-shrink:0;margin-left:.5rem">'+signo+'$'+(m.monto||0).toLocaleString('es-MX')+'</div>'
+        h+='<div class="mc-mov">'
+          +'<div class="mc-mov-left" style="display:flex;align-items:center;gap:.55rem">'
+          +'<span style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:'+color+';box-shadow:0 0 6px '+color+'"></span>'
+          +'<div style="min-width:0"><div class="mc-mov-desc" style="overflow:hidden;text-overflow:ellipsis">'+(m.descripcion||m.tipo)+'</div>'
+          +'<div class="mc-mov-date">'+f2+'</div></div></div>'
+          +'<div class="mc-mov-amt" style="color:'+color+'">'+signo+'$'+(m.monto||0).toLocaleString('es-MX')+'</div>'
           +'</div>';
       });
       movs.innerHTML=h;
@@ -8720,9 +8722,12 @@ function renderResumenRecargas(){
     arr.sort(function(a,b){ return b.base - a.base; });
 
     lista.innerHTML = arr.map(function(x){
-      return '<div style="background:rgba(255,255,255,.03);border-radius:13px;padding:.9rem 1rem">'
-        + '<div style="font-size:.92rem;color:#fff;font-weight:500;line-height:1.35">'+x.nombre+'</div>'
-        + '<div style="font-size:.82rem;color:#6b7280;margin-top:.25rem">'+x.n+' recarga'+(x.n!==1?'s':'')+' &middot; <b style="color:#25d366">'+fmt(x.monto)+'</b></div>'
+      return '<div class="mc-rrow">'
+        + '<div style="min-width:0;flex:1">'
+        +   '<div class="mc-rrow-name">'+x.nombre+'</div>'
+        +   '<div class="mc-rrow-meta">'+x.n+' recarga'+(x.n!==1?'s':'')+'</div>'
+        + '</div>'
+        + '<div class="mc-rrow-price">'+fmt(x.monto)+'</div>'
         + '</div>';
     }).join('');
 
