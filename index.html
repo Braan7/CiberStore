@@ -2058,6 +2058,29 @@ html,body{max-width:100%;overflow-x:hidden}
 .rs-arrow{color:#5a6478;font-size:1.3rem;transition:transform .25s}
 .rs-pay:hover .rs-arrow{transform:translateX(3px);color:#22d3ee}
 .rs-sec-label{font-size:.68rem;color:#8b93a3;letter-spacing:1.5px;margin-bottom:.7rem;font-weight:700;text-transform:uppercase}
+
+/* ═══════════ REVENDEDORES / PINES — tarjetas limpias ═══════════ */
+.rvp-card{display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.08);border-radius:14px;
+  padding:.95rem 1.1rem;transition:border-color .2s,transform .2s}
+.rvp-card:hover{border-color:rgba(34,211,238,.35);transform:translateY(-2px)}
+.rvp-left{display:flex;align-items:center;gap:.85rem;min-width:0}
+.rvp-ico{width:44px;height:44px;flex-shrink:0;border-radius:12px;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.25);display:flex;align-items:center;justify-content:center;font-size:1.25rem}
+.rvp-info{min-width:0}
+.rvp-diam{font-family:Oxanium,sans-serif;font-weight:900;font-size:1.05rem;color:#fff;line-height:1.1}
+.rvp-diam span{font-size:.72rem;font-weight:600;color:#8b93a3;letter-spacing:.3px}
+.rvp-meta{font-size:.68rem;color:#6b7280;margin-top:.15rem}
+.rvp-right{display:flex;flex-direction:column;align-items:flex-end;gap:.35rem;flex-shrink:0}
+.rvp-price{font-family:Oxanium,sans-serif;font-weight:900;font-size:1.2rem;color:#22d3ee;line-height:1;white-space:nowrap}
+.rvp-price .rvp-cur{font-size:.62rem;font-weight:700;color:#5a6478;letter-spacing:.5px}
+.rvp-usd{font-size:.66rem;color:#6b7280}
+.rvp-btn{margin-top:.15rem;padding:.42rem .95rem;background:linear-gradient(135deg,#128c3e,#25d366);border:none;border-radius:9px;color:#fff;font-family:Oxanium,sans-serif;font-weight:800;font-size:.74rem;letter-spacing:.3px;cursor:pointer;white-space:nowrap;transition:filter .2s,transform .15s}
+.rvp-btn:hover{filter:brightness(1.12)}
+.rvp-btn:active{transform:scale(.95)}
+@media(max-width:380px){
+  .rvp-meta{display:none}
+  .rvp-card{padding:.8rem .9rem;gap:.6rem}
+}
 </style>
 
 <script>

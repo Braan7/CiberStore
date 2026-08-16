@@ -4741,12 +4741,12 @@ function comprarPinAPI(productId, precioLocal, nombreProducto){
 // ═══ PRODUCTOS PIN POR API (Recargas América) ═══
 // product_id = ID en Recargas América | precio = tu precio de venta en MXN
 var PINES_API = [
-  {product_id:5, sku:'FFCH100',  nombre:'Free Fire 100 Diamantes +10 Bono',  precio:13,  diamantes:'110'},
-  {product_id:3, sku:'FFCH310',  nombre:'Free Fire 310 Diamantes +31 Bono',  precio:40,  diamantes:'341'},
-  {product_id:6, sku:'FFCH520',  nombre:'Free Fire 520 Diamantes +52 Bono',  precio:69,  diamantes:'572'},
-  {product_id:1, sku:'FFCH1060', nombre:'Free Fire 1060 Diamantes +106 Bono', precio:125, diamantes:'1,166'},
-  {product_id:2, sku:'FFCH2180', nombre:'Free Fire 2180 Diamantes +218 Bono', precio:245, diamantes:'2,398'},
-  {product_id:4, sku:'FFCH5600', nombre:'Free Fire 5600 Diamantes +560 Bono', precio:615, diamantes:'6,160'}
+  {product_id:5, sku:'FFCH100',  nombre:'Free Fire 100 Diamantes +10 Bono',  precio:12.77,  usd:0.75,  diamantes:'110'},
+  {product_id:3, sku:'FFCH310',  nombre:'Free Fire 310 Diamantes +31 Bono',  precio:39.15,  usd:2.30,  diamantes:'341'},
+  {product_id:6, sku:'FFCH520',  nombre:'Free Fire 520 Diamantes +52 Bono',  precio:67.24,  usd:3.95,  diamantes:'572'},
+  {product_id:1, sku:'FFCH1060', nombre:'Free Fire 1060 Diamantes +106 Bono', precio:119.16, usd:7.00,  diamantes:'1,166'},
+  {product_id:2, sku:'FFCH2180', nombre:'Free Fire 2180 Diamantes +218 Bono', precio:239.18, usd:14.05, diamantes:'2,398'},
+  {product_id:4, sku:'FFCH5600', nombre:'Free Fire 5600 Diamantes +560 Bono', precio:578.80, usd:34.00, diamantes:'6,160'}
 ];
 
 // Saldo minimo (MXN) para desbloquear precios de revendedor (~$10 USD)
@@ -4761,16 +4761,21 @@ function renderPinesAPI(){
 
   var html = '';
   PINES_API.forEach(function(p){
-    html += '<div class="lkpln-wrap"><div class="lkpln">'
-      + '<div class="lkpln-l">'
-      + '<div class="lkpln-ico" style="background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.28)">\uD83D\uDC8E</div>'
-      + '<div><div class="lkpln-name">'+p.diamantes+' <span>diamantes</span></div><div class="lkpln-meta">Precio revendedor · entrega por API</div></div>'
+    var precioMXN = p.precio.toFixed(2).replace(/\.00$/,'');
+    html += '<div class="rvp-card">'
+      + '<div class="rvp-left">'
+      +   '<div class="rvp-ico">\uD83D\uDC8E</div>'
+      +   '<div class="rvp-info">'
+      +     '<div class="rvp-diam">'+p.diamantes+' <span>diamantes</span></div>'
+      +     '<div class="rvp-meta">Precio revendedor \u00B7 entrega por API</div>'
+      +   '</div>'
       + '</div>'
-      + '<div class="lkpln-r" style="display:flex;flex-direction:column;align-items:flex-end;gap:.4rem">'
-      + '<div><div class="lkpln-price" style="color:#22d3ee">$'+p.precio+'</div><div class="lkpln-cur">MXN</div></div>'
-      + '<button onclick="comprarPinAPI('+p.product_id+','+p.precio+',\''+p.nombre.replace(/'/g,"")+'\')" style="padding:.35rem .8rem;background:linear-gradient(90deg,#128c3e,#25d366);border:none;border-radius:8px;color:#fff;font-family:Poppins,sans-serif;font-weight:800;font-size:.72rem;cursor:pointer;white-space:nowrap">Comprar</button>'
+      + '<div class="rvp-right">'
+      +   '<div class="rvp-price">$'+precioMXN+' <span class="rvp-cur">MXN</span></div>'
+      +   (p.usd ? '<div class="rvp-usd">\u2248 $'+p.usd.toFixed(2)+' USD</div>' : '')
+      +   '<button class="rvp-btn" onclick="comprarPinAPI('+p.product_id+','+p.precio+',\''+p.nombre.replace(/'/g,"")+'\')">Comprar</button>'
       + '</div>'
-      + '</div></div>';
+      + '</div>';
   });
 
   if(desbloqueado){
@@ -6497,7 +6502,7 @@ function loadPinesMayoreo(){
   // Llenar el selector con los productos de PINES_API
   var opts = '';
   PINES_API.forEach(function(p, i){
-    opts += '<option value="'+i+'">'+p.diamantes+' diamantes — $'+p.precio+' MX c/u</option>';
+    opts += '<option value="'+i+'">'+p.diamantes+' diamantes — $'+p.precio.toFixed(2).replace(/\.00$/,'')+' MX c/u</option>';
   });
   sel.innerHTML = opts;
 
