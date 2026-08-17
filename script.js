@@ -6237,7 +6237,7 @@ function _procesarRecargaAutomatica(p, ffId){
       if(res.success && (res.status==='COMPLETED' || res.status==='PENDING')){
         registrarPedido(p.nombre+' (AUTO)', p.diamantes, 'diamantes', ffId, p.precio, 0);
         if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A1 Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\uD83D\uDC64 Nombre IG: '+nombre, p.precio, ord);
-        _mostrarReciboRecarga(p, ffId, nombre, res.status);
+        _mostrarReciboRecarga(p, ffId, nombre, res.status, ord);
         var txt = res.status==='COMPLETED' ? '\u2705 Recarga COMPLETADA!' : '\u23F3 Recarga en proceso...';
         showToast(txt, 3000);
         _comprandoDiam = false;
@@ -6701,7 +6701,7 @@ function _extraerPines(res, esperados){
 }
 
 // ═══ Recibo visual de recarga exitosa ═══
-function _mostrarReciboRecarga(p, ffId, nombreJugador, status){
+function _mostrarReciboRecarga(p, ffId, nombreJugador, status, ord){
   var det = document.getElementById('diam-detalle');
   if(!det) return;
 
@@ -6712,6 +6712,7 @@ function _mostrarReciboRecarga(p, ffId, nombreJugador, status){
   dia = dia.charAt(0).toUpperCase() + dia.slice(1);
 
   var esPend = (status === 'PENDING');
+  var txId = 'CS-' + (ord || Date.now().toString().slice(-6));
 
   // Numero de diamantes formateado
   var numDiam = (''+(p.diamantes||'')).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -6722,17 +6723,29 @@ function _mostrarReciboRecarga(p, ffId, nombreJugador, status){
   var tituloColor = esPend ? '#ffb84d' : '#25d366';
   var sub = esPend ? 'Tu recarga se acreditara en breve' : 'Los diamantes ya estan en tu cuenta';
 
-  // Icono central: check (exito) o reloj (pendiente)
+  // Guardar datos del comprobante para descargar/compartir
+  _ultimoComprobante = {
+    txId: txId,
+    ord: ord || '',
+    diamantes: p.nombre,
+    numDiam: numDiam,
+    ffId: ffId,
+    jugador: nombreJugador || '',
+    precio: fmt(p.precio),
+    metodo: 'Saldo CiberStore',
+    estado: esPend ? 'EN PROCESO' : 'COMPLETADA',
+    fecha: fecha,
+    hora: hora
+  };
+
   var icono = esPend
     ? '<div class="'+circleCls+'"><svg class="rc-check-svg" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>'
     : '<div class="'+circleCls+'"><svg class="rc-check-svg" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>';
 
-  // Badge de estado
   var badge = esPend
     ? '<div class="rc-badge-status" style="background:rgba(255,184,77,.15);border:1px solid rgba(255,184,77,.4);color:#ffb84d"><span style="width:7px;height:7px;border-radius:50%;background:#ffb84d;box-shadow:0 0 6px #ffb84d"></span> PENDIENTE</div>'
     : '<div class="rc-badge-status" style="background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.4);color:#25d366"><span style="width:7px;height:7px;border-radius:50%;background:#25d366;box-shadow:0 0 6px #25d366"></span> \u2713 EXITOSA</div>';
 
-  // Diamantes flotantes decorativos (solo en exito)
   var gems = esPend ? '' :
     '<div class="rc-gems">'
     + '<span style="left:18%;animation-delay:0s">\uD83D\uDC8E</span>'
@@ -6742,8 +6755,15 @@ function _mostrarReciboRecarga(p, ffId, nombreJugador, status){
     + '<span style="left:82%;animation-delay:.6s">\uD83D\uDC8E</span>'
     + '</div>';
 
+  // Botones de comprobante
+  var comprobanteBtns =
+    '<div style="display:flex;gap:.5rem;margin-top:1rem">'
+    + '<button class="rc-cmp-btn" onclick="descargarComprobante()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg> Descargar</button>'
+    + '<button class="rc-cmp-btn" onclick="compartirComprobante()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg> Compartir</button>'
+    + '</div>';
+
   det.innerHTML =
-    '<div class="'+wrapCls+'">'
+    '<div class="'+wrapCls+'" id="rc-comprobante-card">'
     + gems
     + '<div style="position:relative;z-index:2">'
     +   '<div class="rc-check-ring">' + icono + '</div>'
@@ -6752,19 +6772,147 @@ function _mostrarReciboRecarga(p, ffId, nombreJugador, status){
     +   '<div class="rc-sub">'+sub+'</div>'
     +   badge
     +   '<div class="rc-detail">'
+    +     _filaRecibo('\uD83E\uDDFE Transaccion', txId)
     +     _filaRecibo('\uD83D\uDC8E Diamantes', p.nombre)
     +     _filaRecibo('\uD83C\uDFAE Cuenta', ffId + (nombreJugador ? ' ('+nombreJugador+')' : ''))
     +     _filaRecibo('\uD83D\uDCB0 Precio pagado', fmt(p.precio))
-    +     _filaRecibo('\uD83D\uDCC5 Fecha', fecha)
-    +     _filaRecibo('\uD83D\uDD52 Hora', hora, true)
+    +     _filaRecibo('\uD83D\uDCB3 Metodo', 'Saldo CiberStore')
+    +     _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' ' + hora, true)
     +   '</div>'
-    +   '<button class="rc-btn" onclick="cerrarDiamDetalle()" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6)">Seguir comprando \uD83D\uDED2</button>'
+    +   comprobanteBtns
+    +   '<button class="rc-btn" onclick="cerrarDiamDetalle()" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6);margin-top:.7rem">Seguir comprando \uD83D\uDED2</button>'
     + '</div>'
     + '</div>';
 
   det.style.display = '';
   document.getElementById('diam-catalogo').style.display = 'none';
   det.scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+// Guarda los datos del ultimo comprobante generado
+var _ultimoComprobante = null;
+
+// Genera el comprobante como imagen (canvas) y devuelve el dataURL
+function _generarComprobanteImg(){
+  var c = _ultimoComprobante;
+  if(!c) return null;
+  var W = 720, H = 1000;
+  var cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  var ctx = cv.getContext('2d');
+
+  // Fondo degradado oscuro
+  var g = ctx.createLinearGradient(0,0,W,H);
+  g.addColorStop(0,'#0d0a2e'); g.addColorStop(.5,'#0a0820'); g.addColorStop(1,'#111827');
+  ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+
+  // Glow superior
+  var rg = ctx.createRadialGradient(W*0.8,120,20,W*0.8,120,340);
+  rg.addColorStop(0,'rgba(139,92,246,.35)'); rg.addColorStop(1,'rgba(139,92,246,0)');
+  ctx.fillStyle = rg; ctx.fillRect(0,0,W,400);
+
+  // Borde
+  ctx.strokeStyle = 'rgba(37,211,102,.4)'; ctx.lineWidth = 3;
+  ctx.strokeRect(20,20,W-40,H-40);
+
+  // Logo CIBERSTORE
+  ctx.textAlign = 'center';
+  ctx.font = '900 46px Oxanium, Arial';
+  ctx.fillStyle = '#ffffff'; ctx.fillText('CIBER', W/2 - 52, 100);
+  ctx.fillStyle = '#22d3ee'; ctx.fillText('STORE', W/2 + 68, 100);
+  ctx.font = '600 20px Poppins, Arial';
+  ctx.fillStyle = '#8b93a3'; ctx.fillText('Comprobante de recarga', W/2, 135);
+
+  // Check verde
+  ctx.beginPath(); ctx.arc(W/2,225,52,0,Math.PI*2);
+  ctx.fillStyle = '#25d366'; ctx.fill();
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 7; ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath(); ctx.moveTo(W/2-22,225); ctx.lineTo(W/2-6,242); ctx.lineTo(W/2+24,208); ctx.stroke();
+
+  // Diamantes grandes
+  ctx.font = '900 60px Oxanium, Arial';
+  ctx.fillStyle = '#25d366';
+  ctx.fillText('+' + c.numDiam + ' Diamantes', W/2, 340);
+
+  ctx.font = '800 26px Oxanium, Arial';
+  ctx.fillStyle = '#25d366'; ctx.fillText('\u2713 ' + c.estado, W/2, 385);
+
+  // Tabla de datos
+  var filas = [
+    ['Transaccion', c.txId],
+    ['Paquete', c.diamantes],
+    ['ID del jugador', c.ffId + (c.jugador ? ' ('+c.jugador+')' : '')],
+    ['Precio pagado', c.precio],
+    ['Metodo de pago', c.metodo],
+    ['Estado', c.estado],
+    ['Fecha', c.fecha],
+    ['Hora', c.hora]
+  ];
+  var y = 460;
+  ctx.textAlign = 'left';
+  filas.forEach(function(f){
+    ctx.fillStyle = 'rgba(255,255,255,.04)';
+    _roundRect(ctx, 60, y-30, W-120, 54, 12); ctx.fill();
+    ctx.font = '600 22px Poppins, Arial';
+    ctx.fillStyle = '#8b93a3'; ctx.fillText(f[0], 85, y+5);
+    ctx.textAlign = 'right';
+    ctx.font = '700 23px Poppins, Arial';
+    ctx.fillStyle = '#ffffff'; ctx.fillText(f[1], W-85, y+5);
+    ctx.textAlign = 'left';
+    y += 66;
+  });
+
+  // Pie
+  ctx.textAlign = 'center';
+  ctx.font = '600 19px Poppins, Arial';
+  ctx.fillStyle = '#6b7280';
+  ctx.fillText('Gracias por tu compra en CiberStore', W/2, H-70);
+  ctx.font = '500 16px Poppins, Arial';
+  ctx.fillStyle = '#4b5563';
+  ctx.fillText('ciberstore.lat  \u00B7  Soporte 24/7', W/2, H-42);
+
+  return cv.toDataURL('image/png');
+}
+
+function _roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+
+function descargarComprobante(){
+  try {
+    var url = _generarComprobanteImg();
+    if(!url){ showToast('No hay comprobante disponible'); return; }
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'comprobante-' + (_ultimoComprobante ? _ultimoComprobante.txId : 'ciberstore') + '.png';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    showToast('\u2705 Comprobante descargado');
+  } catch(e){ console.error('[COMPROBANTE]', e); showToast('No se pudo generar el comprobante'); }
+}
+
+function compartirComprobante(){
+  try {
+    var url = _generarComprobanteImg();
+    if(!url){ showToast('No hay comprobante disponible'); return; }
+    // Convertir dataURL a blob para compartir
+    fetch(url).then(function(r){ return r.blob(); }).then(function(blob){
+      var file = new File([blob], 'comprobante-ciberstore.png', { type:'image/png' });
+      if(navigator.share && navigator.canShare && navigator.canShare({ files:[file] })){
+        navigator.share({ files:[file], title:'Comprobante CiberStore', text:'Mi recarga en CiberStore' })
+          .catch(function(){});
+      } else {
+        // Fallback: descargar
+        descargarComprobante();
+        showToast('Compartir no disponible, se descargo el comprobante');
+      }
+    });
+  } catch(e){ console.error('[COMPARTIR]', e); descargarComprobante(); }
 }
 
 // Pantalla premium para estados que NO son exito (fallida, mantenimiento, no disponible, verificar)
