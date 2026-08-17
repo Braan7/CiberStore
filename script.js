@@ -6713,6 +6713,9 @@ function _mostrarReciboRecarga(p, ffId, nombreJugador, status, ord){
 
   var esPend = (status === 'PENDING');
   var txId = 'CS-' + (ord || Date.now().toString().slice(-6));
+  // Numero unico de verificacion (formato XXXX-XXXX-XXXX-XXXX)
+  var _hex = function(n){ var s=''; for(var i=0;i<n;i++){ s += '0123456789ABCDEF'[Math.floor(Math.random()*16)]; } return s; };
+  var verif = _hex(4)+'-'+_hex(4)+'-'+_hex(4)+'-'+_hex(4);
 
   // Numero de diamantes formateado
   var numDiam = (''+(p.diamantes||'')).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -6735,7 +6738,8 @@ function _mostrarReciboRecarga(p, ffId, nombreJugador, status, ord){
     metodo: 'Saldo CiberStore',
     estado: esPend ? 'EN PROCESO' : 'COMPLETADA',
     fecha: fecha,
-    hora: hora
+    hora: hora,
+    verif: verif
   };
 
   var icono = esPend
@@ -6754,6 +6758,12 @@ function _mostrarReciboRecarga(p, ffId, nombreJugador, status, ord){
     + '<span style="left:68%;animation-delay:.3s">\uD83D\uDC8E</span>'
     + '<span style="left:82%;animation-delay:.6s">\uD83D\uDC8E</span>'
     + '</div>';
+
+  // Enlace único del comprobante (datos codificados en la URL)
+  var compUrl = 'https://ciberstore.lat/comprobante?tx=' + encodeURIComponent(txId)
+    + '&d=' + encodeURIComponent(numDiam) + '&id=' + encodeURIComponent(ffId)
+    + '&p=' + encodeURIComponent(fmt(p.precio)) + '&f=' + encodeURIComponent(fecha);
+  _ultimoComprobante.url = compUrl;
 
   // Botones de comprobante
   var comprobanteBtns =
@@ -6796,82 +6806,212 @@ var _ultimoComprobante = null;
 function _generarComprobanteImg(){
   var c = _ultimoComprobante;
   if(!c) return null;
-  var W = 720, H = 1000;
+  var W = 1040;
+  var filasN = 8;
+  var H = 1540;
   var cv = document.createElement('canvas');
   cv.width = W; cv.height = H;
   var ctx = cv.getContext('2d');
 
-  // Fondo degradado oscuro
-  var g = ctx.createLinearGradient(0,0,W,H);
-  g.addColorStop(0,'#0d0a2e'); g.addColorStop(.5,'#0a0820'); g.addColorStop(1,'#111827');
+  // ── Fondo ──
+  var g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#060912'); g.addColorStop(.5,'#080b16'); g.addColorStop(1,'#05070f');
   ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+  // Glow superior azul
+  var rg = ctx.createRadialGradient(W/2,180,20,W/2,180,520);
+  rg.addColorStop(0,'rgba(34,120,238,.14)'); rg.addColorStop(1,'rgba(34,120,238,0)');
+  ctx.fillStyle = rg; ctx.fillRect(0,0,W,600);
+  // Glow verde en el check
+  var rg2 = ctx.createRadialGradient(W/2,340,10,W/2,340,240);
+  rg2.addColorStop(0,'rgba(37,211,102,.16)'); rg2.addColorStop(1,'rgba(37,211,102,0)');
+  ctx.fillStyle = rg2; ctx.fillRect(0,120,W,440);
 
-  // Glow superior
-  var rg = ctx.createRadialGradient(W*0.8,120,20,W*0.8,120,340);
-  rg.addColorStop(0,'rgba(139,92,246,.35)'); rg.addColorStop(1,'rgba(139,92,246,0)');
-  ctx.fillStyle = rg; ctx.fillRect(0,0,W,400);
+  var cx = W/2;
 
-  // Borde
-  ctx.strokeStyle = 'rgba(37,211,102,.4)'; ctx.lineWidth = 3;
-  ctx.strokeRect(20,20,W-40,H-40);
+  // ── Marco tech con esquinas ──
+  ctx.strokeStyle = 'rgba(56,120,190,.35)'; ctx.lineWidth = 2;
+  _roundRect(ctx, 26, 26, W-52, H-52, 26); ctx.stroke();
+  // Esquina decorativa superior izquierda
+  ctx.strokeStyle = 'rgba(34,211,238,.5)'; ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(60,140); ctx.lineTo(60,80); ctx.lineTo(120,80); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(W-60,140); ctx.lineTo(W-60,80); ctx.lineTo(W-120,80); ctx.stroke();
 
-  // Logo CIBERSTORE
-  ctx.textAlign = 'center';
-  ctx.font = '900 46px Oxanium, Arial';
-  ctx.fillStyle = '#ffffff'; ctx.fillText('CIBER', W/2 - 52, 100);
-  ctx.fillStyle = '#22d3ee'; ctx.fillText('STORE', W/2 + 68, 100);
-  ctx.font = '600 20px Poppins, Arial';
-  ctx.fillStyle = '#8b93a3'; ctx.fillText('Comprobante de recarga', W/2, 135);
-
-  // Check verde
-  ctx.beginPath(); ctx.arc(W/2,225,52,0,Math.PI*2);
-  ctx.fillStyle = '#25d366'; ctx.fill();
-  ctx.strokeStyle = '#fff'; ctx.lineWidth = 7; ctx.lineCap='round'; ctx.lineJoin='round';
-  ctx.beginPath(); ctx.moveTo(W/2-22,225); ctx.lineTo(W/2-6,242); ctx.lineTo(W/2+24,208); ctx.stroke();
-
-  // Diamantes grandes
-  ctx.font = '900 60px Oxanium, Arial';
-  ctx.fillStyle = '#25d366';
-  ctx.fillText('+' + c.numDiam + ' Diamantes', W/2, 340);
-
-  ctx.font = '800 26px Oxanium, Arial';
-  ctx.fillStyle = '#25d366'; ctx.fillText('\u2713 ' + c.estado, W/2, 385);
-
-  // Tabla de datos
-  var filas = [
-    ['Transaccion', c.txId],
-    ['Paquete', c.diamantes],
-    ['ID del jugador', c.ffId + (c.jugador ? ' ('+c.jugador+')' : '')],
-    ['Precio pagado', c.precio],
-    ['Metodo de pago', c.metodo],
-    ['Estado', c.estado],
-    ['Fecha', c.fecha],
-    ['Hora', c.hora]
-  ];
-  var y = 460;
+  // ── Encabezado CIBERSTORE ──
   ctx.textAlign = 'left';
-  filas.forEach(function(f){
-    ctx.fillStyle = 'rgba(255,255,255,.04)';
-    _roundRect(ctx, 60, y-30, W-120, 54, 12); ctx.fill();
-    ctx.font = '600 22px Poppins, Arial';
-    ctx.fillStyle = '#8b93a3'; ctx.fillText(f[0], 85, y+5);
-    ctx.textAlign = 'right';
-    ctx.font = '700 23px Poppins, Arial';
-    ctx.fillStyle = '#ffffff'; ctx.fillText(f[1], W-85, y+5);
-    ctx.textAlign = 'left';
-    y += 66;
+  ctx.font = '900 68px Oxanium, Arial, sans-serif';
+  var t1='CIBER', t2='STORE';
+  var w1=ctx.measureText(t1).width, w2=ctx.measureText(t2).width;
+  var sx = cx-(w1+w2)/2;
+  ctx.fillStyle='#ffffff'; ctx.fillText(t1, sx, 130);
+  ctx.fillStyle='#22a3e8'; ctx.fillText(t2, sx+w1, 130);
+
+  // Subtítulo con líneas
+  ctx.textAlign='center';
+  ctx.font='800 26px Oxanium, Arial, sans-serif';
+  ctx.fillStyle='#8b93a3';
+  var sub='COMPROBANTE DE RECARGA';
+  ctx.save(); ctx.letterSpacing = '6px';
+  ctx.fillText(sub, cx, 178); ctx.restore();
+  var subW = ctx.measureText(sub).width + 90;
+  ctx.strokeStyle='rgba(34,163,232,.4)'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(cx-subW/2-30,170); ctx.lineTo(cx-subW/2,170); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx+subW/2,170); ctx.lineTo(cx+subW/2+30,170); ctx.stroke();
+
+  // ── Check verde con anillo ──
+  var chY=310;
+  ctx.beginPath(); ctx.arc(cx,chY,78,0,Math.PI*2);
+  ctx.strokeStyle='rgba(37,211,102,.35)'; ctx.lineWidth=5; ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx,chY,60,0,Math.PI*2);
+  var cg=ctx.createLinearGradient(cx-60,chY-60,cx+60,chY+60);
+  cg.addColorStop(0,'#2ee06f'); cg.addColorStop(1,'#0e9e4f');
+  ctx.fillStyle=cg; ctx.fill();
+  ctx.strokeStyle='#fff'; ctx.lineWidth=9; ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath(); ctx.moveTo(cx-26,chY+2); ctx.lineTo(cx-8,chY+20); ctx.lineTo(cx+28,chY-18); ctx.stroke();
+
+  // Badge "RECARGA COMPLETADA"
+  ctx.font='800 24px Oxanium, Arial, sans-serif';
+  var bt='\u2713 RECARGA '+c.estado;
+  var btw=ctx.measureText(bt).width+52;
+  ctx.fillStyle='rgba(37,211,102,.1)';
+  _roundRect(ctx,cx-btw/2,chY+108,btw,46,23); ctx.fill();
+  ctx.strokeStyle='rgba(37,211,102,.45)'; ctx.lineWidth=1.5;
+  _roundRect(ctx,cx-btw/2,chY+108,btw,46,23); ctx.stroke();
+  ctx.fillStyle='#25d366'; ctx.textAlign='center'; ctx.fillText(bt,cx,chY+138);
+
+  // ── Monto ──
+  var mY=chY+230;
+  ctx.textAlign='center';
+  ctx.font='900 76px Oxanium, Arial, sans-serif';
+  ctx.textAlign='left';
+  var mt1='+'+c.numDiam+' ', mt2='DIAMANTES';
+  ctx.font='900 76px Oxanium, Arial, sans-serif';
+  var mw1=ctx.measureText(mt1).width, mw2=ctx.measureText(mt2).width;
+  var gem=' \uD83D\uDC8E';
+  var mwG=ctx.measureText(gem).width;
+  var msx=cx-(mw1+mw2+mwG)/2;
+  ctx.fillStyle='#25d366'; ctx.fillText(mt1,msx,mY);
+  ctx.fillStyle='#ffffff'; ctx.fillText(mt2,msx+mw1,mY);
+  ctx.fillText(gem,msx+mw1+mw2,mY);
+  ctx.textAlign='center';
+  ctx.font='600 26px Poppins, Arial, sans-serif';
+  ctx.fillStyle='#8b93a3';
+  ctx.fillText('\u00A1Tu recarga se ha realizado con exito!',cx,mY+44);
+
+  // ── Filas de datos con iconos ──
+  var filas = [
+    ['#','ID DE TRANSACCION', c.txId, '#22a3e8'],
+    ['\uD83D\uDC8E','PAQUETE', c.diamantes, '#ffffff'],
+    ['\uD83D\uDC64','ID DEL JUGADOR', c.ffId + (c.jugador?'  ( @'+c.jugador.replace(/^@/,'')+' )':''), '#ffffff'],
+    ['\uD83D\uDCB0','PRECIO PAGADO', c.precio, '#25d366'],
+    ['\uD83D\uDCB3','METODO DE PAGO', c.metodo, '#ffffff'],
+    ['\u2705','ESTADO', c.estado, '#25d366'],
+    ['\uD83D\uDCC5','FECHA', c.fecha, '#ffffff'],
+    ['\uD83D\uDD52','HORA', c.hora, '#ffffff']
+  ];
+  var y = mY+100;
+  var rowH=68, gap=6, padX=60;
+  // Fondo del bloque de filas
+  ctx.fillStyle='rgba(255,255,255,.02)';
+  _roundRect(ctx, 50, y-16, W-100, filas.length*(rowH+gap)+20, 20); ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.06)'; ctx.lineWidth=1;
+  _roundRect(ctx, 50, y-16, W-100, filas.length*(rowH+gap)+20, 20); ctx.stroke();
+
+  filas.forEach(function(f,i){
+    // Icono
+    ctx.font='30px Arial';
+    ctx.textAlign='left';
+    ctx.fillStyle='#67e8f9';
+    ctx.fillText(f[0], padX+22, y+rowH/2+10);
+    // Label
+    ctx.font='700 25px Oxanium, Arial, sans-serif';
+    ctx.fillStyle='#9aa4b2';
+    ctx.fillText(f[1], padX+80, y+rowH/2+9);
+    // Valor
+    ctx.textAlign='right';
+    ctx.font='700 27px Poppins, Arial, sans-serif';
+    ctx.fillStyle=f[3];
+    var val=''+f[2];
+    while(ctx.measureText(val).width > W-500 && val.length>6){ val=val.slice(0,-2); }
+    ctx.fillText(val, W-padX-20, y+rowH/2+9);
+    // Separador
+    if(i<filas.length-1){
+      ctx.strokeStyle='rgba(255,255,255,.05)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(padX+20,y+rowH+gap/2); ctx.lineTo(W-padX-20,y+rowH+gap/2); ctx.stroke();
+    }
+    y += rowH+gap;
   });
 
-  // Pie
-  ctx.textAlign = 'center';
-  ctx.font = '600 19px Poppins, Arial';
-  ctx.fillStyle = '#6b7280';
-  ctx.fillText('Gracias por tu compra en CiberStore', W/2, H-70);
-  ctx.font = '500 16px Poppins, Arial';
-  ctx.fillStyle = '#4b5563';
-  ctx.fillText('ciberstore.lat  \u00B7  Soporte 24/7', W/2, H-42);
+  // ── Sección de verificación con QR ──
+  var vy = y+40;
+  ctx.fillStyle='rgba(255,255,255,.025)';
+  _roundRect(ctx, 50, vy, W-100, 200, 20); ctx.fill();
+  ctx.strokeStyle='rgba(34,163,232,.15)'; ctx.lineWidth=1;
+  _roundRect(ctx, 50, vy, W-100, 200, 20); ctx.stroke();
+  // Escudo
+  ctx.font='60px Arial'; ctx.textAlign='center';
+  ctx.fillText('\uD83D\uDEE1\uFE0F', 145, vy+118);
+  // Texto
+  ctx.textAlign='left';
+  ctx.font='700 26px Poppins, Arial, sans-serif';
+  ctx.fillStyle='#ffffff';
+  ctx.fillText('Comprobante valido como respaldo de tu compra.', 220, vy+80);
+  ctx.font='600 23px Poppins, Arial, sans-serif';
+  ctx.fillStyle='#8b93a3';
+  ctx.fillText('Numero unico de verificacion:', 220, vy+124);
+  ctx.fillStyle='#22a3e8';
+  ctx.font='800 24px Oxanium, Arial, sans-serif';
+  ctx.fillText(c.verif || c.txId, 220, vy+160);
+  // (el QR se agrega en _generarComprobanteConQR, aqui reservamos el espacio a la derecha)
+  ctx._qrBox = { x: W-250, y: vy+20, size: 160 };
 
+  // ── Pie ──
+  var fy = vy+245;
+  ctx.textAlign='center';
+  ctx.font='800 30px Oxanium, Arial, sans-serif';
+  ctx.fillStyle='#22a3e8';
+  ctx.fillText('CIBERSTORE.LAT', cx, fy);
+  ctx.font='600 22px Poppins, Arial, sans-serif';
+  ctx.fillStyle='#6b7280';
+  ctx.fillText('Soporte 24/7  \u00B7  Entrega automatica  \u00B7  Pagos seguros', cx, fy+38);
+
+  // Guardar la caja del QR para la version async
+  cv._qrBox = ctx._qrBox;
   return cv.toDataURL('image/png');
+}
+
+// Version con QR (asincrona): dibuja el QR y devuelve el dataURL via callback
+function _generarComprobanteConQR(callback){
+  var c = _ultimoComprobante;
+  if(!c){ callback(null); return; }
+  // Generamos primero para saber el tamaño y la caja del QR
+  var tmpCv = document.createElement('canvas');
+  var base = _generarComprobanteImg();
+  if(!base || !c.url){ callback(base); return; }
+
+  var baseImg = new Image();
+  baseImg.onload = function(){
+    var cvFull = document.createElement('canvas');
+    cvFull.width = baseImg.width;
+    cvFull.height = baseImg.height;
+    var ctx = cvFull.getContext('2d');
+    ctx.drawImage(baseImg, 0, 0);
+    // Caja del QR (reservada en _generarComprobanteImg): abajo derecha, en la seccion de verificacion
+    var box = { x: cvFull.width-250, y: cvFull.height-380, size: 160 };
+    var qr = new Image();
+    qr.crossOrigin = 'anonymous';
+    qr.onload = function(){
+      ctx.fillStyle = '#fff';
+      _roundRect(ctx, box.x-8, box.y-8, box.size+16, box.size+16, 12); ctx.fill();
+      ctx.drawImage(qr, box.x, box.y, box.size, box.size);
+      callback(cvFull.toDataURL('image/png'));
+    };
+    qr.onerror = function(){ callback(base); };
+    qr.src = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=0&data=' + encodeURIComponent(c.url);
+  };
+  baseImg.onerror = function(){ callback(base); };
+  baseImg.src = base;
 }
 
 function _roundRect(ctx,x,y,w,h,r){
@@ -6886,33 +7026,37 @@ function _roundRect(ctx,x,y,w,h,r){
 
 function descargarComprobante(){
   try {
-    var url = _generarComprobanteImg();
-    if(!url){ showToast('No hay comprobante disponible'); return; }
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = 'comprobante-' + (_ultimoComprobante ? _ultimoComprobante.txId : 'ciberstore') + '.png';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    showToast('\u2705 Comprobante descargado');
+    showToast('Generando comprobante...', 1500);
+    _generarComprobanteConQR(function(url){
+      if(!url){ showToast('No hay comprobante disponible'); return; }
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'comprobante-' + (_ultimoComprobante ? _ultimoComprobante.txId : 'ciberstore') + '.png';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      showToast('\u2705 Comprobante descargado');
+    });
   } catch(e){ console.error('[COMPROBANTE]', e); showToast('No se pudo generar el comprobante'); }
 }
 
 function compartirComprobante(){
   try {
-    var url = _generarComprobanteImg();
-    if(!url){ showToast('No hay comprobante disponible'); return; }
-    // Convertir dataURL a blob para compartir
-    fetch(url).then(function(r){ return r.blob(); }).then(function(blob){
-      var file = new File([blob], 'comprobante-ciberstore.png', { type:'image/png' });
-      if(navigator.share && navigator.canShare && navigator.canShare({ files:[file] })){
-        navigator.share({ files:[file], title:'Comprobante CiberStore', text:'Mi recarga en CiberStore' })
-          .catch(function(){});
-      } else {
-        // Fallback: descargar
-        descargarComprobante();
-        showToast('Compartir no disponible, se descargo el comprobante');
-      }
+    showToast('Preparando para compartir...', 1500);
+    _generarComprobanteConQR(function(url){
+      if(!url){ showToast('No hay comprobante disponible'); return; }
+      fetch(url).then(function(r){ return r.blob(); }).then(function(blob){
+        var file = new File([blob], 'comprobante-ciberstore.png', { type:'image/png' });
+        if(navigator.share && navigator.canShare && navigator.canShare({ files:[file] })){
+          navigator.share({ files:[file], title:'Comprobante CiberStore', text:'Mi recarga en CiberStore' })
+            .catch(function(){});
+        } else {
+          var a = document.createElement('a');
+          a.href = url; a.download = 'comprobante-ciberstore.png';
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+          showToast('Se descargo el comprobante');
+        }
+      });
     });
-  } catch(e){ console.error('[COMPARTIR]', e); descargarComprobante(); }
+  } catch(e){ console.error('[COMPARTIR]', e); showToast('No se pudo compartir'); }
 }
 
 // Pantalla premium para estados que NO son exito (fallida, mantenimiento, no disponible, verificar)
