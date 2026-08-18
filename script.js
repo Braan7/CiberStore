@@ -526,18 +526,14 @@ function ffAddCart(id){
 function toggleSB(){
   var sb=document.getElementById('sidebar');
   var ov=document.getElementById('overlay');
-  var abierto = sb && sb.classList.contains('open');
   if(sb){sb.classList.toggle('open');}
   if(ov){ov.classList.toggle('open');}
-  // Bloquear/desbloquear scroll del body
-  document.body.style.overflow = abierto ? '' : 'hidden';
 }
 function closeSB(){
   var sb=document.getElementById('sidebar');
   var ov=document.getElementById('overlay');
   if(sb) sb.classList.remove('open');
   if(ov) ov.classList.remove('open');
-  document.body.style.overflow = '';
 }
 function updateSidebarUser(){
   var spent=getSpent();
@@ -678,82 +674,6 @@ function admSubTab(tab){
 }
 function adminLogin(){ doAdminLogin(); }
 function adminLogout(){ doAdminLogout(); }
-// ── VERIFICACIONES (admin) ──
-var _admVfUser = null;
-
-function adminBuscarVerif(){
-  var uname = (document.getElementById('adm-vf-user').value||'').trim();
-  var msg = document.getElementById('adm-vf-msg');
-  var found = document.getElementById('adm-vf-found');
-  if(!uname){ showToast('Escribe un nombre de usuario'); return; }
-  sb.get('profiles', 'select=id,username,verificacion,verif_motivo,verif_fecha,verif_por&username=eq.'+encodeURIComponent(uname)).then(function(rows){
-    if(!rows || !rows.length){
-      if(found) found.style.display='none';
-      if(msg){ msg.style.display='block'; msg.style.color='#ff5252'; msg.textContent='Usuario no encontrado: '+uname; }
-      return;
-    }
-    var u = rows[0];
-    _admVfUser = u;
-    if(found) found.style.display='block';
-    if(msg) msg.style.display='none';
-    // Rellenar el estado actual
-    var sel = document.getElementById('adm-vf-tipo');
-    if(sel) sel.value = u.verificacion || '';
-    var mot = document.getElementById('adm-vf-motivo');
-    if(mot) mot.value = u.verif_motivo || '';
-    var cur = document.getElementById('adm-vf-current');
-    if(cur){
-      if(u.verificacion && VERIF_BADGES[u.verificacion]){
-        cur.innerHTML = 'Actual: <b style="color:'+VERIF_BADGES[u.verificacion].color+'">'+VERIF_BADGES[u.verificacion].nombre+'</b>'+(u.verif_fecha?(' &middot; '+u.verif_fecha):'');
-      } else {
-        cur.innerHTML = 'Sin verificacion actual';
-      }
-    }
-  }).catch(function(e){
-    console.error('[VERIF] buscar', e);
-    if(msg){ msg.style.display='block'; msg.style.color='#ff5252'; msg.textContent='Error al buscar. Revisa que existan las columnas en Supabase.'; }
-  });
-}
-
-function adminAsignarVerif(){
-  if(!_admVfUser){ showToast('Primero busca un usuario'); return; }
-  var tipo = document.getElementById('adm-vf-tipo').value;
-  var motivo = (document.getElementById('adm-vf-motivo').value||'').trim();
-  var msg = document.getElementById('adm-vf-msg');
-  var hoy = new Date().toLocaleDateString('es-MX', {day:'2-digit',month:'2-digit',year:'numeric'});
-  var adminNombre = (typeof ADMIN_EMAIL2!=='undefined') ? 'CiberStore Admin' : 'Admin';
-
-  var datos = tipo ? {
-    verificacion: tipo,
-    verif_motivo: motivo || (VERIF_BADGES[tipo] ? VERIF_BADGES[tipo].desc : ''),
-    verif_fecha: hoy,
-    verif_por: adminNombre
-  } : {
-    verificacion: null,
-    verif_motivo: null,
-    verif_fecha: null,
-    verif_por: null
-  };
-
-  sb.patch('profiles', datos, 'id=eq.'+_admVfUser.id).then(function(){
-    if(msg){
-      msg.style.display='block'; msg.style.color='#25d366';
-      msg.textContent = tipo ? ('\u2713 Verificacion asignada a '+_admVfUser.username) : ('\u2713 Verificacion retirada de '+_admVfUser.username);
-    }
-    showToast(tipo ? 'Verificacion guardada' : 'Verificacion retirada');
-    // Refrescar estado
-    _admVfUser.verificacion = tipo || null;
-    var cur = document.getElementById('adm-vf-current');
-    if(cur){
-      if(tipo && VERIF_BADGES[tipo]) cur.innerHTML = 'Actual: <b style="color:'+VERIF_BADGES[tipo].color+'">'+VERIF_BADGES[tipo].nombre+'</b> &middot; '+hoy;
-      else cur.innerHTML = 'Sin verificacion actual';
-    }
-  }).catch(function(e){
-    console.error('[VERIF] asignar', e);
-    if(msg){ msg.style.display='block'; msg.style.color='#ff5252'; msg.textContent='Error al guardar. Verifica las columnas en Supabase.'; }
-  });
-}
-
 function adminCreateCode(){
   var code=((document.getElementById('adm-code')||{}).value||'').trim().toUpperCase();
   var disc=parseInt((document.getElementById('adm-disc')||{}).value||'0');
@@ -863,9 +783,6 @@ function goPage(id){
   window.scrollTo(0,0);
   if(id==='diamantes') setTimeout(function(){ setDiamTipo('ilim'); }, 100);
   if(id==='codigos') setTimeout(_updateScarSaldo, 100);
-  if(id==='actas') setTimeout(_updateActaSaldo, 100);
-  if(id==='monedas') setTimeout(function(){ renderMonedasGrid(); _updateMonedasSaldo(); }, 100);
-  if(id==='robux') setTimeout(function(){ renderRobuxGrid(); _updateRobuxSaldo(); }, 100);
   if(id==='clanes') setTimeout(renderClanes, 100);
   if(id==='pase') setTimeout(_paseReiniciar, 100);
   if(id==='saldo') setTimeout(function(){ recSetMoneda('MXN'); _recTipo=null; recLimpiarTipo(); }, 100);
@@ -879,7 +796,7 @@ function goPage(id){
   if(id==='creadores') setTimeout(renderCreadoresTabla,50);
   if(id==='retirar') setTimeout(_updateRetiroSaldo,50);
   if(typeof _syncBottomNav==='function') _syncBottomNav(id);
-  if(id==='home'){setTimeout(renderResenas,50); setTimeout(renderHomeDashboard,60); setTimeout(renderHomeDiamGrid,70);}
+  if(id==='home'){setTimeout(renderResenas,50); setTimeout(renderHomeDashboard,60);}
   if(id==='comunidad') setTimeout(renderChat,50);
 }
 
@@ -1135,14 +1052,7 @@ function renderPerfil(){
   var fecha    = u.created_at ? new Date(u.created_at).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'}) : '-';
   var roleStr  = u.role === 'admin' ? 'Admin' : 'Usuario';
   if(av)   av.textContent   = u.username.charAt(0).toUpperCase();
-  if(un){
-    // Si el usuario esta verificado, mostrar su nombre con la insignia
-    if(u.verificacion && typeof renderBadge==='function' && VERIF_BADGES[u.verificacion]){
-      un.innerHTML = u.username + ' ' + renderBadge(u.verificacion);
-    } else {
-      un.textContent = u.username;
-    }
-  }
+  if(un)   un.textContent   = u.username;
   // Campos rapidos nuevos
   var qu=document.getElementById('pf-quick-user'); if(qu) qu.textContent=u.username;
   var qav=document.getElementById('pf-quick-av'); if(qav) qav.textContent=u.username.charAt(0).toUpperCase();
@@ -1721,7 +1631,7 @@ var _comprandoHC = false;
 /* \u2500\u2500 STORI / BINANCE MODALS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 function openStoriModal(monto){var el=document.getElementById('modal-stori');if(el) el.classList.add('show'); var mi=document.getElementById('stori-monto'); if(mi && monto) mi.value=monto;}
 function closeStoriModal(){var el=document.getElementById('modal-stori');if(el) el.classList.remove('show');}
-function openBinanceModal(monto){var el=document.getElementById('modal-binance');if(el) el.classList.add('show'); if(typeof renderBinanceMontos==='function') renderBinanceMontos(); _bncSel=null; var r=document.getElementById('bnc-resumen'); if(r) r.style.display='none';}
+function openBinanceModal(monto){var el=document.getElementById('modal-binance');if(el) el.classList.add('show');}
 function closeBinanceModal(){var el=document.getElementById('modal-binance');if(el) el.classList.remove('show');}
 
 /* \u2500\u2500 BUNDLE \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
@@ -1857,126 +1767,6 @@ function toggleTheme(){
   localStorage.setItem('cs_theme',isLight?'light':'dark');
   var btn=document.getElementById('theme-btn');
   if(btn) btn.textContent=isLight?'\uD83C\uDF19':'\u2600\uFE0F';
-}
-
-/* ═══════════ SISTEMA DE VERIFICACIONES CIBERSTORE ═══════════ */
-// Catalogo de insignias. Escalable: para agregar una nueva, solo añade una entrada aqui.
-var VERIF_BADGES = {
-  cliente: {
-    nombre: 'Cliente Verificado',
-    color: '#22a3e8',
-    desc: 'Cliente real con historial positivo en CiberStore.',
-    svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1l2.4 2.4 3.4-.5.5 3.4L21 12l-2.7 3.3-.5 3.4-3.4-.5L12 23l-2.4-2.8-3.4.5-.5-3.4L3 12l2.7-3.2.5-3.4 3.4.5z"/><path d="M9.5 12.5l1.8 1.8 3.6-3.8" stroke="#05070f" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-  },
-  destacado: {
-    nombre: 'Cliente Destacado',
-    color: '#f0b90b',
-    desc: 'Cliente frecuente con buen historial de compras.',
-    svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.8 6.1 20l1.2-6.5L2.5 8.9 9.1 8z"/></svg>'
-  },
-  vip: {
-    nombre: 'VIP',
-    color: '#c026d3',
-    desc: 'Cliente con trayectoria y volumen de compras destacado.',
-    svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 8l4 3 5-7 5 7 4-3-2 11H5z"/><circle cx="3" cy="8" r="1.6"/><circle cx="21" cy="8" r="1.6"/><circle cx="12" cy="4" r="1.6"/></svg>'
-  },
-  creador: {
-    nombre: 'Creador Verificado',
-    color: '#ff4d8d',
-    desc: 'Creador de contenido reconocido.',
-    svg: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="4" width="14" height="16" rx="3"/><path d="M16 10l6-3v10l-6-3z"/></svg>'
-  },
-  influencer: {
-    nombre: 'Influencer Verificado',
-    color: '#22d3ee',
-    desc: 'Influencer con una comunidad relevante.',
-    svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 2.4 3.4-.5.5 3.4L21 12l-2.7 3.3-.5 3.4-3.4-.5L12 23l-2.4-2.8-3.4.5-.5-3.4L3 12l2.7-3.2.5-3.4 3.4.5z"/><circle cx="12" cy="10" r="2.3" fill="#05070f"/><path d="M8 16c0-2 1.8-3 4-3s4 1 4 3" fill="#05070f"/></svg>'
-  },
-  tienda: {
-    nombre: 'Tienda Verificada',
-    color: '#25d366',
-    desc: 'Tienda o negocio reconocido y validado.',
-    svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 9l1-5h14l1 5M4 9h16v2a2 2 0 01-2 2H6a2 2 0 01-2-2zM5 13v7h14v-7"/><path d="M9.5 16.5l1.5 1.5 3-3" stroke="#05070f" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-  },
-  socio: {
-    nombre: 'Socio CiberStore',
-    color: '#8b5cf6',
-    desc: 'Colaboracion oficial con CiberStore.',
-    svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 11l2-2 4 4 4-4 2 2-6 6z"/><path d="M2 8l4-4 4 4-4 4z"/><path d="M14 8l4-4 4 4-4 4z"/></svg>'
-  }
-};
-
-// Devuelve el HTML de una insignia (icono + tooltip). size: '' | 'lg'
-function renderBadge(tipo, size){
-  var b = VERIF_BADGES[tipo];
-  if(!b) return '';
-  var cls = 'vbadge' + (size==='lg' ? ' vbadge-lg' : '');
-  return '<span class="'+cls+'" style="color:'+b.color+'" onclick="this.classList.toggle(\'show\')">'
-    + b.svg
-    + '<span class="vbtip"><div class="vbtip-title" style="color:'+b.color+'">'+b.nombre+'</div><div class="vbtip-desc">'+b.desc+'</div></span>'
-    + '</span>';
-}
-
-// Devuelve un chip completo (nombre de usuario + insignia + etiqueta)
-function renderVerifChip(username, tipo){
-  var b = VERIF_BADGES[tipo];
-  if(!b) return username;
-  return username + ' ' + renderBadge(tipo);
-}
-
-// Lee la verificacion de un perfil (desde el campo que guarde Supabase).
-// Espera un objeto profile con: verificacion (tipo), verif_fecha, verif_motivo, verif_por
-function getVerifData(profile){
-  if(!profile || !profile.verificacion) return null;
-  var b = VERIF_BADGES[profile.verificacion];
-  if(!b) return null;
-  return {
-    tipo: profile.verificacion,
-    nombre: b.nombre,
-    color: b.color,
-    desc: b.desc,
-    fecha: profile.verif_fecha || '',
-    motivo: profile.verif_motivo || '',
-    por: profile.verif_por || 'CiberStore'
-  };
-}
-
-// Renderiza la tarjeta especial de perfil verificado con estadisticas.
-// profile: objeto del perfil; stats: {antiguedad, compras, historial}
-function renderPerfilVerificado(username, profile, stats){
-  var v = getVerifData(profile);
-  if(!v) return '';
-  stats = stats || {};
-  var rgbaBorde = v.color;
-  var html = '<div class="vprofile" style="background:linear-gradient(150deg,'+_hexA(v.color,.12)+',rgba(255,255,255,.01));border:1px solid '+_hexA(v.color,.35)+'">'
-    + '<div style="position:relative;z-index:2">'
-    +   '<div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">'
-    +     '<span style="font-family:Poppins,sans-serif;font-weight:800;font-size:1.25rem;color:#fff">'+username+'</span>'
-    +     renderBadge(v.tipo,'lg')
-    +   '</div>'
-    +   '<div class="vchip" style="margin-top:.6rem;background:'+_hexA(v.color,.15)+';border:1px solid '+_hexA(v.color,.4)+';color:'+v.color+'">'+v.nombre+'</div>'
-    +   '<div style="margin-top:.9rem;padding:.85rem 1rem;background:rgba(0,0,0,.25);border-radius:12px;border:1px solid rgba(255,255,255,.06)">'
-    +     '<div style="font-size:.78rem;color:#c9d1e0;line-height:1.5"><b style="color:'+v.color+'">Verificado por '+v.por+'</b>'+(v.motivo?('<br>'+v.motivo):'')+'</div>'
-    +     (v.fecha?'<div style="font-size:.68rem;color:#6b7280;margin-top:.4rem">Verificado el '+v.fecha+'</div>':'')
-    +   '</div>';
-  // Estadisticas (sin info privada)
-  if(stats.antiguedad || stats.compras || stats.historial){
-    html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-top:.8rem">';
-    if(stats.antiguedad) html += '<div style="text-align:center;background:rgba(255,255,255,.03);border-radius:10px;padding:.6rem"><div style="font-family:Oxanium,sans-serif;font-weight:900;font-size:.95rem;color:#fff">'+stats.antiguedad+'</div><div style="font-size:.6rem;color:#8b93a3;text-transform:uppercase;letter-spacing:.5px;margin-top:.2rem">Antiguedad</div></div>';
-    if(stats.compras) html += '<div style="text-align:center;background:rgba(255,255,255,.03);border-radius:10px;padding:.6rem"><div style="font-family:Oxanium,sans-serif;font-weight:900;font-size:.95rem;color:#fff">'+stats.compras+'</div><div style="font-size:.6rem;color:#8b93a3;text-transform:uppercase;letter-spacing:.5px;margin-top:.2rem">Compras</div></div>';
-    if(stats.historial) html += '<div style="text-align:center;background:rgba(255,255,255,.03);border-radius:10px;padding:.6rem"><div style="font-family:Oxanium,sans-serif;font-weight:900;font-size:.95rem;color:#25d366">'+stats.historial+'</div><div style="font-size:.6rem;color:#8b93a3;text-transform:uppercase;letter-spacing:.5px;margin-top:.2rem">Historial</div></div>';
-    html += '</div>';
-  }
-  html += '<div style="font-size:.62rem;color:#5a6478;margin-top:.8rem;line-height:1.4">Una insignia no implica que CiberStore garantice actividades o servicios externos de esta persona/tienda.</div>';
-  html += '</div></div>';
-  return html;
-}
-
-// Helper: convierte hex a rgba con alpha
-function _hexA(hex, a){
-  hex = hex.replace('#','');
-  var r = parseInt(hex.substr(0,2),16), g = parseInt(hex.substr(2,2),16), b = parseInt(hex.substr(4,2),16);
-  return 'rgba('+r+','+g+','+b+','+a+')';
 }
 
 /* \u2500\u2500 TOAST \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
@@ -4707,9 +4497,6 @@ function loadPines(){
 function _updatePinSaldo(){
   var s = authSession ? fmt(authSession.saldo||0) : fmt(0);
   ['pin-saldo-val','pin-api-saldo'].forEach(function(id){ var el=document.getElementById(id); if(el) el.textContent=s; });
-  // Re-evaluar el bloqueo de la zona de revendedores por si el saldo cambio
-  if(typeof renderPinesAPI === 'function') { try { renderPinesAPI(); } catch(e){} }
-  if(typeof loadPinesMayoreo === 'function') { try { loadPinesMayoreo(); } catch(e){} }
 }
 
 // Muestra los pines comprados en lista, cada uno con botón de copiar
@@ -4884,12 +4671,6 @@ function _extraerPin(data){
 function comprarPinAPI(productId, precioLocal, nombreProducto){
   if(!authSession){ showToast('Inicia sesion'); setTimeout(showAuthModal,600); return; }
 
-  if((authSession.saldo||0) < PINES_MIN_SALDO){
-    showToast('Necesitas un saldo minimo de $'+PINES_MIN_SALDO+' MXN para la zona de revendedores');
-    if(typeof renderPinesAPI==='function') renderPinesAPI();
-    return;
-  }
-
   var saldo = authSession.saldo || 0;
   if(saldo < precioLocal){
     showToast('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MX). Recarga tu cuenta.');
@@ -4952,72 +4733,40 @@ var PINES_API = [
   {product_id:4, sku:'FFCH5600', nombre:'Free Fire 5600 Diamantes +560 Bono', precio:578.80, usd:34.00, diamantes:'6,160'}
 ];
 
-// Saldo minimo (MXN) para desbloquear precios de revendedor (~$10 USD)
-var PINES_MIN_SALDO = 300;
-
 function renderPinesAPI(){
   var cont = document.getElementById('pines-api-grid');
   if(!cont) return;
-
-  var saldo = (authSession && authSession.saldo) ? authSession.saldo : 0;
-  var desbloqueado = saldo >= PINES_MIN_SALDO;
-
   var html = '';
   PINES_API.forEach(function(p){
     var precioMXN = p.precio.toFixed(2).replace(/\.00$/,'');
-    html += '<div class="rvp-card">'
-      + '<div class="rvp-left">'
-      +   '<div class="rvp-ico">\uD83D\uDC8E</div>'
-      +   '<div class="rvp-info">'
-      +     '<div class="rvp-diam">'+p.diamantes+' <span>diamantes</span></div>'
-      +     '<div class="rvp-meta">Precio revendedor \u00B7 entrega por API</div>'
-      +   '</div>'
+    html += '<div class="rz-prod">'
+      + '<div class="rz-prod-ico">\uD83D\uDC8E</div>'
+      + '<div class="rz-prod-mid">'
+      +   '<div class="rz-prod-diam">'+p.diamantes+' DIAMANTES</div>'
+      +   '<div class="rz-prod-sub">Recarga directa a tu ID</div>'
+      +   '<span class="rz-prod-auto">AUTOM\u00C1TICO</span>'
       + '</div>'
-      + '<div class="rvp-right">'
-      +   '<div class="rvp-price">$'+precioMXN+' <span class="rvp-cur">MXN</span></div>'
-      +   (p.usd ? '<div class="rvp-usd">\u2248 $'+p.usd.toFixed(2)+' USD</div>' : '')
-      +   '<button class="rvp-btn" onclick="comprarPinAPI('+p.product_id+','+p.precio+',\''+p.nombre.replace(/'/g,"")+'\')">Comprar</button>'
+      + '<div class="rz-prod-right">'
+      +   '<div class="rz-prod-price">$'+precioMXN+'</div>'
+      +   (p.usd ? '<div class="rz-prod-usd">\u2248 $'+p.usd.toFixed(2)+' USD</div>' : '')
+      +   '<button class="rz-prod-btn" onclick="comprarPinAPI('+p.product_id+','+p.precio+',\''+p.nombre.replace(/'/g,"")+'\')">COMPRAR \u2192</button>'
       + '</div>'
       + '</div>';
   });
-
-  if(desbloqueado){
-    cont.innerHTML = html;
-    return;
-  }
-
-  // BLOQUEADO: vista previa difuminada + overlay con requisito y boton
-  cont.innerHTML =
-      '<div style="position:relative;border-radius:12px;overflow:hidden">'
-    +   '<div style="filter:blur(5px);pointer-events:none;user-select:none;opacity:.55;display:flex;flex-direction:column;gap:.6rem">'+html+'</div>'
-    +   '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:1.5rem 1.2rem;background:rgba(7,7,7,.55)">'
-    +     '<div style="font-size:2.4rem;margin-bottom:.6rem">\uD83D\uDD12</div>'
-    +     '<div style="font-family:Oxanium;font-weight:900;font-size:1.05rem;color:#fff;margin-bottom:.4rem;letter-spacing:.5px">ZONA DE REVENDEDORES</div>'
-    +     '<div style="font-size:.82rem;color:#c9d1e0;line-height:1.6;margin-bottom:.35rem;max-width:320px">Precios especiales de reventa. Para desbloquear necesitas un saldo minimo de <b style="color:#22d3ee">$'+PINES_MIN_SALDO+' MXN</b> en tu cuenta.</div>'
-    +     '<div style="font-size:.75rem;color:var(--muted);margin-bottom:1rem">Tu saldo actual: <b style="color:'+(saldo>0?'#25d366':'#ff6b6b')+'">$'+saldo+' MXN</b></div>'
-    +     '<button onclick="solicitarAccesoRevendedor()" style="padding:.7rem 1.6rem;background:linear-gradient(90deg,#22d3ee,#0891b2);border:none;border-radius:10px;color:#070707;font-family:Oxanium,sans-serif;font-weight:900;font-size:.82rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 18px rgba(34,211,238,.3)">\uD83D\uDD13 SOLICITAR ACCESO</button>'
-    +     '<div style="font-size:.68rem;color:var(--muted);margin-top:.8rem;line-height:1.5;max-width:300px">Recarga saldo para desbloquear al instante, o contactanos si tienes dudas.</div>'
-    +   '</div>'
-    + '</div>';
+  cont.innerHTML = html;
 }
 
-// Boton SOLICITAR ACCESO de la zona de revendedores
-function solicitarAccesoRevendedor(){
-  // Si ya tiene sesion, lo llevamos a recargar saldo; si no, a iniciar sesion.
-  if(!authSession){
-    showToast('Inicia sesion para solicitar acceso');
-    if(typeof showAuthModal==='function') setTimeout(showAuthModal, 500);
-    return;
-  }
-  var user = authSession.username || 'Cliente';
-  var saldo = authSession.saldo || 0;
-  var msg = 'Hola CiberStore! Quiero acceso a la ZONA DE REVENDEDORES (pines a precio de reventa).%0A%0A'
-    + '\uD83D\uDC64 Usuario: ' + encodeURIComponent(user) + '%0A'
-    + '\uD83D\uDCB0 Saldo actual: $' + saldo + ' MXN%0A'
-    + '\uD83C\uDFAF Requisito: $' + PINES_MIN_SALDO + ' MXN minimo%0A%0A'
-    + 'Quiero recargar para desbloquear los precios de revendedor. Gracias!';
-  window.open('https://wa.me/12894273983?text=' + msg, '_blank');
-  showToast('Abriendo WhatsApp...', 2000);
+// Alterna entre las categorias de la Zona de Revendedores
+function rzTab(cual){
+  var secD = document.getElementById('rz-sec-diamantes');
+  var secM = document.getElementById('rz-sec-mayoreo');
+  var tabD = document.getElementById('rz-tab-diam');
+  var tabM = document.getElementById('rz-tab-mayoreo');
+  var esDiam = (cual === 'diamantes');
+  if(secD) secD.style.display = esDiam ? '' : 'none';
+  if(secM) secM.style.display = esDiam ? 'none' : '';
+  if(tabD) tabD.classList.toggle('on', esDiam);
+  if(tabM) tabM.classList.toggle('on', !esDiam);
 }
 
 
@@ -5074,47 +4823,10 @@ function solicitarAccesoAPI(){
 
 
 // ═══ MODAL RECARGA BINANCE ═══
-var _bncSel = null; // {paga (USDT), recibe (MXN), custom, bonoUsdt}
+var _bncSel = null; // {paga, recibe}
 
-// Paquetes: cada uno paga X USDT y da un BONO en USDT (no en MXN),
-// para que el "recibe" se calcule con la tasa real en vivo:
-//   recibe = (paga + bonoUsdt) * USD_MXN
-// El bono en USDT se derivo del bono original a tasa 17:
-//   $5/17, $10/17, $15/17, $50/17
-var BNC_PAQUETES = [
-  { paga:10,  bonoUsdt:5/17  },
-  { paga:30,  bonoUsdt:10/17 },
-  { paga:60,  bonoUsdt:15/17 },
-  { paga:120, bonoUsdt:50/17 }
-];
-
-// Recalcula el "recibe" en MXN de un paquete con la tasa actual
-function _bncRecibe(paga, bonoUsdt){
-  return Math.round((paga + (bonoUsdt||0)) * USD_MXN);
-}
-
-// Renderiza las tarjetas de Binance usando la tasa en vivo (USD_MXN)
-function renderBinanceMontos(){
-  var cont = document.getElementById('binance-montos');
-  var tasaTxt = document.getElementById('bnc-tasa-txt');
-  if(tasaTxt) tasaTxt.textContent = '1 USDT = $' + USD_MXN.toFixed(2) + ' MXN';
-  if(!cont) return;
-  cont.innerHTML = BNC_PAQUETES.map(function(p, i){
-    var recibe = _bncRecibe(p.paga, p.bonoUsdt);
-    var bonoMxn = Math.round(p.bonoUsdt * USD_MXN);
-    return '<div class="bnc-card" onclick="selBinance('+i+',this)">'
-      + '<div class="bnc-amt">'+p.paga+' USDT</div>'
-      + '<div class="bnc-line">Pagas: '+p.paga+' USDT</div>'
-      + '<div class="bnc-recibe">Recibes: '+fmt(recibe)+'</div>'
-      + '<div class="bnc-badge">+'+fmt(bonoMxn)+' BONO</div>'
-      + '</div>';
-  }).join('');
-}
-
-function selBinance(idx, el){
-  var p = BNC_PAQUETES[idx];
-  if(!p) return;
-  _bncSel = { paga: p.paga, recibe: _bncRecibe(p.paga, p.bonoUsdt), custom: false, bonoUsdt: p.bonoUsdt };
+function selBinance(paga, recibe, el){
+  _bncSel = { paga: paga, recibe: recibe, custom: false };
   document.querySelectorAll('.bnc-card').forEach(function(c){ c.classList.remove('sel'); });
   if(el) el.classList.add('sel');
   var inp = document.getElementById('bnc-custom-input'); if(inp) inp.value = '';
@@ -5128,7 +4840,7 @@ function selBinanceCustom(el){
   if(el) el.classList.add('sel');
   if(val > 0){
     // paga = USDT, recibe = USDT * USD_MXN en MXN (sin bono)
-    _bncSel = { paga: val, recibe: Math.round(val * USD_MXN), custom: true, bonoUsdt: 0 };
+    _bncSel = { paga: val, recibe: Math.round(val * USD_MXN), custom: true };
     _bncMostrarResumen();
   } else {
     if(inp) inp.focus();
@@ -5142,7 +4854,7 @@ function onBncCustom(){
   var card = document.getElementById('bnc-custom-card');
   if(card) card.classList.add('sel');
   if(val > 0){
-    _bncSel = { paga: val, recibe: Math.round(val * USD_MXN), custom: true, bonoUsdt: 0 };
+    _bncSel = { paga: val, recibe: Math.round(val * USD_MXN), custom: true };
     _bncMostrarResumen();
   } else {
     _bncSel = null;
@@ -5175,7 +4887,7 @@ function confirmarBinance(){
   var user = (authSession && authSession.username) ? authSession.username : 'Cliente';
   var msg = 'Hola CiberStore! Quiero RECARGAR SALDO por Binance Pay.%0A%0A'
     + 'Usuario: ' + encodeURIComponent(user) + '%0A'
-    + 'Pago: ' + _bncSel.paga.toLocaleString('es-MX',{maximumFractionDigits:2}) + ' USDT%0A'
+    + 'Pago: $' + _bncSel.paga.toLocaleString('es-MX') + ' MXN%0A'
     + 'Recibo: $' + _bncSel.recibe.toLocaleString('es-MX') + ' MXN'
     + (_bncSel.custom ? '' : ' (con bono)') + '%0A%0A'
     + 'Ya transferi a Binance ID 1106987175. Adjunto mi comprobante.';
@@ -5785,17 +5497,6 @@ function notificarPedidoTelegram(titulo, detalles, precio, ord){
   } catch(e){ console.warn('[TG PEDIDO] ', e); }
 }
 
-// Alias: varias secciones (Actas, Robux, Monedas, Codigos, diamantes...) llaman
-// a tgNotifyPurchase. Lo redirigimos a notificarPedidoTelegram para que la
-// notificacion llegue. El webhook las muestra como PEDIDO (sin botones).
-function tgNotifyPurchase(usuario, detalle, precio, ord){
-  var titulo = 'Compra';
-  if(detalle && detalle.indexOf(' - ') > 0) titulo = detalle.split(' - ')[0];
-  else if(detalle && detalle.indexOf('\n') > 0) titulo = detalle.split('\n')[0];
-  else if(detalle) titulo = detalle;
-  notificarPedidoTelegram(titulo, detalle || '', precio || 0, ord || '');
-}
-
 
 // ═══ Cargar saldo + movimientos (para Mis Compras) ═══
 function _cargarSaldoYMovimientos(){
@@ -5818,12 +5519,10 @@ function _cargarSaldoYMovimientos(){
         var isC=m.tipo==='credito'||m.tipo==='ajuste'||m.tipo==='recarga';
         var color=isC?'#00e676':'#ff6b6b';
         var signo=isC?'+':'-';
-        h+='<div class="mc-mov">'
-          +'<div class="mc-mov-left" style="display:flex;align-items:center;gap:.55rem">'
-          +'<span style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:'+color+';box-shadow:0 0 6px '+color+'"></span>'
-          +'<div style="min-width:0"><div class="mc-mov-desc" style="overflow:hidden;text-overflow:ellipsis">'+(m.descripcion||m.tipo)+'</div>'
-          +'<div class="mc-mov-date">'+f2+'</div></div></div>'
-          +'<div class="mc-mov-amt" style="color:'+color+'">'+signo+'$'+(m.monto||0).toLocaleString('es-MX')+'</div>'
+        h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:.42rem .55rem;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px">'
+          +'<div style="min-width:0;flex:1"><div style="font-size:.75rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis">'+(m.descripcion||m.tipo)+'</div>'
+          +'<div style="font-size:.62rem;color:var(--muted)">'+f2+'</div></div>'
+          +'<div style="font-family:Oxanium;font-size:.75rem;font-weight:700;color:'+color+';flex-shrink:0;margin-left:.5rem">'+signo+'$'+(m.monto||0).toLocaleString('es-MX')+'</div>'
           +'</div>';
       });
       movs.innerHTML=h;
@@ -5980,54 +5679,13 @@ var _diamSeleccionado = null;
 // ═══════════ RECARGAS AUTOMÁTICAS (Recargas América type=recharge) ═══════════
 // package_id = el ID de Recargas América | precio = costo USD × 20 (redondeado)
 var RECARGAS_AUTO = [
-  // ─── RECARGAS PRINCIPALES (automaticas por API) ───
-  { package_id:340, sku:'FFCH100R',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.712,  precio:17,  img:'img/diam-100.png'  },
-  { package_id:343, sku:'FFCH310R',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:2.1374, precio:50,  img:'img/diam-310.png'  },
-  { package_id:345, sku:'FFCH520R',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.6164, precio:85,  img:'img/diam-520.png'  },
-  { package_id:341, sku:'FFCH1060R', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.706,  precio:160, img:'img/diam-1060.png' },
-  { package_id:342, sku:'FFCH2180R', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:13.3209,precio:300, img:'img/diam-2180.png' },
-  { package_id:344, sku:'FFCH5600R', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:33.8848,precio:700, img:'img/diam-5600.png' },
-  { package_id:null, sku:'DIAM11200', nombre:'11.200 Diamantes + 1.120 Bono', diamantes:12320, costoUSD:66.32, precio:1390, manual:true },
-
-  // ─── COMBOS (manuales) ───
-  { package_id:null, nombre:'452 Diamantes',   diamantes:452,  costoUSD:3.83,  precio:67,   manual:true, combo:true , pausado:true },
-  { package_id:null, nombre:'682 Diamantes',   diamantes:682,  costoUSD:5.83,  precio:102,  manual:true, combo:true , pausado:true },
-  { package_id:null, nombre:'792 Diamantes',   diamantes:792,  costoUSD:6.69,  precio:117,  manual:true, combo:true , pausado:true },
-  { package_id:null, nombre:'913 Diamantes',   diamantes:913,  costoUSD:7.71,  precio:135,  manual:true, combo:true , pausado:true },
-  { package_id:null, nombre:'1.507 Diamantes', diamantes:1507, costoUSD:12.00, precio:210,  manual:true, combo:true , pausado:true },
-  { package_id:null, nombre:'1.738 Diamantes', diamantes:1738, costoUSD:14.00, precio:245,  manual:true, combo:true , pausado:true },
-  { package_id:null, nombre:'2.079 Diamantes', diamantes:2079, costoUSD:15.43, precio:270,  manual:true, combo:true , pausado:true },
-  { package_id:null, nombre:'3.080 Diamantes', diamantes:3080, costoUSD:22.97, precio:402,  manual:true, combo:true , pausado:true },
-  { package_id:null, nombre:'3.564 Diamantes', diamantes:3564, costoUSD:26.29, precio:460,  manual:true, combo:true , pausado:true },
-  { package_id:null, nombre:'4.136 Diamantes', diamantes:4136, costoUSD:31.14, precio:545,  manual:true, combo:true , pausado:true },
-  { package_id:null, nombre:'4.796 Diamantes', diamantes:4796, costoUSD:34.29, precio:600,  manual:true, combo:true , pausado:true },
-  { package_id:null, nombre:'5.137 Diamantes', diamantes:5137, costoUSD:37.14, precio:650,  manual:true, combo:true , pausado:true },
-  { package_id:null, nombre:'6.732 Diamantes', diamantes:6732, costoUSD:44.86, precio:785,  manual:true, combo:true , pausado:true },
-  { package_id:null, nombre:'7.326 Diamantes', diamantes:7326, costoUSD:49.14, precio:860,  manual:true, combo:true , pausado:true },
-  { package_id:null, nombre:'8.558 Diamantes', diamantes:8558, costoUSD:57.14, precio:1000, manual:true, combo:true , pausado:true },
-  { package_id:null, nombre:'9.130 Diamantes', diamantes:9130, costoUSD:62.00, precio:1085, manual:true, combo:true , pausado:true },
-
-  // ─── MEGA COMBOS (manuales) ───
-  { package_id:null, nombre:'10.065 Diamantes',  diamantes:10065,  costoUSD:69.14,  precio:1210,  manual:true, combo:true, mega:true , pausado:true },
-  { package_id:null, nombre:'10.956 Diamantes',  diamantes:10956,  costoUSD:74.29,  precio:1300,  manual:true, combo:true, mega:true , pausado:true },
-  { package_id:null, sku:'MEGA12320', nombre:'12.320 Diamantes',  diamantes:12320,  costoUSD:80.00,  precio:1400,  manual:true, combo:true, mega:true , pausado:true },
-  { package_id:null, nombre:'15.059 Diamantes',  diamantes:15059,  costoUSD:100.00, precio:1750,  manual:true, combo:true, mega:true , pausado:true },
-  { package_id:null, nombre:'18.480 Diamantes',  diamantes:18480,  costoUSD:120.00, precio:2100,  manual:true, combo:true, mega:true , pausado:true },
-  { package_id:null, nombre:'20.878 Diamantes',  diamantes:20878,  costoUSD:137.14, precio:2400,  manual:true, combo:true, mega:true , pausado:true },
-  { package_id:null, nombre:'24.640 Diamantes',  diamantes:24640,  costoUSD:160.00, precio:2800,  manual:true, combo:true, mega:true , pausado:true },
-  { package_id:null, nombre:'25.212 Diamantes',  diamantes:25212,  costoUSD:164.86, precio:2885,  manual:true, combo:true, mega:true , pausado:true },
-  { package_id:null, nombre:'30.800 Diamantes',  diamantes:30800,  costoUSD:200.00, precio:3500,  manual:true, combo:true, mega:true , pausado:true },
-  { package_id:null, nombre:'40.524 Diamantes',  diamantes:40524,  costoUSD:266.29, precio:4660,  manual:true, combo:true, mega:true , pausado:true },
-  { package_id:null, nombre:'50.446 Diamantes',  diamantes:50446,  costoUSD:329.14, precio:5760,  manual:true, combo:true, mega:true , pausado:true },
-  { package_id:null, nombre:'60.236 Diamantes',  diamantes:60236,  costoUSD:394.29, precio:6900,  manual:true, combo:true, mega:true , pausado:true },
-  { package_id:null, nombre:'70.158 Diamantes',  diamantes:70158,  costoUSD:457.14, precio:8000,  manual:true, combo:true, mega:true , pausado:true },
-  { package_id:null, nombre:'80.080 Diamantes',  diamantes:80080,  costoUSD:520.00, precio:9100,  manual:true, combo:true, mega:true , pausado:true },
-  { package_id:null, nombre:'90.145 Diamantes',  diamantes:90145,  costoUSD:589.14, precio:10310, manual:true, combo:true, mega:true , pausado:true },
-  { package_id:null, nombre:'100.958 Diamantes', diamantes:100958, costoUSD:657.14, precio:11500, manual:true, combo:true, mega:true , pausado:true },
-
-  // ─── TARJETAS (manuales) ───
-  { package_id:null, sku:'TARJSEM', nombre:'Tarjeta Semanal', diamantes:0, costoUSD:0, precio:37,  manual:true, esTarjeta:true, img:'tarjeta-semanal.png' , pausado:true },
-  { package_id:null, sku:'TARJMEN', nombre:'Tarjeta Mensual', diamantes:0, costoUSD:0, precio:150, manual:true, esTarjeta:true, img:'tarjeta-mensual.png' , pausado:true }
+  { package_id:351, sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.70,  precio:16,  img:'img/diam-100.png'  },
+  { package_id:348, sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:2.09,  precio:45,  img:'img/diam-310.png'  },
+  { package_id:350, sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.53,  precio:75,  img:'img/diam-520.png'  },
+  { package_id:347, sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.57,  precio:135, img:'img/diam-1060.png' },
+  { package_id:346, sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:13.03, precio:255, img:'img/diam-2180.png' },
+  { package_id:349, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:33.16, precio:650, img:'img/diam-5600.png' },
+  { package_id:null, nombre:'11.200 Diamantes + 1.120 Bono', diamantes:12320, costoUSD:66.32, precio:1390, manual:true }
 ];
 
 
@@ -6053,18 +5711,13 @@ function _getDiamProductos(tipo){
     return arr;
   } else if(tipo === 'ilim'){
     // Ilimitado = recargas automáticas (Recargas América, directo al ID)
-    return RECARGAS_AUTO.filter(function(r){ return !r.pausado; }).map(function(r){
-      var badge = 'AUTO';
-      if(r.esTarjeta) badge = 'TARJETA';
-      else if(r.mega) badge = 'MEGA';
-      else if(r.combo) badge = 'COMBO';
-      else if(r.manual) badge = 'MANUAL';
+    return RECARGAS_AUTO.map(function(r){
       return {
-        key:(r.manual?'man_':'auto_')+(r.package_id||r.sku||r.diamantes),
+        key:(r.manual?'man_':'auto_')+(r.package_id||r.diamantes),
         nombre:r.nombre, diamantes:r.diamantes, precio:r.precio,
         tipo:(r.manual?'manual':'auto'), package_id:r.package_id,
-        badge:badge,
-        esPase:!!r.esPase, esTarjeta:!!r.esTarjeta, combo:!!r.combo, mega:!!r.mega,
+        badge:(r.manual?'MANUAL':'AUTO'),
+        esPase:!!r.esPase,
         img:r.img || _imgPorDiamantes(r.diamantes)
       };
     });
@@ -6103,32 +5756,6 @@ function cotizarDiamantesWA(){
   window.open('https://wa.me/' + WA + '?text=' + encodeURIComponent(msg), '_blank');
 }
 
-// Grid de diamantes destacados en el HOME (solo las 6 recargas principales visibles)
-function renderHomeDiamGrid(){
-  var grid = document.getElementById('home-diam-grid');
-  if(!grid) return;
-  var productos = (typeof _getDiamProductos==='function') ? _getDiamProductos('ilim') : [];
-  var destacados = productos.filter(function(p){ return !p.combo && !p.mega && !p.esTarjeta; }).slice(0,6);
-  grid.innerHTML = destacados.map(function(p, i){
-    var idxReal = productos.indexOf(p);
-    var pop = (i===3) ? ' gm-prod-pop' : '';
-    var tag = (i===3) ? '<div class="gm-prod-tag">MAS POPULAR</div>' : '';
-    // Numero de diamantes (sin "+bono")
-    var num = (''+p.diamantes).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    var visual = p.img
-      ? '<img class="gm-prod-img" src="'+p.img+'" alt="'+p.nombre+'" onerror="this.outerHTML=\'<div class=&quot;gm-prod-imgbox&quot;>&#128142;</div>\'"/>'
-      : '<div class="gm-prod-imgbox">&#128142;</div>';
-    return '<div class="gm-prod'+pop+'" onclick="goPage(\'diamantes\'); setTimeout(function(){ if(typeof abrirDiamDetalle===\'function\') abrirDiamDetalle('+idxReal+'); }, 350)">'
-      + tag
-      + '<div class="gm-prod-qty">&#128142; '+num+'</div>'
-      + visual
-      + '<div style="font-size:.72rem;color:var(--muted);margin-bottom:.2rem">'+p.nombre+'</div>'
-      + '<div class="gm-prod-price">'+fmt(p.precio)+'</div>'
-      + '<button class="gm-prod-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> COMPRAR</button>'
-      + '</div>';
-  }).join('');
-}
-
 function renderDiamCatalogo(){
   var grid = document.getElementById('diam-grid');
   var count = document.getElementById('diam-count');
@@ -6137,27 +5764,14 @@ function renderDiamCatalogo(){
   if(count) count.textContent = productos.length;
 
   grid.innerHTML = productos.map(function(p, i){
-    // Separador de seccion (ocupa toda la fila del grid)
-    var sep = '';
-    var grupo = p.esTarjeta ? 'tarjeta' : (p.mega ? 'mega' : (p.combo ? 'combo' : 'principal'));
-    var grupoPrev = i>0 ? (function(q){ return q.esTarjeta ? 'tarjeta' : (q.mega ? 'mega' : (q.combo ? 'combo' : 'principal')); })(productos[i-1]) : null;
-    if(grupo !== grupoPrev){
-      var titulos = { principal:'\uD83D\uDC8E RECARGAS PRINCIPALES', combo:'\u2728 COMBOS', mega:'\uD83D\uDD25 MEGA COMBOS', tarjeta:'\uD83D\uDCC5 TARJETAS' };
-      if(titulos[grupo]){
-        sep = '<div style="grid-column:1/-1;margin:'+(i===0?'0':'1rem')+' 0 .2rem;font-family:Oxanium,sans-serif;font-weight:900;font-size:.9rem;letter-spacing:.5px;color:#22d3ee;display:flex;align-items:center;gap:.6rem"><span>'+titulos[grupo]+'</span><span style="flex:1;height:1px;background:linear-gradient(90deg,rgba(34,211,238,.4),transparent)"></span></div>';
-      }
-    }
     var badgeColor = '';
     if(p.badge === 'AUTO') badgeColor = 'background:rgba(37,211,102,.15);border-color:rgba(37,211,102,.4);color:#25d366';
     else if(p.badge === 'MANUAL') badgeColor = 'background:rgba(255,180,60,.15);border-color:rgba(255,180,60,.4);color:#22d3ee';
-    else if(p.badge === 'TARJETA') badgeColor = 'background:rgba(167,139,250,.18);border-color:rgba(167,139,250,.45);color:#c4b5fd';
-    else if(p.badge === 'COMBO') badgeColor = 'background:rgba(0,180,255,.15);border-color:rgba(0,180,255,.45);color:#4dc3ff';
-    else if(p.badge === 'MEGA') badgeColor = 'background:rgba(255,0,120,.15);border-color:rgba(255,0,120,.5);color:#ff4d9d';
     var badge = p.badge ? '<span class="dcat-badge" style="'+badgeColor+'">'+p.badge+'</span>' : '';
     var visual = p.img
       ? '<div style="width:100%;aspect-ratio:4/3;border-radius:11px;overflow:hidden;margin-bottom:.65rem;background:#0a0f1a"><img src="'+p.img+'" alt="'+p.nombre+'" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.parentNode.innerHTML=\'<div class=&quot;dcat-card-ico&quot;>&#127918;</div>\'"/></div>'
       : '<div class="dcat-card-ico">&#127918;</div>';
-    return sep + '<div class="dcat-card" onclick="abrirDiamDetalle('+i+')">'
+    return '<div class="dcat-card" onclick="abrirDiamDetalle('+i+')">'
       + badge
       + visual
       + '<div class="dcat-card-name">'+p.nombre+'</div>'
@@ -6169,11 +5783,6 @@ function renderDiamCatalogo(){
 
 // Aviso de tiempo de entrega segun el tipo de producto
 function _avisoEntrega(p){
-  if(p && p.esTarjeta){
-    return '<div style="background:rgba(255,180,60,.1);border:1px solid rgba(255,180,60,.32);border-radius:11px;padding:.85rem 1rem;margin-bottom:1.25rem;font-size:.79rem;color:#ffb84d;line-height:1.6">'
-      + '\uD83D\uDCC5 <b>Tarjeta de suscripcion Free Fire.</b><br/>Se activa directo en tu cuenta. Puede tardar de <b>1 a 24 horas</b>. Se procesa manualmente.'
-      + '</div>';
-  }
   if(p && p.esPase){
     return '<div style="background:rgba(255,180,60,.1);border:1px solid rgba(255,180,60,.32);border-radius:11px;padding:.85rem 1rem;margin-bottom:1.25rem;font-size:.79rem;color:#ffb84d;line-height:1.6">'
       + '\u26A0\uFE0F <b>El pase se manda mediante REGALO.</b><br/>Puede que te llegue de <b>1 a 4 dias</b>. Consulta con el administrador.'
@@ -6326,12 +5935,10 @@ function confirmarDiamCompra(){
   var btn = document.getElementById('diam-btn');
   if(btn){ btn.className='ddet-btn off'; btn.innerHTML='Procesando...'; }
 
-  // Compra normal (ilimitados / 1vez / tarjetas): pedido manual
+  // Compra normal (ilimitados / 1vez): pedido manual
   var ord=getNextOrder();
-  var descGasto = p.esTarjeta ? (p.nombre+' - ID:'+ffId+' - Pedido #'+ord)
-                              : (p.diamantes+' Diamantes ('+p.tipo+') - ID:'+ffId+' - Pedido #'+ord);
-  addSpend(p.precio, descGasto);
-  registrarPedido(p.nombre, p.esTarjeta?0:p.diamantes, p.esTarjeta?'tarjeta':'diamantes', ffId, p.precio, 0);
+  addSpend(p.precio, p.diamantes+' Diamantes ('+p.tipo+') - ID:'+ffId+' - Pedido #'+ord);
+  registrarPedido(p.nombre, p.diamantes, 'diamantes', ffId, p.precio, 0);
   if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, p.nombre+' - ID:'+ffId, p.precio, ord);
   _mostrarReciboProceso(p, ffId, ord);
   showToast('\u2705 Pedido #'+ord+' realizado!', 3000);
@@ -6406,21 +6013,6 @@ function _procesarRecargaAutomatica(p, ffId){
     if(msg){ msg.className='ddet-msg'; msg.style.color='#25d366'; msg.innerHTML='\u2705 Cuenta encontrada: <b>'+nombre+'</b><br>Procesando recarga...'; }
     if(btn){ btn.innerHTML='Recargando...'; }
 
-    // Animacion de procesamiento premium en el area de detalle
-    var _detProc = document.getElementById('diam-detalle');
-    if(_detProc){
-      _detProc.innerHTML =
-        '<div class="rc-proc">'
-        + '<div class="rc-proc-ring"><div class="rc-proc-gem">\uD83D\uDC8E</div></div>'
-        + '<div class="rc-proc-txt">Procesando recarga...</div>'
-        + '<div class="rc-proc-sub">Cuenta: <b style="color:#fff">'+nombre+'</b> \u00B7 Enviando '+p.nombre+'</div>'
-        + '<div class="rc-proc-sub" style="margin-top:.6rem;color:#25d366">\uD83D\uDD10 No cierres esta ventana</div>'
-        + '</div>';
-      _detProc.style.display = '';
-      var _catProc = document.getElementById('diam-catalogo');
-      if(_catProc) _catProc.style.display = 'none';
-    }
-
     // Paso 2: cobrar el saldo AHORA (antes de recargar)
     var ord=getNextOrder();
     var _movCompraId = null;              // ID del movimiento (para cancelarlo si falla)
@@ -6440,7 +6032,7 @@ function _procesarRecargaAutomatica(p, ffId){
       if(res.success && (res.status==='COMPLETED' || res.status==='PENDING')){
         registrarPedido(p.nombre+' (AUTO)', p.diamantes, 'diamantes', ffId, p.precio, 0);
         if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A1 Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\uD83D\uDC64 Nombre IG: '+nombre, p.precio, ord);
-        _mostrarReciboRecarga(p, ffId, nombre, res.status, ord);
+        _mostrarReciboRecarga(p, ffId, nombre, res.status);
         var txt = res.status==='COMPLETED' ? '\u2705 Recarga COMPLETADA!' : '\u23F3 Recarga en proceso...';
         showToast(txt, 3000);
         _comprandoDiam = false;
@@ -6448,8 +6040,6 @@ function _procesarRecargaAutomatica(p, ffId){
         var errTxt = String(res.error||res.status||'sin confirmar');
         // Fondos agotados del proveedor: la recarga NO se hizo, hay que devolver
         var sinFondos = /saldo insuficiente|insufficient|fondos insuficientes|sin fondos|credito insuficiente|balance too low|no balance|limite excedido|limit exceeded/i.test(errTxt);
-        // Proveedor en mantenimiento / SKU no en catalogo / API caida
-        var enMantenimiento = /no esta en el catalogo|no catalogo|mantenimiento|maintenance|could not be found|route .* not|502|503|504|bad gateway|gateway timeout|service unavailable|temporarily|temporalmente|catalogo del proveedor/i.test(errTxt);
         var noDisponible = /no disponible|not available|no encontrado|not found|sin stock|out of stock/i.test(errTxt);
 
         if(sinFondos){
@@ -6468,7 +6058,6 @@ function _procesarRecargaAutomatica(p, ffId){
 
           if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
           if(msg){ msg.className='ddet-msg err'; msg.style.fontSize='.75rem'; msg.innerHTML='\u274C <b>RECARGA RECHAZADA</b><br/>Contacta al administrador. Tu saldo sera reembolsado.'; }
-          _mostrarEstadoRecarga('fail', 'RECARGA RECHAZADA', 'No se pudo completar. Tu saldo fue reembolsado automaticamente.', p, ffId);
 
           if(typeof _mostrarAvisoModal==='function'){
             _mostrarAvisoModal('RECARGA RECHAZADA',
@@ -6476,30 +6065,6 @@ function _procesarRecargaAutomatica(p, ffId){
               '#ff6b6b');
           }
           showToast('\u274C Recarga rechazada. Saldo reembolsado.', 5000);
-          _mostrarEstadoRecarga('fail', 'RECARGA RECHAZADA', 'No pudimos completar tu recarga. Tu saldo fue reembolsado automaticamente.', p, ffId);
-          _comprandoDiam = false;
-        } else if(enMantenimiento){
-          // Proveedor en mantenimiento: la recarga NO se hizo, DEVOLVER el saldo
-          _rpcAjustarSaldo(authSession.id, p.precio).then(function(saldoNuevo){
-            var sn = Number(saldoNuevo)||0;
-            authSession.saldo = sn;
-            _refreshSaldoUI(sn);
-            if(typeof saveSession==='function') saveSession(authSession);
-            if(typeof sbAddMovimiento==='function') sbAddMovimiento(authSession.id, 'credito', p.precio, 'Devolucion Pedido #'+ord+' - proveedor en mantenimiento');
-            if(_movCompraId) _cancelarMovPorId(_movCompraId); else { _cancelarPendiente = true; _cancelarMovimientoCompra(authSession.id, ord); }
-          }).catch(function(e){ console.error('[RECARGA] devolucion mantenimiento fallo:', e); });
-
-          registrarPedido(p.nombre+' (AUTO - MANTENIMIENTO, devuelto)', p.diamantes, 'diamantes', ffId, 0, 0);
-          if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u2699\uFE0F PROVEEDOR EN MANTENIMIENTO - Recarga AUTO | Paquete: '+p.nombre+' | ID: '+ffId+' | '+errTxt+' | Saldo devuelto al cliente: $'+p.precio+' MXN', p.precio, ord);
-          if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
-          if(msg){ msg.className='ddet-msg err'; msg.style.fontSize='.75rem'; msg.innerHTML='\u2699\uFE0F Las recargas automaticas estan en <b>mantenimiento del proveedor</b> por unos minutos.<br/><b style="color:#25d366">Tu saldo NO se gasto.</b> Intenta mas tarde o escribenos por WhatsApp.'; }
-          _mostrarEstadoRecarga('maint', 'EN MANTENIMIENTO', 'El proveedor esta en mantenimiento. Tu saldo NO se gasto, sigue intacto.', p, ffId);
-          if(typeof _mostrarAvisoModal==='function'){
-            _mostrarAvisoModal('\u2699\uFE0F EN MANTENIMIENTO',
-              'Las recargas automaticas estan <b style="color:#fff">temporalmente en mantenimiento</b> del proveedor.<br/><br/>\u2705 Tu saldo <b style="color:#25d366">no se gasto</b>, sigue intacto.<br/><br/>Intenta de nuevo en unos minutos, o escribenos por WhatsApp si es urgente.',
-              '#ffb84d');
-          }
-          showToast('\u2699\uFE0F En mantenimiento. Tu saldo esta intacto.', 5000);
           _comprandoDiam = false;
         } else if(noDisponible){
           // La recarga NO se hizo (producto no disponible): DEVOLVER el saldo automatico
@@ -6516,7 +6081,6 @@ function _procesarRecargaAutomatica(p, ffId){
           if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F NO DISPONIBLE - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\u2705 SALDO DEVUELTO automaticamente ('+fmt(p.precio)+')', p.precio, ord);
           if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
           if(msg){ msg.className='ddet-msg err'; msg.style.fontSize='.75rem'; msg.innerHTML='\u274C Este paquete no esta disponible para tu ID en este momento (puede ser por la region de tu cuenta o stock momentaneo).<br/><b>Tu saldo fue devuelto.</b> Intenta de nuevo en unos minutos o contacta al admin.'; }
-          _mostrarEstadoRecarga('maint', 'NO DISPONIBLE', 'Este paquete no esta disponible para tu ID ahora. Tu saldo fue devuelto.', p, ffId);
           showToast('\u274C No disponible. Saldo devuelto.', 4000);
           _comprandoDiam = false;
         } else {
@@ -6525,9 +6089,9 @@ function _procesarRecargaAutomatica(p, ffId){
           if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F VERIFICAR - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt, p.precio, ord);
           if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
           if(msg){ msg.className='ddet-msg'; msg.style.color='#22d3ee'; msg.style.fontSize='.72rem'; msg.innerHTML='\u23F3 Tu recarga se esta verificando. Si no llega en unos minutos, contacta al admin con tu ID.'; }
-          _mostrarEstadoRecarga('pend', 'RECARGA EN VERIFICACION', 'Tu recarga se esta verificando. Si no llega en unos minutos, contacta al admin con tu ID.', p, ffId);
           console.error('[RECARGA] Sin confirmar (no reembolsado):', JSON.stringify(res));
           _comprandoDiam = false;
+          setTimeout(cerrarDiamDetalle, 4000);
         }
       }
     }).catch(function(err){
@@ -6536,9 +6100,9 @@ function _procesarRecargaAutomatica(p, ffId){
       if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F VERIFICAR (sin respuesta) - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId, p.precio, ord);
       if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
       if(msg){ msg.className='ddet-msg'; msg.style.color='#22d3ee'; msg.style.fontSize='.72rem'; msg.innerHTML='\u23F3 Tu recarga se esta verificando. Si no llega, contacta al admin.'; }
-      _mostrarEstadoRecarga('pend', 'RECARGA EN VERIFICACION', 'Tu recarga se esta verificando. Si no llega en unos minutos, contacta al admin con tu ID.', p, ffId);
       console.error('[RECARGA] catch compra (no reembolsado):', err);
       _comprandoDiam = false;
+      setTimeout(cerrarDiamDetalle, 4000);
     });
 
   }).catch(function(err){
@@ -6676,33 +6240,7 @@ function verProductosRA(){
 function loadPinesMayoreo(){
   var sel = document.getElementById('pin-plan');
   var grid = document.getElementById('pines-grid');
-  var form = document.getElementById('pin-mayoreo-form');
   if(!sel) return;
-
-  var saldo = (authSession && authSession.saldo) ? authSession.saldo : 0;
-  var desbloqueado = saldo >= PINES_MIN_SALDO;
-
-  // Si no cumple el minimo: vista previa bloqueada + ocultar formulario
-  if(!desbloqueado){
-    if(form) form.style.display = 'none';
-    if(grid){
-      grid.innerHTML =
-          '<div style="position:relative;border-radius:12px;overflow:hidden">'
-        +   '<div style="filter:blur(4px);opacity:.5;pointer-events:none;user-select:none;padding:1.2rem;text-align:center;color:#ffcc00;font-size:.85rem">\uD83C\uDF9F Pines al por mayor con descuentos por volumen (3 a 10 pines) a precio de revendedor.</div>'
-        +   '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:1.5rem 1.2rem;background:rgba(7,7,7,.5)">'
-        +     '<div style="font-size:2.2rem;margin-bottom:.5rem">\uD83D\uDD12</div>'
-        +     '<div style="font-family:Oxanium;font-weight:900;font-size:1rem;color:#fff;margin-bottom:.35rem;letter-spacing:.5px">ZONA DE REVENDEDORES</div>'
-        +     '<div style="font-size:.8rem;color:#c9d1e0;line-height:1.6;margin-bottom:.35rem;max-width:320px">Requiere saldo minimo de <b style="color:#ffcc00">$'+PINES_MIN_SALDO+' MXN</b> para comprar al por mayor.</div>'
-        +     '<div style="font-size:.74rem;color:var(--muted);margin-bottom:1rem">Tu saldo actual: <b style="color:'+(saldo>0?'#25d366':'#ff6b6b')+'">$'+saldo+' MXN</b></div>'
-        +     '<button onclick="solicitarAccesoRevendedor()" style="padding:.7rem 1.6rem;background:linear-gradient(90deg,#ffcc00,#e0a800);border:none;border-radius:10px;color:#070707;font-family:Oxanium,sans-serif;font-weight:900;font-size:.82rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 18px rgba(255,204,0,.3)">\uD83D\uDD13 SOLICITAR ACCESO</button>'
-        +   '</div>'
-        + '</div>';
-    }
-    return;
-  }
-
-  // Desbloqueado: mostrar formulario y llenar selector
-  if(form) form.style.display = 'block';
 
   // Llenar el selector con los productos de PINES_API
   var opts = '';
@@ -6780,11 +6318,6 @@ var _comprandoPin = false; // candado anti-doble-compra de pines
 
 function submitPinSaldo(){
   if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
-  if((authSession.saldo||0) < PINES_MIN_SALDO){
-    showToast('Necesitas un saldo minimo de $'+PINES_MIN_SALDO+' MXN para la zona de revendedores');
-    if(typeof loadPinesMayoreo==='function') loadPinesMayoreo();
-    return;
-  }
   if(_comprandoPin){ return; }
   var err = document.getElementById('pin-err');
   function showErr(m){ if(err){err.textContent=m;err.style.display='block';} }
@@ -6904,7 +6437,7 @@ function _extraerPines(res, esperados){
 }
 
 // ═══ Recibo visual de recarga exitosa ═══
-function _mostrarReciboRecarga(p, ffId, nombreJugador, status, ord){
+function _mostrarReciboRecarga(p, ffId, nombreJugador, status){
   var det = document.getElementById('diam-detalle');
   if(!det) return;
 
@@ -6915,381 +6448,29 @@ function _mostrarReciboRecarga(p, ffId, nombreJugador, status, ord){
   dia = dia.charAt(0).toUpperCase() + dia.slice(1);
 
   var esPend = (status === 'PENDING');
-  var txId = 'CS-' + (ord || Date.now().toString().slice(-6));
-  // Numero unico de verificacion (formato XXXX-XXXX-XXXX-XXXX)
-  var _hex = function(n){ var s=''; for(var i=0;i<n;i++){ s += '0123456789ABCDEF'[Math.floor(Math.random()*16)]; } return s; };
-  var verif = _hex(4)+'-'+_hex(4)+'-'+_hex(4)+'-'+_hex(4);
-
-  // Numero de diamantes formateado
-  var numDiam = (''+(p.diamantes||'')).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-
-  var wrapCls = esPend ? 'rc-wrap pend' : 'rc-wrap';
-  var circleCls = esPend ? 'rc-check-circle pend' : 'rc-check-circle';
-  var titulo = esPend ? 'RECARGA EN PROCESO' : '\u00A1RECARGA COMPLETADA!';
-  var tituloColor = esPend ? '#ffb84d' : '#25d366';
-  var sub = esPend ? 'Tu recarga se acreditara en breve' : 'Los diamantes ya estan en tu cuenta';
-
-  // Guardar datos del comprobante para descargar/compartir
-  _ultimoComprobante = {
-    txId: txId,
-    ord: ord || '',
-    diamantes: p.nombre,
-    numDiam: numDiam,
-    ffId: ffId,
-    jugador: nombreJugador || '',
-    precio: fmt(p.precio),
-    metodo: 'Saldo CiberStore',
-    estado: esPend ? 'EN PROCESO' : 'COMPLETADA',
-    fecha: fecha,
-    hora: hora,
-    verif: verif
-  };
-
-  var icono = esPend
-    ? '<div class="'+circleCls+'"><svg class="rc-check-svg" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>'
-    : '<div class="'+circleCls+'"><svg class="rc-check-svg" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>';
-
-  var badge = esPend
-    ? '<div class="rc-badge-status" style="background:rgba(255,184,77,.15);border:1px solid rgba(255,184,77,.4);color:#ffb84d"><span style="width:7px;height:7px;border-radius:50%;background:#ffb84d;box-shadow:0 0 6px #ffb84d"></span> PENDIENTE</div>'
-    : '<div class="rc-badge-status" style="background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.4);color:#25d366"><span style="width:7px;height:7px;border-radius:50%;background:#25d366;box-shadow:0 0 6px #25d366"></span> \u2713 EXITOSA</div>';
-
-  var gems = esPend ? '' :
-    '<div class="rc-gems">'
-    + '<span style="left:18%;animation-delay:0s">\uD83D\uDC8E</span>'
-    + '<span style="left:34%;animation-delay:.4s">\uD83D\uDC8E</span>'
-    + '<span style="left:52%;animation-delay:.8s">\uD83D\uDC8E</span>'
-    + '<span style="left:68%;animation-delay:.3s">\uD83D\uDC8E</span>'
-    + '<span style="left:82%;animation-delay:.6s">\uD83D\uDC8E</span>'
-    + '</div>';
-
-  // Enlace único del comprobante (datos codificados en la URL)
-  var compUrl = 'https://ciberstore.lat/comprobante?tx=' + encodeURIComponent(txId)
-    + '&d=' + encodeURIComponent(numDiam) + '&id=' + encodeURIComponent(ffId)
-    + '&p=' + encodeURIComponent(fmt(p.precio)) + '&f=' + encodeURIComponent(fecha);
-  _ultimoComprobante.url = compUrl;
-
-  // Botones de comprobante
-  var comprobanteBtns =
-    '<div style="display:flex;gap:.5rem;margin-top:1rem">'
-    + '<button class="rc-cmp-btn" onclick="descargarComprobante()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg> Descargar</button>'
-    + '<button class="rc-cmp-btn" onclick="compartirComprobante()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg> Compartir</button>'
-    + '</div>';
+  var colorBorde = esPend ? 'rgba(255,180,60,.4)' : 'rgba(37,211,102,.4)';
+  var colorTxt = esPend ? '#22d3ee' : '#25d366';
+  var titulo = esPend ? '\u23F3 RECARGA EN PROCESO' : '\u2705 RECARGA EXITOSA';
 
   det.innerHTML =
-    '<div class="'+wrapCls+'" id="rc-comprobante-card">'
-    + gems
-    + '<div style="position:relative;z-index:2">'
-    +   '<div class="rc-check-ring">' + icono + '</div>'
-    +   '<div class="rc-title" style="color:'+tituloColor+'">'+titulo+'</div>'
-    +   (numDiam ? '<div class="rc-amount">+'+numDiam+' \uD83D\uDC8E</div>' : '')
-    +   '<div class="rc-sub">'+sub+'</div>'
-    +   badge
-    +   '<div class="rc-detail">'
-    +     _filaRecibo('\uD83E\uDDFE Transaccion', txId)
-    +     _filaRecibo('\uD83D\uDC8E Diamantes', p.nombre)
-    +     _filaRecibo('\uD83C\uDFAE Cuenta', ffId + (nombreJugador ? ' ('+nombreJugador+')' : ''))
-    +     _filaRecibo('\uD83D\uDCB0 Precio pagado', fmt(p.precio))
-    +     _filaRecibo('\uD83D\uDCB3 Metodo', 'Saldo CiberStore')
-    +     _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' ' + hora, true)
-    +   '</div>'
-    +   comprobanteBtns
-    +   '<button class="rc-btn" onclick="cerrarDiamDetalle()" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6);margin-top:.7rem">Seguir comprando \uD83D\uDED2</button>'
+    '<div style="background:linear-gradient(160deg,rgba(37,211,102,.08),rgba(255,255,255,.02));border:2px solid '+colorBorde+';border-radius:18px;padding:1.75rem 1.35rem;text-align:center;max-width:420px;margin:0 auto">'
+    + '<div style="font-size:2.8rem;margin-bottom:.5rem">'+(esPend?'\u23F3':'\u2705')+'</div>'
+    + '<div style="font-family:Oxanium;font-weight:900;font-size:1.25rem;color:'+colorTxt+';margin-bottom:.35rem;letter-spacing:.5px">'+titulo+'</div>'
+    + '<div style="font-size:.8rem;color:var(--muted);margin-bottom:1.5rem">'+(esPend?'Tu recarga se acreditara en breve':'Los diamantes ya estan en tu cuenta')+'</div>'
+
+    + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
+    +   _filaRecibo('\uD83D\uDC8E Cantidad', p.nombre)
+    +   _filaRecibo('\uD83C\uDFAE ID Free Fire', ffId + (nombreJugador ? ' ('+nombreJugador+')' : ''))
+    +   _filaRecibo('\uD83D\uDCB5 Precio', fmt(p.precio))
+    +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' - ' + dia)
+    +   _filaRecibo('\uD83D\uDD52 Hora', hora, true)
     + '</div>'
+
+    + '<button onclick="cerrarDiamDetalle()" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Volver al catalogo</button>'
     + '</div>';
 
   det.style.display = '';
   document.getElementById('diam-catalogo').style.display = 'none';
-  det.scrollIntoView({ behavior:'smooth', block:'center' });
-}
-
-// Guarda los datos del ultimo comprobante generado
-var _ultimoComprobante = null;
-
-// Genera el comprobante como imagen (canvas) y devuelve el dataURL
-function _generarComprobanteImg(){
-  var c = _ultimoComprobante;
-  if(!c) return null;
-  var W = 1040;
-  var filasN = 8;
-  var H = 1540;
-  var cv = document.createElement('canvas');
-  cv.width = W; cv.height = H;
-  var ctx = cv.getContext('2d');
-
-  // ── Fondo ──
-  var g = ctx.createLinearGradient(0,0,0,H);
-  g.addColorStop(0,'#060912'); g.addColorStop(.5,'#080b16'); g.addColorStop(1,'#05070f');
-  ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
-  // Glow superior azul
-  var rg = ctx.createRadialGradient(W/2,180,20,W/2,180,520);
-  rg.addColorStop(0,'rgba(34,120,238,.14)'); rg.addColorStop(1,'rgba(34,120,238,0)');
-  ctx.fillStyle = rg; ctx.fillRect(0,0,W,600);
-  // Glow verde en el check
-  var rg2 = ctx.createRadialGradient(W/2,340,10,W/2,340,240);
-  rg2.addColorStop(0,'rgba(37,211,102,.16)'); rg2.addColorStop(1,'rgba(37,211,102,0)');
-  ctx.fillStyle = rg2; ctx.fillRect(0,120,W,440);
-
-  var cx = W/2;
-
-  // ── Marco tech con esquinas ──
-  ctx.strokeStyle = 'rgba(56,120,190,.35)'; ctx.lineWidth = 2;
-  _roundRect(ctx, 26, 26, W-52, H-52, 26); ctx.stroke();
-  // Esquina decorativa superior izquierda
-  ctx.strokeStyle = 'rgba(34,211,238,.5)'; ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(60,140); ctx.lineTo(60,80); ctx.lineTo(120,80); ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(W-60,140); ctx.lineTo(W-60,80); ctx.lineTo(W-120,80); ctx.stroke();
-
-  // ── Encabezado CIBERSTORE ──
-  ctx.textAlign = 'left';
-  ctx.font = '900 68px Oxanium, Arial, sans-serif';
-  var t1='CIBER', t2='STORE';
-  var w1=ctx.measureText(t1).width, w2=ctx.measureText(t2).width;
-  var sx = cx-(w1+w2)/2;
-  ctx.fillStyle='#ffffff'; ctx.fillText(t1, sx, 130);
-  ctx.fillStyle='#22a3e8'; ctx.fillText(t2, sx+w1, 130);
-
-  // Subtítulo con líneas
-  ctx.textAlign='center';
-  ctx.font='800 26px Oxanium, Arial, sans-serif';
-  ctx.fillStyle='#8b93a3';
-  var sub='COMPROBANTE DE RECARGA';
-  ctx.save(); ctx.letterSpacing = '6px';
-  ctx.fillText(sub, cx, 178); ctx.restore();
-  var subW = ctx.measureText(sub).width + 90;
-  ctx.strokeStyle='rgba(34,163,232,.4)'; ctx.lineWidth=2;
-  ctx.beginPath(); ctx.moveTo(cx-subW/2-30,170); ctx.lineTo(cx-subW/2,170); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(cx+subW/2,170); ctx.lineTo(cx+subW/2+30,170); ctx.stroke();
-
-  // ── Check verde con anillo ──
-  var chY=310;
-  ctx.beginPath(); ctx.arc(cx,chY,78,0,Math.PI*2);
-  ctx.strokeStyle='rgba(37,211,102,.35)'; ctx.lineWidth=5; ctx.stroke();
-  ctx.beginPath(); ctx.arc(cx,chY,60,0,Math.PI*2);
-  var cg=ctx.createLinearGradient(cx-60,chY-60,cx+60,chY+60);
-  cg.addColorStop(0,'#2ee06f'); cg.addColorStop(1,'#0e9e4f');
-  ctx.fillStyle=cg; ctx.fill();
-  ctx.strokeStyle='#fff'; ctx.lineWidth=9; ctx.lineCap='round'; ctx.lineJoin='round';
-  ctx.beginPath(); ctx.moveTo(cx-26,chY+2); ctx.lineTo(cx-8,chY+20); ctx.lineTo(cx+28,chY-18); ctx.stroke();
-
-  // Badge "RECARGA COMPLETADA"
-  ctx.font='800 24px Oxanium, Arial, sans-serif';
-  var bt='\u2713 RECARGA '+c.estado;
-  var btw=ctx.measureText(bt).width+52;
-  ctx.fillStyle='rgba(37,211,102,.1)';
-  _roundRect(ctx,cx-btw/2,chY+108,btw,46,23); ctx.fill();
-  ctx.strokeStyle='rgba(37,211,102,.45)'; ctx.lineWidth=1.5;
-  _roundRect(ctx,cx-btw/2,chY+108,btw,46,23); ctx.stroke();
-  ctx.fillStyle='#25d366'; ctx.textAlign='center'; ctx.fillText(bt,cx,chY+138);
-
-  // ── Monto ──
-  var mY=chY+230;
-  ctx.textAlign='center';
-  ctx.font='900 76px Oxanium, Arial, sans-serif';
-  ctx.textAlign='left';
-  var mt1='+'+c.numDiam+' ', mt2='DIAMANTES';
-  ctx.font='900 76px Oxanium, Arial, sans-serif';
-  var mw1=ctx.measureText(mt1).width, mw2=ctx.measureText(mt2).width;
-  var gem=' \uD83D\uDC8E';
-  var mwG=ctx.measureText(gem).width;
-  var msx=cx-(mw1+mw2+mwG)/2;
-  ctx.fillStyle='#25d366'; ctx.fillText(mt1,msx,mY);
-  ctx.fillStyle='#ffffff'; ctx.fillText(mt2,msx+mw1,mY);
-  ctx.fillText(gem,msx+mw1+mw2,mY);
-  ctx.textAlign='center';
-  ctx.font='600 26px Poppins, Arial, sans-serif';
-  ctx.fillStyle='#8b93a3';
-  ctx.fillText('\u00A1Tu recarga se ha realizado con exito!',cx,mY+44);
-
-  // ── Filas de datos con iconos ──
-  var filas = [
-    ['#','ID DE TRANSACCION', c.txId, '#22a3e8'],
-    ['\uD83D\uDC8E','PAQUETE', c.diamantes, '#ffffff'],
-    ['\uD83D\uDC64','ID DEL JUGADOR', c.ffId + (c.jugador?'  ( @'+c.jugador.replace(/^@/,'')+' )':''), '#ffffff'],
-    ['\uD83D\uDCB0','PRECIO PAGADO', c.precio, '#25d366'],
-    ['\uD83D\uDCB3','METODO DE PAGO', c.metodo, '#ffffff'],
-    ['\u2705','ESTADO', c.estado, '#25d366'],
-    ['\uD83D\uDCC5','FECHA', c.fecha, '#ffffff'],
-    ['\uD83D\uDD52','HORA', c.hora, '#ffffff']
-  ];
-  var y = mY+100;
-  var rowH=68, gap=6, padX=60;
-  // Fondo del bloque de filas
-  ctx.fillStyle='rgba(255,255,255,.02)';
-  _roundRect(ctx, 50, y-16, W-100, filas.length*(rowH+gap)+20, 20); ctx.fill();
-  ctx.strokeStyle='rgba(255,255,255,.06)'; ctx.lineWidth=1;
-  _roundRect(ctx, 50, y-16, W-100, filas.length*(rowH+gap)+20, 20); ctx.stroke();
-
-  filas.forEach(function(f,i){
-    // Icono
-    ctx.font='30px Arial';
-    ctx.textAlign='left';
-    ctx.fillStyle='#67e8f9';
-    ctx.fillText(f[0], padX+22, y+rowH/2+10);
-    // Label
-    ctx.font='700 25px Oxanium, Arial, sans-serif';
-    ctx.fillStyle='#9aa4b2';
-    ctx.fillText(f[1], padX+80, y+rowH/2+9);
-    // Valor
-    ctx.textAlign='right';
-    ctx.font='700 27px Poppins, Arial, sans-serif';
-    ctx.fillStyle=f[3];
-    var val=''+f[2];
-    while(ctx.measureText(val).width > W-500 && val.length>6){ val=val.slice(0,-2); }
-    ctx.fillText(val, W-padX-20, y+rowH/2+9);
-    // Separador
-    if(i<filas.length-1){
-      ctx.strokeStyle='rgba(255,255,255,.05)'; ctx.lineWidth=1;
-      ctx.beginPath(); ctx.moveTo(padX+20,y+rowH+gap/2); ctx.lineTo(W-padX-20,y+rowH+gap/2); ctx.stroke();
-    }
-    y += rowH+gap;
-  });
-
-  // ── Sección de verificación con QR ──
-  var vy = y+40;
-  ctx.fillStyle='rgba(255,255,255,.025)';
-  _roundRect(ctx, 50, vy, W-100, 200, 20); ctx.fill();
-  ctx.strokeStyle='rgba(34,163,232,.15)'; ctx.lineWidth=1;
-  _roundRect(ctx, 50, vy, W-100, 200, 20); ctx.stroke();
-  // Escudo
-  ctx.font='60px Arial'; ctx.textAlign='center';
-  ctx.fillText('\uD83D\uDEE1\uFE0F', 145, vy+118);
-  // Texto
-  ctx.textAlign='left';
-  ctx.font='700 26px Poppins, Arial, sans-serif';
-  ctx.fillStyle='#ffffff';
-  ctx.fillText('Comprobante valido como respaldo de tu compra.', 220, vy+80);
-  ctx.font='600 23px Poppins, Arial, sans-serif';
-  ctx.fillStyle='#8b93a3';
-  ctx.fillText('Numero unico de verificacion:', 220, vy+124);
-  ctx.fillStyle='#22a3e8';
-  ctx.font='800 24px Oxanium, Arial, sans-serif';
-  ctx.fillText(c.verif || c.txId, 220, vy+160);
-  // (el QR se agrega en _generarComprobanteConQR, aqui reservamos el espacio a la derecha)
-  ctx._qrBox = { x: W-250, y: vy+20, size: 160 };
-
-  // ── Pie ──
-  var fy = vy+245;
-  ctx.textAlign='center';
-  ctx.font='800 30px Oxanium, Arial, sans-serif';
-  ctx.fillStyle='#22a3e8';
-  ctx.fillText('CIBERSTORE.LAT', cx, fy);
-  ctx.font='600 22px Poppins, Arial, sans-serif';
-  ctx.fillStyle='#6b7280';
-  ctx.fillText('Soporte 24/7  \u00B7  Entrega automatica  \u00B7  Pagos seguros', cx, fy+38);
-
-  // Guardar la caja del QR para la version async
-  cv._qrBox = ctx._qrBox;
-  return cv.toDataURL('image/png');
-}
-
-// Version con QR (asincrona): dibuja el QR y devuelve el dataURL via callback
-function _generarComprobanteConQR(callback){
-  var c = _ultimoComprobante;
-  if(!c){ callback(null); return; }
-  // Generamos primero para saber el tamaño y la caja del QR
-  var tmpCv = document.createElement('canvas');
-  var base = _generarComprobanteImg();
-  if(!base || !c.url){ callback(base); return; }
-
-  var baseImg = new Image();
-  baseImg.onload = function(){
-    var cvFull = document.createElement('canvas');
-    cvFull.width = baseImg.width;
-    cvFull.height = baseImg.height;
-    var ctx = cvFull.getContext('2d');
-    ctx.drawImage(baseImg, 0, 0);
-    // Caja del QR (reservada en _generarComprobanteImg): abajo derecha, en la seccion de verificacion
-    var box = { x: cvFull.width-250, y: cvFull.height-380, size: 160 };
-    var qr = new Image();
-    qr.crossOrigin = 'anonymous';
-    qr.onload = function(){
-      ctx.fillStyle = '#fff';
-      _roundRect(ctx, box.x-8, box.y-8, box.size+16, box.size+16, 12); ctx.fill();
-      ctx.drawImage(qr, box.x, box.y, box.size, box.size);
-      callback(cvFull.toDataURL('image/png'));
-    };
-    qr.onerror = function(){ callback(base); };
-    qr.src = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=0&data=' + encodeURIComponent(c.url);
-  };
-  baseImg.onerror = function(){ callback(base); };
-  baseImg.src = base;
-}
-
-function _roundRect(ctx,x,y,w,h,r){
-  ctx.beginPath();
-  ctx.moveTo(x+r,y);
-  ctx.arcTo(x+w,y,x+w,y+h,r);
-  ctx.arcTo(x+w,y+h,x,y+h,r);
-  ctx.arcTo(x,y+h,x,y,r);
-  ctx.arcTo(x,y,x+w,y,r);
-  ctx.closePath();
-}
-
-function descargarComprobante(){
-  try {
-    showToast('Generando comprobante...', 1500);
-    _generarComprobanteConQR(function(url){
-      if(!url){ showToast('No hay comprobante disponible'); return; }
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = 'comprobante-' + (_ultimoComprobante ? _ultimoComprobante.txId : 'ciberstore') + '.png';
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      showToast('\u2705 Comprobante descargado');
-    });
-  } catch(e){ console.error('[COMPROBANTE]', e); showToast('No se pudo generar el comprobante'); }
-}
-
-function compartirComprobante(){
-  try {
-    showToast('Preparando para compartir...', 1500);
-    _generarComprobanteConQR(function(url){
-      if(!url){ showToast('No hay comprobante disponible'); return; }
-      fetch(url).then(function(r){ return r.blob(); }).then(function(blob){
-        var file = new File([blob], 'comprobante-ciberstore.png', { type:'image/png' });
-        if(navigator.share && navigator.canShare && navigator.canShare({ files:[file] })){
-          navigator.share({ files:[file], title:'Comprobante CiberStore', text:'Mi recarga en CiberStore' })
-            .catch(function(){});
-        } else {
-          var a = document.createElement('a');
-          a.href = url; a.download = 'comprobante-ciberstore.png';
-          document.body.appendChild(a); a.click(); document.body.removeChild(a);
-          showToast('Se descargo el comprobante');
-        }
-      });
-    });
-  } catch(e){ console.error('[COMPARTIR]', e); showToast('No se pudo compartir'); }
-}
-
-// Pantalla premium para estados que NO son exito (fallida, mantenimiento, no disponible, verificar)
-// tipo: 'fail' | 'pend' | 'maint'  — reutiliza el area diam-detalle sin tocar la logica
-function _mostrarEstadoRecarga(tipo, titulo, sub, p, ffId){
-  var det = document.getElementById('diam-detalle');
-  if(!det) return;
-  var conf = {
-    fail:  { cls:'fail', color:'#ff6b6b', ico:'<path d="M18 6L6 18M6 6l12 12"/>', badge:'FALLIDA',    bg:'rgba(255,90,90,.15)',  bd:'rgba(255,90,90,.4)' },
-    maint: { cls:'pend', color:'#ffb84d', ico:'<path d="M12 8v4M12 16h.01"/><circle cx="12" cy="12" r="9"/>', badge:'MANTENIMIENTO', bg:'rgba(255,184,77,.15)', bd:'rgba(255,184,77,.4)' },
-    pend:  { cls:'pend', color:'#ffb84d', ico:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', badge:'PENDIENTE', bg:'rgba(255,184,77,.15)', bd:'rgba(255,184,77,.4)' }
-  }[tipo] || {};
-  det.innerHTML =
-    '<div class="rc-wrap '+conf.cls+'">'
-    + '<div style="position:relative;z-index:2">'
-    +   '<div class="rc-check-ring"><div class="rc-check-circle '+conf.cls+'"><svg class="rc-check-svg" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">'+conf.ico+'</svg></div></div>'
-    +   '<div class="rc-title" style="color:'+conf.color+'">'+titulo+'</div>'
-    +   '<div class="rc-sub">'+sub+'</div>'
-    +   '<div class="rc-badge-status" style="background:'+conf.bg+';border:1px solid '+conf.bd+';color:'+conf.color+'"><span style="width:7px;height:7px;border-radius:50%;background:'+conf.color+';box-shadow:0 0 6px '+conf.color+'"></span> '+conf.badge+'</div>'
-    +   (p ? '<div class="rc-detail">'
-    +     _filaRecibo('\uD83D\uDC8E Paquete', p.nombre)
-    +     _filaRecibo('\uD83C\uDFAE Cuenta', ffId||'-')
-    +     _filaRecibo('\uD83D\uDCB0 Monto', fmt(p.precio), true)
-    +   '</div>' : '')
-    +   '<button class="rc-btn" onclick="cerrarDiamDetalle()" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6)">Volver al catalogo</button>'
-    +   '<button class="rc-btn" onclick="window.open(\'https://wa.me/12894273983\',\'_blank\')" style="background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.4);color:#25d366;margin-top:.6rem">\uD83D\uDCAC Contactar soporte</button>'
-    + '</div>'
-    + '</div>';
-  det.style.display = '';
-  var cat = document.getElementById('diam-catalogo'); if(cat) cat.style.display = 'none';
   det.scrollIntoView({ behavior:'smooth', block:'center' });
 }
 
@@ -7301,634 +6482,85 @@ function _filaRecibo(label, valor, ultimo){
 }
 
 
-// ═══════════ CODIGOS FF — SKINS Y TRAJES (grid 2 columnas + modal) ═══════════
-// Compatibilidad: se conserva SCAR_PRECIO para referencias viejas.
-var SCAR_PRECIO = 1150; // MXN
+// ═══════════ SCAR EVOLUTIVA NIVEL 7 ═══════════
+var SCAR_PRECIO = 1500; // MXN
+var _comprandoScar = false;
 
-// Lista de productos de la seccion Codigos FF.
-// Para agregar otro: copia un objeto aqui con su img, nombre, precio y desc.
-var CODIGOS_PRODUCTOS = [
-  // (vacio) Agrega aqui nuevos productos cuando los tengas, por ejemplo:
-  // { id:'ejemplo', nombre:'Nombre', precio:100, img:'imagen.jpg', desc:'Descripcion.', badge:'SKIN' },
-];
-
-var _codigoSel = null;      // producto seleccionado en el modal
-var _comprandoCodigo = false;
-
-// Se llama al abrir la pagina 'codigos' (ver goPage)
-function _updateScarSaldo(){ renderCodigosGrid(); }
-
-function renderCodigosGrid(){
-  var grid = document.getElementById('codigos-grid');
-  if(!grid) return;
-  if(!CODIGOS_PRODUCTOS || CODIGOS_PRODUCTOS.length === 0){
-    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2.5rem 1rem;color:var(--muted)">'
-      + '<div style="font-size:2.4rem;margin-bottom:.6rem">\uD83D\uDD0D</div>'
-      + '<div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:1rem;color:#fff;margin-bottom:.35rem">Proximamente</div>'
-      + '<div style="font-size:.82rem;line-height:1.5">Estamos preparando nuevas skins y trajes. Vuelve pronto.</div>'
-      + '</div>';
-    return;
-  }
-  grid.innerHTML = CODIGOS_PRODUCTOS.map(function(p, i){
-    var badge = p.badge
-      ? '<span class="dcat-badge" style="background:rgba(255,40,60,.15);border-color:rgba(255,40,60,.4);color:#ff5d6c">'+p.badge+'</span>'
-      : '';
-    var visual = '<div style="width:100%;aspect-ratio:4/3;border-radius:11px;overflow:hidden;margin-bottom:.65rem;background:#0a0f1a">'
-      + '<img src="'+p.img+'" alt="'+p.nombre+'" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.parentNode.innerHTML=\'<div class=&quot;dcat-card-ico&quot;>&#128142;</div>\'"/></div>';
-    return '<div class="dcat-card" onclick="abrirCodigoModal('+i+')">'
-      + badge + visual
-      + '<div class="dcat-card-name">'+p.nombre+'</div>'
-      + '<div class="dcat-card-sub">Free Fire</div>'
-      + '<div class="dcat-card-price">'+fmt(p.precio)+'</div>'
-      + '</div>';
-  }).join('');
+function _updateScarSaldo(){
+  var el = document.getElementById('scar-saldo');
+  var precioEl = document.getElementById('scar-precio');
+  if(el) el.textContent = authSession ? fmt(authSession.saldo||0) : fmt(0);
+  if(precioEl) precioEl.textContent = fmt(SCAR_PRECIO);
 }
 
-// Abrir modal de compra de un producto
-function abrirCodigoModal(idx){
-  var p = CODIGOS_PRODUCTOS[idx];
-  if(!p) return;
-  _codigoSel = p;
+function comprarScar(){
+  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
+  if(_comprandoScar){ return; }
 
-  var ov = document.getElementById('codigo-modal-ov');
-  if(ov) ov.remove();
-  ov = document.createElement('div');
-  ov.id = 'codigo-modal-ov';
-  ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:1.2rem;overflow-y:auto';
-  ov.onclick = function(e){ if(e.target===ov) cerrarCodigoModal(); };
-  document.body.appendChild(ov);
-
-  var saldo = authSession ? (authSession.saldo||0) : 0;
-
-  var c = document.createElement('div');
-  c.style.cssText = 'max-width:440px;width:100%;background:#0a0a0a;border:1px solid rgba(255,40,60,.35);border-radius:18px;overflow:hidden;margin:auto';
-  c.innerHTML =
-      '<div style="position:relative;background:radial-gradient(circle at center,rgba(255,40,60,.15),transparent);padding:1.2rem 1.2rem 0">'
-    +   '<button onclick="cerrarCodigoModal()" style="position:absolute;top:.8rem;right:.8rem;z-index:3;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:1.1rem;cursor:pointer;line-height:1">\u00D7</button>'
-    +   '<img src="'+p.img+'" alt="'+p.nombre+'" style="width:100%;border-radius:12px;display:block" onerror="this.style.display=\'none\'"/>'
-    + '</div>'
-    + '<div style="padding:1.35rem">'
-    +   '<div style="font-family:Oxanium;font-weight:800;font-size:1.2rem;color:#fff;margin-bottom:.35rem">'+p.nombre+'</div>'
-    +   '<div style="font-size:.83rem;color:var(--muted);line-height:1.6;margin-bottom:1rem">'+p.desc+'</div>'
-    +   '<div style="display:flex;align-items:center;gap:.6rem;font-size:.8rem;color:#22d3ee;margin-bottom:1rem"><span>\u23F3</span> Entrega: 2 a 3 semanas al correo de tu cuenta</div>'
-    +   '<div style="display:flex;align-items:baseline;gap:.5rem;margin-bottom:1.2rem;padding:.85rem 1rem;background:rgba(255,40,60,.06);border:1px solid rgba(255,40,60,.2);border-radius:12px">'
-    +     '<span style="font-size:.72rem;color:var(--muted)">Precio:</span>'
-    +     '<span style="font-family:Oxanium;font-weight:900;font-size:1.5rem;color:#ff4444">'+fmt(p.precio)+'</span>'
-    +   '</div>'
-    +   '<label class="flabel">ID de Free Fire *</label>'
-    +   '<input class="finput" id="cod-id" type="text" placeholder="Tu ID de jugador"/>'
-    +   '<label class="flabel">Nombre de usuario *</label>'
-    +   '<input class="finput" id="cod-user" type="text" placeholder="Tu nombre en el juego"/>'
-    +   '<label class="flabel">WhatsApp *</label>'
-    +   '<input class="finput" id="cod-wa" type="text" placeholder="Tu numero de WhatsApp"/>'
-    +   '<div style="display:flex;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;margin:1rem 0"><span style="font-size:.8rem;color:var(--muted)">Tu saldo</span><span style="font-family:Oxanium;font-weight:700;color:#25d366">'+fmt(saldo)+'</span></div>'
-    +   '<div id="cod-err" style="display:none;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.3);color:#ff6b6b;border-radius:9px;padding:.7rem .9rem;font-size:.8rem;margin-bottom:.85rem"></div>'
-    +   '<button id="cod-btn" onclick="comprarCodigoSel()" style="width:100%;padding:1rem;background:linear-gradient(135deg,#ff0028,#ff4444);color:#fff;border:none;border-radius:12px;font-family:Oxanium;font-weight:900;font-size:.95rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(255,0,40,.3)">\uD83D\uDC8E COMPRAR CON SALDO</button>'
-    + '</div>';
-  ov.appendChild(c);
-}
-
-function cerrarCodigoModal(){
-  var ov = document.getElementById('codigo-modal-ov');
-  if(ov) ov.remove();
-  _codigoSel = null;
-}
-
-function comprarCodigoSel(){
-  var p = _codigoSel;
-  if(!p) return;
-  if(!authSession){ showToast('Inicia sesion para comprar'); cerrarCodigoModal(); setTimeout(showAuthModal,500); return; }
-  if(_comprandoCodigo){ return; }
-
-  var err = document.getElementById('cod-err');
+  var err = document.getElementById('scar-err');
   function showErr(m){ if(err){ err.textContent=m; err.style.display='block'; } }
 
-  var ffId = ((document.getElementById('cod-id')||{}).value||'').trim();
-  var user = ((document.getElementById('cod-user')||{}).value||'').trim();
-  var wa   = ((document.getElementById('cod-wa')||{}).value||'').trim();
+  var ffId = ((document.getElementById('scar-id')||{}).value||'').trim();
+  var user = ((document.getElementById('scar-user')||{}).value||'').trim();
+  var wa = ((document.getElementById('scar-wa')||{}).value||'').trim();
 
   if(!ffId){ showErr('Escribe tu ID de Free Fire.'); return; }
   if(!user){ showErr('Escribe tu nombre de usuario.'); return; }
   if(!wa){ showErr('Escribe tu WhatsApp.'); return; }
 
   var saldo = authSession.saldo||0;
-  if(saldo < p.precio){ showErr('Saldo insuficiente ('+fmt(saldo)+'). Necesitas '+fmt(p.precio)+'. Recarga tu cuenta.'); return; }
+  if(saldo < SCAR_PRECIO){ showErr('Saldo insuficiente ('+fmt(saldo)+'). Necesitas '+fmt(SCAR_PRECIO)+'. Recarga tu cuenta.'); return; }
   if(err) err.style.display='none';
 
-  _comprandoCodigo = true;
-  var btn = document.getElementById('cod-btn');
-  if(btn){ btn.disabled=true; btn.innerHTML='Procesando...'; }
-
-  var ord = getNextOrder();
-  addSpend(p.precio, p.nombre+' - ID:'+ffId+' - User:'+user+' - WA:'+wa+' - Pedido #'+ord);
-  registrarPedido(p.nombre+' (2-3 semanas)', 0, 'skin', ffId, p.precio, 0);
-  if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, p.nombre+' - ID:'+ffId+' - User:'+user+' - WA:'+wa, p.precio, ord);
-
-  cerrarCodigoModal();
-  _mostrarReciboCodigo(p, ffId, user, ord);
-  showToast('\u2705 Pedido #'+ord+' realizado!', 3000);
-
-  setTimeout(function(){ _comprandoCodigo = false; }, 3000);
-}
-
-// Recibo tras comprar un producto de Codigos FF
-function _mostrarReciboCodigo(p, ffId, user, ord){
-  var ahora = new Date();
-  var fecha = ahora.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' });
-  var hora = ahora.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' });
-
-  var ov = document.createElement('div');
-  ov.id = 'codigo-recibo-ov';
-  ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:1.2rem;overflow-y:auto';
-  ov.onclick = function(e){ if(e.target===ov) ov.remove(); };
-  document.body.appendChild(ov);
-
-  var c = document.createElement('div');
-  c.style.cssText = 'background:linear-gradient(160deg,rgba(255,180,60,.08),rgba(255,255,255,.02));border:2px solid rgba(255,180,60,.35);border-radius:18px;padding:2rem 1.35rem;text-align:center;max-width:440px;width:100%;margin:auto';
-  c.innerHTML =
-      '<div style="font-size:3rem;margin-bottom:.5rem">\u2705</div>'
-    + '<div style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#25d366;margin-bottom:.35rem;letter-spacing:.5px">PEDIDO CONFIRMADO</div>'
-    + '<div style="font-size:.82rem;color:var(--muted);margin-bottom:1.5rem">Tu '+p.nombre+' esta en proceso</div>'
-    + '<div style="background:rgba(0,0,0,.25);border-radius:99px;height:10px;overflow:hidden;margin-bottom:1.5rem"><div style="height:100%;width:25%;border-radius:99px;background:linear-gradient(90deg,#22d3ee,#ff9900);box-shadow:0 0 12px rgba(255,180,60,.5)"></div></div>'
-    + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
-    +   _filaRecibo('\uD83D\uDCCB Pedido', '#'+ord)
-    +   _filaRecibo('\uD83C\uDFAF Producto', p.nombre)
-    +   _filaRecibo('\uD83C\uDFAE ID', ffId)
-    +   _filaRecibo('\uD83D\uDC64 Usuario', user)
-    +   _filaRecibo('\uD83D\uDCB5 Precio', fmt(p.precio))
-    +   _filaRecibo('\u23F3 Entrega', '2 a 3 semanas')
-    +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' \u00B7 ' + hora, true)
-    + '</div>'
-    + '<div style="font-size:.75rem;color:#22d3ee;margin-top:1rem;line-height:1.5">Te contactaremos por WhatsApp. La skin llega en 2-3 semanas al correo de tu cuenta.</div>'
-    + '<button onclick="var o=document.getElementById(\'codigo-recibo-ov\'); if(o) o.remove();" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Cerrar</button>';
-  ov.appendChild(c);
-}
-
-
-
-// ═══════════ ACTAS OFICIALES ═══════════
-var ACTA_PRECIO = 10; // MXN
-var _actaTipo = 'Acta de Nacimiento';
-var _comprandoActa = false;
-
-function _updateActaSaldo(){
-  var el = document.getElementById('acta-saldo');
-  if(el) el.textContent = authSession ? fmt(authSession.saldo||0) : fmt(0);
-}
-
-function selActaTipo(el){
-  if(!el) return;
-  _actaTipo = el.getAttribute('data-tipo') || 'Acta de Nacimiento';
-  document.querySelectorAll('.acta-tipo').forEach(function(c){ c.classList.remove('sel'); });
-  el.classList.add('sel');
-}
-
-// Validacion REAL de CURP mexicana (18 caracteres, estructura oficial)
-// Estructura: 4 letras + 6 digitos (fecha) + H/M + 5 letras (estado+consonantes) + 1 alfanumerico + 1 digito
-function validarCURP(curp){
-  if(!curp) return { ok:false, motivo:'Escribe la CURP.' };
-  curp = curp.toUpperCase().trim();
-  if(curp.length < 18) return { ok:false, motivo:'La CURP tiene menos de 18 caracteres ('+curp.length+'). Debe tener exactamente 18.' };
-  if(curp.length > 18) return { ok:false, motivo:'La CURP tiene mas de 18 caracteres ('+curp.length+'). Debe tener exactamente 18.' };
-
-  // Patron oficial de CURP
-  var re = /^[A-Z][AEIOUX][A-Z]{2}\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])[HM](AS|BC|BS|CC|CS|CH|CL|CM|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QT|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS|NE)[B-DF-HJ-NP-TV-Z]{3}[A-Z\d]\d$/;
-  if(!re.test(curp)){
-    return { ok:false, motivo:'La CURP no tiene un formato valido. Revisa que este bien escrita.' };
-  }
-  return { ok:true, curp:curp };
-}
-
-// Validacion en vivo mientras escribe
-function validarCurpVivo(){
-  var inp = document.getElementById('acta-curp');
-  var msg = document.getElementById('acta-curp-msg');
-  if(!inp || !msg) return;
-  var val = (inp.value||'').toUpperCase();
-  inp.value = val;
-  if(val.length === 0){ msg.textContent=''; return; }
-
-  if(val.length < 18){
-    msg.style.color = '#ffb84d';
-    msg.textContent = val.length + '/18 caracteres...';
-    return;
-  }
-  var r = validarCURP(val);
-  if(r.ok){
-    msg.style.color = '#25d366';
-    msg.textContent = '\u2713 CURP valida';
-  } else {
-    msg.style.color = '#ff6b6b';
-    msg.textContent = '\u2717 ' + r.motivo;
-  }
-}
-
-function comprarActa(){
-  if(!authSession){ showToast('Inicia sesion para solicitar'); setTimeout(showAuthModal,600); return; }
-  if(_comprandoActa){ return; }
-
-  var err = document.getElementById('acta-err');
-  function showErr(m){ if(err){ err.textContent=m; err.style.display='block'; } }
-
-  var curp = ((document.getElementById('acta-curp')||{}).value||'').toUpperCase().trim();
-  var wa   = ((document.getElementById('acta-wa')||{}).value||'').trim();
-
-  // Validacion de CURP — rechaza si no es real / tiene mas o menos digitos
-  var vc = validarCURP(curp);
-  if(!vc.ok){ showErr(vc.motivo); return; }
-  if(!wa){ showErr('Escribe tu WhatsApp de contacto.'); return; }
-
-  var saldo = authSession.saldo||0;
-  if(saldo < ACTA_PRECIO){ showErr('Saldo insuficiente ('+fmt(saldo)+'). Necesitas '+fmt(ACTA_PRECIO)+'. Recarga tu cuenta.'); return; }
-  if(err) err.style.display='none';
-
-  _comprandoActa = true;
+  _comprandoScar = true;
   var btn = event && event.target ? event.target : null;
   if(btn){ btn.disabled=true; btn.innerHTML='Procesando...'; }
 
   var ord = getNextOrder();
-  var detalle = _actaTipo + ' - CURP:' + curp + ' - WA:' + wa;
-  addSpend(ACTA_PRECIO, detalle + ' - Pedido #' + ord);
-  registrarPedido(_actaTipo + ' (CURP: ' + curp + ')', 0, 'acta', curp, ACTA_PRECIO, 0);
-  if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, detalle, ACTA_PRECIO, ord);
+  addSpend(SCAR_PRECIO, 'SCAR Evolutiva Nivel 7 - ID:'+ffId+' - User:'+user+' - WA:'+wa+' - Pedido #'+ord);
+  registrarPedido('SCAR Evolutiva Nivel 7 (2-3 semanas)', 0, 'skin', ffId, SCAR_PRECIO, 0);
+  if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, 'SCAR EVOLUTIVA N7 - ID:'+ffId+' - User:'+user+' - WA:'+wa, SCAR_PRECIO, ord);
 
-  _mostrarReciboActa(_actaTipo, curp, wa, ord);
-  showToast('\u2705 Solicitud #'+ord+' realizada!', 3000);
-
-  setTimeout(function(){ _comprandoActa = false; if(btn){ btn.disabled=false; btn.innerHTML='\uD83D\uDCC4 SOLICITAR ACTA - $10'; } }, 3000);
-
-  // limpiar campos
-  var ic=document.getElementById('acta-curp'); if(ic) ic.value='';
-  var iw=document.getElementById('acta-wa'); if(iw) iw.value='';
-  var im=document.getElementById('acta-curp-msg'); if(im) im.textContent='';
-  _updateActaSaldo();
-}
-
-function _mostrarReciboActa(tipo, curp, wa, ord){
-  var ahora = new Date();
-  var fecha = ahora.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' });
-  var hora = ahora.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' });
-
-  var ov = document.createElement('div');
-  ov.id = 'acta-recibo-ov';
-  ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:1.2rem;overflow-y:auto';
-  ov.onclick = function(e){ if(e.target===ov) ov.remove(); };
-  document.body.appendChild(ov);
-
-  var c = document.createElement('div');
-  c.style.cssText = 'background:linear-gradient(160deg,rgba(37,211,102,.1),rgba(255,255,255,.02));border:2px solid rgba(37,211,102,.35);border-radius:18px;padding:2rem 1.35rem;text-align:center;max-width:440px;width:100%;margin:auto';
-  c.innerHTML =
-      '<div style="font-size:3rem;margin-bottom:.5rem">\u2705</div>'
-    + '<div style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#25d366;margin-bottom:.35rem;letter-spacing:.5px">SOLICITUD CONFIRMADA</div>'
-    + '<div style="font-size:.82rem;color:var(--muted);margin-bottom:1.5rem">Tu '+tipo+' esta en proceso</div>'
-    + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
-    +   _filaRecibo('\uD83D\uDCCB Solicitud', '#'+ord)
-    +   _filaRecibo('\uD83D\uDCC4 Documento', tipo)
-    +   _filaRecibo('\uD83C\uDD94 CURP', curp)
-    +   _filaRecibo('\uD83D\uDCB5 Precio', fmt(ACTA_PRECIO))
-    +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' \u00B7 ' + hora, true)
-    + '</div>'
-    + '<div style="font-size:.75rem;color:#25d366;margin-top:1rem;line-height:1.5">Te enviaremos tu acta por WhatsApp lo antes posible. Revisa que tu numero sea correcto.</div>'
-    + '<button onclick="var o=document.getElementById(\'acta-recibo-ov\'); if(o) o.remove();" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Cerrar</button>';
-  ov.appendChild(c);
-}
-
-
-// ═══════════ MONEDAS TIKTOK ═══════════
-var MONEDAS_TIKTOK = [
-  { monedas:30,     precio:10   },
-  { monedas:40,     precio:12   },
-  { monedas:50,     precio:14   },
-  { monedas:70,     precio:18   },
-  { monedas:100,    precio:30   },
-  { monedas:500,    precio:125  },
-  { monedas:1000,   precio:235  },
-  { monedas:10000,  precio:2250 }
-];
-var _comprandoMoneda = false;
-
-function _updateMonedasSaldo(){
-  var el = document.getElementById('monedas-saldo');
-  if(el) el.textContent = authSession ? fmt(authSession.saldo||0) : fmt(0);
-}
-
-function _fmtMonedas(n){ return n.toLocaleString('es-MX'); }
-
-function renderMonedasGrid(){
-  var grid = document.getElementById('monedas-grid');
-  if(!grid) return;
-  var html = MONEDAS_TIKTOK.map(function(m, i){
-    return '<div class="mon-card" onclick="abrirMonedaModal('+i+')">'
-      + '<div class="mon-card-amt">\uD83C\uDFB5 '+_fmtMonedas(m.monedas)+'</div>'
-      + '<div class="mon-card-lbl">monedas</div>'
-      + '<div class="mon-card-price">'+fmt(m.precio)+'</div>'
-      + '</div>';
-  }).join('');
-  html += '<div class="mon-card custom" onclick="monedasPersonalizado()">'
-    + '<div class="mon-card-amt">\u270F\uFE0F Personalizar</div>'
-    + '<div class="mon-card-lbl">Otra cantidad</div>'
-    + '<div class="mon-card-price" style="color:#00f2ea">Por WhatsApp</div>'
-    + '</div>';
-  grid.innerHTML = html;
-}
-
-function monedasPersonalizado(){
-  var quien = authSession ? authSession.username : '';
-  var msg = 'Hola! Quiero comprar MONEDAS DE TIKTOK (cantidad personalizada).%0A%0A'
-    + (quien ? ('\uD83D\uDC64 Mi usuario: ' + encodeURIComponent(quien) + '%0A') : '')
-    + '\uD83C\uDFB5 Cantidad de monedas que quiero: %0A'
-    + '\uD83D\uDCF1 Mi usuario de TikTok: ';
-  window.open('https://wa.me/12894273983?text=' + msg, '_blank');
-  showToast('Abriendo WhatsApp...', 2000);
-}
-
-function abrirMonedaModal(idx){
-  var m = MONEDAS_TIKTOK[idx];
-  if(!m) return;
-
-  var ov = document.getElementById('moneda-modal-ov');
-  if(ov) ov.remove();
-  ov = document.createElement('div');
-  ov.id = 'moneda-modal-ov';
-  ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:1.2rem;overflow-y:auto';
-  ov.onclick = function(e){ if(e.target===ov) cerrarMonedaModal(); };
-  document.body.appendChild(ov);
-
-  var saldo = authSession ? (authSession.saldo||0) : 0;
-
-  var c = document.createElement('div');
-  c.style.cssText = 'max-width:420px;width:100%;background:#0a0a0a;border:1px solid rgba(255,0,80,.35);border-radius:18px;overflow:hidden;margin:auto';
-  c.innerHTML =
-      '<div style="position:relative;background:linear-gradient(135deg,rgba(255,0,80,.15),rgba(0,242,234,.08));padding:1.6rem 1.3rem;text-align:center">'
-    +   '<button onclick="cerrarMonedaModal()" style="position:absolute;top:.8rem;right:.8rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:1.1rem;cursor:pointer;line-height:1">\u00D7</button>'
-    +   '<div style="font-size:2.6rem;margin-bottom:.3rem">\uD83C\uDFB5</div>'
-    +   '<div style="font-family:Oxanium;font-weight:900;font-size:1.6rem;color:#fff">'+_fmtMonedas(m.monedas)+' Monedas</div>'
-    +   '<div style="font-size:.8rem;color:rgba(255,255,255,.7)">TikTok</div>'
-    + '</div>'
-    + '<div style="padding:1.35rem">'
-    +   '<div style="display:flex;align-items:baseline;gap:.5rem;margin-bottom:1.2rem;padding:.9rem 1rem;background:rgba(37,211,102,.06);border:1px solid rgba(37,211,102,.2);border-radius:12px">'
-    +     '<span style="font-size:.72rem;color:var(--muted)">Precio:</span>'
-    +     '<span style="font-family:Oxanium;font-weight:900;font-size:1.6rem;color:#25d366">'+fmt(m.precio)+'</span>'
-    +   '</div>'
-    +   '<label class="flabel">Usuario de TikTok *</label>'
-    +   '<input class="finput" id="mon-user" type="text" placeholder="Ej: @tu_usuario"/>'
-    +   '<label class="flabel">WhatsApp de contacto *</label>'
-    +   '<input class="finput" id="mon-wa" type="text" placeholder="Tu numero de WhatsApp"/>'
-    +   '<div style="display:flex;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;margin:1rem 0"><span style="font-size:.8rem;color:var(--muted)">Tu saldo</span><span style="font-family:Oxanium;font-weight:700;color:#25d366">'+fmt(saldo)+'</span></div>'
-    +   '<div id="mon-err" style="display:none;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.3);color:#ff6b6b;border-radius:9px;padding:.7rem .9rem;font-size:.8rem;margin-bottom:.85rem"></div>'
-    +   '<button id="mon-btn" onclick="comprarMoneda('+idx+')" style="width:100%;padding:1rem;background:linear-gradient(135deg,#ff0050,#ff4d8d);color:#fff;border:none;border-radius:12px;font-family:Oxanium;font-weight:900;font-size:.95rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(255,0,80,.3)">\uD83C\uDFB5 COMPRAR CON SALDO</button>'
-    +   '<div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.85rem;line-height:1.5">Te contactaremos por WhatsApp para acreditar tus monedas.</div>'
-    + '</div>';
-  ov.appendChild(c);
-}
-
-function cerrarMonedaModal(){
-  var ov = document.getElementById('moneda-modal-ov');
-  if(ov) ov.remove();
-}
-
-function comprarMoneda(idx){
-  var m = MONEDAS_TIKTOK[idx];
-  if(!m) return;
-  if(!authSession){ showToast('Inicia sesion para comprar'); cerrarMonedaModal(); setTimeout(showAuthModal,500); return; }
-  if(_comprandoMoneda){ return; }
-
-  var err = document.getElementById('mon-err');
-  function showErr(t){ if(err){ err.textContent=t; err.style.display='block'; } }
-
-  var user = ((document.getElementById('mon-user')||{}).value||'').trim();
-  var wa   = ((document.getElementById('mon-wa')||{}).value||'').trim();
-
-  if(!user){ showErr('Escribe tu usuario de TikTok.'); return; }
-  if(!wa){ showErr('Escribe tu WhatsApp de contacto.'); return; }
-
-  var saldo = authSession.saldo||0;
-  if(saldo < m.precio){ showErr('Saldo insuficiente ('+fmt(saldo)+'). Necesitas '+fmt(m.precio)+'. Recarga tu cuenta.'); return; }
-  if(err) err.style.display='none';
-
-  _comprandoMoneda = true;
-  var btn = document.getElementById('mon-btn');
-  if(btn){ btn.disabled=true; btn.innerHTML='Procesando...'; }
-
-  var ord = getNextOrder();
-  var nombre = _fmtMonedas(m.monedas)+' Monedas TikTok';
-  var detalle = nombre + ' - TikTok:' + user + ' - WA:' + wa;
-  addSpend(m.precio, detalle + ' - Pedido #' + ord);
-  registrarPedido(nombre + ' (' + user + ')', m.monedas, 'monedas_tiktok', user, m.precio, 0);
-  if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, detalle, m.precio, ord);
-
-  cerrarMonedaModal();
-  _mostrarReciboMoneda(m, user, ord);
+  _mostrarReciboScar(ffId, user, ord);
   showToast('\u2705 Pedido #'+ord+' realizado!', 3000);
 
-  setTimeout(function(){ _comprandoMoneda = false; }, 3000);
-  _updateMonedasSaldo();
+  setTimeout(function(){ _comprandoScar = false; if(btn){ btn.disabled=false; btn.innerHTML='\uD83D\uDC8E COMPRAR CON SALDO'; } }, 3000);
 }
 
-function _mostrarReciboMoneda(m, user, ord){
+// Recibo de la compra de SCAR
+function _mostrarReciboScar(ffId, user, ord){
   var ahora = new Date();
   var fecha = ahora.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' });
   var hora = ahora.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' });
 
-  var ov = document.createElement('div');
-  ov.id = 'moneda-recibo-ov';
-  ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:1.2rem;overflow-y:auto';
-  ov.onclick = function(e){ if(e.target===ov) ov.remove(); };
-  document.body.appendChild(ov);
+  var cont = document.getElementById('page-codigos');
+  if(!cont) return;
+  var wrap = cont.querySelector('div[style*="max-width:620px"]');
+  if(!wrap) return;
 
-  var c = document.createElement('div');
-  c.style.cssText = 'background:linear-gradient(160deg,rgba(255,0,80,.1),rgba(255,255,255,.02));border:2px solid rgba(255,0,80,.35);border-radius:18px;padding:2rem 1.35rem;text-align:center;max-width:420px;width:100%;margin:auto';
-  c.innerHTML =
-      '<div style="font-size:3rem;margin-bottom:.5rem">\u2705</div>'
-    + '<div style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#ff4d8d;margin-bottom:.35rem;letter-spacing:.5px">PEDIDO CONFIRMADO</div>'
-    + '<div style="font-size:.82rem;color:var(--muted);margin-bottom:1.5rem">Tus monedas estan en proceso</div>'
+  wrap.innerHTML =
+    '<div style="background:linear-gradient(160deg,rgba(255,180,60,.08),rgba(255,255,255,.02));border:2px solid rgba(255,180,60,.35);border-radius:18px;padding:2rem 1.35rem;text-align:center;max-width:440px;margin:2rem auto">'
+    + '<div style="font-size:3rem;margin-bottom:.5rem">\u2705</div>'
+    + '<div style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#25d366;margin-bottom:.35rem;letter-spacing:.5px">PEDIDO CONFIRMADO</div>'
+    + '<div style="font-size:.82rem;color:var(--muted);margin-bottom:1.5rem">Tu SCAR Evolutiva esta en proceso</div>'
+    + '<div style="background:rgba(0,0,0,.25);border-radius:99px;height:10px;overflow:hidden;margin-bottom:1.5rem"><div style="height:100%;width:25%;border-radius:99px;background:linear-gradient(90deg,#22d3ee,#ff9900);box-shadow:0 0 12px rgba(255,180,60,.5)"></div></div>'
     + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
     +   _filaRecibo('\uD83D\uDCCB Pedido', '#'+ord)
-    +   _filaRecibo('\uD83C\uDFB5 Monedas', _fmtMonedas(m.monedas))
-    +   _filaRecibo('\uD83D\uDCF1 TikTok', user)
-    +   _filaRecibo('\uD83D\uDCB5 Precio', fmt(m.precio))
+    +   _filaRecibo('\uD83D\uDD2B Producto', 'SCAR Evolutiva Nivel 7')
+    +   _filaRecibo('\uD83C\uDFAE ID', ffId)
+    +   _filaRecibo('\uD83D\uDC64 Usuario', user)
+    +   _filaRecibo('\uD83D\uDCB5 Precio', fmt(SCAR_PRECIO))
+    +   _filaRecibo('\u23F3 Entrega', '2 a 3 semanas')
     +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' \u00B7 ' + hora, true)
     + '</div>'
-    + '<div style="font-size:.75rem;color:#ff6b9d;margin-top:1rem;line-height:1.5">Te contactaremos por WhatsApp para acreditar tus monedas de TikTok.</div>'
-    + '<button onclick="var o=document.getElementById(\'moneda-recibo-ov\'); if(o) o.remove();" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#ff0050,#ff4d8d);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Cerrar</button>';
-  ov.appendChild(c);
-}
-
-
-// ═══════════ ROBUX (ROBLOX) ═══════════
-var ROBUX_PRODUCTOS = [
-  { robux:100,   precio:0,   stock:false },
-  { robux:200,   precio:0,   stock:false },
-  { robux:400,   precio:0,   stock:false },
-  { robux:470,   precio:95,  stock:true  },
-  { robux:800,   precio:175, stock:true  },
-  { robux:1000,  precio:210, stock:false }
-];
-var _comprandoRobux = false;
-
-function _updateRobuxSaldo(){
-  var el = document.getElementById('robux-saldo');
-  if(el) el.textContent = authSession ? fmt(authSession.saldo||0) : fmt(0);
-}
-
-function renderRobuxGrid(){
-  var grid = document.getElementById('robux-grid');
-  if(!grid) return;
-  grid.innerHTML = ROBUX_PRODUCTOS.map(function(r, i){
-    if(!r.stock){
-      return '<div class="mon-card nostock">'
-        + '<div class="mon-card-amt">\uD83D\uDCB5 '+r.robux.toLocaleString('es-MX')+'</div>'
-        + '<div class="mon-card-lbl">Robux</div>'
-        + '<div class="mon-card-nostock-lbl">SIN STOCK</div>'
-        + '</div>';
-    }
-    return '<div class="mon-card" onclick="abrirRobuxModal('+i+')">'
-      + '<div class="mon-card-amt">\uD83D\uDCB5 '+r.robux.toLocaleString('es-MX')+'</div>'
-      + '<div class="mon-card-lbl">Robux</div>'
-      + '<div class="mon-card-price">'+fmt(r.precio)+'</div>'
-      + '</div>';
-  }).join('');
-}
-
-// Modal del videotutorial
-function abrirVideoRobux(){
-  var ov = document.getElementById('robux-video-ov');
-  if(ov) ov.remove();
-  ov = document.createElement('div');
-  ov.id = 'robux-video-ov';
-  ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;padding:1.2rem';
-  ov.onclick = function(e){ if(e.target===ov){ var v=ov.querySelector('video'); if(v) v.pause(); ov.remove(); } };
-  document.body.appendChild(ov);
-
-  var c = document.createElement('div');
-  c.style.cssText = 'max-width:420px;width:100%;background:#0a0a0a;border:1px solid rgba(255,255,255,.15);border-radius:16px;overflow:hidden;margin:auto';
-  c.innerHTML =
-      '<div style="display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08)">'
-    +   '<div style="font-family:Oxanium;font-weight:800;font-size:.95rem;color:#fff">\u25B6\uFE0F Videotutorial Robux</div>'
-    +   '<button onclick="var o=document.getElementById(\'robux-video-ov\'); if(o){var v=o.querySelector(\'video\'); if(v) v.pause(); o.remove();}" style="width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.1);border:none;color:#fff;font-size:1.1rem;cursor:pointer;line-height:1">\u00D7</button>'
-    + '</div>'
-    + '<video controls autoplay playsinline style="width:100%;display:block;background:#000;max-height:70vh">'
-    +   '<source src="robux-tutorial.mp4" type="video/mp4"/>'
-    +   'Tu navegador no soporta el video.'
-    + '</video>'
-    + '<div style="padding:1rem;font-size:.78rem;color:var(--muted);line-height:1.6;text-align:center">Sigue estos pasos para canjear tus Robux en <b style="color:#fff">roblox.com/redeem</b> desde un navegador web.</div>';
-  ov.appendChild(c);
-}
-
-function abrirRobuxModal(idx){
-  var r = ROBUX_PRODUCTOS[idx];
-  if(!r || !r.stock) return;
-
-  var ov = document.getElementById('robux-modal-ov');
-  if(ov) ov.remove();
-  ov = document.createElement('div');
-  ov.id = 'robux-modal-ov';
-  ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:1.2rem;overflow-y:auto';
-  ov.onclick = function(e){ if(e.target===ov) cerrarRobuxModal(); };
-  document.body.appendChild(ov);
-
-  var saldo = authSession ? (authSession.saldo||0) : 0;
-
-  var c = document.createElement('div');
-  c.style.cssText = 'max-width:420px;width:100%;background:#0a0a0a;border:1px solid rgba(255,255,255,.25);border-radius:18px;overflow:hidden;margin:auto';
-  c.innerHTML =
-      '<div style="position:relative;background:linear-gradient(135deg,#1a1a1a,#333);padding:1.6rem 1.3rem;text-align:center">'
-    +   '<button onclick="cerrarRobuxModal()" style="position:absolute;top:.8rem;right:.8rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:1.1rem;cursor:pointer;line-height:1">\u00D7</button>'
-    +   '<div style="font-size:2.6rem;margin-bottom:.3rem">\uD83D\uDCB5</div>'
-    +   '<div style="font-family:Oxanium;font-weight:900;font-size:1.6rem;color:#fff">'+r.robux.toLocaleString('es-MX')+' Robux</div>'
-    +   '<div style="font-size:.8rem;color:rgba(255,255,255,.6)">Roblox &middot; Codigo digital global</div>'
-    + '</div>'
-    + '<div style="padding:1.35rem">'
-    +   '<div style="display:flex;align-items:baseline;gap:.5rem;margin-bottom:1.2rem;padding:.9rem 1rem;background:rgba(37,211,102,.06);border:1px solid rgba(37,211,102,.2);border-radius:12px">'
-    +     '<span style="font-size:.72rem;color:var(--muted)">Precio:</span>'
-    +     '<span style="font-family:Oxanium;font-weight:900;font-size:1.6rem;color:#25d366">'+fmt(r.precio)+'</span>'
-    +   '</div>'
-    +   '<div style="background:rgba(255,180,60,.08);border:1px solid rgba(255,180,60,.28);border-radius:10px;padding:.7rem .85rem;margin-bottom:1rem;font-size:.74rem;color:#ffcf8a;line-height:1.5">\u26A0\uFE0F Canjea en un navegador web (roblox.com/redeem), NO dentro del juego.</div>'
-    +   '<label class="flabel">Usuario de Roblox *</label>'
-    +   '<input class="finput" id="robux-user" type="text" placeholder="Tu usuario de Roblox"/>'
-    +   '<label class="flabel">WhatsApp de contacto *</label>'
-    +   '<input class="finput" id="robux-wa" type="text" placeholder="Tu numero de WhatsApp"/>'
-    +   '<div style="display:flex;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;margin:1rem 0"><span style="font-size:.8rem;color:var(--muted)">Tu saldo</span><span style="font-family:Oxanium;font-weight:700;color:#25d366">'+fmt(saldo)+'</span></div>'
-    +   '<div id="robux-err" style="display:none;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.3);color:#ff6b6b;border-radius:9px;padding:.7rem .9rem;font-size:.8rem;margin-bottom:.85rem"></div>'
-    +   '<button id="robux-btn" onclick="comprarRobux('+idx+')" style="width:100%;padding:1rem;background:linear-gradient(135deg,#00a2ff,#0066ff);color:#fff;border:none;border-radius:12px;font-family:Oxanium;font-weight:900;font-size:.95rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(0,120,255,.3)">\uD83D\uDCB5 COMPRAR CON SALDO</button>'
-    +   '<div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.85rem;line-height:1.5">Te enviaremos tu codigo digital por WhatsApp. Sigue el videotutorial para canjearlo.</div>'
+    + '<div style="font-size:.75rem;color:#22d3ee;margin-top:1rem;line-height:1.5">Te contactaremos por WhatsApp. La skin llega en 2-3 semanas al correo de tu cuenta.</div>'
+    + '<button onclick="goPage(\'home\')" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Volver al inicio</button>'
     + '</div>';
-  ov.appendChild(c);
-}
-
-function cerrarRobuxModal(){
-  var ov = document.getElementById('robux-modal-ov');
-  if(ov) ov.remove();
-}
-
-function comprarRobux(idx){
-  var r = ROBUX_PRODUCTOS[idx];
-  if(!r || !r.stock) return;
-  if(!authSession){ showToast('Inicia sesion para comprar'); cerrarRobuxModal(); setTimeout(showAuthModal,500); return; }
-  if(_comprandoRobux){ return; }
-
-  var err = document.getElementById('robux-err');
-  function showErr(t){ if(err){ err.textContent=t; err.style.display='block'; } }
-
-  var user = ((document.getElementById('robux-user')||{}).value||'').trim();
-  var wa   = ((document.getElementById('robux-wa')||{}).value||'').trim();
-
-  if(!user){ showErr('Escribe tu usuario de Roblox.'); return; }
-  if(!wa){ showErr('Escribe tu WhatsApp de contacto.'); return; }
-
-  var saldo = authSession.saldo||0;
-  if(saldo < r.precio){ showErr('Saldo insuficiente ('+fmt(saldo)+'). Necesitas '+fmt(r.precio)+'. Recarga tu cuenta.'); return; }
-  if(err) err.style.display='none';
-
-  _comprandoRobux = true;
-  var btn = document.getElementById('robux-btn');
-  if(btn){ btn.disabled=true; btn.innerHTML='Procesando...'; }
-
-  var ord = getNextOrder();
-  var nombre = r.robux.toLocaleString('es-MX')+' Robux';
-  var detalle = nombre + ' - Roblox:' + user + ' - WA:' + wa;
-  addSpend(r.precio, detalle + ' - Pedido #' + ord);
-  registrarPedido(nombre + ' (' + user + ')', r.robux, 'robux', user, r.precio, 0);
-  if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, detalle, r.precio, ord);
-
-  cerrarRobuxModal();
-  _mostrarReciboRobux(r, user, ord);
-  showToast('\u2705 Pedido #'+ord+' realizado!', 3000);
-
-  setTimeout(function(){ _comprandoRobux = false; }, 3000);
-  _updateRobuxSaldo();
-}
-
-function _mostrarReciboRobux(r, user, ord){
-  var ahora = new Date();
-  var fecha = ahora.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' });
-  var hora = ahora.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' });
-
-  var ov = document.createElement('div');
-  ov.id = 'robux-recibo-ov';
-  ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:1.2rem;overflow-y:auto';
-  ov.onclick = function(e){ if(e.target===ov) ov.remove(); };
-  document.body.appendChild(ov);
-
-  var c = document.createElement('div');
-  c.style.cssText = 'background:linear-gradient(160deg,rgba(0,120,255,.1),rgba(255,255,255,.02));border:2px solid rgba(0,120,255,.35);border-radius:18px;padding:2rem 1.35rem;text-align:center;max-width:420px;width:100%;margin:auto';
-  c.innerHTML =
-      '<div style="font-size:3rem;margin-bottom:.5rem">\u2705</div>'
-    + '<div style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#4da6ff;margin-bottom:.35rem;letter-spacing:.5px">PEDIDO CONFIRMADO</div>'
-    + '<div style="font-size:.82rem;color:var(--muted);margin-bottom:1.5rem">Tu codigo de Robux esta en proceso</div>'
-    + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
-    +   _filaRecibo('\uD83D\uDCCB Pedido', '#'+ord)
-    +   _filaRecibo('\uD83D\uDCB5 Robux', r.robux.toLocaleString('es-MX'))
-    +   _filaRecibo('\uD83C\uDFAE Roblox', user)
-    +   _filaRecibo('\uD83D\uDCB5 Precio', fmt(r.precio))
-    +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' \u00B7 ' + hora, true)
-    + '</div>'
-    + '<div style="font-size:.75rem;color:#4da6ff;margin-top:1rem;line-height:1.5">Te enviaremos tu codigo por WhatsApp. Recuerda canjearlo en un navegador web (roblox.com/redeem), NO dentro del juego.</div>'
-    + '<button onclick="var o=document.getElementById(\'robux-recibo-ov\'); if(o) o.remove();" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#00a2ff,#0066ff);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Cerrar</button>';
-  ov.appendChild(c);
+  wrap.scrollIntoView({ behavior:'smooth', block:'start' });
 }
 
 
+// ═══ Botón de WhatsApp ARRASTRABLE ═══
 var _waDragged = false;
 (function initWaDrag(){
   function setup(){
@@ -8443,7 +7075,7 @@ function renderHomeDashboard(){
   var hola = document.getElementById('home-hola');
   if(hola){
     var nom = authSession ? (authSession.username || 'Jugador') : 'Bienvenido';
-    hola.innerHTML = authSession ? ('Hola, ' + nom + ' \uD83D\uDC4B') : 'Bienvenido \uD83D\uDC4B';
+    hola.textContent = authSession ? ('Hola, ' + nom) : 'Bienvenido';
   }
 
   // Fecha en espanol
@@ -8519,17 +7151,15 @@ function _syncBottomNav(id){
   // Que pestana se marca segun la pagina (las hijas marcan a su padre)
   var mapa = {
     home:'bn-home',
-    tienda:'bn-tienda', pase:'bn-tienda', diamantes:'bn-tienda', honor:'bn-tienda',
+    tienda:'bn-tienda', pase:'bn-tienda', diamantes:'bn-tienda', pines:'bn-tienda', honor:'bn-tienda',
     honorcuenta:'bn-tienda', codigos:'bn-tienda', clanes:'bn-tienda', cajas:'bn-tienda',
-    actas:'bn-tienda', monedas:'bn-tienda', robux:'bn-tienda',
-    pines:'bn-revend',
     saldo:'bn-saldo', retirar:'bn-saldo', transferir:'bn-saldo',
-    likes:'bn-likes', likes2k:'bn-likes',
+    likes:'bn-likes',
     menu:'bn-menu', perfil:'bn-menu', miscompras:'bn-menu', api:'bn-menu',
     creadores:'bn-menu', comunidad:'bn-menu', faq:'bn-menu', ranking:'bn-menu',
     sobre:'bn-menu', terminos:'bn-menu', referidos:'bn-menu', membresia:'bn-menu'
   };
-  ['bn-home','bn-tienda','bn-saldo','bn-likes','bn-revend','bn-menu'].forEach(function(b){
+  ['bn-home','bn-tienda','bn-saldo','bn-likes','bn-menu'].forEach(function(b){
     var el = document.getElementById(b);
     if(el) el.classList.remove('active');
   });
@@ -8542,7 +7172,7 @@ function _syncBottomNav(id){
 
 
 // ═══════════ PASE BOOYAH (asistente de 3 pasos) ═══════════
-var PASE_PRECIO = 30;
+var PASE_PRECIO = 17;
 var _comprandoPase = false;
 var _paseIdVerificado = null;
 var _paseNickVerificado = '';
@@ -8680,7 +7310,7 @@ function paseVerificarID(){
   fetch(COMPRAR_RECARGA_URL, {
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ action:'validar', product_id: 340, service_user_id: ffId })
+    body: JSON.stringify({ action:'validar', product_id: 351, service_user_id: ffId })
   }).then(function(r){ return r.json(); }).then(function(res){
     if(btn){ btn.disabled = false; btn.textContent = 'Verificar'; }
 
@@ -8744,16 +7374,7 @@ function paseCambiarID(){
   _paseSig1Activo(false);
 }
 
-var PASE_PAUSADO = true; // Poner en false para reactivar la compra de pases
-
 function _paseReiniciar(){
-  // Si el pase esta pausado, mostrar solo el mantenimiento
-  if(PASE_PAUSADO){
-    var mant = document.getElementById('pase-mantenimiento'); if(mant) mant.style.display='block';
-    ['pase-paso-1','pase-paso-2','pase-paso-3'].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display='none'; });
-    var stepper = document.getElementById('pase-stepper'); if(stepper) stepper.style.display='none';
-    return;
-  }
   paseCambiarID();
   var i1 = document.getElementById('pase-id'); if(i1) i1.value='';
   var e1 = document.getElementById('pase-err'); if(e1) e1.style.display='none';
@@ -8991,12 +7612,12 @@ function recSetMoneda(m){
   _recMoneda = m;
   var bM = document.getElementById('rec-cur-mxn');
   var bU = document.getElementById('rec-cur-usd');
-  if(bM){ bM.classList.toggle('on', m==='MXN'); }
-  if(bU){ bU.classList.toggle('on', m==='USD'); }
+  if(bM){ bM.style.background = (m==='MXN')?'#fff':'transparent'; bM.style.color = (m==='MXN')?'#000':'#6b7280'; }
+  if(bU){ bU.style.background = (m==='USD')?'#fff':'transparent'; bU.style.color = (m==='USD')?'#000':'#6b7280'; }
   var lbl = document.getElementById('rec-cur-label');
   if(lbl) lbl.textContent = m;
   var av = document.getElementById('rec-min-aviso');
-  if(av) av.innerHTML = '<span style="color:#22d3ee">&#9432;</span> Minimo ' + (m==='MXN'?'$100 MXN':'$5 USD');
+  if(av) av.textContent = 'Minimo ' + (m==='MXN'?'$100 MXN':'$5 USD');
   var inp = document.getElementById('rec-monto');
   if(inp) inp.value = (m==='MXN') ? 100 : 5;
   _recPintarMontos();
@@ -9007,38 +7628,31 @@ function _recPintarMontos(){
   if(!cont) return;
   var montos = REC_MONTOS[_recMoneda] || REC_MONTOS.MXN;
   cont.innerHTML = montos.map(function(m){
-    return '<button onclick="recSetMonto('+m+')" class="rs-quick">$'+m+'</button>';
+    return '<button onclick="recSetMonto('+m+')" style="flex:1;min-width:60px;padding:.6rem .3rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);color:#c9d1e0;border-radius:11px;font-family:Poppins;font-weight:600;font-size:.82rem;cursor:pointer">$'+m+'</button>';
   }).join('');
 }
 
 function recSetMonto(m){
   var inp = document.getElementById('rec-monto');
   if(inp) inp.value = m;
-  // Marcar el boton activo
-  var cont = document.getElementById('rec-montos');
-  if(cont){
-    var btns = cont.querySelectorAll('.rs-quick');
-    btns.forEach(function(b){ b.classList.toggle('on', b.textContent === '$'+m); });
-  }
 }
 
 // Tipo de recarga (obligatorio): para que va a usar el saldo
 var _recTipo = null;
-var REC_TIPO_LABEL = { ilim:'Diamantes con Bonus', revend:'Zona de Revendedores', '1vez':'Diamantes 1 vez por ID' };
+var REC_TIPO_LABEL = { ilim:'Diamantes con Bono', pase:'Pase Booyah', '1vez':'Diamantes 1 vez por ID' };
 
 function recSetTipo(tipo){
   _recTipo = tipo;
-  [['ilim','rec-tipo-ilim'],['revend','rec-tipo-revend'],['1vez','rec-tipo-1vez']].forEach(function(par){
+  [['ilim','rec-tipo-ilim'],['pase','rec-tipo-pase'],['1vez','rec-tipo-1vez']].forEach(function(par){
     var el = document.getElementById(par[1]);
     if(!el) return;
     var activo = (par[0] === tipo);
-    el.classList.toggle('on', activo);
-    el.style.background = activo ? 'linear-gradient(135deg,rgba(34,211,238,.1),rgba(139,92,246,.08))' : 'rgba(255,255,255,.022)';
-    el.style.borderColor = activo ? 'rgba(34,211,238,.5)' : 'rgba(255,255,255,.08)';
+    el.style.background = activo ? 'rgba(34,211,238,.08)' : 'rgba(255,255,255,.022)';
+    el.style.borderColor = activo ? 'rgba(34,211,238,.45)' : 'rgba(255,255,255,.08)';
     var radio = el.querySelector('.rec-radio');
     if(radio) radio.style.borderColor = activo ? '#22d3ee' : 'rgba(255,255,255,.2)';
     var dot = el.querySelector('.rec-dot');
-    if(dot) dot.style.background = activo ? 'linear-gradient(135deg,#22d3ee,#8b5cf6)' : 'transparent';
+    if(dot) dot.style.background = activo ? '#22d3ee' : 'transparent';
   });
   var err = document.getElementById('rec-tipo-err');
   if(err) err.style.display = 'none';
@@ -9071,10 +7685,9 @@ function recElegirMetodo(metodo){
 var _recMontoElegido = 0;
 
 function recLimpiarTipo(){
-  ['rec-tipo-ilim','rec-tipo-revend','rec-tipo-1vez'].forEach(function(id){
+  ['rec-tipo-ilim','rec-tipo-1vez'].forEach(function(id){
     var el = document.getElementById(id);
     if(!el) return;
-    el.classList.remove('on');
     el.style.background = 'rgba(255,255,255,.022)';
     el.style.borderColor = 'rgba(255,255,255,.08)';
     var r = el.querySelector('.rec-radio'); if(r) r.style.borderColor = 'rgba(255,255,255,.2)';
@@ -9217,12 +7830,9 @@ function renderResumenRecargas(){
     arr.sort(function(a,b){ return b.base - a.base; });
 
     lista.innerHTML = arr.map(function(x){
-      return '<div class="mc-rrow">'
-        + '<div style="min-width:0;flex:1">'
-        +   '<div class="mc-rrow-name">'+x.nombre+'</div>'
-        +   '<div class="mc-rrow-meta">'+x.n+' recarga'+(x.n!==1?'s':'')+'</div>'
-        + '</div>'
-        + '<div class="mc-rrow-price">'+fmt(x.monto)+'</div>'
+      return '<div style="background:rgba(255,255,255,.03);border-radius:13px;padding:.9rem 1rem">'
+        + '<div style="font-size:.92rem;color:#fff;font-weight:500;line-height:1.35">'+x.nombre+'</div>'
+        + '<div style="font-size:.82rem;color:#6b7280;margin-top:.25rem">'+x.n+' recarga'+(x.n!==1?'s':'')+' &middot; <b style="color:#25d366">'+fmt(x.monto)+'</b></div>'
         + '</div>';
     }).join('');
 
