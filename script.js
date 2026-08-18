@@ -678,6 +678,82 @@ function admSubTab(tab){
 }
 function adminLogin(){ doAdminLogin(); }
 function adminLogout(){ doAdminLogout(); }
+// ── VERIFICACIONES (admin) ──
+var _admVfUser = null;
+
+function adminBuscarVerif(){
+  var uname = (document.getElementById('adm-vf-user').value||'').trim();
+  var msg = document.getElementById('adm-vf-msg');
+  var found = document.getElementById('adm-vf-found');
+  if(!uname){ showToast('Escribe un nombre de usuario'); return; }
+  sb.get('profiles', 'select=id,username,verificacion,verif_motivo,verif_fecha,verif_por&username=eq.'+encodeURIComponent(uname)).then(function(rows){
+    if(!rows || !rows.length){
+      if(found) found.style.display='none';
+      if(msg){ msg.style.display='block'; msg.style.color='#ff5252'; msg.textContent='Usuario no encontrado: '+uname; }
+      return;
+    }
+    var u = rows[0];
+    _admVfUser = u;
+    if(found) found.style.display='block';
+    if(msg) msg.style.display='none';
+    // Rellenar el estado actual
+    var sel = document.getElementById('adm-vf-tipo');
+    if(sel) sel.value = u.verificacion || '';
+    var mot = document.getElementById('adm-vf-motivo');
+    if(mot) mot.value = u.verif_motivo || '';
+    var cur = document.getElementById('adm-vf-current');
+    if(cur){
+      if(u.verificacion && VERIF_BADGES[u.verificacion]){
+        cur.innerHTML = 'Actual: <b style="color:'+VERIF_BADGES[u.verificacion].color+'">'+VERIF_BADGES[u.verificacion].nombre+'</b>'+(u.verif_fecha?(' &middot; '+u.verif_fecha):'');
+      } else {
+        cur.innerHTML = 'Sin verificacion actual';
+      }
+    }
+  }).catch(function(e){
+    console.error('[VERIF] buscar', e);
+    if(msg){ msg.style.display='block'; msg.style.color='#ff5252'; msg.textContent='Error al buscar. Revisa que existan las columnas en Supabase.'; }
+  });
+}
+
+function adminAsignarVerif(){
+  if(!_admVfUser){ showToast('Primero busca un usuario'); return; }
+  var tipo = document.getElementById('adm-vf-tipo').value;
+  var motivo = (document.getElementById('adm-vf-motivo').value||'').trim();
+  var msg = document.getElementById('adm-vf-msg');
+  var hoy = new Date().toLocaleDateString('es-MX', {day:'2-digit',month:'2-digit',year:'numeric'});
+  var adminNombre = (typeof ADMIN_EMAIL2!=='undefined') ? 'CiberStore Admin' : 'Admin';
+
+  var datos = tipo ? {
+    verificacion: tipo,
+    verif_motivo: motivo || (VERIF_BADGES[tipo] ? VERIF_BADGES[tipo].desc : ''),
+    verif_fecha: hoy,
+    verif_por: adminNombre
+  } : {
+    verificacion: null,
+    verif_motivo: null,
+    verif_fecha: null,
+    verif_por: null
+  };
+
+  sb.patch('profiles', datos, 'id=eq.'+_admVfUser.id).then(function(){
+    if(msg){
+      msg.style.display='block'; msg.style.color='#25d366';
+      msg.textContent = tipo ? ('\u2713 Verificacion asignada a '+_admVfUser.username) : ('\u2713 Verificacion retirada de '+_admVfUser.username);
+    }
+    showToast(tipo ? 'Verificacion guardada' : 'Verificacion retirada');
+    // Refrescar estado
+    _admVfUser.verificacion = tipo || null;
+    var cur = document.getElementById('adm-vf-current');
+    if(cur){
+      if(tipo && VERIF_BADGES[tipo]) cur.innerHTML = 'Actual: <b style="color:'+VERIF_BADGES[tipo].color+'">'+VERIF_BADGES[tipo].nombre+'</b> &middot; '+hoy;
+      else cur.innerHTML = 'Sin verificacion actual';
+    }
+  }).catch(function(e){
+    console.error('[VERIF] asignar', e);
+    if(msg){ msg.style.display='block'; msg.style.color='#ff5252'; msg.textContent='Error al guardar. Verifica las columnas en Supabase.'; }
+  });
+}
+
 function adminCreateCode(){
   var code=((document.getElementById('adm-code')||{}).value||'').trim().toUpperCase();
   var disc=parseInt((document.getElementById('adm-disc')||{}).value||'0');
@@ -1059,7 +1135,14 @@ function renderPerfil(){
   var fecha    = u.created_at ? new Date(u.created_at).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'}) : '-';
   var roleStr  = u.role === 'admin' ? 'Admin' : 'Usuario';
   if(av)   av.textContent   = u.username.charAt(0).toUpperCase();
-  if(un)   un.textContent   = u.username;
+  if(un){
+    // Si el usuario esta verificado, mostrar su nombre con la insignia
+    if(u.verificacion && typeof renderBadge==='function' && VERIF_BADGES[u.verificacion]){
+      un.innerHTML = u.username + ' ' + renderBadge(u.verificacion);
+    } else {
+      un.textContent = u.username;
+    }
+  }
   // Campos rapidos nuevos
   var qu=document.getElementById('pf-quick-user'); if(qu) qu.textContent=u.username;
   var qav=document.getElementById('pf-quick-av'); if(qav) qav.textContent=u.username.charAt(0).toUpperCase();
@@ -1774,6 +1857,126 @@ function toggleTheme(){
   localStorage.setItem('cs_theme',isLight?'light':'dark');
   var btn=document.getElementById('theme-btn');
   if(btn) btn.textContent=isLight?'\uD83C\uDF19':'\u2600\uFE0F';
+}
+
+/* ═══════════ SISTEMA DE VERIFICACIONES CIBERSTORE ═══════════ */
+// Catalogo de insignias. Escalable: para agregar una nueva, solo añade una entrada aqui.
+var VERIF_BADGES = {
+  cliente: {
+    nombre: 'Cliente Verificado',
+    color: '#22a3e8',
+    desc: 'Cliente real con historial positivo en CiberStore.',
+    svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1l2.4 2.4 3.4-.5.5 3.4L21 12l-2.7 3.3-.5 3.4-3.4-.5L12 23l-2.4-2.8-3.4.5-.5-3.4L3 12l2.7-3.2.5-3.4 3.4.5z"/><path d="M9.5 12.5l1.8 1.8 3.6-3.8" stroke="#05070f" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  },
+  destacado: {
+    nombre: 'Cliente Destacado',
+    color: '#f0b90b',
+    desc: 'Cliente frecuente con buen historial de compras.',
+    svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.8 6.1 20l1.2-6.5L2.5 8.9 9.1 8z"/></svg>'
+  },
+  vip: {
+    nombre: 'VIP',
+    color: '#c026d3',
+    desc: 'Cliente con trayectoria y volumen de compras destacado.',
+    svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 8l4 3 5-7 5 7 4-3-2 11H5z"/><circle cx="3" cy="8" r="1.6"/><circle cx="21" cy="8" r="1.6"/><circle cx="12" cy="4" r="1.6"/></svg>'
+  },
+  creador: {
+    nombre: 'Creador Verificado',
+    color: '#ff4d8d',
+    desc: 'Creador de contenido reconocido.',
+    svg: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="4" width="14" height="16" rx="3"/><path d="M16 10l6-3v10l-6-3z"/></svg>'
+  },
+  influencer: {
+    nombre: 'Influencer Verificado',
+    color: '#22d3ee',
+    desc: 'Influencer con una comunidad relevante.',
+    svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 2.4 3.4-.5.5 3.4L21 12l-2.7 3.3-.5 3.4-3.4-.5L12 23l-2.4-2.8-3.4.5-.5-3.4L3 12l2.7-3.2.5-3.4 3.4.5z"/><circle cx="12" cy="10" r="2.3" fill="#05070f"/><path d="M8 16c0-2 1.8-3 4-3s4 1 4 3" fill="#05070f"/></svg>'
+  },
+  tienda: {
+    nombre: 'Tienda Verificada',
+    color: '#25d366',
+    desc: 'Tienda o negocio reconocido y validado.',
+    svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 9l1-5h14l1 5M4 9h16v2a2 2 0 01-2 2H6a2 2 0 01-2-2zM5 13v7h14v-7"/><path d="M9.5 16.5l1.5 1.5 3-3" stroke="#05070f" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  },
+  socio: {
+    nombre: 'Socio CiberStore',
+    color: '#8b5cf6',
+    desc: 'Colaboracion oficial con CiberStore.',
+    svg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 11l2-2 4 4 4-4 2 2-6 6z"/><path d="M2 8l4-4 4 4-4 4z"/><path d="M14 8l4-4 4 4-4 4z"/></svg>'
+  }
+};
+
+// Devuelve el HTML de una insignia (icono + tooltip). size: '' | 'lg'
+function renderBadge(tipo, size){
+  var b = VERIF_BADGES[tipo];
+  if(!b) return '';
+  var cls = 'vbadge' + (size==='lg' ? ' vbadge-lg' : '');
+  return '<span class="'+cls+'" style="color:'+b.color+'" onclick="this.classList.toggle(\'show\')">'
+    + b.svg
+    + '<span class="vbtip"><div class="vbtip-title" style="color:'+b.color+'">'+b.nombre+'</div><div class="vbtip-desc">'+b.desc+'</div></span>'
+    + '</span>';
+}
+
+// Devuelve un chip completo (nombre de usuario + insignia + etiqueta)
+function renderVerifChip(username, tipo){
+  var b = VERIF_BADGES[tipo];
+  if(!b) return username;
+  return username + ' ' + renderBadge(tipo);
+}
+
+// Lee la verificacion de un perfil (desde el campo que guarde Supabase).
+// Espera un objeto profile con: verificacion (tipo), verif_fecha, verif_motivo, verif_por
+function getVerifData(profile){
+  if(!profile || !profile.verificacion) return null;
+  var b = VERIF_BADGES[profile.verificacion];
+  if(!b) return null;
+  return {
+    tipo: profile.verificacion,
+    nombre: b.nombre,
+    color: b.color,
+    desc: b.desc,
+    fecha: profile.verif_fecha || '',
+    motivo: profile.verif_motivo || '',
+    por: profile.verif_por || 'CiberStore'
+  };
+}
+
+// Renderiza la tarjeta especial de perfil verificado con estadisticas.
+// profile: objeto del perfil; stats: {antiguedad, compras, historial}
+function renderPerfilVerificado(username, profile, stats){
+  var v = getVerifData(profile);
+  if(!v) return '';
+  stats = stats || {};
+  var rgbaBorde = v.color;
+  var html = '<div class="vprofile" style="background:linear-gradient(150deg,'+_hexA(v.color,.12)+',rgba(255,255,255,.01));border:1px solid '+_hexA(v.color,.35)+'">'
+    + '<div style="position:relative;z-index:2">'
+    +   '<div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">'
+    +     '<span style="font-family:Poppins,sans-serif;font-weight:800;font-size:1.25rem;color:#fff">'+username+'</span>'
+    +     renderBadge(v.tipo,'lg')
+    +   '</div>'
+    +   '<div class="vchip" style="margin-top:.6rem;background:'+_hexA(v.color,.15)+';border:1px solid '+_hexA(v.color,.4)+';color:'+v.color+'">'+v.nombre+'</div>'
+    +   '<div style="margin-top:.9rem;padding:.85rem 1rem;background:rgba(0,0,0,.25);border-radius:12px;border:1px solid rgba(255,255,255,.06)">'
+    +     '<div style="font-size:.78rem;color:#c9d1e0;line-height:1.5"><b style="color:'+v.color+'">Verificado por '+v.por+'</b>'+(v.motivo?('<br>'+v.motivo):'')+'</div>'
+    +     (v.fecha?'<div style="font-size:.68rem;color:#6b7280;margin-top:.4rem">Verificado el '+v.fecha+'</div>':'')
+    +   '</div>';
+  // Estadisticas (sin info privada)
+  if(stats.antiguedad || stats.compras || stats.historial){
+    html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-top:.8rem">';
+    if(stats.antiguedad) html += '<div style="text-align:center;background:rgba(255,255,255,.03);border-radius:10px;padding:.6rem"><div style="font-family:Oxanium,sans-serif;font-weight:900;font-size:.95rem;color:#fff">'+stats.antiguedad+'</div><div style="font-size:.6rem;color:#8b93a3;text-transform:uppercase;letter-spacing:.5px;margin-top:.2rem">Antiguedad</div></div>';
+    if(stats.compras) html += '<div style="text-align:center;background:rgba(255,255,255,.03);border-radius:10px;padding:.6rem"><div style="font-family:Oxanium,sans-serif;font-weight:900;font-size:.95rem;color:#fff">'+stats.compras+'</div><div style="font-size:.6rem;color:#8b93a3;text-transform:uppercase;letter-spacing:.5px;margin-top:.2rem">Compras</div></div>';
+    if(stats.historial) html += '<div style="text-align:center;background:rgba(255,255,255,.03);border-radius:10px;padding:.6rem"><div style="font-family:Oxanium,sans-serif;font-weight:900;font-size:.95rem;color:#25d366">'+stats.historial+'</div><div style="font-size:.6rem;color:#8b93a3;text-transform:uppercase;letter-spacing:.5px;margin-top:.2rem">Historial</div></div>';
+    html += '</div>';
+  }
+  html += '<div style="font-size:.62rem;color:#5a6478;margin-top:.8rem;line-height:1.4">Una insignia no implica que CiberStore garantice actividades o servicios externos de esta persona/tienda.</div>';
+  html += '</div></div>';
+  return html;
+}
+
+// Helper: convierte hex a rgba con alpha
+function _hexA(hex, a){
+  hex = hex.replace('#','');
+  var r = parseInt(hex.substr(0,2),16), g = parseInt(hex.substr(2,2),16), b = parseInt(hex.substr(4,2),16);
+  return 'rgba('+r+','+g+','+b+','+a+')';
 }
 
 /* \u2500\u2500 TOAST \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */

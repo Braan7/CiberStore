@@ -2136,6 +2136,26 @@ html,body{max-width:100%;overflow-x:hidden}
 .l2k-input:focus{border-color:rgba(255,77,141,.6);box-shadow:0 0 0 3px rgba(255,77,141,.1)}
 .l2k-benefit{flex:1;min-width:130px;display:flex;align-items:center;justify-content:center;gap:.4rem;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.7rem;font-size:.74rem;color:#c9d1e0;transition:transform .2s,border-color .2s}
 .l2k-benefit:hover{transform:translateY(-2px);border-color:rgba(255,77,141,.3)}
+
+/* ═══════════ SISTEMA DE VERIFICACIONES ═══════════ */
+@keyframes vbglow{0%,100%{filter:drop-shadow(0 0 3px currentColor)}50%{filter:drop-shadow(0 0 7px currentColor)}}
+.vbadge{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;position:relative;cursor:help;line-height:1}
+.vbadge svg{width:1.05em;height:1.05em;animation:vbglow 2.6s ease-in-out infinite}
+.vbadge-lg svg{width:1.35em;height:1.35em}
+/* Tooltip */
+.vbadge .vbtip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(4px);
+  background:#0d1220;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:.55rem .7rem;
+  width:max-content;max-width:220px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:60;
+  box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.vbadge:hover .vbtip,.vbadge.show .vbtip{opacity:1;transform:translateX(-50%) translateY(0)}
+.vbtip-title{font-family:Oxanium,sans-serif;font-weight:800;font-size:.75rem;margin-bottom:.15rem}
+.vbtip-desc{font-size:.68rem;color:#9aa4b2;line-height:1.35}
+.vbtip::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#0d1220}
+/* Chip de verificación (nombre + etiqueta) */
+.vchip{display:inline-flex;align-items:center;gap:.4rem;padding:.3rem .7rem;border-radius:99px;font-family:Oxanium,sans-serif;font-weight:800;font-size:.72rem;letter-spacing:.3px}
+/* Tarjeta de perfil verificado */
+.vprofile{position:relative;overflow:hidden;border-radius:18px;padding:1.3rem;margin-bottom:1.2rem}
+.vprofile::before{content:"";position:absolute;top:-40%;right:-15%;width:180px;height:180px;border-radius:50%;filter:blur(30px);opacity:.4;pointer-events:none}
 </style>
 
 <script>
@@ -4755,6 +4775,38 @@ document.addEventListener('keydown',function(e){
     <div id="admin-dashboard" style="display:none">
       <div class="admin-sec"><div class="admin-sec-title">Crear Codigo Promocional</div><div class="admin-row"><div style="flex:1.2;min-width:110px"><label class="admin-lbl">Codigo</label><input class="admin-inp" id="adm-code" type="text" placeholder="Ej: CREATOR10" style="width:100%;text-transform:uppercase"/></div><div style="flex:.8;min-width:85px"><label class="admin-lbl">Descuento %</label><input class="admin-inp" id="adm-disc" type="number" min="1" max="99" placeholder="10" style="width:100%"/></div><div style="flex:.8;min-width:85px"><label class="admin-lbl">Usos max</label><input class="admin-inp" id="adm-uses" type="number" min="1" placeholder="100" style="width:100%"/></div></div><div class="admin-row" style="margin-bottom:0"><div style="flex:1;min-width:110px"><label class="admin-lbl">Descripcion</label><input class="admin-inp" id="adm-desc" type="text" placeholder="Para creadores" style="width:100%"/></div><button class="btn-admin-create" onclick="adminCreateCode()">Crear</button></div><div id="adm-create-msg" style="font-size:.7rem;margin-top:.45rem;display:none"></div></div>
       <div class="admin-sec"><div class="admin-sec-title" style="display:flex;justify-content:space-between;align-items:center"><span>Codigos activos</span><span id="adm-codes-count" style="font-family:Oxanium;font-size:.72rem;color:var(--muted)">0 codigos</span></div><div class="admin-codes-list" id="adm-codes-list"><div style="text-align:center;padding:1.2rem;color:var(--muted)">Sin codigos creados</div></div></div>
+      <div class="admin-sec"><div class="admin-sec-title">&#128081; Verificaciones</div>
+        <div class="admin-row" style="margin-bottom:.6rem">
+          <div style="flex:1;min-width:140px"><label class="admin-lbl">Usuario a verificar</label><input class="admin-inp" id="adm-vf-user" type="text" placeholder="Nombre de usuario exacto" style="width:100%"/></div>
+          <button class="btn-admin-create" onclick="adminBuscarVerif()" style="align-self:flex-end">Buscar</button>
+        </div>
+        <div id="adm-vf-found" style="display:none">
+          <div class="admin-row" style="margin-bottom:.6rem">
+            <div style="flex:1;min-width:140px"><label class="admin-lbl">Tipo de insignia</label>
+              <select class="admin-inp" id="adm-vf-tipo" style="width:100%">
+                <option value="">— Ninguna (quitar) —</option>
+                <option value="cliente">Cliente Verificado</option>
+                <option value="destacado">Cliente Destacado</option>
+                <option value="vip">VIP</option>
+                <option value="creador">Creador Verificado</option>
+                <option value="influencer">Influencer Verificado</option>
+                <option value="tienda">Tienda Verificada</option>
+                <option value="socio">Socio CiberStore</option>
+              </select>
+            </div>
+          </div>
+          <div class="admin-row" style="margin-bottom:.6rem">
+            <div style="flex:1;min-width:140px"><label class="admin-lbl">Motivo / descripcion</label><input class="admin-inp" id="adm-vf-motivo" type="text" placeholder="Ej: Creador de contenido reconocido" style="width:100%"/></div>
+          </div>
+          <div class="admin-row" style="margin-bottom:0">
+            <div id="adm-vf-current" style="flex:1;font-size:.72rem;color:var(--muted);align-self:center"></div>
+            <button class="btn-admin-create" onclick="adminAsignarVerif()">Guardar verificacion</button>
+          </div>
+          <div id="adm-vf-msg" style="font-size:.72rem;margin-top:.5rem;display:none"></div>
+        </div>
+        <div style="font-size:.68rem;color:#6b7280;margin-top:.9rem;line-height:1.5">Solo el administrador puede asignar o retirar insignias. Los usuarios no pueden auto-asignarse verificaciones.</div>
+      </div>
+
       <div class="admin-sec" style="border:none"><div class="admin-sec-title">Estadisticas</div><div id="adm-stats" style="font-size:.78rem;color:var(--muted);line-height:1.8"></div><button onclick="adminLogout()" style="margin-top:.9rem;background:none;border:1px solid rgba(255,80,80,.28);color:rgba(255,80,80,.65);border-radius:5px;padding:.28rem .75rem;font-family:'Poppins';font-size:.7rem;cursor:pointer;font-weight:700">Cerrar sesion</button></div>
     </div>
   </div>
