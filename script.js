@@ -4579,6 +4579,7 @@ var _origGoPagePines = goPage;
 goPage = function(id){
   _origGoPagePines(id);
   if(id === 'pines') setTimeout(function(){ loadPinesMayoreo(); renderPinesAPI(); _updatePinSaldo(); }, 300);
+  if(id === 'actas') setTimeout(function(){ if(typeof renderActasGrid==='function'){ renderActasGrid(); _updateActaSaldo(); var f=document.getElementById('actas-form'); if(f)f.style.display='none'; var o=document.getElementById('actas-ok'); if(o)o.style.display='none'; var g=document.getElementById('actas-grid'); if(g)g.style.display='flex'; } }, 200);
 };
 
 
@@ -9416,4 +9417,120 @@ function renderHonorPrecios(){
 }
 if(typeof window !== 'undefined'){
   setTimeout(renderHonorPrecios, 2000);
+}
+
+// ═══════════ ACTAS OFICIALES ═══════════
+var ACTAS_TIPOS = [
+  { id:'nacimiento', nombre:'Nacimiento',  ico:'\uD83D\uDC76', precio:10 },
+  { id:'matrimonio', nombre:'Matrimonio',  ico:'\uD83D\uDC8D', precio:10 },
+  { id:'defuncion',  nombre:'Defunci\u00F3n',   ico:'\uD83D\uDD4A\uFE0F', precio:10 },
+  { id:'fallecimiento', nombre:'Fallecimiento', ico:'\uD83D\uDCDC', precio:10 }
+];
+var _actaSel = null;
+var _comprandoActa = false;
+
+function renderActasGrid(){
+  var grid = document.getElementById('actas-grid');
+  if(!grid) return;
+  grid.innerHTML = ACTAS_TIPOS.map(function(a){
+    return '<div onclick="actaSeleccionar(\''+a.id+'\')" id="acta-op-'+a.id+'" style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.025);border:1.5px solid rgba(255,255,255,.08);border-radius:14px;padding:1rem;cursor:pointer;transition:all .2s">'
+      + '<div style="width:44px;height:44px;flex-shrink:0;border-radius:12px;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.25);display:flex;align-items:center;justify-content:center;font-size:1.35rem">'+a.ico+'</div>'
+      + '<div style="flex:1;min-width:0"><div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:.95rem;color:#fff">Acta de '+a.nombre+'</div><div style="font-size:.7rem;color:#8b93a3;margin-top:.15rem">Certificada y oficial</div></div>'
+      + '<div style="font-family:Oxanium,sans-serif;font-weight:900;font-size:1.05rem;color:#22d3ee;flex-shrink:0">$'+a.precio+' MX</div>'
+      + '</div>';
+  }).join('');
+}
+
+function actaSeleccionar(id){
+  _actaSel = ACTAS_TIPOS.filter(function(a){ return a.id===id; })[0] || null;
+  if(!_actaSel) return;
+  // Marcar visualmente
+  ACTAS_TIPOS.forEach(function(a){
+    var el = document.getElementById('acta-op-'+a.id);
+    if(!el) return;
+    var on = (a.id===id);
+    el.style.borderColor = on ? 'rgba(34,211,238,.5)' : 'rgba(255,255,255,.08)';
+    el.style.background = on ? 'linear-gradient(135deg,rgba(34,211,238,.1),rgba(139,92,246,.06))' : 'rgba(255,255,255,.025)';
+  });
+  var form = document.getElementById('actas-form');
+  if(form) form.style.display = 'block';
+  var sel = document.getElementById('actas-tipo-sel');
+  if(sel) sel.textContent = _actaSel.nombre;
+  var pb = document.getElementById('actas-precio-btn');
+  if(pb) pb.textContent = '$'+_actaSel.precio+' MX';
+  _updateActaSaldo();
+  if(form) form.scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+function _updateActaSaldo(){
+  var el = document.getElementById('actas-saldo');
+  if(el) el.textContent = authSession ? fmt(authSession.saldo||0) : fmt(0);
+}
+
+function comprarActa(){
+  if(!authSession){ showToast('Inicia sesion para solicitar'); setTimeout(showAuthModal,600); return; }
+  if(_comprandoActa){ return; }
+  if(!_actaSel){ showToast('Elige el tipo de acta'); return; }
+
+  var err = document.getElementById('actas-err');
+  function showErr(m){ if(err){ err.textContent=m; err.style.display='block'; } }
+
+  var nombre = ((document.getElementById('actas-nombre')||{}).value||'').trim();
+  var curp = ((document.getElementById('actas-curp')||{}).value||'').trim();
+  var estado = ((document.getElementById('actas-estado')||{}).value||'').trim();
+  var wa = ((document.getElementById('actas-wa')||{}).value||'').trim();
+
+  if(!nombre){ showErr('Escribe el nombre completo.'); return; }
+  if(!estado){ showErr('Escribe el estado o entidad.'); return; }
+  if(!wa){ showErr('Escribe tu WhatsApp de contacto.'); return; }
+
+  var saldo = authSession.saldo||0;
+  if(saldo < _actaSel.precio){ showErr('Saldo insuficiente ('+fmt(saldo)+'). Necesitas '+fmt(_actaSel.precio)+'. Recarga tu cuenta.'); return; }
+  if(err) err.style.display='none';
+
+  _comprandoActa = true;
+  var btn = event && event.target ? event.target : null;
+  if(btn){ btn.disabled=true; btn.innerHTML='Procesando...'; }
+
+  var ord = getNextOrder();
+  var detalle = 'Acta '+_actaSel.nombre+' - '+nombre+(curp?(' - CURP:'+curp):'')+' - '+estado+' - WA:'+wa;
+  addSpend(_actaSel.precio, 'Acta '+_actaSel.nombre+' - '+nombre+' - Pedido #'+ord);
+  registrarPedido('Acta de '+_actaSel.nombre+' ('+nombre+')', 0, 'acta', estado, _actaSel.precio, 0);
+  if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, 'ACTA '+_actaSel.nombre.toUpperCase()+' - '+detalle, _actaSel.precio, ord);
+
+  _mostrarReciboActa(nombre, estado, ord);
+  showToast('\u2705 Solicitud #'+ord+' realizada!', 3000);
+
+  setTimeout(function(){ _comprandoActa = false; if(btn){ btn.disabled=false; btn.innerHTML='\uD83D\uDCDC SOLICITAR ACTA'; } }, 3000);
+}
+
+function _mostrarReciboActa(nombre, estado, ord){
+  var ahora = new Date();
+  var fecha = ahora.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' });
+  var hora = ahora.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' });
+
+  var form = document.getElementById('actas-form');
+  var grid = document.getElementById('actas-grid');
+  var ok = document.getElementById('actas-ok');
+  if(form) form.style.display='none';
+  if(grid) grid.style.display='none';
+  if(!ok) return;
+  ok.style.display='block';
+  ok.innerHTML =
+    '<div style="background:linear-gradient(160deg,rgba(37,211,102,.08),rgba(255,255,255,.02));border:2px solid rgba(37,211,102,.35);border-radius:18px;padding:2rem 1.35rem;text-align:center;max-width:440px;margin:1rem auto">'
+    + '<div style="font-size:3rem;margin-bottom:.5rem">\u2705</div>'
+    + '<div style="font-family:Oxanium,sans-serif;font-weight:900;font-size:1.3rem;color:#25d366;margin-bottom:.35rem;letter-spacing:.5px">SOLICITUD RECIBIDA</div>'
+    + '<div style="font-size:.82rem;color:var(--muted);margin-bottom:1.5rem">Tu acta esta en proceso</div>'
+    + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
+    +   _filaRecibo('\uD83D\uDCCB Solicitud', '#'+ord)
+    +   _filaRecibo('\uD83D\uDCDC Acta', _actaSel ? _actaSel.nombre : '')
+    +   _filaRecibo('\uD83D\uDC64 Nombre', nombre)
+    +   _filaRecibo('\uD83D\uDCCD Estado', estado)
+    +   _filaRecibo('\uD83D\uDCB5 Precio', fmt(_actaSel ? _actaSel.precio : 0))
+    +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' \u00B7 ' + hora, true)
+    + '</div>'
+    + '<div style="font-size:.75rem;color:#22d3ee;margin-top:1rem;line-height:1.5">Te contactaremos por WhatsApp para completar la entrega de tu acta.</div>'
+    + '<button onclick="goPage(\'home\')" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#22d3ee);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Volver al inicio</button>'
+    + '</div>';
+  ok.scrollIntoView({ behavior:'smooth', block:'center' });
 }
