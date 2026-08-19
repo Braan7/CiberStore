@@ -5811,17 +5811,52 @@ function _mostrarAvisoModal(titulo, texto, color){
   if(ov) ov.remove();
   ov = document.createElement('div');
   ov.id = 'aviso-entrega-ov';
-  ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:1.2rem';
-  ov.onclick = function(e){ if(e.target===ov) ov.remove(); };
+  ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(4,6,12,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:1.2rem;animation:avOvIn .25s ease';
+  ov.onclick = function(e){ if(e.target===ov){ _cerrarAvisoModal(); } };
   document.body.appendChild(ov);
 
+  // Helper de cierre con animacion
+  window._cerrarAvisoModal = function(){
+    var o = document.getElementById('aviso-entrega-ov');
+    if(!o) return;
+    o.style.animation = 'avOvOut .2s ease forwards';
+    var card = o.querySelector('.av-card');
+    if(card) card.style.animation = 'avCardOut .2s ease forwards';
+    setTimeout(function(){ if(o) o.remove(); }, 200);
+  };
+
+  // Asegurar que existan los keyframes (una sola vez)
+  if(!document.getElementById('av-modal-css')){
+    var st = document.createElement('style');
+    st.id = 'av-modal-css';
+    st.textContent =
+      '@keyframes avOvIn{from{opacity:0}to{opacity:1}}'
+      + '@keyframes avOvOut{from{opacity:1}to{opacity:0}}'
+      + '@keyframes avCardIn{0%{transform:translateY(24px) scale(.94);opacity:0}100%{transform:translateY(0) scale(1);opacity:1}}'
+      + '@keyframes avCardOut{to{transform:translateY(10px) scale(.97);opacity:0}}'
+      + '@keyframes avIcoPop{0%{transform:scale(.3);opacity:0}55%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}'
+      + '@keyframes avRing{0%{transform:scale(.7);opacity:.6}100%{transform:scale(1.5);opacity:0}}'
+      + '.av-btn{transition:transform .15s,filter .2s,box-shadow .2s}'
+      + '.av-btn:hover{filter:brightness(1.1)}'
+      + '.av-btn:active{transform:scale(.96)}';
+    document.head.appendChild(st);
+  }
+
   var c = document.createElement('div');
-  c.style.cssText = 'max-width:400px;width:100%;background:#0a0a0a;border:1px solid '+color+'55;border-radius:18px;padding:1.75rem 1.35rem;text-align:center';
+  c.className = 'av-card';
+  c.style.cssText = 'position:relative;max-width:400px;width:100%;background:linear-gradient(165deg,#12141f,#0a0b12);border:1px solid '+color+'44;border-radius:24px;padding:2rem 1.5rem 1.6rem;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.6),0 0 50px '+color+'22,inset 0 1px 0 rgba(255,255,255,.05);animation:avCardIn .4s cubic-bezier(.2,.8,.3,1.1) both';
   c.innerHTML =
-    '<div style="font-size:2.4rem;margin-bottom:.6rem">\u26A0\uFE0F</div>'
-    + '<div style="font-family:Oxanium;font-weight:800;font-size:1rem;color:'+color+';margin-bottom:.7rem;letter-spacing:.3px">'+titulo+'</div>'
-    + '<div style="font-size:.85rem;color:#c5cad6;line-height:1.65;margin-bottom:1.4rem">'+texto+'</div>'
-    + '<button onclick="var o=document.getElementById(\'aviso-entrega-ov\'); if(o) o.remove();" style="width:100%;padding:.85rem;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.4);color:#22d3ee;border-radius:12px;font-family:Poppins;font-weight:600;font-size:.9rem;cursor:pointer">Entendido</button>';
+    // Icono con anillos animados
+    '<div style="position:relative;width:78px;height:78px;margin:0 auto 1.1rem">'
+    +   '<div style="position:absolute;inset:0;border-radius:50%;border:2px solid '+color+'55;animation:avRing 1.8s ease-out infinite"></div>'
+    +   '<div style="position:absolute;inset:0;border-radius:50%;border:2px solid '+color+'55;animation:avRing 1.8s ease-out infinite 0.9s"></div>'
+    +   '<div style="position:relative;width:78px;height:78px;border-radius:50%;background:linear-gradient(135deg,'+color+'2e,'+color+'14);border:1.5px solid '+color+'66;display:flex;align-items:center;justify-content:center;animation:avIcoPop .5s cubic-bezier(.2,.8,.3,1.3) both">'
+    +     '<svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
+    +   '</div>'
+    + '</div>'
+    + '<div style="font-family:Oxanium,sans-serif;font-weight:900;font-size:1.2rem;color:'+color+';margin-bottom:.7rem;letter-spacing:.5px">'+titulo+'</div>'
+    + '<div style="font-size:.86rem;color:#c5cad6;line-height:1.65;margin-bottom:1.5rem">'+texto+'</div>'
+    + '<button class="av-btn" onclick="_cerrarAvisoModal()" style="width:100%;padding:.95rem;background:linear-gradient(135deg,'+color+',' +color+'cc);color:#06080f;border:none;border-radius:14px;font-family:Oxanium,sans-serif;font-weight:900;font-size:.92rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 8px 24px '+color+'33">Entendido</button>';
   ov.appendChild(c);
 }
 
@@ -6062,7 +6097,7 @@ function _procesarRecargaAutomatica(p, ffId){
 
           if(typeof _mostrarAvisoModal==='function'){
             _mostrarAvisoModal('RECARGA RECHAZADA',
-              'No pudimos completar tu recarga en este momento.<br/><br/><b style=\"color:#fff\">Contacta al administrador.</b><br/><br/>\u2705 Tu saldo fue <b style=\"color:#25d366\">reembolsado</b> automaticamente.',
+              'No pudimos completar tu recarga en este momento.<br/><br/><b style="color:#fff">Contacta al administrador.</b><div style="margin-top:1.1rem;padding:.8rem 1rem;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);border-radius:12px;display:flex;align-items:center;gap:.55rem;justify-content:center"><span style="font-size:1.1rem">\u2705</span><span style="font-size:.82rem;color:#25d366;font-weight:700">Tu saldo fue reembolsado automaticamente</span></div>',
               '#ff6b6b');
           }
           showToast('\u274C Recarga rechazada. Saldo reembolsado.', 5000);
