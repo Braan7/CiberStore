@@ -6484,26 +6484,66 @@ function _mostrarReciboRecarga(p, ffId, nombreJugador, status){
   dia = dia.charAt(0).toUpperCase() + dia.slice(1);
 
   var esPend = (status === 'PENDING');
-  var colorBorde = esPend ? 'rgba(255,180,60,.4)' : 'rgba(37,211,102,.4)';
-  var colorTxt = esPend ? '#22d3ee' : '#25d366';
-  var titulo = esPend ? '\u23F3 RECARGA EN PROCESO' : '\u2705 RECARGA EXITOSA';
+  var titulo = esPend ? 'RECARGA EN PROCESO' : 'RECARGA EXITOSA';
+  var sub = esPend ? 'Tu recarga se acreditara en breve' : 'Los diamantes ya estan en tu cuenta';
+  var numDiam = (''+(p.diamantes||'')).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+  // Icono central
+  var icono = esPend
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="#ffb84d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="#00ff9d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+
+  // SVG iconos de datos
+  var icDiam = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/></svg>';
+  var icId = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M6 14h4"/></svg>';
+  var icPrice = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>';
+  var icCal = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
+  var icClock = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>';
+
+  function cyRow(ic, k, v, cls){
+    return '<div class="cy-row"><div class="cy-row-ic">'+ic+'</div>'
+      + '<div style="min-width:0"><div class="cy-row-k">'+k+'</div></div>'
+      + '<div class="cy-row-r"><div class="cy-row-v '+(cls||'')+'">'+v+'</div></div></div>';
+  }
 
   det.innerHTML =
-    '<div style="background:linear-gradient(160deg,rgba(37,211,102,.08),rgba(255,255,255,.02));border:2px solid '+colorBorde+';border-radius:18px;padding:1.75rem 1.35rem;text-align:center;max-width:420px;margin:0 auto">'
-    + '<div style="font-size:2.8rem;margin-bottom:.5rem">'+(esPend?'\u23F3':'\u2705')+'</div>'
-    + '<div style="font-family:Oxanium;font-weight:900;font-size:1.25rem;color:'+colorTxt+';margin-bottom:.35rem;letter-spacing:.5px">'+titulo+'</div>'
-    + '<div style="font-size:.8rem;color:var(--muted);margin-bottom:1.5rem">'+(esPend?'Tu recarga se acreditara en breve':'Los diamantes ya estan en tu cuenta')+'</div>'
-
-    + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
-    +   _filaRecibo('\uD83D\uDC8E Cantidad', p.nombre)
-    +   _filaRecibo('\uD83C\uDFAE ID Free Fire', ffId + (nombreJugador ? ' ('+nombreJugador+')' : ''))
-    +   _filaRecibo('\uD83D\uDCB5 Precio', fmt(p.precio))
-    +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' - ' + dia)
-    +   _filaRecibo('\uD83D\uDD52 Hora', hora, true)
+    '<div class="cy-card'+(esPend?' pend':'')+'" id="cy-recibo">'
+    + '<div class="cy-termbar"><span class="cy-dot" style="background:#ff5f57"></span><span class="cy-dot" style="background:#febc2e"></span><span class="cy-dot" style="background:#28c840"></span><span class="lbl">ciber@store: ~/tx</span></div>'
+    + '<div class="cy-body">'
+    +   '<div class="cy-tline">&gt; TRANSACTION COMPLETE<span class="dim"> ..... </span>[OK]</div>'
+    +   '<div class="cy-tline">&gt; STATUS: VERIFIED</div>'
+    +   '<div class="cy-tline">&gt; SYSTEM ONLINE<span class="dim"> ......... </span>200</div>'
+    +   '<div class="cy-okzone">'
+    +     '<div class="cy-ring"><i></i><i></i><div class="cy-core">'+icono+'</div></div>'
+    +     '<div class="cy-title">&#10003; '+titulo+'</div>'
+    +     '<div class="cy-sub">'+sub+'</div>'
+    +   '</div>'
+    +   (numDiam ? ('<div class="cy-reward" id="cy-reward"><div class="big">'+numDiam+' \uD83D\uDC8E DIAMANTES</div><div class="bonus">'+ (p.nombre.match(/\+\s*([\d.,]+)\s*Bono/i) ? ('+ '+p.nombre.match(/\+\s*([\d.,]+)\s*Bono/i)[1]+' \uD83C\uDF81 BONO') : 'ENTREGA CONFIRMADA') +'</div></div>') : '')
+    +   '<div class="cy-panel">'
+    +     cyRow(icDiam, '\u25C6 Cantidad', p.nombre)
+    +     cyRow(icId, '\u25C6 Free Fire ID', ffId + (nombreJugador ? ' ('+nombreJugador+')' : ''), 'cyan')
+    +     cyRow(icPrice, '\u25C6 Precio', fmt(p.precio), 'green')
+    +     cyRow(icCal, '\u25C6 Fecha', fecha + ' \u2014 ' + dia)
+    +     cyRow(icClock, '\u25C6 Hora', hora)
+    +   '</div>'
+    +   '<div class="cy-tags"><span class="cy-tag">&#9679; SECURE</span><span class="cy-tag">ENCRYPTED</span><span class="cy-tag">TX VERIFIED</span><span class="cy-tag">STATUS: 100%</span></div>'
+    +   '<button class="cy-btn" onclick="cerrarDiamDetalle()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg> &gt; VOLVER AL CATALOGO</button>'
     + '</div>'
-
-    + '<button onclick="cerrarDiamDetalle()" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Volver al catalogo</button>'
     + '</div>';
+
+  // Partículas en la recompensa
+  var rw = document.getElementById('cy-reward');
+  if(rw){
+    for(var i=0;i<7;i++){
+      var pt = document.createElement('span');
+      pt.className = 'cy-part';
+      pt.style.left = (12+Math.random()*76)+'%';
+      pt.style.top = (18+Math.random()*64)+'%';
+      pt.style.animationDelay = (Math.random()*3)+'s';
+      pt.style.color = (i%2) ? '#a855f7' : '#00f0ff';
+      rw.appendChild(pt);
+    }
+  }
 
   det.style.display = '';
   document.getElementById('diam-catalogo').style.display = 'none';
