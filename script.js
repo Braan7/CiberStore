@@ -6486,14 +6486,21 @@ function _mostrarReciboRecarga(p, ffId, nombreJugador, status){
   var esPend = (status === 'PENDING');
   var titulo = esPend ? 'RECARGA EN PROCESO' : 'RECARGA EXITOSA';
   var sub = esPend ? 'Tu recarga se acreditara en breve' : 'Los diamantes ya estan en tu cuenta';
-  var numDiam = (''+(p.diamantes||'')).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+  // Total de diamantes (protagonista)
+  var totalDiam = (''+(p.diamantes||'')).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  // Desglose: extraer base y bonus del nombre ("520 Diamantes + 52 Bono")
+  var mBase = p.nombre.match(/([\d.,]+)\s*Diamantes/i);
+  var mBonus = p.nombre.match(/\+\s*([\d.,]+)\s*Bono/i);
+  var base = mBase ? mBase[1] : '';
+  var bonus = mBonus ? mBonus[1] : '';
+  var desglose = (base && bonus) ? (base + ' +' + bonus + ' \uD83C\uDF81 BONUS') : '';
 
   // Icono central
   var icono = esPend
     ? '<svg viewBox="0 0 24 24" fill="none" stroke="#ffb84d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
     : '<svg viewBox="0 0 24 24" fill="none" stroke="#00ff9d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
 
-  // SVG iconos de datos
   var icDiam = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/></svg>';
   var icId = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M6 14h4"/></svg>';
   var icPrice = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>';
@@ -6508,37 +6515,36 @@ function _mostrarReciboRecarga(p, ffId, nombreJugador, status){
 
   det.innerHTML =
     '<div class="cy-card'+(esPend?' pend':'')+'" id="cy-recibo">'
-    + '<div class="cy-termbar"><span class="cy-dot" style="background:#ff5f57"></span><span class="cy-dot" style="background:#febc2e"></span><span class="cy-dot" style="background:#28c840"></span><span class="lbl">ciber@store: ~/tx</span></div>'
-    + '<div class="cy-body">'
-    +   '<div class="cy-tline">&gt; TRANSACTION COMPLETE<span class="dim"> ..... </span>[OK]</div>'
-    +   '<div class="cy-tline">&gt; STATUS: VERIFIED</div>'
-    +   '<div class="cy-tline">&gt; SYSTEM ONLINE<span class="dim"> ......... </span>200</div>'
+    + '<div class="cy-body" style="padding-top:1.6rem">'
     +   '<div class="cy-okzone">'
     +     '<div class="cy-ring"><i></i><i></i><div class="cy-core">'+icono+'</div></div>'
     +     '<div class="cy-title">&#10003; '+titulo+'</div>'
     +     '<div class="cy-sub">'+sub+'</div>'
     +   '</div>'
-    +   (numDiam ? ('<div class="cy-reward" id="cy-reward"><div class="big">'+numDiam+' \uD83D\uDC8E DIAMANTES</div><div class="bonus">'+ (p.nombre.match(/\+\s*([\d.,]+)\s*Bono/i) ? ('+ '+p.nombre.match(/\+\s*([\d.,]+)\s*Bono/i)[1]+' \uD83C\uDF81 BONO') : 'ENTREGA CONFIRMADA') +'</div></div>') : '')
-    +   '<div class="cy-panel">'
-    +     cyRow(icDiam, '\u25C6 Cantidad', p.nombre)
-    +     cyRow(icId, '\u25C6 Free Fire ID', ffId + (nombreJugador ? ' ('+nombreJugador+')' : ''), 'cyan')
-    +     cyRow(icPrice, '\u25C6 Precio', fmt(p.precio), 'green')
-    +     cyRow(icCal, '\u25C6 Fecha', fecha + ' \u2014 ' + dia)
-    +     cyRow(icClock, '\u25C6 Hora', hora)
+    +   '<div class="cy-reward" id="cy-reward">'
+    +     '<div class="big">'+totalDiam+' <span style="font-size:1.3rem">\uD83D\uDC8E</span></div>'
+    +     '<div class="cy-diam-lbl">DIAMANTES</div>'
+    +     (desglose ? '<div class="cy-desglose">'+desglose+'</div>' : '')
     +   '</div>'
-    +   '<div class="cy-tags"><span class="cy-tag">&#9679; SECURE</span><span class="cy-tag">ENCRYPTED</span><span class="cy-tag">TX VERIFIED</span><span class="cy-tag">STATUS: 100%</span></div>'
-    +   '<button class="cy-btn" onclick="cerrarDiamDetalle()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg> &gt; VOLVER AL CATALOGO</button>'
+    +   '<div class="cy-panel">'
+    +     cyRow(icDiam, 'Cantidad', p.nombre)
+    +     cyRow(icId, 'Free Fire ID', ffId + (nombreJugador ? ' ('+nombreJugador+')' : ''), 'cyan')
+    +     cyRow(icPrice, 'Precio', fmt(p.precio), 'green')
+    +     cyRow(icCal, 'Fecha', fecha + ' \u00B7 ' + dia)
+    +     cyRow(icClock, 'Hora', hora)
+    +   '</div>'
+    +   '<button class="cy-btn" onclick="cerrarDiamDetalle()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg> VOLVER AL CATALOGO</button>'
     + '</div>'
     + '</div>';
 
-  // Partículas en la recompensa
+  // Partículas sutiles en la recompensa
   var rw = document.getElementById('cy-reward');
   if(rw){
-    for(var i=0;i<7;i++){
+    for(var i=0;i<6;i++){
       var pt = document.createElement('span');
       pt.className = 'cy-part';
-      pt.style.left = (12+Math.random()*76)+'%';
-      pt.style.top = (18+Math.random()*64)+'%';
+      pt.style.left = (14+Math.random()*72)+'%';
+      pt.style.top = (20+Math.random()*60)+'%';
       pt.style.animationDelay = (Math.random()*3)+'s';
       pt.style.color = (i%2) ? '#a855f7' : '#00f0ff';
       rw.appendChild(pt);
@@ -7227,15 +7233,17 @@ function _syncBottomNav(id){
   // Que pestana se marca segun la pagina (las hijas marcan a su padre)
   var mapa = {
     home:'bn-home',
-    tienda:'bn-tienda', pase:'bn-tienda', diamantes:'bn-tienda', pines:'bn-tienda', honor:'bn-tienda',
+    tienda:'bn-tienda', pase:'bn-tienda', diamantes:'bn-tienda', honor:'bn-tienda',
     honorcuenta:'bn-tienda', codigos:'bn-tienda', clanes:'bn-tienda', cajas:'bn-tienda',
+    actas:'bn-tienda', biolarga:'bn-tienda', archivos:'bn-tienda', likes2k:'bn-tienda',
+    pines:'bn-revend',
     saldo:'bn-saldo', retirar:'bn-saldo', transferir:'bn-saldo',
     likes:'bn-likes',
     menu:'bn-menu', perfil:'bn-menu', miscompras:'bn-menu', api:'bn-menu',
     creadores:'bn-menu', comunidad:'bn-menu', faq:'bn-menu', ranking:'bn-menu',
     sobre:'bn-menu', terminos:'bn-menu', referidos:'bn-menu', membresia:'bn-menu'
   };
-  ['bn-home','bn-tienda','bn-saldo','bn-likes','bn-menu'].forEach(function(b){
+  ['bn-home','bn-tienda','bn-revend','bn-saldo','bn-likes','bn-menu'].forEach(function(b){
     var el = document.getElementById(b);
     if(el) el.classList.remove('active');
   });
