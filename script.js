@@ -7609,7 +7609,7 @@ function rcSetCur(cur){
   var tag = document.getElementById('rc-cur-tag');
   if(tag) tag.textContent = cur;
   var minTxt = document.getElementById('rc-min-txt');
-  if(minTxt) minTxt.textContent = cur==='MXN' ? 'Minimo $100 MXN' : 'Minimo $5 USD';
+  if(minTxt) minTxt.textContent = cur==='MXN' ? 'Minimo $200 MXN' : 'Minimo $11.80 USD';
   // Chips por moneda
   var chips = cur==='MXN' ? [50,100,200,500,1000] : [3,10,25,50,100];
   var cont = document.getElementById('rc-chips');
@@ -7689,21 +7689,21 @@ function rcContinuar(){
 
 // ═══════════ RECARGAR SALDO (nueva pagina) ═══════════
 var _recMoneda = 'MXN';
-var REC_MONTOS = { MXN:[100,200,300,500,1000,2500], USD:[5,10,25,50,100,250] };
-var REC_MIN = { MXN:100, USD:5 };
+var REC_MONTOS = { MXN:[200,300,500,1000,2500], USD:[11.80,18,30,60,150] };
+var REC_MIN = { MXN:200, USD:11.80 };
 
 function recSetMoneda(m){
   _recMoneda = m;
   var bM = document.getElementById('rec-cur-mxn');
   var bU = document.getElementById('rec-cur-usd');
-  if(bM){ bM.style.background = (m==='MXN')?'#fff':'transparent'; bM.style.color = (m==='MXN')?'#000':'#6b7280'; }
-  if(bU){ bU.style.background = (m==='USD')?'#fff':'transparent'; bU.style.color = (m==='USD')?'#000':'#6b7280'; }
+  if(bM){ bM.classList.toggle('on', m==='MXN'); }
+  if(bU){ bU.classList.toggle('on', m==='USD'); }
   var lbl = document.getElementById('rec-cur-label');
   if(lbl) lbl.textContent = m;
   var av = document.getElementById('rec-min-aviso');
-  if(av) av.textContent = 'Minimo ' + (m==='MXN'?'$100 MXN':'$5 USD');
+  if(av) av.innerHTML = '<span style="color:#22d3ee">&#9432;</span> Minimo ' + (m==='MXN'?'$200 MXN':'$11.80 USD');
   var inp = document.getElementById('rec-monto');
-  if(inp) inp.value = (m==='MXN') ? 100 : 5;
+  if(inp) inp.value = (m==='MXN') ? 200 : 11.80;
   _recPintarMontos();
 }
 
@@ -7712,13 +7712,19 @@ function _recPintarMontos(){
   if(!cont) return;
   var montos = REC_MONTOS[_recMoneda] || REC_MONTOS.MXN;
   cont.innerHTML = montos.map(function(m){
-    return '<button onclick="recSetMonto('+m+')" style="flex:1;min-width:60px;padding:.6rem .3rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);color:#c9d1e0;border-radius:11px;font-family:Poppins;font-weight:600;font-size:.82rem;cursor:pointer">$'+m+'</button>';
+    var lbl = (m % 1 === 0) ? m.toLocaleString('es-MX') : m.toFixed(2);
+    return '<button onclick="recSetMonto('+m+')" class="wl-quick">$'+lbl+'</button>';
   }).join('');
 }
 
 function recSetMonto(m){
   var inp = document.getElementById('rec-monto');
   if(inp) inp.value = m;
+  var cont = document.getElementById('rec-montos');
+  if(cont){
+    var lbl = '$' + ((m % 1 === 0) ? m.toLocaleString('es-MX') : m.toFixed(2));
+    cont.querySelectorAll('.wl-quick').forEach(function(b){ b.classList.toggle('on', b.textContent === lbl); });
+  }
 }
 
 // Tipo de recarga (obligatorio): para que va a usar el saldo
@@ -7730,13 +7736,7 @@ function recSetTipo(tipo){
   [['ilim','rec-tipo-ilim'],['pase','rec-tipo-pase'],['1vez','rec-tipo-1vez']].forEach(function(par){
     var el = document.getElementById(par[1]);
     if(!el) return;
-    var activo = (par[0] === tipo);
-    el.style.background = activo ? 'rgba(34,211,238,.08)' : 'rgba(255,255,255,.022)';
-    el.style.borderColor = activo ? 'rgba(34,211,238,.45)' : 'rgba(255,255,255,.08)';
-    var radio = el.querySelector('.rec-radio');
-    if(radio) radio.style.borderColor = activo ? '#22d3ee' : 'rgba(255,255,255,.2)';
-    var dot = el.querySelector('.rec-dot');
-    if(dot) dot.style.background = activo ? '#22d3ee' : 'transparent';
+    el.classList.toggle('on', par[0] === tipo);
   });
   var err = document.getElementById('rec-tipo-err');
   if(err) err.style.display = 'none';
@@ -7755,7 +7755,7 @@ function recElegirMetodo(metodo){
   var monto = parseFloat((inp&&inp.value)||'0') || 0;
   var min = REC_MIN[_recMoneda] || 50;
   if(monto < min){
-    showToast('El minimo es ' + (_recMoneda==='MXN'?'$100 MXN':'$5 USD'));
+    showToast('El minimo es ' + (_recMoneda==='MXN'?'$200 MXN':'$11.80 USD'));
     return;
   }
   // Convertir a MXN si el usuario eligio USD
