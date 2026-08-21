@@ -19,6 +19,26 @@ function _refreshSaldoUI(saldo){
   });
 }
 
+// Verifica el saldo REAL en Supabase antes de permitir una compra.
+// Protege contra usuarios que no actualizan la pagina (datos viejos en pantalla).
+// callback(ok, saldoReal): ok=true si alcanza y no esta baneado.
+function verificarSaldoFresco(precio, callback){
+  if(!authSession || !authSession.id){ callback(false, 0); return; }
+  var key = (typeof SUPABASE_ANON !== 'undefined' && SUPABASE_ANON) ? SUPABASE_ANON : (typeof _detectarAnonKey==='function' ? _detectarAnonKey() : '');
+  if(!key){ callback(true, (authSession.saldo||0)); return; }
+  fetch(_SB_URL_RPC + '/rest/v1/profiles?select=saldo,banned&id=eq.' + authSession.id, {
+    headers: { 'apikey': key, 'Authorization': 'Bearer ' + key }
+  }).then(function(r){ return r.json(); }).then(function(rows){
+    if(!rows || !rows.length){ callback(true, (authSession.saldo||0)); return; }
+    var real = Number(rows[0].saldo) || 0;
+    authSession.saldo = real;
+    if(typeof _refreshSaldoUI === 'function') _refreshSaldoUI(real);
+    if(typeof saveSession === 'function') saveSession(authSession);
+    if(rows[0].banned){ callback(false, real); return; }
+    callback(real >= precio, real);
+  }).catch(function(){ callback(true, (authSession.saldo||0)); });
+}
+
 function addSpend(amount, description){
   if(!authSession){
     console.error('[ADDSPEND] No hay sesión');
@@ -4672,11 +4692,13 @@ function _extraerPin(data){
 function comprarPinAPI(productId, precioLocal, nombreProducto){
   if(!authSession){ showToast('Inicia sesion'); setTimeout(showAuthModal,600); return; }
 
-  var saldo = authSession.saldo || 0;
-  if(saldo < precioLocal){
-    showToast('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MX). Recarga tu cuenta.');
-    return;
-  }
+  showToast('Verificando saldo...', 1500);
+  // Verificar saldo REAL en Supabase (protege contra pagina no actualizada)
+  verificarSaldoFresco(precioLocal, function(alcanza, saldoReal){
+    if(!alcanza){
+      showToast('Saldo insuficiente. Tu saldo real es $'+saldoReal.toLocaleString('es-MX')+' MX. Recarga tu cuenta.', 4000);
+      return;
+    }
 
   showToast('Procesando compra...', 2000);
 
@@ -4720,6 +4742,8 @@ function comprarPinAPI(productId, precioLocal, nombreProducto){
     console.error('[PIN API] Error:', e);
     showToast('Error de conexión. Contacta al admin por WhatsApp (no se te cobró).', 4000);
   });
+
+  }); // fin verificarSaldoFresco
 }
 
 
@@ -6031,7 +6055,17 @@ function _procesarRecargaAutomatica(p, ffId){
   _comprandoDiam = true;
   var btn = document.getElementById('diam-btn');
   var msg = document.getElementById('diam-msg');
-  if(btn){ btn.className='ddet-btn off'; btn.innerHTML='Validando ID...'; }
+  if(btn){ btn.className='ddet-btn off'; btn.innerHTML='Verificando saldo...'; }
+
+  // Paso 0: verificar saldo REAL en Supabase (protege contra pagina vieja/no actualizada)
+  verificarSaldoFresco(p.precio, function(alcanza, saldoReal){
+    if(!alcanza){
+      if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
+      if(msg){ msg.className='ddet-msg err'; msg.style.color='#ff6b6b'; msg.innerHTML='Saldo insuficiente. Tu saldo real es <b>'+fmt(saldoReal)+'</b>. <span onclick="goPage(\'saldo\')" style="text-decoration:underline;cursor:pointer">Recarga aqui</span>'; }
+      _comprandoDiam = false;
+      return;
+    }
+    if(btn){ btn.innerHTML='Validando ID...'; }
 
   // Paso 1: validar que el ID exista
   fetch(COMPRAR_RECARGA_URL, {
@@ -6149,6 +6183,8 @@ function _procesarRecargaAutomatica(p, ffId){
     console.error('[RECARGA] catch validar:', err);
     _comprandoDiam = false;
   });
+
+  }); // fin verificarSaldoFresco
 }
 
 
@@ -7375,7 +7411,7 @@ function _syncBottomNav(id){
 
 
 // ═══════════ PASE BOOYAH (asistente de 3 pasos) ═══════════
-var PASE_PRECIO = 17;
+var PASE_PRECIO = 30;
 var _comprandoPase = false;
 var _paseIdVerificado = null;
 var _paseNickVerificado = '';
