@@ -4726,32 +4726,32 @@ function comprarPinAPI(productId, precioLocal, nombreProducto){
 // ═══ PRODUCTOS PIN POR API (Recargas América) ═══
 // product_id = ID en Recargas América | precio = tu precio de venta en MXN
 var PINES_API = [
-  {product_id:5, sku:'FFCH100',  nombre:'Free Fire 100 Diamantes +10 Bono',  precio:12.77,  usd:0.75,  diamantes:'110'},
-  {product_id:3, sku:'FFCH310',  nombre:'Free Fire 310 Diamantes +31 Bono',  precio:39.15,  usd:2.30,  diamantes:'341'},
-  {product_id:6, sku:'FFCH520',  nombre:'Free Fire 520 Diamantes +52 Bono',  precio:67.24,  usd:3.95,  diamantes:'572'},
-  {product_id:1, sku:'FFCH1060', nombre:'Free Fire 1060 Diamantes +106 Bono', precio:119.16, usd:7.00,  diamantes:'1,166'},
-  {product_id:2, sku:'FFCH2180', nombre:'Free Fire 2180 Diamantes +218 Bono', precio:239.18, usd:14.05, diamantes:'2,398'},
-  {product_id:4, sku:'FFCH5600', nombre:'Free Fire 5600 Diamantes +560 Bono', precio:578.80, usd:34.00, diamantes:'6,160'}
+  {product_id:5, sku:'FFCH100',  nombre:'Free Fire 100 Diamantes +10 Bono',  precio:14,  min:5, diamantes:'110'},
+  {product_id:3, sku:'FFCH310',  nombre:'Free Fire 310 Diamantes +31 Bono',  precio:40,  min:4, diamantes:'341'},
+  {product_id:6, sku:'FFCH520',  nombre:'Free Fire 520 Diamantes +52 Bono',  precio:70,  min:4, diamantes:'572'},
+  {product_id:1, sku:'FFCH1060', nombre:'Free Fire 1060 Diamantes +106 Bono', precio:120, min:3, diamantes:'1,166'},
+  {product_id:2, sku:'FFCH2180', nombre:'Free Fire 2180 Diamantes +218 Bono', precio:235, min:3, diamantes:'2,398'},
+  {product_id:4, sku:'FFCH5600', nombre:'Free Fire 5600 Diamantes +560 Bono', precio:595, min:2, diamantes:'6,160'}
 ];
 
 function renderPinesAPI(){
   var cont = document.getElementById('pines-api-grid');
   if(!cont) return;
+  cont.style.display = 'grid';
+  cont.style.gridTemplateColumns = 'repeat(2,1fr)';
+  cont.style.gap = '.7rem';
   var html = '';
   PINES_API.forEach(function(p){
-    var precioMXN = p.precio.toFixed(2).replace(/\.00$/,'');
-    html += '<div class="rz-prod">'
-      + '<div class="rz-prod-ico">\uD83D\uDC8E</div>'
-      + '<div class="rz-prod-mid">'
-      +   '<div class="rz-prod-diam">'+p.diamantes+' DIAMANTES</div>'
-      +   '<div class="rz-prod-sub">Recarga directa a tu ID</div>'
-      +   '<span class="rz-prod-auto">AUTOM\u00C1TICO</span>'
-      + '</div>'
-      + '<div class="rz-prod-right">'
-      +   '<div class="rz-prod-price">$'+precioMXN+'</div>'
-      +   (p.usd ? '<div class="rz-prod-usd">\u2248 $'+p.usd.toFixed(2)+' USD</div>' : '')
-      +   '<button class="rz-prod-btn" onclick="comprarPinAPI('+p.product_id+','+p.precio+',\''+p.nombre.replace(/'/g,"")+'\')">COMPRAR \u2192</button>'
-      + '</div>'
+    var precioMXN = ('$'+p.precio);
+    var nombreSafe = p.nombre.replace(/'/g,"");
+    html += '<div class="rc-card" onclick="comprarPinAPI('+p.product_id+','+p.precio+',\''+nombreSafe+'\')">'
+      + '<span class="rc-badge auto">&#9889; AUTO</span>'
+      + '<div class="rc-ico">&#128142;</div>'
+      + '<div class="rc-diam">'+p.diamantes+'</div>'
+      + '<div class="rc-diam-lbl">DIAMANTES</div>'
+      + '<div class="rc-price">'+precioMXN+'</div>'
+      + (p.min ? '<div class="rc-min">M&iacute;n. '+p.min+' pines</div>' : '')
+      + '<button class="rc-btn">Comprar</button>'
       + '</div>';
   });
   cont.innerHTML = html;
@@ -5253,7 +5253,7 @@ function enviarComprobante(metodo){
         metodo: metodoNom,
         monto: monto,
         monto_acreditar: montoAcreditar,
-        extra: (_recTipo ? ('PARA: ' + (REC_TIPO_LABEL[_recTipo]||_recTipo) + (extra ? ' | ' : '')) : '') + extra,
+        extra: (_recTipo ? ('PARA: ' + _recTipoLabel() + (extra ? ' | ' : '')) : '') + extra,
         foto_base64: fotoB64
       })
     }).then(function(r){ return r.json(); }).then(function(res){
@@ -5680,12 +5680,12 @@ var _diamSeleccionado = null;
 // ═══════════ RECARGAS AUTOMÁTICAS (Recargas América type=recharge) ═══════════
 // package_id = el ID de Recargas América | precio = costo USD × 20 (redondeado)
 var RECARGAS_AUTO = [
-  { package_id:340, sku:'FFCH100R',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.712,  precio:16,  img:'img/diam-100.png'  },
+  { package_id:340, sku:'FFCH100R',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.712,  precio:15,  img:'img/diam-100.png'  },
   { package_id:343, sku:'FFCH310R',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:2.1374, precio:45,  img:'img/diam-310.png'  },
   { package_id:345, sku:'FFCH520R',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.6164, precio:75,  img:'img/diam-520.png'  },
   { package_id:341, sku:'FFCH1060R', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.706,  precio:135, img:'img/diam-1060.png' },
-  { package_id:342, sku:'FFCH2180R', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:13.3209,precio:255, img:'img/diam-2180.png' },
-  { package_id:344, sku:'FFCH5600R', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:33.8848,precio:650, img:'img/diam-5600.png' },
+  { package_id:342, sku:'FFCH2180R', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:13.3209,precio:250, img:'img/diam-2180.png' },
+  { package_id:344, sku:'FFCH5600R', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:33.8848,precio:620, img:'img/diam-5600.png' },
   { package_id:null, nombre:'11.200 Diamantes + 1.120 Bono', diamantes:12320, costoUSD:66.32, precio:1390, manual:true }
 ];
 
@@ -5765,19 +5765,18 @@ function renderDiamCatalogo(){
   if(count) count.textContent = productos.length;
 
   grid.innerHTML = productos.map(function(p, i){
-    var badgeColor = '';
-    if(p.badge === 'AUTO') badgeColor = 'background:rgba(37,211,102,.15);border-color:rgba(37,211,102,.4);color:#25d366';
-    else if(p.badge === 'MANUAL') badgeColor = 'background:rgba(255,180,60,.15);border-color:rgba(255,180,60,.4);color:#22d3ee';
-    var badge = p.badge ? '<span class="dcat-badge" style="'+badgeColor+'">'+p.badge+'</span>' : '';
-    var visual = p.img
-      ? '<div style="width:100%;aspect-ratio:4/3;border-radius:11px;overflow:hidden;margin-bottom:.65rem;background:#0a0f1a"><img src="'+p.img+'" alt="'+p.nombre+'" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.parentNode.innerHTML=\'<div class=&quot;dcat-card-ico&quot;>&#127918;</div>\'"/></div>'
-      : '<div class="dcat-card-ico">&#127918;</div>';
-    return '<div class="dcat-card" onclick="abrirDiamDetalle('+i+')">'
+    // Cantidad de diamantes en grande (solo el numero total)
+    var totalDiam = (''+(p.diamantes||'')).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    var badge = '';
+    if(p.badge === 'AUTO') badge = '<span class="rc-badge auto">&#9889; AUTO</span>';
+    else if(p.badge === 'MANUAL') badge = '<span class="rc-badge manual">MANUAL</span>';
+    return '<div class="rc-card" onclick="abrirDiamDetalle('+i+')">'
       + badge
-      + visual
-      + '<div class="dcat-card-name">'+p.nombre+'</div>'
-      + '<div class="dcat-card-sub">Free Fire</div>'
-      + '<div class="dcat-card-price">'+fmt(p.precio)+'</div>'
+      + '<div class="rc-ico">&#128142;</div>'
+      + '<div class="rc-diam">'+totalDiam+'</div>'
+      + '<div class="rc-diam-lbl">DIAMANTES</div>'
+      + '<div class="rc-price">'+fmt(p.precio)+'</div>'
+      + '<button class="rc-btn">Comprar</button>'
       + '</div>';
   }).join('');
 }
@@ -7729,15 +7728,28 @@ function recSetMonto(m){
 
 // Tipo de recarga (obligatorio): para que va a usar el saldo
 var _recTipo = null;
-var REC_TIPO_LABEL = { ilim:'Diamantes con Bono', pase:'Pase Booyah', '1vez':'Diamantes 1 vez por ID' };
+var REC_TIPO_LABEL = { ilim:'Diamantes con Bono', pase:'Pase Booyah', otro:'Otro', '1vez':'Diamantes 1 vez por ID' };
+function _recTipoLabel(){
+  if(_recTipo === 'otro'){
+    var t = document.getElementById('rec-otro-txt');
+    var txt = (t && t.value ? t.value.trim() : '');
+    return 'Otro: ' + (txt || '(sin especificar)');
+  }
+  return REC_TIPO_LABEL[_recTipo] || _recTipo;
+}
 
 function recSetTipo(tipo){
   _recTipo = tipo;
-  [['ilim','rec-tipo-ilim'],['pase','rec-tipo-pase'],['1vez','rec-tipo-1vez']].forEach(function(par){
+  [['ilim','rec-tipo-ilim'],['pase','rec-tipo-pase'],['otro','rec-tipo-otro'],['1vez','rec-tipo-1vez']].forEach(function(par){
     var el = document.getElementById(par[1]);
     if(!el) return;
     el.classList.toggle('on', par[0] === tipo);
   });
+  var wrap = document.getElementById('rec-otro-wrap');
+  if(wrap){
+    wrap.style.display = (tipo === 'otro') ? 'block' : 'none';
+    if(tipo === 'otro'){ var t = document.getElementById('rec-otro-txt'); if(t) setTimeout(function(){ t.focus(); }, 50); }
+  }
   var err = document.getElementById('rec-tipo-err');
   if(err) err.style.display = 'none';
 }
@@ -7769,14 +7781,14 @@ function recElegirMetodo(metodo){
 var _recMontoElegido = 0;
 
 function recLimpiarTipo(){
-  ['rec-tipo-ilim','rec-tipo-1vez'].forEach(function(id){
+  ['rec-tipo-ilim','rec-tipo-pase','rec-tipo-otro','rec-tipo-1vez'].forEach(function(id){
     var el = document.getElementById(id);
-    if(!el) return;
-    el.style.background = 'rgba(255,255,255,.022)';
-    el.style.borderColor = 'rgba(255,255,255,.08)';
-    var r = el.querySelector('.rec-radio'); if(r) r.style.borderColor = 'rgba(255,255,255,.2)';
-    var d = el.querySelector('.rec-dot');   if(d) d.style.background = 'transparent';
+    if(el) el.classList.remove('on');
   });
+  var wrap = document.getElementById('rec-otro-wrap');
+  if(wrap) wrap.style.display = 'none';
+  var t = document.getElementById('rec-otro-txt');
+  if(t) t.value = '';
   var err = document.getElementById('rec-tipo-err');
   if(err) err.style.display = 'none';
 }

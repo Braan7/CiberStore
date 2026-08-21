@@ -1338,6 +1338,24 @@ h2,h3{
 .dcat-count{font-size:.68rem;color:var(--muted);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:.12rem .5rem}
 
 .dcat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem}
+.rc-card{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;text-align:center;
+  background:linear-gradient(165deg,rgba(20,40,55,.5),rgba(10,20,30,.4));
+  border:1px solid rgba(34,211,238,.18);border-radius:16px;padding:1.1rem .7rem .9rem;cursor:pointer;
+  transition:transform .22s cubic-bezier(.34,1.4,.64,1),border-color .22s,box-shadow .22s}
+.rc-card::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(34,211,238,.5),transparent);opacity:0;transition:opacity .25s}
+.rc-card:hover,.rc-card:active{transform:translateY(-3px);border-color:rgba(34,211,238,.45);box-shadow:0 10px 26px rgba(0,0,0,.4),0 0 22px rgba(34,211,238,.12)}
+.rc-card:hover::before{opacity:1}
+.rc-badge{position:absolute;top:8px;right:8px;font-family:Oxanium,sans-serif;font-size:.5rem;font-weight:800;padding:.14rem .4rem;border-radius:6px;letter-spacing:.3px}
+.rc-badge.auto{background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.4);color:#25d366}
+.rc-badge.manual{background:rgba(255,180,60,.15);border:1px solid rgba(255,180,60,.4);color:#ffb84d}
+.rc-ico{font-size:1.8rem;margin-bottom:.35rem;filter:drop-shadow(0 0 10px rgba(34,211,238,.4))}
+.rc-diam{font-family:Oxanium,sans-serif;font-weight:900;font-size:1.55rem;line-height:1;
+  background:linear-gradient(100deg,#22d3ee,#8b5cf6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.rc-diam-lbl{font-family:Oxanium,sans-serif;font-weight:700;font-size:.56rem;letter-spacing:2px;color:#8b93a3;margin-top:.15rem}
+.rc-price{font-family:Oxanium,sans-serif;font-weight:800;font-size:1.15rem;color:#25d366;margin-top:.55rem}
+.rc-min{font-size:.62rem;color:#ffb84d;margin-top:.2rem;font-weight:600}
+.rc-btn{width:100%;margin-top:.7rem;padding:.55rem;background:linear-gradient(135deg,#22d3ee,#0891b2);border:none;border-radius:10px;color:#04222b;font-family:Oxanium,sans-serif;font-weight:800;font-size:.78rem;letter-spacing:.3px;cursor:pointer;transition:filter .2s}
+.rc-card:hover .rc-btn{filter:brightness(1.1)}
 .dcat-card{
   background:linear-gradient(165deg,rgba(20,40,55,.5),rgba(10,20,30,.35));
   border:1px solid rgba(34,211,238,.12);
@@ -3016,6 +3034,18 @@ document.addEventListener('keydown',function(e){
           <div style="font-size:.72rem;color:#8b93a3;margin-top:.15rem">Utiliza tu saldo para comprar tu Pase Booyah</div>
         </div>
         <div class="wl-opt-ico" style="background:rgba(139,92,246,.12)">&#127903;&#65039;</div>
+      </div>
+
+      <div id="rec-tipo-otro" onclick="recSetTipo('otro')" class="wl-opt">
+        <div class="wl-radio"><div class="wl-dot"></div></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.92rem;font-weight:700;color:#fff">Otro</div>
+          <div style="font-size:.72rem;color:#8b93a3;margin-top:.15rem">Escribe para qu&eacute; usar&aacute;s tu saldo</div>
+        </div>
+        <div class="wl-opt-ico" style="background:rgba(37,211,102,.12)">&#9998;</div>
+      </div>
+      <div id="rec-otro-wrap" style="display:none">
+        <input id="rec-otro-txt" type="text" maxlength="80" placeholder="Ej: comprar diamantes para revender..." style="width:100%;background:rgba(255,255,255,.03);border:1.5px solid rgba(37,211,102,.3);border-radius:13px;padding:.8rem 1rem;color:#fff;font-family:Poppins,sans-serif;font-size:.85rem;outline:none;box-sizing:border-box"/>
       </div>
 
       <div id="rec-tipo-err" style="display:none;background:rgba(255,60,60,.08);border:1px solid rgba(255,60,60,.25);color:#ff6b6b;border-radius:11px;padding:.6rem .85rem;font-size:.76rem">Selecciona para qu&eacute; es tu saldo antes de continuar.</div>
