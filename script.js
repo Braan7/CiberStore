@@ -4726,12 +4726,12 @@ function comprarPinAPI(productId, precioLocal, nombreProducto){
 // ═══ PRODUCTOS PIN POR API (Recargas América) ═══
 // product_id = ID en Recargas América | precio = tu precio de venta en MXN
 var PINES_API = [
-  {product_id:5, sku:'FFCH100',  nombre:'Free Fire 100 Diamantes +10 Bono',  precio:14,  min:5, diamantes:'110'},
-  {product_id:3, sku:'FFCH310',  nombre:'Free Fire 310 Diamantes +31 Bono',  precio:40,  min:4, diamantes:'341'},
-  {product_id:6, sku:'FFCH520',  nombre:'Free Fire 520 Diamantes +52 Bono',  precio:70,  min:4, diamantes:'572'},
-  {product_id:1, sku:'FFCH1060', nombre:'Free Fire 1060 Diamantes +106 Bono', precio:120, min:3, diamantes:'1,166'},
-  {product_id:2, sku:'FFCH2180', nombre:'Free Fire 2180 Diamantes +218 Bono', precio:235, min:3, diamantes:'2,398'},
-  {product_id:4, sku:'FFCH5600', nombre:'Free Fire 5600 Diamantes +560 Bono', precio:595, min:2, diamantes:'6,160'}
+  {product_id:5, sku:'FFCH100',  nombre:'Free Fire 100 Diamantes +10 Bono',  precio:14,  min:5, diamantes:'110',   img:'img/diam-100.png'},
+  {product_id:3, sku:'FFCH310',  nombre:'Free Fire 310 Diamantes +31 Bono',  precio:40,  min:4, diamantes:'341',   img:'img/diam-310.png'},
+  {product_id:6, sku:'FFCH520',  nombre:'Free Fire 520 Diamantes +52 Bono',  precio:70,  min:4, diamantes:'572',   img:'img/diam-520.png'},
+  {product_id:1, sku:'FFCH1060', nombre:'Free Fire 1060 Diamantes +106 Bono', precio:120, min:3, diamantes:'1,166', img:'img/diam-1060.png'},
+  {product_id:2, sku:'FFCH2180', nombre:'Free Fire 2180 Diamantes +218 Bono', precio:235, min:3, diamantes:'2,398', img:'img/diam-2180.png'},
+  {product_id:4, sku:'FFCH5600', nombre:'Free Fire 5600 Diamantes +560 Bono', precio:595, min:2, diamantes:'6,160', img:'img/diam-5600.png'}
 ];
 
 function renderPinesAPI(){
@@ -4744,11 +4744,13 @@ function renderPinesAPI(){
   PINES_API.forEach(function(p){
     var precioMXN = ('$'+p.precio);
     var nombreSafe = p.nombre.replace(/'/g,"");
+    var visual = p.img
+      ? '<div class="rc-img"><img src="'+p.img+'" alt="'+p.nombre+'" onerror="this.parentNode.innerHTML=\'<div class=&quot;rc-ico&quot;>&#128142;</div>\'"/></div>'
+      : '<div class="rc-ico">&#128142;</div>';
     html += '<div class="rc-card" onclick="comprarPinAPI('+p.product_id+','+p.precio+',\''+nombreSafe+'\')">'
       + '<span class="rc-badge auto">&#9889; AUTO</span>'
-      + '<div class="rc-ico">&#128142;</div>'
-      + '<div class="rc-diam">'+p.diamantes+'</div>'
-      + '<div class="rc-diam-lbl">DIAMANTES</div>'
+      + visual
+      + '<div class="rc-name">'+p.nombre.replace(/^Free Fire /,'')+'</div>'
       + '<div class="rc-price">'+precioMXN+'</div>'
       + (p.min ? '<div class="rc-min">M&iacute;n. '+p.min+' pines</div>' : '')
       + '<button class="rc-btn">Comprar</button>'
@@ -5765,16 +5767,17 @@ function renderDiamCatalogo(){
   if(count) count.textContent = productos.length;
 
   grid.innerHTML = productos.map(function(p, i){
-    // Cantidad de diamantes en grande (solo el numero total)
-    var totalDiam = (''+(p.diamantes||'')).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     var badge = '';
     if(p.badge === 'AUTO') badge = '<span class="rc-badge auto">&#9889; AUTO</span>';
     else if(p.badge === 'MANUAL') badge = '<span class="rc-badge manual">MANUAL</span>';
+    // Imagen del diamante (o icono si falla)
+    var visual = p.img
+      ? '<div class="rc-img"><img src="'+p.img+'" alt="'+p.nombre+'" onerror="this.parentNode.innerHTML=\'<div class=&quot;rc-ico&quot;>&#128142;</div>\'"/></div>'
+      : '<div class="rc-ico">&#128142;</div>';
     return '<div class="rc-card" onclick="abrirDiamDetalle('+i+')">'
       + badge
-      + '<div class="rc-ico">&#128142;</div>'
-      + '<div class="rc-diam">'+totalDiam+'</div>'
-      + '<div class="rc-diam-lbl">DIAMANTES</div>'
+      + visual
+      + '<div class="rc-name">'+p.nombre+'</div>'
       + '<div class="rc-price">'+fmt(p.precio)+'</div>'
       + '<button class="rc-btn">Comprar</button>'
       + '</div>';
