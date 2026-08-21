@@ -6486,76 +6486,162 @@ function _mostrarReciboRecarga(p, ffId, nombreJugador, status){
   dia = dia.charAt(0).toUpperCase() + dia.slice(1);
 
   var esPend = (status === 'PENDING');
-  var titulo = esPend ? 'RECARGA EN PROCESO' : 'RECARGA EXITOSA';
+  var titulo = esPend ? 'Recarga en proceso' : 'Recarga exitosa';
   var sub = esPend ? 'Tu recarga se acreditara en breve' : 'Los diamantes ya estan en tu cuenta';
 
-  // Total de diamantes (protagonista)
   var totalDiam = (''+(p.diamantes||'')).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  // Desglose: extraer base y bonus del nombre ("520 Diamantes + 52 Bono")
   var mBase = p.nombre.match(/([\d.,]+)\s*Diamantes/i);
   var mBonus = p.nombre.match(/\+\s*([\d.,]+)\s*Bono/i);
   var base = mBase ? mBase[1] : '';
   var bonus = mBonus ? mBonus[1] : '';
-  var desglose = (base && bonus) ? (base + ' +' + bonus + ' \uD83C\uDF81 BONUS') : '';
 
-  // Icono central
+  var okColor = esPend ? '#f59e0b' : '#16a34a';
   var icono = esPend
-    ? '<svg viewBox="0 0 24 24" fill="none" stroke="#ffb84d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
-    : '<svg viewBox="0 0 24 24" fill="none" stroke="#00ff9d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
 
-  var icDiam = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/></svg>';
-  var icId = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M6 14h4"/></svg>';
-  var icPrice = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>';
-  var icCal = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
-  var icClock = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>';
+  var icDiam = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/></svg>';
+  var icId = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8b93a3" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>';
+  var icPrice = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>';
+  var icCal = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
+  var icClock = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>';
 
-  function cyRow(ic, k, v, cls){
-    return '<div class="cy-row"><div class="cy-row-ic">'+ic+'</div>'
-      + '<div style="min-width:0"><div class="cy-row-k">'+k+'</div></div>'
+  function bg(ic, tint){ return '<div class="cy-row-ic" style="background:'+tint+'">'+ic+'</div>'; }
+  function cyRow(icHtml, k, v, cls){
+    return '<div class="cy-row">'+icHtml
+      + '<div class="cy-row-k">'+k+'</div>'
       + '<div class="cy-row-r"><div class="cy-row-v '+(cls||'')+'">'+v+'</div></div></div>';
   }
 
+  // Guardar datos para el comprobante
+  _ultimoComprobante = {
+    total: totalDiam, base: base, bonus: bonus, nombre: p.nombre,
+    ffId: ffId, jugador: nombreJugador || '', precio: fmt(p.precio),
+    fecha: fecha, dia: dia, hora: hora, titulo: titulo,
+    txId: 'CS-' + Date.now().toString().slice(-8)
+  };
+
   det.innerHTML =
-    '<div class="cy-card'+(esPend?' pend':'')+'" id="cy-recibo">'
-    + '<div class="cy-body" style="padding-top:1.6rem">'
+    '<div class="cy-card" id="cy-recibo">'
     +   '<div class="cy-okzone">'
-    +     '<div class="cy-ring"><i></i><i></i><div class="cy-core">'+icono+'</div></div>'
-    +     '<div class="cy-title">&#10003; '+titulo+'</div>'
+    +     '<div class="cy-ring"><div class="cy-core" style="background:'+okColor+'">'+icono+'</div></div>'
+    +     '<div class="cy-title">'+titulo+'</div>'
     +     '<div class="cy-sub">'+sub+'</div>'
     +   '</div>'
-    +   '<div class="cy-reward" id="cy-reward">'
-    +     '<div class="big">'+totalDiam+' <span style="font-size:1.3rem">\uD83D\uDC8E</span></div>'
-    +     '<div class="cy-diam-lbl">DIAMANTES</div>'
-    +     (desglose ? '<div class="cy-desglose">'+desglose+'</div>' : '')
+    +   '<div class="cy-reward">'
+    +     '<span class="rc-emoji">\uD83D\uDC8E</span>'
+    +     '<div><div class="big">'+totalDiam+'</div><div class="cy-diam-lbl">DIAMANTES</div></div>'
     +   '</div>'
+    +   (base && bonus ? '<div style="text-align:center;margin-top:-.5rem;margin-bottom:1.1rem"><span class="cy-desglose">'+base+' + '+bonus+' \uD83C\uDF81 BONUS</span></div>' : '')
     +   '<div class="cy-panel">'
-    +     cyRow(icDiam, 'Cantidad', p.nombre)
-    +     cyRow(icId, 'Free Fire ID', ffId + (nombreJugador ? ' ('+nombreJugador+')' : ''), 'cyan')
-    +     cyRow(icPrice, 'Precio', fmt(p.precio), 'green')
-    +     cyRow(icCal, 'Fecha', fecha + ' \u00B7 ' + dia)
-    +     cyRow(icClock, 'Hora', hora)
+    +     cyRow(bg(icDiam,'rgba(56,189,248,.1)'), 'Cantidad', p.nombre)
+    +     cyRow(bg(icId,'rgba(255,255,255,.05)'), 'Free Fire ID', ffId + (nombreJugador ? '<br/><span style="color:#38bdf8">@'+nombreJugador+'</span>' : ''), 'cyan')
+    +     cyRow(bg(icPrice,'rgba(74,222,128,.1)'), 'Precio', fmt(p.precio), 'green')
+    +     cyRow(bg(icCal,'rgba(56,189,248,.1)'), 'Fecha', fecha + ' \u00B7 ' + dia)
+    +     cyRow(bg(icClock,'rgba(56,189,248,.1)'), 'Hora', hora)
     +   '</div>'
-    +   '<button class="cy-btn" onclick="cerrarDiamDetalle()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg> VOLVER AL CATALOGO</button>'
-    + '</div>'
+    +   '<div class="cy-actions">'
+    +     '<div class="cy-act" onclick="descargarComprobante()"><div class="cy-act-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div><div><div class="cy-act-t">Descargar comprobante</div><div class="cy-act-s">Guardar como imagen</div></div></div>'
+    +     '<div class="cy-act" id="cy-copy-btn" onclick="copiarLinkComprobante()"><div class="cy-act-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.5-1.5"/></svg></div><div><div class="cy-act-t">Copiar link del comprobante</div><div class="cy-act-s">Comparte tu comprobante</div></div></div>'
+    +   '</div>'
+    +   '<button class="cy-btn" onclick="cerrarDiamDetalle()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg> Volver al catalogo</button>'
     + '</div>';
-
-  // Partículas sutiles en la recompensa
-  var rw = document.getElementById('cy-reward');
-  if(rw){
-    for(var i=0;i<6;i++){
-      var pt = document.createElement('span');
-      pt.className = 'cy-part';
-      pt.style.left = (14+Math.random()*72)+'%';
-      pt.style.top = (20+Math.random()*60)+'%';
-      pt.style.animationDelay = (Math.random()*3)+'s';
-      pt.style.color = (i%2) ? '#a855f7' : '#00f0ff';
-      rw.appendChild(pt);
-    }
-  }
 
   det.style.display = '';
   document.getElementById('diam-catalogo').style.display = 'none';
   det.scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+var _ultimoComprobante = null;
+
+// Copiar link del comprobante
+function copiarLinkComprobante(){
+  var c = _ultimoComprobante;
+  var link = 'https://ciberstore.lat/comprobante?tx=' + (c ? c.txId : '');
+  var btn = document.getElementById('cy-copy-btn');
+  function feedbackOK(){
+    if(btn){
+      var t = btn.querySelector('.cy-act-t');
+      if(t){ var orig = t.textContent; t.textContent = '\u2713 Link copiado'; setTimeout(function(){ t.textContent = orig; }, 2000); }
+    }
+    _toastComprobante('Link copiado correctamente');
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(link).then(feedbackOK).catch(function(){ _copiarFallback(link); feedbackOK(); });
+  } else { _copiarFallback(link); feedbackOK(); }
+}
+function _copiarFallback(txt){
+  try{ var ta=document.createElement('textarea'); ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); }catch(e){}
+}
+function _toastComprobante(msg){
+  var ex = document.getElementById('cy-toast'); if(ex) ex.remove();
+  var t = document.createElement('div'); t.id='cy-toast'; t.className='cy-toast'; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function(){ if(t) t.remove(); }, 2500);
+}
+
+// Descargar comprobante como imagen (canvas)
+function descargarComprobante(){
+  var c = _ultimoComprobante;
+  if(!c){ return; }
+  var W = 720, H = 1000;
+  var cv = document.createElement('canvas'); cv.width=W; cv.height=H;
+  var ctx = cv.getContext('2d');
+  // Fondo
+  ctx.fillStyle = '#0e1118'; ctx.fillRect(0,0,W,H);
+  // Tarjeta
+  _rr(ctx, 40, 50, W-80, H-100, 28); ctx.fillStyle='#12161f'; ctx.fill();
+  // Check verde
+  ctx.beginPath(); ctx.arc(W/2, 175, 52, 0, Math.PI*2); ctx.fillStyle='#16a34a'; ctx.fill();
+  ctx.strokeStyle='#fff'; ctx.lineWidth=8; ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath(); ctx.moveTo(W/2-24, 175); ctx.lineTo(W/2-6, 193); ctx.lineTo(W/2+26, 158); ctx.stroke();
+  // Titulo
+  ctx.textAlign='center'; ctx.fillStyle='#fff'; ctx.font='bold 44px Poppins, sans-serif';
+  ctx.fillText(c.titulo, W/2, 285);
+  ctx.fillStyle='#8b93a3'; ctx.font='24px Poppins, sans-serif';
+  ctx.fillText('Los diamantes ya estan en tu cuenta', W/2, 325);
+  // Tarjeta diamantes
+  _rr(ctx, 80, 370, W-160, 130, 20); ctx.fillStyle='rgba(56,189,248,.06)'; ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.08)'; ctx.lineWidth=1.5; ctx.stroke();
+  ctx.textAlign='left'; ctx.fillStyle='#fff'; ctx.font='bold 68px Poppins, sans-serif';
+  ctx.fillText(c.total, 230, 455);
+  ctx.fillStyle='#8b93a3'; ctx.font='bold 22px Poppins, sans-serif';
+  ctx.fillText('DIAMANTES', 232, 485);
+  ctx.font='60px serif'; ctx.fillText('\uD83D\uDC8E', 130, 465);
+  // Filas de datos
+  var rows = [
+    ['Cantidad', c.nombre],
+    ['Free Fire ID', c.ffId + (c.jugador?(' (@'+c.jugador+')'):'')],
+    ['Precio', c.precio],
+    ['Fecha', c.fecha + ' · ' + c.dia],
+    ['Hora', c.hora]
+  ];
+  var y = 560;
+  rows.forEach(function(r){
+    ctx.textAlign='left'; ctx.fillStyle='#9aa4b2'; ctx.font='24px Poppins, sans-serif';
+    ctx.fillText(r[0], 90, y);
+    ctx.textAlign='right'; ctx.fillStyle='#fff'; ctx.font='600 25px Poppins, sans-serif';
+    ctx.fillText(r[1], W-90, y);
+    ctx.strokeStyle='rgba(255,255,255,.06)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(90, y+22); ctx.lineTo(W-90, y+22); ctx.stroke();
+    y += 62;
+  });
+  // Pie
+  ctx.textAlign='center'; ctx.fillStyle='#5a6478'; ctx.font='20px Poppins, sans-serif';
+  ctx.fillText('CiberStore · ' + c.txId, W/2, H-80);
+
+  try{
+    var url = cv.toDataURL('image/png');
+    var a = document.createElement('a');
+    a.href = url; a.download = 'comprobante-ciberstore-'+c.txId+'.png';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    _toastComprobante('Comprobante descargado');
+  }catch(e){ _toastComprobante('No se pudo descargar'); }
+}
+function _rr(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
 }
 
 function _filaRecibo(label, valor, ultimo){

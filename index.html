@@ -1930,74 +1930,49 @@ body{padding-bottom:104px!important}
   .rz-prod-ico{width:44px;height:44px;font-size:1.3rem}
 }
 
-/* ═══════════ RECIBO CYBER (recarga exitosa) ═══════════ */
-@keyframes cyOvIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-@keyframes cyType{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)}}
-@keyframes cyPop{0%{transform:scale(.3);opacity:0}55%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
-@keyframes cyRing{0%{transform:scale(.7);opacity:.55}100%{transform:scale(1.5);opacity:0}}
-@keyframes cyDraw{to{stroke-dashoffset:0}}
-@keyframes cyHolo{0%,100%{opacity:.55;transform:scale(1)}50%{opacity:1;transform:scale(1.06)}}
-@keyframes cyFloat{0%,100%{transform:translateY(0);opacity:.35}50%{transform:translateY(-13px);opacity:1}}
-@keyframes cySweep{0%,100%{left:-100%}50%{left:200%}}
-@keyframes cyGlitch{0%,92%,100%{transform:translate(0);opacity:1}93%{transform:translate(-2px,1px);opacity:.85}95%{transform:translate(2px,-1px)}97%{transform:translate(-1px,0)}}
-.cy-card{position:relative;overflow:hidden;max-width:430px;margin:0 auto;border-radius:18px;padding:0;
-  background:linear-gradient(165deg,rgba(4,10,20,.96),rgba(1,4,10,.98));
-  border:1px solid rgba(0,240,255,.3);
-  box-shadow:0 0 0 1px rgba(0,0,0,.5),0 20px 55px rgba(0,0,0,.6),0 0 44px rgba(0,240,255,.1);
-  animation:cyOvIn .4s ease both}
-.cy-card::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;
-  background-image:linear-gradient(rgba(0,240,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,240,255,.05) 1px,transparent 1px);
-  background-size:32px 32px;mask-image:radial-gradient(circle at 50% 20%,#000,transparent 70%);-webkit-mask-image:radial-gradient(circle at 50% 20%,#000,transparent 70%)}
-.cy-termbar{position:relative;z-index:2;display:flex;align-items:center;gap:.4rem;padding:.55rem .85rem;border-bottom:1px solid rgba(0,240,255,.12);background:rgba(0,240,255,.03)}
-.cy-dot{width:8px;height:8px;border-radius:50%}
-.cy-termbar .lbl{margin-left:auto;font-family:'Share Tech Mono',monospace;font-size:.54rem;color:#4a5a70;letter-spacing:1px}
-.cy-body{position:relative;z-index:2;padding:1.2rem 1.15rem 1.4rem}
-.cy-tline{font-family:'Share Tech Mono',monospace;font-size:.66rem;letter-spacing:.4px;margin-bottom:.3rem;color:#00ff9d;opacity:0;animation:cyType .4s forwards}
-.cy-tline:nth-child(1){animation-delay:.15s}
-.cy-tline:nth-child(2){animation-delay:.4s}
-.cy-tline:nth-child(3){animation-delay:.65s}
-.cy-tline .dim{color:#33465c}
-.cy-okzone{text-align:center;padding:1.3rem 0 .3rem}
-.cy-ring{position:relative;width:88px;height:88px;margin:0 auto 1rem}
-.cy-ring i{position:absolute;inset:0;border-radius:50%;border:2px solid rgba(0,255,157,.4);animation:cyRing 2s ease-out infinite}
-.cy-ring i:nth-child(2){animation-delay:1s}
-.cy-core{position:relative;width:88px;height:88px;border-radius:22px;background:radial-gradient(circle at 40% 35%,rgba(0,255,157,.35),rgba(0,255,157,.08));border:1.5px solid #00ff9d;display:flex;align-items:center;justify-content:center;box-shadow:0 0 30px rgba(0,255,157,.45),inset 0 0 20px rgba(0,255,157,.15);animation:cyPop .55s cubic-bezier(.2,.8,.3,1.3) both}
-.cy-core svg{width:44px;height:44px}
-.cy-core svg path{stroke-dasharray:40;stroke-dashoffset:40;animation:cyDraw .5s .5s forwards}
-.cy-title{font-family:Oxanium,sans-serif;font-weight:900;font-size:1.4rem;color:#00ff9d;letter-spacing:1px;text-shadow:0 0 20px rgba(0,255,157,.55);animation:cyGlitch 4s infinite}
-.cy-sub{font-size:.82rem;color:#8fa0b5;margin-top:.35rem}
-.cy-reward{position:relative;overflow:hidden;margin:1.2rem 0;border-radius:14px;padding:1.3rem 1rem;text-align:center;
-  background:linear-gradient(135deg,rgba(0,240,255,.08),rgba(168,85,247,.08));border:1px solid rgba(0,240,255,.25)}
-.cy-reward::before{content:"";position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(circle at 30% 30%,rgba(0,240,255,.22),transparent 50%),radial-gradient(circle at 70% 70%,rgba(168,85,247,.2),transparent 50%);
-  animation:cyHolo 6s ease-in-out infinite}
-.cy-reward .big{position:relative;font-family:Oxanium,sans-serif;font-weight:900;font-size:3rem;line-height:1;
-  background:linear-gradient(100deg,#00f0ff,#1e6bff 45%,#a855f7);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px rgba(0,240,255,.35))}
-.cy-diam-lbl{position:relative;font-family:Oxanium,sans-serif;font-weight:800;font-size:.9rem;letter-spacing:4px;color:#8fa0b5;margin-top:.2rem}
-.cy-desglose{position:relative;display:inline-block;margin-top:.9rem;font-family:'Share Tech Mono',monospace;font-size:.82rem;color:#00ff9d;letter-spacing:1px;padding:.35rem .9rem;background:rgba(0,255,157,.08);border:1px solid rgba(0,255,157,.25);border-radius:99px}
-.cy-part{position:absolute;width:3px;height:3px;border-radius:50%;box-shadow:0 0 6px currentColor;animation:cyFloat 3s ease-in-out infinite}
-.cy-panel{background:rgba(0,0,0,.3);border:1px solid rgba(0,240,255,.12);border-radius:13px;padding:.3rem 1rem;text-align:left}
-.cy-row{display:flex;align-items:center;gap:.7rem;padding:.7rem 0;border-bottom:1px solid rgba(0,240,255,.08)}
+/* ═══════════ RECIBO limpio / fintech (recarga exitosa) ═══════════ */
+@keyframes rcpIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes rcpPop{0%{transform:scale(.5);opacity:0}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+@keyframes rcpDraw{to{stroke-dashoffset:0}}
+@keyframes rcpToast{0%{opacity:0;transform:transl(-50%,10px)}12%{opacity:1;transform:translateX(-50%)}88%{opacity:1;transform:translateX(-50%)}100%{opacity:0;transform:translate(-50%,10px)}}
+.cy-card{position:relative;max-width:440px;margin:0 auto;border-radius:20px;padding:1.6rem 1.3rem 1.4rem;
+  background:#0e1118;border:1px solid rgba(255,255,255,.07);
+  box-shadow:0 12px 40px rgba(0,0,0,.35);animation:rcpIn .4s ease both}
+.cy-okzone{text-align:center;padding:.4rem 0 1.2rem}
+.cy-ring{width:78px;height:78px;margin:0 auto 1.1rem}
+.cy-core{width:78px;height:78px;border-radius:50%;background:#16a34a;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(22,163,74,.3);animation:rcpPop .5s cubic-bezier(.2,.8,.3,1.2) both}
+.cy-core svg{width:38px;height:38px}
+.cy-core svg path{stroke-dasharray:40;stroke-dashoffset:40;animation:rcpDraw .45s .35s forwards}
+.cy-title{font-family:Poppins,sans-serif;font-weight:700;font-size:1.5rem;color:#fff;letter-spacing:-.2px}
+.cy-sub{font-size:.9rem;color:#8b93a3;margin-top:.35rem}
+.cy-reward{margin:0 0 1.1rem;border-radius:16px;padding:1.4rem 1rem;text-align:center;
+  background:linear-gradient(150deg,rgba(34,211,238,.06),rgba(59,130,246,.04));border:1px solid rgba(255,255,255,.06);
+  display:flex;align-items:center;justify-content:center;gap:1rem}
+.cy-reward .rc-emoji{font-size:2.6rem;line-height:1}
+.cy-reward .big{font-family:Poppins,sans-serif;font-weight:800;font-size:2.6rem;color:#fff;line-height:1}
+.cy-diam-lbl{font-family:Poppins,sans-serif;font-weight:600;font-size:.72rem;letter-spacing:3px;color:#8b93a3;margin-top:.1rem;text-align:left}
+.cy-desglose{display:inline-flex;align-items:center;gap:.4rem;margin-top:1rem;font-size:.85rem;color:#4ade80;font-weight:600;padding:.5rem 1rem;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.18);border-radius:99px}
+.cy-panel{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:.3rem 1rem;margin-bottom:1.1rem}
+.cy-row{display:flex;align-items:center;gap:.9rem;padding:.85rem .1rem;border-bottom:1px solid rgba(255,255,255,.05)}
 .cy-row:last-child{border-bottom:none}
-.cy-row-ic{width:30px;height:30px;flex-shrink:0;border-radius:8px;background:rgba(0,240,255,.07);border:1px solid rgba(0,240,255,.2);display:flex;align-items:center;justify-content:center;color:#00f0ff}
-.cy-row-k{font-family:'Share Tech Mono',monospace;font-size:.55rem;color:#4a5a70;letter-spacing:1px;text-transform:uppercase}
-.cy-row-v{font-family:Rajdhani,'Oxanium',sans-serif;font-weight:700;font-size:.92rem;color:#fff;margin-top:.05rem}
-.cy-row-v.green{color:#00ff9d}
-.cy-row-v.cyan{color:#00f0ff}
+.cy-row-ic{width:38px;height:38px;flex-shrink:0;border-radius:10px;display:flex;align-items:center;justify-content:center}
+.cy-row-k{font-size:.9rem;color:#9aa4b2}
 .cy-row-r{margin-left:auto;text-align:right;min-width:0}
-.cy-tags{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:1rem;justify-content:center}
-.cy-tag{font-family:'Share Tech Mono',monospace;font-size:.5rem;color:#00ff9d;letter-spacing:1px;padding:.2rem .45rem;border:1px solid rgba(0,255,157,.25);border-radius:5px;background:rgba(0,255,157,.03)}
-.cy-btn{position:relative;overflow:hidden;width:100%;margin-top:1.2rem;padding:1rem;
-  background:linear-gradient(135deg,rgba(0,240,255,.12),rgba(30,107,255,.12));border:1.5px solid #00f0ff;border-radius:14px;color:#00f0ff;
-  font-family:Oxanium,sans-serif;font-weight:800;font-size:.9rem;letter-spacing:1px;cursor:pointer;
-  box-shadow:0 0 22px rgba(0,240,255,.18),inset 0 0 18px rgba(0,240,255,.04);
-  display:flex;align-items:center;justify-content:center;gap:.5rem;transition:transform .15s,box-shadow .25s}
-.cy-btn::before{content:"";position:absolute;top:0;left:-100%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(0,240,255,.3),transparent);transform:skewX(-20deg);animation:cySweep 3.5s ease-in-out infinite}
-.cy-btn:hover{box-shadow:0 0 32px rgba(0,240,255,.35)}
-.cy-btn:active{transform:scale(.97)}
-.cy-card.pend{border-color:rgba(255,184,77,.35)}
-.cy-card.pend .cy-core{border-color:#ffb84d;box-shadow:0 0 30px rgba(255,184,77,.4);background:radial-gradient(circle at 40% 35%,rgba(255,184,77,.35),rgba(255,184,77,.08))}
-.cy-card.pend .cy-title{color:#ffb84d;text-shadow:0 0 20px rgba(255,184,77,.5)}
+.cy-row-v{font-family:Poppins,sans-serif;font-weight:600;font-size:.92rem;color:#fff;line-height:1.35}
+.cy-row-v.green{color:#4ade80}
+.cy-row-v.cyan{color:#38bdf8}
+.cy-actions{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:.9rem}
+@media(max-width:400px){.cy-actions{grid-template-columns:1fr}}
+.cy-act{display:flex;align-items:center;gap:.7rem;text-align:left;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:.9rem;cursor:pointer;transition:background .2s,border-color .2s,transform .15s}
+.cy-act:hover{background:rgba(255,255,255,.055);border-color:rgba(56,189,248,.3)}
+.cy-act:active{transform:scale(.97)}
+.cy-act-ic{width:34px;height:34px;flex-shrink:0;border-radius:9px;background:rgba(56,189,248,.1);display:flex;align-items:center;justify-content:center;color:#38bdf8}
+.cy-act-t{font-family:Poppins,sans-serif;font-weight:600;font-size:.82rem;color:#fff;line-height:1.2}
+.cy-act-s{font-size:.66rem;color:#7b8494;margin-top:.15rem}
+.cy-btn{display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:.95rem;background:transparent;border:1px solid rgba(56,189,248,.4);border-radius:13px;color:#38bdf8;font-family:Poppins,sans-serif;font-weight:600;font-size:.9rem;cursor:pointer;transition:background .2s,transform .15s}
+.cy-btn:hover{background:rgba(56,189,248,.08)}
+.cy-btn:active{transform:scale(.98)}
+.cy-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:9999;background:#16a34a;color:#fff;font-family:Poppins,sans-serif;font-weight:600;font-size:.85rem;padding:.7rem 1.3rem;border-radius:11px;box-shadow:0 8px 26px rgba(0,0,0,.4);animation:rcpToast 2.4s ease forwards}
 
 /* ═══════════ TIENDA premium ═══════════ */
 .shop-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem}
