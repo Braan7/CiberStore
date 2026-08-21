@@ -6542,7 +6542,7 @@ function _mostrarReciboRecarga(p, ffId, nombreJugador, status){
     +   '</div>'
     +   '<div class="cy-actions">'
     +     '<div class="cy-act" onclick="descargarComprobante()"><div class="cy-act-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div><div><div class="cy-act-t">Descargar comprobante</div><div class="cy-act-s">Guardar como imagen</div></div></div>'
-    +     '<div class="cy-act" id="cy-copy-btn" onclick="copiarLinkComprobante()"><div class="cy-act-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.5-1.5"/></svg></div><div><div class="cy-act-t">Copiar link del comprobante</div><div class="cy-act-s">Comparte tu comprobante</div></div></div>'
+    +     '<div class="cy-act" id="cy-copy-btn" onclick="compartirComprobante()"><div class="cy-act-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg></div><div><div class="cy-act-t">Compartir comprobante</div><div class="cy-act-s">Envia la imagen</div></div></div>'
     +   '</div>'
     +   '<button class="cy-btn" onclick="cerrarDiamDetalle()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg> Volver al catalogo</button>'
     + '</div>';
@@ -6557,7 +6557,7 @@ var _ultimoComprobante = null;
 // Copiar link del comprobante
 function copiarLinkComprobante(){
   var c = _ultimoComprobante;
-  var link = 'https://ciberstore.lat/comprobante?tx=' + (c ? c.txId : '');
+  var link = 'https://ciberstore.lat/' + (c ? ('?comprobante=' + c.txId) : '');
   var btn = document.getElementById('cy-copy-btn');
   function feedbackOK(){
     if(btn){
@@ -6580,27 +6580,22 @@ function _toastComprobante(msg){
   setTimeout(function(){ if(t) t.remove(); }, 2500);
 }
 
-// Descargar comprobante como imagen (canvas)
-function descargarComprobante(){
+// Genera el canvas del comprobante (reutilizable)
+function _generarComprobanteCanvas(){
   var c = _ultimoComprobante;
-  if(!c){ return; }
+  if(!c) return null;
   var W = 720, H = 1000;
   var cv = document.createElement('canvas'); cv.width=W; cv.height=H;
   var ctx = cv.getContext('2d');
-  // Fondo
   ctx.fillStyle = '#0e1118'; ctx.fillRect(0,0,W,H);
-  // Tarjeta
   _rr(ctx, 40, 50, W-80, H-100, 28); ctx.fillStyle='#12161f'; ctx.fill();
-  // Check verde
   ctx.beginPath(); ctx.arc(W/2, 175, 52, 0, Math.PI*2); ctx.fillStyle='#16a34a'; ctx.fill();
   ctx.strokeStyle='#fff'; ctx.lineWidth=8; ctx.lineCap='round'; ctx.lineJoin='round';
   ctx.beginPath(); ctx.moveTo(W/2-24, 175); ctx.lineTo(W/2-6, 193); ctx.lineTo(W/2+26, 158); ctx.stroke();
-  // Titulo
   ctx.textAlign='center'; ctx.fillStyle='#fff'; ctx.font='bold 44px Poppins, sans-serif';
   ctx.fillText(c.titulo, W/2, 285);
   ctx.fillStyle='#8b93a3'; ctx.font='24px Poppins, sans-serif';
   ctx.fillText('Los diamantes ya estan en tu cuenta', W/2, 325);
-  // Tarjeta diamantes
   _rr(ctx, 80, 370, W-160, 130, 20); ctx.fillStyle='rgba(56,189,248,.06)'; ctx.fill();
   ctx.strokeStyle='rgba(255,255,255,.08)'; ctx.lineWidth=1.5; ctx.stroke();
   ctx.textAlign='left'; ctx.fillStyle='#fff'; ctx.font='bold 68px Poppins, sans-serif';
@@ -6608,12 +6603,11 @@ function descargarComprobante(){
   ctx.fillStyle='#8b93a3'; ctx.font='bold 22px Poppins, sans-serif';
   ctx.fillText('DIAMANTES', 232, 485);
   ctx.font='60px serif'; ctx.fillText('\uD83D\uDC8E', 130, 465);
-  // Filas de datos
   var rows = [
     ['Cantidad', c.nombre],
     ['Free Fire ID', c.ffId + (c.jugador?(' (@'+c.jugador+')'):'')],
     ['Precio', c.precio],
-    ['Fecha', c.fecha + ' · ' + c.dia],
+    ['Fecha', c.fecha + ' \u00B7 ' + c.dia],
     ['Hora', c.hora]
   ];
   var y = 560;
@@ -6626,10 +6620,16 @@ function descargarComprobante(){
     ctx.beginPath(); ctx.moveTo(90, y+22); ctx.lineTo(W-90, y+22); ctx.stroke();
     y += 62;
   });
-  // Pie
   ctx.textAlign='center'; ctx.fillStyle='#5a6478'; ctx.font='20px Poppins, sans-serif';
-  ctx.fillText('CiberStore · ' + c.txId, W/2, H-80);
+  ctx.fillText('ciberstore.lat \u00B7 ' + c.txId, W/2, H-80);
+  return cv;
+}
 
+// Descargar comprobante como imagen PNG
+function descargarComprobante(){
+  var cv = _generarComprobanteCanvas();
+  if(!cv){ return; }
+  var c = _ultimoComprobante;
   try{
     var url = cv.toDataURL('image/png');
     var a = document.createElement('a');
@@ -6637,6 +6637,37 @@ function descargarComprobante(){
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     _toastComprobante('Comprobante descargado');
   }catch(e){ _toastComprobante('No se pudo descargar'); }
+}
+
+// Compartir comprobante como imagen (usa el menu nativo de compartir)
+function compartirComprobante(){
+  var cv = _generarComprobanteCanvas();
+  if(!cv){ return; }
+  var c = _ultimoComprobante;
+  var nombreArchivo = 'comprobante-ciberstore-'+c.txId+'.png';
+  cv.toBlob(function(blob){
+    if(!blob){ _toastComprobante('No se pudo generar'); return; }
+    var file = new File([blob], nombreArchivo, { type:'image/png' });
+    // Intentar compartir la imagen con el menu nativo
+    if(navigator.canShare && navigator.canShare({ files:[file] })){
+      navigator.share({
+        files:[file],
+        title:'Comprobante CiberStore',
+        text:'Mi comprobante de recarga \u00B7 '+c.txId
+      }).then(function(){ _toastComprobante('Comprobante compartido'); })
+        .catch(function(){ /* usuario cancelo, no hacer nada */ });
+    } else {
+      // Sin soporte de compartir: descargar como respaldo
+      try{
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url; a.download = nombreArchivo;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        _toastComprobante('Imagen descargada para compartir');
+      }catch(e){ _toastComprobante('No se pudo compartir'); }
+    }
+  }, 'image/png');
 }
 function _rr(ctx,x,y,w,h,r){
   ctx.beginPath();
