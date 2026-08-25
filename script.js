@@ -4750,12 +4750,12 @@ function comprarPinAPI(productId, precioLocal, nombreProducto){
 // ═══ PRODUCTOS PIN POR API (Recargas América) ═══
 // product_id = ID en Recargas América | precio = tu precio de venta en MXN
 var PINES_API = [
-  {product_id:5, sku:'FFCH100',  nombre:'Free Fire 100 Diamantes +10 Bono',  precio:14,  min:5, diamantes:'110',   img:'img/diam-100.png'},
-  {product_id:3, sku:'FFCH310',  nombre:'Free Fire 310 Diamantes +31 Bono',  precio:40,  min:4, diamantes:'341',   img:'img/diam-310.png'},
-  {product_id:6, sku:'FFCH520',  nombre:'Free Fire 520 Diamantes +52 Bono',  precio:70,  min:4, diamantes:'572',   img:'img/diam-520.png'},
-  {product_id:1, sku:'FFCH1060', nombre:'Free Fire 1060 Diamantes +106 Bono', precio:120, min:3, diamantes:'1,166', img:'img/diam-1060.png'},
-  {product_id:2, sku:'FFCH2180', nombre:'Free Fire 2180 Diamantes +218 Bono', precio:235, min:3, diamantes:'2,398', img:'img/diam-2180.png'},
-  {product_id:4, sku:'FFCH5600', nombre:'Free Fire 5600 Diamantes +560 Bono', precio:595, min:2, diamantes:'6,160', img:'img/diam-5600.png'}
+  {product_id:5, sku:'FFCH100',  nombre:'Free Fire 100 Diamantes +10 Bono',  precio:14.50,  min:2, diamantes:'110',   img:'img/diam-100.png'},
+  {product_id:3, sku:'FFCH310',  nombre:'Free Fire 310 Diamantes +31 Bono',  precio:43,  min:2, diamantes:'341',   img:'img/diam-310.png'},
+  {product_id:6, sku:'FFCH520',  nombre:'Free Fire 520 Diamantes +52 Bono',  precio:70,  min:2, diamantes:'572',   img:'img/diam-520.png'},
+  {product_id:1, sku:'FFCH1060', nombre:'Free Fire 1060 Diamantes +106 Bono', precio:125, min:2, diamantes:'1,166', img:'img/diam-1060.png'},
+  {product_id:2, sku:'FFCH2180', nombre:'Free Fire 2180 Diamantes +218 Bono', precio:245, min:2, diamantes:'2,398', img:'img/diam-2180.png'},
+  {product_id:4, sku:'FFCH5600', nombre:'Free Fire 5600 Diamantes +560 Bono', precio:605, min:2, diamantes:'6,160', img:'img/diam-5600.png'}
 ];
 
 function renderPinesAPI(){
