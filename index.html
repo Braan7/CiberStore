@@ -327,7 +327,7 @@ body{
 .modal-h h3{font-family:"Oxanium";font-size:.8rem;font-weight:700;color:#fff;letter-spacing:.5px}
 .modal-close{background:none;border:none;color:var(--muted);font-size:1.6rem;cursor:pointer;line-height:1;padding:0 .28rem;transition:color .18s}
 .modal-close:hover{color:#ff5252}
-.modal-b{padding:1.2rem;padding-bottom:calc(2rem + env(safe-area-inset-bottom, 0px) + 90px)}
+.modal-b{padding:1.2rem;padding-bottom:calc(2.5rem + env(safe-area-inset-bottom, 0px) + 100px);overflow-y:auto;max-height:85vh}
 .m-prod-card{display:flex;align-items:center;gap:.85rem;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.85rem;margin-bottom:.9rem;transition:border-color .3s}
 .m-prod-ico{width:60px;height:60px;border-radius:7px;background:linear-gradient(135deg,#0a1020,#0d1830);display:flex;align-items:center;justify-content:center;font-size:1.85rem;flex-shrink:0;border:1px solid var(--border)}
 .m-prod-name{font-family:"Oxanium";font-size:.74rem;font-weight:700;color:#fff;margin-bottom:.2rem}
@@ -345,7 +345,8 @@ body{
 .copy-btn{background:none;border:1px solid rgba(34,211,238,.28);color:var(--c1);border-radius:3px;padding:.08rem .38rem;font-size:.6rem;cursor:pointer;font-family:"Poppins";font-weight:700}
 .pay-note{font-size:.67rem;color:var(--muted);line-height:1.5;padding:.38rem .62rem;background:rgba(255,255,255,.03);border-radius:4px;border:1px solid var(--border);margin-top:.32rem}
 .flabel{display:block;font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:.25rem}
-.finput{width:100%;background:rgba(255,255,255,.03);border:1px solid var(--border);color:#fff;border-radius:11px;padding:.65rem .85rem;font-family:"Poppins";font-size:.86rem;transition:all .2s;margin-bottom:.78rem}
+.finput{width:100%;background:rgba(255,255,255,.03);border:1.5px solid rgba(34,211,238,.2);color:#fff;border-radius:12px;padding:.75rem .9rem;font-family:"Poppins";font-size:.88rem;transition:all .25s;margin-bottom:.85rem}
+.finput:focus{background:rgba(34,211,238,.08);border-color:rgba(34,211,238,.5);box-shadow:0 0 12px rgba(34,211,238,.15)}
 .finput:focus{outline:none;border-color:var(--c1);box-shadow:0 0 6px var(--glow)}
 .finput::placeholder{color:var(--muted)}
 .wa-note{font-size:.67rem;color:var(--muted);text-align:center;margin:.48rem 0;line-height:1.6}
@@ -4500,48 +4501,96 @@ document.addEventListener('keydown',function(e){
   </div>
 </div>
 <div class="modal-ov" id="modal-stori">
-  <div class="modal" style="max-width:430px">
-    <div class="modal-h"><h3>&#127974; Transferencia <span style="color:#25d366">Bancaria</span></h3><button class="modal-close" onclick="closeStoriModal()">&#215;</button></div>
-    <div class="modal-b">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-h"><h3>🏦 Transferencia <span style="color:#25d366">Bancaria</span></h3><button class="modal-close" onclick="closeStoriModal()">✕</button></div>
+    <div class="modal-b" style="padding:1.2rem;display:flex;flex-direction:column;gap:1rem">
 
-      <div style="text-align:center;margin-bottom:1.1rem">
-        <div style="font-size:2.4rem;margin-bottom:.4rem">&#127974;</div>
-        <div style="font-family:Oxanium;font-size:.85rem;font-weight:700;color:#fff">Transferencia SPEI</div>
-        <div style="font-size:.76rem;color:var(--muted)">Deposita y manda tu comprobante</div>
-      </div>
-
-      <!-- Datos bancarios: 3 cuentas -->
-      <div style="font-family:Oxanium;font-size:.68rem;font-weight:700;color:#25d366;letter-spacing:1px;margin-bottom:.7rem">DATOS PARA TRANSFERIR &middot; elige una cuenta</div>
-
-
-      <div style="background:linear-gradient(160deg,rgba(37,211,102,.06),rgba(255,255,255,.015));border:1px solid rgba(37,211,102,.3);border-radius:14px;padding:1.1rem;margin-bottom:.9rem">
-        <div style="display:flex;align-items:center;gap:.55rem;margin-bottom:.8rem">
-          <div style="width:36px;height:36px;flex-shrink:0;border-radius:10px;background:rgba(124,58,237,.14);border:1px solid rgba(124,58,237,.35);display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-weight:900;font-size:.7rem;color:#a78bfa">HEY</div>
-          <div><div style="font-size:.9rem;font-weight:700;color:#fff;line-height:1.1">Klar</div><div style="font-size:.68rem;color:#25d366">Transferencia bancaria</div></div>
+      <!-- Tarjeta Bancaria Premium -->
+      <div style="background:linear-gradient(135deg,rgba(37,211,102,.08),rgba(20,184,166,.04));border:1.5px solid rgba(37,211,102,.35);border-radius:18px;padding:1.3rem;position:relative;overflow:hidden">
+        <div style="position:absolute;top:0;right:0;width:100px;height:100px;background:radial-gradient(circle,rgba(37,211,102,.15),transparent 70%);border-radius:50%;pointer-events:none"></div>
+        
+        <!-- Header tarjeta -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;position:relative;z-index:1">
+          <div>
+            <div style="font-size:.7rem;color:#8b93a3;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:.2rem">Banco</div>
+            <div style="font-size:1.1rem;font-weight:900;color:#fff;font-family:Oxanium">KLAR</div>
+          </div>
+          <div style="font-size:1.6rem">🏦</div>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem .75rem;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.06);border-radius:10px;margin-bottom:.5rem">
-          <div style="text-align:left;min-width:0"><div style="font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Número de Tarjeta</div><div style="font-family:Oxanium;font-size:.82rem;font-weight:700;color:#fff;letter-spacing:.5px">661180006413009414</div></div>
-          <button onclick="_copiarTexto('661180006413009414','Número de Tarjeta copiada')" style="flex-shrink:0;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.35);color:#25d366;border-radius:8px;padding:.45rem .8rem;font-size:.68rem;cursor:pointer;font-family:'Poppins';font-weight:700">Copiar</button>
+
+        <!-- Número destacado -->
+        <div style="background:rgba(0,0,0,.2);border-radius:12px;padding:1rem;margin-bottom:1rem;backdrop-filter:blur(10px)">
+          <div style="font-size:.65rem;color:#8b93a3;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:.4rem">Número de tarjeta</div>
+          <div style="font-family:Oxanium;font-size:1.4rem;font-weight:900;color:#22d3ee;letter-spacing:2px;word-break:break-all;line-height:1.4">661180006413009414</div>
         </div>
-        <div style="padding:.6rem .75rem;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.06);border-radius:10px"><div style="font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Titular</div><div style="font-size:.82rem;font-weight:700;color:#fff">Francisco Meneses</div></div>
+
+        <!-- Titular -->
+        <div style="margin-bottom:.8rem">
+          <div style="font-size:.65rem;color:#8b93a3;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:.25rem">Titular</div>
+          <div style="font-size:.95rem;font-weight:700;color:#e8e8ea">Francisco Meneses</div>
+        </div>
+
+        <!-- Botón copiar -->
+        <button onclick="copyKlarNumber()" style="width:100%;padding:.75rem;background:rgba(37,211,102,.15);border:1.5px solid rgba(37,211,102,.4);color:#25d366;border-radius:11px;font-family:Poppins;font-weight:800;font-size:.82rem;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:.4rem">
+          <span id="klar-copy-ico">📋</span>
+          <span id="klar-copy-txt">Copiar número</span>
+        </button>
       </div>
 
-      <!-- Subir comprobante -->
-      <div style="border-top:1px solid rgba(255,255,255,.08);margin-top:1.2rem;padding-top:1.2rem">
-        <div style="background:rgba(255,180,60,.1);border:1px solid rgba(255,180,60,.3);border-radius:10px;padding:.7rem .9rem;margin-bottom:.9rem;font-size:.75rem;color:#ffb84d;line-height:1.5">&#9888; <b>Importante:</b> escribe el monto exacto que transferiste y adjunta la foto del comprobante para acreditar tu saldo.</div>
-
-        <label class="flabel">Monto transferido (MXN) *</label>
-        <input class="finput" id="stori-monto" type="number" inputmode="numeric" placeholder="Ej: 125" style="margin-bottom:.7rem"/>
-
-        <label class="flabel">Referencia (opcional)</label>
-        <input class="finput" id="stori-ref" type="text" placeholder="Numero de referencia" style="margin-bottom:.7rem"/>
-
-        <label class="flabel">Comprobante (foto) *</label>
-        <input class="finput" id="stori-foto" type="file" accept="image/*" style="padding:.55rem;margin-bottom:.8rem"/>
-
-        <button onclick="enviarComprobante('stori')" style="width:100%;padding:.9rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.82rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(37,211,102,.3)">&#9993; ENVIAR COMPROBANTE</button>
-        <div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.6rem;line-height:1.6">Adjunta la foto arriba y presiona enviar. Te acreditaremos pronto.</div>
+      <!-- Aviso compacto y elegante -->
+      <div style="background:linear-gradient(135deg,rgba(255,180,60,.1),rgba(255,140,0,.05));border-left:3px solid #ffb84d;border-radius:10px;padding:.8rem .95rem;display:flex;gap:.6rem;align-items:flex-start">
+        <div style="font-size:1.2rem;flex-shrink:0">⚠️</div>
+        <div>
+          <div style="font-size:.8rem;font-weight:700;color:#ffb84d;margin-bottom:.2rem">Importante</div>
+          <div style="font-size:.72rem;color:#c9a96e;line-height:1.5">Transfiere exactamente el monto indicado y adjunta tu comprobante para acreditar el saldo.</div>
+        </div>
       </div>
+
+      <!-- Monto (Destacado) -->
+      <div>
+        <label style="font-size:.75rem;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:.4rem">💰 Monto transferido *</label>
+        <div style="position:relative;display:flex;align-items:center">
+          <span style="position:absolute;left:.9rem;font-family:Oxanium;font-weight:900;font-size:1.1rem;color:#25d366">$</span>
+          <input class="finput" id="stori-monto" type="number" inputmode="numeric" placeholder="0.00" style="padding-left:2.2rem;font-size:1.15rem;letter-spacing:.5px;background:rgba(37,211,102,.08);border:1.5px solid rgba(37,211,102,.3)"/>
+          <span style="position:absolute;right:.9rem;font-size:.7rem;font-weight:800;color:#25d366">MXN</span>
+        </div>
+      </div>
+
+      <!-- Referencia (Secundario) -->
+      <div>
+        <label style="font-size:.7rem;font-weight:700;color:#8b93a3;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:.3rem">Referencia <span style="font-style:italic;font-weight:400">(opcional)</span></label>
+        <input class="finput" id="stori-ref" type="text" placeholder="Ej: Ref-12345 o número de referencia" style="font-size:.9rem;opacity:.8"/>
+      </div>
+
+      <!-- Comprobante (Selector personalizado) -->
+      <div>
+        <label style="font-size:.75rem;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:.6rem">📷 Comprobante (foto) *</label>
+        
+        <div id="stori-upload-area" style="background:linear-gradient(135deg,rgba(34,211,238,.05),rgba(20,184,166,.02));border:2px dashed rgba(34,211,238,.4);border-radius:14px;padding:1.2rem;text-align:center;cursor:pointer;transition:all .25s;position:relative">
+          <input class="finput" id="stori-foto" type="file" accept="image/*" style="display:none;margin-bottom:0"/>
+          
+          <div id="stori-upload-prompt">
+            <div style="font-size:2rem;margin-bottom:.5rem">📷</div>
+            <div style="font-weight:800;font-size:.9rem;color:#fff;margin-bottom:.25rem">Sube tu comprobante</div>
+            <div style="font-size:.75rem;color:#8b93a3;margin-bottom:.5rem">Toca para seleccionar una imagen</div>
+            <div style="font-size:.65rem;color:#6b7280">JPG, PNG • Máx. 10MB</div>
+          </div>
+
+          <div id="stori-upload-preview" style="display:none">
+            <img id="stori-preview-img" src="" style="max-width:100%;max-height:180px;border-radius:10px;margin-bottom:.6rem"/>
+            <div id="stori-preview-name" style="font-size:.8rem;color:#25d366;margin-bottom:.5rem;word-break:break-all"></div>
+            <button type="button" onclick="clearStoriFile()" style="background:rgba(255,80,80,.15);border:1px solid rgba(255,80,80,.3);color:#ff6b6b;padding:.4rem .7rem;border-radius:8px;font-size:.7rem;cursor:pointer;font-weight:700">Cambiar imagen</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botón Enviar (Principal) -->
+      <button id="stori-submit-btn" onclick="enviarComprobante('stori')" style="width:100%;padding:1rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:14px;font-family:Oxanium;font-weight:900;font-size:.9rem;letter-spacing:.5px;cursor:pointer;transition:all .3s;box-shadow:0 8px 24px rgba(37,211,102,.25);display:flex;align-items:center;justify-content:center;gap:.5rem">
+        <span id="stori-btn-ico">✓</span>
+        <span id="stori-btn-txt">Enviar Comprobante</span>
+      </button>
+      
+      <div style="font-size:.7rem;color:#8b93a3;text-align:center">Se acreditará tu saldo en menos de 24 horas</div>
 
     </div>
   </div>

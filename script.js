@@ -5200,6 +5200,67 @@ function _updateRetiroSaldo(){
 // URL de la Edge Function que reenvía a tu canal de Telegram
 var NOTIF_RECARGA_URL = 'https://pnotsqsudqpwqzssevig.supabase.co/functions/v1/bright-task';
 
+// ════════ REDISEÑO TRANSFERENCIA BANCARIA ════════
+
+// Manejar cambio de archivo con preview
+document.addEventListener('DOMContentLoaded', function(){
+  var fotoInput = document.getElementById('stori-foto');
+  var uploadArea = document.getElementById('stori-upload-area');
+  
+  if(!fotoInput || !uploadArea) return;
+  
+  // Click en el área abre el selector
+  uploadArea.onclick = function(){ fotoInput.click(); };
+  
+  // Cambio de archivo
+  fotoInput.onchange = function(e){
+    if(!e.target.files || !e.target.files[0]) return;
+    var file = e.target.files[0];
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      var prompt = document.getElementById('stori-upload-prompt');
+      var preview = document.getElementById('stori-upload-preview');
+      var img = document.getElementById('stori-preview-img');
+      var name = document.getElementById('stori-preview-name');
+      if(prompt) prompt.style.display = 'none';
+      if(preview){ preview.style.display = 'block'; }
+      if(img) img.src = ev.target.result;
+      if(name) name.innerHTML = '✓ ' + file.name;
+    };
+    reader.readAsDataURL(file);
+  };
+});
+
+// Limpiar archivo seleccionado
+function clearStoriFile(){
+  var fotoInput = document.getElementById('stori-foto');
+  var prompt = document.getElementById('stori-upload-prompt');
+  var preview = document.getElementById('stori-upload-preview');
+  if(fotoInput) fotoInput.value = '';
+  if(prompt) prompt.style.display = 'block';
+  if(preview) preview.style.display = 'none';
+}
+
+// Copiar número Klar con confirmación elegante
+function copyKlarNumber(){
+  var numero = '661180006413009414';
+  var btn = document.getElementById('stori-submit-btn') || this;
+  var ico = document.getElementById('klar-copy-ico');
+  var txt = document.getElementById('klar-copy-txt');
+  
+  // Copiar al portapapeles
+  navigator.clipboard.writeText(numero).then(function(){
+    if(ico) { ico.innerHTML = '✓'; ico.style.color = '#25d366'; }
+    if(txt) { txt.innerHTML = 'Número copiado'; txt.style.color = '#25d366'; }
+    setTimeout(function(){
+      if(ico) { ico.innerHTML = '📋'; ico.style.color = '#25d366'; }
+      if(txt) { txt.innerHTML = 'Copiar número'; }
+    }, 2500);
+  }).catch(function(){
+    alert('No se pudo copiar al portapapeles');
+  });
+}
+
 var _enviandoComprobante = false;
 function enviarComprobante(metodo){
   // Candado: evitar envios dobles/triples
