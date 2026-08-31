@@ -1436,6 +1436,8 @@ function closeHonorModal(){
 }
 
 var _honorIdxActual = null;
+var _comprandoHonor = false;
+
 function submitHonor(){
   if(_honorIdxActual === null) return;
   var idx = _honorIdxActual;
@@ -1450,26 +1452,68 @@ function submitHonor(){
   if(!idClan){ showToast('Ingresa el ID del clan'); return; }
   if(chk && !chk.checked){ showToast('\u26A0 Confirma que ya configuraste tu clan'); return; }
 
-  var precioHonor = honorPrecioMXN(idx);
-  var saldo = (authSession && authSession.saldo) ? authSession.saldo : 0;
-  if(saldo < precioHonor){
-    showToast('Saldo insuficiente. Tienes ' + fmt(saldo) + ' y necesitas ' + fmt(precioHonor), 3500);
-    setTimeout(function(){ closeHonorModal(); goPage('saldo'); }, 1200);
-    return;
-  }
-
   if(_comprandoHonor) return;
-  if(!confirm('Comprar Honor de Clan ' + h.region + ' por ' + fmt(precioHonor) + '?\n\nClan: ' + clan + '\nID: ' + idClan)) return;
 
+  var precioHonor = honorPrecioMXN(idx);
+  var btn = document.getElementById('honor-submit-btn');
+  if(btn){ btn.disabled=true; btn.textContent='Verificando saldo...'; }
+
+  // Verificar saldo FRESCO (evita comprar con datos desactualizados en pantalla)
+  verificarSaldoFresco(precioHonor, function(alcanza, saldoReal){
+    var saldoEl = document.getElementById('honor-m-saldo');
+    if(saldoEl) saldoEl.textContent = fmt(saldoReal);
+
+    if(!alcanza){
+      showToast('Saldo insuficiente. Tienes ' + fmt(saldoReal) + ' y necesitas ' + fmt(precioHonor), 3500);
+      if(btn){ btn.disabled=false; btn.innerHTML='\uD83C\uDFC6 COMPRAR CON SALDO'; }
+      setTimeout(function(){ closeHonorModal(); goPage('saldo'); }, 1500);
+      return;
+    }
+
+    // Confirmación interna (sin confirm() del navegador, bloqueado en móvil)
+    var existing = document.getElementById('honor-confirm-overlay');
+    if(existing) existing.remove();
+    var ov = document.createElement('div');
+    ov.id = 'honor-confirm-overlay';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px)';
+    ov.innerHTML =
+      '<div style="background:#0e1118;border:1.5px solid rgba(34,211,238,.4);border-radius:18px;padding:1.5rem;max-width:340px;width:100%;text-align:center">'
+      + '<div style="font-size:2rem;margin-bottom:.5rem">\uD83C\uDFC6</div>'
+      + '<div style="font-family:Oxanium;font-weight:900;font-size:1rem;color:#fff;margin-bottom:.35rem">Confirmar compra</div>'
+      + '<div style="font-size:.8rem;color:#8b93a3;margin-bottom:1.1rem;line-height:1.6">'
+      + 'Honor de Clan &middot; ' + h.region + '<br/>'
+      + 'Clan: <b style="color:#22d3ee">' + clan + '</b><br/>'
+      + 'ID: <b style="color:#22d3ee">' + idClan + '</b><br/>'
+      + 'Costo: <b style="color:#25d366">' + fmt(precioHonor) + '</b>'
+      + '</div>'
+      + '<div style="display:flex;gap:.65rem">'
+      + '<button id="honor-confirm-no" style="flex:1;padding:.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#8b93a3;border-radius:11px;font-family:Poppins;font-weight:700;font-size:.82rem;cursor:pointer">Cancelar</button>'
+      + '<button id="honor-confirm-si" style="flex:1;padding:.75rem;background:linear-gradient(135deg,#0ea5e9,#22d3ee);border:none;color:#000;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.82rem;cursor:pointer">\u2713 Confirmar</button>'
+      + '</div></div>';
+    document.body.appendChild(ov);
+
+    document.getElementById('honor-confirm-no').onclick = function(){
+      ov.remove();
+      if(btn){ btn.disabled=false; btn.innerHTML='\uD83C\uDFC6 COMPRAR CON SALDO'; }
+    };
+    document.getElementById('honor-confirm-si').onclick = function(){
+      ov.remove();
+      _honorProcesar(h, clan, idClan, precioHonor, btn);
+    };
+  });
+}
+
+function _honorProcesar(h, clan, idClan, precioHonor, btn){
+  if(_comprandoHonor) return;
   _comprandoHonor = true;
-  var ord = getNextOrder();
+  if(btn){ btn.disabled=true; btn.innerHTML='\u23F3 Procesando...'; }
 
+  var ord = getNextOrder();
   addSpend(precioHonor, 'Honor de Clan ' + h.region + ' - Clan:' + clan + ' - ID:' + idClan + ' - Pedido #' + ord);
 
   if(typeof registrarPedidoHonor === 'function'){
-    try { registrarPedidoHonor('Honor de Clan - ' + h.region, idClan, precioHonor, clan); } catch(e){}
+    try{ registrarPedidoHonor('Honor de Clan - ' + h.region, idClan, precioHonor, clan); }catch(e){}
   }
-
   if(typeof tgNotifyPurchase === 'function'){
     tgNotifyPurchase(authSession.username,
       'HONOR DE CLAN ' + h.region + '\n\uD83D\uDEE1\uFE0F Clan: ' + clan + '\n\uD83C\uDD94 ID Clan: ' + idClan + '\n\u23F0 Entrega: fin de semana',
@@ -1478,10 +1522,11 @@ function submitHonor(){
 
   setTimeout(function(){
     _comprandoHonor = false;
-    closeHonorModal();
+    if(btn){ btn.disabled=false; btn.innerHTML='\uD83C\uDFC6 COMPRAR CON SALDO'; }
     if(typeof _refreshSaldoUI === 'function') _refreshSaldoUI(authSession.saldo||0);
+    closeHonorModal();
     showToast('\u2705 Pedido #' + ord + ' confirmado! Tu Honor de Clan se procesa el fin de semana.', 5000);
-  }, 600);
+  }, 800);
 }
 
 function _mostrarReciboHonor(h, nombreClan, idClan, ord){

@@ -214,15 +214,20 @@ body{
 .lkpln-best{border-color:rgba(255,208,0,.5);box-shadow:0 0 24px rgba(255,208,0,.12)}
 .lkpln-rib{position:absolute;top:-1px;right:-1px;background:linear-gradient(90deg,#f0b90b,#ffd700);color:#1a0a00;font-size:.52rem;font-weight:800;letter-spacing:1px;padding:.2rem .6rem;border-radius:0 14px 0 10px;z-index:2}
 .lkpln-wa{display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.55rem 1rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:9px;font-family:Poppins,sans-serif;font-weight:800;font-size:.78rem;text-decoration:none;white-space:nowrap}
-.honor-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.75rem;padding:0 4vw 2rem;max-width:920px;margin:0 auto}
-.honor-card{background:linear-gradient(160deg,rgba(255,255,255,.04),rgba(255,255,255,.015));border:1px solid var(--border);border-radius:14px;padding:1rem .85rem;transition:all .28s cubic-bezier(.4,0,.2,1);cursor:pointer;text-align:center;position:relative;overflow:hidden;backdrop-filter:blur(8px)}
-.honor-card:hover{transform:translateY(-4px)}
-.honor-flag{font-size:1.8rem;margin-bottom:.4rem;display:block}
-.honor-region{font-family:"Oxanium";font-size:.78rem;font-weight:700;color:#fff;margin-bottom:.15rem}
-.honor-desc{font-size:.65rem;color:var(--muted);margin-bottom:.6rem;line-height:1.4}
-.honor-price{font-family:"Oxanium";font-size:1.35rem;font-weight:900;margin-bottom:.1rem}
-.honor-note{font-size:.6rem;color:var(--muted);margin-bottom:.7rem}
-.btn-honor{width:100%;padding:.5rem;border-radius:8px;border:none;font-family:"Poppins";font-weight:800;font-size:.68rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.honor-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;padding:0 4vw 2rem;max-width:920px;margin:0 auto}
+.honor-card{background:linear-gradient(160deg,rgba(14,18,28,.95),rgba(8,11,20,.9));border:1px solid rgba(34,211,238,.18);border-radius:16px;padding:1rem .9rem;transition:transform .22s,border-color .22s,box-shadow .22s;cursor:pointer;text-align:center;position:relative;overflow:hidden}
+.honor-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(34,211,238,.5),transparent);opacity:0;transition:opacity .25s}
+.honor-card:hover{transform:translateY(-4px);border-color:rgba(34,211,238,.45);box-shadow:0 12px 32px rgba(0,0,0,.4),0 0 20px rgba(34,211,238,.08)}
+.honor-card:hover::before{opacity:1}
+.honor-card:active{transform:translateY(-1px)}
+.honor-flag{font-size:1.7rem;margin-bottom:.35rem;display:block;filter:drop-shadow(0 2px 8px rgba(0,0,0,.4))}
+.honor-region{font-family:"Oxanium";font-size:.82rem;font-weight:900;color:#fff;margin-bottom:.12rem;letter-spacing:.3px}
+.honor-desc{font-size:.62rem;color:#6b7280;margin-bottom:.55rem;line-height:1.4}
+.honor-price{font-family:"Oxanium";font-size:1.3rem;font-weight:900;margin-bottom:.08rem;color:#22d3ee}
+.honor-note{font-size:.58rem;color:#6b7280;margin-bottom:.65rem;display:flex;align-items:center;justify-content:center;gap:.25rem}
+.honor-note::before{content:'';width:5px;height:5px;border-radius:50%;background:#25d366;flex-shrink:0;box-shadow:0 0 4px #25d366}
+.btn-honor{width:100%;padding:.52rem;border-radius:9px;border:none;font-family:"Poppins";font-weight:800;font-size:.68rem;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;background:linear-gradient(135deg,rgba(34,211,238,.15),rgba(34,211,238,.08));border:1px solid rgba(34,211,238,.35);color:#22d3ee}
+.btn-honor:hover{background:rgba(34,211,238,.2);box-shadow:0 4px 14px rgba(34,211,238,.2)}
 .clan-box{background:var(--card);border:1px solid rgba(255,208,0,.2);border-radius:15px;padding:2rem;text-align:center;position:relative;overflow:hidden;margin:0 5vw 3rem;max-width:820px}
 .clan-ico{font-size:3rem;margin-bottom:.65rem;display:block}
 .clan-title{font-family:"Oxanium";font-size:1.2rem;font-weight:900;color:#fff;margin-bottom:.3rem}
@@ -1006,7 +1011,7 @@ input:focus,select:focus,textarea:focus{
   padding:1.2rem!important;
   gap:.5rem!important;
 }
-.honor-card{border-radius:14px!important;padding:1rem .85rem!important}
+.honor-card{border-radius:16px!important}
 
 /* Grids con más aire entre tarjetas */
 .pgrid{gap:1rem!important}
@@ -2841,10 +2846,38 @@ document.addEventListener('keydown',function(e){
   </div>
 
   <div class="honor-grid">
-    <div class="honor-card" onclick="openHonorModal(0)" style="border-color:rgba(255,208,0,.2)"><span class="honor-flag">&#127464;&#127462;</span><div class="honor-region" style="color:var(--c4)">Norteamerica</div><div class="honor-desc">Canada &middot; Rep. Dominicana</div><div class="honor-price" id="honor-price-0" style="color:var(--c4)">$238 <span style="font-size:.95rem;opacity:.65">MX</span></div><div class="honor-note">Entrega en menos de 24 hrs</div><button class="btn-honor" style="background:linear-gradient(90deg,#a07800,var(--c4));color:#020a0a" onclick="event.stopPropagation();openHonorModal(0)">Comprar ahora</button></div>
-    <div class="honor-card" onclick="openHonorModal(1)" style="border-color:rgba(100,160,255,.2)"><span class="honor-flag">&#127482;&#127480;</span><div class="honor-region" style="color:#4dabf7">Estados Unidos</div><div class="honor-desc">Mexico</div><div class="honor-price" id="honor-price-1" style="color:#4dabf7">$238 <span style="font-size:.95rem;opacity:.65">MX</span></div><div class="honor-note">Entrega en menos de 24 hrs</div><button class="btn-honor" style="background:linear-gradient(90deg,#1a5fa8,#4dabf7);color:#fff" onclick="event.stopPropagation();openHonorModal(1)">Comprar ahora</button></div>
-    <div class="honor-card" onclick="openHonorModal(2)" style="border-color:rgba(0,200,100,.18)"><span class="honor-flag">&#127463;&#127479;</span><div class="honor-region" style="color:#40c057">Sudamerica</div><div class="honor-desc">Peru &middot; Chile</div><div class="honor-price" id="honor-price-2" style="color:#40c057">$238 <span style="font-size:.95rem;opacity:.65">MX</span></div><div class="honor-note">Entrega en menos de 24 hrs</div><button class="btn-honor" style="background:linear-gradient(90deg,#1a6b35,#40c057);color:#fff" onclick="event.stopPropagation();openHonorModal(2)">Comprar ahora</button></div>
-    <div class="honor-card" onclick="openHonorModal(3)" style="border-color:rgba(173,120,255,.18)"><span class="honor-flag">&#127466;&#127482;</span><div class="honor-region" style="color:#b39ddb">Europa</div><div class="honor-desc">Espana</div><div class="honor-price" id="honor-price-3" style="color:#b39ddb">$238 <span style="font-size:.95rem;opacity:.65">MX</span></div><div class="honor-note">Entrega en menos de 24 hrs</div><button class="btn-honor" style="background:linear-gradient(90deg,#4a2c8c,#b39ddb);color:#fff" onclick="event.stopPropagation();openHonorModal(3)">Comprar ahora</button></div>
+    <div class="honor-card" onclick="openHonorModal(0)" style="border-color:rgba(255,208,0,.22)">
+      <span class="honor-flag">🇨🇦</span>
+      <div class="honor-region" style="color:#ffd000">Norteamérica</div>
+      <div class="honor-desc">Canadá · Rep. Dominicana</div>
+      <div class="honor-price" style="color:#ffd000" id="honor-price-0">$238 <span style="font-size:.75rem;opacity:.6">MX</span></div>
+      <div class="honor-note">Entrega fin de semana</div>
+      <button class="btn-honor" style="border-color:rgba(255,208,0,.4);color:#ffd000;background:rgba(255,208,0,.08)" onclick="event.stopPropagation();openHonorModal(0)">Comprar ahora</button>
+    </div>
+    <div class="honor-card" onclick="openHonorModal(1)" style="border-color:rgba(77,171,247,.22)">
+      <span class="honor-flag">🇺🇸</span>
+      <div class="honor-region" style="color:#4dabf7">Estados Unidos</div>
+      <div class="honor-desc">México</div>
+      <div class="honor-price" style="color:#4dabf7" id="honor-price-1">$238 <span style="font-size:.75rem;opacity:.6">MX</span></div>
+      <div class="honor-note">Entrega fin de semana</div>
+      <button class="btn-honor" style="border-color:rgba(77,171,247,.4);color:#4dabf7;background:rgba(77,171,247,.08)" onclick="event.stopPropagation();openHonorModal(1)">Comprar ahora</button>
+    </div>
+    <div class="honor-card" onclick="openHonorModal(2)" style="border-color:rgba(64,192,87,.22)">
+      <span class="honor-flag">🇧🇷</span>
+      <div class="honor-region" style="color:#40c057">Sudamérica</div>
+      <div class="honor-desc">Perú · Chile</div>
+      <div class="honor-price" style="color:#40c057" id="honor-price-2">$238 <span style="font-size:.75rem;opacity:.6">MX</span></div>
+      <div class="honor-note">Entrega fin de semana</div>
+      <button class="btn-honor" style="border-color:rgba(64,192,87,.4);color:#40c057;background:rgba(64,192,87,.08)" onclick="event.stopPropagation();openHonorModal(2)">Comprar ahora</button>
+    </div>
+    <div class="honor-card" onclick="openHonorModal(3)" style="border-color:rgba(179,157,219,.22)">
+      <span class="honor-flag">🇪🇺</span>
+      <div class="honor-region" style="color:#b39ddb">Europa</div>
+      <div class="honor-desc">España</div>
+      <div class="honor-price" style="color:#b39ddb" id="honor-price-3">$238 <span style="font-size:.75rem;opacity:.6">MX</span></div>
+      <div class="honor-note">Entrega fin de semana</div>
+      <button class="btn-honor" style="border-color:rgba(179,157,219,.4);color:#b39ddb;background:rgba(179,157,219,.08)" onclick="event.stopPropagation();openHonorModal(3)">Comprar ahora</button>
+    </div>
   </div>
 </div>
 <div class="page" id="page-membresia">
@@ -3304,42 +3337,69 @@ document.addEventListener('keydown',function(e){
 </div>
 
 <div class="modal-ov" id="modal-honor">
-  <div class="modal">
-    <div class="modal-h">
-      <h3 style="color:#ffd000">&#127942; Honor de Clan</h3>
-      <button class="modal-close" onclick="closeHonorModal()">&#215;</button>
+  <div class="modal" style="max-width:420px">
+    <!-- Header -->
+    <div class="pm-head" style="background:linear-gradient(135deg,rgba(255,208,0,.1),rgba(34,211,238,.05))">
+      <div style="display:flex;align-items:center;gap:.65rem">
+        <div class="pm-icon" style="background:rgba(255,208,0,.15);border:1px solid rgba(255,208,0,.35);font-size:1.15rem">🏆</div>
+        <div><div class="pm-title">Honor de Clan</div><div class="pm-sub">Free Fire · Entrega fin de semana</div></div>
+      </div>
+      <button class="pm-close" onclick="closeHonorModal()">✕</button>
     </div>
-    <div class="modal-b">
-      <div class="m-prod-card" style="border-color:rgba(255,208,0,.2)">
-        <div class="m-prod-ico" style="background:linear-gradient(135deg,#221a00,#443300);font-size:1.6rem;display:flex;align-items:center;justify-content:center" id="honor-m-flag">&#127942;</div>
-        <div>
-          <div class="m-prod-name" id="honor-m-region">Honor de Clan</div>
-          <div class="m-prod-price" style="color:#ffd000" id="honor-m-price">$238 MX</div>
-          <div class="m-prod-sub">Entrega el fin de semana</div>
+    <div class="modal-b" style="display:flex;flex-direction:column;gap:.85rem">
+
+      <!-- Resumen del producto -->
+      <div style="background:linear-gradient(135deg,rgba(255,208,0,.08),rgba(34,211,238,.04));border:1.5px solid rgba(255,208,0,.25);border-radius:16px;padding:1rem;display:flex;align-items:center;gap:.9rem">
+        <div style="font-size:2.2rem;flex-shrink:0" id="honor-m-flag">🏆</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.65rem;color:#8b93a3;text-transform:uppercase;letter-spacing:1px;font-weight:700">Región</div>
+          <div style="font-family:Oxanium;font-weight:900;font-size:.95rem;color:#fff" id="honor-m-region">Honor de Clan</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:.6rem;color:#8b93a3;text-transform:uppercase;letter-spacing:1px">Precio</div>
+          <div style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#ffd000" id="honor-m-price">$238 MX</div>
         </div>
       </div>
 
-      <div style="background:rgba(255,208,0,.06);border:1px solid rgba(255,208,0,.25);border-radius:9px;padding:.75rem .9rem;margin-bottom:1rem;font-size:.74rem;color:#ffd88a;line-height:1.6">
-        &#9881;&#65039; <b>Antes de comprar:</b> los pedidos se toman los sabados y domingos. Se uniran 4 cuentas bots a tu clan en la madrugada. Honor garantizado de 380,000 a 420,000 por semana. No se necesita contrasena.
+      <!-- Info importante (compacta) -->
+      <div style="background:rgba(255,208,0,.05);border:1px solid rgba(255,208,0,.18);border-radius:12px;padding:.8rem .95rem">
+        <div style="font-size:.68rem;font-weight:800;color:#ffd000;letter-spacing:.8px;text-transform:uppercase;margin-bottom:.5rem">⚙️ Antes de comprar</div>
+        <ul style="margin:0;padding-left:1rem;font-size:.72rem;color:#c9a96e;line-height:1.8;list-style:disc">
+          <li>Los pedidos se toman los <b style="color:#ffd88a">sábados y domingos</b>.</li>
+          <li>Se unirán <b style="color:#ffd88a">4 cuentas bots</b> a tu clan en la madrugada.</li>
+          <li>Honor garantizado de <b style="color:#ffd88a">380,000 a 420,000</b> por semana.</li>
+          <li>No se necesita contraseña.</li>
+        </ul>
       </div>
 
-      <label class="flabel">Nombre del Clan *</label>
-      <input class="finput" id="honor-m-clan" type="text" placeholder="Nombre exacto de tu clan" style="margin-bottom:.7rem"/>
+      <!-- Nombre del Clan -->
+      <div>
+        <div class="pm-field-label">🛡️ Nombre del Clan *</div>
+        <input class="finput" id="honor-m-clan" type="text" placeholder="Nombre exacto de tu clan" style="margin-bottom:0;border-color:rgba(255,208,0,.3)"/>
+      </div>
 
-      <label class="flabel">ID del Clan *</label>
-      <input class="finput" id="honor-m-idclan" type="text" inputmode="numeric" placeholder="ID de tu clan" style="margin-bottom:.9rem"/>
+      <!-- ID del Clan -->
+      <div>
+        <div class="pm-field-label">🆔 ID del Clan *</div>
+        <input class="finput" id="honor-m-idclan" type="text" inputmode="numeric" placeholder="ID numérico de tu clan" style="margin-bottom:0;border-color:rgba(255,208,0,.3)"/>
+      </div>
 
-      <label style="display:flex;align-items:flex-start;gap:.6rem;cursor:pointer;margin-bottom:1rem">
-        <input type="checkbox" id="honor-m-confirmo" style="margin-top:.2rem;width:18px;height:18px;flex-shrink:0;accent-color:#ffd000"/>
-        <span style="font-size:.76rem;color:#c9d1e0;line-height:1.5">Confirmo que mi clan esta configurado y acepto que la entrega es el fin de semana.</span>
+      <!-- Checkbox moderno -->
+      <label style="display:flex;align-items:flex-start;gap:.7rem;cursor:pointer;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.85rem">
+        <input type="checkbox" id="honor-m-confirmo" style="width:20px;height:20px;flex-shrink:0;margin-top:.1rem;accent-color:#ffd000;cursor:pointer"/>
+        <span style="font-size:.75rem;color:#c9d1e0;line-height:1.55">Confirmo que mi clan está configurado y acepto que la entrega es el <b style="color:#ffd000">fin de semana</b>.</span>
       </label>
 
-      <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:.7rem .9rem;margin-bottom:1rem">
-        <span style="font-size:.72rem;color:#6b7280">Tu saldo</span>
-        <span style="font-family:Oxanium;font-weight:800;font-size:1rem;color:#fff" id="honor-m-saldo">$0 MX</span>
+      <!-- Balance card -->
+      <div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:.7rem;color:#6b7280;display:flex;align-items:center;gap:.4rem">💳 Tu saldo disponible</div>
+        <div style="font-family:Oxanium;font-weight:900;font-size:1.05rem;color:#fff" id="honor-m-saldo">$0 MX</div>
       </div>
 
-      <button onclick="submitHonor()" style="width:100%;padding:.95rem;background:linear-gradient(135deg,#a07800,#ffd000);color:#020a0a;border:none;border-radius:12px;font-family:Oxanium;font-weight:900;font-size:.9rem;letter-spacing:.5px;cursor:pointer">&#127942; COMPRAR CON SALDO</button>
+      <!-- Botón CTA -->
+      <button id="honor-submit-btn" onclick="submitHonor()" class="pm-btn pm-btn--gold" style="font-size:.92rem;padding:1rem">🏆 COMPRAR CON SALDO</button>
+      <div style="font-size:.67rem;color:#6b7280;text-align:center">Entrega garantizada el fin de semana · Sin contraseña</div>
+
     </div>
   </div>
 </div>
