@@ -6155,23 +6155,37 @@ function _mostrarReciboProceso(p, ffId, ord){
   setTimeout(function(){ var b=document.getElementById('recibo-barra'); if(b) b.style.width='80%'; }, 1500);
 }
 
+// ═══ Genera el HTML de un estado de recarga: pending / ok / err ═══
+function _rcEstadoHTML(tipo, titulo, sub){
+  var iconos = { pending:'\u23F3', ok:'\u2705', err:'\u274C' };
+  var ico = iconos[tipo] || '\u23F3';
+  var barra = (tipo === 'pending') ? '<div class="rc-bar"></div>' : '';
+  return '<div class="rc-state rc-state--'+(tipo==='ok'?'ok':tipo==='err'?'err':'pending')+'">'
+    + '<div class="rc-state-head"><span class="rc-state-ico">'+ico+'</span><span class="rc-state-title">'+titulo+'</span></div>'
+    + '<div class="rc-state-sub">'+sub+'</div>'
+    + barra
+    + '</div>';
+}
+
 // ═══ Procesar recarga automática: valida ID → cobra saldo → recarga ═══
 function _procesarRecargaAutomatica(p, ffId){
   if(_comprandoDiam){ return; }
   _comprandoDiam = true;
   var btn = document.getElementById('diam-btn');
   var msg = document.getElementById('diam-msg');
-  if(btn){ btn.className='ddet-btn off'; btn.innerHTML='Verificando saldo...'; }
+  if(btn){ btn.disabled=true; btn.className='ddet-btn off'; btn.innerHTML='<span class="rc-spin"></span> Verificando saldo...'; }
+  if(msg){ msg.className='ddet-msg'; msg.innerHTML = _rcEstadoHTML('pending', '\u23F3 RECARGA EN PROCESO', 'Estamos verificando tu saldo, por favor espera...'); }
 
   // Paso 0: verificar saldo REAL en Supabase (protege contra pagina vieja/no actualizada)
   verificarSaldoFresco(p.precio, function(alcanza, saldoReal){
     if(!alcanza){
-      if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
-      if(msg){ msg.className='ddet-msg err'; msg.style.color='#ff6b6b'; msg.innerHTML='Saldo insuficiente. Tu saldo real es <b>'+fmt(saldoReal)+'</b>. <span onclick="goPage(\'saldo\')" style="text-decoration:underline;cursor:pointer">Recarga aqui</span>'; }
+      if(btn){ btn.disabled=false; btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
+      if(msg){ msg.className='ddet-msg'; msg.innerHTML = _rcEstadoHTML('err', 'SALDO INSUFICIENTE', 'Tu saldo real es <b style="color:#fff">'+fmt(saldoReal)+'</b>. <span onclick="goPage(\'saldo\')" style="text-decoration:underline;cursor:pointer;color:#ff6b6b">Recarga aqui</span>'); }
       _comprandoDiam = false;
       return;
     }
-    if(btn){ btn.innerHTML='Validando ID...'; }
+    if(btn){ btn.innerHTML='<span class="rc-spin"></span> Validando ID...'; }
+    if(msg){ msg.innerHTML = _rcEstadoHTML('pending', '\u23F3 RECARGA EN PROCESO', 'Validando tu ID de Free Fire, por favor espera...'); }
 
   // Paso 1: validar que el ID exista
   fetch(COMPRAR_RECARGA_URL, {
@@ -6179,8 +6193,8 @@ function _procesarRecargaAutomatica(p, ffId){
     body: JSON.stringify({ action:'validar', product_id:p.package_id, service_user_id:ffId })
   }).then(function(r){ return r.json(); }).then(function(val){
     if(!val.success || !val.valido){
-      if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
-      if(msg){ msg.className='ddet-msg err'; msg.style.fontSize='.65rem'; msg.textContent='DEBUG VALIDAR: '+JSON.stringify(val).substring(0,300); }
+      if(btn){ btn.disabled=false; btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
+      if(msg){ msg.className='ddet-msg'; msg.innerHTML = _rcEstadoHTML('err', 'ID NO VALIDO', 'No pudimos validar tu ID de Free Fire. Verifica el numero e intenta de nuevo.'); }
       console.error('[RECARGA] validacion fallo:', JSON.stringify(val));
       _comprandoDiam = false;
       return;
@@ -6188,8 +6202,8 @@ function _procesarRecargaAutomatica(p, ffId){
 
     // ID válido: mostrar nombre y confirmar
     var nombre = val.nombre || 'Jugador';
-    if(msg){ msg.className='ddet-msg'; msg.style.color='#25d366'; msg.innerHTML='\u2705 Cuenta encontrada: <b>'+nombre+'</b><br>Procesando recarga...'; }
-    if(btn){ btn.innerHTML='Recargando...'; }
+    if(msg){ msg.innerHTML = _rcEstadoHTML('pending', '\u23F3 RECARGA EN PROCESO', 'Cuenta encontrada: <b style="color:#fff">'+nombre+'</b><br/>Procesando tu recarga, por favor espera...'); }
+    if(btn){ btn.innerHTML='<span class="rc-spin"></span> Recargando...'; }
 
     // Paso 2: cobrar el saldo AHORA (antes de recargar)
     var ord=getNextOrder();
@@ -6234,8 +6248,8 @@ function _procesarRecargaAutomatica(p, ffId){
           registrarPedido(p.nombre+' (RECHAZADA - reembolsado)', p.diamantes, 'diamantes', ffId, 0, 0);
           if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\uD83D\uDEA8 <b>RECARGA RECHAZADA - SIN FONDOS</b>\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\u2705 Saldo reembolsado al cliente ('+fmt(p.precio)+')\n\n\u26A0\uFE0F <b>RECARGA TU CUENTA DEL PROVEEDOR</b>', p.precio, ord);
 
-          if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
-          if(msg){ msg.className='ddet-msg err'; msg.style.fontSize='.75rem'; msg.innerHTML='\u274C <b>RECARGA RECHAZADA</b><br/>Contacta al administrador. Tu saldo sera reembolsado.'; }
+          if(btn){ btn.disabled=false; btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
+          if(msg){ msg.className='ddet-msg'; msg.innerHTML = _rcEstadoHTML('err', 'RECARGA RECHAZADA', 'Contacta al administrador. <b style="color:#fff">Tu saldo sera reembolsado.</b>'); }
 
           if(typeof _mostrarAvisoModal==='function'){
             _mostrarAvisoModal('RECARGA RECHAZADA',
@@ -6257,16 +6271,16 @@ function _procesarRecargaAutomatica(p, ffId){
 
           registrarPedido(p.nombre+' (AUTO - NO DISPONIBLE, devuelto)', p.diamantes, 'diamantes', ffId, 0, 0);
           if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F NO DISPONIBLE - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\u2705 SALDO DEVUELTO automaticamente ('+fmt(p.precio)+')', p.precio, ord);
-          if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
-          if(msg){ msg.className='ddet-msg err'; msg.style.fontSize='.75rem'; msg.innerHTML='\u274C Este paquete no esta disponible para tu ID en este momento (puede ser por la region de tu cuenta o stock momentaneo).<br/><b>Tu saldo fue devuelto.</b> Intenta de nuevo en unos minutos o contacta al admin.'; }
+          if(btn){ btn.disabled=false; btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
+          if(msg){ msg.className='ddet-msg'; msg.innerHTML = _rcEstadoHTML('err', 'NO DISPONIBLE', 'Este paquete no esta disponible para tu ID en este momento. <b style="color:#fff">Tu saldo fue devuelto.</b> Intenta de nuevo o contacta al admin.'); }
           showToast('\u274C No disponible. Saldo devuelto.', 4000);
           _comprandoDiam = false;
         } else {
           // Error ambiguo: la recarga pudo haberse hecho igual. NO reembolsar, verificar manual.
           registrarPedido(p.nombre+' (AUTO - VERIFICAR)', p.diamantes, 'diamantes', ffId, p.precio, 0);
           if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F VERIFICAR - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt, p.precio, ord);
-          if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
-          if(msg){ msg.className='ddet-msg'; msg.style.color='#22d3ee'; msg.style.fontSize='.72rem'; msg.innerHTML='\u23F3 Tu recarga se esta verificando. Si no llega en unos minutos, contacta al admin con tu ID.'; }
+          if(btn){ btn.disabled=false; btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
+          if(msg){ msg.className='ddet-msg'; msg.innerHTML = _rcEstadoHTML('pending', '\u23F3 EN VERIFICACION', 'Tu recarga se esta verificando. Si no llega en unos minutos, contacta al admin con tu ID.'); }
           console.error('[RECARGA] Sin confirmar (no reembolsado):', JSON.stringify(res));
           _comprandoDiam = false;
           setTimeout(cerrarDiamDetalle, 4000);
@@ -6276,16 +6290,16 @@ function _procesarRecargaAutomatica(p, ffId){
       // NO reembolsar: la recarga pudo haberse completado aunque la respuesta fallo
       registrarPedido(p.nombre+' (AUTO - VERIFICAR)', p.diamantes, 'diamantes', ffId, p.precio, 0);
       if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F VERIFICAR (sin respuesta) - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId, p.precio, ord);
-      if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
-      if(msg){ msg.className='ddet-msg'; msg.style.color='#22d3ee'; msg.style.fontSize='.72rem'; msg.innerHTML='\u23F3 Tu recarga se esta verificando. Si no llega, contacta al admin.'; }
+      if(btn){ btn.disabled=false; btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
+      if(msg){ msg.className='ddet-msg'; msg.innerHTML = _rcEstadoHTML('pending', '\u23F3 EN VERIFICACION', 'Tu recarga se esta verificando. Si no llega, contacta al admin.'); }
       console.error('[RECARGA] catch compra (no reembolsado):', err);
       _comprandoDiam = false;
       setTimeout(cerrarDiamDetalle, 4000);
     });
 
   }).catch(function(err){
-    if(btn){ btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
-    if(msg){ msg.className='ddet-msg err'; msg.style.fontSize='.65rem'; msg.textContent='DEBUG CATCH VALIDAR: '+(err&&err.message?err.message:err); }
+    if(btn){ btn.disabled=false; btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
+    if(msg){ msg.className='ddet-msg'; msg.innerHTML = _rcEstadoHTML('err', 'ERROR DE CONEXION', 'No pudimos validar tu ID. Verifica tu conexion e intenta de nuevo.'); }
     console.error('[RECARGA] catch validar:', err);
     _comprandoDiam = false;
   });
