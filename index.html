@@ -214,15 +214,15 @@ body{
 .lkpln-best{border-color:rgba(255,208,0,.5);box-shadow:0 0 24px rgba(255,208,0,.12)}
 .lkpln-rib{position:absolute;top:-1px;right:-1px;background:linear-gradient(90deg,#f0b90b,#ffd700);color:#1a0a00;font-size:.52rem;font-weight:800;letter-spacing:1px;padding:.2rem .6rem;border-radius:0 14px 0 10px;z-index:2}
 .lkpln-wa{display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.55rem 1rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:9px;font-family:Poppins,sans-serif;font-weight:800;font-size:.78rem;text-decoration:none;white-space:nowrap}
-.honor-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:1rem;padding:0 5vw 3rem;max-width:920px;margin:0 auto}
-.honor-card{background:linear-gradient(160deg,rgba(255,255,255,.04),rgba(255,255,255,.015));border:1px solid var(--border);border-radius:16px;padding:1.6rem 1.1rem;transition:all .28s cubic-bezier(.4,0,.2,1);cursor:pointer;text-align:center;position:relative;overflow:hidden;backdrop-filter:blur(8px)}
+.honor-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.75rem;padding:0 4vw 2rem;max-width:920px;margin:0 auto}
+.honor-card{background:linear-gradient(160deg,rgba(255,255,255,.04),rgba(255,255,255,.015));border:1px solid var(--border);border-radius:14px;padding:1rem .85rem;transition:all .28s cubic-bezier(.4,0,.2,1);cursor:pointer;text-align:center;position:relative;overflow:hidden;backdrop-filter:blur(8px)}
 .honor-card:hover{transform:translateY(-4px)}
-.honor-flag{font-size:2.4rem;margin-bottom:.55rem;display:block}
-.honor-region{font-family:"Oxanium";font-size:.82rem;font-weight:700;color:#fff;margin-bottom:.2rem}
-.honor-desc{font-size:.7rem;color:var(--muted);margin-bottom:.85rem;line-height:1.5}
-.honor-price{font-family:"Oxanium";font-size:1.7rem;font-weight:900;margin-bottom:.12rem}
-.honor-note{font-size:.63rem;color:var(--muted);margin-bottom:.9rem}
-.btn-honor{width:100%;padding:.58rem;border-radius:5px;border:none;font-family:"Poppins";font-weight:800;font-size:.74rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.honor-flag{font-size:1.8rem;margin-bottom:.4rem;display:block}
+.honor-region{font-family:"Oxanium";font-size:.78rem;font-weight:700;color:#fff;margin-bottom:.15rem}
+.honor-desc{font-size:.65rem;color:var(--muted);margin-bottom:.6rem;line-height:1.4}
+.honor-price{font-family:"Oxanium";font-size:1.35rem;font-weight:900;margin-bottom:.1rem}
+.honor-note{font-size:.6rem;color:var(--muted);margin-bottom:.7rem}
+.btn-honor{width:100%;padding:.5rem;border-radius:8px;border:none;font-family:"Poppins";font-weight:800;font-size:.68rem;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s}
 .clan-box{background:var(--card);border:1px solid rgba(255,208,0,.2);border-radius:15px;padding:2rem;text-align:center;position:relative;overflow:hidden;margin:0 5vw 3rem;max-width:820px}
 .clan-ico{font-size:3rem;margin-bottom:.65rem;display:block}
 .clan-title{font-family:"Oxanium";font-size:1.2rem;font-weight:900;color:#fff;margin-bottom:.3rem}
@@ -465,7 +465,7 @@ body{
   #elite-grid{grid-template-columns:1fr!important}
   .rank-prize-grid{grid-template-columns:1fr!important}
   .rank-prize-card.monthly{grid-column:1!important}
-   .honor-grid{grid-template-columns:1fr}
+   .honor-grid{grid-template-columns:1fr 1fr}
    .hero h1{font-size:1.6rem}
  }
 
@@ -660,10 +660,7 @@ body.light-mode .lk-card{background:#fff}
 @media(max-width:380px){
   .pgrid{grid-template-columns:1fr!important}
   .quick-grid{grid-template-columns:repeat(2,1fr)!important}
-  .honor-grid{grid-template-columns:1fr!important}
-}
-
-.auth-body *{color:inherit}
+  .honor-grid{grid-template-columns:1fr 1fr!important}
 .auth-logo-txt{color:#fff!important;font-family:Oxanium,sans-serif;font-size:1.6rem;font-weight:900;letter-spacing:3px}
 .auth-logo-txt .l1{color:#fff}
 .auth-logo-txt .l2{color:#22d3ee}
@@ -1009,7 +1006,7 @@ input:focus,select:focus,textarea:focus{
   padding:1.2rem!important;
   gap:.5rem!important;
 }
-.honor-card{border-radius:20px!important;padding:1.8rem 1.2rem!important}
+.honor-card{border-radius:14px!important;padding:1rem .85rem!important}
 
 /* Grids con más aire entre tarjetas */
 .pgrid{gap:1rem!important}
