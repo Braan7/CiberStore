@@ -171,6 +171,59 @@ var LIKES = [
   {id:14, label:'Instant 20K', emoji:'\u26A1', priceMX:1190, total:20000, perDay:2000, days:10, color:'#ff4da6', isInstant:true}
 ];
 
+// ═══════════ CATÁLOGO DE SERVICIOS (escalable) ═══════════
+// Para agregar un servicio nuevo: copia un objeto, cambia sus datos.
+// estado: 'disponible' | 'construccion' | 'proximamente' | 'buscando_proveedor'
+// imagen: ruta a la imagen real (deja "" mientras no haya imagen; se usa el icono de respaldo)
+var SERVICES = [
+  // ── Videojuegos ──
+  { nombre:'Free Fire', categoria:'videojuegos', descripcion:'Diamantes y membresias', tipoRecarga:'Diamantes', icono:'\uD83D\uDD25', imagen:'', estado:'disponible', ruta:'diamantes' },
+  { nombre:'PUBG Mobile', categoria:'videojuegos', descripcion:'UC y contenido exclusivo', tipoRecarga:'UC', icono:'\uD83E\uDE96', imagen:'', estado:'buscando_proveedor', ruta:null },
+  { nombre:'COD Mobile', categoria:'videojuegos', descripcion:'CP y paquetes de batalla', tipoRecarga:'CP', icono:'\u2694\uFE0F', imagen:'', estado:'buscando_proveedor', ruta:null },
+  { nombre:'Roblox', categoria:'videojuegos', descripcion:'Robux y contenido digital', tipoRecarga:'Robux', icono:'\uD83D\uDFE9', imagen:'', estado:'proximamente', ruta:null },
+  { nombre:'Mobile Legends', categoria:'videojuegos', descripcion:'Diamantes y skins', tipoRecarga:'Diamantes', icono:'\uD83C\uDFAE', imagen:'', estado:'buscando_proveedor', ruta:null },
+  { nombre:'Brawl Stars', categoria:'videojuegos', descripcion:'Gemas y contenido', tipoRecarga:'Gemas', icono:'\uD83D\uDCA5', imagen:'', estado:'buscando_proveedor', ruta:null },
+  { nombre:'Clash of Clans', categoria:'videojuegos', descripcion:'Gemas y constructor', tipoRecarga:'Gemas', icono:'\uD83C\uDFF0', imagen:'', estado:'buscando_proveedor', ruta:null },
+  { nombre:'Clash Royale', categoria:'videojuegos', descripcion:'Gemas y pases', tipoRecarga:'Gemas', icono:'\uD83D\uDC51', imagen:'', estado:'buscando_proveedor', ruta:null },
+  { nombre:'Fortnite', categoria:'videojuegos', descripcion:'Pavos y pases de batalla', tipoRecarga:'Pavos', icono:'\uD83C\uDFAF', imagen:'', estado:'proximamente', ruta:null },
+  { nombre:'EA SPORTS FC Mobile', categoria:'videojuegos', descripcion:'Monedas y puntos FC', tipoRecarga:'Puntos', icono:'\u26BD', imagen:'', estado:'buscando_proveedor', ruta:null },
+  { nombre:'Genshin Impact', categoria:'videojuegos', descripcion:'Cristales y bendicion lunar', tipoRecarga:'Cristales', icono:'\u2694\uFE0F', imagen:'', estado:'buscando_proveedor', ruta:null },
+  { nombre:'Honkai: Star Rail', categoria:'videojuegos', descripcion:'Cristales oniricos', tipoRecarga:'Cristales', icono:'\uD83C\uDF1F', imagen:'', estado:'buscando_proveedor', ruta:null },
+  { nombre:'Asphalt Legends', categoria:'videojuegos', descripcion:'Creditos y tokens', tipoRecarga:'Creditos', icono:'\uD83C\uDFCE\uFE0F', imagen:'', estado:'proximamente', ruta:null },
+  { nombre:'Minecraft', categoria:'videojuegos', descripcion:'Minecoins y contenido', tipoRecarga:'Minecoins', icono:'\uD83E\uDDF1', imagen:'', estado:'proximamente', ruta:null },
+  { nombre:'League of Legends: Wild Rift', categoria:'videojuegos', descripcion:'Nucleos y pases', tipoRecarga:'Nucleos', icono:'\uD83C\uDFAE', imagen:'', estado:'buscando_proveedor', ruta:null },
+  { nombre:'Blood Strike', categoria:'videojuegos', descripcion:'Oro y contenido exclusivo', tipoRecarga:'Oro', icono:'\uD83D\uDD2B', imagen:'', estado:'buscando_proveedor', ruta:null },
+  { nombre:'GTA Online', categoria:'videojuegos', descripcion:'Shark Cards y creditos', tipoRecarga:'Creditos', icono:'\uD83D\uDE97', imagen:'', estado:'proximamente', ruta:null },
+  { nombre:'Valorant', categoria:'videojuegos', descripcion:'Puntos VP y pases', tipoRecarga:'VP', icono:'\uD83C\uDFAD', imagen:'', estado:'buscando_proveedor', ruta:null },
+  { nombre:'Arena Breakout', categoria:'videojuegos', descripcion:'Monedas y equipo', tipoRecarga:'Monedas', icono:'\uD83D\uDEE1\uFE0F', imagen:'', estado:'buscando_proveedor', ruta:null },
+  { nombre:'Stumble Guys', categoria:'videojuegos', descripcion:'Gemas y skins', tipoRecarga:'Gemas', icono:'\uD83C\uDF0D', imagen:'', estado:'buscando_proveedor', ruta:null },
+
+  // ── Redes sociales / servicios digitales ──
+  { nombre:'TikTok', categoria:'digital', descripcion:'Coins y servicios digitales', tipoRecarga:'Coins', icono:'\uD83C\uDFB5', imagen:'', estado:'buscando_proveedor', ruta:null },
+  { nombre:'Instagram', categoria:'digital', descripcion:'Servicios de promocion', tipoRecarga:'Promocion', icono:'\uD83D\uDCF8', imagen:'', estado:'proximamente', ruta:null },
+  { nombre:'YouTube', categoria:'digital', descripcion:'Servicios digitales', tipoRecarga:'Servicios', icono:'\u25B6\uFE0F', imagen:'', estado:'buscando_proveedor', ruta:null },
+  { nombre:'Telegram', categoria:'digital', descripcion:'Servicios de plataforma', tipoRecarga:'Servicios', icono:'\uD83D\uDCAC', imagen:'', estado:'proximamente', ruta:null },
+  { nombre:'Discord', categoria:'digital', descripcion:'Nitro y servicios', tipoRecarga:'Nitro', icono:'\uD83C\uDFAE', imagen:'', estado:'buscando_proveedor', ruta:null }
+];
+
+var ESTADO_LABEL = {
+  disponible: { txt:'DISPONIBLE', color:'#25d366', ico:'\uD83D\uDFE2' },
+  construccion: { txt:'EN CONSTRUCCION', color:'#ffb84d', ico:'\uD83D\uDEA7' },
+  proximamente: { txt:'PROXIMAMENTE', color:'#a78bfa', ico:'\u2728' },
+  buscando_proveedor: { txt:'BUSCANDO PROVEEDOR', color:'#67e8f9', ico:'\uD83D\uDD0E' }
+};
+
+// Click en un servicio sin proveedor: aviso moderno, sin permitir compra
+function clickServicioNoDisponible(nombre){
+  if(typeof _mostrarAvisoModal === 'function'){
+    _mostrarAvisoModal('SERVICIO EN CONSTRUCCION',
+      '<b style="color:#fff">'+nombre+'</b> todavia no esta disponible en CiberStore.<br/><br/>Actualmente estamos buscando un proveedor confiable para ofrecer este servicio.<br/><br/><b style="color:#22d3ee">Proximamente disponible en CiberStore!</b>',
+      '#67e8f9');
+  } else {
+    showToast(nombre+': proximamente disponible', 3000);
+  }
+}
+
 var HONOR = [
   {region:'Norteamerica',flag:'\uD83C\uDDE8\uD83C\uDDE6',color:'#ffd000',priceUSD:14,paises:'Canada, Rep. Dominicana'},
   {region:'Estados Unidos',flag:'\uD83C\uDDFA\uD83C\uDDF8',color:'#4dabf7',priceUSD:14,paises:'Mexico'},
@@ -5992,6 +6045,51 @@ function _mostrarAvisoModal(titulo, texto, color){
   ov.appendChild(c);
 }
 
+// ═══ Renderiza las tarjetas de servicios (juegos / digital) desde SERVICES ═══
+function _renderServiceCard(s){
+  var disp = (s.estado === 'disponible');
+  var est = ESTADO_LABEL[s.estado] || ESTADO_LABEL.buscando_proveedor;
+  var visual = s.imagen
+    ? '<div class="svc-img"><img src="'+s.imagen+'" alt="'+s.nombre+'" onerror="this.parentNode.classList.add(\'svc-img-fallback\')"/></div>'
+    : '<div class="svc-img svc-img-fallback"><span class="svc-ico-big">'+s.icono+'</span></div>';
+  var accion = disp
+    ? 'goPage(\''+s.ruta+'\')'
+    : 'clickServicioNoDisponible(\''+s.nombre.replace(/'/g,"")+'\')';
+  return '<div class="svc-card'+(disp?' svc-card--on':' svc-card--off')+'" onclick="'+accion+'">'
+    + visual
+    + '<div class="svc-body">'
+    +   '<div class="svc-top"><span class="svc-name">'+s.icono+' '+s.nombre+'</span>'+(disp?'':'<span class="svc-tag" style="color:'+est.color+';border-color:'+est.color+'44;background:'+est.color+'14">'+est.ico+' '+est.txt+'</span>')+'</div>'
+    +   '<div class="svc-desc">'+s.descripcion+'</div>'
+    +   '<div class="svc-foot">'+(disp?'<span class="svc-cta">RECARGAR &#8594;</span>':'<span class="svc-cta svc-cta--off">VER MAS &#8594;</span>')+'</div>'
+    + '</div>'
+    + '</div>';
+}
+
+function renderServiciosHome(){
+  var wrapDestacados = document.getElementById('svc-videojuegos');
+  var wrapProximWrap = document.getElementById('svc-proximamente-wrap');
+  var wrapDigital = document.getElementById('svc-digital');
+
+  var juegos = SERVICES.filter(function(s){ return s.categoria==='videojuegos'; });
+
+  // Destacados: Free Fire, PUBG Mobile, COD Mobile, Roblox (los 4 principales pedidos)
+  var nombresDestacados = ['Free Fire','PUBG Mobile','COD Mobile','Roblox'];
+  var destacados = nombresDestacados.map(function(n){ return juegos.find(function(s){ return s.nombre===n; }); }).filter(Boolean);
+  var resto = juegos.filter(function(s){ return nombresDestacados.indexOf(s.nombre) === -1; });
+
+  if(wrapDestacados) wrapDestacados.innerHTML = destacados.map(_renderServiceCard).join('');
+
+  if(wrapProximWrap && resto.length){
+    wrapProximWrap.style.display = 'grid';
+    wrapProximWrap.innerHTML = resto.map(_renderServiceCard).join('');
+  }
+
+  if(wrapDigital){
+    var digital = SERVICES.filter(function(s){ return s.categoria==='digital'; });
+    wrapDigital.innerHTML = digital.map(_renderServiceCard).join('');
+  }
+}
+
 function abrirDiamDetalle(idx){
   var productos = _getDiamProductos(_diamTipoActual);
   var p = productos[idx];
@@ -7434,6 +7532,9 @@ function renderHomeDashboard(){
     var nom = authSession ? (authSession.username || 'Jugador') : 'Bienvenido';
     hola.textContent = authSession ? ('Hola, ' + nom) : 'Bienvenido';
   }
+
+  // Renderizar catalogo de servicios (juegos + digital)
+  if(typeof renderServiciosHome === 'function') renderServiciosHome();
 
   // Fecha en espanol
   var fe = document.getElementById('home-fecha');

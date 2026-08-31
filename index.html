@@ -215,6 +215,32 @@ body{
 .lkpln-best{border-color:rgba(255,208,0,.5);box-shadow:0 0 24px rgba(255,208,0,.12)}
 .lkpln-rib{position:absolute;top:-1px;right:-1px;background:linear-gradient(90deg,#f0b90b,#ffd700);color:#1a0a00;font-size:.52rem;font-weight:800;letter-spacing:1px;padding:.2rem .6rem;border-radius:0 14px 0 10px;z-index:2}
 .lkpln-wa{display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.55rem 1rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:9px;font-family:Poppins,sans-serif;font-weight:800;font-size:.78rem;text-decoration:none;white-space:nowrap}
+/* ═══════════ TARJETAS DE SERVICIOS (catálogo escalable) ═══════════ */
+.svc-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+@media(max-width:420px){.svc-grid{grid-template-columns:1fr}}
+.svc-card{background:linear-gradient(160deg,rgba(255,255,255,.035),rgba(255,255,255,.012));border:1px solid rgba(255,255,255,.07);border-radius:18px;overflow:hidden;cursor:pointer;transition:transform .22s,border-color .22s,box-shadow .22s;position:relative}
+.svc-card--on{border-color:rgba(34,211,238,.22)}
+.svc-card--on:hover{transform:translateY(-4px);border-color:rgba(34,211,238,.5);box-shadow:0 14px 34px rgba(0,0,0,.4),0 0 22px rgba(34,211,238,.14)}
+.svc-card--off{opacity:.88}
+.svc-card--off:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.14)}
+.svc-card:active{transform:translateY(-1px) scale(.99)}
+.svc-img{width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,rgba(34,211,238,.1),rgba(139,92,246,.06));display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.svc-img img{width:100%;height:100%;object-fit:cover;display:block}
+.svc-img-fallback{background:repeating-linear-gradient(135deg,rgba(255,255,255,.025) 0 10px,rgba(255,255,255,.008) 10px 20px)}
+.svc-ico-big{font-size:2.4rem;filter:drop-shadow(0 4px 14px rgba(0,0,0,.5))}
+.svc-body{padding:.85rem .9rem .95rem}
+.svc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:.4rem;margin-bottom:.3rem;flex-wrap:wrap}
+.svc-name{font-family:Poppins,sans-serif;font-weight:700;font-size:.86rem;color:#fff}
+.svc-tag{font-size:.52rem;font-weight:800;letter-spacing:.4px;padding:.2rem .45rem;border-radius:999px;border:1px solid;white-space:nowrap;animation:svcTagIn .3s ease}
+@keyframes svcTagIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+.svc-desc{font-size:.72rem;color:#8b93a3;line-height:1.4;margin-bottom:.65rem}
+.svc-foot{display:flex;justify-content:flex-end}
+.svc-cta{font-size:.72rem;font-weight:800;color:#22d3ee;letter-spacing:.3px}
+.svc-cta--off{color:#67e8f9;opacity:.75}
+
+/* Sección "¿Eres proveedor?" */
+.prov-tag{display:inline-flex;align-items:center;gap:.35rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:.35rem .75rem;font-size:.72rem;color:#c8d0e0}
+
 .honor-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;padding:0 4vw 2rem;max-width:920px;margin:0 auto}
 .honor-card{background:linear-gradient(160deg,rgba(14,18,28,.95),rgba(8,11,20,.9));border:1px solid rgba(34,211,238,.18);border-radius:16px;padding:1rem .9rem;transition:transform .22s,border-color .22s,box-shadow .22s;cursor:pointer;text-align:center;position:relative;overflow:hidden}
 .honor-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(34,211,238,.5),transparent);opacity:0;transition:opacity .25s}
@@ -2272,24 +2298,89 @@ document.addEventListener('keydown',function(e){
       <div id="home-fecha" style="font-size:.85rem;color:#4b5563;margin-top:.15rem">&nbsp;</div>
     </div>
 
-    <!-- Tarjeta saldo -->
-    <div style="background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:18px;padding:1.35rem 1.3rem;margin-bottom:.9rem">
-      <div style="font-size:.75rem;color:#6b7280;letter-spacing:1px;margin-bottom:.5rem">TU SALDO</div>
-      <div id="home-saldo" style="font-family:Poppins,sans-serif;font-weight:700;font-size:2.05rem;color:#fff!important;-webkit-text-fill-color:#fff;line-height:1.15">$0</div>
-      <div id="home-saldo-alt" style="font-size:.85rem;color:#4b5563;margin-top:.3rem">&nbsp;</div>
-      <div onclick="abrirRecargaSheet()" style="display:inline-flex;align-items:center;gap:.4rem;margin-top:1.1rem;color:#22d3ee;font-size:.95rem;font-weight:600;cursor:pointer">Depositar <span style="font-size:1.05rem">&#8594;</span></div>
+    <!-- Tarjeta saldo premium -->
+    <div style="background:linear-gradient(150deg,rgba(34,211,238,.09),rgba(139,92,246,.03) 60%,rgba(255,255,255,.015));border:1px solid rgba(34,211,238,.22);border-radius:20px;padding:1.4rem 1.35rem;margin-bottom:.9rem;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-25%;right:-10%;width:180px;height:180px;background:radial-gradient(circle,rgba(34,211,238,.14),transparent 70%);pointer-events:none"></div>
+      <div style="position:relative;z-index:1">
+        <div style="font-size:.72rem;color:#8b93a3;letter-spacing:1.2px;font-weight:700">TU SALDO DISPONIBLE</div>
+        <div id="home-saldo" style="font-family:Poppins,sans-serif;font-weight:700;font-size:2.15rem;color:#fff!important;-webkit-text-fill-color:#fff;line-height:1.15;margin-top:.3rem">$0</div>
+        <div id="home-saldo-alt" style="font-size:.83rem;color:#6b7280;margin-top:.2rem">&nbsp;</div>
+        <div style="display:flex;gap:.6rem;margin-top:1.1rem">
+          <button onclick="abrirRecargaSheet()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:.4rem;padding:.65rem;background:rgba(34,211,238,.14);border:1px solid rgba(34,211,238,.35);color:#22d3ee;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.82rem;cursor:pointer">+ Depositar</button>
+          <button onclick="goPage('transferir')" style="flex:1;display:flex;align-items:center;justify-content:center;gap:.4rem;padding:.65rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:#c8d0e0;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.82rem;cursor:pointer">Transferir</button>
+        </div>
+      </div>
     </div>
 
-    <!-- Tarjeta diamantes -->
-    <div style="background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:18px;padding:1.35rem 1.3rem;margin-bottom:.9rem;position:relative">
-      <div style="position:absolute;top:1.35rem;right:1.3rem"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9l4-6z"/><path d="M2 9h20"/><path d="M12 21 8 9l2.5-6"/><path d="m12 21 4-12-2.5-6"/></svg></div>
-      <div style="font-size:.75rem;color:#6b7280;letter-spacing:1px;margin-bottom:.5rem">DIAMANTES FF</div>
-      <div id="home-diam" style="font-family:Poppins,sans-serif;font-weight:700;font-size:2.05rem;color:#fff!important;-webkit-text-fill-color:#fff;line-height:1.15">0</div>
-      <div style="font-size:.85rem;color:#4b5563;margin-top:.3rem">Comprados en total</div>
-      <div onclick="goPage('diamantes')" style="display:inline-flex;align-items:center;gap:.4rem;margin-top:1.1rem;color:#ffb84d;font-size:.95rem;font-weight:600;cursor:pointer">Recargar <span style="font-size:1.05rem">&#8594;</span></div>
+    <!-- ¿Qué quieres recargar hoy? -->
+    <div style="margin:1.8rem 0 .9rem">
+      <div style="font-family:Oxanium;font-size:1.05rem;font-weight:900;color:#fff;display:flex;align-items:center;gap:.5rem">&#128293; &iquest;Qu&eacute; quieres recargar hoy?</div>
+      <div style="font-size:.76rem;color:#6b7280;margin-top:.2rem">Elige tu juego favorito y recarga al instante</div>
+    </div>
+    <div class="svc-grid" id="svc-videojuegos">
+      <div style="text-align:center;padding:1.5rem;color:#6b7280;font-size:.78rem;grid-column:1/-1">Cargando cat&aacute;logo...</div>
     </div>
 
-    <!-- Estadisticas -->
+    <!-- Free Fire destacado -->
+    <div style="margin-top:1.6rem;background:linear-gradient(135deg,rgba(255,140,0,.1),rgba(34,211,238,.05));border:1.5px solid rgba(255,150,50,.28);border-radius:20px;padding:1.3rem 1.25rem;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-30%;right:-10%;width:200px;height:200px;background:radial-gradient(circle,rgba(255,150,50,.14),transparent 70%);pointer-events:none"></div>
+      <div style="position:relative;z-index:1">
+        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.7rem">
+          <span style="font-size:1.5rem">&#128293;</span>
+          <span style="font-family:Oxanium;font-weight:900;font-size:1.1rem;color:#fff;letter-spacing:.3px">FREE FIRE</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.35rem;margin-bottom:1rem;font-size:.78rem;color:#c8d0e0">
+          <div>&#128142; <span id="home-diam" style="font-weight:700;color:#fff">0</span> Diamantes comprados</div>
+          <div>&#9889; Entrega autom&aacute;tica</div>
+        </div>
+        <button onclick="goPage('diamantes')" style="width:100%;padding:.85rem;background:linear-gradient(135deg,#ff8c00,#ffb347);color:#1a0f00;border:none;border-radius:13px;font-family:Oxanium;font-weight:900;font-size:.86rem;letter-spacing:.4px;cursor:pointer">RECARGAR FREE FIRE &#8594;</button>
+      </div>
+    </div>
+
+    <!-- Accesos rápidos -->
+    <div style="font-size:.78rem;color:#6b7280;letter-spacing:1.2px;margin:1.9rem 0 .9rem">ACCESOS R&Aacute;PIDOS</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:.5rem">
+
+      <div onclick="goPage('saldo')" style="display:flex;align-items:center;gap:.75rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:15px;padding:.85rem .8rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(34,211,238,.28)'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'">
+        <div style="width:36px;height:36px;flex-shrink:0;border-radius:10px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9aa3b0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 8l9 6 9-6-9-6z"/><path d="M3 8v8l9 6 9-6V8"/></svg></div>
+        <div style="font-size:.83rem;color:#e8e8ea;font-weight:500">Recargar saldo</div>
+      </div>
+
+      <div onclick="goPage('diamantes')" style="display:flex;align-items:center;gap:.75rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:15px;padding:.85rem .8rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(34,211,238,.28)'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'">
+        <div style="width:36px;height:36px;flex-shrink:0;border-radius:10px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9aa3b0" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9l4-6z"/><path d="M2 9h20"/><path d="M12 21 8 9l2.5-6"/><path d="m12 21 4-12-2.5-6"/></svg></div>
+        <div style="font-size:.83rem;color:#e8e8ea;font-weight:500">Recargar diamantes</div>
+      </div>
+
+      <div onclick="goPage('miscompras')" style="display:flex;align-items:center;gap:.75rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:15px;padding:.85rem .8rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(34,211,238,.28)'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'">
+        <div style="width:36px;height:36px;flex-shrink:0;border-radius:10px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9aa3b0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 13H6L5 8z"/><path d="M8.5 11V6.5a3.5 3.5 0 0 1 7 0V11"/></svg></div>
+        <div style="font-size:.83rem;color:#e8e8ea;font-weight:500">Mis compras</div>
+      </div>
+
+      <div onclick="goPage('transferir')" style="display:flex;align-items:center;gap:.75rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:15px;padding:.85rem .8rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(34,211,238,.28)'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'">
+        <div style="width:36px;height:36px;flex-shrink:0;border-radius:10px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9aa3b0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3 21 7l-4 4M21 7H9M7 13l-4 4 4 4M3 17h12"/></svg></div>
+        <div style="font-size:.83rem;color:#e8e8ea;font-weight:500">Transferir saldo</div>
+      </div>
+
+    </div>
+
+    <!-- Videojuegos y plataformas próximamente -->
+    <div style="margin:1.9rem 0 .9rem">
+      <div style="font-family:Oxanium;font-size:1.05rem;font-weight:900;color:#fff;display:flex;align-items:center;gap:.5rem">&#128679; Pr&oacute;ximamente</div>
+      <div style="font-size:.76rem;color:#6b7280;margin-top:.2rem">Servicios en construcci&oacute;n que estamos preparando</div>
+    </div>
+    <div class="svc-grid" id="svc-proximamente-wrap" style="display:none"></div>
+
+    <!-- Redes sociales / servicios digitales -->
+    <div style="margin:1.9rem 0 .9rem">
+      <div style="font-family:Oxanium;font-size:1.05rem;font-weight:900;color:#fff;display:flex;align-items:center;gap:.5rem">&#127760; Redes Sociales &amp; Servicios Digitales</div>
+      <div style="font-size:.76rem;color:#6b7280;margin-top:.2rem">TikTok, Instagram, YouTube y m&aacute;s</div>
+    </div>
+    <div class="svc-grid" id="svc-digital">
+      <div style="text-align:center;padding:1.5rem;color:#6b7280;font-size:.78rem;grid-column:1/-1">Cargando...</div>
+    </div>
+
+    <!-- Resumen de cuenta -->
+    <div style="margin:1.9rem 0 .9rem;font-size:.78rem;color:#6b7280;letter-spacing:1.2px">RESUMEN DE TU CUENTA</div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:18px;padding:1.2rem .5rem;margin-bottom:1.9rem">
       <div style="text-align:center;border-right:1px solid rgba(255,255,255,.06)">
         <div style="font-size:.68rem;color:#6b7280;letter-spacing:.8px;margin-bottom:.4rem">PEDIDOS</div>
@@ -2305,30 +2396,23 @@ document.addEventListener('keydown',function(e){
       </div>
     </div>
 
-    <!-- Acceso rapido -->
-    <div style="font-size:.78rem;color:#6b7280;letter-spacing:1.2px;margin-bottom:.9rem">ACCESO R&Aacute;PIDO</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:2.2rem">
+  </div>
 
-      <div onclick="goPage('saldo')" style="display:flex;align-items:center;gap:.75rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:15px;padding:.85rem .8rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(34,211,238,.28)'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'">
-        <div style="width:36px;height:36px;flex-shrink:0;border-radius:10px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9aa3b0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 8l9 6 9-6-9-6z"/><path d="M3 8v8l9 6 9-6V8"/></svg></div>
-        <div style="font-size:.83rem;color:#e8e8ea;font-weight:500">Recargar saldo</div>
+  <!-- ¿Eres proveedor? -->
+  <div style="max-width:640px;margin:0 auto;padding:0 1.15rem 2.2rem">
+    <div style="background:linear-gradient(150deg,rgba(139,92,246,.08),rgba(34,211,238,.04));border:1px solid rgba(139,92,246,.22);border-radius:20px;padding:1.4rem 1.3rem">
+      <div style="display:flex;align-items:center;gap:.55rem;margin-bottom:.7rem">
+        <span style="font-size:1.3rem">&#129309;</span>
+        <span style="font-family:Oxanium;font-weight:900;font-size:1rem;color:#fff">&iquest;Eres proveedor?</span>
       </div>
-
-      <div onclick="goPage('diamantes')" style="display:flex;align-items:center;gap:.75rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:15px;padding:.85rem .8rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(34,211,238,.28)'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'">
-        <div style="width:36px;height:36px;flex-shrink:0;border-radius:10px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9aa3b0" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9l4-6z"/><path d="M2 9h20"/><path d="M12 21 8 9l2.5-6"/><path d="m12 21 4-12-2.5-6"/></svg></div>
-        <div style="font-size:.83rem;color:#e8e8ea;font-weight:500">Recargar diamantes</div>
+      <div style="font-size:.8rem;color:#c8d0e0;line-height:1.6;margin-bottom:.9rem">&iquest;Eres proveedor directo de recargas, monedas virtuales o servicios digitales? En CiberStore estamos buscando proveedores confiables para ampliar nuestro cat&aacute;logo. Si ofreces alguno de los servicios mostrados arriba, &iexcl;nos interesa hablar contigo!</div>
+      <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.1rem">
+        <span class="prov-tag">&#128142; Recargas de videojuegos</span>
+        <span class="prov-tag">&#127918; Monedas virtuales</span>
+        <span class="prov-tag">&#127925; TikTok Coins</span>
+        <span class="prov-tag">&#127760; Otras plataformas</span>
       </div>
-
-      <div onclick="goPage('tienda')" style="display:flex;align-items:center;gap:.75rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:15px;padding:.85rem .8rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(34,211,238,.28)'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'">
-        <div style="width:36px;height:36px;flex-shrink:0;border-radius:10px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9aa3b0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 13H6L5 8z"/><path d="M8.5 11V6.5a3.5 3.5 0 0 1 7 0V11"/></svg></div>
-        <div style="font-size:.83rem;color:#e8e8ea;font-weight:500">Nueva orden</div>
-      </div>
-
-      <div onclick="goPage('menu')" style="display:flex;align-items:center;gap:.75rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:15px;padding:.85rem .8rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(34,211,238,.28)'" onmouseout="this.style.borderColor='rgba(255,255,255,.06)'">
-        <div style="width:36px;height:36px;flex-shrink:0;border-radius:10px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9aa3b0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h9M17 7h3M4 12h3M11 12h9M4 17h9M17 17h3"/><circle cx="15" cy="7" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="17" r="1.6"/></svg></div>
-        <div style="font-size:.83rem;color:#e8e8ea;font-weight:500">Configuraci&oacute;n</div>
-      </div>
-
+      <a href="https://wa.me/12894273983" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:.85rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border-radius:13px;font-family:Poppins;font-weight:700;font-size:.85rem;text-decoration:none">&#128172; Contactar al privado</a>
     </div>
   </div>
 
