@@ -75,7 +75,8 @@ body{
 .sb-top{padding:1rem;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .sb-logo{font-family:"Oxanium",sans-serif;font-weight:900;font-size:1.1rem;letter-spacing:2px}
 .sb-logo .l1{color:#fff}.sb-logo .l2{color:var(--c1)}
-.sb-close{background:none;border:none;color:#666;font-size:1.5rem;cursor:pointer;line-height:1;padding:.2rem .4rem}
+.sb-close{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#8b93a3;font-size:1.3rem;cursor:pointer;line-height:1;width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.sb-close:hover{background:rgba(255,80,80,.12);border-color:rgba(255,80,80,.3);color:#ff6b6b}
 .sb-close:hover{color:#fff}
 .sb-user{padding:.75rem 1rem;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
 .sb-user-row{display:flex;align-items:center;gap:.65rem}
@@ -1277,64 +1278,130 @@ button[onclick*="submit"]:hover,button[onclick*="comprar"]:hover,button[onclick*
 /* Scroll interno con más padding */
 .sidebar-scroll,.sb-scroll{padding:.5rem .8rem!important}
 
-/* Secciones (títulos) con flechita a la derecha, estilo referencia */
-.sb-section{
-  padding:.8rem .5rem .35rem!important;
-  font-size:.6rem!important;
-  color:#8a93a8!important;
-  letter-spacing:2px!important;
-  font-weight:800!important;
-}
-.sb-collapsible .sb-arrow{color:var(--accent2);font-size:.85rem}
+/* ═══════════ SIDEBAR PREMIUM v2 ═══════════ */
 
-/* Items como tarjetas compactas */
+/* Perfil de usuario — tarjeta premium */
+.sb-user{
+  padding:1rem 1.1rem!important;
+  background:linear-gradient(160deg,rgba(34,211,238,.08),rgba(34,211,238,.02))!important;
+  border-bottom:1px solid rgba(34,211,238,.12)!important;
+  position:relative;
+}
+.sb-user-row{gap:.75rem!important}
+.sb-av{
+  width:42px!important;height:42px!important;
+  box-shadow:0 0 0 2px rgba(34,211,238,.25),0 4px 14px rgba(34,211,238,.25)!important;
+  font-size:.95rem!important;
+}
+.sb-uname{font-size:.86rem!important;letter-spacing:.3px}
+.sb-uspent{font-size:.68rem!important;color:#8b93a3!important;margin-top:.1rem}
+.sb-prog{
+  height:5px!important;margin-top:.65rem!important;
+  background:rgba(255,255,255,.06)!important;
+  border-radius:99px!important;overflow:hidden;position:relative;
+}
+.sb-prog-fill{
+  background:linear-gradient(90deg,#0ea5e9,#22d3ee,#67e8f9)!important;
+  background-size:200% 100%;
+  box-shadow:0 0 10px rgba(34,211,238,.55);
+  animation:sbProgShine 3s linear infinite;
+}
+@keyframes sbProgShine{0%{background-position:0% 0}100%{background-position:200% 0}}
+
+/* Secciones (CUENTA / SERVICIOS / COMUNIDAD) */
+.sb-section{
+  padding:1rem .5rem .4rem!important;
+  font-size:.62rem!important;
+  color:#5a6578!important;
+  letter-spacing:2.2px!important;
+  font-weight:800!important;
+  display:flex;align-items:center;gap:.5rem;
+}
+.sb-section::after{
+  content:'';flex:1;height:1px;
+  background:linear-gradient(90deg,rgba(255,255,255,.08),transparent);
+}
+
+/* Items del menú — tarjetas compactas consistentes */
 .nav-item{
-  padding:.6rem .7rem!important;
-  margin-bottom:.35rem!important;
+  padding:.62rem .7rem!important;
+  margin-bottom:.28rem!important;
   border-radius:12px!important;
-  background:linear-gradient(160deg,rgba(255,255,255,.04),rgba(255,255,255,.015))!important;
-  border:1px solid rgba(255,255,255,.055)!important;
-  font-size:.84rem!important;
+  background:rgba(255,255,255,.025)!important;
+  border:1px solid rgba(255,255,255,.05)!important;
+  font-size:.82rem!important;
   font-weight:600!important;
-  color:#c8d0e0!important;
+  color:#a8b0c0!important;
   gap:.65rem!important;
-  box-shadow:0 1px 6px rgba(0,0,0,.12)!important;
+  transition:background .2s,border-color .2s,transform .18s!important;
 }
 .nav-item:hover{
-  background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.03))!important;
-  border-color:var(--border2)!important;
-  transform:translateX(2px)!important;
+  background:rgba(255,255,255,.05)!important;
+  border-color:rgba(255,255,255,.1)!important;
+  transform:translateX(3px)!important;
 }
+.nav-item:active{transform:translateX(1px) scale(.985)!important}
 .nav-item.active{
   color:#fff!important;
-  background:linear-gradient(135deg,rgba(34,211,238,.25),rgba(34,211,238,.18))!important;
-  border-color:rgba(120,170,255,.35)!important;
-  box-shadow:0 4px 18px rgba(34,211,238,.2),inset 0 0 20px rgba(34,211,238,.1)!important;
+  background:linear-gradient(135deg,rgba(34,211,238,.16),rgba(34,211,238,.06))!important;
+  border-color:rgba(34,211,238,.4)!important;
+  box-shadow:0 0 0 1px rgba(34,211,238,.12),0 4px 16px rgba(34,211,238,.14)!important;
+}
+.nav-item.active .nav-ico{
+  background:rgba(34,211,238,.18)!important;
+  border-color:rgba(34,211,238,.4)!important;
 }
 
-/* Íconos en cuadros redondeados con color (estilo referencia) */
+/* Íconos — tamaño y fondo uniforme */
 .nav-ico{
   width:34px!important;height:34px!important;
   border-radius:10px!important;
-  background:linear-gradient(160deg,rgba(255,180,90,.13),rgba(255,140,60,.05))!important;
-  border:1px solid rgba(255,170,80,.11)!important;
+  background:rgba(255,255,255,.045)!important;
+  border:1px solid rgba(255,255,255,.06)!important;
   font-size:1rem!important;
-}
-.nav-item.active .nav-ico{
-  background:linear-gradient(160deg,rgba(34,211,238,.25),rgba(34,211,238,.15))!important;
-  border-color:rgba(120,170,255,.3)!important;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
 }
 
-/* Badges (NUEVO, API, etc.) más redondeados y visibles */
+/* Badges (NUEVO, TOP, SKIN, API, etc.) — tamaño uniforme */
 .nav-item .nb{
   margin-left:auto!important;
   border-radius:999px!important;
-  padding:.28rem .7rem!important;
-  font-size:.6rem!important;
+  padding:.24rem .58rem!important;
+  font-size:.56rem!important;
   font-weight:800!important;
   letter-spacing:.5px!important;
-  box-shadow:0 0 12px rgba(0,0,0,.3)!important;
+  white-space:nowrap;
+  transition:transform .18s;
 }
+.nav-item:hover .nb{transform:scale(1.05)}
+
+/* Footer del menú — limpio y con separación clara */
+.sb-footer{
+  padding:1rem 1.1rem calc(1rem + env(safe-area-inset-bottom,0px))!important;
+  border-top:1px solid rgba(255,255,255,.07)!important;
+  background:rgba(0,0,0,.18)!important;
+  flex-shrink:0;
+}
+.sb-footer .ftitle{font-size:.85rem!important;margin-bottom:.35rem}
+
+/* Estructura y scroll del sidebar */
+.sidebar{display:flex!important;flex-direction:column!important}
+.sb-nav{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  padding:.5rem .65rem!important;
+  scroll-behavior:smooth;
+}
+
+/* Animación sutil de aparición al abrir el sidebar */
+@keyframes navItemIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)}}
+.sidebar.open .nav-item{animation:navItemIn .28s ease backwards}
+.sidebar.open .nav-item:nth-child(1){animation-delay:.02s}
+.sidebar.open .nav-item:nth-child(2){animation-delay:.04s}
+.sidebar.open .nav-item:nth-child(3){animation-delay:.06s}
+.sidebar.open .nav-item:nth-child(4){animation-delay:.08s}
+.sidebar.open .nav-item:nth-child(5){animation-delay:.1s}
+.sidebar.open .nav-item:nth-child(6){animation-delay:.12s}
 
 /* ═══════════ FIX: asegurar que el sidebar flote (no empuje contenido) ═══════════ */
 .sidebar{
@@ -1343,11 +1410,11 @@ button[onclick*="submit"]:hover,button[onclick*="comprar"]:hover,button[onclick*
   height:100vh!important;height:100dvh!important;
   z-index:9000!important;
   transform:translateX(-100%);
+  transition:transform .32s cubic-bezier(.4,0,.2,1)!important;
 }
 .sidebar.open{transform:translateX(0)!important}
-.sb-nav{flex:1;overflow-y:auto;overflow-x:hidden}
 /* El overlay también por encima del contenido pero debajo del sidebar */
-.overlay{z-index:8500!important}
+.overlay{z-index:8500!important;transition:opacity .3s!important}
 
 /* ═══════════ SEGUIMIENTO DE PEDIDOS (Mis Compras) ═══════════ */
 .ped-card{
@@ -2114,31 +2181,34 @@ document.addEventListener('keydown',function(e){
   <div class="sb-nav">
     <div class="sb-section">Principal</div>
     <div class="nav-item active" id="ni-home" onclick="goPage('home')"><div class="nav-ico">&#127968;</div> Inicio</div>
+
+    <div class="sb-section">Cuenta</div>
+    <div class="nav-item" id="ni-perfil" onclick="goPage('perfil')"><div class="nav-ico">&#128100;</div> Mi Perfil</div>
+    <div class="nav-item" id="ni-saldo" onclick="goPage('saldo')"><div class="nav-ico">&#128176;</div> Recargar Saldo</div>
+    <div class="nav-item" id="ni-miscompras" onclick="goPage('miscompras')"><div class="nav-ico">&#128722;</div> Mis Compras</div>
+    <div class="nav-item" id="ni-transferir" onclick="goPage('transferir')"><div class="nav-ico">&#8646;</div> Transferir Saldo</div>
+    <div class="nav-item" id="ni-referidos" onclick="goPage('referidos')"><div class="nav-ico">&#127381;</div> Programa Referidos <span class="nb" style="background:rgba(255,208,0,.2);border:1px solid rgba(255,208,0,.4);color:#ffd000">NUEVO</span></div>
+    <div class="nav-item" id="ni-retirar" onclick="goPage('retirar')"><div class="nav-ico">&#127974;</div> Retirar Fondos <span class="nb" style="background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.35);color:#25d366">$</span></div>
+
     <div class="sb-section">Servicios</div>
     <div class="nav-item" id="ni-diamantes" onclick="goPage('diamantes')"><div class="nav-ico">&#128142;</div> Diamantes FF</div>
     <div class="nav-item" id="ni-likes" onclick="goPage('likes2k')"><div class="nav-ico">&#128077;</div> Likes</div>
     <div class="nav-item" id="ni-pines" onclick="goPage('pines')"><div class="nav-ico">&#127915;</div> Pines de Free Fire <span class="nb" style="background:rgba(255,204,0,.15);border:1px solid rgba(255,204,0,.3);color:#ffcc00">NEW</span></div>
     <div class="nav-item" id="ni-api" onclick="goPage('api')"><div class="nav-ico">&#128268;</div> API Revendedores <span class="nb" style="background:rgba(34,211,238,.15);border:1px solid rgba(34,211,238,.3);color:#22d3ee">API</span></div>
-    <div class="nav-item" id="ni-creadores" onclick="goPage('creadores')"><div class="nav-ico">&#127909;</div> Creadores <span class="nb" style="background:rgba(255,77,166,.15);border:1px solid rgba(255,77,166,.35);color:#ff4da6">TIKTOK</span></div>
     <div class="nav-item" id="ni-honor" onclick="goPage('honor')"><div class="nav-ico">&#127942;</div> Honor de Clan</div>
     <div class="nav-item" id="ni-actas" onclick="goPage('actas')"><div class="nav-ico">&#128220;</div> Actas Oficiales</div>
     <div class="nav-item" id="ni-honor-cuenta" onclick="goPage('honorcuenta')"><div class="nav-ico">&#127869;</div> Experiencia Cuenta FF <span class="nb" style="background:rgba(0,245,255,.15);border:1px solid rgba(0,245,255,.3);color:#00f5ff">NEW</span></div>
-    
-    <div class="nav-item" id="ni-faq" onclick="goPage('faq')"><div class="nav-ico">&#10067;</div> FAQ / Ayuda</div>
-    <div class="nav-item" id="ni-ranking" onclick="goPage('ranking')"><div class="nav-ico">&#128081;</div> Ranking &amp; Premios <span class="nb" style="background:linear-gradient(90deg,#ff6600,#ff9900);color:#fff;border:none">TOP</span></div>
     <div class="nav-item" id="ni-codigos" onclick="goPage('codigos')"><div class="nav-ico">&#128142;</div> SCAR Evolutiva <span class="nb" style="background:linear-gradient(90deg,#ff0028,#ff4444);color:#fff;border:none">SKIN</span></div>
     <div class="nav-item" id="ni-clanes" onclick="goPage('clanes')"><div class="nav-ico">&#129409;</div> Venta de Clanes <span class="nb" style="background:linear-gradient(90deg,#ffb300,#ff8800);color:#fff;border:none">NV7</span></div>
     <div class="nav-item" id="ni-cajas" onclick="goPage('cajas')"><div class="nav-ico">&#127873;</div> Regalo <span class="nb" style="background:linear-gradient(90deg,#ff4400,#ff8800);color:#fff;border:none">NUEVO</span></div>
+
+    <div class="sb-section">Comunidad &amp; ayuda</div>
+    <div class="nav-item" id="ni-ranking" onclick="goPage('ranking')"><div class="nav-ico">&#128081;</div> Ranking &amp; Premios <span class="nb" style="background:linear-gradient(90deg,#ff6600,#ff9900);color:#fff;border:none">TOP</span></div>
+    <div class="nav-item" id="ni-faq" onclick="goPage('faq')"><div class="nav-ico">&#10067;</div> FAQ / Ayuda</div>
+    <div class="nav-item" id="ni-creadores" onclick="goPage('creadores')"><div class="nav-ico">&#127909;</div> Creadores <span class="nb" style="background:rgba(255,77,166,.15);border:1px solid rgba(255,77,166,.35);color:#ff4da6">TIKTOK</span></div>
     <div class="nav-item" onclick="window.open('https://whatsapp.com/channel/0029VbCXQVjJENyAgAoJLJ3g','_blank');closeSB()"><div class="nav-ico">&#128172;</div> Canal WhatsApp <span class="nb nb-new">NUEVO</span></div>
     <div class="nav-item" onclick="window.open('https://www.tiktok.com/@ciberstore.lat','_blank');closeSB()"><div class="nav-ico">&#127925;</div> TikTok</div>
     <div class="nav-item" onclick="window.open('https://www.instagram.com/ciberstore.lat','_blank');closeSB()"><div class="nav-ico">&#128247;</div> Instagram</div>
-    <div class="sb-section">Mi cuenta</div>
-    <div class="nav-item" id="ni-referidos" onclick="goPage('referidos')"><div class="nav-ico">&#127381;</div> Programa Referidos <span class="nb" style="background:rgba(255,208,0,.2);border:1px solid rgba(255,208,0,.4);color:#ffd000">NUEVO</span></div>
-    <div class="nav-item" id="ni-perfil" onclick="goPage('perfil')"><div class="nav-ico">&#128100;</div> Mi Perfil</div>
-    <div class="nav-item" id="ni-saldo" onclick="goPage('saldo')"><div class="nav-ico">&#128176;</div> Recargar Saldo</div>
-    <div class="nav-item" id="ni-miscompras" onclick="goPage('miscompras')"><div class="nav-ico">&#128722;</div> Mis Compras</div>
-    <div class="nav-item" id="ni-transferir" onclick="goPage('transferir')"><div class="nav-ico">&#8646;</div> Transferir Saldo</div>
-    <div class="nav-item" id="ni-retirar" onclick="goPage('retirar')"><div class="nav-ico">&#127974;</div> Retirar Fondos <span class="nb" style="background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.35);color:#25d366">$</span></div>
     <div class="nav-item" id="ni-sobre" onclick="goPage('sobre')"><div class="nav-ico">&#8505;&#65039;</div> Sobre la pagina</div>
   </div>
   <div class="sb-footer"><div class="ftitle"><span class="l1">CIBER</span><span class="l2">STORE</span></div><div style="font-size:.65rem;color:#4a4a52;line-height:1.6;margin-bottom:.5rem">La tienda definitiva de Free Fire.<br/>Diamantes, likes y honor de clan.</div>
