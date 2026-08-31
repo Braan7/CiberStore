@@ -6066,6 +6066,7 @@ function _renderServiceCard(s){
 }
 
 function renderServiciosHome(){
+  try{
   var wrapDestacados = document.getElementById('svc-videojuegos');
   var wrapProximWrap = document.getElementById('svc-proximamente-wrap');
   var wrapDigital = document.getElementById('svc-digital');
@@ -6088,7 +6089,24 @@ function renderServiciosHome(){
     var digital = SERVICES.filter(function(s){ return s.categoria==='digital'; });
     wrapDigital.innerHTML = digital.map(_renderServiceCard).join('');
   }
+  }catch(e){
+    console.error('[renderServiciosHome] Error:', e);
+    var w = document.getElementById('svc-videojuegos');
+    if(w) w.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#ff6b6b;font-size:.75rem;grid-column:1/-1">Error al cargar el catalogo</div>';
+  }
 }
+
+// Reintento: si el DOM del home ya existe al cargar el script (sin pasar por goPage), renderizar igual.
+(function _svcAutoInit(){
+  function tryRender(){
+    if(document.getElementById('svc-videojuegos')) renderServiciosHome();
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', tryRender);
+  } else {
+    tryRender();
+  }
+})();
 
 function abrirDiamDetalle(idx){
   var productos = _getDiamProductos(_diamTipoActual);
