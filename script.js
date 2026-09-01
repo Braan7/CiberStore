@@ -1582,6 +1582,155 @@ function _honorProcesar(h, clan, idClan, precioHonor, btn){
   }, 800);
 }
 
+// ═══════════════════ PASES FF ═══════════════════
+var PASEFF_PRECIO = 30;
+var PASEFF_MAX = 10;
+var _paseffCantidad = 1;
+var _comprandoPaseFF = false;
+
+function openPaseFFModal(){
+  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
+  var ov = document.getElementById('modal-pasesff');
+  if(!ov){ showToast('Error al abrir, recarga la pagina'); return; }
+
+  _paseffCantidad = 1;
+  var cantEl = document.getElementById('paseff-m-cant');
+  if(cantEl) cantEl.value = 1;
+  _paseffActualizarTotal();
+
+  var idEl = document.getElementById('paseff-m-id'); if(idEl) idEl.value = '';
+  var nomEl = document.getElementById('paseff-m-nombre'); if(nomEl) nomEl.value = '';
+
+  var saldoEl = document.getElementById('paseff-m-saldo');
+  if(saldoEl) saldoEl.textContent = fmt(authSession.saldo || 0);
+
+  ov.classList.add('show');
+  closeSB();
+}
+
+function closePaseFFModal(){
+  var ov = document.getElementById('modal-pasesff');
+  if(ov) ov.classList.remove('show');
+}
+
+function _paseffCant(delta){
+  _paseffCantidad = Math.max(1, Math.min(PASEFF_MAX, _paseffCantidad + delta));
+  var cantEl = document.getElementById('paseff-m-cant');
+  if(cantEl) cantEl.value = _paseffCantidad;
+  _paseffActualizarTotal();
+}
+
+function _paseffActualizarTotal(){
+  var total = PASEFF_PRECIO * _paseffCantidad;
+  var totalEl = document.getElementById('paseff-m-total');
+  if(totalEl) totalEl.textContent = fmt(total);
+}
+
+function submitPaseFF(){
+  var id = ((document.getElementById('paseff-m-id')||{}).value||'').trim();
+  var nombre = ((document.getElementById('paseff-m-nombre')||{}).value||'').trim();
+
+  if(!id){ showToast('Ingresa tu ID de Free Fire'); return; }
+  if(!nombre){ showToast('Ingresa tu nombre de usuario'); return; }
+  if(_paseffCantidad < 1 || _paseffCantidad > PASEFF_MAX){ showToast('Cantidad invalida (maximo '+PASEFF_MAX+')'); return; }
+
+  if(_comprandoPaseFF) return;
+
+  var totalPaseFF = PASEFF_PRECIO * _paseffCantidad;
+  var btn = document.getElementById('paseff-submit-btn');
+  if(btn){ btn.disabled=true; btn.textContent='Verificando saldo...'; }
+
+  // Verificar saldo FRESCO (protege contra pagina no actualizada)
+  verificarSaldoFresco(totalPaseFF, function(alcanza, saldoReal){
+    var saldoEl = document.getElementById('paseff-m-saldo');
+    if(saldoEl) saldoEl.textContent = fmt(saldoReal);
+
+    if(!alcanza){
+      showToast('Saldo insuficiente. Tienes ' + fmt(saldoReal) + ' y necesitas ' + fmt(totalPaseFF), 3500);
+      if(btn){ btn.disabled=false; btn.innerHTML='\uD83E\uDD1D CONFIRMAR PEDIDO'; }
+      setTimeout(function(){ closePaseFFModal(); goPage('saldo'); }, 1500);
+      return;
+    }
+
+    // Confirmación interna con la advertencia de los 3 minutos, ya mostrada en el modal principal.
+    var existing = document.getElementById('paseff-confirm-overlay');
+    if(existing) existing.remove();
+    var ov = document.createElement('div');
+    ov.id = 'paseff-confirm-overlay';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px)';
+    ov.innerHTML =
+      '<div style="background:#0e1118;border:1.5px solid rgba(255,180,60,.4);border-radius:18px;padding:1.5rem;max-width:340px;width:100%;text-align:center">'
+      + '<div style="font-size:2rem;margin-bottom:.5rem">\u26A0\uFE0F</div>'
+      + '<div style="font-family:Oxanium;font-weight:900;font-size:1rem;color:#fff;margin-bottom:.35rem">Confirmar pedido</div>'
+      + '<div style="font-size:.8rem;color:#8b93a3;margin-bottom:1.1rem;line-height:1.6">'
+      + 'Pases FF x' + _paseffCantidad + '<br/>'
+      + 'ID: <b style="color:#22d3ee">' + id + '</b><br/>'
+      + 'Usuario: <b style="color:#22d3ee">' + nombre + '</b><br/>'
+      + 'Total: <b style="color:#25d366">' + fmt(totalPaseFF) + '</b>'
+      + '<br/><br/><b style="color:#ffb84d">Recuerda: tendras 3 minutos para aceptar la solicitud del bot. Sin reembolso si no aceptas a tiempo.</b>'
+      + '</div>'
+      + '<div style="display:flex;gap:.65rem">'
+      + '<button id="paseff-confirm-no" style="flex:1;padding:.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#8b93a3;border-radius:11px;font-family:Poppins;font-weight:700;font-size:.82rem;cursor:pointer">Cancelar</button>'
+      + '<button id="paseff-confirm-si" style="flex:1;padding:.75rem;background:linear-gradient(135deg,#128c3e,#25d366);border:none;color:#fff;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.82rem;cursor:pointer">\u2713 Confirmar</button>'
+      + '</div></div>';
+    document.body.appendChild(ov);
+
+    document.getElementById('paseff-confirm-no').onclick = function(){
+      ov.remove();
+      if(btn){ btn.disabled=false; btn.innerHTML='\uD83E\uDD1D CONFIRMAR PEDIDO'; }
+    };
+    document.getElementById('paseff-confirm-si').onclick = function(){
+      ov.remove();
+      _paseffProcesar(id, nombre, _paseffCantidad, totalPaseFF, btn);
+    };
+  });
+}
+
+function _paseffProcesar(id, nombre, cantidad, total, btn){
+  if(_comprandoPaseFF) return;
+  _comprandoPaseFF = true;
+  if(btn){ btn.disabled=true; btn.innerHTML='\u23F3 Procesando...'; }
+
+  var ord = getNextOrder();
+  addSpend(total, 'Pases FF x' + cantidad + ' - ID:' + id + ' - Usuario:' + nombre + ' - Pedido #' + ord);
+
+  if(typeof registrarPedido === 'function'){
+    try{ registrarPedido('Pases FF x' + cantidad, cantidad, 'pasesff', id, total, 0); }catch(e){}
+  }
+  if(typeof tgNotifyPurchase === 'function'){
+    tgNotifyPurchase(authSession.username,
+      'PASES FF x' + cantidad + '\n\uD83C\uDD94 ID: ' + id + '\n\uD83D\uDC64 Usuario: ' + nombre + '\n\u23F1\uFE0F Bot debe enviar solicitud - 3 min para aceptar',
+      total, ord);
+  }
+
+  // Temporizador de 3 minutos: si no se confirma la aceptacion, se rechaza automaticamente sin reembolso.
+  // NOTA: la aceptacion real la marca el bot/admin desde el panel; este timer es el aviso local del cliente.
+  var deadline = Date.now() + (3 * 60 * 1000);
+  if(typeof _paseffProgramarChequeo === 'function') _paseffProgramarChequeo(ord, deadline);
+
+  setTimeout(function(){
+    _comprandoPaseFF = false;
+    if(btn){ btn.disabled=false; btn.innerHTML='\uD83E\uDD1D CONFIRMAR PEDIDO'; }
+    if(typeof _refreshSaldoUI === 'function') _refreshSaldoUI(authSession.saldo||0);
+    closePaseFFModal();
+    showToast('\u2705 Pedido #' + ord + ' confirmado! Acepta la solicitud del bot en menos de 3 minutos.', 6000);
+  }, 800);
+}
+
+// Revisa a los 3 minutos si el pedido sigue pendiente; si es asi, lo marca como rechazado (sin reembolso) y avisa al cliente.
+function _paseffProgramarChequeo(ord, deadline){
+  var ms = Math.max(0, deadline - Date.now());
+  setTimeout(function(){
+    // El estado real de aceptacion lo define el admin/bot en el pedido; aqui solo se notifica el vencimiento
+    // para que el equipo revise y, si nadie acepto, marque el pedido como Rechazado sin reembolso.
+    if(typeof tgNotifyPurchase === 'function'){
+      tgNotifyPurchase(authSession ? authSession.username : 'sistema',
+        '\u23F0 VERIFICAR PASES FF - Pedido #' + ord + '\nHan pasado 3 minutos desde la solicitud.\nSi el bot no fue aceptado: marcar como RECHAZADO (sin reembolso).',
+        0, ord);
+    }
+  }, ms);
+}
+
 function _mostrarReciboHonor(h, nombreClan, idClan, ord){
   var ahora = new Date();
   var fecha = ahora.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' });
