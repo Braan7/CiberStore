@@ -1676,13 +1676,14 @@ function openPaseFFModal(){
   _paseffCantidad = 1;
   var cantEl = document.getElementById('paseff-m-cant');
   if(cantEl) cantEl.value = 1;
-  _paseffActualizarTotal();
 
   var idEl = document.getElementById('paseff-m-id'); if(idEl) idEl.value = '';
   var nomEl = document.getElementById('paseff-m-nombre'); if(nomEl) nomEl.value = '';
 
-  var saldoEl = document.getElementById('paseff-m-saldo');
-  if(saldoEl) saldoEl.textContent = fmt(authSession.saldo || 0);
+  var precioUnitEl = document.getElementById('paseff-m-precio-unit');
+  if(precioUnitEl) precioUnitEl.textContent = fmt(PASEFF_PRECIO);
+
+  _paseffActualizarTotal();
 
   ov.classList.add('show');
   closeSB();
@@ -1704,6 +1705,31 @@ function _paseffActualizarTotal(){
   var total = PASEFF_PRECIO * _paseffCantidad;
   var totalEl = document.getElementById('paseff-m-total');
   if(totalEl) totalEl.textContent = fmt(total);
+
+  var saldo = authSession ? (authSession.saldo || 0) : 0;
+  var saldoEl = document.getElementById('paseff-m-saldo');
+  if(saldoEl) saldoEl.textContent = fmt(saldo);
+
+  var alcanza = saldo >= total;
+  var payOpt = document.getElementById('paseff-pay-opt');
+  var payBadge = document.getElementById('paseff-pay-badge');
+  if(payOpt && payBadge){
+    if(alcanza){
+      payOpt.className = 'ps-pay-opt ps-pay-opt--ok';
+      payBadge.textContent = 'LISTO';
+    } else {
+      payOpt.className = 'ps-pay-opt ps-pay-opt--low';
+      payBadge.textContent = 'SALDO INSUFICIENTE';
+    }
+  }
+
+  var btnMonto = document.getElementById('paseff-btn-monto');
+  if(btnMonto) btnMonto.textContent = fmt(total);
+  var btn = document.getElementById('paseff-submit-btn');
+  if(btn){
+    if(alcanza){ btn.className = 'ps-pay-btn on'; }
+    else { btn.className = 'ps-pay-btn off'; }
+  }
 }
 
 function submitPaseFF(){
