@@ -7930,84 +7930,70 @@ function _updatePasePagina(){
   var cant = _paseCantidad || 1;
   var extraMsg = _paseMsgActivo ? 1 : 0;
   var total = PASE_PRECIO * cant + extraMsg;
-  // precio unitario en el resumen
+
+  // Precio del producto (tarjeta superior) y total final, siempre via fmt()
   var elPrecio = document.getElementById('pase-r-precio');
   if(elPrecio) elPrecio.textContent = fmt(PASE_PRECIO);
-  // en el paso de pago: mostrar cantidad x precio y el total
   var elPP = document.getElementById('pase-p-precio');
   if(elPP) elPP.textContent = cant > 1 ? (cant + ' x ' + fmt(PASE_PRECIO)) : fmt(PASE_PRECIO);
   var elPT = document.getElementById('pase-p-total');
   if(elPT) elPT.textContent = fmt(total);
+  var cantDisp = document.getElementById('pase-cant-display');
+  if(cantDisp) cantDisp.textContent = cant;
+
+  // Saldo del cliente, siempre convertido via fmt() (la moneda contable sigue siendo MXN)
   var sa = document.getElementById('pase-saldo');
-  if(sa){
-    sa.textContent = fmt(s);
-    sa.style.color = (s >= total) ? '#22d3ee' : '#ff6b6b';
+  if(sa) sa.textContent = fmt(s);
+
+  var alcanzaSaldo = s >= total;
+  var idVerificado = !!_paseIdVerificado;
+
+  // Badge de forma de pago: LISTO / SALDO INSUFICIENTE
+  var payOpt = document.getElementById('pase-pay-opt');
+  var payBadge = document.getElementById('pase-pay-badge');
+  if(payOpt && payBadge){
+    if(alcanzaSaldo){
+      payOpt.className = 'ps-pay-opt ps-pay-opt--ok';
+      payBadge.textContent = 'LISTO';
+    } else {
+      payOpt.className = 'ps-pay-opt ps-pay-opt--low';
+      payBadge.textContent = 'SALDO INSUFICIENTE';
+    }
+  }
+
+  // Boton final: solo habilitado si el ID esta verificado Y el saldo alcanza
+  var btnPagar = document.getElementById('pase-btn-pagar');
+  var btnMonto = document.getElementById('pase-btn-pagar-monto');
+  if(btnMonto) btnMonto.textContent = fmt(total);
+  if(btnPagar){
+    if(idVerificado && alcanzaSaldo){
+      btnPagar.className = 'ps-pay-btn on';
+      btnPagar.disabled = false;
+    } else {
+      btnPagar.className = 'ps-pay-btn off';
+      btnPagar.disabled = true;
+    }
   }
 }
 
 // Navegar entre pasos
+// En el checkout de una sola pantalla ya no hay pasos visuales separados;
+// esta funcion se mantiene por compatibilidad (algunos botones aun la llaman)
+// pero ahora solo refresca los datos visibles y valida antes de pagar.
 function paseIrPaso(n){
-  // Validaciones para avanzar
   if(n >= 2 && !_paseIdVerificado){ showToast('Primero verifica tu ID'); return; }
-
   _pasePasoActual = n;
-  [1,2,3].forEach(function(p){
-    var sec = document.getElementById('pase-paso-'+p);
-    if(sec) sec.style.display = (p===n) ? 'block' : 'none';
-    var num = document.getElementById('pstep-'+p);
-    var lbl = document.getElementById('pstep-lbl-'+p);
-    if(num){
-      if(p < n){
-        num.style.background = 'rgba(34,211,238,.15)';
-        num.style.color = '#22d3ee';
-        num.innerHTML = '\u2713';
-      } else if(p === n){
-        num.style.background = '#22d3ee';
-        num.style.color = '#021418';
-        num.textContent = p;
-      } else {
-        num.style.background = 'rgba(255,255,255,.06)';
-        num.style.color = '#6b7280';
-        num.textContent = p;
-      }
-    }
-    if(lbl) lbl.style.color = (p <= n) ? '#22d3ee' : '#6b7280';
-  });
-
-  // Llenar el resumen al entrar al paso 2
-  if(n === 2){
-    var av = document.getElementById('pase-r-avatar');
-    if(av) av.textContent = (_paseNickVerificado.charAt(0)||'?').toUpperCase();
-    var nk = document.getElementById('pase-r-nick');
-    if(nk) nk.textContent = _paseNickVerificado || '-';
-    var ud = document.getElementById('pase-r-uid');
-    if(ud) ud.textContent = _paseIdVerificado || '-';
+  _updatePasePagina();
+  if(n === 3){
+    try { document.getElementById('pase-btn-pagar').scrollIntoView({behavior:'smooth', block:'center'}); } catch(e){}
   }
-  if(n === 3) _updatePasePagina();
-
-  try { window.scrollTo({ top:0, behavior:'smooth' }); } catch(e) { window.scrollTo(0,0); }
 }
 
+// Habilita/deshabilita el boton final de Pagar segun: ID verificado + saldo suficiente
 function _paseSig1Activo(activo){
-  var b = document.getElementById('pase-btn-sig1');
-  if(!b) return;
-  if(activo){
-    b.style.background = 'rgba(34,211,238,.14)';
-    b.style.border = '1px solid rgba(34,211,238,.45)';
-    b.style.color = '#22d3ee';
-    b.style.cursor = 'pointer';
-    b.innerHTML = 'Continuar <span style="font-size:1.05rem">\u2192</span>';
-    b.style.display = 'flex';
-    b.style.alignItems = 'center';
-    b.style.justifyContent = 'center';
-    b.style.gap = '.5rem';
-  } else {
-    b.style.background = 'rgba(255,255,255,.04)';
-    b.style.border = '1px solid rgba(255,255,255,.1)';
-    b.style.color = '#4b5563';
-    b.style.cursor = 'not-allowed';
-    b.textContent = 'Verifica tu ID';
-  }
+  // Se llama al verificar el ID; solo actualiza datos, el estado real del boton
+  // lo controla _updatePasePagina() combinando verificacion + saldo.
+  if(typeof _updatePasePagina === 'function') _updatePasePagina();
 }
 
 // Verificar el ID contra el proveedor
@@ -8024,14 +8010,14 @@ function paseVerificarID(){
     showErr('Escribe un ID de Free Fire valido.');
     return;
   }
-  if(btn){ btn.disabled = true; btn.textContent = 'Verificando...'; }
+  if(btn){ btn.disabled = true; btn.textContent = 'Verificando cuenta...'; }
 
   fetch(COMPRAR_RECARGA_URL, {
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify({ action:'validar', product_id: 340, service_user_id: ffId })
   }).then(function(r){ return r.json(); }).then(function(res){
-    if(btn){ btn.disabled = false; btn.textContent = 'Verificar'; }
+    if(btn){ btn.disabled = false; btn.textContent = 'Verificar cuenta'; }
 
     if(res && res.success && res.valido){
       _paseIdVerificado = ffId;
@@ -8046,17 +8032,19 @@ function paseVerificarID(){
       if(nk) nk.textContent = _paseNickVerificado;
       var ud = document.getElementById('pase-uid');
       if(ud) ud.textContent = ffId;
+      var rg = document.getElementById('pase-region');
+      if(rg) rg.textContent = res.region || 'LATAM';
       _paseSig1Activo(true);
       showToast('\u2705 Cuenta verificada', 2500);
     } else if(res && res.success && !res.valido){
-      showErr('Ese ID no existe o no es valido. Revisalo e intenta de nuevo.');
+      showErr('\u274C No se encontro la cuenta. Verifica el ID e intentalo de nuevo.');
     } else {
       // El proveedor no respondio (mantenimiento u otro). Dejamos continuar
       // igual con el ID que puso el cliente, sin bloquear la compra.
       _paseContinuarSinVerificar(ffId);
     }
   }).catch(function(e){
-    if(btn){ btn.disabled = false; btn.textContent = 'Verificar'; }
+    if(btn){ btn.disabled = false; btn.textContent = 'Verificar cuenta'; }
     // Error de conexion: continuar igual con el ID que puso
     _paseContinuarSinVerificar(ffId);
     console.error('[PASE-VALIDAR]', e);
