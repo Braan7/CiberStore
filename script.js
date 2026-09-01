@@ -7891,7 +7891,7 @@ function _syncBottomNav(id){
 
 
 // ═══════════ PASE BOOYAH (asistente de 3 pasos) ═══════════
-var PASE_PRECIO = 30;
+var PASE_PRECIO = 25; // Precio BASE en MXN. El sistema global de fmt() lo convierte a la moneda activa.
 var _comprandoPase = false;
 var _paseIdVerificado = null;
 var _paseNickVerificado = '';
@@ -8124,37 +8124,49 @@ function comprarPase(){
     mensajePerso = ((document.getElementById('pase-msg-texto')||{}).value||'').trim();
     if(!mensajePerso){ showErr('Escribe tu mensaje personalizado o desactiva la opcion.'); return; }
   }
-  var totalPase = PASE_PRECIO * cant + extraMsg;
-  var saldo = authSession.saldo||0;
-  if(saldo < totalPase){ showErr('Saldo insuficiente ('+fmt(saldo)+'). Necesitas '+fmt(totalPase)+'.'); return; }
+  var totalPase = PASE_PRECIO * cant + extraMsg; // Siempre calculado en MXN base, nunca desde un valor convertido
   if(err) err.style.display='none';
 
+  var btnPase = document.getElementById('pase-btn-pagar');
+  if(btnPase){ btnPase.disabled = true; btnPase.innerHTML = 'Verificando saldo...'; }
   _comprandoPase = true;
-  var ffId = _paseIdVerificado;
-  var nom = _paseNickVerificado || '-';
-  var ord = getNextOrder();
 
-  var txtCant = cant > 1 ? (cant + 'x Pase Booyah') : 'Pase Booyah';
-  var detMsg = mensajePerso ? (' + Mensaje: "'+mensajePerso+'"') : '';
-  addSpend(totalPase, txtCant + detMsg + ' - ID:'+ffId+' ('+nom+') - Pedido #'+ord);
-  registrarPedido(txtCant, 0, 'otro', ffId, totalPase, 0);
-  if(typeof tgNotifyPurchase==='function'){
-    tgNotifyPurchase(authSession.username,
-      '\uD83C\uDF9F\uFE0F '+txtCant+'\n\uD83C\uDFAE ID: '+ffId+'\n\uD83D\uDC64 Cuenta: '+nom+' (verificada)'+
-      (mensajePerso ? '\n\uD83D\uDCAC Mensaje: '+mensajePerso : '')+
-      '\n\u26A0\uFE0F Entrega por REGALO (1 dia)',
-      totalPase, ord);
-  }
+  // Verificar saldo FRESCO contra la base (protege contra pagina no actualizada / doble cobro)
+  verificarSaldoFresco(totalPase, function(alcanza, saldoReal){
+    if(!alcanza){
+      showErr('Saldo insuficiente ('+fmt(saldoReal)+'). Necesitas '+fmt(totalPase)+'.');
+      if(btnPase){ btnPase.disabled = false; btnPase.innerHTML = 'Pagar <span style="font-size:1.05rem">&#8594;</span>'; }
+      _comprandoPase = false;
+      return;
+    }
 
-  if(typeof _mostrarAvisoModal==='function'){
-    _mostrarAvisoModal('PEDIDO #'+ord+' CONFIRMADO',
-      'Tu <b style="color:#fff">'+txtCant+'</b> fue pedido para <b style="color:#fff">'+nom+'</b>.<br/><br/>Se envia mediante <b style="color:#fff">REGALO</b> y puede tardar <b style="color:#fff">1 dia</b>.',
-      '#22d3ee');
-  }
-  showToast('\u2705 Pedido #'+ord+' confirmado!', 3000);
+    var ffId = _paseIdVerificado;
+    var nom = _paseNickVerificado || '-';
+    var ord = getNextOrder();
 
-  _paseReiniciar();
-  setTimeout(function(){ _comprandoPase = false; }, 3000);
+    var txtCant = cant > 1 ? (cant + 'x Pase Booyah') : 'Pase Booyah';
+    var detMsg = mensajePerso ? (' + Mensaje: "'+mensajePerso+'"') : '';
+    addSpend(totalPase, txtCant + detMsg + ' - ID:'+ffId+' ('+nom+') - Pedido #'+ord);
+    registrarPedido(txtCant, 0, 'otro', ffId, totalPase, 0);
+    if(typeof tgNotifyPurchase==='function'){
+      tgNotifyPurchase(authSession.username,
+        '\uD83C\uDF9F\uFE0F '+txtCant+'\n\uD83C\uDFAE ID: '+ffId+'\n\uD83D\uDC64 Cuenta: '+nom+' (verificada)'+
+        (mensajePerso ? '\n\uD83D\uDCAC Mensaje: '+mensajePerso : '')+
+        '\n\u26A0\uFE0F Entrega por REGALO (1 dia)',
+        totalPase, ord);
+    }
+
+    if(typeof _mostrarAvisoModal==='function'){
+      _mostrarAvisoModal('PEDIDO #'+ord+' CONFIRMADO',
+        'Tu <b style="color:#fff">'+txtCant+'</b> fue pedido para <b style="color:#fff">'+nom+'</b>.<br/><br/>Se envia mediante <b style="color:#fff">REGALO</b> y puede tardar <b style="color:#fff">1 dia</b>.',
+        '#22d3ee');
+    }
+    showToast('\u2705 Pedido #'+ord+' confirmado!', 3000);
+
+    if(btnPase){ btnPase.disabled = false; btnPase.innerHTML = 'Pagar <span style="font-size:1.05rem">&#8594;</span>'; }
+    _paseReiniciar();
+    setTimeout(function(){ _comprandoPase = false; }, 3000);
+  });
 }
 
 
