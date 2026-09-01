@@ -269,9 +269,36 @@ var LANG     = localStorage.getItem('cs_lang')     || 'es';
 var CURRENCY = localStorage.getItem('cs_currency') || 'MXN';
 var USD_MXN  = 17; // 1 USD = 17 MXN
 var RETIRO_COMISION = 0.15; // 15% de comision por retiro
-var RATES    = {MXN:1, USD:(1/USD_MXN), EUR:0.047, ARS:50.2, PEN:0.19};
-var CUR_SYM  = {MXN:'$', USD:'$', EUR:'\u20AC', ARS:'$', PEN:'S/'};
-var CUR_SUF  = {MXN:' MX', USD:' USD', EUR:' EUR', ARS:' ARS', PEN:' PEN'};
+// Catalogo amplio de monedas: bandera, nombre, simbolo. Las tasas reales llegan de la API.
+var CURRENCY_LIST = [
+  { code:'MXN', name:'M\u00e9xico',        flag:'\uD83C\uDDF2\uD83C\uDDFD', sym:'$'   },
+  { code:'USD', name:'Estados Unidos', flag:'\uD83C\uDDFA\uD83C\uDDF8', sym:'$'   },
+  { code:'CAD', name:'Canad\u00e1',        flag:'\uD83C\uDDE8\uD83C\uDDE6', sym:'$'   },
+  { code:'GBP', name:'Reino Unido',    flag:'\uD83C\uDDEC\uD83C\uDDE7', sym:'\u00a3'   },
+  { code:'EUR', name:'Uni\u00f3n Europea',  flag:'\uD83C\uDDEA\uD83C\uDDFA', sym:'\u20ac'   },
+  { code:'JPY', name:'Jap\u00f3n',         flag:'\uD83C\uDDEF\uD83C\uDDF5', sym:'\u00a5'   },
+  { code:'CNY', name:'China',          flag:'\uD83C\uDDE8\uD83C\uDDF3', sym:'\u00a5'   },
+  { code:'BRL', name:'Brasil',         flag:'\uD83C\uDDE7\uD83C\uDDF7', sym:'R$'  },
+  { code:'ARS', name:'Argentina',      flag:'\uD83C\uDDE6\uD83C\uDDF7', sym:'$'   },
+  { code:'CLP', name:'Chile',          flag:'\uD83C\uDDE8\uD83C\uDDF1', sym:'$'   },
+  { code:'COP', name:'Colombia',       flag:'\uD83C\uDDE8\uD83C\uDDF4', sym:'$'   },
+  { code:'PEN', name:'Per\u00fa',          flag:'\uD83C\uDDF5\uD83C\uDDEA', sym:'S/'  },
+  { code:'CHF', name:'Suiza',          flag:'\uD83C\uDDE8\uD83C\uDDED', sym:'Fr'  },
+  { code:'AUD', name:'Australia',      flag:'\uD83C\uDDE6\uD83C\uDDFA', sym:'$'   },
+  { code:'INR', name:'India',          flag:'\uD83C\uDDEE\uD83C\uDDF3', sym:'\u20b9'   },
+  { code:'GTQ', name:'Guatemala',      flag:'\uD83C\uDDEC\uD83C\uDDF9', sym:'Q'   },
+  { code:'HNL', name:'Honduras',       flag:'\uD83C\uDDED\uD83C\uDDF3', sym:'L'   },
+  { code:'UYU', name:'Uruguay',        flag:'\uD83C\uDDFA\uD83C\uDDFE', sym:'$'   },
+  { code:'BOB', name:'Bolivia',        flag:'\uD83C\uDDE7\uD83C\uDDF4', sym:'Bs'  },
+  { code:'DOP', name:'Rep. Dominicana',flag:'\uD83C\uDDE9\uD83C\uDDF4', sym:'RD$' },
+  { code:'VES', name:'Venezuela',      flag:'\uD83C\uDDFB\uD83C\uDDEA', sym:'Bs'  },
+  { code:'KRW', name:'Corea del Sur',  flag:'\uD83C\uDDF0\uD83C\uDDF7', sym:'\u20a9'   }
+];
+var RATES = { MXN:1 };
+CURRENCY_LIST.forEach(function(c){ if(!(c.code in RATES)) RATES[c.code] = 1; }); // placeholder hasta que llegue la API
+RATES.USD = (1/USD_MXN);
+var CUR_SYM = {}; CURRENCY_LIST.forEach(function(c){ CUR_SYM[c.code] = c.sym; });
+var CUR_SUF = {}; CURRENCY_LIST.forEach(function(c){ CUR_SUF[c.code] = ' ' + c.code; });
 
 /* ── TIPO DE CAMBIO EN TIEMPO REAL ──
    Consulta las tasas reales del dolar/monedas desde una API gratuita.
@@ -283,11 +310,10 @@ function actualizarTiposDeCambio(){
     .then(function(d){
       if(!d || !d.rates) return;
       var r = d.rates;
-      // r.USD = cuantos USD es 1 MXN (ej: 0.058). Guardamos igual formato que RATES.
-      if(r.USD) RATES.USD = r.USD;
-      if(r.EUR) RATES.EUR = r.EUR;
-      if(r.ARS) RATES.ARS = r.ARS;
-      if(r.PEN) RATES.PEN = r.PEN;
+      // Actualizar TODAS las monedas del catalogo que la API traiga
+      CURRENCY_LIST.forEach(function(c){
+        if(c.code !== 'MXN' && r[c.code]) RATES[c.code] = r[c.code];
+      });
       // USD_MXN = cuantos MXN es 1 USD (para conversiones internas de USDT)
       if(r.USD) USD_MXN = 1 / r.USD;
       // Guardar en cache local con fecha
@@ -298,6 +324,7 @@ function actualizarTiposDeCambio(){
       if(typeof renderDiamCatalogo === 'function') try { renderDiamCatalogo(); } catch(e){}
       if(typeof renderLikes2k === 'function') try { renderLikes2k(); } catch(e){}
       if(typeof renderHonorPrecios === 'function') try { renderHonorPrecios(); } catch(e){}
+      if(typeof _pintarSelectorMoneda === 'function') try { _pintarSelectorMoneda(); } catch(e){}
       console.log('[TC] Tipos de cambio actualizados. 1 USD =', USD_MXN.toFixed(2), 'MXN');
     })
     .catch(function(e){ console.warn('[TC] No se pudo actualizar el tipo de cambio, usando el ultimo conocido', e); });
@@ -358,6 +385,58 @@ function fmt(mxn){
   else str=sym+val.toFixed(2);
   return str+suf;
 }
+
+// ═══ Selector de moneda ampliado (dropdown en el navbar) ═══
+function toggleCurrencyDropdown(){
+  var dd = document.getElementById('cur-dropdown');
+  var wrap = document.querySelector('.topbar-center');
+  if(!dd) return;
+  var willOpen = !dd.classList.contains('open');
+  dd.classList.toggle('open');
+  if(wrap) wrap.classList.toggle('open', willOpen);
+  if(willOpen) _pintarListaMonedas();
+}
+function closeCurrencyDropdown(){
+  var dd = document.getElementById('cur-dropdown');
+  var wrap = document.querySelector('.topbar-center');
+  if(dd) dd.classList.remove('open');
+  if(wrap) wrap.classList.remove('open');
+}
+function _pintarListaMonedas(){
+  var list = document.getElementById('cur-dropdown-list');
+  if(!list) return;
+  list.innerHTML = CURRENCY_LIST.map(function(c){
+    var activo = (c.code === CURRENCY);
+    return '<div class="cur-opt'+(activo?' active':'')+'" onclick="selectCurrency(\''+c.code+'\')">'
+      + '<span class="cur-opt-flag">'+c.flag+'</span>'
+      + '<span class="cur-opt-name">'+c.name+'</span>'
+      + '<span class="cur-opt-code">'+c.code+'</span>'
+      + (activo ? '<span class="cur-opt-check">&#10003;</span>' : '')
+      + '</div>';
+  }).join('');
+}
+function selectCurrency(code){
+  changeCurrency(code);
+  _pintarSelectorMoneda();
+  closeCurrencyDropdown();
+}
+function _pintarSelectorMoneda(){
+  var c = CURRENCY_LIST.find(function(x){ return x.code === CURRENCY; }) || CURRENCY_LIST[0];
+  var flagEl = document.getElementById('cur-btn-flag');
+  var codeEl = document.getElementById('cur-btn-code');
+  if(flagEl) flagEl.textContent = c.flag;
+  if(codeEl) codeEl.textContent = c.code;
+}
+// Cerrar el dropdown si se toca fuera de el
+document.addEventListener('click', function(e){
+  var dd = document.getElementById('cur-dropdown');
+  var btn = document.getElementById('cur-btn');
+  var wrap = document.querySelector('.topbar-center');
+  if(dd && dd.classList.contains('open') && !dd.contains(e.target) && (!btn || !btn.contains(e.target))){
+    dd.classList.remove('open');
+    if(wrap) wrap.classList.remove('open');
+  }
+});
 
 function changeLang(lang){
   LANG=lang; localStorage.setItem('cs_lang',lang);
@@ -875,6 +954,7 @@ function goPage(id){
 
 function refreshUI(){
   updateSidebarUser();
+  if(typeof _pintarSelectorMoneda === 'function') _pintarSelectorMoneda();
   /* Always re-render products and likes so prices update with new session */
   setTimeout(function(){
     renderProds();
@@ -2615,6 +2695,16 @@ function closeFullAdmin(){
 
 
 
+// Abre/cierra el drawer del panel admin en móvil. Sin argumento: toggle.
+function admToggleNav(force){
+  var nav = document.getElementById('adm-nav');
+  var ov = document.getElementById('adm-nav-overlay');
+  if(!nav) return;
+  var willOpen = (force !== undefined) ? force : !nav.classList.contains('open');
+  nav.classList.toggle('open', willOpen);
+  if(ov) ov.classList.toggle('show', willOpen);
+}
+
 function admFullTab(tab){
   var tabs=['stats','users','pedidos','saldos','top','codigos','chat','resenas','config'];
   tabs.forEach(function(t){
@@ -2631,6 +2721,8 @@ function admFullTab(tab){
   if(tab==='codigos'){ renderAdminCodes();renderAdminStats(); }
   if(tab==='chat')    admLoadChat();
   if(tab==='resenas') admLoadResenas();
+  // Cerrar el drawer al elegir una opción en móvil
+  if(window.innerWidth < 901) admToggleNav(false);
 }
 
 /* \u2500\u2500 DASHBOARD \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */

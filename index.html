@@ -2325,6 +2325,68 @@ button[style*="linear-gradient"]{
 .sb-footer-item.danger:hover{background:rgba(255,80,110,.1);color:#ff6b85}
 .sb-footer-ico{width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .sb-footer-item.danger .sb-footer-ico{background:rgba(255,80,110,.08);border-color:rgba(255,80,110,.15)}
+/* ═══════════ NAVBAR v2 — estructura tipo referencia ═══════════ */
+.topbar--v2{display:flex!important;align-items:center!important;gap:.6rem!important;padding:.7rem 1rem!important}
+.topbar--v2 .topbar-logo{margin-right:auto!important}
+.topbar-center{position:relative}
+.cur-btn{
+  display:flex;align-items:center;gap:.45rem;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;padding:.5rem .85rem;cursor:pointer;
+  color:#fff;font-family:'Poppins',sans-serif;font-size:.82rem;
+  transition:background .2s,border-color .2s;white-space:nowrap;
+}
+.cur-btn:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16)}
+.cur-btn svg{color:#8b93a3;flex-shrink:0;transition:transform .2s}
+.topbar-center.open .cur-btn svg{transform:rotate(180deg)}
+
+.cur-dropdown{
+  display:none;position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);
+  width:280px;max-height:360px;overflow-y:auto;
+  background:#14161f;border:1px solid rgba(255,255,255,.1);border-radius:14px;
+  box-shadow:0 20px 50px rgba(0,0,0,.5);z-index:2000;
+  animation:curDropIn .18s ease;
+}
+.cur-dropdown.open{display:block}
+@keyframes curDropIn{from{opacity:0;transform:translateX(-50%) translateY(-6px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.cur-dropdown-head{padding:.75rem .9rem .5rem;font-size:.65rem;color:#6b7280;text-transform:uppercase;letter-spacing:1px;font-weight:700;border-bottom:1px solid rgba(255,255,255,.06)}
+.cur-dropdown-list{padding:.4rem}
+.cur-opt{display:flex;align-items:center;gap:.6rem;padding:.55rem .6rem;border-radius:10px;cursor:pointer;font-size:.82rem;color:#c8d0e0;transition:background .15s}
+.cur-opt:hover{background:rgba(255,255,255,.05)}
+.cur-opt.active{background:rgba(34,211,238,.1);color:#fff}
+.cur-opt-flag{font-size:1.1rem;flex-shrink:0}
+.cur-opt-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cur-opt-code{font-family:Oxanium;font-weight:800;font-size:.72rem;color:#8b93a3;flex-shrink:0}
+.cur-opt.active .cur-opt-code{color:#22d3ee}
+.cur-opt-check{color:#22d3ee;font-size:.8rem;flex-shrink:0}
+
+.topbar-ico-btn{
+  width:38px;height:38px;flex-shrink:0;border-radius:11px;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  color:#c8d0e0;display:flex;align-items:center;justify-content:center;cursor:pointer;
+  transition:background .2s,border-color .2s;
+}
+.topbar-ico-btn:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.18)}
+
+.user-pill{
+  width:38px!important;height:38px!important;border-radius:11px!important;
+  padding:0!important;background:transparent!important;border:none!important;
+  cursor:pointer;flex-shrink:0;
+}
+.user-pill-av{
+  width:38px;height:38px;border-radius:11px;
+  background:linear-gradient(135deg,#0ea5e9,#22d3ee);
+  display:flex;align-items:center;justify-content:center;
+  color:#04121a;font-weight:900;font-family:Oxanium;font-size:.9rem;
+}
+
+@media(max-width:480px){
+  .topbar--v2{padding:.6rem .75rem!important;gap:.4rem!important}
+  .cur-btn{padding:.45rem .6rem!important;font-size:.76rem!important}
+  .cur-dropdown{width:250px;left:auto;right:0;transform:none}
+  @keyframes curDropIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+  .btn-wa{display:none!important}
+}
 </style>
 
 <script>
@@ -2426,11 +2488,27 @@ document.addEventListener('keydown',function(e){
     <div onclick="goPage('terminos');closeSB&&closeSB()" style="font-size:.63rem;color:#6b7280;cursor:pointer;text-decoration:underline">Terminos y politica de reembolso</div>
   </div>
 </div>
-<div class="topbar">
+<div class="topbar topbar--v2">
   <button class="hamburger" onclick="toggleSB()"><span></span><span></span><span></span></button>
   <div class="topbar-logo" onclick="goPage('home')"><span class="l1">CIBER</span><span class="l2">STORE</span></div>
-  <div class="mem-pill" id="mem-pill"></div>
-  <div class="user-pill" id="user-pill" onclick="openUserMenu()" style="display:none"><div class="user-pill-av" id="user-pill-av">?</div><span class="user-pill-name" id="user-pill-name">Usuario</span></div><button class="cart-btn" onclick="openCart()" title="Carrito">&#128722;<div class="cart-count" id="cart-count">0</div></button>
+
+  <div class="topbar-center">
+    <div class="cur-btn" id="cur-btn" onclick="toggleCurrencyDropdown()">
+      <span id="cur-btn-flag">&#127474;&#127485;</span>
+      <span id="cur-btn-code" style="font-weight:800">MXN</span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="cur-dropdown" id="cur-dropdown">
+      <div class="cur-dropdown-head">Selecciona tu moneda</div>
+      <div class="cur-dropdown-list" id="cur-dropdown-list"></div>
+    </div>
+  </div>
+
+  <button class="topbar-ico-btn" onclick="goPage('miscompras')" title="Notificaciones">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+  </button>
+  <div class="user-pill" id="user-pill" onclick="goPage('perfil')" style="display:none"><div class="user-pill-av" id="user-pill-av">?</div></div>
+  <button class="cart-btn" onclick="openCart()" title="Carrito">&#128722;<div class="cart-count" id="cart-count">0</div></button>
   <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Cambiar tema">&#127763;</button>
   <a href="https://wa.me/12894273983" target="_blank" class="btn-wa">&#128222; WhatsApp</a>
 </div>
