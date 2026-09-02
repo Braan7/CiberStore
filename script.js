@@ -3185,48 +3185,31 @@ function admSendReporte(){
 /* ================================================================
    RESEÑAS DEL HOME — Top 3 destacadas (contenido demo) + reales
 ================================================================ */
-// Estas 3 reseñas son contenido DEMO/SIMULADO para mostrar el formato
-// de la sección mientras se acumulan reseñas reales de clientes.
-// NO representan clientes reales ni reseñas verificadas.
+// Estas 3 reseñas son contenido DEMO/SIMULADO, fijo y permanente.
+// La sección de reseñas del inicio SOLO muestra este Top 3, sin
+// posibilidad de agregar mas reseñas ni cargar reseñas reales.
 var RESENAS_DEMO = [
   { medalla:'\uD83E\uDD47', puesto:1, nombre:'Carlos M.', texto:'Excelente servicio, recib\u00ed mi pase muy r\u00e1pido.' },
   { medalla:'\uD83E\uDD48', puesto:2, nombre:'Kevin R.',  texto:'Todo perfecto, el proceso fue muy sencillo.' },
   { medalla:'\uD83E\uDD49', puesto:3, nombre:'Diego H.',  texto:'Buen precio y entrega r\u00e1pida.' }
 ];
 
-function _resenaCardHTML(r, esDemo){
+function _resenaCardHTML(r){
   var stars = '';
   for(var s=1; s<=5; s++) stars += '<span style="color:#ffd000">&#11088;</span>';
-  var medalla = esDemo ? '<span style="font-size:1.1rem;margin-right:.35rem">'+r.medalla+'</span>' : '';
-  var badgeDemo = esDemo ? '<span style="font-size:.56rem;font-weight:800;letter-spacing:.4px;color:#8b93a3;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:99px;padding:.15rem .5rem;margin-left:.4rem">DESTACADA</span>' : '';
-  return '<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.1rem">'
-    + '<div style="display:flex;align-items:center;margin-bottom:.5rem"><span style="font-weight:700;color:#fff;font-size:.88rem">'+medalla+r.nombre+'</span>'+badgeDemo+'</div>'
-    + '<div style="margin-bottom:.55rem;font-size:.82rem">'+stars+'</div>'
+  return '<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.1rem;text-align:center">'
+    + '<div style="font-size:1.8rem;margin-bottom:.3rem">'+r.medalla+'</div>'
+    + '<div style="font-weight:700;color:#fff;font-size:.9rem;margin-bottom:.5rem">#'+r.puesto+' &mdash; '+r.nombre+'</div>'
+    + '<div style="margin-bottom:.6rem;font-size:.85rem">'+stars+'</div>'
     + '<div style="font-size:.8rem;color:#c9d1e0;line-height:1.5">"'+r.texto+'"</div>'
     + '</div>';
 }
 
 function renderResenas(){
   var grid = document.getElementById('resenas-grid');
-  var summary = document.getElementById('resenas-summary');
   if(!grid) return;
-
-  // Top 3 destacadas (demo) siempre visibles como referencia de formato
-  var html = RESENAS_DEMO.map(function(r){ return _resenaCardHTML(r, true); }).join('');
-  grid.innerHTML = html;
-  if(summary) summary.textContent = 'Rese\u00f1as destacadas';
-
-  // Intentar cargar reseñas reales de Supabase y agregarlas debajo, si existen
-  if(typeof sb !== 'undefined' && sb && typeof sb.get === 'function'){
-    sb.get('resenas','order=created_at.desc&limit=12').then(function(rows){
-      if(!rows || !Array.isArray(rows) || !rows.length) return;
-      var reales = rows.map(function(r){
-        return _resenaCardHTML({ nombre:r.username||'Cliente', texto:r.texto||'' }, false);
-      }).join('');
-      grid.innerHTML = html + reales;
-      if(summary) summary.textContent = rows.length + ' rese\u00f1a'+(rows.length===1?'':'s')+' de clientes';
-    }).catch(function(){ /* sin conexion: se quedan solo las destacadas */ });
-  }
+  // Top 3 fijo — nunca se agregan ni cargan mas reseñas
+  grid.innerHTML = RESENAS_DEMO.map(_resenaCardHTML).join('');
 }
 
 function loadLiveStats(){
@@ -7813,42 +7796,10 @@ function sobreTab(tab){
 // Renderiza TODAS las reseñas en la página Sobre
 function renderResenasFull(){
   var grid = document.getElementById('sobre-resenas-grid');
-  var summary = document.getElementById('sobre-resenas-summary');
   if(!grid) return;
-  if(typeof sb === 'undefined' || !sb.get){ return; }
-  grid.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);font-size:.82rem;grid-column:1/-1">Cargando...</div>';
-  sb.get('resenas', 'order=created_at.desc&limit=100').then(function(rows){
-    if(!rows || !rows.length){
-      grid.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);font-size:.82rem;grid-column:1/-1;background:var(--card);border:1px solid var(--border);border-radius:11px">Aun no hay resenas. Se el primero!</div>';
-      if(summary) summary.textContent = 'Se el primero en opinar';
-      return;
-    }
-    var avg = (rows.reduce(function(s, r){ return s + r.stars; }, 0) / rows.length).toFixed(1);
-    if(summary && typeof _estrellasHTML === 'function'){
-      summary.innerHTML = _estrellasHTML(parseFloat(avg)) + ' <b style="color:#fff">'+avg+'</b> de 5 \u00b7 '+rows.length+' resena'+(rows.length!==1?'s':'');
-    }
-    var h = '';
-    rows.forEach(function(r){
-      var inicial = (r.username || 'U').charAt(0).toUpperCase();
-      var color = (typeof _avatarColor==='function') ? _avatarColor(r.username) : '#0e7490';
-      var tiempo = (typeof _tiempoRelativo==='function') ? _tiempoRelativo(r.created_at) : '';
-      var estrellas = (typeof _estrellasHTML==='function') ? _estrellasHTML(r.stars) : '';
-
-      h += '<div style="background:linear-gradient(160deg,rgba(255,255,255,.025),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:1.1rem;display:flex;flex-direction:column;gap:.7rem">'
-        + '<div style="display:flex;align-items:center;gap:.65rem">'
-        +   '<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,'+color+','+color+'aa);display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-weight:800;font-size:1.05rem;color:#fff;flex-shrink:0;box-shadow:0 3px 10px '+color+'55">'+inicial+'</div>'
-        +   '<div style="flex:1;min-width:0">'
-        +     '<div style="display:flex;align-items:center;gap:.35rem"><span style="font-size:.85rem;font-weight:700;color:#fff">'+r.username+'</span><span style="color:#25d366;font-size:.7rem">\u2714\uFE0F</span></div>'
-        +     '<div style="font-size:.62rem;color:var(--muted)">'+tiempo+'</div>'
-        +   '</div>'
-        + '</div>'
-        + '<div style="display:flex;align-items:center;gap:.5rem">'+estrellas+'<span style="font-size:.65rem;color:#25d366;font-weight:700;background:rgba(37,211,102,.1);padding:.1rem .45rem;border-radius:99px">Compra verificada</span></div>'
-        + '<div style="font-size:.68rem;color:#67e8f9;font-weight:600">\uD83D\uDCE6 '+r.servicio+'</div>'
-        + '<div style="font-size:.8rem;color:#c5cad6;line-height:1.6">\u201c'+r.texto+'\u201d</div>'
-        + '</div>';
-    });
-    grid.innerHTML = h;
-  }).catch(function(){ grid.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted);grid-column:1/-1">Error al cargar.</div>'; });
+  // Top 3 fijo (mismo contenido que en el inicio) — sin conexion a Supabase,
+  // sin promedio calculado, sin posibilidad de agregar mas reseñas.
+  grid.innerHTML = RESENAS_DEMO.map(_resenaCardHTML).join('');
 }
 
 
