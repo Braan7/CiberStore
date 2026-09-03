@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<title>CiberStore — En mantenimiento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@500;700;800;900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#05070c;
+    --bg2:#0a0e16;
+    --cyan:#22d3ee;
+    --cyan-dim:#0e7490;
+    --text:#e8ecf2;
+    --muted:#7b8494;
+    --border:rgba(255,255,255,.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Poppins',sans-serif;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:1.5rem;
+    position:relative;
+    overflow-x:hidden;
+  }
+
+  /* Fondo: rejilla técnica muy sutil + resplandor central */
+  body::before{
+    content:'';
+    position:fixed;inset:0;
+    background-image:
+      linear-gradient(rgba(34,211,238,.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(34,211,238,.035) 1px, transparent 1px);
+    background-size:42px 42px;
+    -webkit-mask-image:radial-gradient(ellipse 70% 60% at 50% 40%, #000 20%, transparent 80%);
+    mask-image:radial-gradient(ellipse 70% 60% at 50% 40%, #000 20%, transparent 80%);
+    pointer-events:none;
+  }
+  body::after{
+    content:'';
+    position:fixed;top:-10%;left:50%;transform:translateX(-50%);
+    width:900px;height:900px;
+    background:radial-gradient(circle, rgba(14,116,144,.16), transparent 65%);
+    pointer-events:none;
+  }
+
+  .wrap{
+    position:relative;z-index:1;
+    width:100%;max-width:460px;
+    text-align:center;
+  }
+
+  /* Logo */
+  .logo{
+    font-family:'Oxanium',sans-serif;
+    font-weight:900;
+    font-size:1.5rem;
+    letter-spacing:1px;
+    margin-bottom:2.2rem;
+  }
+  .logo .l1{color:#fff}
+  .logo .l2{color:var(--cyan)}
+
+  /* Icono de estado */
+  .status-ico{
+    width:76px;height:76px;
+    margin:0 auto 1.6rem;
+    border-radius:20px;
+    background:linear-gradient(160deg, rgba(34,211,238,.14), rgba(34,211,238,.03));
+    border:1px solid rgba(34,211,238,.28);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 0 40px rgba(34,211,238,.12);
+    animation:pulse 2.6s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{box-shadow:0 0 40px rgba(34,211,238,.12)}
+    50%{box-shadow:0 0 56px rgba(34,211,238,.24)}
+  }
+  .status-ico svg{width:34px;height:34px}
+
+  h1{
+    font-family:'Oxanium',sans-serif;
+    font-weight:800;
+    font-size:1.55rem;
+    color:#fff;
+    line-height:1.25;
+    margin-bottom:.7rem;
+    letter-spacing:.2px;
+  }
+  p.sub{
+    font-size:.92rem;
+    color:var(--muted);
+    line-height:1.6;
+    max-width:360px;
+    margin:0 auto 2.2rem;
+  }
+
+  /* Barra de progreso */
+  .prog-wrap{
+    margin-bottom:.6rem;
+  }
+  .prog-track{
+    width:100%;
+    height:8px;
+    border-radius:99px;
+    background:rgba(255,255,255,.06);
+    border:1px solid var(--border);
+    overflow:hidden;
+    position:relative;
+  }
+  .prog-fill{
+    height:100%;
+    width:0%;
+    border-radius:99px;
+    background:linear-gradient(90deg,var(--cyan-dim),var(--cyan));
+    box-shadow:0 0 12px rgba(34,211,238,.55);
+    position:relative;
+    transition:width .3s ease;
+  }
+  .prog-fill::after{
+    content:'';
+    position:absolute;inset:0;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);
+    width:40%;
+    animation:shine 1.8s linear infinite;
+  }
+  @keyframes shine{
+    0%{transform:translateX(-100%)}
+    100%{transform:translateX(340%)}
+  }
+  .prog-meta{
+    display:flex;justify-content:space-between;
+    margin-top:.6rem;
+    font-family:'Oxanium',sans-serif;
+    font-size:.72rem;
+    color:var(--muted);
+    letter-spacing:.4px;
+  }
+  .prog-pct{color:var(--cyan);font-weight:800}
+
+  /* Divider */
+  .divider{
+    height:1px;
+    background:linear-gradient(90deg,transparent,var(--border),transparent);
+    margin:2.2rem 0;
+  }
+
+  /* Contacto */
+  .contact-label{
+    font-size:.72rem;
+    color:var(--muted);
+    letter-spacing:1.2px;
+    text-transform:uppercase;
+    font-weight:600;
+    margin-bottom:1rem;
+  }
+  .contact-row{
+    display:flex;
+    flex-direction:column;
+    gap:.65rem;
+  }
+  .btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:.55rem;
+    width:100%;
+    padding:.85rem 1.1rem;
+    border-radius:13px;
+    font-family:'Poppins',sans-serif;
+    font-weight:600;
+    font-size:.88rem;
+    text-decoration:none;
+    transition:transform .18s ease, border-color .18s ease, background .18s ease;
+    border:1px solid var(--border);
+  }
+  .btn:active{transform:scale(.98)}
+  .btn svg{width:19px;height:19px;flex-shrink:0}
+
+  .btn-channel{
+    background:rgba(34,211,238,.08);
+    border-color:rgba(34,211,238,.28);
+    color:var(--cyan);
+  }
+  .btn-channel:hover{background:rgba(34,211,238,.13);border-color:rgba(34,211,238,.45)}
+
+  .btn-wa{
+    background:rgba(37,211,102,.08);
+    border-color:rgba(37,211,102,.28);
+    color:#25d366;
+  }
+  .btn-wa:hover{background:rgba(37,211,102,.13);border-color:rgba(37,211,102,.45)}
+
+  footer{
+    margin-top:2.4rem;
+    font-size:.72rem;
+    color:#4a5262;
+  }
+
+  @media(max-width:380px){
+    h1{font-size:1.32rem}
+    p.sub{font-size:.85rem}
+  }
+</style>
+</head>
+<body>
+
+  <div class="wrap">
+
+    <div class="logo"><span class="l1">CIBER</span><span class="l2">STORE</span></div>
+
+    <div class="status-ico">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M12 7v5l3.2 2"/>
+      </svg>
+    </div>
+
+    <h1>Estamos en mantenimiento</h1>
+    <p class="sub">Estamos ajustando algunas cosas detrás de escena para mejorar tu experiencia. Volvemos en breve — gracias por tu paciencia.</p>
+
+    <div class="prog-wrap">
+      <div class="prog-track">
+        <div class="prog-fill" id="progFill"></div>
+      </div>
+      <div class="prog-meta">
+        <span>Restaurando servicio</span>
+        <span class="prog-pct"><span id="progNum">0</span>%</span>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="contact-label">Mientras tanto, encuéntranos aquí</div>
+    <div class="contact-row">
+      <a class="btn btn-channel" href="https://whatsapp.com/channel/0029VbCXQVjJENyAgAoJLJ3g" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Canal de novedades
+      </a>
+      <a class="btn btn-wa" href="https://wa.me/12894273983" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.46 1.32 4.96L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.2h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m0 1.8a8.1 8.1 0 0 1 5.75 2.38 8.07 8.07 0 0 1 2.38 5.74c0 4.48-3.65 8.13-8.14 8.13a8.1 8.1 0 0 1-4.13-1.13l-.3-.17-3.11.82.83-3.03-.19-.31a8.09 8.09 0 0 1-1.24-4.32c0-4.48 3.65-8.11 8.15-8.11m-4.5 4.2c-.16 0-.42.06-.64.3s-.85.83-.85 2.02.87 2.34.99 2.5c.12.16 1.7 2.72 4.2 3.7 2.08.82 2.5.66 2.95.62.45-.04 1.45-.59 1.65-1.16.2-.57.2-1.06.14-1.16-.06-.1-.22-.16-.46-.28s-1.45-.72-1.68-.8c-.22-.08-.39-.12-.55.13-.16.24-.63.8-.77.96-.14.16-.28.18-.52.06-.24-.12-1.01-.37-1.93-1.19a7.23 7.23 0 0 1-1.34-1.66c-.14-.24 0-.36.11-.48.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.55-1.36-.77-1.86-.2-.48-.4-.42-.55-.42h-.47"/></svg>
+        Chatea con soporte
+      </a>
+    </div>
+
+    <footer>CiberStore &middot; volveremos pronto</footer>
+
+  </div>
+
+<script>
+  // Barra de progreso hasta 99% — nunca llega a 100 mientras el sitio esté en mantenimiento.
+  (function(){
+    var fill = document.getElementById('progFill');
+    var num  = document.getElementById('progNum');
+    var pct  = 0;
+
+    function tick(){
+      if(pct < 99){
+        // Avanza rápido al inicio, se frena cerca del final (sensación realista de carga)
+        var step = pct < 60 ? (Math.random()*2.2 + .6) : (Math.random()*.6 + .1);
+        pct = Math.min(99, pct + step);
+        fill.style.width = pct + '%';
+        num.textContent = Math.floor(pct);
+      }
+    }
+    tick();
+    setInterval(tick, 220);
+  })();
+</script>
+
+</body>
+</html>
