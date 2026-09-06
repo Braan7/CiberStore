@@ -933,10 +933,11 @@ function goPage(id){
   if(ni) ni.classList.add('active');
   closeSB();
   window.scrollTo(0,0);
-  if(id==='diamantes') setTimeout(function(){ setDiamTipo('ilim'); }, 100);
+  if(id==='diamantes') setTimeout(function(){ setDiamTipo('ilim'); _refrescarPreciosMembresias(); }, 100);
   if(id==='codigos') setTimeout(_updateScarSaldo, 100);
   if(id==='clanes') setTimeout(renderClanes, 100);
   if(id==='pase') setTimeout(_paseReiniciar, 100);
+  if(id==='soporte') setTimeout(sopVolverLista, 100);
   if(id==='saldo') setTimeout(function(){ recSetMoneda('MXN'); _recTipo=null; recLimpiarTipo(); }, 100);
   if(id==='sobre') setTimeout(function(){ sobreTab('resenas'); }, 100);
   if(id==='likes') renderLikes();
@@ -1730,6 +1731,83 @@ function _paseffActualizarTotal(){
     if(alcanza){ btn.className = 'ps-pay-btn on'; }
     else { btn.className = 'ps-pay-btn off'; }
   }
+}
+
+// ═══════════════════ TARJETAS DE MEMBRESIA (Semanal/Mensual) ═══════════════════
+function _refrescarPreciosMembresias(){
+  var elPase = document.getElementById('mem-precio-pase');
+  if(elPase) elPase.textContent = fmt(PASE_PRECIO);
+  var elSB = document.getElementById('mem-precio-sb');
+  if(elSB) elSB.textContent = fmt(MEMBRESIAS_FF.semanal_basica.precio);
+  var elS = document.getElementById('mem-precio-s');
+  if(elS) elS.textContent = fmt(MEMBRESIAS_FF.semanal.precio);
+  var elM = document.getElementById('mem-precio-m');
+  if(elM) elM.textContent = fmt(MEMBRESIAS_FF.mensual.precio);
+}
+
+var MEMBRESIAS_FF = {
+  semanal_basica: { nombre:'Tarjeta Semanal B\u00e1sica', precio:9.10, icon:'\uD83C\uDFAB' },
+  semanal:        { nombre:'Tarjeta Semanal',            precio:33,   icon:'\uD83C\uDF9F\uFE0F' },
+  mensual:        { nombre:'Tarjeta Mensual',             precio:145,  icon:'\uD83C\uDFC6' }
+};
+var _memActual = null;
+var _comprandoMem = false;
+
+function abrirMembresia(tipo){
+  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
+  var m = MEMBRESIAS_FF[tipo];
+  if(!m) return;
+  _memActual = tipo;
+
+  var ov = document.getElementById('modal-membresia');
+  document.getElementById('mem-m-icon').textContent = m.icon;
+  document.getElementById('mem-m-nombre').textContent = m.nombre;
+  document.getElementById('mem-m-precio').textContent = fmt(m.precio);
+  document.getElementById('mem-m-id').value = '';
+  document.getElementById('mem-m-saldo').textContent = fmt(authSession.saldo||0);
+  if(ov) ov.classList.add('show');
+}
+
+function cerrarMembresiaModal(){
+  var ov = document.getElementById('modal-membresia');
+  if(ov) ov.classList.remove('show');
+}
+
+function comprarMembresia(){
+  if(_comprandoMem || !_memActual) return;
+  var m = MEMBRESIAS_FF[_memActual];
+  var ffId = ((document.getElementById('mem-m-id')||{}).value||'').trim();
+  if(!ffId){ showToast('Ingresa tu ID de Free Fire'); return; }
+
+  _comprandoMem = true;
+  var btn = document.getElementById('mem-submit-btn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Verificando saldo...'; }
+
+  verificarSaldoFresco(m.precio, function(alcanza, saldoReal){
+    document.getElementById('mem-m-saldo').textContent = fmt(saldoReal);
+    if(!alcanza){
+      showToast('Saldo insuficiente. Tienes '+fmt(saldoReal)+' y necesitas '+fmt(m.precio), 3500);
+      if(btn){ btn.disabled = false; btn.textContent = 'Comprar'; }
+      _comprandoMem = false;
+      setTimeout(function(){ cerrarMembresiaModal(); goPage('saldo'); }, 1500);
+      return;
+    }
+
+    var ord = getNextOrder();
+    addSpend(m.precio, m.nombre+' - ID:'+ffId+' - Pedido #'+ord);
+    registrarPedido(m.nombre, 1, 'membresia', ffId, m.precio, 0);
+    if(typeof tgNotifyPurchase === 'function'){
+      tgNotifyPurchase(authSession.username, m.nombre+'\n\uD83C\uDFAE ID: '+ffId, m.precio, ord);
+    }
+
+    setTimeout(function(){
+      _comprandoMem = false;
+      if(btn){ btn.disabled = false; btn.textContent = 'Comprar'; }
+      if(typeof _refreshSaldoUI === 'function') _refreshSaldoUI(authSession.saldo||0);
+      cerrarMembresiaModal();
+      showToast('\u2705 Pedido #'+ord+' confirmado! '+m.nombre+' en proceso.', 4000);
+    }, 800);
+  });
 }
 
 function submitPaseFF(){
@@ -2732,7 +2810,7 @@ function admToggleNav(force){
 }
 
 function admFullTab(tab){
-  var tabs=['stats','users','pedidos','saldos','top','codigos','chat','resenas','config'];
+  var tabs=['stats','users','pedidos','saldos','top','codigos','chat','resenas','soporte','config'];
   tabs.forEach(function(t){
     var btn=document.getElementById('admn-'+t);
     var sec=document.getElementById('adms-'+t);
@@ -2747,6 +2825,7 @@ function admFullTab(tab){
   if(tab==='codigos'){ renderAdminCodes();renderAdminStats(); }
   if(tab==='chat')    admLoadChat();
   if(tab==='resenas') admLoadResenas();
+  if(tab==='soporte') admSopCargarLista();
   // Cerrar el drawer al elegir una opción en móvil
   if(window.innerWidth < 901) admToggleNav(false);
 }
@@ -3204,6 +3283,393 @@ function _resenaCardHTML(r){
     + '<div style="font-size:.8rem;color:#c9d1e0;line-height:1.5">"'+r.texto+'"</div>'
     + '</div>';
 }
+
+/* ================================================================
+   CENTRO DE SOPORTE — tickets, chat, respuestas automaticas
+================================================================ */
+var _sopTicketActual = null;   // ticket abierto actualmente en el chat
+var _sopArchivoB64 = null;     // adjunto pendiente de enviar
+var _sopEnviando = false;
+
+var SOP_CATEGORIA_LABEL = { pedido:'Mi pedido', pago:'Pagos y comprobantes', entrega:'Entrega / demora', cuenta:'Mi cuenta', otro:'Otra cosa' };
+var SOP_ESTADO_LABEL = { pendiente:'Pendiente', en_atencion:'En atencion', resuelto:'Resuelto', cerrado:'Cerrado' };
+
+// ── Navegacion entre las 3 vistas de la pagina de soporte ──────
+function sopVolverLista(){
+  document.getElementById('sop-vista-lista').style.display = 'block';
+  document.getElementById('sop-vista-nuevo').style.display = 'none';
+  document.getElementById('sop-vista-chat').style.display = 'none';
+  _sopTicketActual = null;
+  sopCargarLista();
+}
+function sopAbrirNuevo(){
+  if(!authSession){ showToast('Inicia sesion para usar el soporte'); setTimeout(showAuthModal, 600); return; }
+  document.getElementById('sop-vista-lista').style.display = 'none';
+  document.getElementById('sop-vista-nuevo').style.display = 'block';
+  document.getElementById('sop-vista-chat').style.display = 'none';
+}
+
+// ── Lista de tickets del usuario ────────────────────────────────
+function sopCargarLista(){
+  var cont = document.getElementById('sop-lista-tickets');
+  if(!cont) return;
+  if(!authSession){ cont.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);font-size:.82rem">Inicia sesion para ver tu soporte</div>'; return; }
+  cont.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Cargando...</div>';
+
+  sb.get('tickets', 'user_id=eq.'+authSession.id+'&order=updated_at.desc&limit=30').then(function(rows){
+    if(!rows || !rows.length){
+      cont.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);font-size:.82rem;background:var(--card);border:1px solid var(--border);border-radius:11px">Aun no tienes conversaciones. Toca "Nueva conversacion" para empezar.</div>';
+      return;
+    }
+    cont.innerHTML = rows.map(function(t){
+      var badge = 'sop-badge--'+t.status;
+      var unread = t.unread_user ? ' unread' : '';
+      return '<div class="sop-ticket-card'+unread+'" onclick="sopAbrirTicket('+t.id+')">'
+        + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.6rem;margin-bottom:.35rem">'
+        +   '<div style="font-weight:700;color:#fff;font-size:.86rem">'+_esc(t.subject)+'</div>'
+        +   '<span class="sop-badge '+badge+'">'+(SOP_ESTADO_LABEL[t.status]||t.status)+'</span>'
+        + '</div>'
+        + '<div style="font-size:.72rem;color:var(--muted)">'+t.codigo+' &middot; '+(SOP_CATEGORIA_LABEL[t.category]||t.category)+'</div>'
+        + '</div>';
+    }).join('');
+  }).catch(function(){ cont.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted)">Error al cargar tus conversaciones.</div>'; });
+}
+
+// ── Crear un ticket nuevo ───────────────────────────────────────
+function sopCrearTicket(categoria, asunto){
+  if(!authSession){ showToast('Inicia sesion'); return; }
+  sb.post('tickets', {
+    user_id: authSession.id,
+    username: authSession.username,
+    subject: asunto,
+    category: categoria,
+    status: 'pendiente',
+    priority: 'normal'
+  }).then(function(rows){
+    var t = rows && rows[0];
+    if(!t){ showToast('No se pudo crear la conversacion'); return; }
+    // Mensaje de bienvenida automatico del bot
+    var bienvenida = _sopMensajeBienvenida(categoria);
+    sb.post('ticket_messages', { ticket_id: t.id, sender_type:'bot', sender_name:'CiberStore IA', message: bienvenida }).then(function(){
+      sopAbrirTicket(t.id);
+      if(typeof tgSend === 'function'){
+        tgSend('\uD83C\uDFA7 SOPORTE - Nuevo ticket\n\uD83C\uDFAB '+t.codigo+'\n\uD83D\uDC64 '+authSession.username+'\n\uD83D\uDCC2 '+(SOP_CATEGORIA_LABEL[categoria]||categoria)+'\n\uD83D\uDCDD '+asunto);
+      }
+    });
+  }).catch(function(e){ showToast('Error al crear ticket'); console.error('[SOPORTE]', e); });
+}
+
+function _sopMensajeBienvenida(categoria){
+  var textos = {
+    pedido: 'Hola! Cuentame que pasa con tu pedido y te ayudo. Si tienes el numero de pedido, compartelo para revisarlo mas rapido.',
+    pago: 'Hola! Cuentame el problema con tu pago o comprobante. Si ya lo enviaste, dime el monto y el metodo que usaste.',
+    entrega: 'Hola! Cuentame que producto esperas y cuanto tiempo ha pasado, y reviso el estado contigo.',
+    cuenta: 'Hola! Cuentame que necesitas sobre tu cuenta.',
+    otro: 'Hola! Cuentame en que te puedo ayudar.'
+  };
+  return textos[categoria] || textos.otro;
+}
+
+// ── Abrir un ticket y mostrar su chat ───────────────────────────
+function sopAbrirTicket(ticketId){
+  _sopTicketActual = ticketId;
+  document.getElementById('sop-vista-lista').style.display = 'none';
+  document.getElementById('sop-vista-nuevo').style.display = 'none';
+  document.getElementById('sop-vista-chat').style.display = 'block';
+
+  sb.get('tickets', 'id=eq.'+ticketId+'&limit=1').then(function(rows){
+    var t = rows && rows[0];
+    if(!t){ showToast('Ticket no encontrado'); sopVolverLista(); return; }
+
+    document.getElementById('sop-chat-codigo').textContent = t.codigo;
+    document.getElementById('sop-chat-estado').textContent = SOP_CATEGORIA_LABEL[t.category] || t.category;
+    var badgeEl = document.getElementById('sop-chat-status-badge');
+    badgeEl.textContent = SOP_ESTADO_LABEL[t.status] || t.status;
+    badgeEl.className = 'sop-badge sop-badge--' + t.status;
+
+    var btnEscalar = document.getElementById('sop-btn-escalar');
+    var inputRow = document.getElementById('sop-input-row');
+    if(t.status === 'cerrado'){
+      if(btnEscalar) btnEscalar.style.display = 'none';
+      if(inputRow) inputRow.style.display = 'none';
+    } else {
+      if(inputRow) inputRow.style.display = 'flex';
+      if(btnEscalar) btnEscalar.style.display = t.needs_human ? 'none' : 'flex';
+    }
+
+    // Pedido relacionado (si el ticket lo tiene)
+    var pedidoBox = document.getElementById('sop-pedido-rel');
+    if(t.pedido_id){
+      sb.get('pedidos', 'id=eq.'+t.pedido_id+'&limit=1').then(function(peds){
+        var p = peds && peds[0];
+        if(p && pedidoBox){
+          pedidoBox.style.display = 'block';
+          pedidoBox.innerHTML = '<b style="color:#22d3ee">Pedido relacionado</b><br/>'+_esc(p.producto)+' &middot; '+(ESTADO_LABEL[p.estado]?ESTADO_LABEL[p.estado].t:p.estado);
+        }
+      });
+    } else if(pedidoBox){ pedidoBox.style.display = 'none'; }
+
+    // Marcar como leido por el usuario
+    if(t.unread_user) sb.patch('tickets', { unread_user:false }, 'id=eq.'+ticketId);
+
+    sopCargarMensajes(ticketId);
+  }).catch(function(){ showToast('Error al abrir el ticket'); });
+}
+
+function sopCargarMensajes(ticketId){
+  var feed = document.getElementById('sop-chat-feed');
+  feed.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted);font-size:.78rem">Cargando...</div>';
+  sb.get('ticket_messages', 'ticket_id=eq.'+ticketId+'&order=created_at.asc').then(function(rows){
+    if(!rows || !rows.length){ feed.innerHTML = ''; return; }
+    feed.innerHTML = rows.map(_sopMsgHTML).join('');
+    feed.scrollTop = feed.scrollHeight;
+  }).catch(function(){ feed.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted)">Error al cargar mensajes.</div>'; });
+}
+
+function _sopMsgHTML(m){
+  var esMio = m.sender_type === 'user';
+  var fecha = m.created_at ? new Date(m.created_at).toLocaleString('es-MX', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}) : '';
+  var claseGlobo = esMio ? 'sop-msg me' : (m.sender_type === 'bot' ? 'sop-msg bot' : 'sop-msg agent');
+  var label = '';
+  if(m.sender_type === 'bot') label = '<div class="sop-msg-label bot">\uD83E\uDD16 CiberStore IA</div>';
+  else if(m.sender_type === 'agent') label = '<div class="sop-msg-label agent">\uD83D\uDC64 '+_esc(m.sender_name)+' &middot; Agente</div>';
+  var img = m.attachment_url ? '<img src="'+m.attachment_url+'" alt="adjunto"/>' : '';
+  return '<div class="sop-msg-row '+(esMio?'me':'them')+'">'
+    + '<div class="'+claseGlobo+'">'+label+(m.message?_esc(m.message).replace(/\n/g,'<br/>'):'')+img+'</div>'
+    + '<div class="sop-msg-time">'+fecha+'</div>'
+    + '</div>';
+}
+
+// ── Adjuntar imagen ──────────────────────────────────────────────
+function sopArchivoElegido(input){
+  var file = input.files && input.files[0];
+  if(!file) return;
+  if(file.size > 5*1024*1024){ showToast('La imagen debe pesar menos de 5MB'); input.value=''; return; }
+  var reader = new FileReader();
+  reader.onload = function(e){
+    _sopArchivoB64 = e.target.result;
+    var prev = document.getElementById('sop-preview-adjunto');
+    prev.style.display = 'block';
+    prev.innerHTML = '<div style="display:flex;align-items:center;gap:.6rem;background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:10px;padding:.5rem .7rem">'
+      + '<img src="'+_sopArchivoB64+'" style="width:36px;height:36px;border-radius:8px;object-fit:cover"/>'
+      + '<span style="flex:1;font-size:.72rem;color:#c8d0e0">Imagen lista para enviar</span>'
+      + '<button onclick="sopQuitarAdjunto()" style="background:none;border:none;color:#ff6b6b;cursor:pointer;font-size:.8rem">Quitar</button>'
+      + '</div>';
+  };
+  reader.readAsDataURL(file);
+}
+function sopQuitarAdjunto(){
+  _sopArchivoB64 = null;
+  document.getElementById('sop-file-input').value = '';
+  document.getElementById('sop-preview-adjunto').style.display = 'none';
+}
+
+// ── Enviar mensaje del usuario ───────────────────────────────────
+function sopEnviarMensaje(){
+  if(_sopEnviando || !_sopTicketActual) return;
+  var input = document.getElementById('sop-msg-input');
+  var texto = (input.value || '').trim();
+  if(!texto && !_sopArchivoB64){ showToast('Escribe un mensaje o adjunta una imagen'); return; }
+  if(texto.length > 1000){ showToast('Mensaje muy largo (max 1000 caracteres)'); return; }
+
+  _sopEnviando = true;
+  var adjunto = _sopArchivoB64;
+  var ticketId = _sopTicketActual;
+
+  sb.post('ticket_messages', {
+    ticket_id: ticketId, sender_type:'user', sender_name: authSession.username,
+    message: texto, attachment_url: adjunto || null
+  }).then(function(){
+    input.value = '';
+    sopQuitarAdjunto();
+    sb.patch('tickets', { unread_admin:true, status:'pendiente' }, 'id=eq.'+ticketId);
+    sopCargarMensajes(ticketId);
+    _sopEnviando = false;
+
+    // Intentar responder con el motor de reglas si el ticket aun no fue escalado a humano
+    sb.get('tickets', 'id=eq.'+ticketId+'&limit=1').then(function(rows){
+      var t = rows && rows[0];
+      if(t && !t.needs_human && t.status !== 'resuelto' && t.status !== 'cerrado'){
+        setTimeout(function(){ sopResponderAutomatico(ticketId, texto); }, 700);
+      }
+    });
+  }).catch(function(){ showToast('No se pudo enviar tu mensaje'); _sopEnviando = false; });
+}
+
+// ── Motor de respuestas automaticas (reglas por palabras clave) ──
+// Busca en support_faq una coincidencia de palabras clave con el
+// mensaje del usuario. Si encuentra una respuesta con confianza
+// razonable, la envia como el bot. Si no encuentra nada, dice con
+// honestidad que no tiene la respuesta y ofrece pasar con una
+// persona - nunca inventa informacion.
+function sopResponderAutomatico(ticketId, mensajeUsuario){
+  var texto = (mensajeUsuario || '').toLowerCase();
+  sb.get('support_faq', 'active=eq.true').then(function(faqs){
+    var mejor = null, mejorScore = 0;
+    (faqs || []).forEach(function(f){
+      var palabras = (f.keywords || '').split(',').map(function(k){ return k.trim().toLowerCase(); }).filter(Boolean);
+      var score = 0;
+      palabras.forEach(function(p){ if(p && texto.indexOf(p) !== -1) score++; });
+      if(score > mejorScore){ mejorScore = score; mejor = f; }
+    });
+
+    if(mejor && mejorScore > 0){
+      sb.post('ticket_messages', { ticket_id: ticketId, sender_type:'bot', sender_name:'CiberStore IA', message: mejor.answer })
+        .then(function(){ sopCargarMensajes(ticketId); });
+    } else {
+      var msg = 'No tengo informacion suficiente para responder eso con seguridad. Si quieres, puedo pasar tu caso con un miembro del equipo — toca "Hablar con una persona" abajo.';
+      sb.post('ticket_messages', { ticket_id: ticketId, sender_type:'bot', sender_name:'CiberStore IA', message: msg })
+        .then(function(){ sopCargarMensajes(ticketId); });
+    }
+  }).catch(function(){ /* si falla la consulta, simplemente no se autoresponde */ });
+}
+
+// ── Escalar a humano ─────────────────────────────────────────────
+/* ================================================================
+   PANEL ADMIN — SOPORTE
+================================================================ */
+var _admSopTicketActual = null;
+
+function admSopVolver(){
+  document.getElementById('adm-sop-vista-lista').style.display = 'block';
+  document.getElementById('adm-sop-vista-detalle').style.display = 'none';
+  _admSopTicketActual = null;
+  admSopCargarLista();
+}
+
+function admSopCargarLista(){
+  var body = document.getElementById('adm-sop-lista-body');
+  if(!body) return;
+  body.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:1.5rem">Cargando...</td></tr>';
+
+  var estado = ((document.getElementById('adm-sop-filtro-estado')||{}).value||'');
+  var userF = ((document.getElementById('adm-sop-filtro-user')||{}).value||'').trim().toLowerCase();
+  var codF = ((document.getElementById('adm-sop-filtro-codigo')||{}).value||'').trim().toUpperCase();
+
+  var qs = 'order=updated_at.desc&limit=100';
+  var filtros = [];
+  if(estado) filtros.push('status=eq.'+estado);
+  if(userF) filtros.push('username=ilike.*'+encodeURIComponent(userF)+'*');
+  if(codF) filtros.push('codigo=ilike.*'+encodeURIComponent(codF)+'*');
+  if(filtros.length) qs = filtros.join('&') + '&' + qs;
+
+  sb.get('tickets', qs).then(function(rows){
+    // Actualizar badge de pendientes sin responder en el nav
+    var pendientes = (rows||[]).filter(function(t){ return t.unread_admin; }).length;
+    var badge = document.getElementById('adm-soporte-badge');
+    if(badge){
+      if(pendientes > 0){ badge.style.display='inline-block'; badge.textContent = pendientes; }
+      else badge.style.display = 'none';
+    }
+
+    if(!rows || !rows.length){
+      body.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:1.5rem">Sin tickets con esos filtros</td></tr>';
+      return;
+    }
+    body.innerHTML = rows.map(function(t){
+      var fecha = t.updated_at ? new Date(t.updated_at).toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '-';
+      var unreadDot = t.unread_admin ? '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#ff6b6b;margin-right:.4rem"></span>' : '';
+      return '<tr style="cursor:pointer" onclick="admSopAbrirTicket('+t.id+')">'
+        + '<td>'+unreadDot+t.codigo+'</td>'
+        + '<td>'+_esc(t.username)+'</td>'
+        + '<td>'+_esc(t.subject)+'</td>'
+        + '<td>'+(SOP_CATEGORIA_LABEL[t.category]||t.category)+'</td>'
+        + '<td><span class="sop-badge sop-badge--'+t.status+'">'+(SOP_ESTADO_LABEL[t.status]||t.status)+'</span></td>'
+        + '<td>'+t.priority+(t.needs_human?' \uD83D\uDEA8':'')+'</td>'
+        + '<td>'+fecha+'</td>'
+        + '<td><button onclick="event.stopPropagation();admSopAbrirTicket('+t.id+')" class="adm-action-btn" style="border-color:rgba(34,211,238,.3);color:#22d3ee">Abrir</button></td>'
+        + '</tr>';
+    }).join('');
+  }).catch(function(){ body.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:1.5rem">Error al cargar</td></tr>'; });
+}
+
+function admSopAbrirTicket(ticketId){
+  _admSopTicketActual = ticketId;
+  document.getElementById('adm-sop-vista-lista').style.display = 'none';
+  document.getElementById('adm-sop-vista-detalle').style.display = 'block';
+
+  sb.get('tickets', 'id=eq.'+ticketId+'&limit=1').then(function(rows){
+    var t = rows && rows[0];
+    if(!t){ showToast('Ticket no encontrado'); admSopVolver(); return; }
+
+    document.getElementById('adm-sop-d-codigo').textContent = t.codigo;
+    document.getElementById('adm-sop-d-user').textContent = t.username + ' \u00b7 ' + (SOP_CATEGORIA_LABEL[t.category]||t.category);
+    document.getElementById('adm-sop-d-estado').value = t.status;
+    document.getElementById('adm-sop-d-prioridad').value = t.priority;
+
+    var pedidoBox = document.getElementById('adm-sop-d-pedido');
+    if(t.pedido_id){
+      sb.get('pedidos', 'id=eq.'+t.pedido_id+'&limit=1').then(function(peds){
+        var p = peds && peds[0];
+        if(p){
+          pedidoBox.style.display = 'block';
+          pedidoBox.innerHTML = '<b style="color:#22d3ee">Pedido relacionado #'+p.id+'</b><br/>'+_esc(p.producto)+' \u00b7 '+(ESTADO_LABEL[p.estado]?ESTADO_LABEL[p.estado].t:p.estado)+' \u00b7 '+_fechaPed(p.created_at);
+        }
+      });
+    } else { pedidoBox.style.display = 'none'; }
+
+    // Marcar como leido por el admin
+    if(t.unread_admin) sb.patch('tickets', { unread_admin:false }, 'id=eq.'+ticketId).then(admSopCargarLista);
+
+    admSopCargarMensajes(ticketId);
+  });
+}
+
+function admSopCargarMensajes(ticketId){
+  var feed = document.getElementById('adm-sop-d-feed');
+  feed.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted);font-size:.78rem">Cargando...</div>';
+  sb.get('ticket_messages', 'ticket_id=eq.'+ticketId+'&order=created_at.asc').then(function(rows){
+    if(!rows || !rows.length){ feed.innerHTML = ''; return; }
+    feed.innerHTML = rows.map(function(m){
+      // En la vista admin: "user" = ellos (izquierda), "bot"/"agent" = nosotros (derecha)
+      var esNuestro = m.sender_type !== 'user';
+      var clase = m.sender_type === 'bot' ? 'sop-msg bot' : (m.sender_type === 'agent' ? 'sop-msg me' : 'sop-msg agent');
+      var label = m.sender_type === 'bot' ? '<div class="sop-msg-label bot">\uD83E\uDD16 IA</div>' : (m.sender_type === 'agent' ? '<div class="sop-msg-label" style="color:#04151a">\uD83D\uDC64 '+_esc(m.sender_name)+'</div>' : '');
+      var img = m.attachment_url ? '<img src="'+m.attachment_url+'" alt="adjunto"/>' : '';
+      var fecha = m.created_at ? new Date(m.created_at).toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+      return '<div class="sop-msg-row '+(esNuestro?'me':'them')+'">'
+        + '<div class="'+clase+'">'+label+_esc(m.message).replace(/\n/g,'<br/>')+img+'</div>'
+        + '<div class="sop-msg-time">'+fecha+'</div>'
+        + '</div>';
+    }).join('');
+    feed.scrollTop = feed.scrollHeight;
+  });
+}
+
+function admSopResponder(){
+  if(!_admSopTicketActual) return;
+  var input = document.getElementById('adm-sop-d-input');
+  var texto = (input.value||'').trim();
+  if(!texto){ showToast('Escribe una respuesta'); return; }
+
+  var ticketId = _admSopTicketActual;
+  var agente = (authSession && authSession.username) || 'Admin';
+
+  sb.post('ticket_messages', { ticket_id: ticketId, sender_type:'agent', sender_name: agente, message: texto }).then(function(){
+    input.value = '';
+    return sb.patch('tickets', { status:'en_atencion', unread_user:true, assigned_agent: agente }, 'id=eq.'+ticketId);
+  }).then(function(){
+    admSopCargarMensajes(ticketId);
+    showToast('Respuesta enviada', 1800);
+  }).catch(function(){ showToast('No se pudo enviar la respuesta'); });
+}
+
+function admSopCambiarEstado(nuevoEstado){
+  if(!_admSopTicketActual) return;
+  var data = { status: nuevoEstado };
+  if(nuevoEstado === 'cerrado') data.closed_at = new Date().toISOString();
+  sb.patch('tickets', data, 'id=eq.'+_admSopTicketActual).then(function(){
+    showToast('Estado actualizado', 1500);
+  }).catch(function(){ showToast('Error al cambiar estado'); });
+}
+
+function admSopCambiarPrioridad(nuevaPrioridad){
+  if(!_admSopTicketActual) return;
+  sb.patch('tickets', { priority: nuevaPrioridad }, 'id=eq.'+_admSopTicketActual).then(function(){
+    showToast('Prioridad actualizada', 1500);
+  }).catch(function(){ showToast('Error al cambiar prioridad'); });
+}
+
 
 function renderResenas(){
   var grid = document.getElementById('resenas-grid');
@@ -5146,7 +5612,7 @@ function comprarPinAPI(productId, precioLocal, nombreProducto){
 // product_id = ID en Recargas América | precio = tu precio de venta en MXN
 var PINES_API = [
   {product_id:5, sku:'FFCH100',  nombre:'Free Fire 100 Diamantes +10 Bono',  precio:14.50,  min:2, diamantes:'110',   img:'img/diam-100.png'},
-  {product_id:3, sku:'FFCH310',  nombre:'Free Fire 310 Diamantes +31 Bono',  precio:43,  min:2, diamantes:'341',   img:'img/diam-310.png'},
+  {product_id:3, sku:'FFCH310',  nombre:'Free Fire 310 Diamantes +31 Bono',  precio:45,  min:2, diamantes:'341',   img:'img/diam-310.png'},
   {product_id:6, sku:'FFCH520',  nombre:'Free Fire 520 Diamantes +52 Bono',  precio:70,  min:2, diamantes:'572',   img:'img/diam-520.png'},
   {product_id:1, sku:'FFCH1060', nombre:'Free Fire 1060 Diamantes +106 Bono', precio:125, min:2, diamantes:'1,166', img:'img/diam-1060.png'},
   {product_id:2, sku:'FFCH2180', nombre:'Free Fire 2180 Diamantes +218 Bono', precio:245, min:2, diamantes:'2,398', img:'img/diam-2180.png'},
@@ -6162,13 +6628,13 @@ var _diamSeleccionado = null;
 // ═══════════ RECARGAS AUTOMÁTICAS (Recargas América type=recharge) ═══════════
 // package_id = el ID de Recargas América | precio = costo USD × 20 (redondeado)
 var RECARGAS_AUTO = [
-  { package_id:351, sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.712,  precio:15,  img:'img/diam-100.png'  },
-  { package_id:348, sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:2.1374, precio:45,  img:'img/diam-310.png'  },
-  { package_id:350, sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.6164, precio:75,  img:'img/diam-520.png'  },
-  { package_id:347, sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.706,  precio:135, img:'img/diam-1060.png' },
-  { package_id:346, sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:13.3209,precio:250, img:'img/diam-2180.png' },
-  { package_id:349, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:33.8848,precio:620, img:'img/diam-5600.png' },
-  { package_id:null, nombre:'11.200 Diamantes + 1.120 Bono', diamantes:12320, costoUSD:66.32, precio:1390, manual:true }
+  { package_id:351, sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.712,  precio:13,  img:'img/diam-100.png'  },
+  { package_id:348, sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:2.1374, precio:40,  img:'img/diam-310.png'  },
+  { package_id:350, sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.6164, precio:68,  img:'img/diam-520.png'  },
+  { package_id:347, sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.706,  precio:120, img:'img/diam-1060.png' },
+  { package_id:346, sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:13.3209,precio:235, img:'img/diam-2180.png' },
+  { package_id:349, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:33.8848,precio:575, img:'img/diam-5600.png' },
+  { package_id:null, nombre:'11.200 Diamantes + 1.120 Bono', diamantes:12320, costoUSD:66.32, precio:1150, manual:true }
 ];
 
 
@@ -7915,7 +8381,7 @@ function _syncBottomNav(id){
 
 
 // ═══════════ PASE BOOYAH (asistente de 3 pasos) ═══════════
-var PASE_PRECIO = 25; // Precio BASE en MXN. El sistema global de fmt() lo convierte a la moneda activa.
+var PASE_PRECIO = 45; // Precio BASE en MXN. El sistema global de fmt() lo convierte a la moneda activa.
 var _comprandoPase = false;
 var _paseIdVerificado = null;
 var _paseNickVerificado = '';
