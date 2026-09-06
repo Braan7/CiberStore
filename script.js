@@ -3313,25 +3313,58 @@ function sopAbrirNuevo(){
 function sopCargarLista(){
   var cont = document.getElementById('sop-lista-tickets');
   if(!cont) return;
-  if(!authSession){ cont.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);font-size:.82rem">Inicia sesion para ver tu soporte</div>'; return; }
+  if(!authSession){
+    cont.innerHTML = '<div class="sop-empty"><div class="sop-empty-ico"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><div class="sop-empty-title">Inicia sesion para ver tu soporte</div></div>';
+    return;
+  }
   cont.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Cargando...</div>';
 
   sb.get('tickets', 'user_id=eq.'+authSession.id+'&order=updated_at.desc&limit=30').then(function(rows){
     if(!rows || !rows.length){
-      cont.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);font-size:.82rem;background:var(--card);border:1px solid var(--border);border-radius:11px">Aun no tienes conversaciones. Toca "Nueva conversacion" para empezar.</div>';
+      cont.innerHTML = '<div class="sop-empty">'
+        + '<div class="sop-empty-ico"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>'
+        + '<div class="sop-empty-title">Aun no tienes conversaciones</div>'
+        + '<div class="sop-empty-sub">Cuando contactes con nuestro equipo, tus conversaciones apareceran aqui.</div>'
+        + '<button class="sop-empty-btn" onclick="sopAbrirNuevo()">Iniciar una conversacion</button>'
+        + '</div>';
       return;
     }
-    cont.innerHTML = rows.map(function(t){
-      var badge = 'sop-badge--'+t.status;
-      var unread = t.unread_user ? ' unread' : '';
-      return '<div class="sop-ticket-card'+unread+'" onclick="sopAbrirTicket('+t.id+')">'
-        + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.6rem;margin-bottom:.35rem">'
-        +   '<div style="font-weight:700;color:#fff;font-size:.86rem">'+_esc(t.subject)+'</div>'
-        +   '<span class="sop-badge '+badge+'">'+(SOP_ESTADO_LABEL[t.status]||t.status)+'</span>'
-        + '</div>'
-        + '<div style="font-size:.72rem;color:var(--muted)">'+t.codigo+' &middot; '+(SOP_CATEGORIA_LABEL[t.category]||t.category)+'</div>'
-        + '</div>';
-    }).join('');
+
+    // Traer el ultimo mensaje de cada ticket para mostrarlo en la tarjeta
+    var ids = rows.map(function(t){ return t.id; }).join(',');
+    sb.get('ticket_messages', 'ticket_id=in.('+ids+')&order=created_at.desc').then(function(msgs){
+      var ultimoPorTicket = {};
+      (msgs||[]).forEach(function(m){ if(!ultimoPorTicket[m.ticket_id]) ultimoPorTicket[m.ticket_id] = m; });
+
+      cont.innerHTML = rows.map(function(t){
+        var badge = 'sop-badge--'+t.status;
+        var unread = t.unread_user ? ' unread' : '';
+        var um = ultimoPorTicket[t.id];
+        var ultimoTxt = um ? (um.sender_type === 'user' ? 'Tu: ' : '') + (um.message || (um.attachment_url ? 'Imagen adjunta' : '')) : (SOP_CATEGORIA_LABEL[t.category]||t.category);
+        var fecha = t.updated_at ? _tiempoRelativo(t.updated_at) : '';
+        return '<div class="sop-ticket-card'+unread+'" onclick="sopAbrirTicket('+t.id+')">'
+          + '<div class="sop-ticket-av"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11a9 9 0 0 1 18 0v5a3 3 0 0 1-3 3h-1v-7h4M3 11v5a3 3 0 0 0 3 3h1v-7H3"/></svg></div>'
+          + '<div class="sop-ticket-body">'
+          +   '<div class="sop-ticket-top"><span style="font-weight:700;color:#fff;font-size:.85rem">'+_esc(t.subject)+'</span><span class="sop-badge '+badge+'">'+(SOP_ESTADO_LABEL[t.status]||t.status)+'</span></div>'
+          +   '<div class="sop-ticket-last">'+_esc(ultimoTxt)+'</div>'
+          +   '<div class="sop-ticket-meta">'+t.codigo+' &middot; '+fecha+'</div>'
+          + '</div>'
+          + (t.unread_user ? '<span class="sop-unread-dot"></span>' : '')
+          + '</div>';
+      }).join('');
+    }).catch(function(){
+      // Si falla traer los ultimos mensajes, mostrar igual la lista sin ese detalle
+      cont.innerHTML = rows.map(function(t){
+        var badge = 'sop-badge--'+t.status;
+        var unread = t.unread_user ? ' unread' : '';
+        return '<div class="sop-ticket-card'+unread+'" onclick="sopAbrirTicket('+t.id+')">'
+          + '<div class="sop-ticket-av"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11a9 9 0 0 1 18 0v5a3 3 0 0 1-3 3h-1v-7h4M3 11v5a3 3 0 0 0 3 3h1v-7H3"/></svg></div>'
+          + '<div class="sop-ticket-body">'
+          +   '<div class="sop-ticket-top"><span style="font-weight:700;color:#fff;font-size:.85rem">'+_esc(t.subject)+'</span><span class="sop-badge '+badge+'">'+(SOP_ESTADO_LABEL[t.status]||t.status)+'</span></div>'
+          +   '<div class="sop-ticket-meta">'+t.codigo+' &middot; '+(SOP_CATEGORIA_LABEL[t.category]||t.category)+'</div>'
+          + '</div></div>';
+      }).join('');
+    });
   }).catch(function(){ cont.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted)">Error al cargar tus conversaciones.</div>'; });
 }
 
@@ -3465,6 +3498,18 @@ function sopQuitarAdjunto(){
 }
 
 // ── Enviar mensaje del usuario ───────────────────────────────────
+// Indicador visual "escribiendo..." mientras el bot prepara su respuesta
+function _sopMostrarEscribiendo(){
+  var feed = document.getElementById('sop-chat-feed');
+  if(!feed) return;
+  var el = document.createElement('div');
+  el.className = 'sop-msg-row them';
+  el.id = 'sop-typing-indicator';
+  el.innerHTML = '<div class="sop-msg bot"><div class="sop-typing"><span></span><span></span><span></span></div></div>';
+  feed.appendChild(el);
+  feed.scrollTop = feed.scrollHeight;
+}
+
 function sopEnviarMensaje(){
   if(_sopEnviando || !_sopTicketActual) return;
   var input = document.getElementById('sop-msg-input');
@@ -3490,7 +3535,8 @@ function sopEnviarMensaje(){
     sb.get('tickets', 'id=eq.'+ticketId+'&limit=1').then(function(rows){
       var t = rows && rows[0];
       if(t && !t.needs_human && t.status !== 'resuelto' && t.status !== 'cerrado'){
-        setTimeout(function(){ sopResponderAutomatico(ticketId, texto); }, 700);
+        _sopMostrarEscribiendo();
+        setTimeout(function(){ sopResponderAutomatico(ticketId, texto); }, 1100);
       }
     });
   }).catch(function(){ showToast('No se pudo enviar tu mensaje'); _sopEnviando = false; });
@@ -3525,6 +3571,20 @@ function sopResponderAutomatico(ticketId, mensajeUsuario){
 }
 
 // ── Escalar a humano ─────────────────────────────────────────────
+function sopEscalarHumano(){
+  if(!_sopTicketActual) return;
+  var ticketId = _sopTicketActual;
+  sb.patch('tickets', { needs_human:true, status:'pendiente', priority:'alta', unread_admin:true }, 'id=eq.'+ticketId).then(function(){
+    return sb.post('ticket_messages', { ticket_id: ticketId, sender_type:'bot', sender_name:'CiberStore IA', message: 'Voy a pasar tu caso con un miembro del equipo para que puedan revisarlo. En cuanto respondan lo veras aqui mismo.' });
+  }).then(function(){
+    showToast('Tu caso fue enviado al equipo', 2500);
+    if(typeof tgSend === 'function'){
+      tgSend('\uD83C\uDFA7 SOPORTE - Se solicito atencion humana\n\uD83D\uDC64 Usuario: '+authSession.username+'\n\uD83C\uDFAB Ticket ID: '+ticketId+'\n\nRevisa el panel admin > Soporte');
+    }
+    sopAbrirTicket(ticketId);
+  }).catch(function(){ showToast('No se pudo escalar el ticket'); });
+}
+
 /* ================================================================
    PANEL ADMIN — SOPORTE
 ================================================================ */

@@ -2430,12 +2430,59 @@ button[style*="linear-gradient"]{
 .ps-pay-btn.on{background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;box-shadow:0 8px 24px rgba(37,211,102,.25)}
 .ps-pay-btn.off{background:rgba(255,255,255,.04);color:#4b5563;cursor:not-allowed}
 /* ═══════════ CENTRO DE SOPORTE ═══════════ */
+
+/* Tarjeta hero principal */
+.sop-hero{background:linear-gradient(160deg,rgba(34,211,238,.07),rgba(255,255,255,.015));border:1px solid rgba(34,211,238,.18);border-radius:20px;padding:1.4rem 1.3rem;margin-bottom:1.5rem}
+.sop-hero-top{display:flex;align-items:flex-start;gap:.9rem;margin-bottom:1.1rem}
+.sop-hero-ico{width:50px;height:50px;flex-shrink:0;border-radius:14px;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#22d3ee;display:flex;align-items:center;justify-content:center}
+.sop-hero-title{font-family:Oxanium,sans-serif;font-weight:800;font-size:1.05rem;color:#fff;margin-bottom:.2rem}
+.sop-hero-sub{font-size:.8rem;color:#9aa3b0;line-height:1.5}
+.sop-hero-btn{width:100%;padding:1rem;background:linear-gradient(135deg,#0e7490,#22d3ee);color:#04151a;border:none;border-radius:14px;font-family:Oxanium,sans-serif;font-weight:900;font-size:.88rem;letter-spacing:.3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.55rem;transition:transform .18s,box-shadow .18s;box-shadow:0 6px 20px rgba(34,211,238,.18)}
+.sop-hero-btn:hover{transform:translateY(-1px);box-shadow:0 10px 26px rgba(34,211,238,.26)}
+.sop-hero-btn:active{transform:translateY(0)}
+.sop-hero-status{display:flex;align-items:center;gap:.5rem;margin-top:1rem;font-size:.72rem;color:#8b93a3}
+.sop-dot-live{width:8px;height:8px;border-radius:50%;background:#25d366;box-shadow:0 0 8px rgba(37,211,102,.7);flex-shrink:0;animation:sopPulse 2s ease-in-out infinite}
+@keyframes sopPulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* Secciones */
+.sop-section-label{font-size:.72rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;font-weight:700;margin:0 0 .7rem}
+
+/* Categorias rapidas */
+.sop-quickcats{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:1.6rem}
+.sop-qc{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:.9rem .8rem;display:flex;align-items:center;gap:.6rem;font-size:.78rem;color:#c8d0e0;font-weight:600;cursor:pointer;transition:background .18s,border-color .18s,transform .18s}
+.sop-qc span{font-size:1.2rem;flex-shrink:0}
+.sop-qc:hover{background:rgba(34,211,238,.06);border-color:rgba(34,211,238,.3);transform:translateY(-1px)}
+.sop-qc:active{transform:translateY(0) scale(.98)}
+
 .sop-cat-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:15px;padding:1.1rem .9rem;text-align:center;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:.5rem;font-size:.82rem;color:#c8d0e0;font-weight:600}
 .sop-cat-card:hover{background:rgba(34,211,238,.06);border-color:rgba(34,211,238,.3);transform:translateY(-2px)}
 
-.sop-ticket-card{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:.95rem 1.05rem;cursor:pointer;transition:border-color .2s}
+/* Estado vacio de la bandeja */
+.sop-empty{text-align:center;padding:2.4rem 1.5rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.07);border-radius:16px;margin-bottom:1.6rem}
+.sop-empty-ico{width:56px;height:56px;margin:0 auto .9rem;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;color:#5c6472}
+.sop-empty-title{font-family:Poppins,sans-serif;font-weight:700;font-size:.88rem;color:#e0e4ea;margin-bottom:.4rem}
+.sop-empty-sub{font-size:.76rem;color:#767e8c;line-height:1.5;margin-bottom:1.1rem;max-width:280px;margin-left:auto;margin-right:auto}
+.sop-empty-btn{padding:.7rem 1.3rem;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.3);color:#22d3ee;border-radius:11px;font-family:Poppins;font-weight:700;font-size:.8rem;cursor:pointer}
+
+/* Tarjetas de conversacion */
+.sop-ticket-card{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:.95rem 1.05rem;cursor:pointer;transition:border-color .2s,background .2s;display:flex;align-items:center;gap:.8rem}
 .sop-ticket-card:hover{border-color:rgba(34,211,238,.3)}
 .sop-ticket-card.unread{border-color:rgba(34,211,238,.4);background:rgba(34,211,238,.04)}
+.sop-ticket-av{width:38px;height:38px;flex-shrink:0;border-radius:11px;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.25);color:#22d3ee;display:flex;align-items:center;justify-content:center}
+.sop-ticket-body{flex:1;min-width:0}
+.sop-ticket-top{display:flex;justify-content:space-between;align-items:flex-start;gap:.6rem;margin-bottom:.25rem}
+.sop-ticket-last{font-size:.74rem;color:#8b93a3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sop-ticket-meta{font-size:.68rem;color:#5c6472;margin-top:.25rem}
+.sop-unread-dot{width:8px;height:8px;border-radius:50%;background:#22d3ee;box-shadow:0 0 6px rgba(34,211,238,.7);flex-shrink:0}
+
+/* Indicadores de confianza */
+.sop-trust-grid{display:flex;flex-direction:column;gap:.6rem;margin-top:1.7rem}
+.sop-trust{display:flex;align-items:center;gap:.75rem;padding:.85rem .95rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:13px}
+.sop-trust-ico{font-size:1.15rem;flex-shrink:0}
+.sop-trust b{display:block;font-size:.8rem;color:#e0e4ea;font-weight:700;margin-bottom:.1rem}
+.sop-trust span{font-size:.72rem;color:#7b8494;line-height:1.4}
+
+.sop-back{background:none;border:none;color:var(--muted);font-size:.8rem;cursor:pointer;display:flex;align-items:center;gap:.4rem;margin-bottom:1.1rem;padding:0}
 
 .sop-badge{font-size:.6rem;font-weight:800;letter-spacing:.4px;padding:.22rem .6rem;border-radius:99px;flex-shrink:0;text-transform:uppercase}
 .sop-badge--pendiente{background:rgba(255,208,0,.15);border:1px solid rgba(255,208,0,.35);color:#ffd000}
@@ -2443,8 +2490,34 @@ button[style*="linear-gradient"]{
 .sop-badge--resuelto{background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.35);color:#25d366}
 .sop-badge--cerrado{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#8b93a3}
 
+/* Chat: header tipo mensajeria */
+.sop-chat-header{display:flex;align-items:center;gap:.7rem;padding-bottom:.9rem;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:.9rem}
+.sop-chat-back{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#c8d0e0;width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:background .18s}
+.sop-chat-back:hover{background:rgba(255,255,255,.09)}
+.sop-chat-av{width:38px;height:38px;flex-shrink:0;border-radius:11px;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.3);color:#22d3ee;display:flex;align-items:center;justify-content:center}
+
+.sop-feed{display:flex;flex-direction:column;gap:.65rem;min-height:280px;max-height:52vh;overflow-y:auto;padding:.3rem .1rem;margin-bottom:.9rem;scroll-behavior:smooth}
+.sop-escalar-btn{width:100%;padding:.75rem;background:rgba(255,180,60,.08);border:1px solid rgba(255,180,60,.3);color:#ffb84d;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.8rem;cursor:pointer;margin-bottom:.9rem;display:flex;align-items:center;justify-content:center;gap:.5rem;transition:background .18s}
+.sop-escalar-btn:hover{background:rgba(255,180,60,.13)}
+
+.sop-input-row{display:flex;gap:.5rem;align-items:flex-end}
+.sop-attach-btn{flex-shrink:0;width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#8b93a3;transition:background .18s}
+.sop-attach-btn:hover{background:rgba(255,255,255,.09)}
+.sop-textarea{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);color:#fff;border-radius:14px;padding:.75rem 1rem;font-family:Poppins;font-size:.85rem;resize:none;outline:none;max-height:100px;transition:border-color .18s}
+.sop-textarea:focus{border-color:rgba(34,211,238,.4)}
+.sop-send-btn{flex-shrink:0;width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#0e7490,#22d3ee);border:none;color:#04151a;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s}
+.sop-send-btn:active{transform:scale(.92)}
+
+/* Indicador "escribiendo..." */
+.sop-typing{display:flex;align-items:center;gap:.3rem;padding:.6rem .9rem}
+.sop-typing span{width:6px;height:6px;border-radius:50%;background:#a78bfa;animation:sopTyping 1.2s infinite}
+.sop-typing span:nth-child(2){animation-delay:.2s}
+.sop-typing span:nth-child(3){animation-delay:.4s}
+@keyframes sopTyping{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+
 /* Burbujas de mensaje */
-.sop-msg{max-width:82%;padding:.7rem .9rem;border-radius:15px;font-size:.83rem;line-height:1.5;position:relative}
+.sop-msg{max-width:82%;padding:.7rem .9rem;border-radius:15px;font-size:.83rem;line-height:1.5;position:relative;animation:sopMsgIn .2s ease}
+@keyframes sopMsgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .sop-msg-row{display:flex;flex-direction:column}
 .sop-msg-row.me{align-items:flex-end}
 .sop-msg-row.them{align-items:flex-start}
@@ -2456,6 +2529,11 @@ button[style*="linear-gradient"]{
 .sop-msg-label.agent{color:#67e8f9}
 .sop-msg-time{font-size:.6rem;color:#6b7280;margin-top:.25rem}
 .sop-msg img{max-width:100%;border-radius:10px;margin-top:.4rem;display:block}
+
+@media(max-width:420px){
+  .sop-quickcats{grid-template-columns:1fr}
+  .sop-hero{padding:1.15rem 1.05rem}
+}
 </style>
 
 <script>
@@ -4857,66 +4935,116 @@ document.addEventListener('keydown',function(e){
 
 <!-- ═══════════════════ CENTRO DE SOPORTE ═══════════════════ -->
 <div class="page" id="page-soporte">
-  <div class="ph"><div class="stag">Ayuda</div><h2 class="ptitle">&#127911; CENTRO DE <span>SOPORTE</span></h2><p class="psub">Resuelve tus dudas al instante o habla con nuestro equipo.</p></div>
+  <div class="ph">
+    <div class="stag">Centro de soporte</div>
+    <h2 class="ptitle">ESTAMOS AQU&Iacute; <span>PARA AYUDARTE</span></h2>
+    <p class="psub">Obt&eacute;n asistencia r&aacute;pida con tus compras, recargas y servicios.</p>
+  </div>
 
   <div style="max-width:720px;margin:0 auto;padding:0 5vw 3rem">
 
     <!-- Vista: Lista de tickets del usuario -->
     <div id="sop-vista-lista">
-      <button onclick="sopAbrirNuevo()" style="width:100%;padding:1.1rem;background:linear-gradient(135deg,#0e7490,#22d3ee);color:#04151a;border:none;border-radius:16px;font-family:Oxanium;font-weight:900;font-size:.92rem;letter-spacing:.3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.55rem;margin-bottom:1.3rem;box-shadow:0 8px 26px rgba(34,211,238,.2)">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-        Nueva conversacion
-      </button>
 
-      <div style="font-size:.72rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;font-weight:700;margin-bottom:.75rem">Tus conversaciones</div>
+      <!-- Tarjeta principal -->
+      <div class="sop-hero">
+        <div class="sop-hero-top">
+          <div class="sop-hero-ico">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11a9 9 0 0 1 18 0v5a3 3 0 0 1-3 3h-1v-7h4M3 11v5a3 3 0 0 0 3 3h1v-7H3"/></svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div class="sop-hero-title">&iquest;Necesitas ayuda?</div>
+            <div class="sop-hero-sub">Nuestro equipo est&aacute; listo para ayudarte.</div>
+          </div>
+        </div>
+        <button onclick="sopAbrirNuevo()" class="sop-hero-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          Iniciar conversaci&oacute;n
+        </button>
+        <div class="sop-hero-status">
+          <span class="sop-dot-live"></span> Soporte disponible &middot; Respuesta promedio: menos de 5 minutos
+        </div>
+      </div>
+
+      <!-- Categorias de ayuda -->
+      <div class="sop-section-label">Selecciona un motivo</div>
+      <div class="sop-quickcats">
+        <div class="sop-qc" onclick="sopCrearTicket('pago','Problema con un pago')"><span>&#128179;</span>Problema con un pago</div>
+        <div class="sop-qc" onclick="sopCrearTicket('pedido','Problema con mi pedido')"><span>&#128230;</span>Problema con mi pedido</div>
+        <div class="sop-qc" onclick="sopCrearTicket('pedido','Problema con una recarga')"><span>&#128142;</span>Problema con una recarga</div>
+        <div class="sop-qc" onclick="sopCrearTicket('cuenta','Problema con mi cuenta')"><span>&#128272;</span>Problema con mi cuenta</div>
+        <div class="sop-qc" onclick="sopCrearTicket('otro','Pregunta sobre un servicio')"><span>&#10067;</span>Pregunta sobre un servicio</div>
+        <div class="sop-qc" onclick="sopCrearTicket('otro','Hablar con un agente')"><span>&#128100;</span>Hablar con un agente</div>
+      </div>
+
+      <!-- Bandeja de conversaciones -->
+      <div class="sop-section-label">Tus conversaciones</div>
       <div id="sop-lista-tickets" style="display:flex;flex-direction:column;gap:.6rem">
-        <div style="text-align:center;padding:2rem;color:var(--muted);font-size:.82rem">Inicia sesion para ver tu soporte</div>
+        <div class="sop-empty">
+          <div class="sop-empty-ico"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+          <div class="sop-empty-title">Inicia sesi&oacute;n para ver tu soporte</div>
+        </div>
+      </div>
+
+      <!-- Indicadores de confianza -->
+      <div class="sop-trust-grid">
+        <div class="sop-trust"><span class="sop-trust-ico">&#9889;</span><div><b>Respuesta r&aacute;pida</b><span>Normalmente respondemos en menos de 5 minutos.</span></div></div>
+        <div class="sop-trust"><span class="sop-trust-ico">&#128274;</span><div><b>Atenci&oacute;n segura</b><span>Tu informaci&oacute;n se mantiene protegida.</span></div></div>
+        <div class="sop-trust"><span class="sop-trust-ico">&#129309;</span><div><b>Atenci&oacute;n personalizada</b><span>Habla directamente con nuestro equipo.</span></div></div>
       </div>
     </div>
 
     <!-- Vista: Elegir categoria para ticket nuevo -->
     <div id="sop-vista-nuevo" style="display:none">
-      <button onclick="sopVolverLista()" style="background:none;border:none;color:var(--muted);font-size:.8rem;cursor:pointer;display:flex;align-items:center;gap:.4rem;margin-bottom:1.1rem;padding:0"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>Volver</button>
-      <div style="font-family:Oxanium;font-weight:800;font-size:1rem;color:#fff;margin-bottom:.3rem">¿En que podemos ayudarte?</div>
-      <div style="font-size:.78rem;color:var(--muted);margin-bottom:1.2rem">Elige la categoria que mejor describa tu situacion</div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:1.3rem" id="sop-categorias">
-        <div class="sop-cat-card" onclick="sopCrearTicket('pedido','Mi pedido')"><span style="font-size:1.5rem">📦</span><div>Mi pedido</div></div>
-        <div class="sop-cat-card" onclick="sopCrearTicket('pago','Pagos y comprobantes')"><span style="font-size:1.5rem">💳</span><div>Pagos y comprobantes</div></div>
-        <div class="sop-cat-card" onclick="sopCrearTicket('entrega','Entrega / demora')"><span style="font-size:1.5rem">🚚</span><div>Entrega o demora</div></div>
-        <div class="sop-cat-card" onclick="sopCrearTicket('cuenta','Mi cuenta')"><span style="font-size:1.5rem">👤</span><div>Mi cuenta</div></div>
-        <div class="sop-cat-card" onclick="sopCrearTicket('otro','Otra cosa')" style="grid-column:1/-1"><span style="font-size:1.5rem">💬</span><div>Otra cosa</div></div>
+      <button onclick="sopVolverLista()" class="sop-back">&#8592; Volver</button>
+      <div class="sop-hero" style="margin-bottom:1.4rem">
+        <div class="sop-hero-top">
+          <div class="sop-hero-ico" style="background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.3);color:#a78bfa">&#129302;</div>
+          <div style="flex:1;min-width:0">
+            <div class="sop-hero-title">Asistente CIBER</div>
+            <div class="sop-hero-sub">Cu&eacute;ntame qu&eacute; necesitas y tratar&eacute; de ayudarte.</div>
+          </div>
+        </div>
+      </div>
+      <div class="sop-section-label">&iquest;En qu&eacute; podemos ayudarte?</div>
+      <div class="sop-quickcats" id="sop-categorias">
+        <div class="sop-qc" onclick="sopCrearTicket('pedido','Mi pedido')"><span>&#128230;</span>Mi pedido</div>
+        <div class="sop-qc" onclick="sopCrearTicket('pago','Pagos y comprobantes')"><span>&#128179;</span>Pagos y comprobantes</div>
+        <div class="sop-qc" onclick="sopCrearTicket('entrega','Entrega o demora')"><span>&#128666;</span>Entrega o demora</div>
+        <div class="sop-qc" onclick="sopCrearTicket('cuenta','Mi cuenta')"><span>&#128100;</span>Mi cuenta</div>
+        <div class="sop-qc" onclick="sopCrearTicket('otro','Otra cosa')"><span>&#128172;</span>Otra cosa</div>
       </div>
     </div>
 
     <!-- Vista: Chat de un ticket -->
     <div id="sop-vista-chat" style="display:none">
-      <div style="display:flex;align-items:center;gap:.7rem;margin-bottom:1rem">
-        <button onclick="sopVolverLista()" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#c8d0e0;width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <div class="sop-chat-header">
+        <button onclick="sopVolverLista()" class="sop-chat-back"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+        <div class="sop-chat-av"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11a9 9 0 0 1 18 0v5a3 3 0 0 1-3 3h-1v-7h4M3 11v5a3 3 0 0 0 3 3h1v-7H3"/></svg></div>
         <div style="flex:1;min-width:0">
-          <div id="sop-chat-codigo" style="font-family:Oxanium;font-weight:800;font-size:.9rem;color:#fff">Ticket</div>
-          <div id="sop-chat-estado" style="font-size:.68rem;color:var(--muted)">-</div>
+          <div id="sop-chat-codigo" style="font-family:Oxanium;font-weight:800;font-size:.88rem;color:#fff">Ticket</div>
+          <div id="sop-chat-estado" style="font-size:.68rem;color:#25d366;display:flex;align-items:center;gap:.3rem"><span class="sop-dot-live" style="width:6px;height:6px"></span>-</div>
         </div>
         <span id="sop-chat-status-badge" class="sop-badge">-</span>
       </div>
 
       <!-- Pedido relacionado (si aplica) -->
-      <div id="sop-pedido-rel" style="display:none;background:rgba(34,211,238,.05);border:1px solid rgba(34,211,238,.2);border-radius:12px;padding:.8rem .95rem;margin-bottom:.9rem;font-size:.78rem"></div>
+      <div id="sop-pedido-rel" style="display:none;background:rgba(34,211,238,.05);border:1px solid rgba(34,211,238,.2);border-radius:12px;padding:.8rem .95rem;margin:.9rem 0;font-size:.78rem"></div>
 
       <!-- Feed de mensajes -->
-      <div id="sop-chat-feed" style="display:flex;flex-direction:column;gap:.65rem;min-height:280px;max-height:52vh;overflow-y:auto;padding:.3rem .1rem;margin-bottom:.9rem"></div>
+      <div id="sop-chat-feed" class="sop-feed"></div>
 
       <!-- Boton escalar a humano -->
-      <button id="sop-btn-escalar" onclick="sopEscalarHumano()" style="width:100%;padding:.7rem;background:rgba(255,180,60,.08);border:1px solid rgba(255,180,60,.3);color:#ffb84d;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.8rem;cursor:pointer;margin-bottom:.9rem;display:flex;align-items:center;justify-content:center;gap:.5rem">🚨 Hablar con una persona</button>
+      <button id="sop-btn-escalar" onclick="sopEscalarHumano()" class="sop-escalar-btn">&#128680; Hablar con una persona</button>
 
       <!-- Input de mensaje -->
-      <div id="sop-input-row" style="display:flex;gap:.5rem;align-items:flex-end">
-        <label for="sop-file-input" style="flex-shrink:0;width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#8b93a3">
+      <div id="sop-input-row" class="sop-input-row">
+        <label for="sop-file-input" class="sop-attach-btn">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
         </label>
         <input type="file" id="sop-file-input" accept="image/*" style="display:none" onchange="sopArchivoElegido(this)"/>
-        <textarea id="sop-msg-input" placeholder="Escribe tu mensaje..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sopEnviarMensaje();}" style="flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);color:#fff;border-radius:14px;padding:.75rem 1rem;font-family:Poppins;font-size:.85rem;resize:none;outline:none;max-height:100px"></textarea>
-        <button onclick="sopEnviarMensaje()" style="flex-shrink:0;width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#0e7490,#22d3ee);border:none;color:#04151a;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="m3 3 18 9-18 9v-7l13-2-13-2V3z"/></svg></button>
+        <textarea id="sop-msg-input" placeholder="Escribe tu mensaje..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sopEnviarMensaje();}" class="sop-textarea"></textarea>
+        <button onclick="sopEnviarMensaje()" class="sop-send-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="m3 3 18 9-18 9v-7l13-2-13-2V3z"/></svg></button>
       </div>
       <div id="sop-preview-adjunto" style="display:none;margin-top:.6rem"></div>
     </div>
