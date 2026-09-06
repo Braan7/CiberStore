@@ -445,6 +445,8 @@ function loginWithProfile(profile){
   if(typeof renderPerfil === 'function') setTimeout(renderPerfil, 100);
   if(typeof renderHomeDashboard === 'function') setTimeout(renderHomeDashboard, 150);
   if(typeof iniciarSaldoRealtime === 'function') setTimeout(iniciarSaldoRealtime, 500);
+  /* Marcar actividad reciente (para el sistema de usuarios inactivos) */
+  sb.rpc && sb.rpc('marcar_actividad', { p_user_id: profile.id }).catch(function(){});
   /* If admin role — open admin panel automatically */
   if(profile.role === 'admin'){
     adminAuthed = true;
@@ -1106,8 +1108,12 @@ function exportCSV(){
         if(typeof cargarWalletPerfil === 'function') cargarWalletPerfil();
         if(typeof _updatePasePagina === 'function') _updatePasePagina();
         if(typeof iniciarSaldoRealtime === 'function') iniciarSaldoRealtime();
-        /* Restore admin panel if was open */
-        if(u.role === 'admin'){
+        /* Marcar actividad reciente (para el sistema de usuarios inactivos) */
+        sb.rpc && sb.rpc('marcar_actividad', { p_user_id: u.id }).catch(function(){});
+        /* Restaurar el acceso al panel admin si el ROL VIENE CONFIRMADO POR LA BASE DE DATOS.
+           u llega de sbGetById(saved.id), es decir, de una consulta fresca a Supabase -
+           no es un valor que el cliente pueda falsificar quedandose solo en localStorage. */
+        if(u.role === 'admin' && !u.banned){
           adminAuthed = true;
           var adminPanel = document.getElementById('full-admin-panel');
           if(adminPanel && adminPanel.classList.contains('open')){

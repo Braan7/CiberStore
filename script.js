@@ -2810,7 +2810,7 @@ function admToggleNav(force){
 }
 
 function admFullTab(tab){
-  var tabs=['stats','users','pedidos','saldos','top','codigos','chat','resenas','soporte','config'];
+  var tabs=['stats','users','pedidos','saldos','top','codigos','chat','resenas','soporte','inactivos','config'];
   tabs.forEach(function(t){
     var btn=document.getElementById('admn-'+t);
     var sec=document.getElementById('adms-'+t);
@@ -2826,6 +2826,7 @@ function admFullTab(tab){
   if(tab==='chat')    admLoadChat();
   if(tab==='resenas') admLoadResenas();
   if(tab==='soporte') admSopCargarLista();
+  if(tab==='inactivos') admInactCargar();
   // Cerrar el drawer al elegir una opción en móvil
   if(window.innerWidth < 901) admToggleNav(false);
 }
@@ -3728,6 +3729,180 @@ function admSopCambiarPrioridad(nuevaPrioridad){
   sb.patch('tickets', { priority: nuevaPrioridad }, 'id=eq.'+_admSopTicketActual).then(function(){
     showToast('Prioridad actualizada', 1500);
   }).catch(function(){ showToast('Error al cambiar prioridad'); });
+}
+
+/* ================================================================
+   PANEL ADMIN — GESTIÓN DE USUARIOS INACTIVOS
+================================================================ */
+var _inactDiasActual = 7;
+var _inactUsuarios = [];         // ultima lista cargada
+var _inactSeleccion = {};        // {id: true} de los marcados
+
+function admInactSetDias(dias){
+  _inactDiasActual = dias;
+  [7,14,21,30].forEach(function(d){
+    var btn = document.getElementById('inact-f-'+d);
+    if(btn) btn.className = 'inact-filtro-btn' + (d===dias ? ' active' : '');
+  });
+  admInactCargar();
+}
+
+function admInactCargar(){
+  var body = document.getElementById('inact-tabla-body');
+  var resumen = document.getElementById('inact-resumen');
+  if(!body || !authSession) return;
+  body.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:1.5rem">Cargando...</td></tr>';
+  _inactSeleccion = {};
+  admInactActualizarBotonMasivo();
+  var chkAll = document.getElementById('inact-check-all');
+  if(chkAll) chkAll.checked = false;
+
+  sb.rpc('listar_usuarios_inactivos', { p_admin_id: authSession.id, p_dias: _inactDiasActual }).then(function(rows){
+    _inactUsuarios = rows || [];
+    if(!_inactUsuarios.length){
+      body.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:1.5rem">No hay usuarios inactivos con ese filtro</td></tr>';
+      if(resumen) resumen.textContent = 'Usuarios que no han usado la plataforma en los ultimos ' + _inactDiasActual + ' dias: 0';
+      return;
+    }
+    if(resumen) resumen.textContent = 'Usuarios que no han usado la plataforma en los ultimos ' + _inactDiasActual + ' dias: ' + _inactUsuarios.length;
+
+    body.innerHTML = _inactUsuarios.map(function(u){
+      var dias = u.dias_inactivo || 0;
+      var estadoClase = dias >= 30 ? 'candidato' : (dias >= 14 ? 'inactivo' : 'activo');
+      var estadoTxt = dias >= 30 ? 'Candidato a eliminacion' : (dias >= 14 ? 'Inactivo' : 'Activo');
+      var estadoIco = dias >= 30 ? '\uD83D\uDD34' : (dias >= 14 ? '\uD83D\uDFE1' : '\uD83D\uDFE2');
+      var fechaReg = u.created_at ? new Date(u.created_at).toLocaleDateString('es-MX') : '-';
+      var fechaVisto = u.last_seen ? new Date(u.last_seen).toLocaleDateString('es-MX') : '-';
+      return '<tr>'
+        + '<td><input type="checkbox" class="inact-check-row" data-id="'+u.id+'" onchange="admInactToggleUno(\''+u.id+'\',this.checked)" style="width:16px;height:16px;accent-color:#22d3ee"/></td>'
+        + '<td>'+_esc(u.username)+(u.nombre?'<br/><span style="font-size:.68rem;color:var(--muted)">'+_esc(u.nombre)+'</span>':'')+'</td>'
+        + '<td>'+fechaReg+'</td>'
+        + '<td>'+fechaVisto+'</td>'
+        + '<td>'+dias+' dias</td>'
+        + '<td style="color:'+(u.saldo>0?'#25d366':'var(--muted)')+';font-weight:'+(u.saldo>0?'700':'400')+'">'+fmt(u.saldo||0)+'</td>'
+        + '<td><span class="inact-estado inact-estado--'+estadoClase+'">'+estadoIco+' '+estadoTxt+'</span></td>'
+        + '<td><button class="inact-del-btn" onclick="admInactConfirmarUno(\''+u.id+'\')">Eliminar</button></td>'
+        + '</tr>';
+    }).join('');
+  }).catch(function(e){
+    body.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:1.5rem">Error al cargar (&#191;eres admin?)</td></tr>';
+    console.error('[INACTIVOS]', e);
+  });
+}
+
+function admInactToggleAll(marcar){
+  document.querySelectorAll('.inact-check-row').forEach(function(chk){
+    chk.checked = marcar;
+    if(marcar) _inactSeleccion[chk.dataset.id] = true;
+    else delete _inactSeleccion[chk.dataset.id];
+  });
+  admInactActualizarBotonMasivo();
+}
+
+function admInactToggleUno(id, marcado){
+  if(marcado) _inactSeleccion[id] = true;
+  else delete _inactSeleccion[id];
+  admInactActualizarBotonMasivo();
+}
+
+function admInactActualizarBotonMasivo(){
+  var btn = document.getElementById('inact-btn-masivo');
+  var count = Object.keys(_inactSeleccion).length;
+  if(!btn) return;
+  if(count > 0){
+    btn.disabled = false; btn.style.opacity = '1';
+    btn.textContent = 'Eliminar seleccionados ('+count+')';
+  } else {
+    btn.disabled = true; btn.style.opacity = '.5';
+    btn.textContent = 'Eliminar seleccionados';
+  }
+}
+
+// ── Confirmación de eliminación INDIVIDUAL ──────────────────────
+function admInactConfirmarUno(userId){
+  var u = _inactUsuarios.find(function(x){ return x.id === userId; });
+  if(!u) return;
+
+  var tieneSaldo = (u.saldo||0) > 0;
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px)';
+
+  var advertenciaSaldo = tieneSaldo
+    ? '<div style="background:rgba(255,80,80,.1);border:1px solid rgba(255,80,80,.35);border-radius:11px;padding:.8rem .9rem;margin:.9rem 0;font-size:.78rem;color:#ff9a9a;line-height:1.6"><b>&#9888;&#65039; Este usuario tiene '+fmt(u.saldo)+' de saldo.</b><br/>Si continuas, su cuenta y todos sus datos seran eliminados permanentemente. Esta accion no se puede deshacer.</div>'
+    : '';
+
+  var campoConfirmar = tieneSaldo
+    ? '<div style="margin-top:.9rem"><label style="font-size:.72rem;color:#8b93a3;display:block;margin-bottom:.4rem">Escribe <b style="color:#ff6b6b">ELIMINAR</b> para confirmar</label><input id="inact-confirm-txt" type="text" class="finput" style="margin-bottom:0" placeholder="ELIMINAR"/></div>'
+    : '';
+
+  overlay.innerHTML = '<div style="background:#0e1118;border:1.5px solid rgba(255,80,80,.4);border-radius:18px;padding:1.5rem;max-width:380px;width:100%">'
+    + '<div style="font-size:1.8rem;text-align:center;margin-bottom:.5rem">&#128465;&#65039;</div>'
+    + '<div style="font-family:Oxanium;font-weight:900;font-size:1rem;color:#fff;text-align:center;margin-bottom:.5rem">Eliminar a '+_esc(u.username)+'</div>'
+    + '<div style="font-size:.8rem;color:#8b93a3;text-align:center;line-height:1.6">Se borraran su perfil, pedidos, movimientos de saldo, likes enviados, tickets de soporte y resenas.</div>'
+    + advertenciaSaldo
+    + campoConfirmar
+    + '<div style="display:flex;gap:.65rem;margin-top:1.2rem">'
+    + '<button id="inact-cancel-btn" style="flex:1;padding:.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#8b93a3;border-radius:11px;font-family:Poppins;font-weight:700;font-size:.82rem;cursor:pointer">Cancelar</button>'
+    + '<button id="inact-confirm-btn" style="flex:1;padding:.75rem;background:linear-gradient(135deg,#a30000,#ff6b6b);border:none;color:#fff;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.82rem;cursor:pointer">Eliminar</button>'
+    + '</div></div>';
+
+  document.body.appendChild(overlay);
+  document.getElementById('inact-cancel-btn').onclick = function(){ overlay.remove(); };
+  document.getElementById('inact-confirm-btn').onclick = function(){
+    if(tieneSaldo){
+      var txt = (document.getElementById('inact-confirm-txt').value || '').trim().toUpperCase();
+      if(txt !== 'ELIMINAR'){ showToast('Escribe ELIMINAR para confirmar'); return; }
+    }
+    overlay.remove();
+    admInactEjecutarBorrado([userId]);
+  };
+}
+
+// ── Confirmación de eliminación MASIVA ──────────────────────────
+function admInactConfirmarMasivo(){
+  var ids = Object.keys(_inactSeleccion);
+  if(!ids.length) return;
+  var seleccionados = _inactUsuarios.filter(function(u){ return _inactSeleccion[u.id]; });
+  var saldoTotal = seleccionados.reduce(function(s,u){ return s + (u.saldo||0); }, 0);
+
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px)';
+  overlay.innerHTML = '<div style="background:#0e1118;border:1.5px solid rgba(255,80,80,.4);border-radius:18px;padding:1.5rem;max-width:380px;width:100%">'
+    + '<div style="font-size:1.8rem;text-align:center;margin-bottom:.5rem">&#128465;&#65039;</div>'
+    + '<div style="font-family:Oxanium;font-weight:900;font-size:1rem;color:#fff;text-align:center;margin-bottom:.7rem">Eliminacion masiva</div>'
+    + '<div style="font-size:.82rem;color:#c8d0e0;text-align:center;line-height:1.7">Vas a eliminar <b style="color:#fff">'+ids.length+' usuarios</b>.<br/>Saldo total de las cuentas: <b style="color:#ff6b6b">'+fmt(saldoTotal)+' MXN</b>.<br/><br/>Esta accion eliminara permanentemente sus cuentas y datos.</div>'
+    + '<div style="margin-top:1rem"><label style="font-size:.72rem;color:#8b93a3;display:block;margin-bottom:.4rem">Escribe <b style="color:#ff6b6b">ELIMINAR</b> para confirmar</label><input id="inact-confirm-masivo-txt" type="text" class="finput" style="margin-bottom:0" placeholder="ELIMINAR"/></div>'
+    + '<div style="display:flex;gap:.65rem;margin-top:1.2rem">'
+    + '<button id="inact-cancel-masivo-btn" style="flex:1;padding:.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#8b93a3;border-radius:11px;font-family:Poppins;font-weight:700;font-size:.82rem;cursor:pointer">Cancelar</button>'
+    + '<button id="inact-confirm-masivo-btn2" style="flex:1;padding:.75rem;background:linear-gradient(135deg,#a30000,#ff6b6b);border:none;color:#fff;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.82rem;cursor:pointer">Eliminar todos</button>'
+    + '</div></div>';
+
+  document.body.appendChild(overlay);
+  document.getElementById('inact-cancel-masivo-btn').onclick = function(){ overlay.remove(); };
+  document.getElementById('inact-confirm-masivo-btn2').onclick = function(){
+    var txt = (document.getElementById('inact-confirm-masivo-txt').value || '').trim().toUpperCase();
+    if(txt !== 'ELIMINAR'){ showToast('Escribe ELIMINAR para confirmar'); return; }
+    overlay.remove();
+    admInactEjecutarBorrado(ids);
+  };
+}
+
+// ── Ejecuta el borrado real, uno por uno, vía la función segura del servidor ──
+function admInactEjecutarBorrado(ids){
+  showToast('Eliminando '+ids.length+' cuenta(s)...', 3000);
+  var completados = 0, errores = 0;
+
+  function siguiente(i){
+    if(i >= ids.length){
+      showToast('Listo: '+completados+' eliminado(s)'+(errores?', '+errores+' con error':''), 3500);
+      admInactCargar();
+      return;
+    }
+    sb.rpc('eliminar_usuario_completo', { p_admin_id: authSession.id, p_target_id: ids[i] })
+      .then(function(){ completados++; siguiente(i+1); })
+      .catch(function(e){ errores++; console.error('[INACTIVOS] Error al borrar', ids[i], e); siguiente(i+1); });
+  }
+  siguiente(0);
 }
 
 

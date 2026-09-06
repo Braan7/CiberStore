@@ -25,11 +25,30 @@ function sbReq(method, table, body, qs, extraHeaders){
   });
 }
 
+function sbRpc(fn, params){
+  var url = SB_URL + '/rest/v1/rpc/' + fn;
+  return fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type':  'application/json',
+      'apikey':        SB_KEY,
+      'Authorization': 'Bearer ' + SB_KEY
+    },
+    body: JSON.stringify(params || {})
+  }).then(function(r){
+    return r.json().then(function(data){
+      if(data && data.code && data.message) return Promise.reject(new Error(data.message));
+      return data;
+    });
+  });
+}
+
 var sb = {
   get:    function(t, q)    { return sbReq('GET',    t, null, q); },
   post:   function(t, d)    { return sbReq('POST',   t, d); },
   patch:  function(t, d, q) { return sbReq('PATCH',  t, d, q); },
   del:    function(t, q)    { return sbReq('DELETE', t, null, q); },
+  rpc:    function(fn, params) { return sbRpc(fn, params); },
   upsert: function(t, d){
     return sbReq('POST', t, d, null,
       {'Prefer': 'resolution=merge-duplicates,return=representation'});
