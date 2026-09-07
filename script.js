@@ -1323,7 +1323,8 @@ function copyClabe(){
   navigator.clipboard.writeText('167650000086005710').then(function(){showToast('CLABE copiada',2000);}).catch(function(){showToast('CLABE: 167650000086005710',3000);});
 }
 function copyBinanceID(){
-  navigator.clipboard.writeText('1106987175').then(function(){showToast('ID copiado: 1106987175',2000);}).catch(function(){showToast('Binance ID: 1106987175',3000);});
+  var addr = 'TKkrmoStfuqpjP6C8oooJPqcuKchn8Gbdf';
+  navigator.clipboard.writeText(addr).then(function(){showToast('Direccion copiada',2000);}).catch(function(){showToast('USDT: '+addr,3000);});
 }
 
 /* \u2500\u2500 PROMO \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
@@ -6421,7 +6422,6 @@ function enviarComprobante(metodo){
   // Calcular el monto a ACREDITAR (numero limpio en MXN) segun el metodo
   var montoAcreditar = 0;
   if(metodo === 'binance' && _bncSel){ montoAcreditar = _bncSel.recibe; }
-  else if(metodo === 'zelle'){ montoAcreditar = _zelleMXN((document.getElementById('zelle-monto')||{}).value); }
   else { montoAcreditar = parseFloat((document.getElementById('stori-monto')||{}).value) || 0; }
 
   var reader = new FileReader();
@@ -6443,9 +6443,7 @@ function enviarComprobante(metodo){
       if(res && res.success){
         showToast('✓ Comprobante enviado! Te acreditaremos pronto.', 4000);
         // Cerrar el modal correspondiente
-        if(metodo==='stori') closeStoriModal();
-        else if(metodo==='zelle') closeZelleModal();
-        else if(metodo==='binance') closeBinanceModal();
+        if(metodo==='binance') closeBinanceModal();
         // Mantener bloqueado 20s mas para evitar reenvios del mismo comprobante
         setTimeout(_liberarEnvio, 20000);
       } else {
@@ -8990,13 +8988,9 @@ function rcPonMonto(v){
 function rcActualizar(){
   var btn = document.getElementById('rc-continuar');
   if(!btn) return;
-  var monto = parseFloat((document.getElementById('rc-monto')||{}).value||'0')||0;
-  var min = _rcCur==='MXN' ? 20 : 3;
-  var listo = _rcMetodo && monto >= min;
-  // Binance no exige monto (los paquetes estan en su ventana)
-  if(_rcMetodo === 'binance') listo = true;
+  var listo = !!_rcMetodo; // Unico metodo (USDT) no exige monto aqui; los paquetes estan en su ventana
   btn.className = 'rc-continuar' + (listo?' on':'');
-  btn.textContent = !_rcMetodo ? 'Selecciona metodo de pago' : (listo ? 'Continuar' : 'Monto minimo $'+min+' '+_rcCur);
+  btn.textContent = !_rcMetodo ? 'Selecciona metodo de pago' : 'Continuar';
 }
 
 function rcElegirMetodo(m){
@@ -9004,46 +8998,19 @@ function rcElegirMetodo(m){
   cerrarMetodoSheet();
   var txt = document.getElementById('rc-met-txt');
   var ico = document.getElementById('rc-met-ico');
-  var nombres = { transferencia:'Transferencia Bancaria', zelle:'Zelle', binance:'Binance Pay' };
+  var nombres = { binance:'USDT (TRC-20)' };
   if(txt){ txt.textContent = nombres[m]||m; txt.className='txt sel'; }
   if(ico){
-    if(m==='transferencia') ico.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round"><path d="M3 9.5 12 4l9 5.5"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8"/><path d="M3 20h18"/></svg>';
-    else if(m==='zelle') ico.innerHTML = '<span style="font-family:Poppins;font-weight:800;color:#a78bfa;font-size:1.05rem">Z</span>';
-    else ico.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="#f0b90b"><path d="M12 2 8.6 5.4 12 8.8l3.4-3.4L12 2zM5.4 8.6 2 12l3.4 3.4L8.8 12 5.4 8.6zM18.6 8.6 15.2 12l3.4 3.4L22 12l-3.4-3.4zM12 15.2l-3.4 3.4L12 22l3.4-3.4-3.4-3.4zM12 9.7 9.7 12l2.3 2.3 2.3-2.3L12 9.7z"/></svg>';
+    ico.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#26a17b" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 9h8M12 9v6M9.5 14h5"/></svg>';
   }
-  // Si eligio USD y transferencia (MXN), cambiar a MXN automatico
-  if(m==='transferencia' && _rcCur==='USD') rcSetCur('MXN');
-  if(m==='zelle' && _rcCur==='MXN') rcSetCur('USD');
   rcActualizar();
 }
 
 function rcContinuar(){
   if(!_rcMetodo){ abrirMetodoSheet(); return; }
-  var monto = parseFloat((document.getElementById('rc-monto')||{}).value||'0')||0;
-  var min = _rcCur==='MXN' ? 20 : 3;
-
-  if(_rcMetodo === 'binance'){
-    // Binance: abrir su ventana con los paquetes de bono tal cual
-    cerrarRecargaSheet();
-    if(typeof openBinanceModal==='function') openBinanceModal();
-    return;
-  }
-  if(monto < min){ showToast('Monto minimo $'+min+' '+_rcCur); return; }
-
+  // Unico metodo disponible: USDT. Abre su ventana con los montos, tal cual.
   cerrarRecargaSheet();
-  if(_rcMetodo === 'transferencia'){
-    if(typeof openStoriModal==='function') openStoriModal();
-    setTimeout(function(){
-      var i = document.getElementById('stori-monto');
-      if(i){ i.value = monto; }
-    }, 150);
-  } else if(_rcMetodo === 'zelle'){
-    if(typeof openZelleModal==='function') openZelleModal();
-    setTimeout(function(){
-      var i = document.getElementById('zelle-monto');
-      if(i){ i.value = monto; if(typeof calcZelleConversion==='function') calcZelleConversion(); }
-    }, 150);
-  }
+  if(typeof openBinanceModal==='function') openBinanceModal();
 }
 
 
@@ -9135,9 +9102,7 @@ function recElegirMetodo(metodo){
   var montoMXN = (_recMoneda==='USD') ? Math.round(monto * USD_MXN) : monto;
   _recMontoElegido = montoMXN;
 
-  if(metodo==='transfer'){ if(typeof openStoriModal==='function') openStoriModal(montoMXN); }
-  else if(metodo==='binance'){ if(typeof openBinanceModal==='function') openBinanceModal(montoMXN); }
-  else if(metodo==='zelle'){ if(typeof openZelleModal==='function') openZelleModal(montoMXN); }
+  if(metodo==='binance'){ if(typeof openBinanceModal==='function') openBinanceModal(montoMXN); }
 }
 var _recMontoElegido = 0;
 

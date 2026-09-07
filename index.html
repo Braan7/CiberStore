@@ -3628,21 +3628,9 @@ document.addEventListener('keydown',function(e){
     <div class="shop-sec-label">M&eacute;todo de pago</div>
     <div style="display:flex;flex-direction:column;gap:.65rem">
 
-      <div onclick="recElegirMetodo('transfer')" class="wl-pay" style="border-color:rgba(37,211,102,.15)">
-        <div class="wl-pay-ico" style="background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.25)"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M4 10h16M5 10 12 4l7 6M6 10v11M18 10v11M10 10v11M14 10v11"/></svg></div>
-        <div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap"><span style="font-size:.96rem;font-weight:700;color:#fff">Transferencia</span><span class="wl-tag" style="background:rgba(37,211,102,.14);color:#25d366">M&eacute;xico</span></div><div style="font-size:.74rem;color:#8b93a3;margin-top:.15rem">SPEI &middot; dep&oacute;sito bancario</div></div>
-        <span class="wl-arrow">&#8250;</span>
-      </div>
-
-      <div onclick="recElegirMetodo('binance')" class="wl-pay" style="border-color:rgba(240,185,11,.15)">
-        <div class="wl-pay-ico" style="background:rgba(240,185,11,.1);border:1px solid rgba(240,185,11,.25)"><svg width="23" height="23" viewBox="0 0 24 24" fill="#f0b90b"><path d="M12 2 8.5 5.5 10 7l2-2 2 2 1.5-1.5L12 2zM5.5 8.5 2 12l3.5 3.5L7 14l-2-2 2-2-1.5-1.5zM18.5 8.5 17 10l2 2-2 2 1.5 1.5L22 12l-3.5-3.5zM12 10l-2 2 2 2 2-2-2-2zM8.5 15.5 10 17l2-2 2 2 1.5-1.5L14 14l-2 2-2-2-1.5 1.5z"/></svg></div>
-        <div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap"><span style="font-size:.96rem;font-weight:700;color:#fff">Binance Pay</span><span class="wl-tag" style="background:rgba(240,185,11,.16);color:#f0b90b">Bono extra</span></div><div style="font-size:.74rem;color:#8b93a3;margin-top:.15rem">USDT &middot; respondemos en menos de 5 min</div></div>
-        <span class="wl-arrow">&#8250;</span>
-      </div>
-
-      <div onclick="recElegirMetodo('zelle')" class="wl-pay" style="border-color:rgba(103,232,249,.15)">
-        <div class="wl-pay-ico" style="background:rgba(103,232,249,.08);border:1px solid rgba(103,232,249,.22)"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="#67e8f9" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12L6 16h12"/></svg></div>
-        <div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap"><span style="font-size:.96rem;font-weight:700;color:#fff">Zelle</span><span class="wl-tag" style="background:rgba(103,232,249,.12);color:#67e8f9">USA</span></div><div style="font-size:.74rem;color:#8b93a3;margin-top:.15rem">Desde USA &middot; +6 USD comisi&oacute;n</div></div>
+      <div onclick="recElegirMetodo('binance')" class="wl-pay" style="border-color:rgba(38,161,123,.2)">
+        <div class="wl-pay-ico" style="background:rgba(38,161,123,.12);border:1px solid rgba(38,161,123,.3)"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="#26a17b" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 9h8M12 9v6M9.5 14h5"/></svg></div>
+        <div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap"><span style="font-size:.96rem;font-weight:700;color:#fff">USDT</span><span class="wl-tag" style="background:rgba(38,161,123,.16);color:#26a17b">TRC-20</span></div><div style="font-size:.74rem;color:#8b93a3;margin-top:.15rem">Red TRON &middot; respondemos en menos de 5 min</div></div>
         <span class="wl-arrow">&#8250;</span>
       </div>
 
@@ -4010,22 +3998,10 @@ document.addEventListener('keydown',function(e){
 
       <div class="order-disp" id="hcff-order">PEDIDO #...</div>
 
-      <!-- Pago tabs -->
-      <div style="display:flex;gap:.45rem;margin-bottom:.85rem">
-        <button id="hcff-tab-stori" onclick="hcffPayTab('stori')" style="flex:1;padding:.38rem .55rem;border-radius:6px;font-family:'Poppins';font-weight:800;font-size:.7rem;letter-spacing:1px;cursor:pointer;border:1px solid rgba(37,211,102,.38);background:rgba(37,211,102,.1);color:#25d366">Transferencia Bancaria</button>
-        <button id="hcff-tab-binance" onclick="hcffPayTab('binance')" style="flex:1;padding:.38rem .55rem;border-radius:6px;font-family:'Poppins';font-weight:800;font-size:.7rem;letter-spacing:1px;cursor:pointer;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--muted)">BINANCE</button>
-      </div>
-      <div id="hcff-paybox-stori" class="pay-box">
-        <div class="pay-title">Transferencia Bancaria</div>
-        <div class="pay-field"><div class="pf-label">Banco</div><div class="pf-val">Transferencia Bancaria</div></div>
-        <div class="pay-field"><div class="pf-label">Titular</div><div class="pf-val"></div></div>
-        <div class="pay-field"><div><div class="pf-label">Cuenta / Número de Tarjeta</div><div class="pf-val pf-acc">661180006413009414</div></div><button class="copy-btn" onclick="copyClabe()">Copiar</button></div>
-        <div class="pay-note">Transfiere el monto exacto y manda el comprobante + numero de pedido al WhatsApp.</div>
-      </div>
-      <div id="hcff-paybox-binance" class="pay-box" style="display:none;background:rgba(240,185,11,.05);border-color:rgba(240,185,11,.2)">
-        <div class="pay-title" style="color:#f0b90b">&#128176; Binance Pay</div>
-        <div class="pay-field"><div><div class="pf-label">Binance ID</div><div class="pf-val" style="color:#f0b90b;letter-spacing:1px">1106987175</div></div><button class="copy-btn" onclick="copyBinanceID()" style="border-color:rgba(240,185,11,.3);color:#f0b90b">Copiar</button></div>
-        <div class="pay-note">Binance App &gt; Pay &gt; ID 1106987175 &gt; transfiere en USDT &gt; manda comprobante al WhatsApp.</div>
+      <div id="hcff-paybox-binance" class="pay-box" style="background:rgba(38,161,123,.05);border-color:rgba(38,161,123,.2)">
+        <div class="pay-title" style="color:#26a17b">&#128176; USDT (TRC-20)</div>
+        <div class="pay-field"><div><div class="pf-label">Direcci&oacute;n</div><div class="pf-val" style="color:#26a17b;letter-spacing:.3px;font-size:.72rem;word-break:break-all">TKkrmoStfuqpjP6C8oooJPqcuKchn8Gbdf</div></div><button class="copy-btn" onclick="copyBinanceID()" style="border-color:rgba(38,161,123,.3);color:#26a17b">Copiar</button></div>
+        <div class="pay-note">Env&iacute;a USDT por la red TRON (TRC-20) &gt; manda comprobante al WhatsApp.</div>
       </div>
 
       <!-- Campos -->
@@ -4932,7 +4908,7 @@ document.addEventListener('keydown',function(e){
   <div style="max-width:680px;margin:0 auto;padding:0 5vw 3rem">
     <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Es seguro comprar aqui? <span class="faq-arrow">&#9660;</span></div><div class="faq-a"><div class="faq-a-inner">Si. Llevamos mas de 2 anos vendiendo. Mas de 1,200 pedidos completados con 5 estrellas de calificacion. Tu informacion solo se usa para procesar tu pedido.</div></div></div>
     <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Cuanto tarda la entrega? <span class="faq-arrow">&#9660;</span></div><div class="faq-a"><div class="faq-a-inner">Los diamantes y likes se entregan en menos de 3 minutos despues de confirmar tu pago. El honor de clan puede tardar hasta 24 hrs segun la region.</div></div></div>
-    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Como pago? <span class="faq-arrow">&#9660;</span></div><div class="faq-a"><div class="faq-a-inner">Aceptamos transferencia bancaria Klar (Número de Tarjeta: 661180006413009414) y Binance Pay (ID: 1106987175). Proximamente PayPal y Mercado Pago.</div></div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Como pago? <span class="faq-arrow">&#9660;</span></div><div class="faq-a"><div class="faq-a-inner">Aceptamos pagos en USDT por la red TRON (TRC-20). Direccion: TKkrmoStfuqpjP6C8oooJPqcuKchn8Gbdf</div></div></div>
     <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Necesito dar mi contrasena de Free Fire? <span class="faq-arrow">&#9660;</span></div><div class="faq-a"><div class="faq-a-inner">Nunca. Para diamantes y likes solo necesitas tu ID de Free Fire. Para la experiencia de cuenta se usa un token temporal que no compromete tu contrasena.</div></div></div>
     <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Hay riesgo de baneo? <span class="faq-arrow">&#9660;</span></div><div class="faq-a"><div class="faq-a-inner">Los diamantes, likes y honor de clan no tienen riesgo. Para la experiencia de cuenta recomendamos usar cuentas secundarias. El riesgo en cuentas principales es bajo pero existe.</div></div></div>
     <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Que hago si no llega mi pedido? <span class="faq-arrow">&#9660;</span></div><div class="faq-a"><div class="faq-a-inner">Escribenos al WhatsApp +52 55 4846 1200 con tu numero de pedido y comprobante de pago. Respondemos en menos de 5 minutos y resolvemos de inmediato.</div></div></div>
@@ -5236,153 +5212,55 @@ document.addEventListener('keydown',function(e){
     </div>
   </div>
 </div>
-<div class="modal-ov" id="modal-stori">
-  <div class="modal" style="max-width:430px">
-    <div class="pm-head pm-head--green">
-      <div style="display:flex;align-items:center;gap:.65rem">
-        <div class="pm-icon pm-icon--green">🏦</div>
-        <div><div class="pm-title">Transferencia Bancaria</div><div class="pm-sub">Klar · México</div></div>
-      </div>
-      <button class="pm-close" onclick="closeStoriModal()">✕</button>
-    </div>
-    <div class="modal-b" style="display:flex;flex-direction:column;gap:.85rem">
-      <div class="pm-bank-card">
-        <div class="pm-bank-top">
-          <div><div class="pm-bank-label">Banco</div><div class="pm-bank-name">KLAR</div></div>
-          <div style="opacity:.55;font-size:1.5rem">🏦</div>
-        </div>
-        <div class="pm-bank-num-wrap">
-          <div class="pm-bank-label" style="margin-bottom:.3rem">Número de tarjeta</div>
-          <div class="pm-bank-num">6611 8000 6413 0094 14</div>
-        </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.75rem;gap:.5rem">
-          <div><div class="pm-bank-label">Titular</div><div style="font-size:.88rem;font-weight:700;color:#e8e8ea">Francisco Meneses</div></div>
-          <button class="pm-copy-btn pm-copy-btn--green" onclick="copyKlarNumber()"><span id="klar-copy-ico">📋</span><span id="klar-copy-txt">Copiar</span></button>
-        </div>
-      </div>
-      <div class="pm-alert pm-alert--amber"><span style="font-size:1rem;flex-shrink:0">⚠️</span><div><div style="font-weight:700;font-size:.78rem;color:#f59e0b;margin-bottom:.1rem">Importante</div><div style="font-size:.71rem;color:#c9a96e;line-height:1.45">Transfiere exactamente el monto y adjunta tu comprobante para acreditar el saldo.</div></div></div>
-      <div><div class="pm-field-label">💰 Monto transferido *</div>
-        <div style="position:relative;display:flex;align-items:center">
-          <span style="position:absolute;left:.85rem;font-family:Oxanium;font-weight:900;font-size:1rem;color:#25d366;pointer-events:none">$</span>
-          <input class="finput" id="stori-monto" type="number" inputmode="numeric" placeholder="0.00" style="padding-left:2rem;padding-right:3.2rem;font-size:1.05rem;margin-bottom:0;border-color:rgba(37,211,102,.35);background:rgba(37,211,102,.05)"/>
-          <span style="position:absolute;right:.85rem;font-size:.68rem;font-weight:800;color:#25d366;pointer-events:none">MXN</span>
-        </div>
-      </div>
-      <div><div class="pm-field-label pm-field-label--muted">Referencia <em style="font-weight:400">(opcional)</em></div>
-        <input class="finput" id="stori-ref" type="text" placeholder="Ej: Ref-12345" style="margin-bottom:0;font-size:.88rem"/>
-      </div>
-      <div><div class="pm-field-label">📷 Comprobante *</div>
-        <div class="pm-upload" id="stori-upload-area">
-          <input class="finput" id="stori-foto" type="file" accept="image/*" style="display:none;margin-bottom:0"/>
-          <div id="stori-upload-prompt"><div style="font-size:1.7rem;margin-bottom:.35rem">📷</div><div style="font-weight:700;font-size:.85rem;color:#fff;margin-bottom:.15rem">Sube tu comprobante</div><div style="font-size:.7rem;color:#6b7280">Toca para seleccionar · JPG, PNG · Máx. 10MB</div></div>
-          <div id="stori-upload-preview" style="display:none"><img id="stori-preview-img" src="" style="max-width:100%;max-height:150px;border-radius:10px;margin-bottom:.4rem"/><div id="stori-preview-name" style="font-size:.75rem;color:#25d366;margin-bottom:.35rem;word-break:break-all"></div><button type="button" onclick="clearStoriFile()" class="pm-clear-btn">Cambiar imagen</button></div>
-        </div>
-      </div>
-      <div class="pm-alert pm-alert--blue"><span style="flex-shrink:0">ℹ️</span><span style="font-size:.7rem;color:#93c5fd;line-height:1.45"><b>Envía tu solicitud solo 1 vez.</b> Presiona el botón una vez y espera confirmación.</span></div>
-      <button id="stori-submit-btn" onclick="enviarComprobante('stori')" class="pm-btn pm-btn--green"><span id="stori-btn-ico">✓</span><span id="stori-btn-txt">Enviar Comprobante</span></button>
-      <div style="font-size:.67rem;color:#6b7280;text-align:center">Acreditación en menos de 24 horas</div>
-    </div>
-  </div>
-</div>
-
-<div class="modal-ov" id="modal-zelle">
-  <div class="modal" style="max-width:430px">
-    <div class="pm-head pm-head--purple">
-      <div style="display:flex;align-items:center;gap:.65rem">
-        <div class="pm-icon pm-icon--purple">🇺🇸</div>
-        <div><div class="pm-title">Pago con Zelle</div><div class="pm-sub">Desde USA · USD</div></div>
-      </div>
-      <button class="pm-close" onclick="closeZelleModal()">✕</button>
-    </div>
-    <div class="modal-b" style="display:flex;flex-direction:column;gap:.85rem">
-      <div class="pm-alert pm-alert--purple"><span style="font-size:1rem;flex-shrink:0">💜</span><div style="font-size:.72rem;color:#c4b5fd;line-height:1.45">Este método tiene <strong style="color:#67e8f9">+6 USD de comisión</strong> (3 Zelle + 3 banco)</div></div>
-      <div class="pm-bank-card pm-bank-card--purple">
-        <div class="pm-bank-top">
-          <div><div class="pm-bank-label">Método</div><div class="pm-bank-name" style="color:#67e8f9">ZELLE</div></div>
-          <div style="opacity:.55;font-size:1.5rem">💜</div>
-        </div>
-        <div class="pm-bank-num-wrap" style="border-color:rgba(103,232,249,.15)">
-          <div class="pm-bank-label" style="margin-bottom:.3rem">Número Zelle</div>
-          <div class="pm-bank-num" style="color:#67e8f9;font-size:1.15rem">+1 (440) 705-0630</div>
-        </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.75rem;gap:.5rem">
-          <div><div class="pm-bank-label">Titular</div><div style="font-size:.82rem;font-weight:600;color:#c4b5fd">El nombre que aparezca al agregar</div></div>
-          <button class="pm-copy-btn pm-copy-btn--purple" onclick="copyZelle()">📋 Copiar</button>
-        </div>
-      </div>
-      <button onclick="mostrarFormPago('zelle')" id="zelle-show-form-btn" class="pm-btn pm-btn--purple">✅ Ya pagué — Enviar comprobante</button>
-      <div id="zelle-form" style="display:none;display:flex;flex-direction:column;gap:.75rem">
-        <div style="height:1px;background:rgba(103,232,249,.15)"></div>
-        <div class="pm-field-label">Monto que enviaste (USD)</div>
-        <input class="finput" id="zelle-monto" type="number" placeholder="Ej: 16" min="7" oninput="calcZelleConversion()" style="margin-bottom:0;border-color:rgba(103,232,249,.3)"/>
-        <div id="zelle-conversion" style="display:none;background:rgba(103,232,249,.06);border:1px solid rgba(103,232,249,.2);border-radius:12px;padding:.8rem;font-size:.74rem;line-height:1.9">
-          <div style="display:flex;justify-content:space-between;color:#8b93a3"><span>Enviaste</span><span id="zc-usd" style="color:#fff">$0 USD</span></div>
-          <div style="display:flex;justify-content:space-between;color:#8b93a3"><span>Comisión (Zelle + banco)</span><span style="color:#ff6b6b">-$6 USD</span></div>
-          <div style="display:flex;justify-content:space-between;color:#8b93a3"><span>Convertible (x17.5)</span><span id="zc-neto" style="color:#fff">$0 USD</span></div>
-          <div style="display:flex;justify-content:space-between;font-weight:800;padding-top:.4rem;margin-top:.35rem;border-top:1px solid rgba(103,232,249,.18)"><span style="color:#fff">Saldo a recibir</span><span id="zc-mxn" style="color:#67e8f9">$0 MXN</span></div>
-        </div>
-        <div><div class="pm-field-label">Nombre del que envió</div><input class="finput" id="zelle-nombre" type="text" placeholder="Tu nombre en Zelle" style="margin-bottom:0"/></div>
-        <div><div class="pm-field-label">📷 Comprobante (foto)</div>
-          <input class="finput" id="zelle-foto" type="file" accept="image/*" style="padding:.55rem;margin-bottom:0"/>
-        </div>
-        <div class="pm-alert pm-alert--amber"><span style="flex-shrink:0">⚠️</span><span style="font-size:.7rem;color:#c9a96e"><b>Envía tu solicitud solo 1 vez.</b> Los envíos repetidos pueden retrasar tu acreditación.</span></div>
-        <button onclick="enviarComprobante('zelle')" class="pm-btn pm-btn--purple">✉️ Enviar comprobante</button>
-        <div style="font-size:.67rem;color:#6b7280;text-align:center">Adjunta la foto y presiona enviar. Te acreditamos pronto.</div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <div class="modal-ov" id="modal-binance">
   <div class="modal" style="max-width:440px">
-    <div class="pm-head pm-head--gold">
+    <div class="pm-head" style="background:linear-gradient(135deg,rgba(38,161,123,.1),rgba(38,161,123,.03))">
       <div style="display:flex;align-items:center;gap:.65rem">
-        <div class="pm-icon pm-icon--gold">💛</div>
-        <div><div class="pm-title">Recarga con Binance Pay</div><div class="pm-sub">USDT · Bono extra incluido</div></div>
+        <div class="pm-icon" style="background:rgba(38,161,123,.15);border:1px solid rgba(38,161,123,.35);color:#26a17b">&#36;</div>
+        <div><div class="pm-title">Recarga con USDT</div><div class="pm-sub">Red TRON &middot; TRC-20</div></div>
       </div>
       <button class="pm-close" onclick="closeBinanceModal()">✕</button>
     </div>
     <div class="modal-b" style="display:flex;flex-direction:column;gap:.85rem">
-      <div class="pm-alert pm-alert--gold"><span style="font-size:1rem;flex-shrink:0">🎁</span><div style="font-size:.72rem;color:#fcd34d;line-height:1.45">¡Recibe <strong>BONO EXTRA</strong> en todas tus recargas pagando con Binance Pay!</div></div>
-      <div style="background:rgba(240,185,11,.05);border:1px solid rgba(240,185,11,.18);border-radius:10px;padding:.55rem .75rem;font-size:.7rem;color:#f0b90b;text-align:center">💛 Pagas en <b>USDT</b> · 1 USDT = $17 MXN · El saldo se acredita en tu moneda</div>
+      <div style="background:rgba(38,161,123,.05);border:1px solid rgba(38,161,123,.18);border-radius:10px;padding:.55rem .75rem;font-size:.7rem;color:#26a17b;text-align:center">&#128176; Pagas en <b>USDT</b> &middot; 1 USDT = $17 MXN &middot; El saldo se acredita en tu moneda</div>
       <div class="pm-field-label" style="margin-bottom:0">Selecciona el monto:</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem" id="binance-montos">
-        <div class="bnc-card" onclick="selBinance(10,175,this)"><div class="bnc-amt">10 USDT</div><div class="bnc-line">Pagas: 10 USDT</div><div class="bnc-recibe">Recibes: $175</div><div class="bnc-badge">+$5 BONO</div></div>
-        <div class="bnc-card" onclick="selBinance(30,520,this)"><div class="bnc-amt">30 USDT</div><div class="bnc-line">Pagas: 30 USDT</div><div class="bnc-recibe">Recibes: $520</div><div class="bnc-badge">+$10 BONO</div></div>
-        <div class="bnc-card" onclick="selBinance(60,1035,this)"><div class="bnc-amt">60 USDT</div><div class="bnc-line">Pagas: 60 USDT</div><div class="bnc-recibe">Recibes: $1,035</div><div class="bnc-badge">+$15 BONO</div></div>
-        <div class="bnc-card" onclick="selBinance(120,2090,this)"><div class="bnc-amt">120 USDT</div><div class="bnc-line">Pagas: 120 USDT</div><div class="bnc-recibe">Recibes: $2,090</div><div class="bnc-badge">+$50 BONO</div></div>
+        <div class="bnc-card" onclick="selBinance(10,170,this)"><div class="bnc-amt">10 USDT</div><div class="bnc-line">Pagas: 10 USDT</div><div class="bnc-recibe">Recibes: $170</div></div>
+        <div class="bnc-card" onclick="selBinance(30,510,this)"><div class="bnc-amt">30 USDT</div><div class="bnc-line">Pagas: 30 USDT</div><div class="bnc-recibe">Recibes: $510</div></div>
+        <div class="bnc-card" onclick="selBinance(60,1020,this)"><div class="bnc-amt">60 USDT</div><div class="bnc-line">Pagas: 60 USDT</div><div class="bnc-recibe">Recibes: $1,020</div></div>
+        <div class="bnc-card" onclick="selBinance(120,2040,this)"><div class="bnc-amt">120 USDT</div><div class="bnc-line">Pagas: 120 USDT</div><div class="bnc-recibe">Recibes: $2,040</div></div>
       </div>
       <div class="bnc-card" onclick="selBinanceCustom(this)" id="bnc-custom-card">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap">
-          <div><div style="font-family:Oxanium;font-weight:900;color:#fff;font-size:.9rem">✏️ PERSONALIZADO</div><div class="bnc-line">Tú eliges cuántos USDT (sin bono)</div></div>
-          <input id="bnc-custom-input" type="number" min="1" step="0.01" placeholder="USDT" onclick="event.stopPropagation()" oninput="onBncCustom()" style="width:90px;background:#080808;border:1px solid rgba(240,185,11,.3);color:#fff;border-radius:8px;padding:.5rem .6rem;font-family:Oxanium;font-weight:700;font-size:.88rem;text-align:center"/>
+          <div><div style="font-family:Oxanium;font-weight:900;color:#fff;font-size:.9rem">✏️ PERSONALIZADO</div><div class="bnc-line">Tú eliges cuántos USDT</div></div>
+          <input id="bnc-custom-input" type="number" min="1" step="0.01" placeholder="USDT" onclick="event.stopPropagation()" oninput="onBncCustom()" style="width:90px;background:#080808;border:1px solid rgba(38,161,123,.3);color:#fff;border-radius:8px;padding:.5rem .6rem;font-family:Oxanium;font-weight:700;font-size:.88rem;text-align:center"/>
         </div>
       </div>
-      <div id="bnc-resumen" style="display:none;background:rgba(240,185,11,.07);border:1px solid rgba(240,185,11,.25);border-radius:12px;padding:.85rem;text-align:center">
+      <div id="bnc-resumen" style="display:none;background:rgba(38,161,123,.07);border:1px solid rgba(38,161,123,.25);border-radius:12px;padding:.85rem;text-align:center">
         <div style="font-size:.7rem;color:#8b93a3">Vas a recargar</div>
-        <div style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#f0b90b" id="bnc-resumen-recibe">$0</div>
+        <div style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#26a17b" id="bnc-resumen-recibe">$0</div>
         <div style="font-size:.7rem;color:#25d366" id="bnc-resumen-detalle">-</div>
       </div>
-      <div class="pm-bank-card pm-bank-card--gold" style="text-align:center">
-        <div class="pm-bank-label" style="text-align:center;margin-bottom:.65rem">ESCANEA O COPIA EL ID</div>
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=Binance%20Pay%20ID%3A1106987175" alt="QR Binance" style="width:160px;height:160px;border-radius:12px;background:#fff;padding:8px;margin-bottom:.75rem"/>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:.55rem .75rem;background:rgba(0,0,0,.25);border:1px solid rgba(240,185,11,.15);border-radius:10px">
-          <div style="text-align:left"><div class="pm-bank-label">Binance ID</div><div style="font-family:Oxanium;font-size:.9rem;font-weight:700;color:#f0b90b;letter-spacing:1px">1106987175</div></div>
-          <button class="pm-copy-btn pm-copy-btn--gold" onclick="copyBinanceID()">📋 Copiar</button>
+      <div class="pm-bank-card" style="text-align:center;border-color:rgba(38,161,123,.25)">
+        <div class="pm-bank-label" style="text-align:center;margin-bottom:.65rem">ESCANEA O COPIA LA DIRECCI&Oacute;N</div>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=TKkrmoStfuqpjP6C8oooJPqcuKchn8Gbdf" alt="QR USDT TRC-20" style="width:160px;height:160px;border-radius:12px;background:#fff;padding:8px;margin-bottom:.75rem"/>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:.55rem .75rem;background:rgba(0,0,0,.25);border:1px solid rgba(38,161,123,.15);border-radius:10px;gap:.5rem">
+          <div style="text-align:left;min-width:0"><div class="pm-bank-label">Direcci&oacute;n USDT (TRC-20)</div><div style="font-family:Oxanium;font-size:.72rem;font-weight:700;color:#26a17b;letter-spacing:.3px;word-break:break-all">TKkrmoStfuqpjP6C8oooJPqcuKchn8Gbdf</div></div>
+          <button class="pm-copy-btn" style="background:rgba(38,161,123,.12);border:1px solid rgba(38,161,123,.35);color:#26a17b;flex-shrink:0" onclick="copyBinanceID()">📋 Copiar</button>
         </div>
       </div>
-      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(240,185,11,.12);border-radius:12px;padding:.85rem;font-size:.72rem;color:#8b93a3;line-height:1.8">
-        1. Abre <strong style="color:#f0b90b">Binance → Pay</strong><br/>
-        2. Escanea el QR o busca el ID <strong style="color:#f0b90b">1106987175</strong><br/>
-        3. Transfiere el monto exacto en <strong style="color:#f0b90b">USDT</strong><br/>
+      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(38,161,123,.12);border-radius:12px;padding:.85rem;font-size:.72rem;color:#8b93a3;line-height:1.8">
+        1. Abre tu wallet o exchange (Binance, Trust Wallet, etc.)<br/>
+        2. Escanea el QR o copia la direcci&oacute;n<br/>
+        3. Env&iacute;a el monto exacto en <strong style="color:#26a17b">USDT</strong> por la red <strong style="color:#26a17b">TRON (TRC-20)</strong><br/>
         4. Sube tu comprobante abajo 👇
       </div>
-      <div class="pm-alert pm-alert--amber"><span style="flex-shrink:0">⚠️</span><div style="font-size:.71rem;color:#c9a96e"><b>Obligatorio:</b> selecciona el monto y adjunta la foto del comprobante. Sin estos datos no podemos acreditar tu saldo.</div></div>
+      <div class="pm-alert pm-alert--amber"><span style="flex-shrink:0">⚠️</span><div style="font-size:.71rem;color:#c9a96e"><b>Importante:</b> usa siempre la red TRC-20. Enviar por otra red puede perder tu dinero. Selecciona el monto y adjunta la foto del comprobante.</div></div>
       <div><div class="pm-field-label">📷 Comprobante (foto) *</div>
         <input class="finput" id="binance-foto" type="file" accept="image/*" style="padding:.55rem;margin-bottom:0"/>
       </div>
       <div class="pm-alert pm-alert--blue"><span style="flex-shrink:0">ℹ️</span><span style="font-size:.7rem;color:#93c5fd"><b>Envía tu solicitud solo 1 vez.</b> Presiona el botón una vez y espera confirmación.</span></div>
-      <button onclick="enviarComprobante('binance')" class="pm-btn pm-btn--gold">✉️ Enviar Comprobante</button>
+      <button onclick="enviarComprobante('binance')" class="pm-btn" style="background:linear-gradient(135deg,#1c7a5e,#26a17b)">✉️ Enviar Comprobante</button>
     </div>
   </div>
 </div>
@@ -5875,12 +5753,7 @@ document.addEventListener('keydown',function(e){
         <div style="font-size:.72rem;color:#00e676;font-weight:700">Ahorras $14 MX (10% descuento)</div>
       </div>
       <div class="order-disp" id="bundle-order">PEDIDO #...</div>
-      <div style="display:flex;gap:.45rem;margin-bottom:.85rem">
-        <button id="btab-stori" onclick="bundlePayTab('stori')" style="flex:1;padding:.38rem .55rem;border-radius:6px;font-family:'Poppins';font-weight:800;font-size:.7rem;cursor:pointer;border:1px solid rgba(37,211,102,.38);background:rgba(37,211,102,.1);color:#25d366">Transferencia Bancaria</button>
-        <button id="btab-binance" onclick="bundlePayTab('binance')" style="flex:1;padding:.38rem .55rem;border-radius:6px;font-family:'Poppins';font-weight:800;font-size:.7rem;cursor:pointer;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--muted)">BINANCE</button>
-      </div>
-      <div id="bpaybox-stori" class="pay-box"><div class="pay-title">Transferencia Bancaria</div><div class="pay-field"><div class="pf-label">Número de Tarjeta</div><div class="pf-val pf-acc">661180006413009414</div><button class="copy-btn" onclick="copyClabe()">Copiar</button></div><div class="pay-note">Transfiere $125 MX y manda comprobante al WhatsApp.</div></div>
-      <div id="bpaybox-binance" class="pay-box" style="display:none;background:rgba(240,185,11,.05);border-color:rgba(240,185,11,.2)"><div class="pay-title" style="color:#f0b90b">Binance Pay</div><div class="pay-field"><div class="pf-label">ID</div><div class="pf-val" style="color:#f0b90b">1106987175</div><button class="copy-btn" onclick="copyBinanceID()" style="border-color:rgba(240,185,11,.3);color:#f0b90b">Copiar</button></div><div class="pay-note">Binance > Pay > 1106987175 > $125 MX > manda comprobante.</div></div>
+      <div id="bpaybox-binance" class="pay-box" style="background:rgba(38,161,123,.05);border-color:rgba(38,161,123,.2)"><div class="pay-title" style="color:#26a17b">USDT (TRC-20)</div><div class="pay-field"><div class="pf-label">Direcci&oacute;n</div><div class="pf-val" style="color:#26a17b;font-size:.7rem;word-break:break-all">TKkrmoStfuqpjP6C8oooJPqcuKchn8Gbdf</div><button class="copy-btn" onclick="copyBinanceID()" style="border-color:rgba(38,161,123,.3);color:#26a17b">Copiar</button></div><div class="pay-note">Env&iacute;a USDT (red TRC-20) por $125 MX y manda comprobante.</div></div>
       <label class="flabel">Tu ID de Free Fire</label><input class="finput" id="bundle-id" type="text" placeholder="Ej: 123456789"/>
       <label class="flabel">Tu nombre</label><input class="finput" id="bundle-nombre" type="text" placeholder="Ej: Roberto Gomez"/>
       <label class="flabel">Numero de WhatsApp</label><input class="finput" id="bundle-wa" type="tel" placeholder="Ej: 5512345678"/>
@@ -6574,27 +6447,11 @@ document.addEventListener('keydown',function(e){
       <button class="sheet-x" onclick="cerrarMetodoSheet();cerrarRecargaSheet()">&#215;</button>
     </div>
 
-    <div class="met-card" onclick="rcElegirMetodo('transferencia')">
-      <div class="logo" style="background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.25)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round"><path d="M3 9.5 12 4l9 5.5"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8"/><path d="M3 20h18"/></svg></div>
-      <div class="info">
-        <div class="nom"><b>Transferencia Bancaria</b><span class="met-badge" style="background:rgba(34,211,238,.12);color:#22d3ee;border:1px solid rgba(34,211,238,.3)">Recomendado</span><span class="met-badge" style="background:rgba(37,211,102,.1);color:#25d366;border:1px solid rgba(37,211,102,.3)">M&eacute;xico</span></div>
-        <div class="sub">SPEI o dep&oacute;sito &middot; MXN</div>
-      </div>
-    </div>
-
-    <div class="met-card" onclick="rcElegirMetodo('zelle')">
-      <div class="logo" style="background:rgba(109,40,217,.12);border:1px solid rgba(139,92,246,.3);font-family:Poppins;font-weight:800;color:#a78bfa;font-size:1.25rem">Z</div>
-      <div class="info">
-        <div class="nom"><b>Zelle</b><span class="met-badge" style="background:rgba(139,92,246,.12);color:#a78bfa;border:1px solid rgba(139,92,246,.3)">Internacional</span></div>
-        <div class="sub">Desde EE.UU. &middot; USD</div>
-      </div>
-    </div>
-
     <div class="met-card" onclick="rcElegirMetodo('binance')">
-      <div class="logo" style="background:rgba(240,185,11,.1);border:1px solid rgba(240,185,11,.3)"><svg width="20" height="20" viewBox="0 0 24 24" fill="#f0b90b"><path d="M12 2 8.6 5.4 12 8.8l3.4-3.4L12 2zM5.4 8.6 2 12l3.4 3.4L8.8 12 5.4 8.6zM18.6 8.6 15.2 12l3.4 3.4L22 12l-3.4-3.4zM12 15.2l-3.4 3.4L12 22l3.4-3.4-3.4-3.4zM12 9.7 9.7 12l2.3 2.3 2.3-2.3L12 9.7z"/></svg></div>
+      <div class="logo" style="background:rgba(38,161,123,.1);border:1px solid rgba(38,161,123,.3)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#26a17b" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 9h8M12 9v6M9.5 14h5"/></svg></div>
       <div class="info">
-        <div class="nom"><b>Binance Pay</b><span class="met-badge" style="background:rgba(240,185,11,.12);color:#f0b90b;border:1px solid rgba(240,185,11,.3)">Internacional</span></div>
-        <div class="sub">ID y QR &middot; USDT con bono</div>
+        <div class="nom"><b>USDT</b><span class="met-badge" style="background:rgba(38,161,123,.12);color:#26a17b;border:1px solid rgba(38,161,123,.3)">Recomendado</span></div>
+        <div class="sub">Red TRON &middot; TRC-20</div>
       </div>
     </div>
 
