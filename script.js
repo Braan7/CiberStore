@@ -178,9 +178,9 @@ var LIKES = [
 var SERVICES = [
   // ── Videojuegos ──
   { nombre:'Free Fire', categoria:'videojuegos', descripcion:'Diamantes y membresias', tipoRecarga:'Diamantes', icono:'\uD83D\uDD25', imagen:'', estado:'disponible', ruta:'diamantes' },
-  { nombre:'PUBG Mobile', categoria:'videojuegos', descripcion:'UC y contenido exclusivo', tipoRecarga:'UC', icono:'\uD83E\uDE96', imagen:'', estado:'buscando_proveedor', ruta:null },
-  { nombre:'COD Mobile', categoria:'videojuegos', descripcion:'CP y paquetes de batalla', tipoRecarga:'CP', icono:'\u2694\uFE0F', imagen:'', estado:'buscando_proveedor', ruta:null },
-  { nombre:'Roblox', categoria:'videojuegos', descripcion:'Robux y contenido digital', tipoRecarga:'Robux', icono:'\uD83D\uDFE9', imagen:'', estado:'proximamente', ruta:null },
+  { nombre:'PUBG Mobile', categoria:'videojuegos', descripcion:'UC y contenido exclusivo', tipoRecarga:'UC', icono:'\uD83E\uDE96', imagen:'img/pubg-mobile.jpg', estado:'buscando_proveedor', ruta:null },
+  { nombre:'COD Mobile', categoria:'videojuegos', descripcion:'CP y paquetes de batalla', tipoRecarga:'CP', icono:'\u2694\uFE0F', imagen:'img/codm.jpg', estado:'buscando_proveedor', ruta:null },
+  { nombre:'Roblox', categoria:'videojuegos', descripcion:'Robux y contenido digital', tipoRecarga:'Robux', icono:'\uD83D\uDFE9', imagen:'img/roblox.jpg', estado:'proximamente', ruta:null },
   { nombre:'Mobile Legends', categoria:'videojuegos', descripcion:'Diamantes y skins', tipoRecarga:'Diamantes', icono:'\uD83C\uDFAE', imagen:'', estado:'buscando_proveedor', ruta:null },
   { nombre:'Brawl Stars', categoria:'videojuegos', descripcion:'Gemas y contenido', tipoRecarga:'Gemas', icono:'\uD83D\uDCA5', imagen:'', estado:'buscando_proveedor', ruta:null },
   { nombre:'Clash of Clans', categoria:'videojuegos', descripcion:'Gemas y constructor', tipoRecarga:'Gemas', icono:'\uD83C\uDFF0', imagen:'', estado:'buscando_proveedor', ruta:null },
@@ -7092,10 +7092,10 @@ function renderServiciosHome(){
 
   var juegos = SERVICES.filter(function(s){ return s.categoria==='videojuegos'; });
 
-  // Destacados: Free Fire, PUBG Mobile, COD Mobile, Roblox (los 4 principales pedidos)
-  var nombresDestacados = ['Free Fire','PUBG Mobile','COD Mobile','Roblox'];
+  // Destacados: PUBG Mobile, COD Mobile, Roblox (Free Fire ya tiene su propio hero arriba, no se duplica aqui)
+  var nombresDestacados = ['PUBG Mobile','COD Mobile','Roblox'];
   var destacados = nombresDestacados.map(function(n){ return juegos.find(function(s){ return s.nombre===n; }); }).filter(Boolean);
-  var resto = juegos.filter(function(s){ return nombresDestacados.indexOf(s.nombre) === -1; });
+  var resto = juegos.filter(function(s){ return nombresDestacados.indexOf(s.nombre) === -1 && s.nombre !== 'Free Fire'; });
 
   if(wrapDestacados) wrapDestacados.innerHTML = destacados.map(_renderServiceCard).join('');
 
