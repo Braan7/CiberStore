@@ -7259,6 +7259,15 @@ function _renderServiceCard(s){
     + '</div>';
 }
 
+// Pastilla ovalada compacta (solo texto): usada en "Proximamente" y "Redes Sociales / Servicios Digitales"
+function _renderServicePill(s){
+  var disp = (s.estado === 'disponible');
+  var accion = disp
+    ? 'goPage(\''+s.ruta+'\')'
+    : 'clickServicioNoDisponible(\''+s.nombre.replace(/'/g,"")+'\')';
+  return '<div class="svc-pill'+(disp?' svc-pill--on':' svc-pill--off')+'" onclick="'+accion+'">'+s.icono+' '+s.nombre+'</div>';
+}
+
 function renderServiciosHome(){
   try{
   var wrapDestacados = document.getElementById('svc-videojuegos');
@@ -7276,13 +7285,13 @@ function renderServiciosHome(){
   if(wrapDestacados) wrapDestacados.innerHTML = destacados.map(_renderServiceCard).join('');
 
   if(wrapProximWrap && resto.length){
-    wrapProximWrap.style.display = 'grid';
-    wrapProximWrap.innerHTML = resto.map(_renderServiceCard).join('');
+    wrapProximWrap.style.display = 'flex';
+    wrapProximWrap.innerHTML = resto.map(_renderServicePill).join('');
   }
 
   if(wrapDigital){
     var digital = SERVICES.filter(function(s){ return s.categoria==='digital'; });
-    wrapDigital.innerHTML = digital.map(_renderServiceCard).join('');
+    wrapDigital.innerHTML = digital.map(_renderServicePill).join('');
   }
   }catch(e){
     console.error('[renderServiciosHome] Error:', e);

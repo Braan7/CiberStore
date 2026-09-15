@@ -2661,6 +2661,12 @@ button[style*="linear-gradient"]{
 .ff-tienda-img{width:100%;aspect-ratio:16/9;background-size:cover;background-position:center;position:relative}
 .ff-tienda-soon-tag{position:absolute;top:.55rem;left:.55rem;background:rgba(255,180,60,.9);color:#1a0f00;font-size:.55rem;font-weight:800;letter-spacing:.4px;padding:.22rem .5rem;border-radius:7px}
 .ff-tienda-name{padding:.7rem .8rem;font-family:Poppins,sans-serif;font-weight:700;font-size:.82rem;color:#fff;text-align:center}
+/* ═══════════ PASTILLAS DE SERVICIOS (Próximamente / Redes Sociales) ═══════════ */
+.svc-pill{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.1rem;border-radius:999px;font-family:Poppins,sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;transition:background .18s,border-color .18s,transform .18s;white-space:nowrap}
+.svc-pill--on{background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.28);color:#e8ecf2}
+.svc-pill--on:hover{background:rgba(37,211,102,.14);transform:translateY(-1px)}
+.svc-pill--off{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09);color:#9aa3b0}
+.svc-pill--off:hover{background:rgba(255,255,255,.06);transform:translateY(-1px)}
 </style>
 
 <script>
@@ -2886,15 +2892,15 @@ document.addEventListener('keydown',function(e){
       <div style="font-family:Oxanium;font-size:1.05rem;font-weight:900;color:#fff;display:flex;align-items:center;gap:.5rem">&#128679; Pr&oacute;ximamente</div>
       <div style="font-size:.76rem;color:#6b7280;margin-top:.2rem">Servicios en construcci&oacute;n que estamos preparando</div>
     </div>
-    <div class="svc-grid" id="svc-proximamente-wrap" style="display:none"></div>
+    <div style="display:none;flex-wrap:wrap;gap:.55rem" id="svc-proximamente-wrap"></div>
 
     <!-- Redes sociales / servicios digitales -->
     <div style="margin:1.9rem 0 .9rem">
       <div style="font-family:Oxanium;font-size:1.05rem;font-weight:900;color:#fff;display:flex;align-items:center;gap:.5rem">&#127760; Redes Sociales &amp; Servicios Digitales</div>
       <div style="font-size:.76rem;color:#6b7280;margin-top:.2rem">TikTok, Instagram, YouTube y m&aacute;s</div>
     </div>
-    <div class="svc-grid" id="svc-digital">
-      <div style="text-align:center;padding:1.5rem;color:#6b7280;font-size:.78rem;grid-column:1/-1">Cargando...</div>
+    <div style="display:flex;flex-wrap:wrap;gap:.55rem" id="svc-digital">
+      <div style="color:#6b7280;font-size:.78rem">Cargando...</div>
     </div>
 
     <!-- Resumen de cuenta -->
