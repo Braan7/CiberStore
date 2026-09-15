@@ -2588,7 +2588,7 @@ button[style*="linear-gradient"]{
 .ds-cat-card--soon{opacity:.65}
 .ds-cat-card--soon .ds-cat-sub{color:#ffb84d;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
 .ds-cat-card:hover{border-color:rgba(34,211,238,.3);background:rgba(34,211,238,.05);transform:translateY(-2px)}
-.ds-cat-ico{font-size:1.6rem}
+.ds-cat-ico{font-size:1.6rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .ds-cat-name{font-size:.72rem;font-weight:700;color:#e0e4ea}
 
 /* Producto - tarjeta con precio anterior/descuento/mas vendido */
@@ -2992,12 +2992,12 @@ document.addEventListener('keydown',function(e){
 
       <div style="display:flex;flex-direction:column;gap:.75rem">
         <button type="button" class="ds-cat-card" style="width:100%;flex-direction:row;align-items:center;text-align:left;padding:1.2rem 1.1rem;gap:1rem;font-family:inherit;color:inherit" onclick="ffIrTienda()">
-          <span class="ds-cat-ico" style="font-size:1.9rem">&#9638;</span>
+          <span class="ds-cat-ico"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 13H6L5 8z"/><path d="M8.5 11V6.5a3.5 3.5 0 0 1 7 0V11"/></svg></span>
           <div style="flex:1"><div class="ds-cat-name" style="font-size:.95rem">Tienda</div><div class="ds-cat-sub" style="font-size:.72rem">Pases, tokens y cajas</div></div>
           <span style="color:#6b7280;font-size:1.2rem">&#8250;</span>
         </button>
         <button type="button" class="ds-cat-card" style="width:100%;flex-direction:row;align-items:center;text-align:left;padding:1.2rem 1.1rem;gap:1rem;font-family:inherit;color:inherit" onclick="ffIrCuentas()">
-          <span class="ds-cat-ico" style="font-size:1.9rem">&#9817;</span>
+          <span class="ds-cat-ico"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#67e8f9" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg></span>
           <div style="flex:1"><div class="ds-cat-name" style="font-size:.95rem">Cuentas</div><div class="ds-cat-sub" style="font-size:.72rem">Pases de nivel</div></div>
           <span style="color:#6b7280;font-size:1.2rem">&#8250;</span>
         </button>
@@ -3013,12 +3013,12 @@ document.addEventListener('keydown',function(e){
         <div style="font-size:.8rem;color:#8b93a3;margin-top:.15rem">Pases, tokens y cajas</div>
       </div>
       <div class="ds-cat-grid">
-        <div class="ds-cat-card" onclick="goPage('diamantes')"><span class="ds-cat-ico">&#128142;</span><span class="ds-cat-name">Diamantes</span></div>
-        <div class="ds-cat-card" onclick="goPage('pase')"><span class="ds-cat-ico">&#127915;</span><span class="ds-cat-name">Pases Booyah</span></div>
-        <div class="ds-cat-card" onclick="goPage('cajas')"><span class="ds-cat-ico">&#129516;</span><span class="ds-cat-name">Fragmentos EVO</span></div>
-        <div class="ds-cat-card" onclick="goPage('honor')"><span class="ds-cat-ico">&#127942;</span><span class="ds-cat-name">Honor para clanes</span></div>
-        <div class="ds-cat-card" onclick="goPage('clanes')"><span class="ds-cat-ico">&#127984;</span><span class="ds-cat-name">Clanes NVL 7</span></div>
-        <div class="ds-cat-card ds-cat-card--soon" onclick="showToast('Cajas EVO: proximamente disponible')"><span class="ds-cat-ico">&#128230;</span><span class="ds-cat-name">Cajas EVO</span><span class="ds-cat-sub">Pr&oacute;ximamente</span></div>
+        <div class="ds-cat-card" onclick="goPage('diamantes')"><span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9l4-6z"/><path d="M2 9h20"/><path d="M12 21 8 9l2.5-6"/><path d="m12 21 4-12-2.5-6"/></svg></span><span class="ds-cat-name">Diamantes</span></div>
+        <div class="ds-cat-card" onclick="goPage('pase')"><span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffd000" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1a2 2 0 0 0 0 4v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1a2 2 0 0 0 0-4V9z"/><path d="M13 5v2M13 11v2M13 17v2"/></svg></span><span class="ds-cat-name">Pases Booyah</span></div>
+        <div class="ds-cat-card" onclick="goPage('cajas')"><span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></span><span class="ds-cat-name">Fragmentos EVO</span></div>
+        <div class="ds-cat-card" onclick="goPage('honor')"><span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffb84d" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4a2 2 0 0 0 0 4h1.5M17 6h3a2 2 0 0 1 0 4h-1.5"/></svg></span><span class="ds-cat-name">Honor para clanes</span></div>
+        <div class="ds-cat-card" onclick="goPage('clanes')"><span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 6-11 3 5 3-7 6 13H3z"/><circle cx="12" cy="4" r="1.5"/></svg></span><span class="ds-cat-name">Clanes NVL 7</span></div>
+        <div class="ds-cat-card ds-cat-card--soon" onclick="showToast('Cajas EVO: proximamente disponible')"><span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg></span><span class="ds-cat-name">Cajas EVO</span><span class="ds-cat-sub">Pr&oacute;ximamente</span></div>
       </div>
     </div>
 
@@ -3031,7 +3031,7 @@ document.addEventListener('keydown',function(e){
         <div style="font-size:.8rem;color:#8b93a3;margin-top:.15rem">Pases de nivel</div>
       </div>
       <div class="ds-cat-card" style="flex-direction:row;align-items:center;text-align:left;padding:1.2rem 1.1rem;gap:1rem" onclick="goPage('honorcuenta')">
-        <span class="ds-cat-ico" style="font-size:1.9rem">&#129302;</span>
+        <span class="ds-cat-ico"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
         <div style="flex:1"><div class="ds-cat-name" style="font-size:.95rem">Cuentas NVL [1-30]</div><div class="ds-cat-sub" style="font-size:.72rem">Cuentas ya creadas por pedido</div></div>
         <span style="color:#6b7280;font-size:1.2rem">&#8250;</span>
       </div>
