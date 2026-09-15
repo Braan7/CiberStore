@@ -206,7 +206,7 @@ var SERVICES = [
   { nombre:'Discord', categoria:'digital', descripcion:'Nitro y servicios', tipoRecarga:'Nitro', icono:'\uD83C\uDFAE', imagen:'', estado:'buscando_proveedor', ruta:null }
 ];
 
-var ESTADO_LABEL = {
+var SVC_ESTADO_LABEL = {
   disponible: { txt:'DISPONIBLE', color:'#25d366', ico:'\uD83D\uDFE2' },
   construccion: { txt:'EN CONSTRUCCION', color:'#ffb84d', ico:'\uD83D\uDEA7' },
   proximamente: { txt:'PROXIMAMENTE', color:'#a78bfa', ico:'\u2728' },
@@ -938,6 +938,7 @@ function goPage(id){
   if(id==='clanes') setTimeout(renderClanes, 100);
   if(id==='pase') setTimeout(_paseReiniciar, 100);
   if(id==='soporte') setTimeout(sopVolverLista, 100);
+  if(id==='freefire') setTimeout(ffVolverInicio, 100);
   if(id==='saldo') setTimeout(function(){ recSetMoneda('MXN'); _recTipo=null; recLimpiarTipo(); }, 100);
   if(id==='sobre') setTimeout(function(){ sobreTab('resenas'); }, 100);
   if(id==='likes') renderLikes();
@@ -3297,6 +3298,25 @@ var SOP_CATEGORIA_LABEL = { pedido:'Mi pedido', pago:'Pagos y comprobantes', ent
 var SOP_ESTADO_LABEL = { pendiente:'Pendiente', en_atencion:'En atencion', resuelto:'Resuelto', cerrado:'Cerrado' };
 
 // ── Navegacion entre las 3 vistas de la pagina de soporte ──────
+/* ================================================================
+   PÁGINA FREE FIRE — navegación Tienda / Cuentas
+================================================================ */
+function ffVolverInicio(){
+  document.getElementById('ff-vista-inicio').style.display = 'block';
+  document.getElementById('ff-vista-tienda').style.display = 'none';
+  document.getElementById('ff-vista-cuentas').style.display = 'none';
+}
+function ffIrTienda(){
+  document.getElementById('ff-vista-inicio').style.display = 'none';
+  document.getElementById('ff-vista-tienda').style.display = 'block';
+  document.getElementById('ff-vista-cuentas').style.display = 'none';
+}
+function ffIrCuentas(){
+  document.getElementById('ff-vista-inicio').style.display = 'none';
+  document.getElementById('ff-vista-tienda').style.display = 'none';
+  document.getElementById('ff-vista-cuentas').style.display = 'block';
+}
+
 function sopVolverLista(){
   document.getElementById('sop-vista-lista').style.display = 'block';
   document.getElementById('sop-vista-nuevo').style.display = 'none';
@@ -6949,16 +6969,19 @@ function renderDiamCatalogo(){
     var badge = '';
     if(p.badge === 'AUTO') badge = '<span class="rc-badge auto">&#9889; AUTO</span>';
     else if(p.badge === 'MANUAL') badge = '<span class="rc-badge manual">MANUAL</span>';
+    // Etiqueta MAS VENDIDO en el paquete de 341 diamantes (el mas popular segun el historial de compras)
+    var masVendido = (p.diamantes === 341) ? '<div class="ds-prod-badge">M&Aacute;S VENDIDO</div>' : '';
     // Imagen del diamante (o icono si falla)
     var visual = p.img
       ? '<div class="rc-img"><img src="'+p.img+'" alt="'+p.nombre+'" onerror="this.parentNode.innerHTML=\'<div class=&quot;rc-ico&quot;>&#128142;</div>\'"/></div>'
       : '<div class="rc-ico">&#128142;</div>';
-    return '<div class="rc-card" onclick="abrirDiamDetalle('+i+')">'
+    return '<div class="rc-card" style="position:relative" onclick="abrirDiamDetalle('+i+')">'
+      + masVendido
       + badge
       + visual
       + '<div class="rc-name">'+p.nombre+'</div>'
       + '<div class="rc-price">'+fmt(p.precio)+'</div>'
-      + '<button class="rc-btn">Comprar</button>'
+      + '<button class="rc-btn ds-prod-btn" style="margin-top:.5rem">Comprar</button>'
       + '</div>';
   }).join('');
 }
@@ -7044,7 +7067,7 @@ function _mostrarAvisoModal(titulo, texto, color){
 // ═══ Renderiza las tarjetas de servicios (juegos / digital) desde SERVICES ═══
 function _renderServiceCard(s){
   var disp = (s.estado === 'disponible');
-  var est = ESTADO_LABEL[s.estado] || ESTADO_LABEL.buscando_proveedor;
+  var est = SVC_ESTADO_LABEL[s.estado] || SVC_ESTADO_LABEL.buscando_proveedor;
   var visual = s.imagen
     ? '<div class="svc-img"><img src="'+s.imagen+'" alt="'+s.nombre+'" onerror="this.parentNode.classList.add(\'svc-img-fallback\')"/></div>'
     : '<div class="svc-img svc-img-fallback"><span class="svc-ico-big">'+s.icono+'</span></div>';
