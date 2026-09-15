@@ -2625,6 +2625,19 @@ button[style*="linear-gradient"]{
   .ds-cat-grid{grid-template-columns:repeat(2,1fr);gap:.5rem}
   .ds-cat-card{padding:.85rem .4rem}
 }
+/* ═══════════ TARJETAS DE CUENTA RANDOM (Free Fire → Cuentas) ═══════════ */
+.ff-acc-card{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.09);border-radius:18px;overflow:hidden;cursor:pointer;transition:border-color .2s,transform .2s}
+.ff-acc-card:hover{border-color:rgba(225,29,46,.35);transform:translateY(-2px)}
+.ff-acc-img{width:100%;aspect-ratio:16/9;background-size:cover;background-position:center top;position:relative}
+.ff-acc-badge{position:absolute;top:.75rem;left:.75rem;background:var(--grad-red);color:#fff;font-size:.62rem;font-weight:800;letter-spacing:.4px;padding:.3rem .65rem;border-radius:8px;box-shadow:0 4px 12px var(--red-glow)}
+.ff-acc-body{padding:1.1rem 1.15rem}
+.ff-acc-tag{font-size:.62rem;font-weight:800;letter-spacing:1.2px;color:#ff6b6b;text-transform:uppercase;margin-bottom:.35rem}
+.ff-acc-title{font-family:Oxanium,sans-serif;font-weight:800;font-size:1.05rem;color:#fff;margin-bottom:.45rem}
+.ff-acc-desc{font-size:.8rem;color:#9aa3b0;line-height:1.5;margin-bottom:.9rem;padding-bottom:.9rem;border-bottom:1px solid rgba(255,255,255,.07)}
+.ff-acc-foot{display:flex;align-items:center;justify-content:space-between;gap:.75rem}
+.ff-acc-price{font-family:Poppins,sans-serif;font-weight:800;font-size:1.15rem;color:#fff}
+.ff-acc-btn{padding:.65rem 1.2rem;background:var(--grad-red);color:#fff;border:none;border-radius:11px;font-family:Poppins,sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;transition:filter .18s;white-space:nowrap}
+.ff-acc-btn:hover{filter:brightness(1.12)}
 </style>
 
 <script>
@@ -3011,15 +3024,74 @@ document.addEventListener('keydown',function(e){
       <div style="margin:1.3rem 0 1.1rem">
         <div class="ds-eyebrow"><div class="ds-eyebrow-bar"></div><div class="ds-eyebrow-txt">Explora el cat&aacute;logo</div></div>
         <div style="font-family:Oxanium,sans-serif;font-weight:900;font-size:1.35rem;color:#fff;letter-spacing:-.3px">CUENTAS</div>
-        <div style="font-size:.8rem;color:#8b93a3;margin-top:.15rem">Pases de nivel</div>
+        <div style="font-size:.8rem;color:#8b93a3;margin-top:.15rem">Cuentas con pase de nivel listas para entregar</div>
       </div>
-      <div class="ds-cat-card" style="flex-direction:row;align-items:center;text-align:left;padding:1.2rem 1.1rem;gap:1rem" onclick="goPage('honorcuenta')">
-        <span class="ds-cat-ico"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
-        <div style="flex:1"><div class="ds-cat-name" style="font-size:.95rem">Cuentas NVL [1-30]</div><div class="ds-cat-sub" style="font-size:.72rem">Cuentas ya creadas por pedido</div></div>
-        <span style="color:#6b7280;font-size:1.2rem">&#8250;</span>
+
+      <div style="display:flex;flex-direction:column;gap:1rem">
+        <div class="ff-acc-card" onclick="abrirCuentaRandom('1-15')">
+          <div class="ff-acc-img" style="background-image:url('img/cuenta-nvl-1-15.png')">
+            <span class="ff-acc-badge">NIVEL ALEATORIO</span>
+          </div>
+          <div class="ff-acc-body">
+            <div class="ff-acc-tag">NIVELES</div>
+            <div class="ff-acc-title">Cuenta Random Nivel 1&ndash;15</div>
+            <div class="ff-acc-desc">Recibe una cuenta aleatoria con nivel entre 1 y 15. Incluye sus datos de acceso.</div>
+            <div class="ff-acc-foot">
+              <div class="ff-acc-price" id="ffacc-precio-1-15">$0</div>
+              <button class="ff-acc-btn" onclick="event.stopPropagation();abrirCuentaRandom('1-15')">Agregar +</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="ff-acc-card" onclick="abrirCuentaRandom('16-30')">
+          <div class="ff-acc-img" style="background-image:url('img/cuenta-nvl-16-30.png')">
+            <span class="ff-acc-badge">NIVEL ALEATORIO</span>
+          </div>
+          <div class="ff-acc-body">
+            <div class="ff-acc-tag">NIVELES</div>
+            <div class="ff-acc-title">Cuenta Random Nivel 16&ndash;30</div>
+            <div class="ff-acc-desc">Recibe una cuenta aleatoria con nivel entre 16 y 30. Incluye sus datos de acceso.</div>
+            <div class="ff-acc-foot">
+              <div class="ff-acc-price" id="ffacc-precio-16-30">$0</div>
+              <button class="ff-acc-btn" onclick="event.stopPropagation();abrirCuentaRandom('16-30')">Agregar +</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- ═══ MODAL: COMPRA CUENTA RANDOM ═══ -->
+<div class="modal-ov" id="modal-cuentarandom">
+  <div class="modal" style="max-width:400px">
+    <div class="pm-head" style="background:linear-gradient(135deg,rgba(225,29,46,.1),rgba(34,211,238,.04))">
+      <div style="display:flex;align-items:center;gap:.65rem">
+        <div class="pm-icon" style="background:rgba(225,29,46,.15);border:1px solid rgba(225,29,46,.35);color:#ff6b6b"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <div><div class="pm-title" id="cr-m-nombre">Cuenta Random</div><div class="pm-sub">Entrega manual &middot; Datos de acceso</div></div>
+      </div>
+      <button class="pm-close" onclick="cerrarCuentaRandomModal()">✕</button>
+    </div>
+    <div class="modal-b" style="display:flex;flex-direction:column;gap:.85rem">
+      <div style="background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:.8rem 1rem;display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:.8rem;color:#8b93a3">Precio</span>
+        <span id="cr-m-precio" style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#25d366">$0</span>
+      </div>
+      <div>
+        <div class="pm-field-label">🆔 Tu ID de Free Fire (destino) *</div>
+        <input class="finput" id="cr-m-id" type="text" inputmode="numeric" placeholder="Donde quieres recibir la informacion" style="margin-bottom:0;border-color:rgba(34,211,238,.3)"/>
+      </div>
+      <div class="pm-alert pm-alert--amber">
+        <span style="font-size:1rem;flex-shrink:0">⚠️</span>
+        <div style="font-size:.72rem;color:#c9a96e;line-height:1.5">La cuenta se asigna de forma aleatoria segun disponibilidad. Te enviaremos usuario y contrase&ntilde;a por Mis Compras / Soporte.</div>
+      </div>
+      <div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:.7rem;color:#6b7280">💳 Tu saldo disponible</div>
+        <div style="font-family:Oxanium;font-weight:900;font-size:1.05rem;color:#fff" id="cr-m-saldo">$0</div>
+      </div>
+      <button id="cr-submit-btn" onclick="comprarCuentaRandom()" class="pm-btn" style="background:linear-gradient(135deg,#a3121f,#e11d2e)">Agregar +</button>
+    </div>
   </div>
 </div>
 

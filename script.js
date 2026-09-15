@@ -938,7 +938,7 @@ function goPage(id){
   if(id==='clanes') setTimeout(renderClanes, 100);
   if(id==='pase') setTimeout(_paseReiniciar, 100);
   if(id==='soporte') setTimeout(sopVolverLista, 100);
-  if(id==='freefire') setTimeout(ffVolverInicio, 100);
+  if(id==='freefire') setTimeout(function(){ ffVolverInicio(); _refrescarPreciosCuentasRandom(); }, 100);
   if(id==='saldo') setTimeout(function(){ recSetMoneda('MXN'); _recTipo=null; recLimpiarTipo(); }, 100);
   if(id==='sobre') setTimeout(function(){ sobreTab('resenas'); }, 100);
   if(id==='likes') renderLikes();
@@ -1808,6 +1808,78 @@ function comprarMembresia(){
       if(typeof _refreshSaldoUI === 'function') _refreshSaldoUI(authSession.saldo||0);
       cerrarMembresiaModal();
       showToast('\u2705 Pedido #'+ord+' confirmado! '+m.nombre+' en proceso.', 4000);
+    }, 800);
+  });
+}
+
+// ═══════════════════ CUENTAS RANDOM (Free Fire → Cuentas) ═══════════════════
+// IMPORTANTE: precios de ejemplo (0). Actualiza CUENTAS_RANDOM con el precio real.
+var CUENTAS_RANDOM = {
+  '1-15':  { nombre:'Cuenta Random Nivel 1-15',  precio:40 },
+  '16-30': { nombre:'Cuenta Random Nivel 16-30', precio:75 }
+};
+var _crActual = null;
+var _comprandoCR = false;
+
+function _refrescarPreciosCuentasRandom(){
+  var el1 = document.getElementById('ffacc-precio-1-15');
+  if(el1) el1.textContent = fmt(CUENTAS_RANDOM['1-15'].precio);
+  var el2 = document.getElementById('ffacc-precio-16-30');
+  if(el2) el2.textContent = fmt(CUENTAS_RANDOM['16-30'].precio);
+}
+
+function abrirCuentaRandom(rango){
+  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
+  var c = CUENTAS_RANDOM[rango];
+  if(!c) return;
+  _crActual = rango;
+
+  var ov = document.getElementById('modal-cuentarandom');
+  document.getElementById('cr-m-nombre').textContent = c.nombre;
+  document.getElementById('cr-m-precio').textContent = fmt(c.precio);
+  document.getElementById('cr-m-id').value = '';
+  document.getElementById('cr-m-saldo').textContent = fmt(authSession.saldo||0);
+  if(ov) ov.classList.add('show');
+}
+
+function cerrarCuentaRandomModal(){
+  var ov = document.getElementById('modal-cuentarandom');
+  if(ov) ov.classList.remove('show');
+}
+
+function comprarCuentaRandom(){
+  if(_comprandoCR || !_crActual) return;
+  var c = CUENTAS_RANDOM[_crActual];
+  var ffId = ((document.getElementById('cr-m-id')||{}).value||'').trim();
+  if(!ffId){ showToast('Ingresa tu ID de Free Fire'); return; }
+
+  _comprandoCR = true;
+  var btn = document.getElementById('cr-submit-btn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Verificando saldo...'; }
+
+  verificarSaldoFresco(c.precio, function(alcanza, saldoReal){
+    document.getElementById('cr-m-saldo').textContent = fmt(saldoReal);
+    if(!alcanza){
+      showToast('Saldo insuficiente. Tienes '+fmt(saldoReal)+' y necesitas '+fmt(c.precio), 3500);
+      if(btn){ btn.disabled = false; btn.textContent = 'Agregar +'; }
+      _comprandoCR = false;
+      setTimeout(function(){ cerrarCuentaRandomModal(); goPage('saldo'); }, 1500);
+      return;
+    }
+
+    var ord = getNextOrder();
+    addSpend(c.precio, c.nombre+' - ID destino:'+ffId+' - Pedido #'+ord);
+    registrarPedido(c.nombre, 1, 'cuenta_random', ffId, c.precio, 0);
+    if(typeof tgNotifyPurchase === 'function'){
+      tgNotifyPurchase(authSession.username, c.nombre+'\n\uD83C\uDFAE ID destino: '+ffId+'\n\u26A0\uFE0F Asignar cuenta random y enviar datos de acceso', c.precio, ord);
+    }
+
+    setTimeout(function(){
+      _comprandoCR = false;
+      if(btn){ btn.disabled = false; btn.textContent = 'Agregar +'; }
+      if(typeof _refreshSaldoUI === 'function') _refreshSaldoUI(authSession.saldo||0);
+      cerrarCuentaRandomModal();
+      showToast('\u2705 Pedido #'+ord+' confirmado! Te enviaremos los datos de acceso pronto.', 4000);
     }, 800);
   });
 }
