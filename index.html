@@ -2567,7 +2567,7 @@ button[style*="linear-gradient"]{
 
 /* Hero de Free Fire (imagen de fondo + overlay) */
 .ds-hero{position:relative;max-width:640px;margin:0 auto;border-radius:22px;overflow:hidden;border:1px solid rgba(225,29,46,.28);min-height:340px;display:flex;align-items:flex-end;box-shadow:0 20px 50px rgba(0,0,0,.5)}
-.ds-hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:saturate(1.05)}
+.ds-hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;background-color:#0a0e16;filter:saturate(1.05)}
 .ds-hero-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,5,8,.15) 0%,rgba(5,5,8,.55) 55%,rgba(5,5,8,.96) 100%)}
 .ds-hero-body{position:relative;z-index:1;padding:1.6rem 1.4rem 1.5rem;width:100%}
 .ds-hero-status{display:inline-flex;align-items:center;gap:.4rem;font-size:.7rem;font-weight:700;color:#25d366;margin-bottom:.6rem}
@@ -2818,7 +2818,7 @@ document.addEventListener('keydown',function(e){
 
     <!-- ═══ HERO FREE FIRE (enlaza al catálogo del juego) ═══ -->
     <div class="ds-hero" style="margin-bottom:1.9rem" onclick="goPage('freefire')">
-      <div class="ds-hero-bg" id="ds-hero-bg" style="background-color:#0a0e16;background-image:linear-gradient(160deg,rgba(225,29,46,.12),rgba(34,211,238,.05))"></div>
+      <div class="ds-hero-bg" id="ds-hero-bg" style="background-image:url('img/freefire-hero.png')"></div>
       <div class="ds-hero-overlay"></div>
       <div class="ds-hero-body">
         <div class="ds-hero-status"><span class="dot"></span>CAT&Aacute;LOGO DISPONIBLE</div>
@@ -2970,7 +2970,7 @@ document.addEventListener('keydown',function(e){
       <button onclick="goPage('home')" class="sop-back" style="margin-top:1rem">&#8592; Todos los juegos</button>
 
       <div class="ds-hero" style="margin-bottom:1.6rem">
-        <div class="ds-hero-bg" style="background-color:#0a0e16;background-image:linear-gradient(160deg,rgba(225,29,46,.14),rgba(34,211,238,.05))"></div>
+        <div class="ds-hero-bg" style="background-image:url('img/freefire-hero.png')"></div>
         <div class="ds-hero-overlay"></div>
         <div class="ds-hero-body">
           <div class="ds-hero-status"><span class="dot"></span>CAT&Aacute;LOGO DISPONIBLE</div>
@@ -2991,16 +2991,16 @@ document.addEventListener('keydown',function(e){
       </div>
 
       <div style="display:flex;flex-direction:column;gap:.75rem">
-        <div class="ds-cat-card" style="flex-direction:row;align-items:center;text-align:left;padding:1.2rem 1.1rem;gap:1rem" onclick="ffIrTienda()">
+        <button type="button" class="ds-cat-card" style="width:100%;flex-direction:row;align-items:center;text-align:left;padding:1.2rem 1.1rem;gap:1rem;font-family:inherit;color:inherit" onclick="ffIrTienda()">
           <span class="ds-cat-ico" style="font-size:1.9rem">&#9638;</span>
           <div style="flex:1"><div class="ds-cat-name" style="font-size:.95rem">Tienda</div><div class="ds-cat-sub" style="font-size:.72rem">Pases, tokens y cajas</div></div>
           <span style="color:#6b7280;font-size:1.2rem">&#8250;</span>
-        </div>
-        <div class="ds-cat-card" style="flex-direction:row;align-items:center;text-align:left;padding:1.2rem 1.1rem;gap:1rem" onclick="ffIrCuentas()">
+        </button>
+        <button type="button" class="ds-cat-card" style="width:100%;flex-direction:row;align-items:center;text-align:left;padding:1.2rem 1.1rem;gap:1rem;font-family:inherit;color:inherit" onclick="ffIrCuentas()">
           <span class="ds-cat-ico" style="font-size:1.9rem">&#9817;</span>
           <div style="flex:1"><div class="ds-cat-name" style="font-size:.95rem">Cuentas</div><div class="ds-cat-sub" style="font-size:.72rem">Pases de nivel</div></div>
           <span style="color:#6b7280;font-size:1.2rem">&#8250;</span>
-        </div>
+        </button>
       </div>
     </div>
 
