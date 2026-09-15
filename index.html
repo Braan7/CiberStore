@@ -2638,6 +2638,22 @@ button[style*="linear-gradient"]{
 .ff-acc-price{font-family:Poppins,sans-serif;font-weight:800;font-size:1.15rem;color:#fff}
 .ff-acc-btn{padding:.65rem 1.2rem;background:var(--grad-red);color:#fff;border:none;border-radius:11px;font-family:Poppins,sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;transition:filter .18s;white-space:nowrap}
 .ff-acc-btn:hover{filter:brightness(1.12)}
+/* ═══════════ SELECTOR DE REGIÓN — Honor de Clan ═══════════ */
+.honor-region-select{display:flex;align-items:center;gap:.7rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:.9rem 1.1rem;cursor:pointer;transition:border-color .18s}
+.honor-region-select:hover{border-color:rgba(255,208,0,.35)}
+.honor-region-select-flag{font-size:1.3rem}
+.honor-region-select-name{flex:1;font-family:Poppins,sans-serif;font-weight:700;font-size:.92rem;color:#fff}
+#honor-sel-arrow{color:#6b7280;transition:transform .2s;flex-shrink:0}
+.honor-region-select.open #honor-sel-arrow{transform:rotate(180deg)}
+.honor-region-drop{display:none;max-height:320px;overflow-y:auto;background:#14161f;border:1px solid rgba(255,255,255,.1);border-radius:14px;margin-top:.5rem;box-shadow:0 16px 40px rgba(0,0,0,.5)}
+.honor-region-drop.open{display:block;animation:curDropIn .18s ease}
+.honor-region-opt{display:flex;align-items:center;gap:.7rem;padding:.8rem 1.05rem;cursor:pointer;transition:background .15s;border-bottom:1px solid rgba(255,255,255,.05)}
+.honor-region-opt:last-child{border-bottom:none}
+.honor-region-opt:hover{background:rgba(255,255,255,.05)}
+.honor-region-opt.active{background:rgba(255,208,0,.08)}
+.honor-region-opt-flag{font-size:1.15rem;flex-shrink:0}
+.honor-region-opt-name{flex:1;font-size:.85rem;color:#e0e4ea;font-weight:600}
+.honor-region-opt-check{color:#ffd000;font-size:.85rem;flex-shrink:0}
 </style>
 
 <script>
@@ -3079,8 +3095,8 @@ document.addEventListener('keydown',function(e){
         <span id="cr-m-precio" style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#25d366">$0</span>
       </div>
       <div>
-        <div class="pm-field-label">🆔 Tu ID de Free Fire (destino) *</div>
-        <input class="finput" id="cr-m-id" type="text" inputmode="numeric" placeholder="Donde quieres recibir la informacion" style="margin-bottom:0;border-color:rgba(34,211,238,.3)"/>
+        <div class="pm-field-label">📱 Contacto de la persona *</div>
+        <input class="finput" id="cr-m-id" type="text" placeholder="WhatsApp, Telegram o correo para enviar los datos" style="margin-bottom:0;border-color:rgba(34,211,238,.3)"/>
       </div>
       <div class="pm-alert pm-alert--amber">
         <span style="font-size:1rem;flex-shrink:0">⚠️</span>
@@ -3567,9 +3583,23 @@ document.addEventListener('keydown',function(e){
   </div>
 </div><div class="page" id="page-honor">
   <div class="ph"><div class="stag">Clan - Free Fire</div><h2 class="ptitle">&#127942; HONOR DE <span>CLAN</span></h2><p class="psub">Selecciona tu region. Entrega rapida garantizada.</p></div>
-  <!-- Configuracion del clan -->
-  <div style="max-width:700px;margin:0 auto 1.5rem;padding:0 5vw">
-    <div style="background:linear-gradient(135deg,rgba(255,208,0,.06),rgba(255,102,0,.04));border:1px solid rgba(255,208,0,.25);border-radius:13px;padding:1.1rem 1.25rem">
+  <div style="max-width:700px;margin:0 auto;padding:0 5vw 3rem">
+    <div class="pm-field-label" style="margin-bottom:.6rem">&#128737;&#65039; Regi&oacute;n de cuentas</div>
+
+    <div class="honor-region-select" id="honor-region-select" onclick="toggleHonorRegionDrop()">
+      <span class="honor-region-select-flag" id="honor-sel-flag">🇺🇸</span>
+      <span class="honor-region-select-name" id="honor-sel-name">Estados Unidos</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" id="honor-sel-arrow"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="honor-region-drop" id="honor-region-drop"></div>
+
+    <div style="display:flex;align-items:center;gap:.5rem;margin:1rem 0 1.6rem">
+      <span style="font-size:.8rem;color:#8b93a3">Costo:</span>
+      <span style="font-family:Oxanium;font-weight:900;font-size:1.1rem;color:#25d366" id="honor-sel-precio">$260 MX</span>
+    </div>
+
+    <!-- Configuracion del clan -->
+    <div style="background:linear-gradient(135deg,rgba(255,208,0,.06),rgba(255,102,0,.04));border:1px solid rgba(255,208,0,.25);border-radius:13px;padding:1.1rem 1.25rem;margin-bottom:1.5rem">
       <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.85rem">
         <span style="font-size:1.2rem">&#9881;&#65039;</span>
         <div style="font-family:Oxanium;font-size:.82rem;font-weight:700;color:var(--c4);letter-spacing:1px">CONFIGURACION DEL CLAN</div>
@@ -3594,41 +3624,18 @@ document.addEventListener('keydown',function(e){
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="honor-grid">
-    <div class="honor-card" onclick="openHonorModal(0)" style="border-color:rgba(255,208,0,.22)">
-      <span class="honor-flag">🇨🇦</span>
-      <div class="honor-region" style="color:#ffd000">Norteamérica</div>
-      <div class="honor-desc">Canadá · Rep. Dominicana</div>
-      <div class="honor-price" style="color:#ffd000" id="honor-price-0">$238 <span style="font-size:.75rem;opacity:.6">MX</span></div>
-      <div class="honor-note">Entrega fin de semana</div>
-      <button class="btn-honor" style="border-color:rgba(255,208,0,.4);color:#ffd000;background:rgba(255,208,0,.08)" onclick="event.stopPropagation();openHonorModal(0)">Comprar ahora</button>
+    <!-- ID y Nombre del clan -->
+    <div style="margin-bottom:1rem">
+      <div class="pm-field-label">🛡️ Nombre del Clan *</div>
+      <input class="finput" id="honor-p-clan" type="text" placeholder="Nombre exacto de tu clan" style="margin-bottom:0;border-color:rgba(255,208,0,.3)"/>
     </div>
-    <div class="honor-card" onclick="openHonorModal(1)" style="border-color:rgba(77,171,247,.22)">
-      <span class="honor-flag">🇺🇸</span>
-      <div class="honor-region" style="color:#4dabf7">Estados Unidos</div>
-      <div class="honor-desc">México</div>
-      <div class="honor-price" style="color:#4dabf7" id="honor-price-1">$238 <span style="font-size:.75rem;opacity:.6">MX</span></div>
-      <div class="honor-note">Entrega fin de semana</div>
-      <button class="btn-honor" style="border-color:rgba(77,171,247,.4);color:#4dabf7;background:rgba(77,171,247,.08)" onclick="event.stopPropagation();openHonorModal(1)">Comprar ahora</button>
+    <div style="margin-bottom:1.5rem">
+      <div class="pm-field-label">🆔 ID del Clan *</div>
+      <input class="finput" id="honor-p-idclan" type="text" inputmode="numeric" placeholder="ID numérico de tu clan" style="margin-bottom:0;border-color:rgba(255,208,0,.3)"/>
     </div>
-    <div class="honor-card" onclick="openHonorModal(2)" style="border-color:rgba(64,192,87,.22)">
-      <span class="honor-flag">🇧🇷</span>
-      <div class="honor-region" style="color:#40c057">Sudamérica</div>
-      <div class="honor-desc">Perú · Chile</div>
-      <div class="honor-price" style="color:#40c057" id="honor-price-2">$238 <span style="font-size:.75rem;opacity:.6">MX</span></div>
-      <div class="honor-note">Entrega fin de semana</div>
-      <button class="btn-honor" style="border-color:rgba(64,192,87,.4);color:#40c057;background:rgba(64,192,87,.08)" onclick="event.stopPropagation();openHonorModal(2)">Comprar ahora</button>
-    </div>
-    <div class="honor-card" onclick="openHonorModal(3)" style="border-color:rgba(179,157,219,.22)">
-      <span class="honor-flag">🇪🇺</span>
-      <div class="honor-region" style="color:#b39ddb">Europa</div>
-      <div class="honor-desc">España</div>
-      <div class="honor-price" style="color:#b39ddb" id="honor-price-3">$238 <span style="font-size:.75rem;opacity:.6">MX</span></div>
-      <div class="honor-note">Entrega fin de semana</div>
-      <button class="btn-honor" style="border-color:rgba(179,157,219,.4);color:#b39ddb;background:rgba(179,157,219,.08)" onclick="event.stopPropagation();openHonorModal(3)">Comprar ahora</button>
-    </div>
+
+    <button class="pm-btn pm-btn--gold" style="font-size:.92rem;padding:1rem" onclick="lanzarGrupoHonor()">&#9889; Grupo inicial ($260 MX)</button>
   </div>
 </div>
 <div class="page" id="page-membresia">
@@ -4071,74 +4078,6 @@ document.addEventListener('keydown',function(e){
       <input class="finput" id="pass-confirma" type="password" placeholder="Repite la nueva contrase&ntilde;a"/>
       <div id="pass-msg" style="display:none;font-size:.78rem;margin:.5rem 0;padding:.5rem .7rem;border-radius:8px"></div>
       <button onclick="guardarNuevaPass()" style="width:100%;margin-top:.6rem;padding:.85rem;background:var(--grad);color:#fff;border:none;border-radius:10px;font-family:Oxanium;font-weight:900;font-size:.82rem;letter-spacing:.5px;cursor:pointer">Guardar cambios</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-ov" id="modal-honor">
-  <div class="modal" style="max-width:420px">
-    <!-- Header -->
-    <div class="pm-head" style="background:linear-gradient(135deg,rgba(255,208,0,.1),rgba(34,211,238,.05))">
-      <div style="display:flex;align-items:center;gap:.65rem">
-        <div class="pm-icon" style="background:rgba(255,208,0,.15);border:1px solid rgba(255,208,0,.35);font-size:1.15rem">🏆</div>
-        <div><div class="pm-title">Honor de Clan</div><div class="pm-sub">Free Fire · Entrega fin de semana</div></div>
-      </div>
-      <button class="pm-close" onclick="closeHonorModal()">✕</button>
-    </div>
-    <div class="modal-b" style="display:flex;flex-direction:column;gap:.85rem">
-
-      <!-- Resumen del producto -->
-      <div style="background:linear-gradient(135deg,rgba(255,208,0,.08),rgba(34,211,238,.04));border:1.5px solid rgba(255,208,0,.25);border-radius:16px;padding:1rem;display:flex;align-items:center;gap:.9rem">
-        <div style="font-size:2.2rem;flex-shrink:0" id="honor-m-flag">🏆</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:.65rem;color:#8b93a3;text-transform:uppercase;letter-spacing:1px;font-weight:700">Región</div>
-          <div style="font-family:Oxanium;font-weight:900;font-size:.95rem;color:#fff" id="honor-m-region">Honor de Clan</div>
-        </div>
-        <div style="text-align:right;flex-shrink:0">
-          <div style="font-size:.6rem;color:#8b93a3;text-transform:uppercase;letter-spacing:1px">Precio</div>
-          <div style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#ffd000" id="honor-m-price">$238 MX</div>
-        </div>
-      </div>
-
-      <!-- Info importante (compacta) -->
-      <div style="background:rgba(255,208,0,.05);border:1px solid rgba(255,208,0,.18);border-radius:12px;padding:.8rem .95rem">
-        <div style="font-size:.68rem;font-weight:800;color:#ffd000;letter-spacing:.8px;text-transform:uppercase;margin-bottom:.5rem">⚙️ Antes de comprar</div>
-        <ul style="margin:0;padding-left:1rem;font-size:.72rem;color:#c9a96e;line-height:1.8;list-style:disc">
-          <li>Los pedidos se toman los <b style="color:#ffd88a">sábados y domingos</b>.</li>
-          <li>Se unirán <b style="color:#ffd88a">4 cuentas bots</b> a tu clan en la madrugada.</li>
-          <li>Honor garantizado de <b style="color:#ffd88a">380,000 a 420,000</b> por semana.</li>
-          <li>No se necesita contraseña.</li>
-        </ul>
-      </div>
-
-      <!-- Nombre del Clan -->
-      <div>
-        <div class="pm-field-label">🛡️ Nombre del Clan *</div>
-        <input class="finput" id="honor-m-clan" type="text" placeholder="Nombre exacto de tu clan" style="margin-bottom:0;border-color:rgba(255,208,0,.3)"/>
-      </div>
-
-      <!-- ID del Clan -->
-      <div>
-        <div class="pm-field-label">🆔 ID del Clan *</div>
-        <input class="finput" id="honor-m-idclan" type="text" inputmode="numeric" placeholder="ID numérico de tu clan" style="margin-bottom:0;border-color:rgba(255,208,0,.3)"/>
-      </div>
-
-      <!-- Checkbox moderno -->
-      <label style="display:flex;align-items:flex-start;gap:.7rem;cursor:pointer;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.85rem">
-        <input type="checkbox" id="honor-m-confirmo" style="width:20px;height:20px;flex-shrink:0;margin-top:.1rem;accent-color:#ffd000;cursor:pointer"/>
-        <span style="font-size:.75rem;color:#c9d1e0;line-height:1.55">Confirmo que mi clan está configurado y acepto que la entrega es el <b style="color:#ffd000">fin de semana</b>.</span>
-      </label>
-
-      <!-- Balance card -->
-      <div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between">
-        <div style="font-size:.7rem;color:#6b7280;display:flex;align-items:center;gap:.4rem">💳 Tu saldo disponible</div>
-        <div style="font-family:Oxanium;font-weight:900;font-size:1.05rem;color:#fff" id="honor-m-saldo">$0 MX</div>
-      </div>
-
-      <!-- Botón CTA -->
-      <button id="honor-submit-btn" onclick="submitHonor()" class="pm-btn pm-btn--gold" style="font-size:.92rem;padding:1rem">🏆 COMPRAR CON SALDO</button>
-      <div style="font-size:.67rem;color:#6b7280;text-align:center">Entrega garantizada el fin de semana · Sin contraseña</div>
-
     </div>
   </div>
 </div>

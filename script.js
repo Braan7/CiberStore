@@ -225,16 +225,25 @@ function clickServicioNoDisponible(nombre){
 }
 
 var HONOR = [
-  {region:'Norteamerica',flag:'\uD83C\uDDE8\uD83C\uDDE6',color:'#ffd000',priceUSD:14,paises:'Canada, Rep. Dominicana'},
-  {region:'Estados Unidos',flag:'\uD83C\uDDFA\uD83C\uDDF8',color:'#4dabf7',priceUSD:14,paises:'Mexico'},
-  {region:'Sudamerica',flag:'\uD83C\uDDE7\uD83C\uDDF7',color:'#40c057',priceUSD:14,paises:'Peru, Chile'},
-  {region:'Europa',flag:'\uD83C\uDDEA\uD83C\uDDFA',color:'#b39ddb',priceUSD:14,paises:'Espana'}
+  {region:'Estados Unidos', flag:'\uD83C\uDDFA\uD83C\uDDF8', color:'#4dabf7', precio:260},
+  {region:'Sudamerica',     flag:'\uD83C\uDDE7\uD83C\uDDF7', color:'#40c057', precio:260},
+  {region:'Norteamerica',   flag:'\uD83C\uDDE8\uD83C\uDDE6', color:'#ffd000', precio:260},
+  {region:'Brasil',         flag:'\uD83C\uDDE7\uD83C\uDDF7', color:'#25d366', precio:260},
+  {region:'Bangladesh',     flag:'\uD83C\uDDE7\uD83C\uDDE9', color:'#2ecc71', precio:260},
+  {region:'Europa',         flag:'\uD83C\uDDEA\uD83C\uDDFA', color:'#b39ddb', precio:260},
+  {region:'India',          flag:'\uD83C\uDDEE\uD83C\uDDF3', color:'#ff9933', precio:260},
+  {region:'Indonesia',      flag:'\uD83C\uDDEE\uD83C\uDDE9', color:'#e74c3c', precio:260},
+  {region:'Oriente Medio',  flag:'\uD83C\uDDE6\uD83C\uDDEA', color:'#f0b90b', precio:260},
+  {region:'Pakistan',       flag:'\uD83C\uDDF5\uD83C\uDDF0', color:'#01a049', precio:260},
+  {region:'Rusia',          flag:'\uD83C\uDDF7\uD83C\uDDFA', color:'#67e8f9', precio:260},
+  {region:'Singapur',       flag:'\uD83C\uDDF8\uD83C\uDDEC', color:'#ff6b6b', precio:260},
+  {region:'Tailandia',      flag:'\uD83C\uDDF9\uD83C\uDDED', color:'#a78bfa', precio:260},
+  {region:'Vietnam',        flag:'\uD83C\uDDFB\uD83C\uDDF3', color:'#ffb84d', precio:260}
 ];
-// Devuelve el precio en MXN de un honor, usando el tipo de cambio real del momento
+// Devuelve el precio en MXN de un honor (precio fijo, ya no depende del tipo de cambio)
 function honorPrecioMXN(i){
   var h = HONOR[i]; if(!h) return 0;
-  var tc = (typeof USD_MXN === 'number' && USD_MXN > 0) ? USD_MXN : 17;
-  return Math.round(h.priceUSD * tc);
+  return h.precio;
 }
 
 var TIERS = [
@@ -934,6 +943,7 @@ function goPage(id){
   closeSB();
   window.scrollTo(0,0);
   if(id==='diamantes') setTimeout(function(){ setDiamTipo('ilim'); _refrescarPreciosMembresias(); }, 100);
+  if(id==='honor') setTimeout(function(){ seleccionarHonorRegion(_honorIdxActual||0); }, 100);
   if(id==='codigos') setTimeout(_updateScarSaldo, 100);
   if(id==='clanes') setTimeout(renderClanes, 100);
   if(id==='pase') setTimeout(_paseReiniciar, 100);
@@ -1545,64 +1555,79 @@ function updateModalBalance(){
     if(sb) sb.textContent = saldoStr;
   }, 50);
 }
-function openHonorModal(idx){
-  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
-  var h = HONOR[idx];
-  if(!h) return;
-  _honorIdxActual = idx;
-  var precioHonor = honorPrecioMXN(idx);
-
-  // Rellenar el modal simple
-  var ov = document.getElementById('modal-honor');
-  if(!ov){ showToast('Error al abrir, recarga la pagina'); return; }
-  var setTxt = function(id,txt){ var e=document.getElementById(id); if(e) e.textContent=txt; };
-  setTxt('honor-m-flag', h.flag);
-  setTxt('honor-m-region', 'Honor de Clan - ' + h.region);
-  setTxt('honor-m-price', fmt(precioHonor));
-  setTxt('honor-m-saldo', fmt(authSession.saldo||0));
-  // Limpiar campos
-  ['honor-m-clan','honor-m-idclan'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
-  var chk = document.getElementById('honor-m-confirmo'); if(chk) chk.checked=false;
-  ov.classList.add('show');
-}
-
-function closeHonorModal(){
-  var ov = document.getElementById('modal-honor');
-  if(ov) ov.classList.remove('show');
-}
-
-var _honorIdxActual = null;
+var _honorIdxActual = 0; // Estados Unidos por defecto
 var _comprandoHonor = false;
 
-function submitHonor(){
-  if(_honorIdxActual === null) return;
+function toggleHonorRegionDrop(){
+  var sel = document.getElementById('honor-region-select');
+  var drop = document.getElementById('honor-region-drop');
+  if(!sel || !drop) return;
+  var abrir = !drop.classList.contains('open');
+  drop.classList.toggle('open', abrir);
+  sel.classList.toggle('open', abrir);
+  if(abrir) _pintarHonorRegiones();
+}
+
+function _pintarHonorRegiones(){
+  var drop = document.getElementById('honor-region-drop');
+  if(!drop) return;
+  drop.innerHTML = HONOR.map(function(h, i){
+    var activo = (i === _honorIdxActual);
+    return '<div class="honor-region-opt'+(activo?' active':'')+'" onclick="seleccionarHonorRegion('+i+')">'
+      + '<span class="honor-region-opt-flag">'+h.flag+'</span>'
+      + '<span class="honor-region-opt-name">'+h.region+'</span>'
+      + (activo ? '<span class="honor-region-opt-check">&#10003;</span>' : '')
+      + '</div>';
+  }).join('');
+}
+
+function seleccionarHonorRegion(idx){
+  _honorIdxActual = idx;
+  var h = HONOR[idx];
+  if(!h) return;
+  document.getElementById('honor-sel-flag').textContent = h.flag;
+  document.getElementById('honor-sel-name').textContent = h.region;
+  document.getElementById('honor-sel-precio').textContent = fmt(h.precio) + ' MX';
+  var drop = document.getElementById('honor-region-drop');
+  var sel = document.getElementById('honor-region-select');
+  if(drop) drop.classList.remove('open');
+  if(sel) sel.classList.remove('open');
+}
+
+// Cerrar el dropdown si se toca fuera
+document.addEventListener('click', function(e){
+  var drop = document.getElementById('honor-region-drop');
+  var sel = document.getElementById('honor-region-select');
+  if(drop && drop.classList.contains('open') && sel && !sel.contains(e.target) && !drop.contains(e.target)){
+    drop.classList.remove('open');
+    sel.classList.remove('open');
+  }
+});
+
+function lanzarGrupoHonor(){
   var idx = _honorIdxActual;
   var h = HONOR[idx];
   if(!h) return;
+  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
 
-  var clan = ((document.getElementById('honor-m-clan')||{}).value||'').trim();
-  var idClan = ((document.getElementById('honor-m-idclan')||{}).value||'').trim();
-  var chk = document.getElementById('honor-m-confirmo');
+  var clan = ((document.getElementById('honor-p-clan')||{}).value||'').trim();
+  var idClan = ((document.getElementById('honor-p-idclan')||{}).value||'').trim();
 
   if(!clan){ showToast('Ingresa el nombre del clan'); return; }
   if(!idClan){ showToast('Ingresa el ID del clan'); return; }
-  if(chk && !chk.checked){ showToast('\u26A0 Confirma que ya configuraste tu clan'); return; }
 
   if(_comprandoHonor) return;
 
   var precioHonor = honorPrecioMXN(idx);
-  var btn = document.getElementById('honor-submit-btn');
+  var btn = document.querySelector('#page-honor .pm-btn--gold');
   if(btn){ btn.disabled=true; btn.textContent='Verificando saldo...'; }
 
   // Verificar saldo FRESCO (evita comprar con datos desactualizados en pantalla)
   verificarSaldoFresco(precioHonor, function(alcanza, saldoReal){
-    var saldoEl = document.getElementById('honor-m-saldo');
-    if(saldoEl) saldoEl.textContent = fmt(saldoReal);
-
     if(!alcanza){
       showToast('Saldo insuficiente. Tienes ' + fmt(saldoReal) + ' y necesitas ' + fmt(precioHonor), 3500);
-      if(btn){ btn.disabled=false; btn.innerHTML='\uD83C\uDFC6 COMPRAR CON SALDO'; }
-      setTimeout(function(){ closeHonorModal(); goPage('saldo'); }, 1500);
+      if(btn){ btn.disabled=false; btn.innerHTML='\u26A1 Grupo inicial ('+fmt(precioHonor)+' MX)'; }
+      setTimeout(function(){ goPage('saldo'); }, 1500);
       return;
     }
 
@@ -1613,33 +1638,33 @@ function submitHonor(){
     ov.id = 'honor-confirm-overlay';
     ov.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px)';
     ov.innerHTML =
-      '<div style="background:#0e1118;border:1.5px solid rgba(34,211,238,.4);border-radius:18px;padding:1.5rem;max-width:340px;width:100%;text-align:center">'
-      + '<div style="font-size:2rem;margin-bottom:.5rem">\uD83C\uDFC6</div>'
-      + '<div style="font-family:Oxanium;font-weight:900;font-size:1rem;color:#fff;margin-bottom:.35rem">Confirmar compra</div>'
+      '<div style="background:#0e1118;border:1.5px solid rgba(255,208,0,.4);border-radius:18px;padding:1.5rem;max-width:340px;width:100%;text-align:center">'
+      + '<div style="font-size:2rem;margin-bottom:.5rem">'+h.flag+'</div>'
+      + '<div style="font-family:Oxanium;font-weight:900;font-size:1rem;color:#fff;margin-bottom:.35rem">Confirmar grupo</div>'
       + '<div style="font-size:.8rem;color:#8b93a3;margin-bottom:1.1rem;line-height:1.6">'
       + 'Honor de Clan &middot; ' + h.region + '<br/>'
-      + 'Clan: <b style="color:#22d3ee">' + clan + '</b><br/>'
-      + 'ID: <b style="color:#22d3ee">' + idClan + '</b><br/>'
+      + 'Clan: <b style="color:#ffd000">' + clan + '</b><br/>'
+      + 'ID: <b style="color:#ffd000">' + idClan + '</b><br/>'
       + 'Costo: <b style="color:#25d366">' + fmt(precioHonor) + '</b>'
       + '</div>'
       + '<div style="display:flex;gap:.65rem">'
       + '<button id="honor-confirm-no" style="flex:1;padding:.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#8b93a3;border-radius:11px;font-family:Poppins;font-weight:700;font-size:.82rem;cursor:pointer">Cancelar</button>'
-      + '<button id="honor-confirm-si" style="flex:1;padding:.75rem;background:linear-gradient(135deg,#0ea5e9,#22d3ee);border:none;color:#000;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.82rem;cursor:pointer">\u2713 Confirmar</button>'
+      + '<button id="honor-confirm-si" style="flex:1;padding:.75rem;background:linear-gradient(135deg,#a3121f,#e11d2e);border:none;color:#fff;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.82rem;cursor:pointer">\u2713 Confirmar</button>'
       + '</div></div>';
     document.body.appendChild(ov);
 
     document.getElementById('honor-confirm-no').onclick = function(){
       ov.remove();
-      if(btn){ btn.disabled=false; btn.innerHTML='\uD83C\uDFC6 COMPRAR CON SALDO'; }
+      if(btn){ btn.disabled=false; btn.innerHTML='\u26A1 Grupo inicial ('+fmt(precioHonor)+' MX)'; }
     };
     document.getElementById('honor-confirm-si').onclick = function(){
       ov.remove();
-      _honorProcesar(h, clan, idClan, precioHonor, btn);
+      _honorProcesarPagina(h, clan, idClan, precioHonor, btn);
     };
   });
 }
 
-function _honorProcesar(h, clan, idClan, precioHonor, btn){
+function _honorProcesarPagina(h, clan, idClan, precioHonor, btn){
   if(_comprandoHonor) return;
   _comprandoHonor = true;
   if(btn){ btn.disabled=true; btn.innerHTML='\u23F3 Procesando...'; }
@@ -1658,11 +1683,31 @@ function _honorProcesar(h, clan, idClan, precioHonor, btn){
 
   setTimeout(function(){
     _comprandoHonor = false;
-    if(btn){ btn.disabled=false; btn.innerHTML='\uD83C\uDFC6 COMPRAR CON SALDO'; }
+    if(btn){ btn.disabled=false; btn.innerHTML='\u26A1 Grupo inicial ('+fmt(precioHonor)+' MX)'; }
     if(typeof _refreshSaldoUI === 'function') _refreshSaldoUI(authSession.saldo||0);
-    closeHonorModal();
-    showToast('\u2705 Pedido #' + ord + ' confirmado! Tu Honor de Clan se procesa el fin de semana.', 5000);
+    // Limpiar campos para un siguiente pedido
+    var elClan = document.getElementById('honor-p-clan'); if(elClan) elClan.value = '';
+    var elId = document.getElementById('honor-p-idclan'); if(elId) elId.value = '';
+    _mostrarInstruccionesHonor(ord);
   }, 800);
+}
+
+// Muestra las instrucciones (imagen honor-instrucciones.jpg) tras confirmar el pedido
+function _mostrarInstruccionesHonor(ord){
+  var ov = document.createElement('div');
+  ov.id = 'honor-instrucciones-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px)';
+  ov.innerHTML =
+    '<div style="background:#0e1118;border:1.5px solid rgba(255,208,0,.35);border-radius:18px;padding:1.4rem;max-width:400px;width:100%;max-height:90vh;overflow-y:auto">'
+    + '<div style="text-align:center;margin-bottom:1rem">'
+    +   '<div style="font-size:1.8rem;margin-bottom:.4rem">\u2705</div>'
+    +   '<div style="font-family:Oxanium;font-weight:900;font-size:1rem;color:#fff">Pedido #'+ord+' confirmado</div>'
+    +   '<div style="font-size:.78rem;color:#8b93a3;margin-top:.3rem">Sigue estos pasos para preparar tu clan</div>'
+    + '</div>'
+    + '<img src="img/honor-instrucciones.jpg" alt="Instrucciones Honor de Clan" style="width:100%;border-radius:12px;margin-bottom:1rem" onerror="this.style.display=\'none\'"/>'
+    + '<button onclick="document.getElementById(\'honor-instrucciones-overlay\').remove()" style="width:100%;padding:.85rem;background:linear-gradient(135deg,#a3121f,#e11d2e);color:#fff;border:none;border-radius:12px;font-family:Oxanium;font-weight:800;font-size:.85rem;cursor:pointer">Entendido</button>'
+    + '</div>';
+  document.body.appendChild(ov);
 }
 
 // ═══════════════════ PASES FF ═══════════════════
@@ -1850,8 +1895,8 @@ function cerrarCuentaRandomModal(){
 function comprarCuentaRandom(){
   if(_comprandoCR || !_crActual) return;
   var c = CUENTAS_RANDOM[_crActual];
-  var ffId = ((document.getElementById('cr-m-id')||{}).value||'').trim();
-  if(!ffId){ showToast('Ingresa tu ID de Free Fire'); return; }
+  var contacto = ((document.getElementById('cr-m-id')||{}).value||'').trim();
+  if(!contacto){ showToast('Ingresa el contacto de la persona'); return; }
 
   _comprandoCR = true;
   var btn = document.getElementById('cr-submit-btn');
@@ -1868,10 +1913,10 @@ function comprarCuentaRandom(){
     }
 
     var ord = getNextOrder();
-    addSpend(c.precio, c.nombre+' - ID destino:'+ffId+' - Pedido #'+ord);
-    registrarPedido(c.nombre, 1, 'cuenta_random', ffId, c.precio, 0);
+    addSpend(c.precio, c.nombre+' - Contacto:'+contacto+' - Pedido #'+ord);
+    registrarPedido(c.nombre, 1, 'cuenta_random', contacto, c.precio, 0);
     if(typeof tgNotifyPurchase === 'function'){
-      tgNotifyPurchase(authSession.username, c.nombre+'\n\uD83C\uDFAE ID destino: '+ffId+'\n\u26A0\uFE0F Asignar cuenta random y enviar datos de acceso', c.precio, ord);
+      tgNotifyPurchase(authSession.username, c.nombre+'\n\uD83D\uDCF1 Contacto: '+contacto+'\n\u26A0\uFE0F Asignar cuenta random y enviar datos de acceso', c.precio, ord);
     }
 
     setTimeout(function(){
