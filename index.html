@@ -3026,7 +3026,7 @@ document.addEventListener('keydown',function(e){
       </div>
       <div class="ds-cat-grid">
         <div class="ds-cat-card" onclick="goPage('diamantes')"><span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9l4-6z"/><path d="M2 9h20"/><path d="M12 21 8 9l2.5-6"/><path d="m12 21 4-12-2.5-6"/></svg></span><span class="ds-cat-name">Diamantes</span></div>
-        <div class="ds-cat-card" onclick="goPage('pase')"><span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffd000" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1a2 2 0 0 0 0 4v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1a2 2 0 0 0 0-4V9z"/><path d="M13 5v2M13 11v2M13 17v2"/></svg></span><span class="ds-cat-name">Pases Booyah</span></div>
+        <div class="ds-cat-card" onclick="abrirPaseElite()"><span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffd000" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1a2 2 0 0 0 0 4v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1a2 2 0 0 0 0-4V9z"/><path d="M13 5v2M13 11v2M13 17v2"/></svg></span><span class="ds-cat-name">Pase Elite</span></div>
         <div class="ds-cat-card" onclick="goPage('cajas')"><span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></span><span class="ds-cat-name">Fragmentos EVO</span></div>
         <div class="ds-cat-card" onclick="goPage('honor')"><span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffb84d" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4a2 2 0 0 0 0 4h1.5M17 6h3a2 2 0 0 1 0 4h-1.5"/></svg></span><span class="ds-cat-name">Honor para clanes</span></div>
         <div class="ds-cat-card" onclick="goPage('clanes')"><span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 6-11 3 5 3-7 6 13H3z"/><circle cx="12" cy="4" r="1.5"/></svg></span><span class="ds-cat-name">Clanes NVL 7</span></div>
@@ -3111,6 +3111,34 @@ document.addEventListener('keydown',function(e){
   </div>
 </div>
 
+<!-- ═══ MODAL: PASE ELITE ═══ -->
+<div class="modal-ov" id="modal-paseelite">
+  <div class="modal" style="max-width:400px">
+    <div class="pm-head" style="background:linear-gradient(135deg,rgba(255,208,0,.1),rgba(34,211,238,.04))">
+      <div style="display:flex;align-items:center;gap:.65rem">
+        <div class="pm-icon" style="background:rgba(255,208,0,.15);border:1px solid rgba(255,208,0,.35);color:#ffd000"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1a2 2 0 0 0 0 4v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1a2 2 0 0 0 0-4V9z"/><path d="M13 5v2M13 11v2M13 17v2"/></svg></div>
+        <div><div class="pm-title">Pase Elite</div><div class="pm-sub">Entrega al instante</div></div>
+      </div>
+      <button class="pm-close" onclick="cerrarPaseEliteModal()">✕</button>
+    </div>
+    <div class="modal-b" style="display:flex;flex-direction:column;gap:.85rem">
+      <div style="background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:.8rem 1rem;display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:.8rem;color:#8b93a3">Precio</span>
+        <span id="pe-m-precio" style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#25d366">$30</span>
+      </div>
+      <div>
+        <div class="pm-field-label">🆔 Tu ID de Free Fire *</div>
+        <input class="finput" id="pe-m-id" type="text" inputmode="numeric" placeholder="Ej: 11655323248" style="margin-bottom:0;border-color:rgba(255,208,0,.3)"/>
+      </div>
+      <div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:.7rem;color:#6b7280">💳 Tu saldo disponible</div>
+        <div style="font-family:Oxanium;font-weight:900;font-size:1.05rem;color:#fff" id="pe-m-saldo">$0</div>
+      </div>
+      <button id="pe-submit-btn" onclick="comprarPaseElite()" class="pm-btn pm-btn--gold">Comprar Pase Elite</button>
+    </div>
+  </div>
+</div>
+
 <div class="page" id="page-diamantes">
   <div class="ph">
     <div class="stag">Recarga Instantanea</div>
@@ -3163,13 +3191,6 @@ document.addEventListener('keydown',function(e){
       </div>
       <div class="dcat-grid">
 
-        <div class="rc-card" onclick="goPage('pase')">
-          <span class="rc-badge auto">&#9889; AUTO</span>
-          <div class="rc-ico">🤝</div>
-          <div class="rc-name">Pase Booyah</div>
-          <div class="rc-price" id="mem-precio-pase">$45</div>
-          <button class="rc-btn">Comprar</button>
-        </div>
 
         <div class="rc-card" onclick="abrirMembresia('semanal_basica')">
           <span class="rc-badge auto">&#9889; AUTO</span>
@@ -4608,7 +4629,7 @@ document.addEventListener('keydown',function(e){
 
     <!-- ═══ HEADER "PAGO SEGURO" ═══ -->
     <div class="ps-head">
-      <button class="ps-back" onclick="goPage('tienda')" title="Volver"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <button class="ps-back" onclick="goPage('freefire')" title="Volver"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
       <div class="ps-title">Pago seguro</div>
     </div>
 
@@ -4617,7 +4638,7 @@ document.addEventListener('keydown',function(e){
       <div style="font-size:3rem;margin-bottom:.7rem">&#128230;</div>
       <div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.2rem;color:#ffb84d;margin-bottom:.5rem">Sin stock por ahora</div>
       <div style="font-size:.85rem;color:#9aa3b0;line-height:1.6;max-width:320px;margin:0 auto 1.3rem">Se nos agotaron los Pases Booyah. Estamos reponiendo stock, vuelve pronto o escribenos por WhatsApp para avisarte cuando lleguen.</div>
-      <button onclick="goPage('tienda')" style="padding:.8rem 1.8rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:12px;font-family:Poppins;font-weight:600;font-size:.88rem;cursor:pointer">Volver a la tienda</button>
+      <button onclick="goPage('freefire')" style="padding:.8rem 1.8rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:12px;font-family:Poppins;font-weight:600;font-size:.88rem;cursor:pointer">Volver a la tienda</button>
     </div>
 
     <div id="pase-checkout-body">
@@ -4894,7 +4915,7 @@ document.addEventListener('keydown',function(e){
 
 <div class="page" id="page-archivos">
   <div class="page-inner">
-    <button class="back-btn" onclick="goPage('tienda')">&#8592; Volver</button>
+    <button class="back-btn" onclick="goPage('home')">&#8592; Volver</button>
     <h2 class="ptitle">ARCHIVOS <span>FF</span></h2>
     <p class="psub">Colaboracion CIBER x GARCITA</p>
 
@@ -4965,48 +4986,6 @@ document.addEventListener('keydown',function(e){
       <div style="font-size:.62rem;color:#6b7280;text-transform:uppercase;letter-spacing:1px;margin-bottom:.2rem">Tu saldo</div>
       <div id="archivos-saldo-val" style="font-family:Oxanium,sans-serif;font-weight:800;font-size:1.4rem;color:#fff">$0 MX</div>
     </div>
-  </div>
-</div>
-
-<div class="page" id="page-tienda">
-  <div style="max-width:640px;margin:0 auto;padding:1.5rem 1.15rem 0">
-    <div style="margin-bottom:1.5rem">
-      <div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.7rem;color:#fff;letter-spacing:-.2px">Tienda</div>
-      <div style="font-size:.88rem;color:#6b7280;margin-top:.2rem">Todos nuestros productos</div>
-    </div>
-
-    <div class="shop-sec-label">Productos</div>
-
-    <!-- Revendedores destacado (reemplaza Pines de FF) -->
-    <div onclick="goPage('pines')" class="shop-card reseller" style="margin-bottom:.9rem">
-      <div class="shop-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9l1.5-5h13L20 9M4 9h16v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM5 13v7h14v-7"/><path d="M9 20v-4h6v4"/></svg></div>
-      <div style="flex:1;min-width:0">
-        <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap"><span style="font-family:Oxanium,sans-serif;font-weight:800;font-size:1rem;color:#fff">Revendedores</span><span style="background:rgba(34,211,238,.15);border:1px solid rgba(34,211,238,.4);color:#67e8f9;font-family:Oxanium,sans-serif;font-size:.5rem;font-weight:800;padding:.14rem .4rem;border-radius:5px;letter-spacing:.5px">MAYORISTA</span></div>
-        <div style="font-size:.72rem;color:#9aa4b2;margin-top:.2rem;line-height:1.4">Precios especiales para revender. Compra mínima: <b style="color:#22d3ee">$300 MXN</b></div>
-      </div>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a6478" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M9 18l6-6-6-6"/></svg>
-    </div>
-
-    <div class="shop-grid" style="margin-bottom:1.8rem">
-      <div onclick="goPage('likes2k')" class="shop-card"><span class="shop-badge new">NEW</span><div class="shop-ico amber"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffb84d" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></svg></div><div class="shop-name">Likes 2K</div></div>
-      <div onclick="goPage('biolarga')" class="shop-card"><span class="shop-badge newg">NEW</span><div class="shop-ico green"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V5a2 2 0 0 1 2-2h2M4 17v2a2 2 0 0 0 2 2h2M20 7V5a2 2 0 0 0-2-2h-2M20 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 12h10"/></svg></div><div class="shop-name">Bio Larga</div></div>
-      <div onclick="goPage('archivos')" class="shop-card"><span class="shop-badge vip">VIP</span><div class="shop-ico purple"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a878ff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><path d="M14 2v6h6M9 13l2 2 4-4"/></svg></div><div class="shop-name">Archivos FF</div></div>
-      <div onclick="goPage('pase')" class="shop-card"><div class="shop-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="m12 8 1.2 2.4 2.8.4-2 2 .5 2.7L12 14.2l-2.5 1.3.5-2.7-2-2 2.8-.4L12 8z"/></svg></div><div class="shop-name">Pase Booyah</div></div>
-      <div onclick="goPage('diamantes')" class="shop-card"><div class="shop-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9l4-6z"/><path d="M2 9h20"/><path d="M12 21 8 9l2.5-6"/><path d="m12 21 4-12-2.5-6"/></svg></div><div class="shop-name">Diamantes FF</div></div>
-      <div onclick="goPage('honor')" class="shop-card"><div class="shop-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/><path d="M12 14v3M8 21h8M10 17h4v4h-4z"/></svg></div><div class="shop-name">Honor para clan</div></div>
-      <div onclick="goPage('actas')" class="shop-card"><div class="shop-ico" style="font-size:1.2rem">&#128220;</div><div class="shop-name">Actas Oficiales</div></div>
-      <div onclick="goPage('honorcuenta')" class="shop-card"><div class="shop-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10M12 10l-4 4M12 10l4 4"/><path d="M4 4h16"/></svg></div><div class="shop-name">Experiencia FF</div></div>
-      <div onclick="goPage('codigos')" class="shop-card"><div class="shop-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M12 7v13M3 12h18M12 7s-1-4-4-4-3 4 0 4h4zM12 7s1-4 4-4 3 4 0 4h-4z"/></svg></div><div class="shop-name">C&oacute;digos FF</div></div>
-      <div onclick="goPage('clanes')" class="shop-card"><div class="shop-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v5c0 5 3.3 8.6 7 10 3.7-1.4 7-5 7-10V6l-7-3z"/><path d="m9.5 12 2 2 3.5-4"/></svg></div><div class="shop-name">Clanes NV7</div></div>
-      <div onclick="goPage('cajas')" class="shop-card" style="opacity:.6"><span class="shop-badge pausa">PAUSA</span><div class="shop-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg></div><div class="shop-name">Regalo</div></div>
-    </div>
-
-    <div class="shop-sec-label">Comunidad</div>
-    <a href="https://whatsapp.com/channel/0029VbCXQVjJENyAgAoJLJ3g" target="_blank" class="shop-card" style="flex-direction:row;justify-content:flex-start;gap:.9rem;padding:1.05rem;text-decoration:none;margin-bottom:2.5rem;border-color:rgba(37,211,102,.28);background:linear-gradient(135deg,rgba(37,211,102,.08),rgba(255,255,255,.01))">
-      <div class="shop-ico green" style="width:46px;height:46px"><svg width="20" height="20" viewBox="0 0 24 24" fill="#25d366"><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.8-1.5A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.8.9.9-2.7-.2-.3A8 8 0 1 1 12 20zm4.5-5.8c-.2-.1-1.4-.7-1.7-.8s-.4-.1-.5.1-.6.8-.8 1-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.2-.4.2-.4.6-1.2a.4.4 0 0 0 0-.4c0-.1-.5-1.3-.7-1.7s-.4-.4-.5-.4h-.5a.9.9 0 0 0-.7.3 2.8 2.8 0 0 0-.9 2.1 4.9 4.9 0 0 0 1 2.6 11 11 0 0 0 4.3 3.8c1.6.6 1.9.5 2.3.5a2.4 2.4 0 0 0 1.6-1.1 2 2 0 0 0 .1-1.1c0-.1-.2-.2-.4-.3z"/></svg></div>
-      <div style="flex:1;min-width:0"><div style="font-size:.9rem;color:#25d366;font-weight:700;line-height:1.3">Canal de WhatsApp</div><div style="font-size:.7rem;color:#8b93a3;margin-top:.15rem">Únete para ofertas y novedades</div></div>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M9 18l6-6-6-6"/></svg>
-    </a>
   </div>
 </div>
 
@@ -5303,7 +5282,7 @@ document.addEventListener('keydown',function(e){
       <div style="font-size:3rem;margin-bottom:.7rem">&#128679;</div>
       <div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.2rem;color:#ffb84d;margin-bottom:.5rem">Fuera de servicio</div>
       <div style="font-size:.85rem;color:#9aa3b0;line-height:1.6;max-width:320px;margin:0 auto 1.3rem">Los fragmentos y cajas estan temporalmente fuera de servicio. Escribenos por WhatsApp si necesitas ayuda con tu pedido.</div>
-      <button onclick="goPage('tienda')" style="padding:.8rem 1.8rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:12px;font-family:Poppins;font-weight:600;font-size:.88rem;cursor:pointer">Volver a la tienda</button>
+      <button onclick="goPage('freefire')" style="padding:.8rem 1.8rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:12px;font-family:Poppins;font-weight:600;font-size:.88rem;cursor:pointer">Volver a la tienda</button>
     </div>
 
     <div id="fragu-contenido" style="display:none">

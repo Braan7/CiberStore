@@ -1782,8 +1782,6 @@ function _paseffActualizarTotal(){
 
 // ═══════════════════ TARJETAS DE MEMBRESIA (Semanal/Mensual) ═══════════════════
 function _refrescarPreciosMembresias(){
-  var elPase = document.getElementById('mem-precio-pase');
-  if(elPase) elPase.textContent = fmt(PASE_PRECIO);
   var elSB = document.getElementById('mem-precio-sb');
   if(elSB) elSB.textContent = fmt(MEMBRESIAS_FF.semanal_basica.precio);
   var elS = document.getElementById('mem-precio-s');
@@ -1928,6 +1926,61 @@ function comprarCuentaRandom(){
     }, 800);
   });
 }
+
+// ═══════════════════ PASE ELITE (reemplaza a Pases Booyah en Tienda) ═══════════════════
+var PASE_ELITE_PRECIO = 30; // Precio BASE en MXN. fmt() lo convierte a la moneda activa en tiempo real.
+var _comprandoPaseElite = false;
+
+function abrirPaseElite(){
+  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
+  var ov = document.getElementById('modal-paseelite');
+  document.getElementById('pe-m-precio').textContent = fmt(PASE_ELITE_PRECIO);
+  document.getElementById('pe-m-id').value = '';
+  document.getElementById('pe-m-saldo').textContent = fmt(authSession.saldo||0);
+  if(ov) ov.classList.add('show');
+}
+
+function cerrarPaseEliteModal(){
+  var ov = document.getElementById('modal-paseelite');
+  if(ov) ov.classList.remove('show');
+}
+
+function comprarPaseElite(){
+  if(_comprandoPaseElite) return;
+  var ffId = ((document.getElementById('pe-m-id')||{}).value||'').trim();
+  if(!ffId){ showToast('Ingresa tu ID de Free Fire'); return; }
+
+  _comprandoPaseElite = true;
+  var btn = document.getElementById('pe-submit-btn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Verificando saldo...'; }
+
+  verificarSaldoFresco(PASE_ELITE_PRECIO, function(alcanza, saldoReal){
+    document.getElementById('pe-m-saldo').textContent = fmt(saldoReal);
+    if(!alcanza){
+      showToast('Saldo insuficiente. Tienes '+fmt(saldoReal)+' y necesitas '+fmt(PASE_ELITE_PRECIO), 3500);
+      if(btn){ btn.disabled = false; btn.textContent = 'Comprar Pase Elite'; }
+      _comprandoPaseElite = false;
+      setTimeout(function(){ cerrarPaseEliteModal(); goPage('saldo'); }, 1500);
+      return;
+    }
+
+    var ord = getNextOrder();
+    addSpend(PASE_ELITE_PRECIO, 'Pase Elite - ID:'+ffId+' - Pedido #'+ord);
+    registrarPedido('Pase Elite', 1, 'pase_elite', ffId, PASE_ELITE_PRECIO, 0);
+    if(typeof tgNotifyPurchase === 'function'){
+      tgNotifyPurchase(authSession.username, 'PASE ELITE\n\uD83C\uDFAE ID: '+ffId, PASE_ELITE_PRECIO, ord);
+    }
+
+    setTimeout(function(){
+      _comprandoPaseElite = false;
+      if(btn){ btn.disabled = false; btn.textContent = 'Comprar Pase Elite'; }
+      if(typeof _refreshSaldoUI === 'function') _refreshSaldoUI(authSession.saldo||0);
+      cerrarPaseEliteModal();
+      showToast('\u2705 Pedido #'+ord+' confirmado! Tu Pase Elite se procesa al instante.', 4000);
+    }, 800);
+  });
+}
+
 
 function submitPaseFF(){
   var id = ((document.getElementById('paseff-m-id')||{}).value||'').trim();
