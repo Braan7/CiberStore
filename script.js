@@ -948,7 +948,7 @@ function goPage(id){
   if(id==='clanes') setTimeout(renderClanes, 100);
   if(id==='pase') setTimeout(_paseReiniciar, 100);
   if(id==='soporte') setTimeout(sopVolverLista, 100);
-  if(id==='freefire') setTimeout(function(){ ffVolverInicio(); _refrescarPreciosCuentasRandom(); }, 100);
+  if(id==='freefire') setTimeout(function(){ ffVolverInicio(); _refrescarPreciosCuentasRandom(); _refrescarPrecioPaseElite(); }, 100);
   if(id==='saldo') setTimeout(function(){ recSetMoneda('MXN'); _recTipo=null; recLimpiarTipo(); }, 100);
   if(id==='sobre') setTimeout(function(){ sobreTab('resenas'); }, 100);
   if(id==='likes') renderLikes();
@@ -1938,6 +1938,11 @@ function abrirPaseElite(){
   document.getElementById('pe-m-id').value = '';
   document.getElementById('pe-m-saldo').textContent = fmt(authSession.saldo||0);
   if(ov) ov.classList.add('show');
+}
+
+function _refrescarPrecioPaseElite(){
+  var el = document.getElementById('pe-card-precio');
+  if(el) el.textContent = fmt(PASE_ELITE_PRECIO);
 }
 
 function cerrarPaseEliteModal(){

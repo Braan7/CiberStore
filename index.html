@@ -3026,7 +3026,20 @@ document.addEventListener('keydown',function(e){
       </div>
       <div class="ds-cat-grid">
         <div class="ds-cat-card" onclick="goPage('diamantes')"><span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9l4-6z"/><path d="M2 9h20"/><path d="M12 21 8 9l2.5-6"/><path d="m12 21 4-12-2.5-6"/></svg></span><span class="ds-cat-name">Diamantes</span></div>
-        <div class="ds-cat-card" onclick="abrirPaseElite()"><span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffd000" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1a2 2 0 0 0 0 4v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1a2 2 0 0 0 0-4V9z"/><path d="M13 5v2M13 11v2M13 17v2"/></svg></span><span class="ds-cat-name">Pase Elite</span></div>
+        <div class="ff-acc-card" style="grid-column:1/-1" onclick="abrirPaseElite()">
+          <div class="ff-acc-img" style="background-image:url('img/pase-elite.png');aspect-ratio:21/9">
+            <span class="ff-acc-badge" style="background:linear-gradient(135deg,#a3860a,#ffd000)">PASE ELITE</span>
+          </div>
+          <div class="ff-acc-body" style="padding:.9rem 1rem">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:.75rem">
+              <div>
+                <div class="ff-acc-title" style="font-size:.95rem;margin-bottom:.2rem">Pase Elite</div>
+                <div style="font-size:.75rem;color:#9aa3b0">Entrega al instante</div>
+              </div>
+              <span style="font-family:Oxanium;font-weight:900;font-size:1.2rem;color:#ffd000;flex-shrink:0" id="pe-card-precio">$30</span>
+            </div>
+          </div>
+        </div>
         <div class="ds-cat-card" onclick="goPage('cajas')"><span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></span><span class="ds-cat-name">Fragmentos EVO</span></div>
         <div class="ds-cat-card" onclick="goPage('honor')"><span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffb84d" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4a2 2 0 0 0 0 4h1.5M17 6h3a2 2 0 0 1 0 4h-1.5"/></svg></span><span class="ds-cat-name">Honor para clanes</span></div>
         <div class="ds-cat-card" onclick="goPage('clanes')"><span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 6-11 3 5 3-7 6 13H3z"/><circle cx="12" cy="4" r="1.5"/></svg></span><span class="ds-cat-name">Clanes NVL 7</span></div>
@@ -3122,6 +3135,7 @@ document.addEventListener('keydown',function(e){
       <button class="pm-close" onclick="cerrarPaseEliteModal()">✕</button>
     </div>
     <div class="modal-b" style="display:flex;flex-direction:column;gap:.85rem">
+      <div style="width:100%;aspect-ratio:21/9;border-radius:14px;overflow:hidden;background-image:url('img/pase-elite.png');background-size:cover;background-position:center"></div>
       <div style="background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:.8rem 1rem;display:flex;align-items:center;justify-content:space-between">
         <span style="font-size:.8rem;color:#8b93a3">Precio</span>
         <span id="pe-m-precio" style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#25d366">$30</span>
