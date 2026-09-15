@@ -2654,6 +2654,13 @@ button[style*="linear-gradient"]{
 .honor-region-opt-flag{font-size:1.15rem;flex-shrink:0}
 .honor-region-opt-name{flex:1;font-size:.85rem;color:#e0e4ea;font-weight:600}
 .honor-region-opt-check{color:#ffd000;font-size:.85rem;flex-shrink:0}
+/* ═══════════ TARJETAS DE TIENDA (Free Fire → Tienda, con imagen) ═══════════ */
+.ff-tienda-card{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.09);border-radius:16px;overflow:hidden;cursor:pointer;transition:border-color .2s,transform .2s}
+.ff-tienda-card:hover{border-color:rgba(34,211,238,.35);transform:translateY(-2px)}
+.ff-tienda-card--soon{opacity:.75}
+.ff-tienda-img{width:100%;aspect-ratio:16/9;background-size:cover;background-position:center;position:relative}
+.ff-tienda-soon-tag{position:absolute;top:.55rem;left:.55rem;background:rgba(255,180,60,.9);color:#1a0f00;font-size:.55rem;font-weight:800;letter-spacing:.4px;padding:.22rem .5rem;border-radius:7px}
+.ff-tienda-name{padding:.7rem .8rem;font-family:Poppins,sans-serif;font-weight:700;font-size:.82rem;color:#fff;text-align:center}
 </style>
 
 <script>
@@ -3024,8 +3031,34 @@ document.addEventListener('keydown',function(e){
         <div style="font-family:Oxanium,sans-serif;font-weight:900;font-size:1.35rem;color:#fff;letter-spacing:-.3px">TIENDA</div>
         <div style="font-size:.8rem;color:#8b93a3;margin-top:.15rem">Pases, tokens y cajas</div>
       </div>
-      <div class="ds-cat-grid">
-        <div class="ds-cat-card" onclick="goPage('diamantes')"><span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9l4-6z"/><path d="M2 9h20"/><path d="M12 21 8 9l2.5-6"/><path d="m12 21 4-12-2.5-6"/></svg></span><span class="ds-cat-name">Diamantes</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem">
+
+        <div class="ff-tienda-card" onclick="goPage('diamantes')">
+          <div class="ff-tienda-img" style="background-image:url('img/diamantes-ilimitados.png')"></div>
+          <div class="ff-tienda-name">Diamantes</div>
+        </div>
+
+        <div class="ff-tienda-card" onclick="goPage('honor')">
+          <div class="ff-tienda-img" style="background-image:url('img/honor-clanes.png')"></div>
+          <div class="ff-tienda-name">Honor para clanes</div>
+        </div>
+
+        <div class="ff-tienda-card" onclick="goPage('clanes')">
+          <div class="ff-tienda-img" style="background-image:url('img/clanes-nvl7.png')"></div>
+          <div class="ff-tienda-name">Clanes NVL 7</div>
+        </div>
+
+        <div class="ff-tienda-card ff-tienda-card--soon" onclick="showToast('Cajas EVO: proximamente disponible')">
+          <div class="ff-tienda-img" style="background-image:url('img/cajas-evo.png')"><span class="ff-tienda-soon-tag">PR&Oacute;XIMAMENTE</span></div>
+          <div class="ff-tienda-name">Cajas EVO</div>
+        </div>
+
+        <div class="ds-cat-card" style="grid-column:1/-1;flex-direction:row;align-items:center;text-align:left;padding:1.1rem 1.2rem;gap:1rem" onclick="goPage('cajas')">
+          <span class="ds-cat-ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></span>
+          <div style="flex:1"><div class="ds-cat-name" style="font-size:.95rem">Fragmentos EVO</div><div class="ds-cat-sub" style="font-size:.72rem">Se entregan por regalo</div></div>
+          <span style="color:#6b7280;font-size:1.2rem">&#8250;</span>
+        </div>
+
         <div class="ff-acc-card" style="grid-column:1/-1" onclick="abrirPaseElite()">
           <div class="ff-acc-img" style="background-image:url('img/pase-elite.png');aspect-ratio:21/9">
             <span class="ff-acc-badge" style="background:linear-gradient(135deg,#a3860a,#ffd000)">PASE ELITE</span>
@@ -3040,10 +3073,7 @@ document.addEventListener('keydown',function(e){
             </div>
           </div>
         </div>
-        <div class="ds-cat-card" onclick="goPage('cajas')"><span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></span><span class="ds-cat-name">Fragmentos EVO</span></div>
-        <div class="ds-cat-card" onclick="goPage('honor')"><span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffb84d" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4a2 2 0 0 0 0 4h1.5M17 6h3a2 2 0 0 1 0 4h-1.5"/></svg></span><span class="ds-cat-name">Honor para clanes</span></div>
-        <div class="ds-cat-card" onclick="goPage('clanes')"><span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 6-11 3 5 3-7 6 13H3z"/><circle cx="12" cy="4" r="1.5"/></svg></span><span class="ds-cat-name">Clanes NVL 7</span></div>
-        <div class="ds-cat-card ds-cat-card--soon" onclick="showToast('Cajas EVO: proximamente disponible')"><span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg></span><span class="ds-cat-name">Cajas EVO</span><span class="ds-cat-sub">Pr&oacute;ximamente</span></div>
+
       </div>
     </div>
 
