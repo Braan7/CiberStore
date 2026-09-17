@@ -178,7 +178,7 @@ var LIKES = [
 var SERVICES = [
   // ── Videojuegos ──
   { nombre:'Free Fire', categoria:'videojuegos', descripcion:'Diamantes, pases y mas', tipoRecarga:'Diamantes', icono:'\uD83D\uDD25', imagen:'img/freefire-hero.png', estado:'disponible', ruta:'freefire' },
-  { nombre:'PUBG Mobile', categoria:'videojuegos', descripcion:'UC y contenido exclusivo', tipoRecarga:'UC', icono:'\uD83E\uDE96', imagen:'img/pubg-mobile.jpg', estado:'buscando_proveedor', ruta:null },
+  { nombre:'PUBG Mobile', categoria:'videojuegos', descripcion:'UC y contenido exclusivo', tipoRecarga:'UC', icono:'\uD83E\uDE96', imagen:'img/pubg-mobile.jpg', estado:'disponible', ruta:'pubg' },
   { nombre:'COD Mobile', categoria:'videojuegos', descripcion:'CP y paquetes de batalla', tipoRecarga:'CP', icono:'\u2694\uFE0F', imagen:'img/codm.jpg', estado:'buscando_proveedor', ruta:null },
   { nombre:'Roblox', categoria:'videojuegos', descripcion:'Robux y contenido digital', tipoRecarga:'Robux', icono:'\uD83D\uDFE9', imagen:'img/roblox.jpg', estado:'proximamente', ruta:null },
   { nombre:'Mobile Legends', categoria:'videojuegos', descripcion:'Diamantes y skins', tipoRecarga:'Diamantes', icono:'\uD83C\uDFAE', imagen:'', estado:'buscando_proveedor', ruta:null },
@@ -949,6 +949,7 @@ function goPage(id){
   if(id==='pase') setTimeout(_paseReiniciar, 100);
   if(id==='soporte') setTimeout(sopVolverLista, 100);
   if(id==='freefire') setTimeout(function(){ ffVolverInicio(); _refrescarPreciosCuentasRandom(); _refrescarPrecioPaseElite(); }, 100);
+  if(id==='pubg') setTimeout(renderPubgCatalogo, 100);
   if(id==='saldo') setTimeout(function(){ recSetMoneda('MXN'); _recTipo=null; recLimpiarTipo(); }, 100);
   if(id==='sobre') setTimeout(function(){ sobreTab('resenas'); }, 100);
   if(id==='likes') renderLikes();
@@ -1923,6 +1924,79 @@ function comprarCuentaRandom(){
       if(typeof _refreshSaldoUI === 'function') _refreshSaldoUI(authSession.saldo||0);
       cerrarCuentaRandomModal();
       showToast('\u2705 Pedido #'+ord+' confirmado! Te enviaremos los datos de acceso pronto.', 4000);
+    }, 800);
+  });
+}
+
+// ═══════════════════ PUBG MOBILE — UC (recarga manual, sin API) ═══════════════════
+var _pubgIdxActual = null;
+var _comprandoPubg = false;
+
+function renderPubgCatalogo(){
+  var cont = document.getElementById('pubg-catalogo');
+  if(!cont) return;
+  cont.innerHTML = PUBG_UC.map(function(u, i){
+    return '<div class="ds-cat-card" style="flex-direction:row;align-items:center;text-align:left;padding:1.1rem 1.2rem;gap:1rem" onclick="abrirPubgModal('+i+')">'
+      + '<span class="ds-cat-ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ffb84d" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>'
+      + '<div style="flex:1"><div class="ds-cat-name" style="font-size:.92rem">'+u.nombre+'</div><div class="ds-cat-sub" style="font-size:.72rem">Entrega manual</div></div>'
+      + '<span style="font-family:Oxanium;font-weight:800;font-size:1rem;color:#ffb84d;flex-shrink:0">'+fmt(u.precio)+'</span>'
+      + '</div>';
+  }).join('');
+}
+
+function abrirPubgModal(idx){
+  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
+  var u = PUBG_UC[idx];
+  if(!u) return;
+  _pubgIdxActual = idx;
+
+  var ov = document.getElementById('modal-pubg');
+  document.getElementById('pubg-m-nombre').textContent = u.nombre;
+  document.getElementById('pubg-m-precio').textContent = fmt(u.precio);
+  document.getElementById('pubg-m-id').value = '';
+  document.getElementById('pubg-m-saldo').textContent = fmt(authSession.saldo||0);
+  if(ov) ov.classList.add('show');
+}
+
+function cerrarPubgModal(){
+  var ov = document.getElementById('modal-pubg');
+  if(ov) ov.classList.remove('show');
+}
+
+function comprarPubgUC(){
+  if(_comprandoPubg || _pubgIdxActual === null) return;
+  var u = PUBG_UC[_pubgIdxActual];
+  if(!u) return;
+  var playerId = ((document.getElementById('pubg-m-id')||{}).value||'').trim();
+  if(!playerId){ showToast('Ingresa tu ID de jugador PUBG Mobile'); return; }
+
+  _comprandoPubg = true;
+  var btn = document.getElementById('pubg-submit-btn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Verificando saldo...'; }
+
+  verificarSaldoFresco(u.precio, function(alcanza, saldoReal){
+    document.getElementById('pubg-m-saldo').textContent = fmt(saldoReal);
+    if(!alcanza){
+      showToast('Saldo insuficiente. Tienes '+fmt(saldoReal)+' y necesitas '+fmt(u.precio), 3500);
+      if(btn){ btn.disabled = false; btn.textContent = 'Comprar'; }
+      _comprandoPubg = false;
+      setTimeout(function(){ cerrarPubgModal(); goPage('saldo'); }, 1500);
+      return;
+    }
+
+    var ord = getNextOrder();
+    addSpend(u.precio, 'PUBG Mobile '+u.nombre+' - ID:'+playerId+' - Pedido #'+ord);
+    registrarPedido('PUBG Mobile '+u.nombre, u.uc, 'pubg_uc', playerId, u.precio, 0);
+    if(typeof tgNotifyPurchase === 'function'){
+      tgNotifyPurchase(authSession.username, '\uD83C\uDFAE PUBG Mobile - '+u.nombre+'\n\uD83C\uDD94 ID jugador: '+playerId+'\n\u26A0\uFE0F Recarga MANUAL, procesar y acreditar', u.precio, ord);
+    }
+
+    setTimeout(function(){
+      _comprandoPubg = false;
+      if(btn){ btn.disabled = false; btn.textContent = 'Comprar'; }
+      if(typeof _refreshSaldoUI === 'function') _refreshSaldoUI(authSession.saldo||0);
+      cerrarPubgModal();
+      showToast('\u2705 Pedido #'+ord+' confirmado! Se procesa manualmente en las siguientes horas.', 4500);
     }, 800);
   });
 }
@@ -7056,13 +7130,26 @@ var _diamSeleccionado = null;
 // ═══════════ RECARGAS AUTOMÁTICAS (Recargas América type=recharge) ═══════════
 // package_id = el ID de Recargas América | precio = costo USD × 20 (redondeado)
 var RECARGAS_AUTO = [
-  { package_id:351, sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.712,  precio:13,  img:'img/diam-100.png'  },
-  { package_id:348, sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:2.1374, precio:40,  img:'img/diam-310.png'  },
-  { package_id:350, sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.6164, precio:68,  img:'img/diam-520.png'  },
-  { package_id:347, sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.706,  precio:120, img:'img/diam-1060.png' },
-  { package_id:346, sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:13.3209,precio:235, img:'img/diam-2180.png' },
-  { package_id:349, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:33.8848,precio:575, img:'img/diam-5600.png' },
+  { package_id:351, sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.712,  precio:15,  img:'img/diam-100.png'  },
+  { package_id:348, sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:2.1374, precio:45,  img:'img/diam-310.png'  },
+  { package_id:350, sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.6164, precio:75,  img:'img/diam-520.png'  },
+  { package_id:347, sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.706,  precio:125, img:'img/diam-1060.png' },
+  { package_id:346, sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:13.3209,precio:245, img:'img/diam-2180.png' },
+  { package_id:349, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:33.8848,precio:595, img:'img/diam-5600.png' },
   { package_id:null, nombre:'11.200 Diamantes + 1.120 Bono', diamantes:12320, costoUSD:66.32, precio:1150, manual:true }
+];
+
+// PUBG Mobile — recarga MANUAL (sin API de proveedor todavia).
+// precio ya esta en MXN (convertido desde USD al tipo de cambio USD_MXN=17
+// vigente al momento de cargarlo); costoUSD queda como referencia original.
+var PUBG_UC = [
+  { nombre:'60 UC',             uc:60,    costoUSD:1,     precio:17,   manual:true },
+  { nombre:'300 + 25 UC',       uc:325,   costoUSD:4.90,  precio:83.3, manual:true },
+  { nombre:'600 + 60 UC',       uc:660,   costoUSD:10,    precio:170,  manual:true },
+  { nombre:'1.500 + 300 UC',    uc:1800,  costoUSD:23,    precio:391,  manual:true },
+  { nombre:'3.000 + 850 UC',    uc:3850,  costoUSD:48,    precio:816,  manual:true },
+  { nombre:'6.000 + 2.100 UC',  uc:8100,  costoUSD:92.4,  precio:1570.8, manual:true },
+  { nombre:'12.000 + 4.200 UC', uc:16200, costoUSD:186,   precio:3162, manual:true }
 ];
 
 
