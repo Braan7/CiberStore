@@ -7513,9 +7513,10 @@ function _procesarRecargaAutomatica(p, ffId){
     body: JSON.stringify({ action:'validar', product_id:p.package_id, service_user_id:ffId })
   }).then(function(r){ return r.json(); }).then(function(val){
     if(!val.success || !val.valido){
-      if(btn){ btn.disabled=false; btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
-      if(msg){ msg.className='ddet-msg'; msg.innerHTML = _rcEstadoHTML('err', 'ID NO VALIDO', 'No pudimos validar tu ID de Free Fire. Verifica el numero e intenta de nuevo.'); }
-      console.error('[RECARGA] validacion fallo:', JSON.stringify(val));
+      // ID NO VERIFICADO: no bloquear. Mostrar advertencia clara y pedir confirmacion explicita.
+      if(btn){ btn.disabled=false; }
+      _mostrarConfirmacionIdNoVerificado(p, ffId, btn, msg);
+      console.warn('[RECARGA] ID no verificado:', JSON.stringify(val));
       _comprandoDiam = false;
       return;
     }
@@ -7524,99 +7525,7 @@ function _procesarRecargaAutomatica(p, ffId){
     var nombre = val.nombre || 'Jugador';
     if(msg){ msg.innerHTML = _rcEstadoHTML('pending', '\u23F3 RECARGA EN PROCESO', 'Cuenta encontrada: <b style="color:#fff">'+nombre+'</b><br/>Procesando tu recarga, por favor espera...'); }
     if(btn){ btn.innerHTML='<span class="rc-spin"></span> Recargando...'; }
-
-    // Paso 2: cobrar el saldo AHORA (antes de recargar)
-    var ord=getNextOrder();
-    var _movCompraId = null;              // ID del movimiento (para cancelarlo si falla)
-    var _cancelarPendiente = false;       // si la recarga falla antes de tener el ID
-    addSpend._onMovId = function(id){
-      _movCompraId = id;
-      // Si la recarga ya habia fallado, cancelar ahora que tenemos el ID
-      if(_cancelarPendiente) _cancelarMovPorId(id);
-    };
-    addSpend(p.precio, p.diamantes+' Diamantes (Recarga AUTO '+p.nombre+') - ID:'+ffId+' ('+nombre+') - Pedido #'+ord);
-
-    // Paso 3: hacer la recarga automática
-    fetch(COMPRAR_RECARGA_URL, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ action:'comprar', package_id:p.package_id, sku:p.sku, player_id:ffId, client_name:authSession.username })
-    }).then(function(r){ return r.json(); }).then(function(res){
-      if(res.success && (res.status==='COMPLETED' || res.status==='PENDING')){
-        registrarPedido(p.nombre+' (AUTO)', p.diamantes, 'diamantes', ffId, p.precio, 0);
-        if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A1 Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\uD83D\uDC64 Nombre IG: '+nombre, p.precio, ord);
-        _mostrarReciboRecarga(p, ffId, nombre, res.status);
-        var txt = res.status==='COMPLETED' ? '\u2705 Recarga COMPLETADA!' : '\u23F3 Recarga en proceso...';
-        showToast(txt, 3000);
-        _comprandoDiam = false;
-      } else {
-        var errTxt = String(res.error||res.status||'sin confirmar');
-        // Fondos agotados del proveedor: la recarga NO se hizo, hay que devolver
-        var sinFondos = /saldo insuficiente|insufficient|fondos insuficientes|sin fondos|credito insuficiente|balance too low|no balance|limite excedido|limit exceeded/i.test(errTxt);
-        var noDisponible = /no disponible|not available|no encontrado|not found|sin stock|out of stock/i.test(errTxt);
-
-        if(sinFondos){
-          // RECARGA RECHAZADA: devolver el saldo y avisar al admin con urgencia
-          _rpcAjustarSaldo(authSession.id, p.precio).then(function(saldoNuevo){
-            var sn = Number(saldoNuevo)||0;
-            authSession.saldo = sn;
-            _refreshSaldoUI(sn);
-            if(typeof saveSession==='function') saveSession(authSession);
-            if(typeof sbAddMovimiento==='function') sbAddMovimiento(authSession.id, 'credito', p.precio, 'Reembolso Pedido #'+ord+' - recarga rechazada');
-            if(_movCompraId) _cancelarMovPorId(_movCompraId); else { _cancelarPendiente = true; _cancelarMovimientoCompra(authSession.id, ord); }
-          }).catch(function(e){ console.error('[RECARGA] reembolso fallo:', e); });
-
-          registrarPedido(p.nombre+' (RECHAZADA - reembolsado)', p.diamantes, 'diamantes', ffId, 0, 0);
-          if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\uD83D\uDEA8 <b>RECARGA RECHAZADA - SIN FONDOS</b>\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\u2705 Saldo reembolsado al cliente ('+fmt(p.precio)+')\n\n\u26A0\uFE0F <b>RECARGA TU CUENTA DEL PROVEEDOR</b>', p.precio, ord);
-
-          if(btn){ btn.disabled=false; btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
-          if(msg){ msg.className='ddet-msg'; msg.innerHTML = _rcEstadoHTML('err', 'RECARGA RECHAZADA', 'Contacta al administrador. <b style="color:#fff">Tu saldo sera reembolsado.</b>'); }
-
-          if(typeof _mostrarAvisoModal==='function'){
-            _mostrarAvisoModal('RECARGA RECHAZADA',
-              'No pudimos completar tu recarga en este momento.<br/><br/><b style="color:#fff">Contacta al administrador.</b><div style="margin-top:1.1rem;padding:.8rem 1rem;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);border-radius:12px;display:flex;align-items:center;gap:.55rem;justify-content:center"><span style="font-size:1.1rem">\u2705</span><span style="font-size:.82rem;color:#25d366;font-weight:700">Tu saldo fue reembolsado automaticamente</span></div>',
-              '#ff6b6b');
-          }
-          showToast('\u274C Recarga rechazada. Saldo reembolsado.', 5000);
-          _comprandoDiam = false;
-        } else if(noDisponible){
-          // La recarga NO se hizo (producto no disponible): DEVOLVER el saldo automatico
-          _rpcAjustarSaldo(authSession.id, p.precio).then(function(saldoNuevo){
-            var sn = Number(saldoNuevo)||0;
-            authSession.saldo = sn;
-            _refreshSaldoUI(sn);
-            if(typeof saveSession==='function') saveSession(authSession);
-            if(typeof sbAddMovimiento==='function') sbAddMovimiento(authSession.id, 'credito', p.precio, 'Devolucion Pedido #'+ord+' - producto no disponible');
-            if(_movCompraId) _cancelarMovPorId(_movCompraId); else { _cancelarPendiente = true; _cancelarMovimientoCompra(authSession.id, ord); }
-          }).catch(function(e){ console.error('[RECARGA] devolucion fallo:', e); });
-
-          registrarPedido(p.nombre+' (AUTO - NO DISPONIBLE, devuelto)', p.diamantes, 'diamantes', ffId, 0, 0);
-          if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F NO DISPONIBLE - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\u2705 SALDO DEVUELTO automaticamente ('+fmt(p.precio)+')', p.precio, ord);
-          if(btn){ btn.disabled=false; btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
-          if(msg){ msg.className='ddet-msg'; msg.innerHTML = _rcEstadoHTML('err', 'NO DISPONIBLE', 'Este paquete no esta disponible para tu ID en este momento. <b style="color:#fff">Tu saldo fue devuelto.</b> Intenta de nuevo o contacta al admin.'); }
-          showToast('\u274C No disponible. Saldo devuelto.', 4000);
-          _comprandoDiam = false;
-        } else {
-          // Error ambiguo: la recarga pudo haberse hecho igual. NO reembolsar, verificar manual.
-          registrarPedido(p.nombre+' (AUTO - VERIFICAR)', p.diamantes, 'diamantes', ffId, p.precio, 0);
-          if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F VERIFICAR - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt, p.precio, ord);
-          if(btn){ btn.disabled=false; btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
-          if(msg){ msg.className='ddet-msg'; msg.innerHTML = _rcEstadoHTML('pending', '\u23F3 EN VERIFICACION', 'Tu recarga se esta verificando. Si no llega en unos minutos, contacta al admin con tu ID.'); }
-          console.error('[RECARGA] Sin confirmar (no reembolsado):', JSON.stringify(res));
-          _comprandoDiam = false;
-          setTimeout(cerrarDiamDetalle, 4000);
-        }
-      }
-    }).catch(function(err){
-      // NO reembolsar: la recarga pudo haberse completado aunque la respuesta fallo
-      registrarPedido(p.nombre+' (AUTO - VERIFICAR)', p.diamantes, 'diamantes', ffId, p.precio, 0);
-      if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F VERIFICAR (sin respuesta) - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId, p.precio, ord);
-      if(btn){ btn.disabled=false; btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
-      if(msg){ msg.className='ddet-msg'; msg.innerHTML = _rcEstadoHTML('pending', '\u23F3 EN VERIFICACION', 'Tu recarga se esta verificando. Si no llega, contacta al admin.'); }
-      console.error('[RECARGA] catch compra (no reembolsado):', err);
-      _comprandoDiam = false;
-      setTimeout(cerrarDiamDetalle, 4000);
-    });
-
+    _ejecutarRecargaVerificada(p, ffId, nombre, 'verified', btn, msg);
   }).catch(function(err){
     if(btn){ btn.disabled=false; btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
     if(msg){ msg.className='ddet-msg'; msg.innerHTML = _rcEstadoHTML('err', 'ERROR DE CONEXION', 'No pudimos validar tu ID. Verifica tu conexion e intenta de nuevo.'); }
@@ -7625,6 +7534,231 @@ function _procesarRecargaAutomatica(p, ffId){
   });
 
   }); // fin verificarSaldoFresco
+}
+
+// ═══ Ejecuta el cobro + recarga real contra el proveedor.
+// verificationStatus: 'verified' | 'unverified' — nunca inventa nombre de jugador
+// cuando es unverified; el ID que se envia al proveedor es EXACTAMENTE el que
+// escribio el usuario, sin modificarlo. ═══
+function _ejecutarRecargaVerificada(p, ffId, nombre, verificationStatus, btn, msg){
+  var esVerificado = (verificationStatus === 'verified');
+  var etiquetaJugador = esVerificado ? (' ('+nombre+')') : ' (SIN VERIFICAR)';
+
+  // Paso 2: cobrar el saldo AHORA (antes de recargar)
+  var ord=getNextOrder();
+  var _movCompraId = null;              // ID del movimiento (para cancelarlo si falla)
+  var _cancelarPendiente = false;       // si la recarga falla antes de tener el ID
+  addSpend._onMovId = function(id){
+    _movCompraId = id;
+    // Si la recarga ya habia fallado, cancelar ahora que tenemos el ID
+    if(_cancelarPendiente) _cancelarMovPorId(id);
+  };
+  addSpend(p.precio, p.diamantes+' Diamantes (Recarga AUTO '+p.nombre+') - ID:'+ffId+etiquetaJugador+' - Pedido #'+ord);
+
+  // Paso 3: hacer la recarga automática — SIEMPRE con el ffId exacto que escribio el usuario
+  fetch(COMPRAR_RECARGA_URL, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ action:'comprar', package_id:p.package_id, sku:p.sku, player_id:ffId, client_name:authSession.username })
+  }).then(function(r){ return r.json(); }).then(function(res){
+    if(res.success && (res.status==='COMPLETED' || res.status==='PENDING')){
+      registrarPedido(p.nombre+' (AUTO'+(esVerificado?'':' - ID NO VERIFICADO')+')', p.diamantes, 'diamantes', ffId, p.precio, 0);
+      if(typeof tgNotifyPurchase==='function'){
+        var infoJugador = esVerificado ? ('\uD83D\uDC64 Nombre IG: '+nombre) : '\u26A0\uFE0F ID SIN VERIFICAR - cliente confirmo bajo su responsabilidad';
+        tgNotifyPurchase(authSession.username, '\u26A1 Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n'+infoJugador, p.precio, ord);
+      }
+      _mostrarReciboRecarga(p, ffId, esVerificado ? nombre : null, res.status);
+      var txt = res.status==='COMPLETED' ? '\u2705 Recarga COMPLETADA!' : '\u23F3 Recarga en proceso...';
+      showToast(txt, 3000);
+      _comprandoDiam = false;
+    } else {
+      var errTxt = String(res.error||res.status||'sin confirmar');
+      // Fondos agotados del proveedor: la recarga NO se hizo, hay que devolver
+      var sinFondos = /saldo insuficiente|insufficient|fondos insuficientes|sin fondos|credito insuficiente|balance too low|no balance|limite excedido|limit exceeded/i.test(errTxt);
+      var noDisponible = /no disponible|not available|no encontrado|not found|sin stock|out of stock/i.test(errTxt);
+
+      if(sinFondos){
+        // RECARGA RECHAZADA: devolver el saldo y avisar al admin con urgencia
+        _rpcAjustarSaldo(authSession.id, p.precio).then(function(saldoNuevo){
+          var sn = Number(saldoNuevo)||0;
+          authSession.saldo = sn;
+          _refreshSaldoUI(sn);
+          if(typeof saveSession==='function') saveSession(authSession);
+          if(typeof sbAddMovimiento==='function') sbAddMovimiento(authSession.id, 'credito', p.precio, 'Reembolso Pedido #'+ord+' - recarga rechazada');
+          if(_movCompraId) _cancelarMovPorId(_movCompraId); else { _cancelarPendiente = true; _cancelarMovimientoCompra(authSession.id, ord); }
+        }).catch(function(e){ console.error('[RECARGA] reembolso fallo:', e); });
+
+        registrarPedido(p.nombre+' (RECHAZADA - reembolsado)', p.diamantes, 'diamantes', ffId, 0, 0);
+        if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\uD83D\uDEA8 <b>RECARGA RECHAZADA - SIN FONDOS</b>\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\u2705 Saldo reembolsado al cliente ('+fmt(p.precio)+')\n\n\u26A0\uFE0F <b>RECARGA TU CUENTA DEL PROVEEDOR</b>', p.precio, ord);
+
+        if(btn){ btn.disabled=false; btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
+        if(msg){ msg.className='ddet-msg'; msg.innerHTML = _rcEstadoHTML('err', 'RECARGA RECHAZADA', 'Contacta al administrador. <b style="color:#fff">Tu saldo sera reembolsado.</b>'); }
+
+        if(typeof _mostrarAvisoModal==='function'){
+          _mostrarAvisoModal('RECARGA RECHAZADA',
+            'No pudimos completar tu recarga en este momento.<br/><br/><b style="color:#fff">Contacta al administrador.</b><div style="margin-top:1.1rem;padding:.8rem 1rem;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);border-radius:12px;display:flex;align-items:center;gap:.55rem;justify-content:center"><span style="font-size:1.1rem">\u2705</span><span style="font-size:.82rem;color:#25d366;font-weight:700">Tu saldo fue reembolsado automaticamente</span></div>',
+            '#ff6b6b');
+        }
+        showToast('\u274C Recarga rechazada. Saldo reembolsado.', 5000);
+        _comprandoDiam = false;
+      } else if(noDisponible){
+        // La recarga NO se hizo (producto no disponible): DEVOLVER el saldo automatico
+        _rpcAjustarSaldo(authSession.id, p.precio).then(function(saldoNuevo){
+          var sn = Number(saldoNuevo)||0;
+          authSession.saldo = sn;
+          _refreshSaldoUI(sn);
+          if(typeof saveSession==='function') saveSession(authSession);
+          if(typeof sbAddMovimiento==='function') sbAddMovimiento(authSession.id, 'credito', p.precio, 'Devolucion Pedido #'+ord+' - producto no disponible');
+          if(_movCompraId) _cancelarMovPorId(_movCompraId); else { _cancelarPendiente = true; _cancelarMovimientoCompra(authSession.id, ord); }
+        }).catch(function(e){ console.error('[RECARGA] devolucion fallo:', e); });
+
+        registrarPedido(p.nombre+' (AUTO - NO DISPONIBLE, devuelto)', p.diamantes, 'diamantes', ffId, 0, 0);
+        if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F NO DISPONIBLE - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\u2705 SALDO DEVUELTO automaticamente ('+fmt(p.precio)+')', p.precio, ord);
+        if(btn){ btn.disabled=false; btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
+        if(msg){ msg.className='ddet-msg'; msg.innerHTML = _rcEstadoHTML('err', 'NO DISPONIBLE', 'Este paquete no esta disponible para tu ID en este momento. <b style="color:#fff">Tu saldo fue devuelto.</b> Intenta de nuevo o contacta al admin.'); }
+        showToast('\u274C No disponible. Saldo devuelto.', 4000);
+        _comprandoDiam = false;
+      } else {
+        // Error ambiguo: la recarga pudo haberse hecho igual. NO reembolsar, verificar manual.
+        registrarPedido(p.nombre+' (AUTO - VERIFICAR)', p.diamantes, 'diamantes', ffId, p.precio, 0);
+        if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F VERIFICAR - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt, p.precio, ord);
+        if(btn){ btn.disabled=false; btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
+        if(msg){ msg.className='ddet-msg'; msg.innerHTML = _rcEstadoHTML('pending', '\u23F3 EN VERIFICACION', 'Tu recarga se esta verificando. Si no llega en unos minutos, contacta al admin con tu ID.'); }
+        console.error('[RECARGA] Sin confirmar (no reembolsado):', JSON.stringify(res));
+        _comprandoDiam = false;
+        setTimeout(cerrarDiamDetalle, 4000);
+      }
+    }
+  }).catch(function(err){
+    // NO reembolsar: la recarga pudo haberse completado aunque la respuesta fallo
+    registrarPedido(p.nombre+' (AUTO - VERIFICAR)', p.diamantes, 'diamantes', ffId, p.precio, 0);
+    if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F VERIFICAR (sin respuesta) - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId, p.precio, ord);
+    if(btn){ btn.disabled=false; btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
+    if(msg){ msg.className='ddet-msg'; msg.innerHTML = _rcEstadoHTML('pending', '\u23F3 EN VERIFICACION', 'Tu recarga se esta verificando. Si no llega, contacta al admin.'); }
+    console.error('[RECARGA] catch compra (no reembolsado):', err);
+    _comprandoDiam = false;
+    setTimeout(cerrarDiamDetalle, 4000);
+  });
+}
+
+// ═══ Cuando el proveedor NO pudo confirmar el ID: mostrar advertencia clara
+// y checkbox de responsabilidad. El boton de continuar queda deshabilitado
+// hasta marcar el checkbox. El ID que el usuario escribio NUNCA se modifica. ═══
+function _mostrarConfirmacionIdNoVerificado(p, ffId, btnOriginal, msgOriginal){
+  if(btnOriginal){ btnOriginal.className='ddet-btn on'; btnOriginal.innerHTML='Recargar con saldo &#8594;'; }
+  if(msgOriginal){ msgOriginal.className='ddet-msg'; msgOriginal.innerHTML = ''; }
+
+  var existing = document.getElementById('id-noverif-overlay');
+  if(existing) existing.remove();
+
+  var ov = document.createElement('div');
+  ov.id = 'id-noverif-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px)';
+  ov.innerHTML =
+    '<div style="background:#0e1118;border:1.5px solid rgba(255,180,60,.45);border-radius:18px;padding:1.4rem;max-width:380px;width:100%;max-height:90vh;overflow-y:auto">'
+    + '<div style="text-align:center;margin-bottom:1rem">'
+    +   '<div style="font-size:2rem;margin-bottom:.4rem">\u26A0\uFE0F</div>'
+    +   '<div style="font-family:Oxanium;font-weight:900;font-size:1.05rem;color:#ffb84d">ID NO VERIFICADO</div>'
+    +   '<div style="font-size:.8rem;color:#9aa4b2;margin-top:.4rem;line-height:1.5">No pudimos confirmar que este ID pertenezca a un jugador de Free Fire.</div>'
+    + '</div>'
+    + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:.7rem .9rem;margin-bottom:1rem;text-align:center">'
+    +   '<div style="font-size:.65rem;color:#6b7280;text-transform:uppercase;letter-spacing:1px">ID ingresado</div>'
+    +   '<div style="font-family:Oxanium;font-weight:800;font-size:1.1rem;color:#fff;margin-top:.15rem">'+_esc(ffId)+'</div>'
+    + '</div>'
+    + '<div style="background:rgba(255,80,80,.08);border:1px solid rgba(255,80,80,.3);border-radius:12px;padding:.85rem .95rem;margin-bottom:1rem;font-size:.75rem;color:#ffb3b3;line-height:1.55">'
+    +   '<b style="color:#ff6b6b">IMPORTANTE:</b> Puedes continuar con este ID bajo tu responsabilidad. Si el ID ingresado es incorrecto, la recarga podr&iacute;a no llegar al jugador correcto y no podremos garantizar la entrega ni hacernos responsables por errores ocasionados por un ID incorrecto.'
+    + '</div>'
+    + '<label style="display:flex;align-items:flex-start;gap:.65rem;cursor:pointer;margin-bottom:1.1rem;padding:.75rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:11px">'
+    +   '<input type="checkbox" id="chk-id-noverif" style="width:19px;height:19px;flex-shrink:0;margin-top:.1rem;accent-color:#ffb84d;cursor:pointer" onchange="_toggleBtnIdNoVerif()"/>'
+    +   '<span style="font-size:.75rem;color:#c9d1e0;line-height:1.5">Entiendo que si proporcion&eacute; un ID incorrecto, la recarga puede no entregarse y acepto continuar.</span>'
+    + '</label>'
+    + '<div style="display:flex;gap:.65rem">'
+    +   '<button id="id-noverif-cancel" style="flex:1;padding:.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#8b93a3;border-radius:11px;font-family:Poppins;font-weight:700;font-size:.82rem;cursor:pointer">Cancelar</button>'
+    +   '<button id="btn-continuar-noverif" disabled style="flex:1.4;padding:.75rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#4b5563;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.8rem;cursor:not-allowed">CONTINUAR CON LA RECARGA</button>'
+    + '</div></div>';
+  document.body.appendChild(ov);
+
+  document.getElementById('id-noverif-cancel').onclick = function(){ ov.remove(); };
+  document.getElementById('btn-continuar-noverif').onclick = function(){
+    var chk = document.getElementById('chk-id-noverif');
+    if(!chk || !chk.checked) return;
+    ov.remove();
+    _mostrarConfirmacionFinalNoVerificado(p, ffId);
+  };
+}
+
+function _toggleBtnIdNoVerif(){
+  var chk = document.getElementById('chk-id-noverif');
+  var btn = document.getElementById('btn-continuar-noverif');
+  if(!chk || !btn) return;
+  if(chk.checked){
+    btn.disabled = false;
+    btn.style.cssText = 'flex:1.4;padding:.75rem;background:linear-gradient(135deg,#a3690a,#ffb84d);border:none;color:#1a0f00;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.8rem;cursor:pointer';
+  } else {
+    btn.disabled = true;
+    btn.style.cssText = 'flex:1.4;padding:.75rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#4b5563;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.8rem;cursor:not-allowed';
+  }
+}
+
+// ═══ Pantalla final de confirmacion antes de cobrar: repite el ID exacto y
+// pide una segunda confirmacion explicita ("Confirmo que el ID es correcto"). ═══
+function _mostrarConfirmacionFinalNoVerificado(p, ffId){
+  var existing = document.getElementById('id-noverif-final-overlay');
+  if(existing) existing.remove();
+
+  var ov = document.createElement('div');
+  ov.id = 'id-noverif-final-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px)';
+  ov.innerHTML =
+    '<div style="background:#0e1118;border:1.5px solid rgba(255,180,60,.45);border-radius:18px;padding:1.4rem;max-width:360px;width:100%">'
+    + '<div style="text-align:center;margin-bottom:1rem">'
+    +   '<div style="font-size:1.8rem;margin-bottom:.4rem">\u26A0\uFE0F</div>'
+    +   '<div style="font-family:Oxanium;font-weight:900;font-size:1rem;color:#ffb84d">ID NO VERIFICADO</div>'
+    + '</div>'
+    + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:.75rem .9rem;margin-bottom:1rem">'
+    +   '<div style="display:flex;justify-content:space-between;font-size:.78rem;padding:.3rem 0"><span style="color:#6b7280">ID de jugador</span><span style="color:#fff;font-weight:700;font-family:Oxanium">'+_esc(ffId)+'</span></div>'
+    +   '<div style="display:flex;justify-content:space-between;font-size:.78rem;padding:.3rem 0;border-top:1px solid rgba(255,255,255,.06)"><span style="color:#6b7280">Estado</span><span style="color:#ffb84d;font-weight:700">No se pudo verificar</span></div>'
+    + '</div>'
+    + '<div style="font-size:.76rem;color:#c9d1e0;text-align:center;margin-bottom:1.1rem">Revisa cuidadosamente tu ID antes de confirmar.</div>'
+    + '<label style="display:flex;align-items:flex-start;gap:.6rem;cursor:pointer;margin-bottom:1.1rem">'
+    +   '<input type="checkbox" id="chk-id-final" style="width:19px;height:19px;flex-shrink:0;margin-top:.1rem;accent-color:#ffb84d;cursor:pointer" onchange="_toggleBtnFinalNoVerif()"/>'
+    +   '<span style="font-size:.76rem;color:#c9d1e0;line-height:1.5">Confirmo que el ID ingresado es correcto.</span>'
+    + '</label>'
+    + '<div style="display:flex;gap:.65rem">'
+    +   '<button id="id-final-cancel" style="flex:1;padding:.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#8b93a3;border-radius:11px;font-family:Poppins;font-weight:700;font-size:.82rem;cursor:pointer">Cancelar</button>'
+    +   '<button id="btn-confirmar-final" disabled style="flex:1.4;padding:.75rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#4b5563;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.8rem;cursor:not-allowed">CONFIRMAR RECARGA</button>'
+    + '</div></div>';
+  document.body.appendChild(ov);
+
+  document.getElementById('id-final-cancel').onclick = function(){ ov.remove(); };
+  document.getElementById('btn-confirmar-final').onclick = function(){
+    var chk = document.getElementById('chk-id-final');
+    if(!chk || !chk.checked) return;
+    ov.remove();
+
+    var det = document.getElementById('diam-detalle');
+    var btn = document.getElementById('diam-btn');
+    var msg = document.getElementById('diam-msg');
+    if(_comprandoDiam) return;
+    _comprandoDiam = true;
+    if(btn){ btn.disabled=true; btn.className='ddet-btn off'; btn.innerHTML='<span class="rc-spin"></span> Recargando...'; }
+    if(msg){ msg.className='ddet-msg'; msg.innerHTML = _rcEstadoHTML('pending', '\u23F3 RECARGA EN PROCESO', 'ID sin verificar, confirmado bajo tu responsabilidad.<br/>Procesando tu recarga...'); }
+
+    // El ID enviado al proveedor es EXACTAMENTE el que el usuario escribio original.
+    _ejecutarRecargaVerificada(p, ffId, null, 'unverified', btn, msg);
+  };
+}
+
+function _toggleBtnFinalNoVerif(){
+  var chk = document.getElementById('chk-id-final');
+  var btn = document.getElementById('btn-confirmar-final');
+  if(!chk || !btn) return;
+  if(chk.checked){
+    btn.disabled = false;
+    btn.style.cssText = 'flex:1.4;padding:.75rem;background:linear-gradient(135deg,#a3690a,#ffb84d);border:none;color:#1a0f00;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.8rem;cursor:pointer';
+  } else {
+    btn.disabled = true;
+    btn.style.cssText = 'flex:1.4;padding:.75rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#4b5563;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.8rem;cursor:not-allowed';
+  }
 }
 
 
@@ -8011,7 +8145,7 @@ function _mostrarReciboRecarga(p, ffId, nombreJugador, status){
     +   (base && bonus ? '<div style="text-align:center;margin-top:-.5rem;margin-bottom:1.1rem"><span class="cy-desglose">'+base+' + '+bonus+' \uD83C\uDF81 BONUS</span></div>' : '')
     +   '<div class="cy-panel">'
     +     cyRow(bg(icDiam,'rgba(56,189,248,.1)'), 'Cantidad', p.nombre)
-    +     cyRow(bg(icId,'rgba(255,255,255,.05)'), 'Free Fire ID', ffId + (nombreJugador ? '<br/><span style="color:#38bdf8">@'+nombreJugador+'</span>' : ''), 'cyan')
+    +     cyRow(bg(icId,'rgba(255,255,255,.05)'), 'Free Fire ID', ffId + (nombreJugador ? '<br/><span style="color:#38bdf8">@'+nombreJugador+'</span>' : '<br/><span style="color:#ffb84d;font-size:.72em">&#9888; ID sin verificar</span>'), 'cyan')
     +     cyRow(bg(icPrice,'rgba(74,222,128,.1)'), 'Precio', fmt(p.precio), 'green')
     +     cyRow(bg(icCal,'rgba(56,189,248,.1)'), 'Fecha', fecha + ' \u00B7 ' + dia)
     +     cyRow(bg(icClock,'rgba(56,189,248,.1)'), 'Hora', hora)
