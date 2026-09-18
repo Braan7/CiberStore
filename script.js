@@ -3106,10 +3106,16 @@ function admFullLoadStats(){
   if(upd) upd.textContent='Actualizado '+new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
 
   // Conteo EXACTO de usuarios (no se queda pegado en 1000 como con .length de una consulta sin paginar)
+  var elUsersLoading = document.getElementById('adm-s-users');
+  if(elUsersLoading) elUsersLoading.textContent = '...';
   sb.count('profiles').then(function(totalUsuarios){
     var el1=document.getElementById('adm-s-users');
     if(el1) el1.textContent=totalUsuarios;
-  }).catch(function(e){ console.error('[STATS] Error contando usuarios:', e); });
+  }).catch(function(e){
+    console.error('[STATS] Error contando usuarios:', e);
+    var el1=document.getElementById('adm-s-users');
+    if(el1) el1.textContent='Error';
+  });
 
   sbGetAll('profiles', 'saldo,role,banned').then(function(users){
     if(!users||!Array.isArray(users)) return;

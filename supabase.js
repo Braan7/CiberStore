@@ -28,6 +28,8 @@ function sbReq(method, table, body, qs, extraHeaders){
 // Conteo EXACTO de filas sin traerlas todas (usa el header count=exact de
 // PostgREST/Supabase, que devuelve el total real en Content-Range aunque
 // haya mas de 1000 filas). qs es opcional (ej: 'role=eq.admin' para filtrar).
+// Si el navegador bloquea la lectura del header Content-Range (CORS), cae
+// automaticamente a contar trayendo todas las filas paginadas.
 function sbCount(table, qs){
   var url = SB_URL + '/rest/v1/' + table + '?select=id' + (qs ? '&' + qs : '') + '&limit=1';
   return fetch(url, {
@@ -40,8 +42,33 @@ function sbCount(table, qs){
   }).then(function(r){
     var range = r.headers.get('content-range'); // formato "0-0/1234"
     var total = range ? parseInt(range.split('/')[1], 10) : NaN;
-    return isNaN(total) ? 0 : total;
+    if(!isNaN(total)) return total;
+    // Plan B: el header no llego (CORS u otro motivo). Contar trayendo todo, paginado.
+    console.warn('[sbCount] Content-Range no disponible, usando conteo por paginacion para', table);
+    return sbCountByPaging(table, qs);
+  }).catch(function(e){
+    console.error('[sbCount] fetch fallo, usando conteo por paginacion para', table, e);
+    return sbCountByPaging(table, qs);
   });
+}
+
+// Plan B de conteo: trae solo la columna id, paginando de 1000 en 1000,
+// hasta agotar las filas, y devuelve el total real sin limite.
+function sbCountByPaging(table, qs){
+  var pageSize = 1000;
+  function contarDesde(desde, acumulado){
+    var url = SB_URL + '/rest/v1/' + table + '?select=id' + (qs ? '&' + qs : '') + '&offset=' + desde + '&limit=' + pageSize;
+    return fetch(url, {
+      method: 'GET',
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+    }).then(function(r){ return r.json(); }).then(function(rows){
+      if(!rows || !Array.isArray(rows) || !rows.length) return acumulado;
+      var nuevoTotal = acumulado + rows.length;
+      if(rows.length < pageSize) return nuevoTotal; // ultima pagina
+      return contarDesde(desde + pageSize, nuevoTotal);
+    });
+  }
+  return contarDesde(0, 0);
 }
 
 function sbRpc(fn, params){
