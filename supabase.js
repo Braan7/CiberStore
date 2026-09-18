@@ -25,6 +25,25 @@ function sbReq(method, table, body, qs, extraHeaders){
   });
 }
 
+// Conteo EXACTO de filas sin traerlas todas (usa el header count=exact de
+// PostgREST/Supabase, que devuelve el total real en Content-Range aunque
+// haya mas de 1000 filas). qs es opcional (ej: 'role=eq.admin' para filtrar).
+function sbCount(table, qs){
+  var url = SB_URL + '/rest/v1/' + table + '?select=id' + (qs ? '&' + qs : '') + '&limit=1';
+  return fetch(url, {
+    method: 'GET',
+    headers: {
+      'apikey':        SB_KEY,
+      'Authorization': 'Bearer ' + SB_KEY,
+      'Prefer':        'count=exact'
+    }
+  }).then(function(r){
+    var range = r.headers.get('content-range'); // formato "0-0/1234"
+    var total = range ? parseInt(range.split('/')[1], 10) : NaN;
+    return isNaN(total) ? 0 : total;
+  });
+}
+
 function sbRpc(fn, params){
   var url = SB_URL + '/rest/v1/rpc/' + fn;
   return fetch(url, {
@@ -49,6 +68,7 @@ var sb = {
   patch:  function(t, d, q) { return sbReq('PATCH',  t, d, q); },
   del:    function(t, q)    { return sbReq('DELETE', t, null, q); },
   rpc:    function(fn, params) { return sbRpc(fn, params); },
+  count:  function(t, q)    { return sbCount(t, q); },
   upsert: function(t, d){
     return sbReq('POST', t, d, null,
       {'Prefer': 'resolution=merge-duplicates,return=representation'});

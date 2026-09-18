@@ -3083,24 +3083,46 @@ function admFullTab(tab){
 }
 
 /* \u2500\u2500 DASHBOARD \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+// Trae TODAS las filas de una tabla paginando de 1000 en 1000 (evita el
+// limite por defecto de Supabase que corta en 1000 y deja datos incompletos
+// en sumas/promedios). select y qs son opcionales.
+function sbGetAll(table, select, qsExtra){
+  var pageSize = 1000;
+  var acumulado = [];
+  function pedirPagina(desde){
+    var qs = (select ? 'select=' + select : '') + (qsExtra ? '&' + qsExtra : '') + '&offset=' + desde + '&limit=' + pageSize;
+    return sb.get(table, qs).then(function(rows){
+      if(!rows || !Array.isArray(rows) || !rows.length) return acumulado;
+      acumulado = acumulado.concat(rows);
+      if(rows.length < pageSize) return acumulado; // ultima pagina
+      return pedirPagina(desde + pageSize);
+    });
+  }
+  return pedirPagina(0);
+}
+
 function admFullLoadStats(){
   var upd=document.getElementById('adm-last-update');
   if(upd) upd.textContent='Actualizado '+new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
 
-  sb.get('profiles','select=saldo,role,banned').then(function(users){
+  // Conteo EXACTO de usuarios (no se queda pegado en 1000 como con .length de una consulta sin paginar)
+  sb.count('profiles').then(function(totalUsuarios){
+    var el1=document.getElementById('adm-s-users');
+    if(el1) el1.textContent=totalUsuarios;
+  }).catch(function(e){ console.error('[STATS] Error contando usuarios:', e); });
+
+  sbGetAll('profiles', 'saldo,role,banned').then(function(users){
     if(!users||!Array.isArray(users)) return;
     var total=users.reduce(function(s,u){return s+(u.saldo||0);},0);
     var admins=users.filter(function(u){return u.role==='admin';}).length;
-    var el1=document.getElementById('adm-s-users');
     var el2=document.getElementById('adm-s-saldo');
     var el3=document.getElementById('adm-s-admins');
-    if(el1) el1.textContent=users.length;
     if(el2) el2.textContent='$'+total.toLocaleString('es-MX');
     if(el3) el3.textContent=admins;
     renderAdminStats2(users);
   }).catch(function(){});
 
-  sb.get('movimientos_saldo','select=id,tipo,descripcion,monto').then(function(movs){
+  sbGetAll('movimientos_saldo', 'id,tipo,descripcion,monto').then(function(movs){
     if(!movs||!Array.isArray(movs)) return;
     var el4=document.getElementById('adm-s-movs');
     if(el4) el4.textContent=movs.length;
