@@ -7158,13 +7158,13 @@ var _diamSeleccionado = null;
 // ═══════════ RECARGAS AUTOMÁTICAS (Recargas América type=recharge) ═══════════
 // package_id = el ID de Recargas América | precio = costo USD × 20 (redondeado)
 var RECARGAS_AUTO = [
-  { package_id:351, sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.712,  precio:15,  img:'img/diam-100.png'  },
-  { package_id:348, sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:2.1374, precio:45,  img:'img/diam-310.png'  },
-  { package_id:350, sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.6164, precio:75,  img:'img/diam-520.png'  },
-  { package_id:347, sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.706,  precio:125, img:'img/diam-1060.png' },
-  { package_id:346, sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:13.3209,precio:245, img:'img/diam-2180.png' },
-  { package_id:349, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:33.8848,precio:595, img:'img/diam-5600.png' },
-  { package_id:null, nombre:'11.200 Diamantes + 1.120 Bono', diamantes:12320, costoUSD:66.32, precio:1150, manual:true }
+  { package_id:351, catalog_id:5,  sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.712,  precio:15,  img:'img/diam-100.png'  },
+  { package_id:348, catalog_id:6,  sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:2.1374, precio:45,  img:'img/diam-310.png'  },
+  { package_id:350, catalog_id:7,  sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.6164, precio:75,  img:'img/diam-520.png'  },
+  { package_id:347, catalog_id:8,  sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.706,  precio:125, img:'img/diam-1060.png' },
+  { package_id:346, catalog_id:9,  sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:13.3209,precio:245, img:'img/diam-2180.png' },
+  { package_id:349, catalog_id:10, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:33.8848,precio:595, img:'img/diam-5600.png' },
+  { package_id:null, catalog_id:null, nombre:'11.200 Diamantes + 1.120 Bono', diamantes:12320, costoUSD:66.32, precio:1150, manual:true }
 ];
 
 // PUBG Mobile — recarga MANUAL (sin API de proveedor todavia).
@@ -7670,16 +7670,23 @@ function _ejecutarRecargaVerificada(p, ffId, nombre, verificationStatus, btn, ms
   };
   addSpend(p.precio, p.diamantes+' Diamantes (Recarga AUTO '+p.nombre+') - ID:'+ffId+etiquetaJugador+' - Pedido #'+ord);
 
+  // Idempotency key: se genera UNA VEZ por pedido (no en cada llamada de red). Si este
+  // mismo pedido necesitara reintentarse (ej: el admin lo reintenta manual desde el
+  // panel), debe reenviarse esta MISMA clave — nunca generar una nueva — para que el
+  // proveedor detecte el duplicado en vez de cobrar dos veces por la misma recarga.
+  var idempotencyKey = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : ('cs-'+ord+'-'+Date.now());
+
   // Paso 3: hacer la recarga automática — SIEMPRE con el ffId exacto que escribio el usuario
   fetch(COMPRAR_RECARGA_URL, {
     method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ action:'comprar', package_id:p.package_id, sku:p.sku, player_id:ffId, client_name:authSession.username })
+    body: JSON.stringify({ action:'comprar', package_id:p.package_id, catalog_id:p.catalog_id, sku:p.sku, player_id:ffId, client_name:authSession.username, idempotency_key:idempotencyKey })
   }).then(function(r){ return r.json(); }).then(function(res){
     if(res.success && (res.status==='COMPLETED' || res.status==='PENDING')){
       registrarPedido(p.nombre+' (AUTO'+(esVerificado?'':' - ID NO VERIFICADO')+')', p.diamantes, 'diamantes', ffId, p.precio, 0);
       if(typeof tgNotifyPurchase==='function'){
         var infoJugador = esVerificado ? ('\uD83D\uDC64 Nombre IG: '+nombre) : '\u26A0\uFE0F ID SIN VERIFICAR - cliente confirmo bajo su responsabilidad';
-        tgNotifyPurchase(authSession.username, '\u26A1 Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n'+infoJugador, p.precio, ord);
+        var infoVia = res.via ? ('\n\uD83D\uDD17 Via: '+(res.via==='catalog'?'Catalogo Unificado':'API pines')) : '';
+        tgNotifyPurchase(authSession.username, '\u26A1 Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n'+infoJugador+infoVia, p.precio, ord);
       }
       _mostrarReciboRecarga(p, ffId, esVerificado ? nombre : null, res.status);
       var txt = res.status==='COMPLETED' ? '\u2705 Recarga COMPLETADA!' : '\u23F3 Recarga en proceso...';
@@ -7687,9 +7694,44 @@ function _ejecutarRecargaVerificada(p, ffId, nombre, verificationStatus, btn, ms
       _comprandoDiam = false;
     } else {
       var errTxt = String(res.error||res.status||'sin confirmar');
-      // Fondos agotados del proveedor: la recarga NO se hizo, hay que devolver
-      var sinFondos = /saldo insuficiente|insufficient|fondos insuficientes|sin fondos|credito insuficiente|balance too low|no balance|limite excedido|limit exceeded/i.test(errTxt);
-      var noDisponible = /no disponible|not available|no encontrado|not found|sin stock|out of stock/i.test(errTxt);
+      var errCode = String(res.code||'');
+      // La Edge Function nueva devuelve un "code" explicito del proveedor
+      // (PURCHASE_FAILED, PRODUCT_INACTIVE, PROVIDER_ERROR, DUPLICATE_REQUEST).
+      // Ese code es la fuente de verdad; el regex de texto solo cubre el caso
+      // de una version vieja de la funcion que aun no mande "code".
+      var sinFondos = (errCode==='PURCHASE_FAILED' || errCode==='PRODUCT_INACTIVE') ||
+        (!errCode && /saldo insuficiente|insufficient|fondos insuficientes|sin fondos|credito insuficiente|balance too low|no balance|limite excedido|limit exceeded/i.test(errTxt));
+      var noDisponible = (!errCode && /no disponible|not available|no encontrado|not found|sin stock|out of stock/i.test(errTxt));
+      // PROVIDER_ERROR: el proveedor SI fue contactado - nunca reembolsar automatico,
+      // siempre dejar para revision manual (igual que el bloque de "error ambiguo" abajo).
+      var proveedorContactado = (errCode === 'PROVIDER_ERROR');
+      var esDuplicado = (errCode === 'DUPLICATE_REQUEST');
+
+      if(esDuplicado){
+        // Esta misma idempotency_key ya se habia usado — no asumir nada, dejar
+        // en revision manual para que el admin consulte el estado real primero.
+        registrarPedido(p.nombre+' (AUTO - DUPLICADA, VERIFICAR)', p.diamantes, 'diamantes', ffId, p.precio, 0);
+        if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F PEDIDO DUPLICADO (idempotencia) - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\uD83D\uDD11 Key: '+idempotencyKey, p.precio, ord);
+        if(btn){ btn.disabled=false; btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
+        if(msg){ msg.className='ddet-msg'; msg.innerHTML = _rcEstadoHTML('pending', '\u23F3 EN VERIFICACION', 'Este pedido parece repetido. Estamos verificando el estado real antes de continuar.'); }
+        console.warn('[RECARGA] Duplicado (no reembolsado, revision manual):', JSON.stringify(res));
+        _comprandoDiam = false;
+        return;
+      }
+
+      if(proveedorContactado){
+        // El proveedor fue contactado (con exito o no) - la wallet mayorista ya se
+        // movio. Nunca reembolsar solo: dejar para revision manual, igual que el
+        // bloque de "error ambiguo" que ya existia.
+        registrarPedido(p.nombre+' (AUTO - VERIFICAR)', p.diamantes, 'diamantes', ffId, p.precio, 0);
+        if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F PROVEEDOR CONTACTADO, VERIFICAR - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\uD83D\uDD11 Key: '+idempotencyKey, p.precio, ord);
+        if(btn){ btn.disabled=false; btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
+        if(msg){ msg.className='ddet-msg'; msg.innerHTML = _rcEstadoHTML('pending', '\u23F3 EN VERIFICACION', 'Tu recarga se esta verificando. Si no llega en unos minutos, contacta al admin con tu ID.'); }
+        console.error('[RECARGA] Proveedor contactado (no reembolsado, revision manual):', JSON.stringify(res));
+        _comprandoDiam = false;
+        setTimeout(cerrarDiamDetalle, 4000);
+        return;
+      }
 
       if(sinFondos){
         // RECARGA RECHAZADA: devolver el saldo y avisar al admin con urgencia
