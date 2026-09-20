@@ -1712,7 +1712,7 @@ function _mostrarInstruccionesHonor(ord){
 }
 
 // ═══════════════════ PASES FF ═══════════════════
-var PASEFF_PRECIO = 30;
+var PASEFF_PRECIO = 35;
 var PASEFF_MAX = 10;
 var _paseffCantidad = 1;
 var _comprandoPaseFF = false;
@@ -1790,7 +1790,7 @@ var MEMBRESIAS_FF = [
   { catalog_id:1, nombre:'Tarjeta Semanal B\u00e1sica', precio:9.10, icon:'\uD83C\uDFAB' },
   { catalog_id:2, nombre:'Tarjeta Semanal',            precio:33,  icon:'\uD83C\uDF9F\uFE0F' },
   { catalog_id:3, nombre:'Tarjeta Mensual',            precio:145, icon:'\uD83C\uDFC6' },
-  { catalog_id:4, nombre:'Pase Elite',                 precio:30,  icon:'\u26D3\uFE0F' }
+  { catalog_id:4, nombre:'Pase Elite',                 precio:50,  icon:'\u26D3\uFE0F' }
 ];
 var _memIdxActual = null;
 var _comprandoMem = false;
