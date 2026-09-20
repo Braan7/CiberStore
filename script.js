@@ -457,7 +457,7 @@ function changeCurrency(cur){
   var page=document.querySelector('.page.active');
   if(page){
     var id=page.id.replace('page-','');
-    if(id==='diamantes') setTimeout(function(){ renderDiamCatalogo(); if(document.getElementById('diam-detalle') && document.getElementById('diam-detalle').style.display!=='none' && _diamSeleccionado) _refrescarDiamPrecios(); }, 100);
+    if(id==='diamantes') setTimeout(function(){ renderDiamCatalogo(); renderMembresiasCatalogo(); if(document.getElementById('diam-detalle') && document.getElementById('diam-detalle').style.display!=='none' && _diamSeleccionado) _refrescarDiamPrecios(); }, 100);
     if(id==='likes') renderLikes();
     if(id==='membresia'){renderMems();renderWallet();}
   }
@@ -942,8 +942,7 @@ function goPage(id){
   if(ni) ni.classList.add('active');
   closeSB();
   window.scrollTo(0,0);
-  if(id==='diamantes') setTimeout(function(){ setDiamTipo('ilim'); }, 100);
-  if(id==='unificado') setTimeout(renderUnificadoCatalogo, 100);
+  if(id==='diamantes') setTimeout(function(){ setDiamTipo('ilim'); renderMembresiasCatalogo(); }, 100);
   if(id==='honor') setTimeout(function(){ seleccionarHonorRegion(_honorIdxActual||0); }, 100);
   if(id==='codigos') setTimeout(_updateScarSaldo, 100);
   if(id==='clanes') setTimeout(renderClanes, 100);
@@ -1783,67 +1782,68 @@ function _paseffActualizarTotal(){
 }
 
 // ═══════════════════ TARJETAS DE MEMBRESIA (Semanal/Mensual) ═══════════════════
-// ═══════════════════ MENÚ UNIFICADO (Tarjetas + Pase Booyah, via /buy/catalog) ═══════════════════
+// ═══════════════════ MEMBRESIAS Y PASE ELITE — dentro de Diamantes FF (Tarjetas + Pase, via /buy/catalog del proveedor) ═══════════════════
 // catalog_id = ID real en el Catálogo Unificado del proveedor (confirmado via /products/catalog).
 // precio = tu precio de venta en MXN (independiente del costo del proveedor).
-var UNIFICADO_PRODUCTOS = [
+// ═══════════════════ MEMBRESIAS Y PASE ELITE (dentro de Diamantes FF) ═══════════════════
+var MEMBRESIAS_FF = [
   { catalog_id:1, nombre:'Tarjeta Semanal B\u00e1sica', precio:9.10, icon:'\uD83C\uDFAB' },
   { catalog_id:2, nombre:'Tarjeta Semanal',            precio:33,  icon:'\uD83C\uDF9F\uFE0F' },
   { catalog_id:3, nombre:'Tarjeta Mensual',            precio:145, icon:'\uD83C\uDFC6' },
-  { catalog_id:4, nombre:'Pase Booyah',                precio:30,  icon:'\u26D3\uFE0F' }
+  { catalog_id:4, nombre:'Pase Elite',                 precio:30,  icon:'\u26D3\uFE0F' }
 ];
-var _unifIdxActual = null;
-var _comprandoUnif = false;
+var _memIdxActual = null;
+var _comprandoMem = false;
 
-function renderUnificadoCatalogo(){
-  var cont = document.getElementById('unif-catalogo');
+function renderMembresiasCatalogo(){
+  var cont = document.getElementById('diam-membresias');
   if(!cont) return;
-  cont.innerHTML = UNIFICADO_PRODUCTOS.map(function(u, i){
-    return '<div class="ds-cat-card" style="flex-direction:row;align-items:center;text-align:left;padding:1.1rem 1.2rem;gap:1rem" onclick="abrirUnificado('+i+')">'
+  cont.innerHTML = MEMBRESIAS_FF.map(function(u, i){
+    return '<div class="ds-cat-card" style="flex-direction:row;align-items:center;text-align:left;padding:1.1rem 1.2rem;gap:1rem" onclick="abrirMembresia('+i+')">'
       + '<span class="ds-cat-ico" style="font-size:1.5rem">'+u.icon+'</span>'
       + '<div style="flex:1"><div class="ds-cat-name" style="font-size:.92rem">'+u.nombre+'</div><div class="ds-cat-sub" style="font-size:.72rem">Entrega autom&aacute;tica</div></div>'
-      + '<span style="font-family:Oxanium;font-weight:800;font-size:1rem;color:#a78bfa;flex-shrink:0" id="unif-precio-'+i+'">'+fmt(u.precio)+'</span>'
+      + '<span style="font-family:Oxanium;font-weight:800;font-size:1rem;color:#a78bfa;flex-shrink:0" id="mem-precio-'+i+'">'+fmt(u.precio)+'</span>'
       + '</div>';
   }).join('');
 }
 
-function abrirUnificado(idx){
+function abrirMembresia(idx){
   if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
-  var u = UNIFICADO_PRODUCTOS[idx];
+  var u = MEMBRESIAS_FF[idx];
   if(!u) return;
-  _unifIdxActual = idx;
+  _memIdxActual = idx;
 
-  var ov = document.getElementById('modal-unificado');
-  document.getElementById('unif-m-nombre').textContent = u.nombre;
-  document.getElementById('unif-m-precio').textContent = fmt(u.precio);
-  document.getElementById('unif-m-id').value = '';
-  document.getElementById('unif-m-saldo').textContent = fmt(authSession.saldo||0);
+  var ov = document.getElementById('modal-membresia');
+  document.getElementById('mem-m-nombre').textContent = u.nombre;
+  document.getElementById('mem-m-precio').textContent = fmt(u.precio);
+  document.getElementById('mem-m-id').value = '';
+  document.getElementById('mem-m-saldo').textContent = fmt(authSession.saldo||0);
   if(ov) ov.classList.add('show');
 }
 
-function cerrarUnificadoModal(){
-  var ov = document.getElementById('modal-unificado');
+function cerrarMembresiaModal(){
+  var ov = document.getElementById('modal-membresia');
   if(ov) ov.classList.remove('show');
 }
 
-function comprarUnificado(){
-  if(_comprandoUnif || _unifIdxActual === null) return;
-  var u = UNIFICADO_PRODUCTOS[_unifIdxActual];
+function comprarMembresia(){
+  if(_comprandoMem || _memIdxActual === null) return;
+  var u = MEMBRESIAS_FF[_memIdxActual];
   if(!u) return;
-  var ffId = ((document.getElementById('unif-m-id')||{}).value||'').trim();
+  var ffId = ((document.getElementById('mem-m-id')||{}).value||'').trim();
   if(!ffId){ showToast('Ingresa tu ID de Free Fire'); return; }
 
-  _comprandoUnif = true;
-  var btn = document.getElementById('unif-submit-btn');
+  _comprandoMem = true;
+  var btn = document.getElementById('mem-submit-btn');
   if(btn){ btn.disabled = true; btn.textContent = 'Verificando saldo...'; }
 
   verificarSaldoFresco(u.precio, function(alcanza, saldoReal){
-    document.getElementById('unif-m-saldo').textContent = fmt(saldoReal);
+    document.getElementById('mem-m-saldo').textContent = fmt(saldoReal);
     if(!alcanza){
       showToast('Saldo insuficiente. Tienes '+fmt(saldoReal)+' y necesitas '+fmt(u.precio), 3500);
       if(btn){ btn.disabled = false; btn.textContent = 'Comprar'; }
-      _comprandoUnif = false;
-      setTimeout(function(){ cerrarUnificadoModal(); goPage('saldo'); }, 1500);
+      _comprandoMem = false;
+      setTimeout(function(){ cerrarMembresiaModal(); goPage('saldo'); }, 1500);
       return;
     }
 
@@ -1851,38 +1851,37 @@ function comprarUnificado(){
     var idempotencyKey = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : ('cs-'+ord+'-'+Date.now());
     if(btn) btn.textContent = 'Procesando...';
 
-    // Este producto SOLO existe en el Catalogo Unificado (no tiene respaldo en
-    // /buy/pins) — se manda solo catalog_id, sin package_id.
+    // Este producto SOLO existe en el Catalogo Unificado del proveedor (no tiene
+    // respaldo en /buy/pins) — se manda solo catalog_id, sin package_id.
     fetch(COMPRAR_RECARGA_URL, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ action:'comprar', catalog_id:u.catalog_id, player_id:ffId, client_name:authSession.username, idempotency_key:idempotencyKey })
     }).then(function(r){ return r.json(); }).then(function(res){
       if(res.success && (res.status==='COMPLETED' || res.status==='PENDING')){
-        addSpend(u.precio, u.nombre+' (UNIFICADO) - ID:'+ffId+' - Pedido #'+ord);
-        registrarPedido(u.nombre+' (UNIFICADO)', 1, 'unificado', ffId, u.precio, 0);
+        addSpend(u.precio, u.nombre+' - ID:'+ffId+' - Pedido #'+ord);
+        registrarPedido(u.nombre, 1, 'membresia', ffId, u.precio, 0);
         if(typeof tgNotifyPurchase === 'function'){
-          tgNotifyPurchase(authSession.username, u.nombre+' (Catalogo Unificado)\n\uD83C\uDFAE ID: '+ffId, u.precio, ord);
+          tgNotifyPurchase(authSession.username, u.nombre+'\n\uD83C\uDFAE ID: '+ffId, u.precio, ord);
         }
-        _comprandoUnif = false;
+        _comprandoMem = false;
         if(btn){ btn.disabled = false; btn.textContent = 'Comprar'; }
         if(typeof _refreshSaldoUI === 'function') _refreshSaldoUI(authSession.saldo||0);
-        cerrarUnificadoModal();
+        cerrarMembresiaModal();
         showToast('\u2705 Pedido #'+ord+' confirmado! '+u.nombre+' en proceso.', 4000);
       } else {
-        // El proveedor NO confirmo el exito: NO cobrar. A diferencia de diamantes,
-        // este flujo cobra DESPUES de la confirmacion (no antes), asi que si falla
-        // simplemente no se descuenta nada — no hace falta reembolsar.
+        // El proveedor NO confirmo el exito: NO cobrar. Este flujo cobra DESPUES
+        // de la confirmacion (no antes), asi que si falla no se descuenta nada.
         var errTxt = String(res.error||res.status||'sin confirmar');
         showToast('No se pudo completar: '+errTxt+'. No se te cobro.', 4000);
-        _comprandoUnif = false;
+        _comprandoMem = false;
         if(btn){ btn.disabled = false; btn.textContent = 'Comprar'; }
-        console.error('[UNIFICADO] Error:', JSON.stringify(res));
+        console.error('[MEMBRESIA] Error:', JSON.stringify(res));
       }
     }).catch(function(err){
       showToast('Error de conexion. No se te cobro. Intenta de nuevo.', 4000);
-      _comprandoUnif = false;
+      _comprandoMem = false;
       if(btn){ btn.disabled = false; btn.textContent = 'Comprar'; }
-      console.error('[UNIFICADO] catch:', err);
+      console.error('[MEMBRESIA] catch:', err);
     });
   });
 }
