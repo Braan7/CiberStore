@@ -942,13 +942,14 @@ function goPage(id){
   if(ni) ni.classList.add('active');
   closeSB();
   window.scrollTo(0,0);
-  if(id==='diamantes') setTimeout(function(){ setDiamTipo('ilim'); _refrescarPreciosMembresias(); }, 100);
+  if(id==='diamantes') setTimeout(function(){ setDiamTipo('ilim'); }, 100);
+  if(id==='unificado') setTimeout(renderUnificadoCatalogo, 100);
   if(id==='honor') setTimeout(function(){ seleccionarHonorRegion(_honorIdxActual||0); }, 100);
   if(id==='codigos') setTimeout(_updateScarSaldo, 100);
   if(id==='clanes') setTimeout(renderClanes, 100);
   if(id==='pase') setTimeout(_paseReiniciar, 100);
   if(id==='soporte') setTimeout(sopVolverLista, 100);
-  if(id==='freefire') setTimeout(function(){ ffVolverInicio(); _refrescarPreciosCuentasRandom(); _refrescarPrecioPaseElite(); }, 100);
+  if(id==='freefire') setTimeout(function(){ ffVolverInicio(); _refrescarPreciosCuentasRandom(); }, 100);
   if(id==='pubg') setTimeout(renderPubgCatalogo, 100);
   if(id==='saldo') setTimeout(function(){ recSetMoneda('MXN'); _recTipo=null; recLimpiarTipo(); }, 100);
   if(id==='sobre') setTimeout(function(){ sobreTab('resenas'); }, 100);
@@ -1782,77 +1783,107 @@ function _paseffActualizarTotal(){
 }
 
 // ═══════════════════ TARJETAS DE MEMBRESIA (Semanal/Mensual) ═══════════════════
-function _refrescarPreciosMembresias(){
-  var elSB = document.getElementById('mem-precio-sb');
-  if(elSB) elSB.textContent = fmt(MEMBRESIAS_FF.semanal_basica.precio);
-  var elS = document.getElementById('mem-precio-s');
-  if(elS) elS.textContent = fmt(MEMBRESIAS_FF.semanal.precio);
-  var elM = document.getElementById('mem-precio-m');
-  if(elM) elM.textContent = fmt(MEMBRESIAS_FF.mensual.precio);
+// ═══════════════════ MENÚ UNIFICADO (Tarjetas + Pase Booyah, via /buy/catalog) ═══════════════════
+// catalog_id = ID real en el Catálogo Unificado del proveedor (confirmado via /products/catalog).
+// precio = tu precio de venta en MXN (independiente del costo del proveedor).
+var UNIFICADO_PRODUCTOS = [
+  { catalog_id:1, nombre:'Tarjeta Semanal B\u00e1sica', precio:9.10, icon:'\uD83C\uDFAB' },
+  { catalog_id:2, nombre:'Tarjeta Semanal',            precio:33,  icon:'\uD83C\uDF9F\uFE0F' },
+  { catalog_id:3, nombre:'Tarjeta Mensual',            precio:145, icon:'\uD83C\uDFC6' },
+  { catalog_id:4, nombre:'Pase Booyah',                precio:30,  icon:'\u26D3\uFE0F' }
+];
+var _unifIdxActual = null;
+var _comprandoUnif = false;
+
+function renderUnificadoCatalogo(){
+  var cont = document.getElementById('unif-catalogo');
+  if(!cont) return;
+  cont.innerHTML = UNIFICADO_PRODUCTOS.map(function(u, i){
+    return '<div class="ds-cat-card" style="flex-direction:row;align-items:center;text-align:left;padding:1.1rem 1.2rem;gap:1rem" onclick="abrirUnificado('+i+')">'
+      + '<span class="ds-cat-ico" style="font-size:1.5rem">'+u.icon+'</span>'
+      + '<div style="flex:1"><div class="ds-cat-name" style="font-size:.92rem">'+u.nombre+'</div><div class="ds-cat-sub" style="font-size:.72rem">Entrega autom&aacute;tica</div></div>'
+      + '<span style="font-family:Oxanium;font-weight:800;font-size:1rem;color:#a78bfa;flex-shrink:0" id="unif-precio-'+i+'">'+fmt(u.precio)+'</span>'
+      + '</div>';
+  }).join('');
 }
 
-var MEMBRESIAS_FF = {
-  semanal_basica: { nombre:'Tarjeta Semanal B\u00e1sica', precio:9.10, icon:'\uD83C\uDFAB' },
-  semanal:        { nombre:'Tarjeta Semanal',            precio:33,   icon:'\uD83C\uDF9F\uFE0F' },
-  mensual:        { nombre:'Tarjeta Mensual',             precio:145,  icon:'\uD83C\uDFC6' }
-};
-var _memActual = null;
-var _comprandoMem = false;
-
-function abrirMembresia(tipo){
+function abrirUnificado(idx){
   if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
-  var m = MEMBRESIAS_FF[tipo];
-  if(!m) return;
-  _memActual = tipo;
+  var u = UNIFICADO_PRODUCTOS[idx];
+  if(!u) return;
+  _unifIdxActual = idx;
 
-  var ov = document.getElementById('modal-membresia');
-  document.getElementById('mem-m-icon').textContent = m.icon;
-  document.getElementById('mem-m-nombre').textContent = m.nombre;
-  document.getElementById('mem-m-precio').textContent = fmt(m.precio);
-  document.getElementById('mem-m-id').value = '';
-  document.getElementById('mem-m-saldo').textContent = fmt(authSession.saldo||0);
+  var ov = document.getElementById('modal-unificado');
+  document.getElementById('unif-m-nombre').textContent = u.nombre;
+  document.getElementById('unif-m-precio').textContent = fmt(u.precio);
+  document.getElementById('unif-m-id').value = '';
+  document.getElementById('unif-m-saldo').textContent = fmt(authSession.saldo||0);
   if(ov) ov.classList.add('show');
 }
 
-function cerrarMembresiaModal(){
-  var ov = document.getElementById('modal-membresia');
+function cerrarUnificadoModal(){
+  var ov = document.getElementById('modal-unificado');
   if(ov) ov.classList.remove('show');
 }
 
-function comprarMembresia(){
-  if(_comprandoMem || !_memActual) return;
-  var m = MEMBRESIAS_FF[_memActual];
-  var ffId = ((document.getElementById('mem-m-id')||{}).value||'').trim();
+function comprarUnificado(){
+  if(_comprandoUnif || _unifIdxActual === null) return;
+  var u = UNIFICADO_PRODUCTOS[_unifIdxActual];
+  if(!u) return;
+  var ffId = ((document.getElementById('unif-m-id')||{}).value||'').trim();
   if(!ffId){ showToast('Ingresa tu ID de Free Fire'); return; }
 
-  _comprandoMem = true;
-  var btn = document.getElementById('mem-submit-btn');
+  _comprandoUnif = true;
+  var btn = document.getElementById('unif-submit-btn');
   if(btn){ btn.disabled = true; btn.textContent = 'Verificando saldo...'; }
 
-  verificarSaldoFresco(m.precio, function(alcanza, saldoReal){
-    document.getElementById('mem-m-saldo').textContent = fmt(saldoReal);
+  verificarSaldoFresco(u.precio, function(alcanza, saldoReal){
+    document.getElementById('unif-m-saldo').textContent = fmt(saldoReal);
     if(!alcanza){
-      showToast('Saldo insuficiente. Tienes '+fmt(saldoReal)+' y necesitas '+fmt(m.precio), 3500);
+      showToast('Saldo insuficiente. Tienes '+fmt(saldoReal)+' y necesitas '+fmt(u.precio), 3500);
       if(btn){ btn.disabled = false; btn.textContent = 'Comprar'; }
-      _comprandoMem = false;
-      setTimeout(function(){ cerrarMembresiaModal(); goPage('saldo'); }, 1500);
+      _comprandoUnif = false;
+      setTimeout(function(){ cerrarUnificadoModal(); goPage('saldo'); }, 1500);
       return;
     }
 
     var ord = getNextOrder();
-    addSpend(m.precio, m.nombre+' - ID:'+ffId+' - Pedido #'+ord);
-    registrarPedido(m.nombre, 1, 'membresia', ffId, m.precio, 0);
-    if(typeof tgNotifyPurchase === 'function'){
-      tgNotifyPurchase(authSession.username, m.nombre+'\n\uD83C\uDFAE ID: '+ffId, m.precio, ord);
-    }
+    var idempotencyKey = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : ('cs-'+ord+'-'+Date.now());
+    if(btn) btn.textContent = 'Procesando...';
 
-    setTimeout(function(){
-      _comprandoMem = false;
+    // Este producto SOLO existe en el Catalogo Unificado (no tiene respaldo en
+    // /buy/pins) — se manda solo catalog_id, sin package_id.
+    fetch(COMPRAR_RECARGA_URL, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ action:'comprar', catalog_id:u.catalog_id, player_id:ffId, client_name:authSession.username, idempotency_key:idempotencyKey })
+    }).then(function(r){ return r.json(); }).then(function(res){
+      if(res.success && (res.status==='COMPLETED' || res.status==='PENDING')){
+        addSpend(u.precio, u.nombre+' (UNIFICADO) - ID:'+ffId+' - Pedido #'+ord);
+        registrarPedido(u.nombre+' (UNIFICADO)', 1, 'unificado', ffId, u.precio, 0);
+        if(typeof tgNotifyPurchase === 'function'){
+          tgNotifyPurchase(authSession.username, u.nombre+' (Catalogo Unificado)\n\uD83C\uDFAE ID: '+ffId, u.precio, ord);
+        }
+        _comprandoUnif = false;
+        if(btn){ btn.disabled = false; btn.textContent = 'Comprar'; }
+        if(typeof _refreshSaldoUI === 'function') _refreshSaldoUI(authSession.saldo||0);
+        cerrarUnificadoModal();
+        showToast('\u2705 Pedido #'+ord+' confirmado! '+u.nombre+' en proceso.', 4000);
+      } else {
+        // El proveedor NO confirmo el exito: NO cobrar. A diferencia de diamantes,
+        // este flujo cobra DESPUES de la confirmacion (no antes), asi que si falla
+        // simplemente no se descuenta nada — no hace falta reembolsar.
+        var errTxt = String(res.error||res.status||'sin confirmar');
+        showToast('No se pudo completar: '+errTxt+'. No se te cobro.', 4000);
+        _comprandoUnif = false;
+        if(btn){ btn.disabled = false; btn.textContent = 'Comprar'; }
+        console.error('[UNIFICADO] Error:', JSON.stringify(res));
+      }
+    }).catch(function(err){
+      showToast('Error de conexion. No se te cobro. Intenta de nuevo.', 4000);
+      _comprandoUnif = false;
       if(btn){ btn.disabled = false; btn.textContent = 'Comprar'; }
-      if(typeof _refreshSaldoUI === 'function') _refreshSaldoUI(authSession.saldo||0);
-      cerrarMembresiaModal();
-      showToast('\u2705 Pedido #'+ord+' confirmado! '+m.nombre+' en proceso.', 4000);
-    }, 800);
+      console.error('[UNIFICADO] catch:', err);
+    });
   });
 }
 
@@ -2000,66 +2031,6 @@ function comprarPubgUC(){
     }, 800);
   });
 }
-
-// ═══════════════════ PASE ELITE (reemplaza a Pases Booyah en Tienda) ═══════════════════
-var PASE_ELITE_PRECIO = 30; // Precio BASE en MXN. fmt() lo convierte a la moneda activa en tiempo real.
-var _comprandoPaseElite = false;
-
-function abrirPaseElite(){
-  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
-  var ov = document.getElementById('modal-paseelite');
-  document.getElementById('pe-m-precio').textContent = fmt(PASE_ELITE_PRECIO);
-  document.getElementById('pe-m-id').value = '';
-  document.getElementById('pe-m-saldo').textContent = fmt(authSession.saldo||0);
-  if(ov) ov.classList.add('show');
-}
-
-function _refrescarPrecioPaseElite(){
-  var el = document.getElementById('pe-card-precio');
-  if(el) el.textContent = fmt(PASE_ELITE_PRECIO);
-}
-
-function cerrarPaseEliteModal(){
-  var ov = document.getElementById('modal-paseelite');
-  if(ov) ov.classList.remove('show');
-}
-
-function comprarPaseElite(){
-  if(_comprandoPaseElite) return;
-  var ffId = ((document.getElementById('pe-m-id')||{}).value||'').trim();
-  if(!ffId){ showToast('Ingresa tu ID de Free Fire'); return; }
-
-  _comprandoPaseElite = true;
-  var btn = document.getElementById('pe-submit-btn');
-  if(btn){ btn.disabled = true; btn.textContent = 'Verificando saldo...'; }
-
-  verificarSaldoFresco(PASE_ELITE_PRECIO, function(alcanza, saldoReal){
-    document.getElementById('pe-m-saldo').textContent = fmt(saldoReal);
-    if(!alcanza){
-      showToast('Saldo insuficiente. Tienes '+fmt(saldoReal)+' y necesitas '+fmt(PASE_ELITE_PRECIO), 3500);
-      if(btn){ btn.disabled = false; btn.textContent = 'Comprar Pase Elite'; }
-      _comprandoPaseElite = false;
-      setTimeout(function(){ cerrarPaseEliteModal(); goPage('saldo'); }, 1500);
-      return;
-    }
-
-    var ord = getNextOrder();
-    addSpend(PASE_ELITE_PRECIO, 'Pase Elite - ID:'+ffId+' - Pedido #'+ord);
-    registrarPedido('Pase Elite', 1, 'pase_elite', ffId, PASE_ELITE_PRECIO, 0);
-    if(typeof tgNotifyPurchase === 'function'){
-      tgNotifyPurchase(authSession.username, 'PASE ELITE\n\uD83C\uDFAE ID: '+ffId, PASE_ELITE_PRECIO, ord);
-    }
-
-    setTimeout(function(){
-      _comprandoPaseElite = false;
-      if(btn){ btn.disabled = false; btn.textContent = 'Comprar Pase Elite'; }
-      if(typeof _refreshSaldoUI === 'function') _refreshSaldoUI(authSession.saldo||0);
-      cerrarPaseEliteModal();
-      showToast('\u2705 Pedido #'+ord+' confirmado! Tu Pase Elite se procesa al instante.', 4000);
-    }, 800);
-  });
-}
-
 
 function submitPaseFF(){
   var id = ((document.getElementById('paseff-m-id')||{}).value||'').trim();
@@ -6144,12 +6115,12 @@ function comprarPinAPI(productId, precioLocal, nombreProducto){
 // ═══ PRODUCTOS PIN POR API (Recargas América) ═══
 // product_id = ID en Recargas América | precio = tu precio de venta en MXN
 var PINES_API = [
-  {product_id:5, sku:'FFCH100',  nombre:'Free Fire 100 Diamantes +10 Bono',  precio:14.50,  min:2, diamantes:'110',   img:'img/diam-100.png'},
+  {product_id:5, sku:'FFCH100',  nombre:'Free Fire 100 Diamantes +10 Bono',  precio:15,  min:2, diamantes:'110',   img:'img/diam-100.png'},
   {product_id:3, sku:'FFCH310',  nombre:'Free Fire 310 Diamantes +31 Bono',  precio:45,  min:2, diamantes:'341',   img:'img/diam-310.png'},
-  {product_id:6, sku:'FFCH520',  nombre:'Free Fire 520 Diamantes +52 Bono',  precio:70,  min:2, diamantes:'572',   img:'img/diam-520.png'},
+  {product_id:6, sku:'FFCH520',  nombre:'Free Fire 520 Diamantes +52 Bono',  precio:75,  min:2, diamantes:'572',   img:'img/diam-520.png'},
   {product_id:1, sku:'FFCH1060', nombre:'Free Fire 1060 Diamantes +106 Bono', precio:125, min:2, diamantes:'1,166', img:'img/diam-1060.png'},
   {product_id:2, sku:'FFCH2180', nombre:'Free Fire 2180 Diamantes +218 Bono', precio:245, min:2, diamantes:'2,398', img:'img/diam-2180.png'},
-  {product_id:4, sku:'FFCH5600', nombre:'Free Fire 5600 Diamantes +560 Bono', precio:605, min:2, diamantes:'6,160', img:'img/diam-5600.png'}
+  {product_id:4, sku:'FFCH5600', nombre:'Free Fire 5600 Diamantes +560 Bono', precio:595, min:2, diamantes:'6,160', img:'img/diam-5600.png'}
 ];
 
 function renderPinesAPI(){

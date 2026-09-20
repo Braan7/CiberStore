@@ -2806,6 +2806,7 @@ document.addEventListener('keydown',function(e){
 
     <div class="sb-section">Juegos</div>
     <div class="nav-item" id="ni-freefire" onclick="goPage('freefire')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c-2 3-4 5-4 8a4 4 0 0 0 8 0c0-1-.4-1.8-1-2.5.3 1.5-.3 2.5-1.3 2.5-1.2 0-1.5-1-1-2 .8-1.5.3-3.3-.7-6z"/><path d="M8 15a6 6 0 0 0 12 0c0-1.5-.5-2.8-1.3-4"/></svg></div> Free Fire <span class="nb" style="background:rgba(225,29,46,.15);border:1px solid rgba(225,29,46,.35);color:#ff6b6b">CAT&Aacute;LOGO</span></div>
+    <div class="nav-item" id="ni-unificado" onclick="goPage('unificado')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div> Men&uacute; Unificado <span class="nb" style="background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.35);color:#a78bfa">NUEVO</span></div>
 
     <div class="sb-section">Servicios</div>
     <div class="nav-item" id="ni-likes" onclick="goPage('likes2k')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v10H4a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1z"/><path d="M7 11l3.5-7a1.5 1.5 0 0 1 2.7 1.3L12 9h6.3a2 2 0 0 1 1.9 2.6l-2 6.5a2 2 0 0 1-1.9 1.4H7"/></svg></div> Likes</div>
@@ -3194,21 +3195,6 @@ document.addEventListener('keydown',function(e){
           </div>
         </div>
 
-        <div class="ff-acc-card" onclick="abrirPaseElite()">
-          <div class="ff-acc-img" style="background-image:url('img/pase-elite.png');aspect-ratio:21/9">
-            <span class="ff-acc-badge" style="background:linear-gradient(135deg,#a3860a,#ffd000)">PASE ELITE</span>
-          </div>
-          <div class="ff-acc-body" style="padding:.9rem 1rem">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:.75rem">
-              <div>
-                <div class="ff-acc-title" style="font-size:.95rem;margin-bottom:.2rem">Pase Elite</div>
-                <div style="font-size:.75rem;color:#9aa3b0">Entrega al instante</div>
-              </div>
-              <span style="font-family:Oxanium;font-weight:900;font-size:1.2rem;color:#ffd000;flex-shrink:0" id="pe-card-precio">$30</span>
-            </div>
-          </div>
-        </div>
-
       </div>
     </div>
 
@@ -3290,34 +3276,6 @@ document.addEventListener('keydown',function(e){
 </div>
 
 <!-- ═══ MODAL: PASE ELITE ═══ -->
-<div class="modal-ov" id="modal-paseelite">
-  <div class="modal" style="max-width:400px">
-    <div class="pm-head" style="background:linear-gradient(135deg,rgba(255,208,0,.1),rgba(34,211,238,.04))">
-      <div style="display:flex;align-items:center;gap:.65rem">
-        <div class="pm-icon" style="background:rgba(255,208,0,.15);border:1px solid rgba(255,208,0,.35);color:#ffd000"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1a2 2 0 0 0 0 4v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1a2 2 0 0 0 0-4V9z"/><path d="M13 5v2M13 11v2M13 17v2"/></svg></div>
-        <div><div class="pm-title">Pase Elite</div><div class="pm-sub">Entrega al instante</div></div>
-      </div>
-      <button class="pm-close" onclick="cerrarPaseEliteModal()">✕</button>
-    </div>
-    <div class="modal-b" style="display:flex;flex-direction:column;gap:.85rem">
-      <div style="width:100%;aspect-ratio:21/9;border-radius:14px;overflow:hidden;background-image:url('img/pase-elite.png');background-size:cover;background-position:center"></div>
-      <div style="background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:.8rem 1rem;display:flex;align-items:center;justify-content:space-between">
-        <span style="font-size:.8rem;color:#8b93a3">Precio</span>
-        <span id="pe-m-precio" style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#25d366">$30</span>
-      </div>
-      <div>
-        <div class="pm-field-label">🆔 Tu ID de Free Fire *</div>
-        <input class="finput" id="pe-m-id" type="text" inputmode="numeric" placeholder="Ej: 11655323248" style="margin-bottom:0;border-color:rgba(255,208,0,.3)"/>
-      </div>
-      <div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between">
-        <div style="font-size:.7rem;color:#6b7280">💳 Tu saldo disponible</div>
-        <div style="font-family:Oxanium;font-weight:900;font-size:1.05rem;color:#fff" id="pe-m-saldo">$0</div>
-      </div>
-      <button id="pe-submit-btn" onclick="comprarPaseElite()" class="pm-btn pm-btn--gold">Comprar Pase Elite</button>
-    </div>
-  </div>
-</div>
-
 <!-- ═══════════════════ PUBG MOBILE — UC (recarga manual) ═══════════════════ -->
 <div class="page" id="page-pubg">
   <div class="ph">
@@ -3407,40 +3365,6 @@ document.addEventListener('keydown',function(e){
       </div>
       <div class="dcat-grid" id="diam-grid"></div>
 
-      <!-- ═══ MEMBRESIAS Y PASES ═══ -->
-      <div class="dcat-head" style="margin-top:1.8rem">
-        <div class="dcat-head-ico">🎟️</div>
-        <div class="dcat-head-txt">Membres&iacute;as y Pases</div>
-      </div>
-      <div class="dcat-grid">
-
-
-        <div class="rc-card" onclick="abrirMembresia('semanal_basica')">
-          <span class="rc-badge auto">&#9889; AUTO</span>
-          <div class="rc-ico">🎫</div>
-          <div class="rc-name">Tarjeta Semanal B&aacute;sica</div>
-          <div class="rc-price" id="mem-precio-sb">$9.10</div>
-          <button class="rc-btn">Comprar</button>
-        </div>
-
-        <div class="rc-card" onclick="abrirMembresia('semanal')">
-          <span class="rc-badge auto">&#9889; AUTO</span>
-          <div class="rc-ico">🎟️</div>
-          <div class="rc-name">Tarjeta Semanal</div>
-          <div class="rc-price" id="mem-precio-s">$33</div>
-          <button class="rc-btn">Comprar</button>
-        </div>
-
-        <div class="rc-card" onclick="abrirMembresia('mensual')">
-          <span class="rc-badge auto">&#9889; AUTO</span>
-          <div class="rc-ico">🏆</div>
-          <div class="rc-name">Tarjeta Mensual</div>
-          <div class="rc-price" id="mem-precio-m">$145</div>
-          <button class="rc-btn">Comprar</button>
-        </div>
-
-      </div>
-
       <!-- Cotizar otros paquetes -->
       <div style="margin-top:1.6rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:1.2rem 1.1rem;text-align:center">
         <div style="font-family:Poppins,sans-serif;font-weight:700;font-size:.95rem;color:#fff;margin-bottom:.35rem">&iquest;Buscas otro paquete?</div>
@@ -3456,32 +3380,6 @@ document.addEventListener('keydown',function(e){
     <div id="diam-detalle" style="display:none"></div>
 
     <!-- ═══ MODAL COMPRA MEMBRESIA ═══ -->
-    <div class="modal-ov" id="modal-membresia">
-      <div class="modal" style="max-width:400px">
-        <div class="pm-head" style="background:linear-gradient(135deg,rgba(34,211,238,.1),rgba(139,92,246,.05))">
-          <div style="display:flex;align-items:center;gap:.65rem">
-            <div class="pm-icon" style="background:rgba(34,211,238,.15);border:1px solid rgba(34,211,238,.35);font-size:1.15rem" id="mem-m-icon">🎫</div>
-            <div><div class="pm-title" id="mem-m-nombre">Tarjeta</div><div class="pm-sub">Entrega autom&aacute;tica</div></div>
-          </div>
-          <button class="pm-close" onclick="cerrarMembresiaModal()">✕</button>
-        </div>
-        <div class="modal-b" style="display:flex;flex-direction:column;gap:.85rem">
-          <div style="background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:.8rem 1rem;display:flex;align-items:center;justify-content:space-between">
-            <span style="font-size:.8rem;color:#8b93a3">Precio</span>
-            <span id="mem-m-precio" style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#25d366">$0</span>
-          </div>
-          <div>
-            <div class="pm-field-label">🆔 ID de Free Fire *</div>
-            <input class="finput" id="mem-m-id" type="text" inputmode="numeric" placeholder="ID de tu cuenta" style="margin-bottom:0;border-color:rgba(34,211,238,.3)"/>
-          </div>
-          <div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between">
-            <div style="font-size:.7rem;color:#6b7280">💳 Tu saldo disponible</div>
-            <div style="font-family:Oxanium;font-weight:900;font-size:1.05rem;color:#fff" id="mem-m-saldo">$0</div>
-          </div>
-          <button id="mem-submit-btn" onclick="comprarMembresia()" class="pm-btn pm-btn--green">Comprar</button>
-        </div>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -3636,6 +3534,46 @@ document.addEventListener('keydown',function(e){
     </div>
 
   </div>
+<!-- ═══════════════════ MENÚ UNIFICADO — Tarjetas y Pase (via Catálogo Unificado) ═══════════════════ -->
+<div class="page" id="page-unificado">
+  <div class="ph">
+    <div class="stag">Cat&aacute;logo Unificado</div>
+    <h2 class="ptitle">MEN&Uacute; <span>UNIFICADO</span></h2>
+    <p class="psub">Tarjetas y Pase Booyah con el mejor proveedor disponible en tiempo real.</p>
+  </div>
+  <div style="max-width:640px;margin:0 auto;padding:0 5vw 3rem">
+    <div id="unif-catalogo" style="display:flex;flex-direction:column;gap:.65rem"></div>
+  </div>
+</div>
+
+<!-- Modal de compra Menú Unificado -->
+<div class="modal-ov" id="modal-unificado">
+  <div class="modal" style="max-width:400px">
+    <div class="pm-head" style="background:linear-gradient(135deg,rgba(139,92,246,.1),rgba(34,211,238,.04))">
+      <div style="display:flex;align-items:center;gap:.65rem">
+        <div class="pm-icon" style="background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.35);color:#a78bfa"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+        <div><div class="pm-title" id="unif-m-nombre">Producto</div><div class="pm-sub">Cat&aacute;logo Unificado</div></div>
+      </div>
+      <button class="pm-close" onclick="cerrarUnificadoModal()">✕</button>
+    </div>
+    <div class="modal-b" style="display:flex;flex-direction:column;gap:.85rem">
+      <div style="background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:.8rem 1rem;display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:.8rem;color:#8b93a3">Precio</span>
+        <span id="unif-m-precio" style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#25d366">$0</span>
+      </div>
+      <div>
+        <div class="pm-field-label">🆔 ID de Free Fire *</div>
+        <input class="finput" id="unif-m-id" type="text" inputmode="numeric" placeholder="Ej: 11655323248" style="margin-bottom:0;border-color:rgba(139,92,246,.3)"/>
+      </div>
+      <div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:.7rem;color:#6b7280">💳 Tu saldo disponible</div>
+        <div style="font-family:Oxanium;font-weight:900;font-size:1.05rem;color:#fff" id="unif-m-saldo">$0</div>
+      </div>
+      <button id="unif-submit-btn" onclick="comprarUnificado()" class="pm-btn" style="background:linear-gradient(135deg,#5b21b6,#a78bfa)">Comprar</button>
+    </div>
+  </div>
+</div>
+
 </div><div class="page" id="page-pines">
   <div class="ph">
     <div class="stag">Recargas</div>
