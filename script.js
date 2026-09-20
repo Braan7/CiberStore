@@ -7177,7 +7177,7 @@ function _getDiamProductos(tipo){
       return {
         key:(r.manual?'man_':'auto_')+(r.package_id||r.diamantes),
         nombre:r.nombre, diamantes:r.diamantes, precio:r.precio,
-        tipo:(r.manual?'manual':'auto'), package_id:r.package_id,
+        tipo:(r.manual?'manual':'auto'), package_id:r.package_id, catalog_id:r.catalog_id,
         badge:(r.manual?'MANUAL':'AUTO'),
         esPase:!!r.esPase,
         img:r.img || _imgPorDiamantes(r.diamantes)
