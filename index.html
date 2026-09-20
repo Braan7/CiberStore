@@ -2745,6 +2745,42 @@ button[style*="linear-gradient"]{
 @keyframes navItemInPremium{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
 .sidebar.open .nav-item{animation:navItemInPremium .22s ease backwards}
 .sidebar.open .nav-item:nth-child(-n+8){animation-delay:calc(.015s * var(--i,0))}
+/* ═══════════════════════════════════════════════════════════════
+   DESKTOP — la tienda (no el panel admin) aprovecha el ancho real
+   de pantalla en vez de quedar en una columna angosta de 640px.
+   Solo afecta layout/anchos: colores, textos e imágenes intactos.
+   ═══════════════════════════════════════════════════════════════ */
+@media(min-width:901px){
+  /* Contenedor raíz de cada página de la tienda */
+  .page-wrap{max-width:1400px!important;width:min(92%,1400px)!important;margin:0 auto!important}
+
+  /* Header: más aire entre logo, buscador y acciones */
+  .topbar{padding-left:1.5rem!important;padding-right:1.5rem!important}
+  .ds-search-wrap{max-width:680px!important;width:min(55vw,680px)!important}
+  #ds-search-results{max-width:680px!important;width:min(55vw,680px)!important}
+
+  /* Hero de Free Fire: se ensancha con el contenedor, ya no fijo a 640 */
+  .ds-hero{max-width:100%!important}
+
+  /* Categorías del hero y pasos: hasta 4 por fila con más espacio */
+  .ds-cat-grid{max-width:100%!important;grid-template-columns:repeat(4,1fr)!important}
+  .ds-steps,.ds-support-grid{max-width:820px!important;margin:0 auto!important}
+  .ds-soon-card{max-width:100%!important}
+
+  /* Catálogo "¿Qué quieres recargar hoy?": grid real, no una columna */
+  .svc-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:1.1rem!important}
+
+  /* Tarjeta de saldo y accesos rápidos: más ancho de maniobra */
+  .home-wrap > div[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:repeat(4,1fr)!important}
+}
+
+@media(min-width:1440px){
+  .svc-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+}
+
+@media(min-width:1200px) and (max-width:1440px){
+  .page-wrap{width:min(94%,1300px)!important}
+}
 </style>
 
 <script>
@@ -2906,7 +2942,7 @@ document.addEventListener('keydown',function(e){
 <div class="page active" id="page-home">
 
   <!-- ═══════════ DASHBOARD INICIO ═══════════ -->
-  <div style="max-width:640px;margin:0 auto;padding:1.5rem 1.15rem 0">
+  <div class="home-wrap page-wrap" style="max-width:640px;margin:0 auto;padding:1.5rem 1.15rem 0">
 
     <!-- Saludo -->
     <div style="margin-bottom:1.5rem">
@@ -3004,7 +3040,7 @@ document.addEventListener('keydown',function(e){
   </div>
 
   <!-- ═══ CÓMO COMPRAR ═══ -->
-  <div style="max-width:640px;margin:0 auto;padding:0 1.15rem 2.2rem">
+  <div class="page-wrap" style="max-width:640px;margin:0 auto;padding:0 1.15rem 2.2rem">
     <div class="ds-eyebrow"><div class="ds-eyebrow-bar"></div><div class="ds-eyebrow-txt">Proceso simple</div></div>
     <div style="font-family:Oxanium,sans-serif;font-weight:900;font-size:1.15rem;color:#fff;margin-bottom:1.1rem">C&Oacute;MO COMPRAR</div>
     <div class="ds-steps">
@@ -3015,7 +3051,7 @@ document.addEventListener('keydown',function(e){
   </div>
 
   <!-- ═══ SOPORTE ═══ -->
-  <div style="max-width:640px;margin:0 auto;padding:0 1.15rem 2.2rem">
+  <div class="page-wrap" style="max-width:640px;margin:0 auto;padding:0 1.15rem 2.2rem">
     <div class="ds-eyebrow"><div class="ds-eyebrow-bar"></div><div class="ds-eyebrow-txt">Estamos para ayudarte</div></div>
     <div style="font-family:Oxanium,sans-serif;font-weight:900;font-size:1.15rem;color:#fff;margin-bottom:.4rem">&iquest;NECESITAS AYUDA?</div>
     <div style="font-size:.8rem;color:#8b93a3;line-height:1.5;margin-bottom:1.1rem">Nuestro equipo est&aacute; disponible para ayudarte antes, durante y despu&eacute;s de tu compra.</div>
@@ -3027,7 +3063,7 @@ document.addEventListener('keydown',function(e){
   </div>
 
   <!-- ¿Eres proveedor? -->
-  <div style="max-width:640px;margin:0 auto;padding:0 1.15rem 2.2rem">
+  <div class="page-wrap" style="max-width:640px;margin:0 auto;padding:0 1.15rem 2.2rem">
     <div style="background:linear-gradient(150deg,rgba(139,92,246,.08),rgba(34,211,238,.04));border:1px solid rgba(139,92,246,.22);border-radius:20px;padding:1.4rem 1.3rem">
       <div style="display:flex;align-items:center;gap:.55rem;margin-bottom:.7rem">
         <span style="font-size:1.3rem">&#129309;</span>
@@ -3069,7 +3105,7 @@ document.addEventListener('keydown',function(e){
 </div>
 <!-- ═══════════════════ FREE FIRE — catálogo del juego ═══════════════════ -->
 <div class="page" id="page-freefire">
-  <div style="max-width:640px;margin:0 auto;padding:0 5vw 3rem">
+  <div class="page-wrap" style="max-width:640px;margin:0 auto;padding:0 5vw 3rem">
 
     <!-- Vista 1: Elegir Tienda o Cuentas -->
     <div id="ff-vista-inicio">
@@ -3283,7 +3319,7 @@ document.addEventListener('keydown',function(e){
     <h2 class="ptitle">PUBG <span>MOBILE</span></h2>
     <p class="psub">Selecciona tu paquete de UC. Entrega manual dentro de las siguientes horas.</p>
   </div>
-  <div style="max-width:640px;margin:0 auto;padding:0 5vw 3rem">
+  <div class="page-wrap" style="max-width:640px;margin:0 auto;padding:0 5vw 3rem">
     <div id="pubg-catalogo" style="display:flex;flex-direction:column;gap:.65rem"></div>
   </div>
 </div>
@@ -3541,7 +3577,7 @@ document.addEventListener('keydown',function(e){
     <h2 class="ptitle">MEN&Uacute; <span>UNIFICADO</span></h2>
     <p class="psub">Tarjetas y Pase Booyah con el mejor proveedor disponible en tiempo real.</p>
   </div>
-  <div style="max-width:640px;margin:0 auto;padding:0 5vw 3rem">
+  <div class="page-wrap" style="max-width:640px;margin:0 auto;padding:0 5vw 3rem">
     <div id="unif-catalogo" style="display:flex;flex-direction:column;gap:.65rem"></div>
   </div>
 </div>
@@ -4520,7 +4556,7 @@ document.addEventListener('keydown',function(e){
 <div class="page" id="page-creadores">
   <div class="ph"><div class="stag">Recompensas Extra</div><h2 class="ptitle">PROGRAMA DE <span>CREADORES</span></h2><p class="psub">Gana diamantes gratis por cada video en TikTok que mencione CiberStore.</p></div>
 
-  <div style="max-width:640px;margin:0 auto;padding:0 5vw 3rem">
+  <div class="page-wrap" style="max-width:640px;margin:0 auto;padding:0 5vw 3rem">
 
     <!-- Hero explicativo -->
     <div style="background:linear-gradient(135deg,rgba(255,77,166,.1),rgba(34,211,238,.06));border:1px solid rgba(255,77,166,.25);border-radius:18px;padding:1.5rem;margin-bottom:1.5rem;text-align:center">
@@ -5151,7 +5187,7 @@ document.addEventListener('keydown',function(e){
 </div>
 
 <div class="page" id="page-menu">
-  <div style="max-width:640px;margin:0 auto;padding:1.5rem 1.15rem 0">
+  <div class="page-wrap" style="max-width:640px;margin:0 auto;padding:1.5rem 1.15rem 0">
     <div style="margin-bottom:1.5rem">
       <div id="menu-hola" style="font-family:Oxanium;font-weight:700;font-size:1.7rem;color:#fff;letter-spacing:-.3px">Mi cuenta</div>
       <div style="font-size:.88rem;color:#6b7280;margin-top:.2rem">Ajustes y accesos</div>
