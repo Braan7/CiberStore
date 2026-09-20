@@ -10,15 +10,21 @@
 /* ================================================================
    TELEGRAM NOTIFICATIONS
 ================================================================ */
-var TG_TOKEN   = '8324650981:AAGFM2gHPUH1OiCXZgu2efxL9s8FDaGCFEE';
-var TG_CHAT_ID = '-1003917741824';
+/* Se envian a traves de la Edge Function notif-recarga (bright-task),
+   NO directo desde el navegador: la llamada directa exponia el token
+   del bot en el codigo publico, y ademas fallaba silenciosamente para
+   algunos clientes (bloqueadores de red / restricciones del navegador),
+   por lo que pedidos y registros dejaban de llegar. Las recargas de
+   saldo ya usaban este mismo camino y por eso nunca fallaron. */
+var NOTIF_RECARGA_URL_TG = (typeof NOTIF_RECARGA_URL !== 'undefined')
+  ? NOTIF_RECARGA_URL
+  : 'https://pnotsqsudqpwqzssevig.supabase.co/functions/v1/bright-task';
 
 function tgSend(msg){
-  /* Direct to Telegram API — Vercel Hobby blocks outgoing requests */
-  fetch('https://api.telegram.org/bot' + TG_TOKEN + '/sendMessage', {
+  fetch(NOTIF_RECARGA_URL_TG, {
     method:  'POST',
     headers: {'Content-Type': 'application/json'},
-    body:    JSON.stringify({chat_id: TG_CHAT_ID, text: msg, parse_mode: 'HTML'})
+    body:    JSON.stringify({ html_msg: msg })
   }).catch(function(){});
 }
 
