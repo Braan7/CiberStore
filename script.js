@@ -4982,11 +4982,13 @@ function loadTopDiamantes(){
       return;
     }
 
-    // Filtrar solo diamantes y sumar
+    // Filtrar solo diamantes REALMENTE completados y sumar (excluye
+    // rechazadas, en verificacion o duplicadas — nunca se entregaron).
     var agg = {};
     movs.forEach(function(m){
       var desc = (m.descripcion || '').toLowerCase();
       if(desc.indexOf('diamante') < 0) return; // solo diamantes
+      if(/verificar|rechazad|duplicad|no disponible|fallid/.test(desc)) return;
 
       var uid = m.user_id;
       if(!agg[uid]) agg[uid] = {monto: 0, diamantes: 0};
@@ -5280,11 +5282,15 @@ function loadDiamondTop(){
       return;
     }
 
-    // Agregar diamantes por usuario (solo compras de diamantes)
+    // Agregar diamantes por usuario (solo compras de diamantes REALMENTE
+    // completadas — se excluyen las rechazadas, en verificacion o duplicadas,
+    // que siguen usando la misma palabra "diamante" en su descripcion pero
+    // NUNCA se entregaron de verdad).
     var agg = {};
     movs.forEach(function(m){
       var desc = (m.descripcion || '').toLowerCase();
       if(desc.indexOf('diamante') < 0) return;
+      if(/verificar|rechazad|duplicad|no disponible|fallid/.test(desc)) return;
       var uid = m.user_id;
       if(!agg[uid]) agg[uid] = {diamonds: 0, monto: 0};
       var match = desc.match(/(\d[\d,]*)\s*diamante/);
@@ -7704,7 +7710,10 @@ function _ejecutarRecargaVerificada(p, ffId, nombre, verificationStatus, btn, ms
       }
 
       if(sinFondos){
-        // RECARGA RECHAZADA: devolver el saldo y avisar al admin con urgencia
+        // RECARGA RECHAZADA: devolver el saldo y avisar al admin con urgencia.
+        // IMPORTANTE: el mensaje a Telegram debe reflejar si el reembolso REAL
+        // se completo o no — antes se avisaba "reembolsado" sin condicion,
+        // aunque el RPC hubiera fallado, y el dinero se quedaba sin devolver.
         _rpcAjustarSaldo(authSession.id, p.precio).then(function(saldoNuevo){
           var sn = Number(saldoNuevo)||0;
           authSession.saldo = sn;
@@ -7712,10 +7721,17 @@ function _ejecutarRecargaVerificada(p, ffId, nombre, verificationStatus, btn, ms
           if(typeof saveSession==='function') saveSession(authSession);
           if(typeof sbAddMovimiento==='function') sbAddMovimiento(authSession.id, 'credito', p.precio, 'Reembolso Pedido #'+ord+' - recarga rechazada');
           if(_movCompraId) _cancelarMovPorId(_movCompraId); else { _cancelarPendiente = true; _cancelarMovimientoCompra(authSession.id, ord); }
-        }).catch(function(e){ console.error('[RECARGA] reembolso fallo:', e); });
 
-        registrarPedido(p.nombre+' (RECHAZADA - reembolsado)', p.diamantes, 'diamantes', ffId, 0, 0);
-        if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\uD83D\uDEA8 <b>RECARGA RECHAZADA - SIN FONDOS</b>\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\u2705 Saldo reembolsado al cliente ('+fmt(p.precio)+')\n\n\u26A0\uFE0F <b>RECARGA TU CUENTA DEL PROVEEDOR</b>', p.precio, ord);
+          registrarPedido(p.nombre+' (RECHAZADA - reembolsado)', p.diamantes, 'diamantes', ffId, 0, 0);
+          if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\uD83D\uDEA8 <b>RECARGA RECHAZADA - SIN FONDOS</b>\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\u2705 Saldo reembolsado al cliente ('+fmt(p.precio)+')\n\n\u26A0\uFE0F <b>RECARGA TU CUENTA DEL PROVEEDOR</b>', p.precio, ord);
+        }).catch(function(e){
+          // El reembolso NO se pudo completar — el cliente SIGUE sin su dinero.
+          // No decir "reembolsado" en Telegram: avisar con urgencia real para
+          // que el admin lo reembolse manualmente.
+          console.error('[RECARGA] reembolso fallo:', e);
+          registrarPedido(p.nombre+' (RECHAZADA - REEMBOLSO FALLIDO, REVISAR)', p.diamantes, 'diamantes', ffId, p.precio, 0);
+          if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\uD83D\uDD25 <b>URGENTE: REEMBOLSO FALLIDO</b>\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 Recarga rechazada: '+errTxt+'\n\u274C El reembolso automatico de '+fmt(p.precio)+' AL CLIENTE FALLO ('+String((e&&e.message)||e)+')\n\n\uD83D\uDEA8 <b>REEMBOLSA MANUALMENTE AL CLIENTE Y RECARGA TU CUENTA DEL PROVEEDOR</b>', p.precio, ord);
+        });
 
         if(btn){ btn.disabled=false; btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
         if(msg){ msg.className='ddet-msg'; msg.innerHTML = _rcEstadoHTML('err', 'RECARGA RECHAZADA', 'Contacta al administrador. <b style="color:#fff">Tu saldo sera reembolsado.</b>'); }
@@ -7728,7 +7744,8 @@ function _ejecutarRecargaVerificada(p, ffId, nombre, verificationStatus, btn, ms
         showToast('\u274C Recarga rechazada. Saldo reembolsado.', 5000);
         _comprandoDiam = false;
       } else if(noDisponible){
-        // La recarga NO se hizo (producto no disponible): DEVOLVER el saldo automatico
+        // La recarga NO se hizo (producto no disponible): DEVOLVER el saldo automatico.
+        // Mismo arreglo que arriba: solo avisar "devuelto" si el RPC realmente funciono.
         _rpcAjustarSaldo(authSession.id, p.precio).then(function(saldoNuevo){
           var sn = Number(saldoNuevo)||0;
           authSession.saldo = sn;
@@ -7736,10 +7753,14 @@ function _ejecutarRecargaVerificada(p, ffId, nombre, verificationStatus, btn, ms
           if(typeof saveSession==='function') saveSession(authSession);
           if(typeof sbAddMovimiento==='function') sbAddMovimiento(authSession.id, 'credito', p.precio, 'Devolucion Pedido #'+ord+' - producto no disponible');
           if(_movCompraId) _cancelarMovPorId(_movCompraId); else { _cancelarPendiente = true; _cancelarMovimientoCompra(authSession.id, ord); }
-        }).catch(function(e){ console.error('[RECARGA] devolucion fallo:', e); });
 
-        registrarPedido(p.nombre+' (AUTO - NO DISPONIBLE, devuelto)', p.diamantes, 'diamantes', ffId, 0, 0);
-        if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F NO DISPONIBLE - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\u2705 SALDO DEVUELTO automaticamente ('+fmt(p.precio)+')', p.precio, ord);
+          registrarPedido(p.nombre+' (AUTO - NO DISPONIBLE, devuelto)', p.diamantes, 'diamantes', ffId, 0, 0);
+          if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F NO DISPONIBLE - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\u2705 SALDO DEVUELTO automaticamente ('+fmt(p.precio)+')', p.precio, ord);
+        }).catch(function(e){
+          console.error('[RECARGA] devolucion fallo:', e);
+          registrarPedido(p.nombre+' (NO DISPONIBLE - DEVOLUCION FALLIDA, REVISAR)', p.diamantes, 'diamantes', ffId, p.precio, 0);
+          if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\uD83D\uDD25 <b>URGENTE: DEVOLUCION FALLIDA</b>\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 Producto no disponible: '+errTxt+'\n\u274C La devolucion automatica de '+fmt(p.precio)+' AL CLIENTE FALLO ('+String((e&&e.message)||e)+')\n\n\uD83D\uDEA8 <b>DEVUELVE MANUALMENTE AL CLIENTE</b>', p.precio, ord);
+        });
         if(btn){ btn.disabled=false; btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
         if(msg){ msg.className='ddet-msg'; msg.innerHTML = _rcEstadoHTML('err', 'NO DISPONIBLE', 'Este paquete no esta disponible para tu ID en este momento. <b style="color:#fff">Tu saldo fue devuelto.</b> Intenta de nuevo o contacta al admin.'); }
         showToast('\u274C No disponible. Saldo devuelto.', 4000);
@@ -10961,7 +10982,7 @@ function verificarPromoId(){
           + '<div style="width:60px;height:60px;margin:0 auto 1rem;border-radius:50%;background:rgba(37,211,102,.15);display:flex;align-items:center;justify-content:center"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>'
           + '<div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.1rem;color:#25d366;margin-bottom:.4rem">Disponible!</div>'
           + '<div style="font-size:.85rem;color:#9aa3b0;line-height:1.5">El ID <b style="color:#fff">' + ffId + '</b> aun puede usar promociones de 1 vez por cuenta.</div>'
-          + '<button onclick="goPage(\'tienda\')" style="margin-top:1.1rem;padding:.7rem 1.6rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:11px;font-family:Poppins;font-weight:700;font-size:.85rem;cursor:pointer">Ver ofertas</button>'
+          + '<button onclick="goPage(\'freefire\')" style="margin-top:1.1rem;padding:.7rem 1.6rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:11px;font-family:Poppins;font-weight:700;font-size:.85rem;cursor:pointer">Ver ofertas</button>'
           + '</div>';
       }
     }).catch(function(e){
