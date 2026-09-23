@@ -7672,10 +7672,13 @@ function _ejecutarRecargaVerificada(p, ffId, nombre, verificationStatus, btn, ms
       var errTxt = String(res.error||res.status||'sin confirmar');
       var errCode = String(res.code||'');
       // La Edge Function nueva devuelve un "code" explicito del proveedor
-      // (PURCHASE_FAILED, PRODUCT_INACTIVE, PROVIDER_ERROR, DUPLICATE_REQUEST).
-      // Ese code es la fuente de verdad; el regex de texto solo cubre el caso
-      // de una version vieja de la funcion que aun no mande "code".
-      var sinFondos = (errCode==='PURCHASE_FAILED' || errCode==='PRODUCT_INACTIVE') ||
+      // (PURCHASE_FAILED, PRODUCT_INACTIVE, PROVIDER_ERROR, DUPLICATE_REQUEST,
+      // ENDPOINT_DISABLED). Ese code es la fuente de verdad; el regex de texto
+      // solo cubre el caso de una version vieja de la funcion que aun no mande "code".
+      // ENDPOINT_DISABLED significa que la ruta HTTP fue rechazada ANTES de tocar
+      // el proveedor (404, ruta inexistente) — nunca se llego a cobrar nada, es
+      // igual de seguro reembolsar que con PURCHASE_FAILED/PRODUCT_INACTIVE.
+      var sinFondos = (errCode==='PURCHASE_FAILED' || errCode==='PRODUCT_INACTIVE' || errCode==='ENDPOINT_DISABLED') ||
         (!errCode && /saldo insuficiente|insufficient|fondos insuficientes|sin fondos|credito insuficiente|balance too low|no balance|limite excedido|limit exceeded/i.test(errTxt));
       var noDisponible = (!errCode && /no disponible|not available|no encontrado|not found|sin stock|out of stock/i.test(errTxt));
       // PROVIDER_ERROR: el proveedor SI fue contactado - nunca reembolsar automatico,
