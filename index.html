@@ -1538,6 +1538,7 @@ h2,h3{
 .dcat-count{font-size:.68rem;color:var(--muted);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:.12rem .5rem}
 
 .dcat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem}
+.rz-pines-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem}
 .rc-card{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;text-align:center;
   background:linear-gradient(165deg,rgba(20,40,55,.5),rgba(10,20,30,.4));
   border:1px solid rgba(34,211,238,.18);border-radius:16px;padding:1.1rem .7rem .9rem;cursor:pointer;
@@ -2776,15 +2777,22 @@ button[style*="linear-gradient"]{
   /* Diamantes FF: catálogo en más columnas en pantallas grandes, sin
      tocar el JS que las llena — solo cambia cuántas caben por fila. */
   .dcat-grid{grid-template-columns:repeat(3,1fr)!important;gap:1rem!important}
+
+  /* Pines de Free Fire (Zona Revendedores): mismo tratamiento que Diamantes */
+  .rz-pines-grid{grid-template-columns:repeat(3,1fr)!important;gap:1rem!important}
+  .rz-mayoreo-grid{display:grid!important;grid-template-columns:repeat(2,1fr)!important;gap:.8rem!important}
 }
 
 @media(min-width:1200px){
   .dcat-grid{grid-template-columns:repeat(4,1fr)!important}
+  .rz-pines-grid{grid-template-columns:repeat(4,1fr)!important}
 }
 
 @media(min-width:600px) and (max-width:900px){
   .dcat-grid{grid-template-columns:repeat(3,1fr)!important}
   .diam-mem-grid{display:grid!important;grid-template-columns:repeat(2,1fr)!important;gap:1rem!important}
+  .rz-pines-grid{grid-template-columns:repeat(2,1fr)!important;gap:.8rem!important}
+  .rz-mayoreo-grid{display:grid!important;grid-template-columns:repeat(2,1fr)!important;gap:.8rem!important}
 }
 
 @media(min-width:901px){
@@ -3703,7 +3711,7 @@ document.addEventListener('keydown',function(e){
     <p class="psub">Precios especiales para revendedores. Entrega automática 24/7.</p>
   </div>
 
-  <div style="max-width:600px;margin:0 auto;padding:0 1.1rem 2.5rem">
+  <div class="page-wrap" style="max-width:600px;margin:0 auto;padding:0 1.1rem 2.5rem">
 
     <!-- Hero revendedor -->
     <div class="rz-hero">
@@ -3749,7 +3757,7 @@ document.addEventListener('keydown',function(e){
           </div>
 
           <!-- Grid de pines (se llena desde JS) -->
-          <div id="pines-grid" style="display:flex;flex-direction:column;gap:.6rem;margin:1rem 0">
+          <div id="pines-grid" class="rz-mayoreo-grid" style="display:flex;flex-direction:column;gap:.6rem;margin:1rem 0">
             <div style="text-align:center;padding:2rem;color:var(--muted);font-size:.82rem">Cargando pines disponibles...</div>
           </div>
         </div>
