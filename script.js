@@ -1,6 +1,6 @@
 /* CiberStore v1779504760 */
 /* \u2500\u2500 DATA \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-var WA = '12894273983';
+var WA = '573180051415';
 
 /* Fallback if supabase_integration.js not loaded yet */
 if(typeof getSpent === 'undefined'){
@@ -6304,9 +6304,7 @@ var PINES_API = [
 function renderPinesAPI(){
   var cont = document.getElementById('pines-api-grid');
   if(!cont) return;
-  cont.style.display = 'grid';
-  cont.style.gridTemplateColumns = 'repeat(2,1fr)';
-  cont.style.gap = '.7rem';
+  cont.className = 'rz-pines-grid';
   var html = '';
   PINES_API.forEach(function(p){
     var precioMXN = ('$'+p.precio);
