@@ -1538,7 +1538,13 @@ h2,h3{
 .dcat-count{font-size:.68rem;color:var(--muted);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:.12rem .5rem}
 
 .dcat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem}
-.rz-pines-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem}
+.rz-pines-grid{display:flex;flex-direction:column;gap:.75rem}
+.fragu-productos-grid{display:block}
+.clanes-grid{display:block}
+.clanes-grid > div{margin-bottom:1.5rem}
+.clanes-grid > div:last-child{margin-bottom:0}
+.cuentas-ff-grid{display:flex;flex-direction:column;gap:1rem}
+.tienda-ff-grid{display:flex;flex-direction:column;gap:1rem}
 .rc-card{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;text-align:center;
   background:linear-gradient(165deg,rgba(20,40,55,.5),rgba(10,20,30,.4));
   border:1px solid rgba(34,211,238,.18);border-radius:16px;padding:1.1rem .7rem .9rem;cursor:pointer;
@@ -2055,18 +2061,39 @@ button[style*="linear-gradient"]{
 @keyframes lkspin{to{transform:rotate(360deg)}}
 
 /* ═══════════ ZONA REVENDEDORES premium ═══════════ */
-.rz-hero{position:relative;overflow:hidden;border-radius:20px;padding:1.5rem 1.3rem;margin-bottom:1rem;
-  background:linear-gradient(150deg,rgba(34,211,238,.12),rgba(8,145,178,.05) 60%,rgba(15,20,30,.5));
-  border:1px solid rgba(34,211,238,.3);box-shadow:0 12px 36px rgba(14,116,144,.16)}
-.rz-hero::before{content:"";position:absolute;top:-40%;right:-12%;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(34,211,238,.25),transparent 65%);pointer-events:none}
-.rz-tag{display:inline-flex;align-items:center;gap:.4rem;background:rgba(34,211,238,.15);border:1px solid rgba(34,211,238,.4);color:#67e8f9;font-family:Oxanium,sans-serif;font-weight:800;font-size:.6rem;letter-spacing:1px;padding:.3rem .7rem;border-radius:99px;margin-bottom:.9rem}
-.rz-info{display:flex;gap:.5rem;margin-bottom:1.4rem}
-.rz-info-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:.3rem;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:13px;padding:.75rem .4rem;text-align:center}
-.rz-info-ico{font-size:1.1rem}
-.rz-info-txt{font-size:.62rem;color:#9aa4b2;font-weight:600;line-height:1.25}
-.rz-tabs{display:flex;gap:.4rem;background:rgba(0,0,0,.3);padding:.3rem;border-radius:13px;margin-bottom:1.2rem;border:1px solid rgba(255,255,255,.05)}
-.rz-tab{flex:1;padding:.6rem;background:transparent;border:none;color:#6b7280;border-radius:10px;font-family:Oxanium,sans-serif;font-weight:800;font-size:.72rem;letter-spacing:.5px;cursor:pointer;transition:all .2s}
-.rz-tab.on{background:linear-gradient(135deg,#22d3ee,#0891b2);color:#04222b;box-shadow:0 4px 14px rgba(34,211,238,.3)}
+.rz-hero{position:relative;overflow:hidden;border-radius:22px;padding:1.7rem 1.5rem;margin-bottom:1.2rem;
+  background:linear-gradient(160deg,rgba(255,180,40,.14) 0%,rgba(120,70,10,.08) 45%,rgba(10,12,18,.65) 100%);
+  border:1px solid rgba(255,180,40,.32);box-shadow:0 18px 44px rgba(120,70,10,.22),inset 0 1px 0 rgba(255,255,255,.06)}
+.rz-hero::before{content:"";position:absolute;top:-45%;right:-15%;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(255,180,40,.28),transparent 65%);pointer-events:none}
+.rz-hero::after{content:"";position:absolute;bottom:-30%;left:-10%;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(255,208,0,.14),transparent 70%);pointer-events:none}
+.rz-tag{display:inline-flex;align-items:center;gap:.4rem;background:linear-gradient(135deg,rgba(255,180,40,.22),rgba(255,208,0,.1));border:1px solid rgba(255,190,60,.5);color:#ffd76b;font-family:Oxanium,sans-serif;font-weight:800;font-size:.62rem;letter-spacing:1.3px;padding:.4rem .85rem;border-radius:99px;margin-bottom:1.1rem;box-shadow:0 2px 10px rgba(255,180,40,.15)}
+.rz-info{display:flex;gap:.6rem;margin-bottom:1.5rem}
+.rz-info-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:.4rem;background:linear-gradient(165deg,rgba(255,255,255,.035),rgba(255,255,255,.008));border:1px solid rgba(255,180,40,.16);border-radius:15px;padding:.9rem .5rem;text-align:center;transition:border-color .2s,transform .2s}
+.rz-info-item:hover{border-color:rgba(255,180,40,.4);transform:translateY(-2px)}
+.rz-info-ico{width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:rgba(255,180,40,.12);font-size:1.05rem}
+.rz-info-txt{font-size:.64rem;color:#a8adb8;font-weight:700;line-height:1.3;letter-spacing:.1px}
+.rz-tabs{display:flex;gap:.35rem;background:rgba(0,0,0,.35);padding:.35rem;border-radius:15px;margin-bottom:1.4rem;border:1px solid rgba(255,255,255,.06);box-shadow:inset 0 1px 4px rgba(0,0,0,.3)}
+.rz-tab{flex:1;padding:.7rem;background:transparent;border:none;color:#6b7280;border-radius:11px;font-family:Oxanium,sans-serif;font-weight:800;font-size:.74rem;letter-spacing:.6px;cursor:pointer;transition:all .25s}
+.rz-tab:hover{color:#c9ced8}
+.rz-tab.on{background:linear-gradient(135deg,#e8a317,#ffcc00);color:#241900;box-shadow:0 6px 18px rgba(255,180,40,.35),inset 0 1px 0 rgba(255,255,255,.25)}
+
+/* ═══ Tarjetas de PIN individual (Zona Revendedores → Diamantes) ═══ */
+.pinv-card{position:relative;display:flex;align-items:center;gap:1rem;
+  background:linear-gradient(150deg,rgba(255,255,255,.035),rgba(255,255,255,.01));
+  border:1px solid rgba(255,180,40,.2);border-radius:17px;padding:.9rem 1.1rem .9rem .9rem;
+  cursor:pointer;transition:border-color .22s,transform .22s,box-shadow .22s}
+.pinv-card:hover,.pinv-card:active{border-color:rgba(255,190,60,.5);transform:translateY(-2px);box-shadow:0 10px 26px rgba(0,0,0,.35),0 0 20px rgba(255,180,40,.1)}
+.pinv-img{width:58px;height:58px;flex-shrink:0;border-radius:13px;overflow:hidden;background:#0d0a05;border:1px solid rgba(255,180,40,.22);display:flex;align-items:center;justify-content:center}
+.pinv-img img{width:100%;height:100%;object-fit:contain;padding:4px}
+.pinv-ico{font-size:1.7rem}
+.pinv-body{flex:1;min-width:0}
+.pinv-name{font-family:Poppins,sans-serif;font-weight:700;font-size:.85rem;color:#f0f1f4;line-height:1.25;margin-bottom:.3rem}
+.pinv-meta{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.pinv-price{font-family:Oxanium,sans-serif;font-weight:900;font-size:1.05rem;color:#ffcc33}
+.pinv-min{font-size:.62rem;color:#ffb84d;font-weight:700;background:rgba(255,180,40,.1);border:1px solid rgba(255,180,40,.28);border-radius:99px;padding:.12rem .5rem}
+.pinv-badge{position:absolute;top:-8px;left:.9rem;font-family:Oxanium,sans-serif;font-size:.5rem;font-weight:800;letter-spacing:.4px;padding:.16rem .5rem;border-radius:7px;background:linear-gradient(135deg,#00c896,#00e676);color:#012b1a;box-shadow:0 3px 10px rgba(0,230,118,.35)}
+.pinv-arrow{flex-shrink:0;width:30px;height:30px;border-radius:9px;background:rgba(255,180,40,.08);border:1px solid rgba(255,180,40,.18);display:flex;align-items:center;justify-content:center;color:#ffb84d;transition:background .2s}
+.pinv-card:hover .pinv-arrow{background:rgba(255,180,40,.18)}
 .rz-prod{position:relative;overflow:hidden;display:flex;align-items:center;gap:.9rem;
   background:linear-gradient(160deg,rgba(34,211,238,.05),rgba(20,26,36,.6));
   border:1px solid rgba(34,211,238,.2);border-radius:16px;padding:1rem 1.1rem;transition:transform .22s,border-color .22s,box-shadow .22s}
@@ -2778,21 +2805,37 @@ button[style*="linear-gradient"]{
      tocar el JS que las llena — solo cambia cuántas caben por fila. */
   .dcat-grid{grid-template-columns:repeat(3,1fr)!important;gap:1rem!important}
 
-  /* Pines de Free Fire (Zona Revendedores): mismo tratamiento que Diamantes */
-  .rz-pines-grid{grid-template-columns:repeat(3,1fr)!important;gap:1rem!important}
+  /* Pines de Free Fire (Zona Revendedores): tarjetas horizontales, una sola columna en todos los tamaños */
   .rz-mayoreo-grid{display:grid!important;grid-template-columns:repeat(2,1fr)!important;gap:.8rem!important}
+
+  /* Fragmentos por Regalo: las 2 tarjetas de producto lado a lado */
+  .fragu-productos-grid{display:grid!important;grid-template-columns:repeat(2,1fr)!important;gap:1rem!important}
+
+  /* Clanes NVL 7: tarjetas grandes en 2 columnas cuando hay mas de una */
+  .clanes-grid{display:grid!important;grid-template-columns:repeat(2,1fr)!important;gap:1.2rem!important}
+  .clanes-grid > div{margin-bottom:0!important}
+
+  /* Cuentas NVL [1-30] (Free Fire → Cuentas): las 2 tarjetas lado a lado */
+  .cuentas-ff-grid{display:grid!important;grid-template-columns:repeat(2,1fr)!important;gap:1.2rem!important}
+
+  /* Tienda (Free Fire → Tienda): 5 tarjetas en 2 columnas */
+  .tienda-ff-grid{display:grid!important;grid-template-columns:repeat(2,1fr)!important;gap:1.2rem!important}
 }
 
 @media(min-width:1200px){
   .dcat-grid{grid-template-columns:repeat(4,1fr)!important}
-  .rz-pines-grid{grid-template-columns:repeat(4,1fr)!important}
+  .tienda-ff-grid{grid-template-columns:repeat(3,1fr)!important}
 }
 
 @media(min-width:600px) and (max-width:900px){
   .dcat-grid{grid-template-columns:repeat(3,1fr)!important}
   .diam-mem-grid{display:grid!important;grid-template-columns:repeat(2,1fr)!important;gap:1rem!important}
-  .rz-pines-grid{grid-template-columns:repeat(2,1fr)!important;gap:.8rem!important}
   .rz-mayoreo-grid{display:grid!important;grid-template-columns:repeat(2,1fr)!important;gap:.8rem!important}
+  .fragu-productos-grid{display:grid!important;grid-template-columns:repeat(2,1fr)!important;gap:1rem!important}
+  .clanes-grid{display:grid!important;grid-template-columns:repeat(2,1fr)!important;gap:1rem!important}
+  .clanes-grid > div{margin-bottom:0!important}
+  .cuentas-ff-grid{display:grid!important;grid-template-columns:repeat(2,1fr)!important;gap:1rem!important}
+  .tienda-ff-grid{display:grid!important;grid-template-columns:repeat(2,1fr)!important;gap:1rem!important}
 }
 
 @media(min-width:901px){
@@ -2937,7 +2980,7 @@ document.addEventListener('keydown',function(e){
   <div class="user-pill" id="user-pill" onclick="goPage('perfil')" style="display:none"><div class="user-pill-av" id="user-pill-av">?</div></div>
   <button class="cart-btn" onclick="openCart()" title="Carrito">&#128722;<div class="cart-count" id="cart-count">0</div></button>
   <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Cambiar tema">&#127763;</button>
-  <a href="https://wa.me/12894273983" target="_blank" class="btn-wa">&#128222; WhatsApp</a>
+  <a href="https://wa.me/573180051415" target="_blank" class="btn-wa">&#128222; WhatsApp</a>
 </div>
 <div style="padding:.5rem 5vw;max-width:1050px;margin:0 auto;position:relative" id="search-wrap">
   <div class="search-bar-wrap">
@@ -3081,7 +3124,7 @@ document.addEventListener('keydown',function(e){
     <div style="font-family:Oxanium,sans-serif;font-weight:900;font-size:1.15rem;color:#fff;margin-bottom:.4rem">&iquest;NECESITAS AYUDA?</div>
     <div style="font-size:.8rem;color:#8b93a3;line-height:1.5;margin-bottom:1.1rem">Nuestro equipo est&aacute; disponible para ayudarte antes, durante y despu&eacute;s de tu compra.</div>
     <div class="ds-support-grid">
-      <a href="https://wa.me/12894273983" target="_blank" class="ds-support-btn"><div class="ds-support-ico">&#128172;</div><div><div style="font-weight:700;font-size:.85rem;color:#fff">WhatsApp</div><div style="font-size:.72rem;color:#8b93a3">Respuesta en menos de 5 min</div></div></a>
+      <a href="https://wa.me/573180051415" target="_blank" class="ds-support-btn"><div class="ds-support-ico">&#128172;</div><div><div style="font-weight:700;font-size:.85rem;color:#fff">WhatsApp</div><div style="font-size:.72rem;color:#8b93a3">Respuesta en menos de 5 min</div></div></a>
       <div class="ds-support-btn" onclick="goPage('soporte')"><div class="ds-support-ico">&#127911;</div><div><div style="font-weight:700;font-size:.85rem;color:#fff">Centro de Soporte</div><div style="font-size:.72rem;color:#8b93a3">Chat directo desde tu cuenta</div></div></div>
       <div class="ds-support-btn" onclick="goPage('faq')"><div class="ds-support-ico">&#10067;</div><div><div style="font-weight:700;font-size:.85rem;color:#fff">Preguntas frecuentes</div><div style="font-size:.72rem;color:#8b93a3">Respuestas al instante</div></div></div>
     </div>
@@ -3101,7 +3144,7 @@ document.addEventListener('keydown',function(e){
         <span class="prov-tag">&#127925; TikTok Coins</span>
         <span class="prov-tag">&#127760; Otras plataformas</span>
       </div>
-      <a href="https://wa.me/12894273983" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:.85rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border-radius:13px;font-family:Poppins;font-weight:700;font-size:.85rem;text-decoration:none">&#128172; Contactar al privado</a>
+      <a href="https://wa.me/573180051415" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:.85rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border-radius:13px;font-family:Poppins;font-weight:700;font-size:.85rem;text-decoration:none">&#128172; Contactar al privado</a>
     </div>
   </div>
 
@@ -3179,7 +3222,7 @@ document.addEventListener('keydown',function(e){
         <div style="font-family:Oxanium,sans-serif;font-weight:900;font-size:1.35rem;color:#fff;letter-spacing:-.3px">TIENDA</div>
         <div style="font-size:.8rem;color:#8b93a3;margin-top:.15rem">Pases, tokens y cajas</div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:1rem">
+      <div class="tienda-ff-grid" style="display:flex;flex-direction:column;gap:1rem">
 
         <div class="ff-acc-card" onclick="goPage('diamantes')">
           <div class="ff-acc-img" style="background-image:url('img/diamantes-ilimitados.png');aspect-ratio:21/9">
@@ -3268,7 +3311,7 @@ document.addEventListener('keydown',function(e){
         <div style="font-size:.8rem;color:#8b93a3;margin-top:.15rem">Cuentas con pase de nivel listas para entregar</div>
       </div>
 
-      <div style="display:flex;flex-direction:column;gap:1rem">
+      <div class="cuentas-ff-grid" style="display:flex;flex-direction:column;gap:1rem">
         <div class="ff-acc-card" onclick="abrirCuentaRandom('1-15')">
           <div class="ff-acc-img" style="background-image:url('img/cuenta-nvl-1-15.png')">
             <span class="ff-acc-badge">NIVEL ALEATORIO</span>
@@ -3716,17 +3759,17 @@ document.addEventListener('keydown',function(e){
     <!-- Hero revendedor -->
     <div class="rz-hero">
       <div style="position:relative;z-index:2">
-        <div class="rz-tag">&#10003; ACCESO PARA REVENDEDORES</div>
-        <div style="font-family:Oxanium,sans-serif;font-size:1.15rem;font-weight:900;color:#22d3ee;letter-spacing:.5px">Precios de revendedor</div>
-        <div style="font-size:.8rem;color:#c9d1e0;margin-top:.35rem;line-height:1.5">Obtén mejores precios y compra diamantes con entrega automática directa a tu ID.</div>
+        <div class="rz-tag"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:-1px"><path d="M20 6 9 17l-5-5"/></svg> ACCESO PARA REVENDEDORES</div>
+        <div style="font-family:Oxanium,sans-serif;font-size:1.3rem;font-weight:900;color:#ffd76b;letter-spacing:.3px;text-shadow:0 2px 16px rgba(255,180,40,.25)">Precios de revendedor</div>
+        <div style="font-size:.82rem;color:#c9ced8;margin-top:.4rem;line-height:1.55;max-width:340px">Obt&eacute;n mejores precios y compra diamantes con entrega autom&aacute;tica directa a tu ID.</div>
       </div>
     </div>
 
     <!-- Barra de beneficios -->
     <div class="rz-info">
-      <div class="rz-info-item"><span class="rz-info-ico">&#9889;</span><span class="rz-info-txt">Entrega<br>automática</span></div>
-      <div class="rz-info-item"><span class="rz-info-ico">&#128176;</span><span class="rz-info-txt">Precios de<br>revendedor</span></div>
-      <div class="rz-info-item"><span class="rz-info-ico">&#128274;</span><span class="rz-info-txt">Pagos<br>seguros</span></div>
+      <div class="rz-info-item"><span class="rz-info-ico">&#9889;</span><span class="rz-info-txt">Entrega<br>autom&aacute;tica</span></div>
+      <div class="rz-info-item"><span class="rz-info-ico">&#128176;</span><span class="rz-info-txt">Precio de<br>revendedor</span></div>
+      <div class="rz-info-item"><span class="rz-info-ico">&#128274;</span><span class="rz-info-txt">Pago<br>seguro</span></div>
     </div>
 
     <!-- Tabs de categorías -->
@@ -3737,77 +3780,94 @@ document.addEventListener('keydown',function(e){
 
     <!-- Grid de productos (diamantes) -->
     <div id="rz-sec-diamantes">
-      <div id="pines-api-grid" style="display:flex;flex-direction:column;gap:.7rem">
+      <div id="pines-api-grid" style="display:flex;flex-direction:column;gap:.75rem">
         <div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Cargando...</div>
       </div>
-      <div style="display:flex;justify-content:space-between;background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.18);border-radius:11px;padding:.7rem 1rem;margin-top:1rem"><span style="font-size:.76rem;color:var(--muted)">Tu saldo disponible</span><span id="pin-api-saldo" style="font-family:Oxanium,sans-serif;font-weight:800;color:#22d3ee;font-size:.95rem">$0 MX</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,rgba(255,180,40,.09),rgba(255,180,40,.03));border:1px solid rgba(255,180,40,.25);border-radius:14px;padding:.85rem 1.1rem;margin-top:1.1rem">
+        <span style="font-size:.76rem;color:#a8adb8;font-weight:600">Tu saldo disponible</span>
+        <span id="pin-api-saldo" style="font-family:Oxanium,sans-serif;font-weight:900;color:#ffcc33;font-size:1rem">$0 MX</span>
+      </div>
     </div>
 
     <!-- Sección MAYOREO (oculta por defecto) -->
     <div id="rz-sec-mayoreo" style="display:none">
-      <div style="background:linear-gradient(135deg,#1a1408,#0d0a05);border:1px solid rgba(255,204,0,.28);border-radius:16px;padding:1.3rem 1.15rem;position:relative;overflow:hidden">
-        <div style="position:absolute;top:-30%;right:-10%;width:280px;height:280px;background:radial-gradient(circle,rgba(255,204,0,.1) 0%,transparent 70%);pointer-events:none"></div>
+      <div style="background:linear-gradient(155deg,#1f1608,#0c0906 65%);border:1px solid rgba(255,204,0,.24);border-radius:19px;padding:1.5rem 1.3rem;position:relative;overflow:hidden;box-shadow:0 16px 40px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.04)">
+        <div style="position:absolute;top:-35%;right:-12%;width:300px;height:300px;background:radial-gradient(circle,rgba(255,204,0,.1) 0%,transparent 70%);pointer-events:none"></div>
         <div style="position:relative;z-index:2">
-          <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem">
-            <span style="font-size:1.5rem">&#127915;</span>
+          <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem">
+            <div style="width:44px;height:44px;flex-shrink:0;border-radius:13px;background:linear-gradient(145deg,rgba(255,204,0,.18),rgba(255,204,0,.05));border:1px solid rgba(255,204,0,.3);display:flex;align-items:center;justify-content:center;font-size:1.35rem">&#127915;</div>
             <div>
-              <div style="font-family:Oxanium;font-size:1rem;font-weight:900;color:#ffcc00;letter-spacing:.5px">PINES AL POR MAYOR</div>
-              <div style="font-size:.72rem;color:var(--muted)">Compra varios PINes al instante (hasta 10)</div>
+              <div style="font-family:Oxanium;font-size:1.05rem;font-weight:900;color:#ffd76b;letter-spacing:.4px">PINES AL POR MAYOR</div>
+              <div style="font-size:.74rem;color:#9aa0ab">Compra varios PINes al instante (hasta 10)</div>
             </div>
           </div>
 
           <!-- Grid de pines (se llena desde JS) -->
-          <div id="pines-grid" class="rz-mayoreo-grid" style="display:flex;flex-direction:column;gap:.6rem;margin:1rem 0">
+          <div id="pines-grid" class="rz-mayoreo-grid" style="display:flex;flex-direction:column;gap:.65rem;margin:1.2rem 0">
             <div style="text-align:center;padding:2rem;color:var(--muted);font-size:.82rem">Cargando pines disponibles...</div>
           </div>
         </div>
 
         <!-- Formulario compra -->
-        <div style="border-top:1px solid rgba(255,204,0,.15);padding-top:1rem">
-          <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem">Comprar con saldo</div>
-          <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Elige tu PIN</label>
-          <select id="pin-plan" onchange="_updatePinTotal()" style="width:100%;background:#1a1408;border:1px solid rgba(255,204,0,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Poppins,sans-serif;font-size:.88rem;margin-bottom:.65rem;box-sizing:border-box">
+        <div style="position:relative;z-index:2;border-top:1px solid rgba(255,204,0,.14);padding-top:1.2rem">
+          <div style="font-size:.68rem;color:#8b93a3;text-transform:uppercase;letter-spacing:1.4px;font-weight:800;margin-bottom:.75rem">Comprar con saldo</div>
+
+          <label style="font-size:.68rem;color:#9aa0ab;font-weight:700;display:block;margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.6px">Elige tu PIN</label>
+          <select id="pin-plan" onchange="_updatePinTotal()" style="width:100%;background:#161009;border:1.5px solid rgba(255,204,0,.22);color:#fff;border-radius:12px;padding:.75rem .9rem;font-family:Poppins,sans-serif;font-size:.88rem;margin-bottom:.9rem;box-sizing:border-box;transition:border-color .2s">
             <option value="">Cargando...</option>
           </select>
-          <label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Cantidad <span style="color:#ffb84d">(minimo 3)</span></label>
-          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.65rem">
-            <button onclick="_cambiarCantPin(-1)" style="width:38px;height:38px;background:rgba(255,204,0,.1);border:1px solid rgba(255,204,0,.25);color:#ffcc00;border-radius:9px;font-size:1.2rem;font-weight:700;cursor:pointer">&minus;</button>
-            <input id="pin-cantidad" type="number" value="3" min="3" onchange="_updatePinTotal()" style="flex:1;text-align:center;background:#1a1408;border:1px solid rgba(255,204,0,.25);color:#fff;border-radius:9px;padding:.6rem;font-family:Oxanium;font-weight:700;font-size:1rem;box-sizing:border-box"/>
-            <button onclick="_cambiarCantPin(1)" style="width:38px;height:38px;background:rgba(255,204,0,.1);border:1px solid rgba(255,204,0,.25);color:#ffcc00;border-radius:9px;font-size:1.2rem;font-weight:700;cursor:pointer">+</button>
+
+          <label style="font-size:.68rem;color:#9aa0ab;font-weight:700;display:block;margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.6px">Cantidad <span style="color:#ffb84d;text-transform:none;font-weight:600">(m&iacute;nimo 3)</span></label>
+          <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.85rem">
+            <button onclick="_cambiarCantPin(-1)" style="width:42px;height:42px;flex-shrink:0;background:rgba(255,204,0,.1);border:1.5px solid rgba(255,204,0,.28);color:#ffcc00;border-radius:11px;font-size:1.25rem;font-weight:700;cursor:pointer;transition:background .2s">&minus;</button>
+            <input id="pin-cantidad" type="number" value="3" min="3" onchange="_updatePinTotal()" style="flex:1;text-align:center;background:#161009;border:1.5px solid rgba(255,204,0,.22);color:#fff;border-radius:11px;padding:.7rem;font-family:Oxanium;font-weight:800;font-size:1.05rem;box-sizing:border-box"/>
+            <button onclick="_cambiarCantPin(1)" style="width:42px;height:42px;flex-shrink:0;background:rgba(255,204,0,.1);border:1.5px solid rgba(255,204,0,.28);color:#ffcc00;border-radius:11px;font-size:1.25rem;font-weight:700;cursor:pointer;transition:background .2s">+</button>
           </div>
-          <div style="font-size:.64rem;color:var(--muted);text-align:center;margin-bottom:.65rem;line-height:1.6">&#127881; Descuentos: <b style="color:#25d366">3-4</b>=1% &middot; <b style="color:#25d366">5-6</b>=2% &middot; <b style="color:#25d366">7</b>=3% &middot; <b style="color:#25d366">8-9</b>=4% &middot; <b style="color:#25d366">10</b>=5%</div>
-          <div id="pin-descuento-row" style="display:none;justify-content:space-between;align-items:center;background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.25);border-radius:8px;padding:.45rem .85rem;margin-bottom:.4rem"><span style="font-size:.72rem;color:#25d366">&#127881; Descuento por volumen</span><span id="pin-descuento-val" style="font-family:Oxanium;font-weight:700;color:#25d366;font-size:.82rem">-0%</span></div>
-          <div style="display:flex;justify-content:space-between;background:rgba(255,204,0,.06);border:1px solid rgba(255,204,0,.18);border-radius:8px;padding:.45rem .85rem;margin-bottom:.5rem"><span style="font-size:.72rem;color:var(--muted)">Total a pagar</span><span id="pin-total-val" style="font-family:Oxanium;font-weight:700;color:#ffcc00;font-size:.82rem">$0 MX</span></div>
-          <div style="display:flex;justify-content:space-between;background:rgba(255,204,0,.06);border:1px solid rgba(255,204,0,.18);border-radius:8px;padding:.45rem .85rem;margin-bottom:.5rem"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span id="pin-saldo-val" style="font-family:Oxanium;font-weight:700;color:#ffcc00;font-size:.82rem">$0 MX</span></div>
-          <div id="pin-err" style="display:none;color:#ff6b6b;font-size:.75rem;margin-bottom:.5rem"></div>
-          <button onclick="submitPinSaldo()" style="width:100%;padding:.78rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:10px;font-family:Poppins,sans-serif;font-weight:900;font-size:.9rem;cursor:pointer">&#128274; Comprar y recibir PIN</button>
-          <div style="text-align:center;font-size:.68rem;color:var(--muted);margin-top:.6rem">Si hay algún error, contacta al admin 👇</div>
-          <a href="https://wa.me/12894273983?text=Hola!%20Tuve%20un%20problema%20con%20mi%20compra%20de%20PIN%20de%20Free%20Fire" target="_blank" style="display:block;text-align:center;margin-top:.4rem;color:#25d366;font-size:.78rem;font-weight:700;text-decoration:none">💬 Contactar al admin por WhatsApp</a>
+
+          <div style="display:flex;justify-content:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.9rem">
+            <span style="font-size:.62rem;color:#6b7280;font-weight:700;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:99px;padding:.22rem .6rem">3-4 &middot; <b style="color:#25d366">1%</b></span>
+            <span style="font-size:.62rem;color:#6b7280;font-weight:700;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:99px;padding:.22rem .6rem">5-6 &middot; <b style="color:#25d366">2%</b></span>
+            <span style="font-size:.62rem;color:#6b7280;font-weight:700;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:99px;padding:.22rem .6rem">7 &middot; <b style="color:#25d366">3%</b></span>
+            <span style="font-size:.62rem;color:#6b7280;font-weight:700;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:99px;padding:.22rem .6rem">8-9 &middot; <b style="color:#25d366">4%</b></span>
+            <span style="font-size:.62rem;color:#6b7280;font-weight:700;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:99px;padding:.22rem .6rem">10 &middot; <b style="color:#25d366">5%</b></span>
+          </div>
+
+          <div id="pin-descuento-row" style="display:none;justify-content:space-between;align-items:center;background:linear-gradient(135deg,rgba(37,211,102,.1),rgba(37,211,102,.03));border:1px solid rgba(37,211,102,.28);border-radius:11px;padding:.6rem .9rem;margin-bottom:.5rem"><span style="font-size:.74rem;color:#25d366;font-weight:700">&#127881; Descuento por volumen</span><span id="pin-descuento-val" style="font-family:Oxanium;font-weight:800;color:#25d366;font-size:.85rem">-0%</span></div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,rgba(255,204,0,.08),rgba(255,204,0,.02));border:1px solid rgba(255,204,0,.22);border-radius:11px;padding:.7rem 1rem;margin-bottom:.55rem"><span style="font-size:.75rem;color:#a8adb8;font-weight:600">Total a pagar</span><span id="pin-total-val" style="font-family:Oxanium;font-weight:900;color:#ffcc00;font-size:1rem">$0 MX</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:.7rem 1rem;margin-bottom:.7rem"><span style="font-size:.75rem;color:#a8adb8;font-weight:600">Tu saldo</span><span id="pin-saldo-val" style="font-family:Oxanium;font-weight:800;color:#fff;font-size:.9rem">$0 MX</span></div>
+
+          <div id="pin-err" style="display:none;color:#ff6b6b;font-size:.78rem;font-weight:600;margin-bottom:.65rem;background:rgba(255,60,60,.08);border:1px solid rgba(255,60,60,.25);border-radius:10px;padding:.6rem .85rem"></div>
+
+          <button onclick="submitPinSaldo()" style="width:100%;padding:.95rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:13px;font-family:Poppins,sans-serif;font-weight:800;font-size:.92rem;cursor:pointer;box-shadow:0 8px 24px rgba(37,211,102,.28);transition:filter .2s" onmouseover="this.style.filter='brightness(1.08)'" onmouseout="this.style.filter='none'">&#128274; Comprar y recibir PIN</button>
+
+          <div style="text-align:center;font-size:.7rem;color:#6b7280;margin-top:.75rem">Si hay alg&uacute;n error, contacta al admin &#128071;</div>
+          <a href="https://wa.me/573180051415?text=Hola!%20Tuve%20un%20problema%20con%20mi%20compra%20de%20PIN%20de%20Free%20Fire" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.4rem;margin-top:.5rem;color:#25d366;font-size:.8rem;font-weight:700;text-decoration:none">&#128172; Contactar al admin por WhatsApp</a>
         </div>
       </div>
     </div>
 
     <!-- PIN entregado (aparece tras compra exitosa) -->
-    <div id="pin-entregado" style="display:none;background:linear-gradient(135deg,#0a1f14,#0a0a0a);border:2px solid rgba(0,230,118,.4);border-radius:16px;padding:1.5rem 1.25rem;text-align:center;margin-bottom:1.5rem">
-      <div style="font-size:2.5rem;margin-bottom:.5rem">✅</div>
-      <div style="font-family:Oxanium;font-size:1rem;font-weight:900;color:#00e676;margin-bottom:.5rem">¡PIN ENTREGADO!</div>
-      <div style="font-size:.8rem;color:var(--muted);margin-bottom:.85rem">Tu código PIN es:</div>
-      <div id="pin-codigo" onclick="_seleccionarPin(this)" style="background:#04120a;border:1px dashed rgba(0,230,118,.5);border-radius:10px;padding:1rem;font-family:'Courier New',monospace;font-size:.9rem;font-weight:700;color:#fff;letter-spacing:1px;word-break:break-all;white-space:pre-wrap;text-align:left;max-height:280px;overflow:auto;margin-bottom:.85rem;-webkit-user-select:all;user-select:all;cursor:pointer">----</div>
-      <button onclick="copiarPin()" style="padding:.6rem 1.5rem;background:rgba(0,230,118,.15);border:1px solid rgba(0,230,118,.4);color:#00e676;border-radius:9px;font-family:Poppins,sans-serif;font-weight:800;font-size:.82rem;cursor:pointer">📋 Copiar código</button>
+    <div id="pin-entregado" style="display:none;background:linear-gradient(160deg,#0b1f15,#070a08);border:1.5px solid rgba(0,230,118,.38);border-radius:19px;padding:1.7rem 1.4rem;text-align:center;margin-bottom:1.5rem;box-shadow:0 16px 40px rgba(0,0,0,.4),0 0 30px rgba(0,230,118,.08)">
+      <div style="width:60px;height:60px;margin:0 auto .8rem;border-radius:50%;background:linear-gradient(145deg,rgba(0,230,118,.18),rgba(0,230,118,.04));border:1.5px solid rgba(0,230,118,.4);display:flex;align-items:center;justify-content:center;font-size:1.8rem">&#9989;</div>
+      <div style="font-family:Oxanium;font-size:1.1rem;font-weight:900;color:#00e676;margin-bottom:.55rem;letter-spacing:.3px">&iexcl;PIN ENTREGADO!</div>
+      <div style="font-size:.82rem;color:#9aa0ab;margin-bottom:1rem">Tu c&oacute;digo PIN es:</div>
+      <div id="pin-codigo" onclick="_seleccionarPin(this)" style="background:#03150c;border:1.5px dashed rgba(0,230,118,.45);border-radius:12px;padding:1.1rem;font-family:'Courier New',monospace;font-size:.92rem;font-weight:700;color:#fff;letter-spacing:1px;word-break:break-all;white-space:pre-wrap;text-align:left;max-height:280px;overflow:auto;margin-bottom:1rem;-webkit-user-select:all;user-select:all;cursor:pointer;box-shadow:inset 0 2px 8px rgba(0,0,0,.3)">----</div>
+      <button onclick="copiarPin()" style="padding:.7rem 1.7rem;background:linear-gradient(135deg,rgba(0,230,118,.18),rgba(0,230,118,.08));border:1.5px solid rgba(0,230,118,.4);color:#00e676;border-radius:11px;font-family:Poppins,sans-serif;font-weight:800;font-size:.84rem;cursor:pointer;transition:background .2s">&#128203; Copiar c&oacute;digo</button>
 
       <!-- Instrucciones de canje -->
-      <div style="background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:10px;padding:1rem;margin-top:1rem;text-align:left">
-        <div style="font-family:Oxanium;font-size:.75rem;font-weight:900;color:#22d3ee;letter-spacing:.5px;margin-bottom:.5rem">📲 ¿CÓMO CANJEAR TU PIN?</div>
-        <div style="font-size:.78rem;color:var(--text);line-height:1.7">
-          1️⃣ Copia tu código de arriba<br>
-          2️⃣ Entra a la página de canje<br>
-          3️⃣ Pega el PIN y mete tu ID de Free Fire<br>
-          4️⃣ ¡Listo! Tus diamantes llegan a tu cuenta
+      <div style="background:linear-gradient(150deg,rgba(34,211,238,.07),rgba(34,211,238,.015));border:1px solid rgba(34,211,238,.22);border-radius:14px;padding:1.15rem;margin-top:1.2rem;text-align:left">
+        <div style="font-family:Oxanium;font-size:.78rem;font-weight:900;color:#22d3ee;letter-spacing:.4px;margin-bottom:.6rem">&#128241; &#191;C&Oacute;MO CANJEAR TU PIN?</div>
+        <div style="font-size:.8rem;color:#c9ced8;line-height:1.8">
+          1&#65039;&#8419; Copia tu c&oacute;digo de arriba<br>
+          2&#65039;&#8419; Entra a la p&aacute;gina de canje<br>
+          3&#65039;&#8419; Pega el PIN y mete tu ID de Free Fire<br>
+          4&#65039;&#8419; &iexcl;Listo! Tus diamantes llegan a tu cuenta
         </div>
-        <a href="https://redeempins.com/" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:.75rem;margin-top:.85rem;background:linear-gradient(90deg,#22d3ee,#0891b2);color:#fff;border-radius:9px;font-family:Oxanium,sans-serif;font-weight:900;font-size:.82rem;text-decoration:none;box-sizing:border-box">🎁 IR A CANJEAR MI PIN</a>
+        <a href="https://redeempins.com/" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:.85rem;margin-top:.9rem;background:linear-gradient(90deg,#0e7490,#22d3ee);color:#04151a;border-radius:11px;font-family:Oxanium,sans-serif;font-weight:900;font-size:.84rem;text-decoration:none;box-sizing:border-box;box-shadow:0 6px 18px rgba(34,211,238,.25)">&#127873; IR A CANJEAR MI PIN</a>
       </div>
 
-      <div style="font-size:.68rem;color:var(--muted);margin-top:.75rem">Guárdalo bien. También quedó en "Mis Compras".</div>
+      <div style="font-size:.7rem;color:#6b7280;margin-top:.85rem">Gu&aacute;rdalo bien. Tambi&eacute;n qued&oacute; en "Mis Compras".</div>
     </div>
 
   </div>
@@ -3895,7 +3955,8 @@ document.addEventListener('keydown',function(e){
   </div>
 </div><div class="page" id="page-honor">
   <div class="ph"><div class="stag">Clan - Free Fire</div><h2 class="ptitle">&#127942; HONOR DE <span>CLAN</span></h2><p class="psub">Selecciona tu region. Entrega rapida garantizada.</p></div>
-  <div style="max-width:700px;margin:0 auto;padding:0 5vw 3rem">
+  <div class="page-wrap" style="max-width:700px;margin:0 auto;padding:0 5vw 3rem">
+    <div style="max-width:520px;margin:0 auto">
     <div class="pm-field-label" style="margin-bottom:.6rem">&#128737;&#65039; Regi&oacute;n de cuentas</div>
 
     <div class="honor-region-select" id="honor-region-select" onclick="toggleHonorRegionDrop()">
@@ -3948,6 +4009,7 @@ document.addEventListener('keydown',function(e){
     </div>
 
     <button class="pm-btn pm-btn--gold" style="font-size:.92rem;padding:1rem" onclick="lanzarGrupoHonor()">&#9889; Grupo inicial ($260 MX)</button>
+    </div>
   </div>
 </div>
 <div class="page" id="page-membresia">
@@ -4337,7 +4399,7 @@ document.addEventListener('keydown',function(e){
         &#9314; El sistema genera tu token automaticamente<br/>
         &#9315; Copialo y pegalo en el formulario de pedido
       </div>
-      <a href="https://wa.me/12894273983?text=Hola%2C%20necesito%20ayuda%20para%20obtener%20mi%20token%20de%20Free%20Fire" target="_blank" style="display:inline-flex;align-items:center;gap:.45rem;margin-top:.85rem;padding:.55rem 1.1rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:6px;font-family:'Poppins';font-weight:800;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none">
+      <a href="https://wa.me/573180051415?text=Hola%2C%20necesito%20ayuda%20para%20obtener%20mi%20token%20de%20Free%20Fire" target="_blank" style="display:inline-flex;align-items:center;gap:.45rem;margin-top:.85rem;padding:.55rem 1.1rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:6px;font-family:'Poppins';font-weight:800;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none">
         &#128222; Preguntame como obtenerlo
       </a>
     </div>
@@ -4747,8 +4809,8 @@ document.addEventListener('keydown',function(e){
     <p class="psub">Clanes de alto nivel y honor, listos para ti.</p>
   </div>
 
-  <div style="max-width:620px;margin:0 auto;padding:0 5vw 3rem">
-    <div id="clanes-lista"></div>
+  <div class="page-wrap" style="max-width:620px;margin:0 auto;padding:0 5vw 3rem">
+    <div id="clanes-lista" class="clanes-grid"></div>
   </div>
 </div>
 
@@ -5566,22 +5628,25 @@ document.addEventListener('keydown',function(e){
     <p class="psub">Se entregan mediante regalo en el juego. Compra la cantidad que necesites.</p>
   </div>
 
-  <div style="max-width:520px;margin:0 auto;padding:0 5vw 3rem">
+  <div class="page-wrap" style="max-width:520px;margin:0 auto;padding:0 5vw 3rem">
 
     <!-- FUERA DE SERVICIO -->
-    <div id="fragu-mantenimiento" style="background:linear-gradient(160deg,rgba(255,180,60,.08),rgba(255,255,255,.01));border:1px solid rgba(255,180,60,.28);border-radius:18px;padding:2.2rem 1.5rem;text-align:center;margin-top:1.2rem">
+    <div id="fragu-mantenimiento" style="background:linear-gradient(160deg,rgba(255,180,60,.08),rgba(255,255,255,.01));border:1px solid rgba(255,180,60,.28);border-radius:18px;padding:2.2rem 1.5rem;text-align:center;margin-top:1.2rem;max-width:520px;margin-left:auto;margin-right:auto">
       <div style="font-size:3rem;margin-bottom:.7rem">&#128679;</div>
       <div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.2rem;color:#ffb84d;margin-bottom:.5rem">Fuera de servicio</div>
       <div style="font-size:.85rem;color:#9aa3b0;line-height:1.6;max-width:320px;margin:0 auto 1.3rem">Los fragmentos y cajas estan temporalmente fuera de servicio. Escribenos por WhatsApp si necesitas ayuda con tu pedido.</div>
       <button onclick="goPage('freefire')" style="padding:.8rem 1.8rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:12px;font-family:Poppins;font-weight:600;font-size:.88rem;cursor:pointer">Volver a la tienda</button>
     </div>
 
-    <div id="fragu-contenido" style="display:none">
+    <div id="fragu-contenido" style="display:none;max-width:640px;margin:0 auto">
     <!-- TU ID -->
     <div style="background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:1.2rem;margin-bottom:1.3rem">
       <label style="font-size:.72rem;color:#6b7280;letter-spacing:1px;display:block;margin-bottom:.5rem">TU ID DE FREE FIRE</label>
       <input id="fragu-id" type="text" placeholder="Ej: 273968086" style="width:100%;box-sizing:border-box;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);color:#fff;border-radius:12px;padding:.9rem 1rem;font-family:Poppins,sans-serif;font-size:1rem;outline:none"/>
     </div>
+
+    <!-- Tarjetas de producto: en fila desde tablet en adelante -->
+    <div class="fragu-productos-grid">
 
     <!-- CAJA DE FRAGMENTOS -->
     <div style="background:linear-gradient(160deg,rgba(0,245,255,.05),rgba(255,255,255,.015));border:1px solid rgba(0,245,255,.22);border-radius:18px;padding:1.3rem;margin-bottom:1rem">
@@ -5621,6 +5686,8 @@ document.addEventListener('keydown',function(e){
       </div>
     </div>
 
+    </div>
+
     <!-- TOTAL Y COMPRAR -->
     <div style="background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:1.2rem;margin-bottom:1rem">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
@@ -5638,6 +5705,54 @@ document.addEventListener('keydown',function(e){
   </div>
 </div>
 
+
+<!-- ═══ MODAL: COMPRAR PIN INDIVIDUAL (Zona Revendedores → Diamantes) ═══ -->
+<div class="modal-ov" id="modal-pinapi">
+  <div class="modal" style="max-width:400px;border-color:rgba(255,180,40,.22)">
+    <div class="pm-head" style="background:linear-gradient(135deg,rgba(255,180,40,.13),rgba(255,208,0,.04))">
+      <div style="display:flex;align-items:center;gap:.65rem">
+        <div class="pm-icon" style="background:linear-gradient(145deg,rgba(255,180,40,.2),rgba(255,180,40,.06));border:1px solid rgba(255,190,60,.4);color:#ffcc33"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10v4M5 12h4M15 11h.01M17.5 13h.01"/></svg></div>
+        <div><div class="pm-title" id="pinapi-m-nombre">Pin de Diamantes</div><div class="pm-sub">Entrega autom&aacute;tica &middot; C&oacute;digo PIN</div></div>
+      </div>
+      <button class="pm-close" onclick="cerrarPinApiModal()">✕</button>
+    </div>
+    <div class="modal-b" style="display:flex;flex-direction:column;gap:.9rem">
+
+      <div style="width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:linear-gradient(150deg,#12100a,#0a0805);border:1px solid rgba(255,180,40,.22);display:flex;align-items:center;justify-content:center">
+        <img id="pinapi-m-img" src="" alt="" style="width:82%;height:82%;object-fit:contain" onerror="this.style.display='none'"/>
+      </div>
+
+      <div style="background:linear-gradient(135deg,rgba(255,180,40,.08),rgba(255,180,40,.02));border:1px solid rgba(255,180,40,.2);border-radius:13px;padding:.85rem 1.05rem;display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:.78rem;color:#a8adb8;font-weight:600">Precio por pin</span>
+        <span id="pinapi-m-precio-unit" style="font-family:Oxanium;font-weight:900;font-size:1.15rem;color:#ffcc33">$0</span>
+      </div>
+
+      <div>
+        <div class="pm-field-label" id="pinapi-m-cant-label" style="color:#c9ced8">Cantidad *</div>
+        <div style="display:flex;align-items:center;gap:.75rem">
+          <button type="button" onclick="_pinApiCant(-1)" onmouseover="this.style.background='rgba(255,180,40,.2)'" onmouseout="this.style.background='rgba(255,180,40,.1)'" style="width:44px;height:44px;flex-shrink:0;border-radius:12px;background:rgba(255,180,40,.1);border:1.5px solid rgba(255,180,40,.28);color:#ffcc33;font-size:1.2rem;font-weight:900;cursor:pointer;transition:background .2s">−</button>
+          <input class="finput" id="pinapi-m-cant" type="number" min="1" value="1" readonly style="text-align:center;font-family:Oxanium;font-weight:900;font-size:1.15rem;margin-bottom:0;border-color:rgba(255,180,40,.28);background:rgba(255,180,40,.04)"/>
+          <button type="button" onclick="_pinApiCant(1)" onmouseover="this.style.background='rgba(255,180,40,.2)'" onmouseout="this.style.background='rgba(255,180,40,.1)'" style="width:44px;height:44px;flex-shrink:0;border-radius:12px;background:rgba(255,180,40,.1);border:1.5px solid rgba(255,180,40,.28);color:#ffcc33;font-size:1.2rem;font-weight:900;cursor:pointer;transition:background .2s">+</button>
+        </div>
+        <div id="pinapi-m-min-aviso" style="display:none;font-size:.72rem;color:#ffb84d;font-weight:600;margin-top:.55rem;background:rgba(255,180,40,.07);border:1px solid rgba(255,180,40,.2);border-radius:9px;padding:.5rem .7rem">&#9888;&#65039; Este producto requiere un m&iacute;nimo de <b id="pinapi-m-min-num">2</b> pines por compra.</div>
+      </div>
+
+      <div style="background:linear-gradient(135deg,rgba(255,208,0,.1),rgba(255,180,40,.03));border:1px solid rgba(255,204,0,.28);border-radius:14px;padding:1rem;text-align:center">
+        <div style="font-size:.72rem;color:#a8adb8;font-weight:600;letter-spacing:.3px">TOTAL A PAGAR</div>
+        <div style="font-family:Oxanium;font-weight:900;font-size:1.55rem;color:#ffcc00;margin-top:.15rem" id="pinapi-m-total">$0</div>
+      </div>
+
+      <div style="background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:.72rem;color:#6b7280;font-weight:600">💳 Tu saldo disponible</div>
+        <div style="font-family:Oxanium;font-weight:900;font-size:1.05rem;color:#fff" id="pinapi-m-saldo">$0</div>
+      </div>
+
+      <div id="pinapi-m-err" style="display:none;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.3);color:#ff6b6b;border-radius:10px;padding:.7rem .9rem;font-size:.8rem;font-weight:600"></div>
+
+      <button id="pinapi-submit-btn" onclick="confirmarCompraPinApi()" class="pm-btn" style="background:linear-gradient(135deg,#e8a317,#ffcc00);color:#241900;box-shadow:0 8px 22px rgba(255,180,40,.3)">Confirmar compra</button>
+    </div>
+  </div>
+</div>
 
 <div class="modal-ov" id="modal-cart">
   <div class="modal">
