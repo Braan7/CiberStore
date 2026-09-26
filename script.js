@@ -178,9 +178,10 @@ var LIKES = [
 var SERVICES = [
   // ── Videojuegos ──
   { nombre:'Free Fire', categoria:'videojuegos', descripcion:'Diamantes, pases y mas', tipoRecarga:'Diamantes', icono:'\uD83D\uDD25', imagen:'img/freefire-hero.png', estado:'disponible', ruta:'freefire' },
-  { nombre:'PUBG Mobile', categoria:'videojuegos', descripcion:'UC y contenido exclusivo', tipoRecarga:'UC', icono:'\uD83E\uDE96', imagen:'img/pubg-mobile.jpg', estado:'disponible', ruta:'pubg' },
+  { nombre:'PUBG', categoria:'videojuegos', descripcion:'Monedas G para PC (Steam) &middot; Mobile en construccion', tipoRecarga:'Monedas', icono:'\uD83E\uDE96', imagen:'img/pubg-hero.png', estado:'disponible', ruta:'pubg' },
   { nombre:'COD Mobile', categoria:'videojuegos', descripcion:'CP y paquetes de batalla', tipoRecarga:'CP', icono:'\u2694\uFE0F', imagen:'img/codm.jpg', estado:'buscando_proveedor', ruta:null },
   { nombre:'Roblox', categoria:'videojuegos', descripcion:'Robux y contenido digital', tipoRecarga:'Robux', icono:'\uD83D\uDFE9', imagen:'img/roblox.jpg', estado:'proximamente', ruta:null },
+  { nombre:'Delta Force', categoria:'videojuegos', descripcion:'Monedas Delta y paquetes', tipoRecarga:'Monedas', icono:'\uD83E\uDD85', imagen:'img/delta-force-hero.png', estado:'disponible', ruta:'deltaforce' },
   { nombre:'Mobile Legends', categoria:'videojuegos', descripcion:'Diamantes y skins', tipoRecarga:'Diamantes', icono:'\uD83C\uDFAE', imagen:'', estado:'buscando_proveedor', ruta:null },
   { nombre:'Brawl Stars', categoria:'videojuegos', descripcion:'Gemas y contenido', tipoRecarga:'Gemas', icono:'\uD83D\uDCA5', imagen:'', estado:'buscando_proveedor', ruta:null },
   { nombre:'Clash of Clans', categoria:'videojuegos', descripcion:'Gemas y constructor', tipoRecarga:'Gemas', icono:'\uD83C\uDFF0', imagen:'', estado:'buscando_proveedor', ruta:null },
@@ -949,7 +950,8 @@ function goPage(id){
   if(id==='pase') setTimeout(_paseReiniciar, 100);
   if(id==='soporte') setTimeout(sopVolverLista, 100);
   if(id==='freefire') setTimeout(function(){ ffVolverInicio(); _refrescarPreciosCuentasRandom(); }, 100);
-  if(id==='pubg') setTimeout(renderPubgCatalogo, 100);
+  if(id==='pubg') setTimeout(function(){ renderPubgPcCatalogo(); setPubgTab('pc'); }, 100);
+  if(id==='deltaforce') setTimeout(function(){ renderDeltaCatalogo(); setDeltaTab('monedas'); }, 100);
   if(id==='saldo') setTimeout(function(){ recSetMoneda('MXN'); _recTipo=null; recLimpiarTipo(); }, 100);
   if(id==='sobre') setTimeout(function(){ sobreTab('resenas'); }, 100);
   if(id==='likes') renderLikes();
@@ -1958,74 +1960,245 @@ function comprarCuentaRandom(){
   });
 }
 
-// ═══════════════════ PUBG MOBILE — UC (recarga manual, sin API) ═══════════════════
-var _pubgIdxActual = null;
-var _comprandoPubg = false;
+// ═══════════════════ PUBG — Mobile (en construccion) y PC/Steam (Monedas G) ═══════════════════
+// precio ya esta en MXN (convertido desde USD a USD_MXN=17 vigente al cargarlo)
+var PUBGPC_MONEDAS = [
+  { nombre:'1,050 Monedas G',  precio:204 },
+  { nombre:'2,700 Monedas G',  precio:442 },
+  { nombre:'5,500 Monedas G',  precio:850 },
+  { nombre:'11,200 Monedas G', precio:1649 }
+];
+var _pubgTabActual = 'pc';
+var _pubgpcIdxActual = null;
+var _comprandoPubgPc = false;
 
-function renderPubgCatalogo(){
-  var cont = document.getElementById('pubg-catalogo');
+function setPubgTab(tab){
+  _pubgTabActual = tab;
+  var btnM = document.getElementById('ptab-mobile');
+  var btnP = document.getElementById('ptab-pc');
+  var contM = document.getElementById('pubg-tab-mobile');
+  var contP = document.getElementById('pubg-tab-pc');
+  if(tab === 'mobile'){
+    if(btnM){ btnM.style.background = 'linear-gradient(90deg,#a3860a,#ffd000)'; btnM.style.color = '#1a0f00'; }
+    if(btnP){ btnP.style.background = 'transparent'; btnP.style.color = '#8b93a3'; }
+    if(contM) contM.style.display = 'block';
+    if(contP) contP.style.display = 'none';
+  } else {
+    if(btnP){ btnP.style.background = 'linear-gradient(90deg,#a3860a,#ffd000)'; btnP.style.color = '#1a0f00'; }
+    if(btnM){ btnM.style.background = 'transparent'; btnM.style.color = '#8b93a3'; }
+    if(contP) contP.style.display = 'flex';
+    if(contM) contM.style.display = 'none';
+  }
+}
+
+function renderPubgPcCatalogo(){
+  var cont = document.getElementById('pubgpc-catalogo');
   if(!cont) return;
-  cont.innerHTML = PUBG_UC.map(function(u, i){
-    return '<div class="ds-cat-card" style="flex-direction:row;align-items:center;text-align:left;padding:1.1rem 1.2rem;gap:1rem" onclick="abrirPubgModal('+i+')">'
-      + '<span class="ds-cat-ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ffb84d" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>'
-      + '<div style="flex:1"><div class="ds-cat-name" style="font-size:.92rem">'+u.nombre+'</div><div class="ds-cat-sub" style="font-size:.72rem">Entrega manual</div></div>'
+  cont.innerHTML = PUBGPC_MONEDAS.map(function(u, i){
+    return '<div class="ds-cat-card" style="flex-direction:row;align-items:center;text-align:left;padding:1.1rem 1.2rem;gap:1rem" onclick="abrirPubgPcModal('+i+')">'
+      + '<span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffb84d" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10v4M5 12h4M15 11h.01M17.5 13h.01"/></svg></span>'
+      + '<div style="flex:1"><div class="ds-cat-name" style="font-size:.92rem">'+u.nombre+'</div><div class="ds-cat-sub" style="font-size:.72rem;color:#67e8f9">&#127917; Se entrega c&oacute;digo</div></div>'
       + '<span style="font-family:Oxanium;font-weight:800;font-size:1rem;color:#ffb84d;flex-shrink:0">'+fmt(u.precio)+'</span>'
       + '</div>';
   }).join('');
 }
 
-function abrirPubgModal(idx){
+function abrirPubgPcModal(idx){
   if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
-  var u = PUBG_UC[idx];
+  var u = PUBGPC_MONEDAS[idx];
   if(!u) return;
-  _pubgIdxActual = idx;
+  _pubgpcIdxActual = idx;
 
-  var ov = document.getElementById('modal-pubg');
-  document.getElementById('pubg-m-nombre').textContent = u.nombre;
-  document.getElementById('pubg-m-precio').textContent = fmt(u.precio);
-  document.getElementById('pubg-m-id').value = '';
-  document.getElementById('pubg-m-saldo').textContent = fmt(authSession.saldo||0);
+  var ov = document.getElementById('modal-pubgpc');
+  document.getElementById('pubgpc-m-nombre').textContent = u.nombre;
+  document.getElementById('pubgpc-m-precio').textContent = fmt(u.precio);
+  document.getElementById('pubgpc-m-saldo').textContent = fmt(authSession.saldo||0);
   if(ov) ov.classList.add('show');
 }
 
-function cerrarPubgModal(){
-  var ov = document.getElementById('modal-pubg');
+function cerrarPubgPcModal(){
+  var ov = document.getElementById('modal-pubgpc');
   if(ov) ov.classList.remove('show');
 }
 
-function comprarPubgUC(){
-  if(_comprandoPubg || _pubgIdxActual === null) return;
-  var u = PUBG_UC[_pubgIdxActual];
+// Sin campo de ID: este producto se entrega mediante codigo, no a un jugador especifico.
+function comprarPubgPC(){
+  if(_comprandoPubgPc || _pubgpcIdxActual === null) return;
+  var u = PUBGPC_MONEDAS[_pubgpcIdxActual];
   if(!u) return;
-  var playerId = ((document.getElementById('pubg-m-id')||{}).value||'').trim();
-  if(!playerId){ showToast('Ingresa tu ID de jugador PUBG Mobile'); return; }
 
-  _comprandoPubg = true;
-  var btn = document.getElementById('pubg-submit-btn');
+  _comprandoPubgPc = true;
+  var btn = document.getElementById('pubgpc-submit-btn');
   if(btn){ btn.disabled = true; btn.textContent = 'Verificando saldo...'; }
 
   verificarSaldoFresco(u.precio, function(alcanza, saldoReal){
-    document.getElementById('pubg-m-saldo').textContent = fmt(saldoReal);
+    document.getElementById('pubgpc-m-saldo').textContent = fmt(saldoReal);
     if(!alcanza){
       showToast('Saldo insuficiente. Tienes '+fmt(saldoReal)+' y necesitas '+fmt(u.precio), 3500);
       if(btn){ btn.disabled = false; btn.textContent = 'Comprar'; }
-      _comprandoPubg = false;
-      setTimeout(function(){ cerrarPubgModal(); goPage('saldo'); }, 1500);
+      _comprandoPubgPc = false;
+      setTimeout(function(){ cerrarPubgPcModal(); goPage('saldo'); }, 1500);
       return;
     }
 
     var ord = getNextOrder();
-    addSpend(u.precio, 'PUBG Mobile '+u.nombre+' - ID:'+playerId+' - Pedido #'+ord);
-    registrarPedido('PUBG Mobile '+u.nombre, u.uc, 'pubg_uc', playerId, u.precio, 0);
+    addSpend(u.precio, 'PUBG PC (Steam) '+u.nombre+' - Pedido #'+ord);
+    registrarPedido('PUBG PC (Steam) '+u.nombre, 1, 'pubgpc_codigo', '', u.precio, 0);
     if(typeof tgNotifyPurchase === 'function'){
-      tgNotifyPurchase(authSession.username, '\uD83C\uDFAE PUBG Mobile - '+u.nombre+'\n\uD83C\uDD94 ID jugador: '+playerId+'\n\u26A0\uFE0F Recarga MANUAL, procesar y acreditar', u.precio, ord);
+      tgNotifyPurchase(authSession.username, '\uD83C\uDFAE PUBG PC (Steam) - '+u.nombre+'\n\uD83C\uDFAB Se entrega mediante CODIGO\n\u26A0\uFE0F Procesar y enviar codigo al cliente', u.precio, ord);
     }
 
     setTimeout(function(){
-      _comprandoPubg = false;
+      _comprandoPubgPc = false;
       if(btn){ btn.disabled = false; btn.textContent = 'Comprar'; }
       if(typeof _refreshSaldoUI === 'function') _refreshSaldoUI(authSession.saldo||0);
-      cerrarPubgModal();
+      cerrarPubgPcModal();
+      showToast('\u2705 Pedido #'+ord+' confirmado! Tu codigo se procesa manualmente.', 4500);
+    }, 800);
+  });
+}
+
+// ═══════════════════ DELTA FORCE — Monedas y Paquetes (recarga manual) ═══════════════════
+// precio ya esta en MXN (convertido desde USD a USD_MXN=17 vigente al cargarlo)
+var DELTA_MONEDAS = [
+  { nombre:'320 Monedas Delta',    precio:68 },
+  { nombre:'460 Monedas Delta',    precio:103.70 },
+  { nombre:'750 Monedas Delta',    precio:137.70 },
+  { nombre:'1,480 Monedas Delta',  precio:289 },
+  { nombre:'1,980 Monedas Delta',  precio:374 },
+  { nombre:'3,950 Monedas Delta',  precio:680 },
+  { nombre:'8,100 Monedas Delta',  precio:1343 },
+  { nombre:'16,200 Monedas Delta', precio:2652 },
+  { nombre:'24,300 Monedas Delta', precio:3978 }
+];
+var DELTA_PAQUETES = [
+  { nombre:'BHD - Paquete G\u00e9nesis',                    precio:45.90 },
+  { nombre:'BHD - Redefine Bundle',                    precio:76.50 },
+  { nombre:'Paquete Black Hawk Down',                  precio:374 },
+  { nombre:'Paquete Resplandor Marino',                precio:722.50 },
+  { nombre:'Paquete Joyride',                          precio:374 },
+  { nombre:'Paquete Spacewalk',                         precio:374 },
+  { nombre:'Suministros Silent Sentinel',               precio:10.88 },
+  { nombre:'Suministros Silent Sentinel - Avanzados',   precio:34.85 },
+  { nombre:'Paquete Sombras Plateadas',                 precio:374 }
+];
+var _deltaTabActual = 'monedas';
+var _deltaCatActual = null; // 'monedas' | 'paquetes'
+var _deltaIdxActual = null;
+var _comprandoDelta = false;
+
+function setDeltaTab(tab){
+  _deltaTabActual = tab;
+  var btnM = document.getElementById('dtab-monedas');
+  var btnP = document.getElementById('dtab-paquetes');
+  var contM = document.getElementById('delta-catalogo-monedas');
+  var contP = document.getElementById('delta-catalogo-paquetes');
+  if(tab === 'monedas'){
+    if(btnM){ btnM.style.background = 'linear-gradient(90deg,#a3860a,#ffd000)'; btnM.style.color = '#1a0f00'; }
+    if(btnP){ btnP.style.background = 'transparent'; btnP.style.color = '#8b93a3'; }
+    if(contM) contM.style.display = 'flex';
+    if(contP) contP.style.display = 'none';
+  } else {
+    if(btnP){ btnP.style.background = 'linear-gradient(90deg,#a3860a,#ffd000)'; btnP.style.color = '#1a0f00'; }
+    if(btnM){ btnM.style.background = 'transparent'; btnM.style.color = '#8b93a3'; }
+    if(contP) contP.style.display = 'flex';
+    if(contM) contM.style.display = 'none';
+  }
+}
+
+function renderDeltaCatalogo(){
+  var contM = document.getElementById('delta-catalogo-monedas');
+  var contP = document.getElementById('delta-catalogo-paquetes');
+  if(contM){
+    contM.innerHTML = DELTA_MONEDAS.map(function(u, i){
+      return '<div class="ds-cat-card" style="flex-direction:row;align-items:center;text-align:left;padding:1.1rem 1.2rem;gap:1rem" onclick="abrirDeltaModal(\'monedas\','+i+')">'
+        + '<span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffd000" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v2M12 15v2M9 9.5a3 3 0 0 1 3-1.5c1.5 0 3 .8 3 2s-1.5 1.5-3 2-3 .8-3 2 1.5 2 3 2a3 3 0 0 0 3-1.5"/></svg></span>'
+        + '<div style="flex:1"><div class="ds-cat-name" style="font-size:.92rem">'+u.nombre+'</div><div class="ds-cat-sub" style="font-size:.72rem">Entrega manual</div></div>'
+        + '<span style="font-family:Oxanium;font-weight:800;font-size:1rem;color:#ffd000;flex-shrink:0">'+fmt(u.precio)+'</span>'
+        + '</div>';
+    }).join('');
+  }
+  if(contP){
+    contP.innerHTML = DELTA_PAQUETES.map(function(u, i){
+      return '<div class="ds-cat-card" style="flex-direction:row;align-items:center;text-align:left;padding:1.1rem 1.2rem;gap:1rem" onclick="abrirDeltaModal(\'paquetes\','+i+')">'
+        + '<span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#67e8f9" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg></span>'
+        + '<div style="flex:1"><div class="ds-cat-name" style="font-size:.92rem">'+u.nombre+'</div><div class="ds-cat-sub" style="font-size:.72rem">Entrega manual</div></div>'
+        + '<span style="font-family:Oxanium;font-weight:800;font-size:1rem;color:#67e8f9;flex-shrink:0">'+fmt(u.precio)+'</span>'
+        + '</div>';
+    }).join('');
+  }
+}
+
+function abrirDeltaModal(categoria, idx){
+  if(!authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal,600); return; }
+  var lista = (categoria === 'monedas') ? DELTA_MONEDAS : DELTA_PAQUETES;
+  var u = lista[idx];
+  if(!u) return;
+  _deltaCatActual = categoria;
+  _deltaIdxActual = idx;
+
+  var ov = document.getElementById('modal-deltaforce');
+  document.getElementById('delta-m-nombre').textContent = u.nombre;
+  document.getElementById('delta-m-precio').textContent = fmt(u.precio);
+  document.getElementById('delta-m-id').value = '';
+  document.getElementById('delta-m-saldo').textContent = fmt(authSession.saldo||0);
+  var resumen = document.getElementById('delta-resumen');
+  if(resumen) resumen.style.display = 'none';
+  if(ov) ov.classList.add('show');
+}
+
+function cerrarDeltaModal(){
+  var ov = document.getElementById('modal-deltaforce');
+  if(ov) ov.classList.remove('show');
+}
+
+// Actualiza el resumen (producto + ID) en vivo mientras el usuario escribe,
+// tal como pide el flujo: mostrar resumen del producto y el ID introducido.
+function _actualizarResumenDelta(){
+  var lista = (_deltaCatActual === 'monedas') ? DELTA_MONEDAS : DELTA_PAQUETES;
+  var u = lista && _deltaIdxActual!=null ? lista[_deltaIdxActual] : null;
+  var idVal = ((document.getElementById('delta-m-id')||{}).value||'').trim();
+  var resumen = document.getElementById('delta-resumen');
+  if(!resumen || !u) return;
+  if(!idVal){ resumen.style.display = 'none'; return; }
+  resumen.style.display = 'block';
+  resumen.innerHTML = '<b style="color:#ffd000">Resumen del pedido</b><br/>Producto: <b style="color:#fff">'+u.nombre+'</b><br/>Precio: <b style="color:#fff">'+fmt(u.precio)+'</b><br/>ID de Delta Force: <b style="color:#fff">'+idVal+'</b>';
+}
+
+function comprarDeltaForce(){
+  if(_comprandoDelta || _deltaIdxActual === null) return;
+  var lista = (_deltaCatActual === 'monedas') ? DELTA_MONEDAS : DELTA_PAQUETES;
+  var u = lista[_deltaIdxActual];
+  if(!u) return;
+  var playerId = ((document.getElementById('delta-m-id')||{}).value||'').trim();
+  if(!playerId){ showToast('Ingresa tu ID de Delta Force'); return; }
+
+  _comprandoDelta = true;
+  var btn = document.getElementById('delta-submit-btn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Verificando saldo...'; }
+
+  verificarSaldoFresco(u.precio, function(alcanza, saldoReal){
+    document.getElementById('delta-m-saldo').textContent = fmt(saldoReal);
+    if(!alcanza){
+      showToast('Saldo insuficiente. Tienes '+fmt(saldoReal)+' y necesitas '+fmt(u.precio), 3500);
+      if(btn){ btn.disabled = false; btn.textContent = 'Comprar'; }
+      _comprandoDelta = false;
+      setTimeout(function(){ cerrarDeltaModal(); goPage('saldo'); }, 1500);
+      return;
+    }
+
+    var ord = getNextOrder();
+    addSpend(u.precio, 'Delta Force '+u.nombre+' - ID:'+playerId+' - Pedido #'+ord);
+    registrarPedido('Delta Force '+u.nombre, 1, 'delta_force', playerId, u.precio, 0);
+    if(typeof tgNotifyPurchase === 'function'){
+      tgNotifyPurchase(authSession.username, '\uD83C\uDFAE Delta Force - '+u.nombre+'\n\uD83C\uDD94 ID Delta Force: '+playerId+'\n\u26A0\uFE0F Recarga MANUAL, procesar y acreditar', u.precio, ord);
+    }
+
+    setTimeout(function(){
+      _comprandoDelta = false;
+      if(btn){ btn.disabled = false; btn.textContent = 'Comprar'; }
+      if(typeof _refreshSaldoUI === 'function') _refreshSaldoUI(authSession.saldo||0);
+      cerrarDeltaModal();
       showToast('\u2705 Pedido #'+ord+' confirmado! Se procesa manualmente en las siguientes horas.', 4500);
     }, 800);
   });
@@ -7143,19 +7316,6 @@ var RECARGAS_AUTO = [
   { package_id:null, catalog_id:null, nombre:'11.200 Diamantes + 1.120 Bono', diamantes:12320, costoUSD:66.32, precio:1150, manual:true }
 ];
 
-// PUBG Mobile — recarga MANUAL (sin API de proveedor todavia).
-// precio ya esta en MXN (convertido desde USD al tipo de cambio USD_MXN=17
-// vigente al momento de cargarlo); costoUSD queda como referencia original.
-var PUBG_UC = [
-  { nombre:'60 UC',             uc:60,    costoUSD:1,     precio:17,   manual:true },
-  { nombre:'300 + 25 UC',       uc:325,   costoUSD:4.90,  precio:83.3, manual:true },
-  { nombre:'600 + 60 UC',       uc:660,   costoUSD:10,    precio:170,  manual:true },
-  { nombre:'1.500 + 300 UC',    uc:1800,  costoUSD:23,    precio:391,  manual:true },
-  { nombre:'3.000 + 850 UC',    uc:3850,  costoUSD:48,    precio:816,  manual:true },
-  { nombre:'6.000 + 2.100 UC',  uc:8100,  costoUSD:92.4,  precio:1570.8, manual:true },
-  { nombre:'12.000 + 4.200 UC', uc:16200, costoUSD:186,   precio:3162, manual:true }
-];
-
 
 // Devuelve la imagen del diamante según la cantidad total
 function _imgPorDiamantes(total){
@@ -7369,7 +7529,7 @@ function renderServiciosHome(){
 
   // Destacados: PUBG Mobile, COD Mobile, Roblox (Free Fire ya tiene su propio hero arriba, no se duplica aqui)
   // Destacados: Free Fire primero (imagen real, catalogo disponible), luego PUBG, COD, Roblox
-  var nombresDestacados = ['Free Fire','PUBG Mobile','COD Mobile','Roblox'];
+  var nombresDestacados = ['Free Fire','PUBG','COD Mobile','Roblox'];
   var destacados = nombresDestacados.map(function(n){ return juegos.find(function(s){ return s.nombre===n; }); }).filter(Boolean);
   var resto = juegos.filter(function(s){ return nombresDestacados.indexOf(s.nombre) === -1; });
 

@@ -2842,6 +2842,7 @@ document.addEventListener('keydown',function(e){
 
     <div class="sb-section">Juegos</div>
     <div class="nav-item" id="ni-freefire" onclick="goPage('freefire')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c-2 3-4 5-4 8a4 4 0 0 0 8 0c0-1-.4-1.8-1-2.5.3 1.5-.3 2.5-1.3 2.5-1.2 0-1.5-1-1-2 .8-1.5.3-3.3-.7-6z"/><path d="M8 15a6 6 0 0 0 12 0c0-1.5-.5-2.8-1.3-4"/></svg></div> Free Fire <span class="nb" style="background:rgba(225,29,46,.15);border:1px solid rgba(225,29,46,.35);color:#ff6b6b">CAT&Aacute;LOGO</span></div>
+    <div class="nav-item" id="ni-deltaforce" onclick="goPage('deltaforce')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6l-8-4z"/><path d="M9 12l2 2 4-4"/></svg></div> Delta Force <span class="nb" style="background:rgba(255,208,0,.15);border:1px solid rgba(255,208,0,.35);color:#ffd000">NUEVO</span></div>
 
     <div class="sb-section">Servicios</div>
     <div class="nav-item" id="ni-likes" onclick="goPage('likes2k')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v10H4a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1z"/><path d="M7 11l3.5-7a1.5 1.5 0 0 1 2.7 1.3L12 9h6.3a2 2 0 0 1 1.9 2.6l-2 6.5a2 2 0 0 1-1.9 1.4H7"/></svg></div> Likes</div>
@@ -3314,43 +3315,119 @@ document.addEventListener('keydown',function(e){
 <!-- ═══════════════════ PUBG MOBILE — UC (recarga manual) ═══════════════════ -->
 <div class="page" id="page-pubg">
   <div class="ph">
-    <div class="stag">Recarga manual</div>
-    <h2 class="ptitle">PUBG <span>MOBILE</span></h2>
-    <p class="psub">Selecciona tu paquete de UC. Entrega manual dentro de las siguientes horas.</p>
+    <div class="stag">PUBG</div>
+    <h2 class="ptitle">PUBG <span>PLATAFORMAS</span></h2>
+    <p class="psub">Elige tu plataforma para ver los productos disponibles.</p>
   </div>
   <div class="page-wrap" style="max-width:640px;margin:0 auto;padding:0 5vw 3rem">
-    <div id="pubg-catalogo" style="display:flex;flex-direction:column;gap:.65rem"></div>
+
+    <div style="width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;margin:1.2rem 0 1.4rem;background-image:url('img/pubg-hero.png');background-size:cover;background-position:center;border:1px solid rgba(255,208,0,.25)"></div>
+
+    <!-- Tabs Mobile / PC -->
+    <div style="display:flex;gap:.4rem;margin-bottom:1.2rem;background:rgba(0,0,0,.3);padding:.3rem;border-radius:11px">
+      <button onclick="setPubgTab('mobile')" id="ptab-mobile" style="flex:1;padding:.6rem;background:transparent;border:none;color:#8b93a3;border-radius:8px;font-family:Oxanium,sans-serif;font-weight:800;font-size:.78rem;cursor:pointer;letter-spacing:.3px">&#128241; PUBG MOBILE</button>
+      <button onclick="setPubgTab('pc')" id="ptab-pc" style="flex:1;padding:.6rem;background:linear-gradient(90deg,#a3860a,#ffd000);border:none;color:#1a0f00;border-radius:8px;font-family:Oxanium,sans-serif;font-weight:800;font-size:.78rem;cursor:pointer;letter-spacing:.3px">&#128421;&#65039; PUBG PC</button>
+    </div>
+
+    <!-- PUBG Mobile: en construcción -->
+    <div id="pubg-tab-mobile" style="display:none;text-align:center;padding:2.5rem 1.5rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.07);border-radius:16px">
+      <div style="font-size:2.2rem;margin-bottom:.7rem">&#128679;</div>
+      <div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:1.05rem;color:#ffb84d;margin-bottom:.5rem">EN CONSTRUCCI&Oacute;N</div>
+      <div style="font-size:.82rem;color:#9aa3b0;line-height:1.5;max-width:320px;margin:0 auto">PUBG Mobile estar&aacute; disponible pr&oacute;ximamente. Por ahora puedes comprar Monedas G para PUBG PC (Steam).</div>
+    </div>
+
+    <!-- PUBG PC - Steam: catálogo funcional -->
+    <div id="pubg-tab-pc" style="display:flex;flex-direction:column;gap:.65rem">
+      <div style="margin-bottom:.3rem">
+        <div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:.9rem;color:#fff">Monedas G &middot; PUBG para STEAM</div>
+        <div style="display:inline-flex;align-items:center;gap:.35rem;margin-top:.4rem;font-size:.7rem;font-weight:700;color:#67e8f9;background:rgba(103,232,249,.1);border:1px solid rgba(103,232,249,.28);border-radius:99px;padding:.25rem .65rem">&#127917; Se entrega c&oacute;digo</div>
+      </div>
+      <div id="pubgpc-catalogo" style="display:flex;flex-direction:column;gap:.65rem"></div>
+    </div>
+
   </div>
 </div>
 
-<!-- Modal de compra PUBG UC -->
-<div class="modal-ov" id="modal-pubg">
+<!-- Modal de compra PUBG PC (Monedas G, sin ID - se entrega código) -->
+<div class="modal-ov" id="modal-pubgpc">
   <div class="modal" style="max-width:400px">
     <div class="pm-head" style="background:linear-gradient(135deg,rgba(255,180,0,.1),rgba(34,211,238,.04))">
       <div style="display:flex;align-items:center;gap:.65rem">
-        <div class="pm-icon" style="background:rgba(255,180,0,.15);border:1px solid rgba(255,180,0,.35);color:#ffb84d"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
-        <div><div class="pm-title" id="pubg-m-nombre">PUBG UC</div><div class="pm-sub">Entrega manual</div></div>
+        <div class="pm-icon" style="background:rgba(255,180,0,.15);border:1px solid rgba(255,180,0,.35);color:#ffb84d"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10v4M5 12h4M15 11h.01M17.5 13h.01"/></svg></div>
+        <div><div class="pm-title" id="pubgpc-m-nombre">Monedas G</div><div class="pm-sub">Se entrega c&oacute;digo</div></div>
       </div>
-      <button class="pm-close" onclick="cerrarPubgModal()">✕</button>
+      <button class="pm-close" onclick="cerrarPubgPcModal()">✕</button>
     </div>
     <div class="modal-b" style="display:flex;flex-direction:column;gap:.85rem">
       <div style="background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:.8rem 1rem;display:flex;align-items:center;justify-content:space-between">
         <span style="font-size:.8rem;color:#8b93a3">Precio</span>
-        <span id="pubg-m-precio" style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#25d366">$0</span>
+        <span id="pubgpc-m-precio" style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#25d366">$0</span>
+      </div>
+      <div class="pm-alert pm-alert--amber">
+        <span style="font-size:1rem;flex-shrink:0">🎟️</span>
+        <div style="font-size:.72rem;color:#c9a96e;line-height:1.5">Este producto se entrega mediante <b>c&oacute;digo</b>. Se procesa manualmente y se te enviar&aacute; a tu cuenta. No se requiere ID de jugador.</div>
+      </div>
+      <div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:.7rem;color:#6b7280">💳 Tu saldo disponible</div>
+        <div style="font-family:Oxanium;font-weight:900;font-size:1.05rem;color:#fff" id="pubgpc-m-saldo">$0</div>
+      </div>
+      <button id="pubgpc-submit-btn" onclick="comprarPubgPC()" class="pm-btn" style="background:linear-gradient(135deg,#a3690a,#ffb84d)">Comprar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ DELTA FORCE — Monedas y Paquetes (recarga manual) ═══════════════════ -->
+<div class="page" id="page-deltaforce">
+  <div class="ph" style="background:linear-gradient(180deg,rgba(255,208,0,.08),transparent);border-bottom:1px solid rgba(255,208,0,.14)">
+    <div class="stag" style="color:#ffd000">Recarga manual</div>
+    <h2 class="ptitle">DELTA <span style="color:#ffd000">FORCE</span></h2>
+    <p class="psub">Monedas Delta y paquetes de suministros. Entrega manual dentro de las siguientes horas.</p>
+  </div>
+  <div class="page-wrap" style="max-width:640px;margin:0 auto;padding:0 5vw 3rem">
+
+    <div style="width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;margin:1.2rem 0 1.4rem;background-image:url('img/delta-force-hero.png');background-size:cover;background-position:center;border:1px solid rgba(255,208,0,.25)"></div>
+
+    <!-- Tabs Monedas / Paquetes -->
+    <div style="display:flex;gap:.4rem;margin-bottom:1.2rem;background:rgba(0,0,0,.3);padding:.3rem;border-radius:11px">
+      <button onclick="setDeltaTab('monedas')" id="dtab-monedas" style="flex:1;padding:.6rem;background:linear-gradient(90deg,#a3860a,#ffd000);border:none;color:#1a0f00;border-radius:8px;font-family:Oxanium,sans-serif;font-weight:800;font-size:.78rem;cursor:pointer;letter-spacing:.3px">&#128176; MONEDAS DELTA</button>
+      <button onclick="setDeltaTab('paquetes')" id="dtab-paquetes" style="flex:1;padding:.6rem;background:transparent;border:none;color:#8b93a3;border-radius:8px;font-family:Oxanium,sans-serif;font-weight:800;font-size:.78rem;cursor:pointer;letter-spacing:.3px">&#128230; PAQUETES</button>
+    </div>
+
+    <div id="delta-catalogo-monedas" style="display:flex;flex-direction:column;gap:.65rem"></div>
+    <div id="delta-catalogo-paquetes" style="display:none;flex-direction:column;gap:.65rem"></div>
+
+  </div>
+</div>
+
+<!-- Modal de compra Delta Force -->
+<div class="modal-ov" id="modal-deltaforce">
+  <div class="modal" style="max-width:400px">
+    <div class="pm-head" style="background:linear-gradient(135deg,rgba(255,208,0,.1),rgba(34,211,238,.04))">
+      <div style="display:flex;align-items:center;gap:.65rem">
+        <div class="pm-icon" style="background:rgba(255,208,0,.15);border:1px solid rgba(255,208,0,.35);color:#ffd000"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+        <div><div class="pm-title" id="delta-m-nombre">Delta Force</div><div class="pm-sub">Entrega manual</div></div>
+      </div>
+      <button class="pm-close" onclick="cerrarDeltaModal()">✕</button>
+    </div>
+    <div class="modal-b" style="display:flex;flex-direction:column;gap:.85rem">
+      <div style="background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:.8rem 1rem;display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:.8rem;color:#8b93a3">Precio</span>
+        <span id="delta-m-precio" style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#25d366">$0</span>
       </div>
       <div>
-        <div class="pm-field-label">🆔 ID de jugador PUBG Mobile *</div>
-        <input class="finput" id="pubg-m-id" type="text" inputmode="numeric" placeholder="Ej: 5123456789" style="margin-bottom:0;border-color:rgba(255,180,0,.3)"/>
+        <div class="pm-field-label">🆔 ID de Delta Force *</div>
+        <input class="finput" id="delta-m-id" type="text" placeholder="Ingresa tu ID de Delta Force" oninput="_actualizarResumenDelta()" style="margin-bottom:0;border-color:rgba(255,208,0,.3)"/>
       </div>
+      <div id="delta-resumen" style="display:none;background:rgba(255,208,0,.06);border:1px solid rgba(255,208,0,.22);border-radius:12px;padding:.8rem .9rem;font-size:.78rem;color:#e0e4ea;line-height:1.6"></div>
       <div class="pm-alert pm-alert--amber">
         <span style="font-size:1rem;flex-shrink:0">⚠️</span>
         <div style="font-size:.72rem;color:#c9a96e;line-height:1.5">Recarga <b>manual</b>. Se procesa dentro de las siguientes horas. Verifica bien tu ID antes de confirmar.</div>
       </div>
       <div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between">
         <div style="font-size:.7rem;color:#6b7280">💳 Tu saldo disponible</div>
-        <div style="font-family:Oxanium;font-weight:900;font-size:1.05rem;color:#fff" id="pubg-m-saldo">$0</div>
+        <div style="font-family:Oxanium;font-weight:900;font-size:1.05rem;color:#fff" id="delta-m-saldo">$0</div>
       </div>
-      <button id="pubg-submit-btn" onclick="comprarPubgUC()" class="pm-btn" style="background:linear-gradient(135deg,#a3690a,#ffb84d)">Comprar</button>
+      <button id="delta-submit-btn" onclick="comprarDeltaForce()" class="pm-btn" style="background:linear-gradient(135deg,#a3860a,#ffd000)">Comprar</button>
     </div>
   </div>
 </div>
