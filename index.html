@@ -2772,6 +2772,23 @@ button[style*="linear-gradient"]{
 
   /* Tarjeta de saldo y accesos rápidos: más ancho de maniobra */
   .home-wrap > div[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:repeat(4,1fr)!important}
+
+  /* Diamantes FF: catálogo en más columnas en pantallas grandes, sin
+     tocar el JS que las llena — solo cambia cuántas caben por fila. */
+  .dcat-grid{grid-template-columns:repeat(3,1fr)!important;gap:1rem!important}
+}
+
+@media(min-width:1200px){
+  .dcat-grid{grid-template-columns:repeat(4,1fr)!important}
+}
+
+@media(min-width:600px) and (max-width:900px){
+  .dcat-grid{grid-template-columns:repeat(3,1fr)!important}
+  .diam-mem-grid{display:grid!important;grid-template-columns:repeat(2,1fr)!important;gap:1rem!important}
+}
+
+@media(min-width:901px){
+  .diam-mem-grid{display:grid!important;grid-template-columns:repeat(2,1fr)!important;gap:1rem!important}
 }
 
 @media(min-width:1440px){
@@ -3443,7 +3460,7 @@ document.addEventListener('keydown',function(e){
 
 
 
-  <div style="max-width:760px;margin:0 auto;padding:0 5vw 3rem">
+  <div class="page-wrap" style="max-width:760px;margin:0 auto;padding:0 5vw 3rem">
     <!-- Selector de tipo -->
     <div style="display:none;gap:.5rem;margin-bottom:1.5rem;background:rgba(0,0,0,.25);padding:.35rem;border-radius:12px">
       <button id="dtab-ilim" onclick="setDiamTipo('ilim')" class="dtab-btn active">&#127873; Con Bono</button>
@@ -3452,7 +3469,7 @@ document.addEventListener('keydown',function(e){
     <!-- Catálogo (cuadrícula) -->
     <div id="diam-catalogo">
       <!-- AVISO 1 VEZ POR ID -->
-      <div id="diam-1vez-aviso" style="display:none;margin-bottom:1rem">
+      <div id="diam-1vez-aviso" style="display:none;margin-bottom:1rem;max-width:640px">
         <div style="background:linear-gradient(160deg,rgba(255,80,80,.09),rgba(255,180,60,.04));border:1px solid rgba(255,120,80,.32);border-radius:12px;padding:1rem 1.1rem">
           <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.55rem">
             <span style="font-size:1.05rem">&#9888;&#65039;</span>
@@ -3463,7 +3480,7 @@ document.addEventListener('keydown',function(e){
       </div>
 
       <!-- AVISO REGION LATAM -->
-      <div id="diam-latam-aviso" style="margin-bottom:1rem">
+      <div id="diam-latam-aviso" style="margin-bottom:1rem;max-width:640px">
         <div style="background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.25);border-radius:12px;padding:.8rem 1rem;font-size:.78rem;color:#67e8f9;line-height:1.6">
           &#127758; Las recargas con bono son <b style="color:#fff">solo para cuentas de region LATAM</b>. Si tu cuenta es de otra region, el pedido sera rechazado y tu saldo devuelto.
         </div>
@@ -3482,10 +3499,10 @@ document.addEventListener('keydown',function(e){
         <div class="dcat-head-ico">&#127915;</div>
         <div class="dcat-head-txt">Membres&iacute;as y Pase</div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:.65rem" id="diam-membresias"></div>
+      <div class="diam-mem-grid" style="display:flex;flex-direction:column;gap:.65rem" id="diam-membresias"></div>
 
       <!-- Cotizar otros paquetes -->
-      <div style="margin-top:1.6rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:1.2rem 1.1rem;text-align:center">
+      <div style="margin-top:1.6rem;max-width:640px;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:1.2rem 1.1rem;text-align:center">
         <div style="font-family:Poppins,sans-serif;font-weight:700;font-size:.95rem;color:#fff;margin-bottom:.35rem">&iquest;Buscas otro paquete?</div>
         <div style="font-size:.8rem;color:#6b7280;line-height:1.6;margin-bottom:1rem">Tenemos paquetes especiales, promociones por ID y cantidades personalizadas. Escribenos y te cotizamos al momento.</div>
         <button onclick="cotizarDiamantesWA()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:.55rem;padding:.9rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:13px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">
