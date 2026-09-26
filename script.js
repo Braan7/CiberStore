@@ -1,6 +1,6 @@
 /* CiberStore v1779504760 */
 /* \u2500\u2500 DATA \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-var WA = '573180051415';
+var WA = '12894273983';
 
 /* Fallback if supabase_integration.js not loaded yet */
 if(typeof getSpent === 'undefined'){
@@ -6232,61 +6232,142 @@ function _extraerPin(data){
   return encontrado || '';
 }
 
-function comprarPinAPI(productId, precioLocal, nombreProducto){
+var _pinApiIdxActual = null;
+var _pinApiCantActual = 1;
+var _comprandoPinApi = false;
+
+function abrirPinApiModal(idx){
   if(!authSession){ showToast('Inicia sesion'); setTimeout(showAuthModal,600); return; }
+  var p = PINES_API[idx];
+  if(!p) return;
+  _pinApiIdxActual = idx;
+  _pinApiCantActual = p.min || 1;
 
-  showToast('Verificando saldo...', 1500);
-  // Verificar saldo REAL en Supabase (protege contra pagina no actualizada)
-  verificarSaldoFresco(precioLocal, function(alcanza, saldoReal){
+  document.getElementById('pinapi-m-nombre').textContent = p.nombre;
+  var img = document.getElementById('pinapi-m-img');
+  if(img){ img.src = p.img || ''; img.style.display = p.img ? 'block' : 'none'; }
+  document.getElementById('pinapi-m-precio-unit').textContent = fmt(p.precio);
+  document.getElementById('pinapi-m-cant').value = _pinApiCantActual;
+  document.getElementById('pinapi-m-cant').min = p.min || 1;
+  var avisoMin = document.getElementById('pinapi-m-min-aviso');
+  if(p.min && p.min > 1){
+    avisoMin.style.display = 'block';
+    document.getElementById('pinapi-m-min-num').textContent = p.min;
+  } else {
+    avisoMin.style.display = 'none';
+  }
+  var err = document.getElementById('pinapi-m-err');
+  if(err) err.style.display = 'none';
+
+  _actualizarTotalPinApi();
+  document.getElementById('pinapi-m-saldo').textContent = fmt(authSession.saldo||0);
+
+  var ov = document.getElementById('modal-pinapi');
+  if(ov) ov.classList.add('show');
+}
+
+function cerrarPinApiModal(){
+  var ov = document.getElementById('modal-pinapi');
+  if(ov) ov.classList.remove('show');
+}
+
+function _pinApiCant(delta){
+  var p = PINES_API[_pinApiIdxActual];
+  if(!p) return;
+  var min = p.min || 1;
+  _pinApiCantActual = Math.max(min, _pinApiCantActual + delta);
+  document.getElementById('pinapi-m-cant').value = _pinApiCantActual;
+  _actualizarTotalPinApi();
+}
+
+function _actualizarTotalPinApi(){
+  var p = PINES_API[_pinApiIdxActual];
+  if(!p) return;
+  var total = p.precio * _pinApiCantActual;
+  document.getElementById('pinapi-m-total').textContent = fmt(total);
+}
+
+function confirmarCompraPinApi(){
+  if(_comprandoPinApi || _pinApiIdxActual === null) return;
+  var p = PINES_API[_pinApiIdxActual];
+  if(!p) return;
+  var min = p.min || 1;
+  var cant = _pinApiCantActual;
+  var err = document.getElementById('pinapi-m-err');
+  function showErr(m){ if(err){ err.textContent = m; err.style.display = 'block'; } }
+
+  if(cant < min){ showErr('La cantidad minima para este producto es '+min+' pines.'); return; }
+
+  var total = p.precio * cant;
+  _comprandoPinApi = true;
+  var btn = document.getElementById('pinapi-submit-btn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Verificando saldo...'; }
+  if(err) err.style.display = 'none';
+
+  verificarSaldoFresco(total, function(alcanza, saldoReal){
+    document.getElementById('pinapi-m-saldo').textContent = fmt(saldoReal);
     if(!alcanza){
-      showToast('Saldo insuficiente. Tu saldo real es $'+saldoReal.toLocaleString('es-MX')+' MX. Recarga tu cuenta.', 4000);
+      showErr('Saldo insuficiente. Tienes '+fmt(saldoReal)+' y necesitas '+fmt(total)+'.');
+      if(btn){ btn.disabled = false; btn.textContent = 'Confirmar compra'; }
+      _comprandoPinApi = false;
       return;
     }
 
-  showToast('Procesando compra...', 2000);
+    if(btn) btn.textContent = 'Procesando compra...';
 
-  // Llamar al PORTERO (Edge Function), nunca a Recargas América directo
-  var _headers = { 'Content-Type': 'application/json' };
-  if(SUPABASE_ANON){ _headers['Authorization'] = 'Bearer '+SUPABASE_ANON; _headers['apikey'] = SUPABASE_ANON; }
-  fetch(PORTERO_URL, {
-    method: 'POST',
-    headers: _headers,
-    body: JSON.stringify({ product_id: productId, quantity: 1 })
-  }).then(function(r){ return r.json(); }).then(function(res){
-    if(!res || res.success === false){
-      showToast('Error: '+((res&&res.error)||'no se pudo comprar')+'. Contacta al admin.', 4000);
-      return;
-    }
+    // Llamar al PORTERO (Edge Function), nunca a Recargas América directo
+    var _headers = { 'Content-Type': 'application/json' };
+    if(SUPABASE_ANON){ _headers['Authorization'] = 'Bearer '+SUPABASE_ANON; _headers['apikey'] = SUPABASE_ANON; }
+    fetch(PORTERO_URL, {
+      method: 'POST',
+      headers: _headers,
+      body: JSON.stringify({ product_id: p.product_id, quantity: cant })
+    }).then(function(r){ return r.json(); }).then(function(res){
+      _comprandoPinApi = false;
+      if(btn){ btn.disabled = false; btn.textContent = 'Confirmar compra'; }
 
-    // Buscar el PIN/serial en la respuesta de Recargas América
-    var fuente = res.ra_response || res.data || res;
-    var pin = _extraerPin(fuente);
-    // Si de plano no se encontró nada, guardar la respuesta para soporte (sin mostrarla fea)
-    if(!pin || pin === 'Ver detalle en Mis Compras'){
-      console.log('[PIN API] Sin datos claros:', JSON.stringify(res));
-      pin = 'Codigo recibido. Si no lo ves completo, contacta al admin con tu numero de pedido.';
-    }
+      if(!res || res.success === false){
+        showErr('Error: '+((res&&res.error)||'no se pudo comprar')+'. Contacta al admin. No se te cobro.');
+        console.error('[PIN API] Error:', JSON.stringify(res));
+        return;
+      }
 
-    // Descontar saldo del cliente en TU web
-    var ord = getNextOrder();
-    addSpend(precioLocal, 'PIN API: '+(nombreProducto||'Producto')+' - '+pin+' - Pedido #'+ord);
-    if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, 'PIN API '+(nombreProducto||''), precioLocal, ord);
+      // El portero puede devolver un array de pines (si quantity>1) o uno solo
+      var pines = Array.isArray(res.pines) ? res.pines : null;
+      var pin;
+      if(pines && pines.length){
+        pin = pines.join('\n\n');
+      } else {
+        var fuente = res.ra_response || res.data || res;
+        pin = _extraerPin(fuente);
+        if(!pin || pin === 'Ver detalle en Mis Compras'){
+          console.log('[PIN API] Sin datos claros:', JSON.stringify(res));
+          pin = 'Codigo recibido. Si no lo ves completo, contacta al admin con tu numero de pedido.';
+        }
+      }
 
-    // Mostrar el PIN al cliente
-    _ultimoPin = pin;
-    var box = document.getElementById('pin-entregado');
-    var cod = document.getElementById('pin-codigo');
-    if(cod) cod.textContent = pin;
-    if(box){ box.style.display='block'; box.scrollIntoView({behavior:'smooth',block:'center'}); }
+      var ord = getNextOrder();
+      addSpend(total, 'PIN API: '+cant+'x '+p.nombre+' - '+pin+' - Pedido #'+ord);
+      if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, cant+'x PIN API '+p.nombre, total, ord);
 
-    var msg = res.sandbox ? '✓ (PRUEBA) PIN generado' : '✓ PIN entregado!';
-    showToast(msg, 3000);
-  }).catch(function(e){
-    console.error('[PIN API] Error:', e);
-    showToast('Error de conexión. Contacta al admin por WhatsApp (no se te cobró).', 4000);
+      cerrarPinApiModal();
+      if(typeof _refreshSaldoUI === 'function') _refreshSaldoUI(authSession.saldo||0);
+
+      _ultimoPin = pin;
+      var box = document.getElementById('pin-entregado');
+      var cod = document.getElementById('pin-codigo');
+      if(cod) cod.textContent = pin;
+      if(box){ box.style.display='block'; box.scrollIntoView({behavior:'smooth',block:'center'}); }
+
+      var msg = res.sandbox ? '✓ (PRUEBA) PIN generado' : '✓ Pedido #'+ord+' confirmado! PIN entregado.';
+      showToast(msg, 3500);
+    }).catch(function(e){
+      _comprandoPinApi = false;
+      if(btn){ btn.disabled = false; btn.textContent = 'Confirmar compra'; }
+      console.error('[PIN API] Error:', e);
+      showErr('Error de conexion. Contacta al admin por WhatsApp. No se te cobro.');
+    });
   });
-
-  }); // fin verificarSaldoFresco
 }
 
 
@@ -6306,19 +6387,21 @@ function renderPinesAPI(){
   if(!cont) return;
   cont.className = 'rz-pines-grid';
   var html = '';
-  PINES_API.forEach(function(p){
-    var precioMXN = ('$'+p.precio);
-    var nombreSafe = p.nombre.replace(/'/g,"");
+  PINES_API.forEach(function(p, i){
+    var precioMXN = fmt(p.precio);
     var visual = p.img
-      ? '<div class="rc-img"><img src="'+p.img+'" alt="'+p.nombre+'" onerror="this.parentNode.innerHTML=\'<div class=&quot;rc-ico&quot;>&#128142;</div>\'"/></div>'
-      : '<div class="rc-ico">&#128142;</div>';
-    html += '<div class="rc-card" onclick="comprarPinAPI('+p.product_id+','+p.precio+',\''+nombreSafe+'\')">'
-      + '<span class="rc-badge auto">&#9889; AUTO</span>'
+      ? '<div class="pinv-img"><img src="'+p.img+'" alt="'+p.nombre+'" onerror="this.parentNode.innerHTML=\'<span class=&quot;pinv-ico&quot;>&#128142;</span>\'"/></div>'
+      : '<div class="pinv-img"><span class="pinv-ico">&#128142;</span></div>';
+    html += '<div class="pinv-card" onclick="abrirPinApiModal('+i+')">'
+      + '<span class="pinv-badge">&#9889; AUTO</span>'
       + visual
-      + '<div class="rc-name">'+p.nombre.replace(/^Free Fire /,'')+'</div>'
-      + '<div class="rc-price">'+precioMXN+'</div>'
-      + (p.min ? '<div class="rc-min">M&iacute;n. '+p.min+' pines</div>' : '')
-      + '<button class="rc-btn">Comprar</button>'
+      + '<div class="pinv-body">'
+      +   '<div class="pinv-name">'+p.nombre.replace(/^Free Fire /,'')+'</div>'
+      +   '<div class="pinv-meta"><span class="pinv-price">'+precioMXN+'</span>'
+      +     (p.min ? '<span class="pinv-min">M&iacute;n. '+p.min+'</span>' : '')
+      +   '</div>'
+      + '</div>'
+      + '<span class="pinv-arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>'
       + '</div>';
   });
   cont.innerHTML = html;
@@ -8761,7 +8844,7 @@ function renderClanes(){
   }
 
   cont.innerHTML = CLANES.map(function(c){
-    return '<div style="background:linear-gradient(160deg,rgba(255,179,0,.08),rgba(20,15,8,.4));border:1px solid rgba(255,179,0,.3);border-radius:20px;overflow:hidden;margin-bottom:1.5rem">'
+    return '<div style="background:linear-gradient(160deg,rgba(255,179,0,.08),rgba(20,15,8,.4));border:1px solid rgba(255,179,0,.3);border-radius:20px;overflow:hidden">'
       + '<div style="position:relative;background:radial-gradient(circle at center,rgba(255,179,0,.12),transparent);padding:1.5rem 1.5rem 0">'
       +   '<div style="position:absolute;top:1rem;right:1rem;background:linear-gradient(90deg,#ffb300,#ff8800);color:#fff;font-family:Oxanium;font-weight:800;font-size:.68rem;padding:.35rem .85rem;border-radius:99px;letter-spacing:.5px;z-index:2;box-shadow:0 4px 14px rgba(255,179,0,.4)">'+(c.vendido?'VENDIDO':'NIVEL 7')+'</div>'
       +   '<img src="'+c.img+'" alt="'+c.nombre+'" style="width:100%;border-radius:14px;display:block'+(c.vendido?";filter:grayscale(85%) brightness(.55)":"")+'" onerror="this.style.display=\'none\'"/>'
@@ -8848,7 +8931,7 @@ function _mostrarReciboClan(c, ffId, user, ord){
   if(!cont) return;
 
   cont.innerHTML =
-    '<div style="background:linear-gradient(160deg,rgba(37,211,102,.08),rgba(255,255,255,.02));border:2px solid rgba(37,211,102,.35);border-radius:18px;padding:2rem 1.35rem;text-align:center;max-width:440px;margin:1rem auto">'
+    '<div style="grid-column:1/-1;background:linear-gradient(160deg,rgba(37,211,102,.08),rgba(255,255,255,.02));border:2px solid rgba(37,211,102,.35);border-radius:18px;padding:2rem 1.35rem;text-align:center;max-width:440px;margin:1rem auto">'
     + '<div style="font-size:3rem;margin-bottom:.5rem">\u2705</div>'
     + '<div style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#25d366;margin-bottom:.35rem;letter-spacing:.5px">PEDIDO CONFIRMADO</div>'
     + '<div style="font-size:.82rem;color:var(--muted);margin-bottom:1.5rem">Te contactaremos para entregar tu clan</div>'
