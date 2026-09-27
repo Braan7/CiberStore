@@ -3212,7 +3212,7 @@ function admFullTab(tab){
     if(sec) sec.className='adm-section'+(t===tab?' active':'');
   });
   if(tab==='stats')   admFullLoadStats();
-  if(tab==='users')   admFullLoadUsers();
+  if(tab==='users')   { admFullLoadUsers(); admCargarStatsClientes(); }
   if(tab==='pedidos') admLoadPedidos();
   if(tab==='saldos')  admFullLoadMovs();
   if(tab==='top')     admLoadTop();
@@ -3382,6 +3382,193 @@ function admRenderChart(canvas){
 }
 
 /* \u2500\u2500 USERS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+// ═══════════════════ EXPORTACIÓN / GESTIÓN DE CLIENTES (panel admin) ═══════════════════
+// Trae TODOS los registros de profiles (sin limite arbitrario, paginado con
+// sbGetAll para no cortar en 1000 filas) y calcula estadisticas reales.
+// Excluye SIEMPRE password_hash y api_key de lo que se muestra/exporta.
+function admCargarStatsClientes(){
+  var totalEl = document.getElementById('acs-total');
+  var activosEl = document.getElementById('acs-activos');
+  var adminsEl = document.getElementById('acs-admins');
+  var consaldoEl = document.getElementById('acs-consaldo');
+  var saldoTotalEl = document.getElementById('acs-saldototal');
+  [totalEl,activosEl,adminsEl,consaldoEl,saldoTotalEl].forEach(function(el){ if(el) el.textContent = '...'; });
+
+  sbGetAll('profiles', 'id,role,banned,saldo').then(function(users){
+    if(!users || !Array.isArray(users)){
+      [totalEl,activosEl,adminsEl,consaldoEl,saldoTotalEl].forEach(function(el){ if(el) el.textContent = 'Error'; });
+      return;
+    }
+    var total = users.length;
+    var baneados = users.filter(function(u){ return u.banned; }).length;
+    var activos = total - baneados;
+    var admins = users.filter(function(u){ return u.role === 'admin'; }).length;
+    var conSaldo = users.filter(function(u){ return (Number(u.saldo)||0) > 0; }).length;
+    var saldoTotal = users.reduce(function(s,u){ return s + (Number(u.saldo)||0); }, 0);
+
+    if(totalEl) totalEl.textContent = total.toLocaleString('es-MX');
+    if(activosEl) activosEl.textContent = activos.toLocaleString('es-MX') + ' / ' + baneados.toLocaleString('es-MX');
+    if(adminsEl) adminsEl.textContent = admins.toLocaleString('es-MX');
+    if(consaldoEl) consaldoEl.textContent = conSaldo.toLocaleString('es-MX');
+    if(saldoTotalEl) saldoTotalEl.textContent = '$' + Math.round(saldoTotal).toLocaleString('es-MX') + ' MXN';
+  }).catch(function(e){
+    console.error('[CLIENTES] Error cargando stats:', e);
+    [totalEl,activosEl,adminsEl,consaldoEl,saldoTotalEl].forEach(function(el){ if(el) el.textContent = 'Error'; });
+  });
+}
+
+// Campos reales de profiles que SÍ se exportan (nunca password_hash ni api_key)
+var CLIENTES_EXPORT_CAMPOS = ['id','username','nombre','whatsapp','sexo','role','saldo','ref_code','banned','created_at','last_seen'];
+
+function _progresoExport(txt, pct){
+  var box = document.getElementById('adm-export-progreso');
+  var t = document.getElementById('adm-export-progreso-txt');
+  var b = document.getElementById('adm-export-progreso-bar');
+  if(box) box.style.display = 'block';
+  if(t) t.textContent = txt;
+  if(b) b.style.width = pct + '%';
+}
+
+function admExportarClientes(formato){
+  _progresoExport('Preparando datos...', 5);
+
+  // 1) Traer TODOS los perfiles, sin limite (paginado internamente por sbGetAll)
+  sbGetAll('profiles', CLIENTES_EXPORT_CAMPOS.join(',')).then(function(clientes){
+    if(!clientes || !clientes.length){
+      _progresoExport('No hay clientes para exportar.', 0);
+      return;
+    }
+    var total = clientes.length;
+    _progresoExport('Procesando 0 / ' + total, 15);
+
+    // 2) Traer TODOS los movimientos y pedidos para calcular gasto/recargas/pedidos
+    //    por cliente en memoria — una sola pasada, no una consulta por usuario
+    //    (con 1200+ clientes eso serian miles de peticiones).
+    Promise.all([
+      sbGetAll('movimientos_saldo', 'user_id,tipo,monto'),
+      sbGetAll('pedidos', 'username,producto,ff_id,precio,cantidad')
+    ]).then(function(res){
+      var movs = res[0] || [];
+      var pedidos = res[1] || [];
+
+      // Agregar movimientos por user_id
+      var porUsuario = {};
+      movs.forEach(function(m){
+        var uid = m.user_id;
+        if(!uid) return;
+        if(!porUsuario[uid]) porUsuario[uid] = { totalRecargado:0, totalGastado:0, numMovimientos:0 };
+        var monto = Number(m.monto)||0;
+        if(m.tipo === 'credito') porUsuario[uid].totalRecargado += monto;
+        if(m.tipo === 'compra' || m.tipo === 'debito') porUsuario[uid].totalGastado += monto;
+        porUsuario[uid].numMovimientos++;
+      });
+
+      // Agregar pedidos por username (la tabla pedidos no guarda user_id, solo username)
+      var pedidosPorUser = {};
+      pedidos.forEach(function(p){
+        var un = (p.username||'').toLowerCase();
+        if(!un) return;
+        if(!pedidosPorUser[un]) pedidosPorUser[un] = { numPedidos:0, productos:[], ffIds:[] };
+        pedidosPorUser[un].numPedidos++;
+        if(p.producto) pedidosPorUser[un].productos.push(p.producto);
+        if(p.ff_id && pedidosPorUser[un].ffIds.indexOf(p.ff_id) === -1) pedidosPorUser[un].ffIds.push(p.ff_id);
+      });
+
+      _progresoExport('Procesando ' + Math.round(total*0.5) + ' / ' + total, 55);
+
+      // 3) Armar el registro final por cliente — SOLO campos reales, sin inventar nada
+      var salida = clientes.map(function(c, idx){
+        var agg = porUsuario[c.id] || { totalRecargado:0, totalGastado:0, numMovimientos:0 };
+        var pedAgg = pedidosPorUser[(c.username||'').toLowerCase()] || { numPedidos:0, productos:[], ffIds:[] };
+        return {
+          id: c.id,
+          username: c.username || '',
+          nombre: c.nombre || '',
+          whatsapp: c.whatsapp || '',
+          sexo: c.sexo || '',
+          rol: c.role || '',
+          saldo_actual_mxn: Number(c.saldo)||0,
+          codigo_referido: c.ref_code || '',
+          cuenta_baneada: !!c.banned,
+          fecha_registro: c.created_at || '',
+          ultimo_acceso: c.last_seen || '',
+          total_recargado_mxn: Math.round(agg.totalRecargado*100)/100,
+          total_gastado_mxn: Math.round(agg.totalGastado*100)/100,
+          numero_movimientos: agg.numMovimientos,
+          numero_pedidos: pedAgg.numPedidos,
+          productos_comprados: pedAgg.productos.join(' | '),
+          ids_free_fire_usados: pedAgg.ffIds.join(', ')
+        };
+      });
+
+      _progresoExport('Procesando ' + total + ' / ' + total, 90);
+
+      setTimeout(function(){
+        if(formato === 'csv') _descargarClientesCSV(salida);
+        else if(formato === 'json') _descargarClientesJSON(salida);
+        else if(formato === 'excel') _descargarClientesExcel(salida);
+        _progresoExport('Exportaci\u00f3n completada. (' + total + ' clientes)', 100);
+        showToast('\u2705 ' + total + ' clientes exportados', 3500);
+      }, 300);
+
+    }).catch(function(e){
+      console.error('[CLIENTES] Error trayendo movimientos/pedidos:', e);
+      _progresoExport('Error al procesar movimientos/pedidos.', 0);
+    });
+  }).catch(function(e){
+    console.error('[CLIENTES] Error trayendo profiles:', e);
+    _progresoExport('Error al cargar clientes.', 0);
+  });
+}
+
+function _csvEscape(v){
+  var s = (v===null||v===undefined) ? '' : String(v);
+  if(/[",\n]/.test(s)) s = '"' + s.replace(/"/g,'""') + '"';
+  return s;
+}
+
+function _descargarClientesCSV(filas){
+  var cols = Object.keys(filas[0]);
+  var csv = cols.join(',') + '\n';
+  filas.forEach(function(f){
+    csv += cols.map(function(c){ return _csvEscape(f[c]); }).join(',') + '\n';
+  });
+  var blob = new Blob(['\uFEFF'+csv], { type: 'text/csv;charset=utf-8;' });
+  _descargarBlob(blob, 'clientes-ciberstore-' + _fechaHoyExport() + '.csv');
+}
+
+function _descargarClientesJSON(filas){
+  var blob = new Blob([JSON.stringify(filas, null, 2)], { type: 'application/json;charset=utf-8;' });
+  _descargarBlob(blob, 'clientes-ciberstore-' + _fechaHoyExport() + '.json');
+}
+
+function _descargarClientesExcel(filas){
+  // Excel abre correctamente un CSV con BOM UTF-8 y extension .xlsx la mayoria
+  // de las veces, pero para un .xlsx real usamos una tabla HTML minima, que
+  // Excel/Sheets reconocen e importan con las columnas ya separadas.
+  var cols = Object.keys(filas[0]);
+  var html = '<table><tr>' + cols.map(function(c){ return '<th>'+c+'</th>'; }).join('') + '</tr>';
+  filas.forEach(function(f){
+    html += '<tr>' + cols.map(function(c){
+      var v = (f[c]===null||f[c]===undefined) ? '' : String(f[c]).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+      return '<td>'+v+'</td>';
+    }).join('') + '</tr>';
+  });
+  html += '</table>';
+  var blob = new Blob(['\uFEFF'+html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+  _descargarBlob(blob, 'clientes-ciberstore-' + _fechaHoyExport() + '.xls');
+}
+
+function _descargarBlob(blob, filename){
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function _fechaHoyExport(){ return new Date().toISOString().slice(0,10); }
+
 function admFullLoadUsers(){
   var tbody=document.getElementById('adm-full-users-body');
   if(!tbody) return;
