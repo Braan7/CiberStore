@@ -928,6 +928,264 @@ function enviarComprobanteWA(){
   var sel=document.getElementById('recarga-metodo'); if(sel) sel.selectedIndex=0;
 }
 
+// ═══════════════════ SISTEMA DE PUNTOS, RANGOS Y PREMIOS ═══════════════════
+// Los puntos se otorgan/revierten via RPC seguro en Supabase (ver
+// setup_puntos_ranking.sql) — nunca se calculan ni confian en el frontend.
+// Esta seccion solo LEE y MUESTRA lo que ya quedo registrado en el servidor.
+var RANGOS_INFO = {
+  bronce:   { nombre:'BRONCE',   icono:'\uD83E\uDD49', min:0,    max:50,   color:'#cd7f32' },
+  plata:    { nombre:'PLATA',    icono:'\uD83E\uDD48', min:50,   max:150,  color:'#c0c0c0' },
+  oro:      { nombre:'ORO',      icono:'\uD83E\uDD47', min:150,  max:300,  color:'#ffd700' },
+  diamante: { nombre:'DIAMANTE', icono:'\uD83D\uDC8E', min:300,  max:600,  color:'#67e8f9' },
+  elite:    { nombre:'\u00c9LITE',    icono:'\uD83D\uDC51', min:600,  max:1000, color:'#a78bfa' },
+  leyenda:  { nombre:'LEYENDA',  icono:'\uD83D\uDD25', min:1000, max:null, color:'#ff6b35' }
+};
+var RANGOS_ORDEN = ['bronce','plata','oro','diamante','elite','leyenda'];
+
+function cargarMiRango(){
+  if(!authSession || !authSession.id){
+    var card = document.getElementById('rango-usuario-card');
+    if(card) card.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted);font-size:.85rem">Inicia sesion para ver tu rango y puntos</div>';
+    return;
+  }
+  if(typeof sb === 'undefined' || !sb.rpc) return;
+
+  sb.rpc('stats_puntos_usuario', { p_user_id: authSession.id }).then(function(rows){
+    var s = (Array.isArray(rows) && rows[0]) ? rows[0] : { puntos_totales:0, diamantes_validos:0, compras_validas:0, rango:'bronce' };
+    var info = RANGOS_INFO[s.rango] || RANGOS_INFO.bronce;
+    var idx = RANGOS_ORDEN.indexOf(s.rango);
+    var siguiente = (idx >= 0 && idx < RANGOS_ORDEN.length-1) ? RANGOS_INFO[RANGOS_ORDEN[idx+1]] : null;
+
+    var elIcono = document.getElementById('rango-icono');
+    var elNombre = document.getElementById('rango-nombre');
+    if(elIcono) elIcono.textContent = info.icono;
+    if(elNombre){ elNombre.textContent = info.nombre; elNombre.style.color = info.color; }
+
+    var puntos = Number(s.puntos_totales)||0;
+    document.getElementById('rango-puntos').textContent = puntos.toLocaleString('es-MX');
+    document.getElementById('rango-diamantes').textContent = (Number(s.diamantes_validos)||0).toLocaleString('es-MX');
+    document.getElementById('rango-compras').textContent = (Number(s.compras_validas)||0).toLocaleString('es-MX');
+
+    var progTxt = document.getElementById('rango-progreso-txt');
+    var sigTxt = document.getElementById('rango-siguiente-txt');
+    var bar = document.getElementById('rango-progreso-bar');
+    if(siguiente){
+      var base = info.min, tope = siguiente.min;
+      var pct = Math.min(100, Math.round(((puntos-base)/(tope-base))*100));
+      if(progTxt) progTxt.textContent = puntos.toLocaleString('es-MX')+' / '+tope.toLocaleString('es-MX')+' puntos';
+      if(sigTxt) sigTxt.textContent = 'Faltan '+(tope-puntos).toLocaleString('es-MX')+' para '+siguiente.nombre;
+      if(bar) bar.style.width = pct+'%';
+    } else {
+      // Ya esta en el rango maximo (Leyenda)
+      if(progTxt) progTxt.textContent = puntos.toLocaleString('es-MX')+' puntos';
+      if(sigTxt) sigTxt.textContent = '\u00a1Rango m\u00e1ximo alcanzado!';
+      if(bar) bar.style.width = '100%';
+    }
+
+    // Posicion en el TOP (se calcula sobre el mismo top que ya pedimos)
+    sb.rpc('top_puntos_ranking', { p_limit: 1000 }).then(function(top){
+      var posEl = document.getElementById('rango-posicion');
+      if(!Array.isArray(top) || !posEl) return;
+      var idxPos = top.findIndex(function(u){ return u.user_id === authSession.id; });
+      posEl.textContent = idxPos >= 0 ? ('Posici\u00f3n #'+(idxPos+1)+' en el TOP') : 'Sin posici\u00f3n en el TOP todav\u00eda';
+    }).catch(function(){});
+  }).catch(function(e){
+    console.error('[RANGO] Error:', e);
+  });
+}
+
+function cargarTopPuntos(){
+  var cont = document.getElementById('top-puntos-list');
+  if(!cont) return;
+  if(typeof sb === 'undefined' || !sb.rpc){ cont.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">No disponible</div>'; return; }
+
+  sb.rpc('top_puntos_ranking', { p_limit: 10 }).then(function(top){
+    if(!Array.isArray(top) || !top.length){
+      cont.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Aun no hay clientes en el ranking de puntos</div>';
+      return;
+    }
+    var medallas = ['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49'];
+    cont.innerHTML = top.map(function(u, i){
+      var info = RANGOS_INFO[u.rango] || RANGOS_INFO.bronce;
+      var medalla = medallas[i] || ('#'+(i+1));
+      return '<div style="display:flex;align-items:center;gap:.7rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:11px;padding:.65rem .85rem">'
+        + '<span style="font-size:1rem;width:28px;text-align:center;flex-shrink:0">'+medalla+'</span>'
+        + '<span style="font-size:1.1rem;flex-shrink:0">'+info.icono+'</span>'
+        + '<div style="flex:1;min-width:0"><div style="font-family:Poppins;font-weight:700;font-size:.85rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+_esc(u.username)+'</div><div style="font-size:.66rem;color:#6b7280">'+info.nombre+'</div></div>'
+        + '<span style="font-family:Oxanium;font-weight:900;font-size:.95rem;color:#67e8f9;flex-shrink:0">'+(Number(u.puntos)||0).toLocaleString('es-MX')+' pts</span>'
+        + '</div>';
+    }).join('');
+  }).catch(function(e){
+    console.error('[TOP PUNTOS] Error:', e);
+    cont.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#ff6b6b;font-size:.82rem">Error al cargar</div>';
+  });
+}
+
+function cargarPremios(){
+  var cont = document.getElementById('premios-list');
+  if(!cont) return;
+  if(typeof sb === 'undefined' || !sb.get){ cont.innerHTML = ''; return; }
+
+  sb.get('premios', 'activo=eq.true&order=costo_puntos.asc').then(function(premios){
+    if(!premios || !premios.length){
+      cont.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Aun no hay premios disponibles</div>';
+      return;
+    }
+    cont.innerHTML = premios.map(function(p){
+      return '<div style="display:flex;align-items:center;gap:.7rem;background:rgba(255,255,255,.03);border:1px solid rgba(167,139,250,.18);border-radius:12px;padding:.75rem .9rem">'
+        + '<span style="font-size:1.4rem;flex-shrink:0">'+(p.icono||'\uD83C\uDF81')+'</span>'
+        + '<div style="flex:1;min-width:0"><div style="font-family:Poppins;font-weight:700;font-size:.85rem;color:#fff">'+_esc(p.nombre)+'</div>'+(p.descripcion?('<div style="font-size:.7rem;color:#9aa3b0;margin-top:.1rem">'+_esc(p.descripcion)+'</div>'):'')+'</div>'
+        + '<button onclick="canjearPremioUI('+p.id+',\''+_esc(p.nombre).replace(/'/g,"")+'\','+p.costo_puntos+')" style="flex-shrink:0;padding:.5rem .9rem;background:linear-gradient(135deg,#5b21b6,#a78bfa);color:#fff;border:none;border-radius:9px;font-family:Oxanium;font-weight:800;font-size:.78rem;cursor:pointer">'+p.costo_puntos+' pts</button>'
+        + '</div>';
+    }).join('');
+  }).catch(function(e){
+    console.error('[PREMIOS] Error:', e);
+    cont.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#ff6b6b;font-size:.82rem">Error al cargar</div>';
+  });
+}
+
+function canjearPremioUI(premioId, nombrePremio, costoPuntos){
+  if(!authSession || !authSession.id){ showToast('Inicia sesion'); setTimeout(showAuthModal,600); return; }
+  if(!confirm('Canjear "'+nombrePremio+'" por '+costoPuntos+' puntos?')) return;
+
+  sb.rpc('canjear_premio', { p_user_id: authSession.id, p_premio_id: premioId }).then(function(res){
+    var r = Array.isArray(res) ? res[0] : res;
+    if(r && r.success){
+      showToast('\u2705 Premio canjeado! El admin te lo entregara pronto.', 4000);
+      cargarMiRango();
+    } else {
+      showToast('\u274C '+((r&&r.error)||'No se pudo canjear'), 3500);
+    }
+  }).catch(function(e){
+    console.error('[CANJE] Error:', e);
+    showToast('Error de conexion al canjear', 3000);
+  });
+}
+
+// ═══ PANEL ADMIN: Puntos y Premios ═══
+function admBuscarHistorialPuntos(){
+  var username = ((document.getElementById('adm-puntos-user')||{}).value||'').trim();
+  var cont = document.getElementById('adm-puntos-historial');
+  if(!cont) return;
+  if(!username){ cont.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted);font-size:.8rem">Escribe un username</div>'; return; }
+  cont.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Buscando...</div>';
+
+  sb.get('profiles', 'username=eq.'+encodeURIComponent(username)+'&select=id,username&limit=1').then(function(rows){
+    var u = rows && rows[0];
+    if(!u){ cont.innerHTML = '<div style="text-align:center;padding:1rem;color:#ff6b6b;font-size:.8rem">Usuario no encontrado</div>'; return; }
+
+    sb.rpc('historial_puntos_usuario', { p_user_id: u.id }).then(function(hist){
+      if(!Array.isArray(hist) || !hist.length){
+        cont.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted);font-size:.8rem">Sin movimientos de puntos</div>';
+        return;
+      }
+      var total = hist.reduce(function(s,h){ return s+(Number(h.puntos)||0); }, 0);
+      var rowsHtml = hist.map(function(h){
+        var esOtorgado = h.tipo_movimiento === 'otorgado';
+        var fecha = h.created_at ? new Date(h.created_at).toLocaleString('es-MX') : '';
+        return '<div style="display:flex;align-items:center;gap:.6rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:9px;padding:.55rem .8rem">'
+          + '<span style="font-family:Oxanium;font-weight:800;font-size:.85rem;color:'+(esOtorgado?'#25d366':'#ff6b6b')+'">'+(h.puntos>=0?'+':'')+h.puntos+'</span>'
+          + '<div style="flex:1;min-width:0"><div style="font-size:.78rem;color:#fff">Pedido #'+h.pedido_id+' &middot; '+(h.diamantes||0)+' &#128142;</div><div style="font-size:.68rem;color:#6b7280">'+(h.motivo||'')+' &middot; '+fecha+'</div></div>'
+          + '</div>';
+      }).join('');
+      cont.innerHTML = '<div style="text-align:right;font-family:Oxanium;font-weight:800;color:#67e8f9;font-size:.85rem;margin-bottom:.5rem">Total actual: '+total+' puntos</div>' + rowsHtml;
+    }).catch(function(){ cont.innerHTML = '<div style="text-align:center;padding:1rem;color:#ff6b6b;font-size:.8rem">Error al cargar historial</div>'; });
+  }).catch(function(){ cont.innerHTML = '<div style="text-align:center;padding:1rem;color:#ff6b6b;font-size:.8rem">Error de conexion</div>'; });
+}
+
+function admMostrarFormPremio(){
+  var f = document.getElementById('adm-form-premio');
+  if(f) f.style.display = (f.style.display==='none') ? 'block' : 'none';
+}
+
+function admGuardarPremio(){
+  var nombre = ((document.getElementById('adm-premio-nombre')||{}).value||'').trim();
+  var icono = ((document.getElementById('adm-premio-icono')||{}).value||'').trim() || '\uD83C\uDF81';
+  var desc = ((document.getElementById('adm-premio-desc')||{}).value||'').trim();
+  var costo = parseInt((document.getElementById('adm-premio-costo')||{}).value||'0', 10);
+
+  if(!nombre){ showToast('Ingresa el nombre del premio'); return; }
+  if(!costo || costo <= 0){ showToast('Ingresa un costo en puntos valido'); return; }
+
+  sb.post('premios', { nombre: nombre, icono: icono, descripcion: desc, costo_puntos: costo, activo: true }).then(function(){
+    showToast('\u2705 Premio creado');
+    document.getElementById('adm-premio-nombre').value = '';
+    document.getElementById('adm-premio-icono').value = '';
+    document.getElementById('adm-premio-desc').value = '';
+    document.getElementById('adm-premio-costo').value = '';
+    admMostrarFormPremio();
+    admCargarPremiosLista();
+  }).catch(function(e){
+    console.error('[PREMIO] Error creando:', e);
+    showToast('Error al crear el premio');
+  });
+}
+
+function admCargarPremiosLista(){
+  var cont = document.getElementById('adm-premios-lista');
+  if(!cont) return;
+  sb.get('premios', 'order=created_at.desc').then(function(premios){
+    if(!premios || !premios.length){ cont.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted);font-size:.8rem">Sin premios todavia</div>'; return; }
+    cont.innerHTML = premios.map(function(p){
+      return '<div style="display:flex;align-items:center;gap:.6rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:.6rem .8rem;opacity:'+(p.activo?'1':'.5')+'">'
+        + '<span style="font-size:1.2rem">'+(p.icono||'\uD83C\uDF81')+'</span>'
+        + '<div style="flex:1;min-width:0"><div style="font-size:.82rem;color:#fff;font-weight:700">'+_esc(p.nombre)+'</div><div style="font-size:.7rem;color:#6b7280">'+p.costo_puntos+' pts'+(p.activo?'':' &middot; INACTIVO')+'</div></div>'
+        + '<button data-id="'+p.id+'" data-a="'+p.activo+'" onclick="admTogglePremio(this.dataset.id,this.dataset.a)" class="adm-action-btn" style="border-color:rgba(255,208,0,.3);color:#ffd000">'+(p.activo?'Desactivar':'Activar')+'</button>'
+        + '</div>';
+    }).join('');
+  }).catch(function(){ cont.innerHTML = '<div style="text-align:center;padding:1rem;color:#ff6b6b;font-size:.8rem">Error al cargar</div>'; });
+}
+
+function admTogglePremio(id, activoActual){
+  var nuevoActivo = !(activoActual === 'true');
+  sb.patch('premios', { activo: nuevoActivo }, 'id=eq.'+id).then(function(){
+    showToast(nuevoActivo ? 'Premio activado' : 'Premio desactivado');
+    admCargarPremiosLista();
+  }).catch(function(){ showToast('Error al actualizar'); });
+}
+
+function admCargarCanjesPendientes(){
+  var cont = document.getElementById('adm-canjes-lista');
+  if(!cont) return;
+  sb.get('premios_canjes', 'entregado=eq.false&select=id,user_id,premio_id,puntos_usados,created_at&order=created_at.asc').then(function(canjes){
+    if(!canjes || !canjes.length){ cont.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted);font-size:.8rem">No hay canjes pendientes</div>'; return; }
+
+    var userIds = canjes.map(function(c){ return c.user_id; });
+    var premioIds = canjes.map(function(c){ return c.premio_id; });
+
+    Promise.all([
+      sb.get('profiles', 'id=in.('+userIds.map(function(u){return '"'+u+'"';}).join(',')+')&select=id,username'),
+      sb.get('premios', 'id=in.('+premioIds.join(',')+')&select=id,nombre,icono')
+    ]).then(function(res){
+      var users = res[0]||[], premios = res[1]||[];
+      var umap = {}; users.forEach(function(u){ umap[u.id]=u.username; });
+      var pmap = {}; premios.forEach(function(p){ pmap[p.id]=p; });
+
+      cont.innerHTML = canjes.map(function(c){
+        var p = pmap[c.premio_id] || {};
+        var fecha = c.created_at ? new Date(c.created_at).toLocaleString('es-MX') : '';
+        return '<div style="display:flex;align-items:center;gap:.6rem;background:rgba(255,208,0,.05);border:1px solid rgba(255,208,0,.2);border-radius:9px;padding:.6rem .8rem">'
+          + '<span style="font-size:1.2rem">'+(p.icono||'\uD83C\uDF81')+'</span>'
+          + '<div style="flex:1;min-width:0"><div style="font-size:.82rem;color:#fff;font-weight:700">'+_esc(umap[c.user_id]||'?')+' &middot; '+_esc(p.nombre||'?')+'</div><div style="font-size:.7rem;color:#6b7280">'+c.puntos_usados+' pts &middot; '+fecha+'</div></div>'
+          + '<button data-id="'+c.id+'" onclick="admMarcarCanjeEntregado(this.dataset.id)" class="adm-action-btn" style="border-color:rgba(0,230,118,.3);color:#00e676">Entregado</button>'
+          + '</div>';
+      }).join('');
+    });
+  }).catch(function(){ cont.innerHTML = '<div style="text-align:center;padding:1rem;color:#ff6b6b;font-size:.8rem">Error al cargar</div>'; });
+}
+
+function admMarcarCanjeEntregado(canjeId){
+  if(!authSession || !authSession.id) return;
+  sb.rpc('marcar_premio_entregado', { p_admin_id: authSession.id, p_canje_id: canjeId }).then(function(){
+    showToast('\u2705 Marcado como entregado');
+    admCargarCanjesPendientes();
+  }).catch(function(e){
+    console.error('[CANJE] Error marcando entregado:', e);
+    showToast('Error al marcar entrega');
+  });
+}
+
+
 function goPage(id){
   if(id==='likes') id='likes2k'; // el sistema viejo de likes fue reemplazado por Likes 2K
   setTimeout(function(){ if(window._hookPasteAll) window._hookPasteAll(); }, 300);
@@ -952,6 +1210,7 @@ function goPage(id){
   if(id==='freefire') setTimeout(function(){ ffVolverInicio(); _refrescarPreciosCuentasRandom(); }, 100);
   if(id==='pubg') setTimeout(function(){ renderPubgPcCatalogo(); setPubgTab('pc'); }, 100);
   if(id==='deltaforce') setTimeout(function(){ renderDeltaCatalogo(); setDeltaTab('monedas'); }, 100);
+  if(id==='ranking') setTimeout(function(){ cargarMiRango(); cargarTopPuntos(); cargarPremios(); }, 100);
   if(id==='saldo') setTimeout(function(){ recSetMoneda('MXN'); _recTipo=null; recLimpiarTipo(); }, 100);
   if(id==='sobre') setTimeout(function(){ sobreTab('resenas'); }, 100);
   if(id==='likes') renderLikes();
@@ -3204,7 +3463,7 @@ function admToggleNav(force){
 }
 
 function admFullTab(tab){
-  var tabs=['stats','users','pedidos','saldos','top','codigos','chat','resenas','soporte','inactivos','config'];
+  var tabs=['stats','users','pedidos','saldos','top','puntos','codigos','chat','resenas','soporte','inactivos','config'];
   tabs.forEach(function(t){
     var btn=document.getElementById('admn-'+t);
     var sec=document.getElementById('adms-'+t);
@@ -3216,6 +3475,7 @@ function admFullTab(tab){
   if(tab==='pedidos') admLoadPedidos();
   if(tab==='saldos')  admFullLoadMovs();
   if(tab==='top')     admLoadTop();
+  if(tab==='puntos')  { admCargarPremiosLista(); admCargarCanjesPendientes(); }
   if(tab==='codigos'){ renderAdminCodes();renderAdminStats(); }
   if(tab==='chat')    admLoadChat();
   if(tab==='resenas') admLoadResenas();
@@ -8092,6 +8352,15 @@ function _ejecutarRecargaVerificada(p, ffId, nombre, verificationStatus, btn, ms
         var infoVia = res.via ? ('\n\uD83D\uDD17 Via: '+(res.via==='catalog'?'Catalogo Unificado':'API pines')) : '';
         tgNotifyPurchase(authSession.username, '\u26A1 Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n'+infoJugador+infoVia, p.precio, ord);
       }
+      // Puntos de ranking: SOLO cuando el proveedor confirma COMPLETED de verdad.
+      // PENDING no otorga puntos (regla explicita) — si mas tarde se marca
+      // COMPLETED por otro medio, otorgar_puntos_pedido() puede llamarse de nuevo
+      // con el mismo pedido_id sin duplicar (UNIQUE lo protege).
+      if(res.status==='COMPLETED' && typeof sb!=='undefined' && sb.rpc && authSession && authSession.id){
+        sb.rpc('otorgar_puntos_pedido', { p_user_id: authSession.id, p_pedido_id: ord, p_diamantes: p.diamantes })
+          .then(function(pts){ if(pts) console.log('[PUNTOS] +'+pts+' puntos otorgados, pedido #'+ord); })
+          .catch(function(e){ console.error('[PUNTOS] Error otorgando:', e); });
+      }
       _mostrarReciboRecarga(p, ffId, esVerificado ? nombre : null, res.status);
       var txt = res.status==='COMPLETED' ? '\u2705 Recarga COMPLETADA!' : '\u23F3 Recarga en proceso...';
       showToast(txt, 3000);
@@ -8154,6 +8423,12 @@ function _ejecutarRecargaVerificada(p, ffId, nombre, verificationStatus, btn, ms
           if(_movCompraId) _cancelarMovPorId(_movCompraId); else { _cancelarPendiente = true; _cancelarMovimientoCompra(authSession.id, ord); }
 
           registrarPedido(p.nombre+' (RECHAZADA - reembolsado)', p.diamantes, 'diamantes', ffId, 0, 0);
+          // Reversion de seguridad: si por algun motivo este pedido ya habia
+          // otorgado puntos antes, los revierte. Si nunca otorgo puntos (caso
+          // normal aqui), el RPC simplemente devuelve 0 sin hacer nada.
+          if(typeof sb!=='undefined' && sb.rpc && authSession && authSession.id){
+            sb.rpc('revertir_puntos_pedido', { p_user_id: authSession.id, p_pedido_id: ord, p_motivo: 'Recarga rechazada - sin fondos del proveedor' }).catch(function(){});
+          }
           if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\uD83D\uDEA8 <b>RECARGA RECHAZADA - SIN FONDOS</b>\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\u2705 Saldo reembolsado al cliente ('+fmt(p.precio)+')\n\n\u26A0\uFE0F <b>RECARGA TU CUENTA DEL PROVEEDOR</b>', p.precio, ord);
         }).catch(function(e){
           // El reembolso NO se pudo completar — el cliente SIGUE sin su dinero.
@@ -8186,6 +8461,9 @@ function _ejecutarRecargaVerificada(p, ffId, nombre, verificationStatus, btn, ms
           if(_movCompraId) _cancelarMovPorId(_movCompraId); else { _cancelarPendiente = true; _cancelarMovimientoCompra(authSession.id, ord); }
 
           registrarPedido(p.nombre+' (AUTO - NO DISPONIBLE, devuelto)', p.diamantes, 'diamantes', ffId, 0, 0);
+          if(typeof sb!=='undefined' && sb.rpc && authSession && authSession.id){
+            sb.rpc('revertir_puntos_pedido', { p_user_id: authSession.id, p_pedido_id: ord, p_motivo: 'Producto no disponible - devuelto' }).catch(function(){});
+          }
           if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F NO DISPONIBLE - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\u2705 SALDO DEVUELTO automaticamente ('+fmt(p.precio)+')', p.precio, ord);
         }).catch(function(e){
           console.error('[RECARGA] devolucion fallo:', e);

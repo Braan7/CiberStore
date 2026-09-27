@@ -6016,6 +6016,72 @@ document.addEventListener('keydown',function(e){
     <p class="psub">Compite por el TOP 1 y gana premios. Datos en tiempo real de todos los clientes.</p>
   </div>
 
+  <!-- ═══ MI RANGO Y PUNTOS ═══ -->
+  <div style="max-width:900px;margin:0 auto;padding:1.25rem 5vw 0">
+    <div id="rango-usuario-card" style="background:linear-gradient(160deg,rgba(103,232,249,.1),rgba(20,15,30,.4));border:1.5px solid rgba(103,232,249,.3);border-radius:18px;padding:1.3rem;position:relative;overflow:hidden;margin-bottom:1.5rem">
+      <div style="position:absolute;top:-35%;right:-10%;width:220px;height:220px;background:radial-gradient(circle,rgba(103,232,249,.14),transparent 70%);pointer-events:none"></div>
+      <div style="position:relative;z-index:2">
+        <div style="display:flex;align-items:center;gap:.9rem;margin-bottom:1rem">
+          <div id="rango-icono" style="width:54px;height:54px;flex-shrink:0;border-radius:15px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:1.7rem">&#129352;</div>
+          <div style="flex:1;min-width:0">
+            <div id="rango-nombre" style="font-family:Oxanium,sans-serif;font-weight:900;font-size:1.15rem;color:#fff;letter-spacing:.3px">BRONCE</div>
+            <div style="font-size:.75rem;color:#9aa3b0" id="rango-posicion">Cargando tu posici&oacute;n...</div>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.4rem">
+          <span style="font-size:.72rem;color:#9aa3b0;font-weight:600" id="rango-progreso-txt">0 / 50 puntos</span>
+          <span style="font-size:.68rem;color:#67e8f9;font-weight:700" id="rango-siguiente-txt"></span>
+        </div>
+        <div style="height:9px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden">
+          <div id="rango-progreso-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#0e7490,#22d3ee);border-radius:99px;transition:width .5s ease"></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-top:1.1rem">
+          <div style="background:rgba(0,0,0,.25);border-radius:11px;padding:.65rem;text-align:center">
+            <div style="font-family:Oxanium;font-weight:900;font-size:1.1rem;color:#67e8f9" id="rango-puntos">0</div>
+            <div style="font-size:.62rem;color:#6b7280;text-transform:uppercase;letter-spacing:.4px">Puntos</div>
+          </div>
+          <div style="background:rgba(0,0,0,.25);border-radius:11px;padding:.65rem;text-align:center">
+            <div style="font-family:Oxanium;font-weight:900;font-size:1.1rem;color:#22d3ee" id="rango-diamantes">0</div>
+            <div style="font-size:.62rem;color:#6b7280;text-transform:uppercase;letter-spacing:.4px">Diamantes v&aacute;lidos</div>
+          </div>
+          <div style="background:rgba(0,0,0,.25);border-radius:11px;padding:.65rem;text-align:center">
+            <div style="font-family:Oxanium;font-weight:900;font-size:1.1rem;color:#25d366" id="rango-compras">0</div>
+            <div style="font-size:.62rem;color:#6b7280;text-transform:uppercase;letter-spacing:.4px">Compras v&aacute;lidas</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TOP DE PUNTOS ═══ -->
+  <div style="max-width:900px;margin:0 auto;padding:0 5vw 1.5rem">
+    <div style="background:linear-gradient(135deg,#0a1620,#0a0a0a);border:1px solid rgba(103,232,249,.25);border-radius:16px;padding:1.25rem;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-30%;right:-10%;width:300px;height:300px;background:radial-gradient(circle,rgba(103,232,249,.1) 0%,transparent 70%);pointer-events:none"></div>
+      <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:1rem;position:relative;z-index:2">
+        <span style="font-size:1.1rem">&#127942;</span>
+        <div style="font-family:Oxanium;font-size:.85rem;font-weight:900;color:#fff;letter-spacing:1.5px">TOP CIBERSTORE &middot; PUNTOS</div>
+      </div>
+      <div id="top-puntos-list" style="position:relative;z-index:2;display:flex;flex-direction:column;gap:.5rem">
+        <div style="text-align:center;padding:2rem;color:var(--muted);font-size:.82rem">Cargando...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PREMIOS ═══ -->
+  <div style="max-width:900px;margin:0 auto;padding:0 5vw 1.5rem">
+    <div style="background:linear-gradient(135deg,#1a0f1c,#0a0a0a);border:1px solid rgba(167,139,250,.25);border-radius:16px;padding:1.25rem">
+      <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:1rem">
+        <span style="font-size:1.1rem">&#127873;</span>
+        <div style="font-family:Oxanium;font-size:.85rem;font-weight:900;color:#fff;letter-spacing:1.5px">PREMIOS</div>
+      </div>
+      <div id="premios-list" style="display:flex;flex-direction:column;gap:.6rem">
+        <div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Cargando...</div>
+      </div>
+    </div>
+  </div>
+
   <!-- Totales globales de la plataforma -->
   <div style="max-width:900px;margin:0 auto;padding:1.25rem 5vw 0">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;cursor:pointer" onclick="toggleSeccion('totales-globales',this)">
@@ -6412,6 +6478,7 @@ document.addEventListener('keydown',function(e){
       <button class="adm-nav-btn"        id="admn-stats2"  onclick="admFullTab('stats2')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M12 20V4M20 20v-7"/></svg> Estad&iacute;sticas</button>
       <button class="adm-nav-btn"        id="admn-tools"   onclick="admFullTab('tools')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 1-5.4 5.4L4 17l3 3 5.3-5.3a4 4 0 0 1 5.4-5.4L21 6l-3-3-3.3 3.3z"/></svg> Herramientas</button>
       <button class="adm-nav-btn"        id="admn-top"     onclick="admFullTab('top')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M6 4h12l-1 6a5 5 0 0 1-10 0L6 4z"/><path d="M6 6H4a2 2 0 0 0 2 4M18 6h2a2 2 0 0 1-2 4"/></svg> Top</button>
+      <button class="adm-nav-btn"        id="admn-puntos"  onclick="admFullTab('puntos')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 15 8.5 22 9.5 17 14.2 18.2 21 12 17.7 5.8 21 7 14.2 2 9.5 9 8.5z"/></svg> Puntos y Premios</button>
       <button class="adm-nav-btn"        id="admn-codigos" onclick="admFullTab('codigos')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M2.5 10h19M6 14h4"/></svg> C&oacute;digos</button>
       <button class="adm-nav-btn"        id="admn-chat"    onclick="admFullTab('chat')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 1 1-3.4-6.5"/><path d="M21 4v6h-6"/></svg> Chat</button>
       <button class="adm-nav-btn"        id="admn-resenas" onclick="admFullTab('resenas')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 14.5 9l6 .8-4.3 4.1 1 6-5.2-2.8L7 20l1-6-4.3-4.2 6-.8L12 3.5z"/></svg> Rese&ntilde;as</button>
@@ -6646,6 +6713,46 @@ document.addEventListener('keydown',function(e){
         <div style="font-family:Oxanium;font-size:.72rem;color:#67e8f9;letter-spacing:1px;margin-bottom:.85rem">&#128081; TOP TOTAL</div>
         <div id="adm-top-total" style="display:flex;flex-direction:column;gap:.35rem"><div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Cargando...</div></div>
       </div>
+    </div>
+  </div>
+
+  <!-- ══ PUNTOS Y PREMIOS ══ -->
+  <div class="adm-section" id="adms-puntos">
+
+    <!-- Buscar historial de puntos de un usuario -->
+    <div class="admin-card" style="margin-bottom:1.25rem">
+      <div style="font-family:Oxanium;font-size:.72rem;color:#67e8f9;letter-spacing:1px;margin-bottom:.85rem">&#128202; HISTORIAL DE PUNTOS POR USUARIO</div>
+      <div class="adm-inp-row" style="margin-bottom:.85rem">
+        <div class="adm-inp-group" style="flex:2"><label>Username</label><input class="admin-inp" id="adm-puntos-user" type="text" placeholder="Usuario exacto..." style="width:100%"/></div>
+        <div style="align-self:flex-end"><button onclick="admBuscarHistorialPuntos()" class="btn-admin-create">Buscar</button></div>
+      </div>
+      <div id="adm-puntos-historial" style="display:flex;flex-direction:column;gap:.4rem"></div>
+    </div>
+
+    <!-- Gestión de premios -->
+    <div class="admin-card" style="margin-bottom:1.25rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem">
+        <div style="font-family:Oxanium;font-size:.72rem;color:#a78bfa;letter-spacing:1px">&#127873; PREMIOS</div>
+        <button onclick="admMostrarFormPremio()" class="btn-admin-create" style="font-size:.72rem">+ Nuevo premio</button>
+      </div>
+      <div id="adm-form-premio" style="display:none;background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.22);border-radius:10px;padding:.9rem;margin-bottom:.9rem">
+        <div class="adm-inp-row" style="margin-bottom:.6rem">
+          <div class="adm-inp-group" style="flex:2"><label>Nombre</label><input class="admin-inp" id="adm-premio-nombre" type="text" placeholder="Nombre del premio" style="width:100%"/></div>
+          <div class="adm-inp-group" style="max-width:90px"><label>Icono</label><input class="admin-inp" id="adm-premio-icono" type="text" placeholder="&#127873;" style="width:100%"/></div>
+        </div>
+        <div class="adm-inp-row" style="margin-bottom:.6rem">
+          <div class="adm-inp-group" style="flex:2"><label>Descripcion</label><input class="admin-inp" id="adm-premio-desc" type="text" placeholder="Opcional" style="width:100%"/></div>
+          <div class="adm-inp-group" style="max-width:130px"><label>Costo (puntos)</label><input class="admin-inp" id="adm-premio-costo" type="number" min="1" style="width:100%"/></div>
+        </div>
+        <button onclick="admGuardarPremio()" class="btn-admin-create">Guardar premio</button>
+      </div>
+      <div id="adm-premios-lista" style="display:flex;flex-direction:column;gap:.5rem"><div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Cargando...</div></div>
+    </div>
+
+    <!-- Canjes pendientes de entrega -->
+    <div class="admin-card">
+      <div style="font-family:Oxanium;font-size:.72rem;color:#ffd000;letter-spacing:1px;margin-bottom:.85rem">&#128230; CANJES PENDIENTES DE ENTREGA</div>
+      <div id="adm-canjes-lista" style="display:flex;flex-direction:column;gap:.5rem"><div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Cargando...</div></div>
     </div>
   </div>
 
