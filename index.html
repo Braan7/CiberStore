@@ -6247,42 +6247,6 @@ document.addEventListener('keydown',function(e){
       </div>
     </div>
 
-    <!-- TOP GENERAL - PURO DINERO -->
-    <div style="margin-bottom:2rem">
-      <div style="background:linear-gradient(90deg,rgba(34,211,238,.1),rgba(34,211,238,.05));border:1px solid rgba(34,211,238,.25);border-bottom:none;padding:1rem;border-radius:8px 8px 0 0">
-        <div style="display:flex;align-items:center;gap:.6rem">
-          <span style="font-size:1.2rem">💰</span>
-          <div>
-            <div style="font-family:Oxanium;font-size:.95rem;font-weight:900;color:#22d3ee;letter-spacing:1px">TOP GENERAL</div>
-            <div style="font-size:.65rem;color:var(--muted)">Todos los tiempos - Puro dinero gastado</div>
-          </div>
-        </div>
-      </div>
-      <div style="background:#0b0b0b;border:1px solid rgba(34,211,238,.25);border-top:none;border-radius:0 0 8px 8px;padding:1rem">
-        <div id="rank-list-top-general" style="min-height:100px;display:flex;flex-direction:column;gap:.5rem">
-          <div style="text-align:center;padding:2rem;color:var(--muted)">Cargando...</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- TOP COMPRADORES LIKES -->
-    <div style="margin-bottom:2rem">
-      <div style="background:linear-gradient(90deg,rgba(255,107,157,.1),rgba(255,107,157,.05));border:1px solid rgba(255,107,157,.25);border-bottom:none;padding:1rem;border-radius:8px 8px 0 0">
-        <div style="display:flex;align-items:center;gap:.6rem">
-          <span style="font-size:1.2rem">👍</span>
-          <div>
-            <div style="font-family:Oxanium;font-size:.95rem;font-weight:900;color:#ff6b9d;letter-spacing:1px">TOP COMPRADORES LIKES</div>
-            <div style="font-size:.65rem;color:var(--muted)">Todos los clientes que compraron likes</div>
-          </div>
-        </div>
-      </div>
-      <div style="background:#0b0b0b;border:1px solid rgba(255,107,157,.25);border-top:none;border-radius:0 0 8px 8px;padding:1rem">
-        <div id="rank-list-top-likes" style="min-height:100px;display:flex;flex-direction:column;gap:.5rem">
-          <div style="text-align:center;padding:2rem;color:var(--muted)">Cargando...</div>
-        </div>
-      </div>
-    </div>
-
     <!-- TOP COMPRADORES DIAMANTES -->
     <div style="margin-bottom:2rem">
       <div style="background:linear-gradient(90deg,rgba(167,139,250,.1),rgba(167,139,250,.05));border:1px solid rgba(167,139,250,.25);border-bottom:none;padding:1rem;border-radius:8px 8px 0 0">
@@ -6290,13 +6254,18 @@ document.addEventListener('keydown',function(e){
           <span style="font-size:1.2rem">💎</span>
           <div>
             <div style="font-family:Oxanium;font-size:.95rem;font-weight:900;color:#67e8f9;letter-spacing:1px">TOP COMPRADORES DIAMANTES</div>
-            <div style="font-size:.65rem;color:var(--muted)">Todos los clientes que compraron diamantes</div>
+            <div style="font-size:.65rem;color:var(--muted)">Diamantes comprados v&aacute;lidamente (sin reembolsos)</div>
           </div>
         </div>
       </div>
       <div style="background:#0b0b0b;border:1px solid rgba(167,139,250,.25);border-top:none;border-radius:0 0 8px 8px;padding:1rem">
         <div id="rank-list-top-diamantes" style="min-height:100px;display:flex;flex-direction:column;gap:.5rem">
           <div style="text-align:center;padding:2rem;color:var(--muted)">Cargando...</div>
+        </div>
+        <div style="text-align:center;margin-top:.6rem">
+          <button id="top-diam-vermas-btn" onclick="toggleTopDiamantes()" style="display:inline-flex;align-items:center;gap:.35rem;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.3);color:#a78bfa;border-radius:8px;padding:.4rem .9rem;font-family:Poppins,sans-serif;font-weight:700;font-size:.76rem;cursor:pointer">
+            Ver m&aacute;s <svg id="top-diam-vermas-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
         </div>
       </div>
     </div>
@@ -6326,7 +6295,7 @@ document.addEventListener('keydown',function(e){
           // Si no cargó, mostrar estado vacío y seguir intentando
           if(!loaded){
             console.log('[RANKING] Supabase aún no disponible, mostrando estado vacío...');
-            var containers = ['rank-list-habibis','rank-list-top-diario','rank-list-top-semanal','rank-list-top-mensual','rank-list-top-general','rank-list-top-likes','rank-list-top-diamantes'];
+            var containers = ['rank-list-habibis','rank-list-top-diario','rank-list-top-semanal','rank-list-top-mensual','rank-list-top-diamantes'];
             containers.forEach(function(id){
               var el = document.getElementById(id);
               if(el) el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#999;font-size:.8rem">⏳ Datos en vivo<br><span style="font-size:.65rem">Los rankings se actualizarán cuando Supabase esté listo</span></div>';

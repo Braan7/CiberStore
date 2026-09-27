@@ -5475,192 +5475,88 @@ function setRankPeriod(period){
 }
 
 /**
- * Top general (todos los tiempos)
- */
-function loadTopGeneral(){
-  var el = document.getElementById('rank-list-top-general');
-  if(!el) return;
-  
-  if(!window.sb || typeof sb !== 'object'){
-    el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#ff9900;font-size:.82rem">⚠️ Esperando conexión...</div>';
-    setTimeout(loadTopGeneral, 2000);
-    return;
-  }
-  el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted)">Cargando...</div>';
-
-  sb.get('movimientos_saldo', 'tipo=eq.compra&select=user_id,monto').then(function(movs){
-    if(!movs || !Array.isArray(movs) || !movs.length){
-      el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Sin datos historicos</div>';
-      return;
-    }
-
-    var agg = {};
-    movs.forEach(function(m){
-      var uid = m.user_id;
-      agg[uid] = (agg[uid] || 0) + (m.monto || 0);
-    });
-
-    var uids = Object.keys(agg);
-    sb.get('profiles', 'select=id,username&id=in.('+uids.map(function(u){return '"'+u+'"';}).join(',')+')').then(function(profs){
-      var umap = {};
-      if(profs) profs.forEach(function(p){ umap[p.id] = p.username; });
-
-      var sorted = uids.map(function(uid){
-        return {username: umap[uid] || 'Usuario', value: agg[uid]};
-      }).sort(function(a,b){ return b.value - a.value; }).slice(0,15);
-
-      renderTopList('rank-list-top-general', sorted);
-    });
-  }).catch(function(){
-    el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#ff6b6b;font-size:.82rem">Error</div>';
-  });
-}
-
-/**
- * Top compradores de LIKES
- */
-function loadTopLikes(){
-  var el = document.getElementById('rank-list-top-likes');
-  if(!el) return;
-  el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted)">Cargando...</div>';
-
-  sb.get('movimientos_saldo', 'tipo=eq.compra&select=user_id,descripcion,monto').then(function(movs){
-    if(!movs || !Array.isArray(movs) || !movs.length){
-      el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Sin compras de likes aun</div>';
-      return;
-    }
-
-    // Filtrar solo likes y sumar
-    var agg = {};
-    movs.forEach(function(m){
-      var desc = (m.descripcion || '').toLowerCase();
-      if(desc.indexOf('like') < 0) return; // solo likes
-
-      var uid = m.user_id;
-      if(!agg[uid]) agg[uid] = {monto: 0, likes: 0};
-      agg[uid].monto += (m.monto || 0);
-
-      // Extraer cantidad de likes
-      var match = desc.match(/(\\d[\\d,]*)\\s*like/);
-      if(match) agg[uid].likes += parseInt(match[1].replace(/[,]/g,''))||0;
-    });
-
-    var uids = Object.keys(agg);
-    if(!uids.length){
-      el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Sin compras de likes</div>';
-      return;
-    }
-
-    sb.get('profiles', 'select=id,username&id=in.('+uids.map(function(u){return '"'+u+'"';}).join(',')+')').then(function(profs){
-      var umap = {};
-      if(profs) profs.forEach(function(p){ umap[p.id] = p.username; });
-
-      var sorted = uids.map(function(uid){
-        return {username: umap[uid] || 'Usuario', value: agg[uid].monto, likes: agg[uid].likes};
-      }).sort(function(a,b){ return b.value - a.value; }).slice(0,15);
-
-      // Renderizar con likes incluidos
-      var medals = ['🥇','🥈','🥉'];
-      var html = '';
-      sorted.forEach(function(item, i){
-        var medal = i < 3 ? medals[i] : (i+1)+'.';
-        var medalColor = i < 3 ? (i===0?'#ffd700':i===1?'#c0c0c0':'#cd7f32') : 'var(--muted)';
-        var initial = (item.username || 'U').charAt(0).toUpperCase();
-        var isMe = authSession && authSession.username === item.username;
-        var bg = i === 0 ? 'rgba(255,215,0,.06)' : 'rgba(255,255,255,.02)';
-        var border = i === 0 ? 'rgba(255,215,0,.25)' : 'rgba(255,255,255,.06)';
-
-        html += '<div style="background:'+bg+';border:1px solid '+border+';border-radius:11px;padding:.75rem 1rem;display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem">'
-          + '<div style="width:30px;text-align:center;font-size:'+(i<3?'1.2rem':'.82rem')+';color:'+medalColor+';font-weight:700;flex-shrink:0">'+medal+'</div>'
-          + '<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-size:.72rem;font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+medalColor+'44">'+initial+'</div>'
-          + '<div style="flex:1;min-width:0">'
-          + '<div style="font-size:.85rem;font-weight:700;color:#fff">'+item.username+(isMe?' <span style="font-size:.62rem;background:rgba(34,211,238,.15);color:var(--c1);padding:.1rem .35rem;border-radius:4px">Tu</span>':'')+' </div>'
-          + '<div style="font-size:.65rem;color:var(--muted);margin-top:.15rem">👍 '+item.likes.toLocaleString('es-MX')+' likes</div>'
-          + '</div>'
-          + '<div style="text-align:right;flex-shrink:0;font-family:Oxanium;font-size:.82rem;font-weight:900;color:'+(i===0?'#ffd700':'#00e676')+'">$'+item.value.toLocaleString('es-MX')+'</div>'
-          + '</div>';
-      });
-
-      el.innerHTML = html;
-    });
-  }).catch(function(){
-    el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#ff6b6b;font-size:.82rem">Error</div>';
-  });
-}
-
-/**
  * Top compradores de DIAMANTES
  */
+var _topDiamData = [];       // cache de la ultima carga, para expandir/minimizar sin re-pedir
+var _topDiamExpandido = false;
+
 function loadTopDiamantes(){
   var el = document.getElementById('rank-list-top-diamantes');
   if(!el) return;
   el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted)">Cargando...</div>';
 
-  sb.get('movimientos_saldo', 'tipo=eq.compra&select=user_id,descripcion,monto').then(function(movs){
-    if(!movs || !Array.isArray(movs) || !movs.length){
-      el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Sin compras de diamantes aun</div>';
+  if(typeof sb === 'undefined' || !sb.rpc){
+    el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#ff6b6b;font-size:.82rem">No disponible</div>';
+    return;
+  }
+
+  // Usa el sistema real de puntos (tabla puntos_movimientos): solo cuenta
+  // diamantes de compras COMPLETED, y ya excluye lo reembolsado porque una
+  // reversion resta exactamente los mismos diamantes que se habian sumado.
+  // Esto reemplaza el metodo anterior (parsear texto de movimientos_saldo con
+  // regex), que era menos confiable.
+  sb.rpc('top_puntos_ranking', { p_limit: 100 }).then(function(top){
+    if(!Array.isArray(top) || !top.length){
+      el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Sin compras de diamantes validas aun</div>';
+      var btn = document.getElementById('top-diam-vermas-btn'); if(btn) btn.style.display = 'none';
       return;
     }
+    // Reordenar por diamantes (top_puntos_ranking ordena por puntos, que para
+    // diamantes suele coincidir, pero re-ordenamos explicitamente por seguridad)
+    var sorted = top.map(function(u){
+      return { username: u.username, diamantes: Number(u.diamantes)||0 };
+    }).filter(function(u){ return u.diamantes > 0; })
+      .sort(function(a,b){ return b.diamantes - a.diamantes; });
 
-    // Filtrar solo diamantes REALMENTE completados y sumar (excluye
-    // rechazadas, en verificacion o duplicadas — nunca se entregaron).
-    var agg = {};
-    movs.forEach(function(m){
-      var desc = (m.descripcion || '').toLowerCase();
-      if(desc.indexOf('diamante') < 0) return; // solo diamantes
-      if(/verificar|rechazad|duplicad|no disponible|fallid/.test(desc)) return;
-
-      var uid = m.user_id;
-      if(!agg[uid]) agg[uid] = {monto: 0, diamantes: 0};
-      agg[uid].monto += (m.monto || 0);
-
-      // Extraer cantidad de diamantes
-      var match = desc.match(/(\\d[\\d,]*)\\s*diamante/);
-      if(match) agg[uid].diamantes += parseInt(match[1].replace(/[,]/g,''))||0;
-    });
-
-    var uids = Object.keys(agg);
-    if(!uids.length){
-      el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Sin compras de diamantes</div>';
-      return;
-    }
-
-    sb.get('profiles', 'select=id,username&id=in.('+uids.map(function(u){return '"'+u+'"';}).join(',')+')').then(function(profs){
-      var umap = {};
-      if(profs) profs.forEach(function(p){ umap[p.id] = p.username; });
-
-      var sorted = uids.map(function(uid){
-        return {username: umap[uid] || 'Usuario', value: agg[uid].monto, diamantes: agg[uid].diamantes};
-      }).sort(function(a,b){ return b.value - a.value; }).slice(0,15);
-
-      // Renderizar con diamantes incluidos
-      var medals = ['🥇','🥈','🥉'];
-      var html = '';
-      sorted.forEach(function(item, i){
-        var medal = i < 3 ? medals[i] : (i+1)+'.';
-        var medalColor = i < 3 ? (i===0?'#ffd700':i===1?'#c0c0c0':'#cd7f32') : 'var(--muted)';
-        var initial = (item.username || 'U').charAt(0).toUpperCase();
-        var isMe = authSession && authSession.username === item.username;
-        var bg = i === 0 ? 'rgba(255,215,0,.06)' : 'rgba(255,255,255,.02)';
-        var border = i === 0 ? 'rgba(255,215,0,.25)' : 'rgba(255,255,255,.06)';
-
-        html += '<div style="background:'+bg+';border:1px solid '+border+';border-radius:11px;padding:.75rem 1rem;display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem">'
-          + '<div style="width:30px;text-align:center;font-size:'+(i<3?'1.2rem':'.82rem')+';color:'+medalColor+';font-weight:700;flex-shrink:0">'+medal+'</div>'
-          + '<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-size:.72rem;font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+medalColor+'44">'+initial+'</div>'
-          + '<div style="flex:1;min-width:0">'
-          + '<div style="font-size:.85rem;font-weight:700;color:#fff">'+item.username+(isMe?' <span style="font-size:.62rem;background:rgba(34,211,238,.15);color:var(--c1);padding:.1rem .35rem;border-radius:4px">Tu</span>':'')+' </div>'
-          + '<div style="font-size:.65rem;color:var(--muted);margin-top:.15rem">💎 '+item.diamantes.toLocaleString('es-MX')+' diamantes</div>'
-          + '</div>'
-          + '<div style="text-align:right;flex-shrink:0;font-family:Oxanium;font-size:.82rem;font-weight:900;color:'+(i===0?'#ffd700':'#00e676')+'">$'+item.value.toLocaleString('es-MX')+'</div>'
-          + '</div>';
-      });
-
-      el.innerHTML = html;
-    });
-  }).catch(function(){
+    _topDiamData = sorted;
+    _renderTopDiamantesLista();
+  }).catch(function(e){
+    console.error('[TOP DIAMANTES] Error:', e);
     el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#ff6b6b;font-size:.82rem">Error</div>';
   });
 }
+
+function _renderTopDiamantesLista(){
+  var el = document.getElementById('rank-list-top-diamantes');
+  var btn = document.getElementById('top-diam-vermas-btn');
+  if(!el) return;
+  var lista = _topDiamExpandido ? _topDiamData : _topDiamData.slice(0,3);
+
+  var medals = ['🥇','🥈','🥉'];
+  var html = '';
+  lista.forEach(function(item, i){
+    var medal = i < 3 ? medals[i] : (i+1)+'.';
+    var medalColor = i < 3 ? (i===0?'#ffd700':i===1?'#c0c0c0':'#cd7f32') : 'var(--muted)';
+    var initial = (item.username || 'U').charAt(0).toUpperCase();
+    var isMe = authSession && authSession.username === item.username;
+    var bg = i === 0 ? 'rgba(255,215,0,.06)' : 'rgba(255,255,255,.02)';
+    var border = i === 0 ? 'rgba(255,215,0,.25)' : 'rgba(255,255,255,.06)';
+
+    html += '<div style="background:'+bg+';border:1px solid '+border+';border-radius:11px;padding:.75rem 1rem;display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem">'
+      + '<div style="width:30px;text-align:center;font-size:'+(i<3?'1.2rem':'.82rem')+';color:'+medalColor+';font-weight:700;flex-shrink:0">'+medal+'</div>'
+      + '<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-size:.72rem;font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+medalColor+'44">'+initial+'</div>'
+      + '<div style="flex:1;min-width:0">'
+      + '<div style="font-size:.85rem;font-weight:700;color:#fff">'+_esc(item.username)+(isMe?' <span style="font-size:.62rem;background:rgba(34,211,238,.15);color:var(--c1);padding:.1rem .35rem;border-radius:4px">Tu</span>':'')+'</div>'
+      + '</div>'
+      + '<div style="text-align:right;flex-shrink:0;font-family:Oxanium;font-size:.9rem;font-weight:900;color:'+(i===0?'#ffd700':'#67e8f9')+'">'+item.diamantes.toLocaleString('es-MX')+' \uD83D\uDC8E</div>'
+      + '</div>';
+  });
+  el.innerHTML = html;
+
+  if(btn){
+    btn.style.display = (_topDiamData.length > 3) ? 'inline-flex' : 'none';
+    btn.childNodes[0].textContent = _topDiamExpandido ? 'Ver menos ' : 'Ver m\u00e1s ';
+    var icon = document.getElementById('top-diam-vermas-icon');
+    if(icon) icon.style.transform = _topDiamExpandido ? 'rotate(180deg)' : 'none';
+  }
+}
+
+function toggleTopDiamantes(){
+  _topDiamExpandido = !_topDiamExpandido;
+  _renderTopDiamantesLista();
+}
+
+
 
 /**
  * Cargar todos los tops cuando se abre la página de ranking
@@ -5750,8 +5646,6 @@ function initRankingPage(){
     loadRankingByPeriod('daily');
     loadRankingByPeriod('weekly');
     loadRankingByPeriod('monthly');
-    loadTopGeneral();
-    loadTopLikes();
     loadTopDiamantes();
     console.log('[RANKING] ✓ Todas las funciones lanzadas');
     return true;
