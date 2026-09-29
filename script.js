@@ -1011,8 +1011,8 @@ function cargarTopPuntos(){
       return '<div style="display:flex;align-items:center;gap:.7rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:11px;padding:.65rem .85rem">'
         + '<span style="font-size:1rem;width:28px;text-align:center;flex-shrink:0">'+medalla+'</span>'
         + '<span style="font-size:1.1rem;flex-shrink:0">'+info.icono+'</span>'
-        + '<div style="flex:1;min-width:0"><div style="font-family:Poppins;font-weight:700;font-size:.85rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+_esc(u.username)+'</div><div style="font-size:.66rem;color:#6b7280">'+info.nombre+'</div></div>'
-        + '<span style="font-family:Oxanium;font-weight:900;font-size:.95rem;color:#67e8f9;flex-shrink:0">'+(Number(u.puntos)||0).toLocaleString('es-MX')+' pts</span>'
+        + '<div style="flex:1;min-width:0"><div style="font-family:Barlow;font-weight:700;font-size:.85rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+_esc(u.username)+'</div><div style="font-size:.66rem;color:#6b7280">'+info.nombre+'</div></div>'
+        + '<span style="font-family:Saira;font-weight:900;font-size:.95rem;color:#67e8f9;flex-shrink:0">'+(Number(u.puntos)||0).toLocaleString('es-MX')+' pts</span>'
         + '</div>';
     }).join('');
   }).catch(function(e){
@@ -1034,8 +1034,8 @@ function cargarPremios(){
     cont.innerHTML = premios.map(function(p){
       return '<div style="display:flex;align-items:center;gap:.7rem;background:rgba(255,255,255,.03);border:1px solid rgba(167,139,250,.18);border-radius:12px;padding:.75rem .9rem">'
         + '<span style="font-size:1.4rem;flex-shrink:0">'+(p.icono||'\uD83C\uDF81')+'</span>'
-        + '<div style="flex:1;min-width:0"><div style="font-family:Poppins;font-weight:700;font-size:.85rem;color:#fff">'+_esc(p.nombre)+'</div>'+(p.descripcion?('<div style="font-size:.7rem;color:#9aa3b0;margin-top:.1rem">'+_esc(p.descripcion)+'</div>'):'')+'</div>'
-        + '<button onclick="canjearPremioUI('+p.id+',\''+_esc(p.nombre).replace(/'/g,"")+'\','+p.costo_puntos+')" style="flex-shrink:0;padding:.5rem .9rem;background:linear-gradient(135deg,#5b21b6,#a78bfa);color:#fff;border:none;border-radius:9px;font-family:Oxanium;font-weight:800;font-size:.78rem;cursor:pointer">'+p.costo_puntos+' pts</button>'
+        + '<div style="flex:1;min-width:0"><div style="font-family:Barlow;font-weight:700;font-size:.85rem;color:#fff">'+_esc(p.nombre)+'</div>'+(p.descripcion?('<div style="font-size:.7rem;color:#9aa3b0;margin-top:.1rem">'+_esc(p.descripcion)+'</div>'):'')+'</div>'
+        + '<button onclick="canjearPremioUI('+p.id+',\''+_esc(p.nombre).replace(/'/g,"")+'\','+p.costo_puntos+')" style="flex-shrink:0;padding:.5rem .9rem;background:linear-gradient(135deg,#5b21b6,#a78bfa);color:#fff;border:none;border-radius:9px;font-family:Saira;font-weight:800;font-size:.78rem;cursor:pointer">'+p.costo_puntos+' pts</button>'
         + '</div>';
     }).join('');
   }).catch(function(e){
@@ -1084,11 +1084,11 @@ function admBuscarHistorialPuntos(){
         var esOtorgado = h.tipo_movimiento === 'otorgado';
         var fecha = h.created_at ? new Date(h.created_at).toLocaleString('es-MX') : '';
         return '<div style="display:flex;align-items:center;gap:.6rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:9px;padding:.55rem .8rem">'
-          + '<span style="font-family:Oxanium;font-weight:800;font-size:.85rem;color:'+(esOtorgado?'#25d366':'#ff6b6b')+'">'+(h.puntos>=0?'+':'')+h.puntos+'</span>'
+          + '<span style="font-family:Saira;font-weight:800;font-size:.85rem;color:'+(esOtorgado?'#25d366':'#ff6b6b')+'">'+(h.puntos>=0?'+':'')+h.puntos+'</span>'
           + '<div style="flex:1;min-width:0"><div style="font-size:.78rem;color:#fff">Pedido #'+h.pedido_id+' &middot; '+(h.diamantes||0)+' &#128142;</div><div style="font-size:.68rem;color:#6b7280">'+(h.motivo||'')+' &middot; '+fecha+'</div></div>'
           + '</div>';
       }).join('');
-      cont.innerHTML = '<div style="text-align:right;font-family:Oxanium;font-weight:800;color:#67e8f9;font-size:.85rem;margin-bottom:.5rem">Total actual: '+total+' puntos</div>' + rowsHtml;
+      cont.innerHTML = '<div style="text-align:right;font-family:Saira;font-weight:800;color:#67e8f9;font-size:.85rem;margin-bottom:.5rem">Total actual: '+total+' puntos</div>' + rowsHtml;
     }).catch(function(){ cont.innerHTML = '<div style="text-align:center;padding:1rem;color:#ff6b6b;font-size:.8rem">Error al cargar historial</div>'; });
   }).catch(function(){ cont.innerHTML = '<div style="text-align:center;padding:1rem;color:#ff6b6b;font-size:.8rem">Error de conexion</div>'; });
 }
@@ -1270,7 +1270,7 @@ function renderProds(){
   rows+='<div style="grid-column:1/-1;background:linear-gradient(135deg,#0a0a0a,#0a0a0a);border:1px solid rgba(34,211,238,.28);border-radius:16px;padding:1.3rem 1.15rem;margin-bottom:1.25rem">'
     +'<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:1rem">'
     +'<span style="font-size:1.5rem">\u26A1</span>'
-    +'<div><div style="font-family:Oxanium;font-size:1rem;font-weight:900;color:#22d3ee;letter-spacing:.5px">DIAMANTES ILIMITADOS</div>'
+    +'<div><div style="font-family:Saira;font-size:1rem;font-weight:900;color:#22d3ee;letter-spacing:.5px">DIAMANTES ILIMITADOS</div>'
     +'<div style="font-size:.72rem;color:var(--muted)">Recarga las veces que quieras</div></div>'
     +'</div>'
     +'<div class="lkpln-grid" style="margin-bottom:1.1rem">';
@@ -1282,19 +1282,19 @@ function renderProds(){
     +'<div style="border-top:1px solid rgba(34,211,238,.15);padding-top:1rem">'
     +'<div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem">Pedir con saldo</div>'
     +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Elige tu paquete</label>'
-    +'<select id="ilim-plan" style="width:100%;background:#0a0a0a;border:1px solid rgba(34,211,238,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Poppins,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box">';
+    +'<select id="ilim-plan" style="width:100%;background:#0a0a0a;border:1px solid rgba(34,211,238,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Barlow,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box">';
   for(var a=0;a<PRODUCTS.length;a++){
     rows+='<option value="'+PRODUCTS[a].total+'|'+PRODUCTS[a].prices[0]+'">'+PRODUCTS[a].name+' diamantes \u2014 '+fmt(PRODUCTS[a].prices[0])+' MX</option>';
   }
   rows+='</select>'
     +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Tu ID de Free Fire</label>'
-    +'<input id="ilim-id" type="text" placeholder="Ej: 123456789" style="width:100%;background:#0a0a0a;border:1px solid rgba(34,211,238,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Poppins,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box"/>'
+    +'<input id="ilim-id" type="text" placeholder="Ej: 123456789" style="width:100%;background:#0a0a0a;border:1px solid rgba(34,211,238,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Barlow,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box"/>'
     +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Nombre en el juego</label>'
-    +'<input id="ilim-nombre" type="text" placeholder="Tu nickname" style="width:100%;background:#0a0a0a;border:1px solid rgba(34,211,238,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Poppins,sans-serif;font-size:.88rem;margin-bottom:.65rem;box-sizing:border-box"/>'
-    +'<div style="display:flex;justify-content:space-between;background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.18);border-radius:8px;padding:.45rem .85rem;margin-bottom:.5rem"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span id="ilim-saldo-val" style="font-family:Oxanium;font-weight:700;color:#22d3ee;font-size:.82rem">$0 MX</span></div>'
+    +'<input id="ilim-nombre" type="text" placeholder="Tu nickname" style="width:100%;background:#0a0a0a;border:1px solid rgba(34,211,238,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Barlow,sans-serif;font-size:.88rem;margin-bottom:.65rem;box-sizing:border-box"/>'
+    +'<div style="display:flex;justify-content:space-between;background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.18);border-radius:8px;padding:.45rem .85rem;margin-bottom:.5rem"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span id="ilim-saldo-val" style="font-family:Saira;font-weight:700;color:#22d3ee;font-size:.82rem">$0 MX</span></div>'
     +'<div id="ilim-err" style="display:none;color:#ff6b6b;font-size:.75rem;margin-bottom:.5rem"></div>'
-    +'<button onclick="submitIlimSaldo()" style="width:100%;padding:.78rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:10px;font-family:Poppins,sans-serif;font-weight:900;font-size:.9rem;cursor:pointer">\uD83D\uDD12 Confirmar con saldo</button>'
-    +'<button onclick="cotizarIlim()" style="width:100%;padding:.62rem;margin-top:.5rem;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.3);color:#22d3ee;border-radius:10px;font-family:Poppins;font-weight:900;font-size:.82rem;cursor:pointer">\uD83D\uDCAC O cotizar por WhatsApp</button>'
+    +'<button onclick="submitIlimSaldo()" style="width:100%;padding:.78rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:10px;font-family:Barlow,sans-serif;font-weight:900;font-size:.9rem;cursor:pointer">\uD83D\uDD12 Confirmar con saldo</button>'
+    +'<button onclick="cotizarIlim()" style="width:100%;padding:.62rem;margin-top:.5rem;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.3);color:#22d3ee;border-radius:10px;font-family:Barlow;font-weight:900;font-size:.82rem;cursor:pointer">\uD83D\uDCAC O cotizar por WhatsApp</button>'
     +'</div>'
     +'</div>';
 
@@ -1302,7 +1302,7 @@ function renderProds(){
   rows+='<div style="grid-column:1/-1;background:linear-gradient(135deg,#0a1f14,#0a0a0a);border:1px solid rgba(0,230,118,.28);border-radius:16px;padding:1.3rem 1.15rem">'
     +'<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem">'
     +'<span style="font-size:1.5rem">\uD83C\uDF1F</span>'
-    +'<div><div style="font-family:Oxanium;font-size:1rem;font-weight:900;color:#00e676;letter-spacing:.5px">DIAMANTES 1 VEZ x ID</div>'
+    +'<div><div style="font-family:Saira;font-size:1rem;font-weight:900;color:#00e676;letter-spacing:.5px">DIAMANTES 1 VEZ x ID</div>'
     +'<div style="font-size:.72rem;color:var(--muted)">Precios especiales · una vez por ID</div></div>'
     +'</div>'
     // Aviso verificar ID
@@ -1310,7 +1310,7 @@ function renderProds(){
     +'<span style="font-size:1.1rem;flex-shrink:0">\u26A0\uFE0F</span>'
     +'<div style="font-size:.76rem;color:var(--text);line-height:1.6"><strong style="color:#ffa500">Manda tu ID para comprobar si tiene la oferta.</strong> Una vez comprobada, haz tu pedido con saldo.</div>'
     +'</div>'
-    +'<a href="https://wa.me/573180051415?text=Hola!%20Quiero%20verificar%20mi%20ID%20para%20Diamantes%201%20Vez%20x%20ID" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:.72rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:9px;font-family:Poppins,sans-serif;font-weight:800;font-size:.85rem;text-decoration:none;box-sizing:border-box;margin-bottom:1.1rem">\uD83D\uDCF1 Verificar mi ID por WhatsApp</a>'
+    +'<a href="https://wa.me/573180051415?text=Hola!%20Quiero%20verificar%20mi%20ID%20para%20Diamantes%201%20Vez%20x%20ID" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:.72rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:9px;font-family:Barlow,sans-serif;font-weight:800;font-size:.85rem;text-decoration:none;box-sizing:border-box;margin-bottom:1.1rem">\uD83D\uDCF1 Verificar mi ID por WhatsApp</a>'
     +'<div class="lkpln-grid" style="margin-bottom:1.1rem">';
   for(var j=0;j<PRODUCTS_1VEZ.length;j++){
     rows+=makeModernCard(PRODUCTS_1VEZ[j], '#00e676', PRODUCTS_1VEZ[j].badge==='MEJOR PRECIO');
@@ -1320,18 +1320,18 @@ function renderProds(){
     +'<div style="border-top:1px solid rgba(0,230,118,.15);padding-top:1rem">'
     +'<div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem">Pedir con saldo (ID ya verificado)</div>'
     +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Elige tu paquete</label>'
-    +'<select id="v1-plan" style="width:100%;background:#0a1f14;border:1px solid rgba(0,230,118,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Poppins,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box">';
+    +'<select id="v1-plan" style="width:100%;background:#0a1f14;border:1px solid rgba(0,230,118,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Barlow,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box">';
   for(var b=0;b<PRODUCTS_1VEZ.length;b++){
     rows+='<option value="'+PRODUCTS_1VEZ[b].total+'|'+PRODUCTS_1VEZ[b].prices[0]+'">'+PRODUCTS_1VEZ[b].name+' diamantes \u2014 '+fmt(PRODUCTS_1VEZ[b].prices[0])+' MX</option>';
   }
   rows+='</select>'
     +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Tu ID de Free Fire</label>'
-    +'<input id="v1-id" type="text" placeholder="Ej: 123456789" style="width:100%;background:#0a1f14;border:1px solid rgba(0,230,118,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Poppins,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box"/>'
+    +'<input id="v1-id" type="text" placeholder="Ej: 123456789" style="width:100%;background:#0a1f14;border:1px solid rgba(0,230,118,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Barlow,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box"/>'
     +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Nombre en el juego</label>'
-    +'<input id="v1-nombre" type="text" placeholder="Tu nickname" style="width:100%;background:#0a1f14;border:1px solid rgba(0,230,118,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Poppins,sans-serif;font-size:.88rem;margin-bottom:.65rem;box-sizing:border-box"/>'
-    +'<div style="display:flex;justify-content:space-between;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.18);border-radius:8px;padding:.45rem .85rem;margin-bottom:.5rem"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span id="v1-saldo-val" style="font-family:Oxanium;font-weight:700;color:#00e676;font-size:.82rem">$0 MX</span></div>'
+    +'<input id="v1-nombre" type="text" placeholder="Tu nickname" style="width:100%;background:#0a1f14;border:1px solid rgba(0,230,118,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Barlow,sans-serif;font-size:.88rem;margin-bottom:.65rem;box-sizing:border-box"/>'
+    +'<div style="display:flex;justify-content:space-between;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.18);border-radius:8px;padding:.45rem .85rem;margin-bottom:.5rem"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span id="v1-saldo-val" style="font-family:Saira;font-weight:700;color:#00e676;font-size:.82rem">$0 MX</span></div>'
     +'<div id="v1-err" style="display:none;color:#ff6b6b;font-size:.75rem;margin-bottom:.5rem"></div>'
-    +'<button onclick="submitV1Saldo()" style="width:100%;padding:.78rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:10px;font-family:Poppins,sans-serif;font-weight:900;font-size:.9rem;cursor:pointer">\uD83D\uDD12 Confirmar con saldo</button>'
+    +'<button onclick="submitV1Saldo()" style="width:100%;padding:.78rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:10px;font-family:Barlow,sans-serif;font-weight:900;font-size:.9rem;cursor:pointer">\uD83D\uDD12 Confirmar con saldo</button>'
     +'</div>'
     +'</div>';
 
@@ -1358,7 +1358,7 @@ function renderLikes(){
     card+='<div class="lk-total">'+p.total.toLocaleString()+'<span> likes</span></div></div></div>';
     card+='<div class="lk-price-row">';
     if(isVip&&p.origMX){
-      card+='<div><div style="text-decoration:line-through;font-size:.78rem;color:var(--muted);font-family:Oxanium">'+fmt(p.origMX)+'</div>';
+      card+='<div><div style="text-decoration:line-through;font-size:.78rem;color:var(--muted);font-family:Saira">'+fmt(p.origMX)+'</div>';
       card+='<div class="lk-price">'+fmt(p.priceMX)+'<span> MX</span></div></div>';
     } else {
       card+='<div class="lk-price">'+fmt(p.priceMX)+'<span> MX</span></div>';
@@ -1505,7 +1505,7 @@ function renderPerfil(){
         h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:.42rem .55rem;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px">'
           +'<div style="min-width:0;flex:1"><div style="font-size:.75rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis">'+(m.descripcion||m.tipo)+'</div>'
           +'<div style="font-size:.62rem;color:var(--muted)">'+f2+'</div></div>'
-          +'<div style="font-family:Oxanium;font-size:.75rem;font-weight:700;color:'+color+';flex-shrink:0;margin-left:.5rem">'+signo+'$'+(m.monto||0).toLocaleString('es-MX')+'</div>'
+          +'<div style="font-family:Saira;font-size:.75rem;font-weight:700;color:'+color+';flex-shrink:0;margin-left:.5rem">'+signo+'$'+(m.monto||0).toLocaleString('es-MX')+'</div>'
           +'</div>';
       });
       movs.innerHTML=h;
@@ -1902,7 +1902,7 @@ function lanzarGrupoHonor(){
     ov.innerHTML =
       '<div style="background:#0e1118;border:1.5px solid rgba(255,208,0,.4);border-radius:18px;padding:1.5rem;max-width:340px;width:100%;text-align:center">'
       + '<div style="font-size:2rem;margin-bottom:.5rem">'+h.flag+'</div>'
-      + '<div style="font-family:Oxanium;font-weight:900;font-size:1rem;color:#fff;margin-bottom:.35rem">Confirmar grupo</div>'
+      + '<div style="font-family:Saira;font-weight:900;font-size:1rem;color:#fff;margin-bottom:.35rem">Confirmar grupo</div>'
       + '<div style="font-size:.8rem;color:#8b93a3;margin-bottom:1.1rem;line-height:1.6">'
       + 'Honor de Clan &middot; ' + h.region + '<br/>'
       + 'Clan: <b style="color:#ffd000">' + clan + '</b><br/>'
@@ -1910,8 +1910,8 @@ function lanzarGrupoHonor(){
       + 'Costo: <b style="color:#25d366">' + fmt(precioHonor) + '</b>'
       + '</div>'
       + '<div style="display:flex;gap:.65rem">'
-      + '<button id="honor-confirm-no" style="flex:1;padding:.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#8b93a3;border-radius:11px;font-family:Poppins;font-weight:700;font-size:.82rem;cursor:pointer">Cancelar</button>'
-      + '<button id="honor-confirm-si" style="flex:1;padding:.75rem;background:linear-gradient(135deg,#a3121f,#e11d2e);border:none;color:#fff;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.82rem;cursor:pointer">\u2713 Confirmar</button>'
+      + '<button id="honor-confirm-no" style="flex:1;padding:.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#8b93a3;border-radius:11px;font-family:Barlow;font-weight:700;font-size:.82rem;cursor:pointer">Cancelar</button>'
+      + '<button id="honor-confirm-si" style="flex:1;padding:.75rem;background:linear-gradient(135deg,#a3121f,#e11d2e);border:none;color:#fff;border-radius:11px;font-family:Saira;font-weight:900;font-size:.82rem;cursor:pointer">\u2713 Confirmar</button>'
       + '</div></div>';
     document.body.appendChild(ov);
 
@@ -1963,11 +1963,11 @@ function _mostrarInstruccionesHonor(ord){
     '<div style="background:#0e1118;border:1.5px solid rgba(255,208,0,.35);border-radius:18px;padding:1.4rem;max-width:400px;width:100%;max-height:90vh;overflow-y:auto">'
     + '<div style="text-align:center;margin-bottom:1rem">'
     +   '<div style="font-size:1.8rem;margin-bottom:.4rem">\u2705</div>'
-    +   '<div style="font-family:Oxanium;font-weight:900;font-size:1rem;color:#fff">Pedido #'+ord+' confirmado</div>'
+    +   '<div style="font-family:Saira;font-weight:900;font-size:1rem;color:#fff">Pedido #'+ord+' confirmado</div>'
     +   '<div style="font-size:.78rem;color:#8b93a3;margin-top:.3rem">Sigue estos pasos para preparar tu clan</div>'
     + '</div>'
     + '<img src="img/honor-instrucciones.jpg" alt="Instrucciones Honor de Clan" style="width:100%;border-radius:12px;margin-bottom:1rem" onerror="this.style.display=\'none\'"/>'
-    + '<button onclick="document.getElementById(\'honor-instrucciones-overlay\').remove()" style="width:100%;padding:.85rem;background:linear-gradient(135deg,#a3121f,#e11d2e);color:#fff;border:none;border-radius:12px;font-family:Oxanium;font-weight:800;font-size:.85rem;cursor:pointer">Entendido</button>'
+    + '<button onclick="document.getElementById(\'honor-instrucciones-overlay\').remove()" style="width:100%;padding:.85rem;background:linear-gradient(135deg,#a3121f,#e11d2e);color:#fff;border:none;border-radius:12px;font-family:Saira;font-weight:800;font-size:.85rem;cursor:pointer">Entendido</button>'
     + '</div>';
   document.body.appendChild(ov);
 }
@@ -2063,7 +2063,7 @@ function renderMembresiasCatalogo(){
     return '<div class="ds-cat-card" style="flex-direction:row;align-items:center;text-align:left;padding:1.1rem 1.2rem;gap:1rem" onclick="abrirMembresia('+i+')">'
       + '<span class="ds-cat-ico" style="font-size:1.5rem">'+u.icon+'</span>'
       + '<div style="flex:1"><div class="ds-cat-name" style="font-size:.92rem">'+u.nombre+'</div><div class="ds-cat-sub" style="font-size:.72rem">Entrega autom&aacute;tica</div></div>'
-      + '<span style="font-family:Oxanium;font-weight:800;font-size:1rem;color:#a78bfa;flex-shrink:0" id="mem-precio-'+i+'">'+fmt(u.precio)+'</span>'
+      + '<span style="font-family:Saira;font-weight:800;font-size:1rem;color:#a78bfa;flex-shrink:0" id="mem-precio-'+i+'">'+fmt(u.precio)+'</span>'
       + '</div>';
   }).join('');
 }
@@ -2257,7 +2257,7 @@ function renderPubgPcCatalogo(){
     return '<div class="ds-cat-card" style="flex-direction:row;align-items:center;text-align:left;padding:1.1rem 1.2rem;gap:1rem" onclick="abrirPubgPcModal('+i+')">'
       + '<span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffb84d" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10v4M5 12h4M15 11h.01M17.5 13h.01"/></svg></span>'
       + '<div style="flex:1"><div class="ds-cat-name" style="font-size:.92rem">'+u.nombre+'</div><div class="ds-cat-sub" style="font-size:.72rem;color:#67e8f9">&#127917; Se entrega c&oacute;digo</div></div>'
-      + '<span style="font-family:Oxanium;font-weight:800;font-size:1rem;color:#ffb84d;flex-shrink:0">'+fmt(u.precio)+'</span>'
+      + '<span style="font-family:Saira;font-weight:800;font-size:1rem;color:#ffb84d;flex-shrink:0">'+fmt(u.precio)+'</span>'
       + '</div>';
   }).join('');
 }
@@ -2373,7 +2373,7 @@ function renderDeltaCatalogo(){
       return '<div class="ds-cat-card" style="flex-direction:row;align-items:center;text-align:left;padding:1.1rem 1.2rem;gap:1rem" onclick="abrirDeltaModal(\'monedas\','+i+')">'
         + '<span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffd000" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v2M12 15v2M9 9.5a3 3 0 0 1 3-1.5c1.5 0 3 .8 3 2s-1.5 1.5-3 2-3 .8-3 2 1.5 2 3 2a3 3 0 0 0 3-1.5"/></svg></span>'
         + '<div style="flex:1"><div class="ds-cat-name" style="font-size:.92rem">'+u.nombre+'</div><div class="ds-cat-sub" style="font-size:.72rem">Entrega manual</div></div>'
-        + '<span style="font-family:Oxanium;font-weight:800;font-size:1rem;color:#ffd000;flex-shrink:0">'+fmt(u.precio)+'</span>'
+        + '<span style="font-family:Saira;font-weight:800;font-size:1rem;color:#ffd000;flex-shrink:0">'+fmt(u.precio)+'</span>'
         + '</div>';
     }).join('');
   }
@@ -2382,7 +2382,7 @@ function renderDeltaCatalogo(){
       return '<div class="ds-cat-card" style="flex-direction:row;align-items:center;text-align:left;padding:1.1rem 1.2rem;gap:1rem" onclick="abrirDeltaModal(\'paquetes\','+i+')">'
         + '<span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#67e8f9" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg></span>'
         + '<div style="flex:1"><div class="ds-cat-name" style="font-size:.92rem">'+u.nombre+'</div><div class="ds-cat-sub" style="font-size:.72rem">Entrega manual</div></div>'
-        + '<span style="font-family:Oxanium;font-weight:800;font-size:1rem;color:#67e8f9;flex-shrink:0">'+fmt(u.precio)+'</span>'
+        + '<span style="font-family:Saira;font-weight:800;font-size:1rem;color:#67e8f9;flex-shrink:0">'+fmt(u.precio)+'</span>'
         + '</div>';
     }).join('');
   }
@@ -2498,7 +2498,7 @@ function submitPaseFF(){
     ov.innerHTML =
       '<div style="background:#0e1118;border:1.5px solid rgba(255,180,60,.4);border-radius:18px;padding:1.5rem;max-width:340px;width:100%;text-align:center">'
       + '<div style="font-size:2rem;margin-bottom:.5rem">\u26A0\uFE0F</div>'
-      + '<div style="font-family:Oxanium;font-weight:900;font-size:1rem;color:#fff;margin-bottom:.35rem">Confirmar pedido</div>'
+      + '<div style="font-family:Saira;font-weight:900;font-size:1rem;color:#fff;margin-bottom:.35rem">Confirmar pedido</div>'
       + '<div style="font-size:.8rem;color:#8b93a3;margin-bottom:1.1rem;line-height:1.6">'
       + 'Pases FF x' + _paseffCantidad + '<br/>'
       + 'ID: <b style="color:#22d3ee">' + id + '</b><br/>'
@@ -2507,8 +2507,8 @@ function submitPaseFF(){
       + '<br/><br/><b style="color:#ffb84d">Recuerda: tendras 3 minutos para aceptar la solicitud del bot. Sin reembolso si no aceptas a tiempo.</b>'
       + '</div>'
       + '<div style="display:flex;gap:.65rem">'
-      + '<button id="paseff-confirm-no" style="flex:1;padding:.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#8b93a3;border-radius:11px;font-family:Poppins;font-weight:700;font-size:.82rem;cursor:pointer">Cancelar</button>'
-      + '<button id="paseff-confirm-si" style="flex:1;padding:.75rem;background:linear-gradient(135deg,#128c3e,#25d366);border:none;color:#fff;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.82rem;cursor:pointer">\u2713 Confirmar</button>'
+      + '<button id="paseff-confirm-no" style="flex:1;padding:.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#8b93a3;border-radius:11px;font-family:Barlow;font-weight:700;font-size:.82rem;cursor:pointer">Cancelar</button>'
+      + '<button id="paseff-confirm-si" style="flex:1;padding:.75rem;background:linear-gradient(135deg,#128c3e,#25d366);border:none;color:#fff;border-radius:11px;font-family:Saira;font-weight:900;font-size:.82rem;cursor:pointer">\u2713 Confirmar</button>'
       + '</div></div>';
     document.body.appendChild(ov);
 
@@ -2591,7 +2591,7 @@ function _mostrarReciboHonor(h, nombreClan, idClan, ord){
   cont.innerHTML =
     '<div style="background:linear-gradient(160deg,#0a0e14,#0a0f14);border:2px solid rgba(37,211,102,.35);border-radius:18px;padding:1.75rem 1.25rem;text-align:center">'
     + '<div style="font-size:2.8rem;margin-bottom:.5rem">\u2705</div>'
-    + '<div style="font-family:Oxanium;font-weight:900;font-size:1.25rem;color:#25d366;margin-bottom:.35rem;letter-spacing:.5px">PEDIDO CONFIRMADO</div>'
+    + '<div style="font-family:Saira;font-weight:900;font-size:1.25rem;color:#25d366;margin-bottom:.35rem;letter-spacing:.5px">PEDIDO CONFIRMADO</div>'
     + '<div style="font-size:.8rem;color:var(--muted);margin-bottom:1.35rem">Tu honor de clan esta en proceso</div>'
     + '<div style="background:rgba(0,0,0,.25);border-radius:99px;height:10px;overflow:hidden;margin-bottom:1.4rem"><div style="height:100%;width:20%;border-radius:99px;background:linear-gradient(90deg,#22d3ee,#ff9900);box-shadow:0 0 12px rgba(255,180,60,.5)"></div></div>'
     + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
@@ -2603,7 +2603,7 @@ function _mostrarReciboHonor(h, nombreClan, idClan, ord){
     +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' \u00B7 ' + hora, true)
     + '</div>'
     + '<div style="background:rgba(255,180,60,.08);border:1px solid rgba(255,180,60,.25);border-radius:10px;padding:.75rem .9rem;margin-top:1rem;font-size:.73rem;color:#22d3ee;line-height:1.55">&#128197; Los pedidos se procesan <b>sabados y domingos</b>.<br/>&#129302; Los bots se uniran entre las <b>3:00 y 7:00 AM</b>.</div>'
-    + '<button onclick="var o=document.getElementById(\'recibo-honor-ov\'); if(o) o.remove();" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Entendido</button>'
+    + '<button onclick="var o=document.getElementById(\'recibo-honor-ov\'); if(o) o.remove();" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Barlow;font-weight:700;font-size:.9rem;cursor:pointer">Entendido</button>'
     + '</div>';
 }
 function clanWA(){
@@ -2627,7 +2627,7 @@ function renderExpPackages(){
       +'</div>';
   }
   rows+='<div style="grid-column:1/-1;text-align:center;margin-top:.5rem">'
-    +'<button onclick="openHonorCuentaModalWithPkg()" style="padding:.75rem 2rem;background:linear-gradient(90deg,#007799,#00f5ff);color:#020a0a;border:none;border-radius:8px;font-family:\'Poppins\';font-weight:800;font-size:.85rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;box-shadow:0 0 20px rgba(0,245,255,.3)">\u26A1 Contratar plan</button>'
+    +'<button onclick="openHonorCuentaModalWithPkg()" style="padding:.75rem 2rem;background:linear-gradient(90deg,#007799,#00f5ff);color:#020a0a;border:none;border-radius:8px;font-family:\'Barlow\';font-weight:800;font-size:.85rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;box-shadow:0 0 20px rgba(0,245,255,.3)">\u26A1 Contratar plan</button>'
     +'</div>';
   g.innerHTML=rows;
 }
@@ -3041,7 +3041,7 @@ function drawRuleta(angle){
     ctx.fillStyle=RULETA_PRIZES[i].color; ctx.fill();
     ctx.strokeStyle='rgba(255,255,255,.15)'; ctx.lineWidth=1.5; ctx.stroke();
     ctx.save(); ctx.translate(cx,cy); ctx.rotate(start+arc/2);
-    ctx.textAlign='right'; ctx.fillStyle='#fff'; ctx.font='bold 13px Oxanium,sans-serif';
+    ctx.textAlign='right'; ctx.fillStyle='#fff'; ctx.font='bold 13px Saira,sans-serif';
     ctx.fillText(RULETA_PRIZES[i].label,r-8,5); ctx.restore();
   }
   ctx.beginPath(); ctx.arc(cx,cy,16,0,Math.PI*2);
@@ -3370,7 +3370,7 @@ function loadLeaderboard(){
             /* Position */
             + '<div style="width:30px;text-align:center;font-size:'+(i<3?'1.2rem':'.82rem')+';color:'+color+';font-weight:700;flex-shrink:0">'+medal+'</div>'
             /* Avatar */
-            + '<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-size:.72rem;font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+(i===0?'#ffd700':color)+'44">'+initial+'</div>'
+            + '<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Saira;font-size:.72rem;font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+(i===0?'#ffd700':color)+'44">'+initial+'</div>'
             /* Name + stats */
             + '<div style="flex:1;min-width:0">'
             + '<div style="font-size:.85rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'
@@ -3381,7 +3381,7 @@ function loadLeaderboard(){
             + '</div></div>'
             /* Amount */
             + '<div style="text-align:right;flex-shrink:0">'
-            + '<div style="font-family:Oxanium;font-size:.82rem;font-weight:900;color:'+(i===0?'#ffd700':'#00e676')+'">'+'$'+monto.toLocaleString('es-MX')+'</div>'
+            + '<div style="font-family:Saira;font-size:.82rem;font-weight:900;color:'+(i===0?'#ffd700':'#00e676')+'">'+'$'+monto.toLocaleString('es-MX')+'</div>'
             + '<div style="font-size:.6rem;color:var(--muted);margin-top:.1rem">MX</div>'
             + '</div>'
             + '</div>';
@@ -3562,7 +3562,7 @@ function admFullLoadStats(){
           h+='<tr>'
             +'<td style="font-weight:700;color:#fff">'+(umap[m.user_id]||'-')+'</td>'
             +'<td style="color:var(--muted)">'+(m.descripcion||'-')+'</td>'
-            +'<td style="font-family:Oxanium;color:#00e676;font-weight:700">$'+(m.monto||0).toLocaleString('es-MX')+'</td>'
+            +'<td style="font-family:Saira;color:#00e676;font-weight:700">$'+(m.monto||0).toLocaleString('es-MX')+'</td>'
             +'<td style="color:var(--muted)">'+fecha+'</td>'
             +'</tr>';
         });
@@ -3632,10 +3632,10 @@ function admRenderChart(canvas){
         var maxDay=Math.max.apply(null,sales);
         extra.innerHTML=
           '<div style="background:rgba(34,211,238,.07);border:1px solid rgba(34,211,238,.15);border-radius:8px;padding:.65rem;text-align:center">'
-          +'<div style="font-family:Oxanium;font-size:.9rem;font-weight:700;color:var(--c1)">$'+avg.toLocaleString('es-MX')+'</div>'
+          +'<div style="font-family:Saira;font-size:.9rem;font-weight:700;color:var(--c1)">$'+avg.toLocaleString('es-MX')+'</div>'
           +'<div style="font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:.1rem">Promedio/dia</div></div>'
           +'<div style="background:rgba(255,208,0,.07);border:1px solid rgba(255,208,0,.15);border-radius:8px;padding:.65rem;text-align:center">'
-          +'<div style="font-family:Oxanium;font-size:.9rem;font-weight:700;color:var(--c4)">$'+maxDay.toLocaleString('es-MX')+'</div>'
+          +'<div style="font-family:Saira;font-size:.9rem;font-weight:700;color:var(--c4)">$'+maxDay.toLocaleString('es-MX')+'</div>'
           +'<div style="font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:.1rem">Mejor dia</div></div>';
       }
     }).catch(function(){});
@@ -3858,7 +3858,7 @@ function admFullLoadUsers(){
         +'<td>'+(u.nombre||'-')+'</td>'
         +'<td>'+(u.whatsapp?'+'+u.whatsapp:'-')+'</td>'
         +'<td>'+roleBadge+'</td>'
-        +'<td style="font-family:Oxanium;color:#00e676;font-weight:700">$'+(u.saldo||0).toLocaleString('es-MX')+'</td>'
+        +'<td style="font-family:Saira;color:#00e676;font-weight:700">$'+(u.saldo||0).toLocaleString('es-MX')+'</td>'
         +'<td style="color:var(--muted)">'+fecha+'</td>'
         +'<td><div style="display:flex;gap:.3rem;flex-wrap:wrap">'
         +'<button data-u="'+u.id+'" data-n="'+u.username+'" onclick="admAddSaldo(this.dataset.u,this.dataset.n)" class="adm-action-btn" style="border-color:rgba(0,230,118,.3);color:#00e676">+$</button>'
@@ -3901,11 +3901,11 @@ function admLoadPedidos(){
         var isC=m.tipo==='credito'||m.tipo==='ajuste';
         var tipoBadge='<span class="adm-badge" style="background:rgba('+(isC?'0,230,118':'255,80,80')+',.1);color:'+(isC?'#00e676':m.tipo==='compra'?'var(--c1)':'#ff6b6b')+'">'+m.tipo+'</span>';
         h+='<tr>'
-          +'<td style="color:var(--muted);font-family:Oxanium;font-size:.7rem">'+(i+1)+'</td>'
+          +'<td style="color:var(--muted);font-family:Saira;font-size:.7rem">'+(i+1)+'</td>'
           +'<td style="font-weight:700;color:#fff">'+(umap[m.user_id]||'-')+'</td>'
           +'<td>'+tipoBadge+'</td>'
           +'<td style="color:var(--muted)">'+(m.descripcion||'-')+'</td>'
-          +'<td style="font-family:Oxanium;font-weight:700;color:'+(isC?'#00e676':'#ff6b6b')+'">'+(isC?'+':'-')+'$'+(m.monto||0).toLocaleString('es-MX')+'</td>'
+          +'<td style="font-family:Saira;font-weight:700;color:'+(isC?'#00e676':'#ff6b6b')+'">'+(isC?'+':'-')+'$'+(m.monto||0).toLocaleString('es-MX')+'</td>'
           +'<td style="color:var(--muted)">'+fecha+'</td>'
           +'</tr>';
       });
@@ -3931,7 +3931,7 @@ function admFullLoadMovs(){
         h+='<tr>'
           +'<td style="color:#fff;font-weight:600">'+(umap[m.user_id]||'-')+'</td>'
           +'<td><span class="adm-badge" style="background:rgba('+(isC?'0,230,118':'255,80,80')+',.1);color:'+(isC?'#00e676':'#ff6b6b')+'">'+m.tipo+'</span></td>'
-          +'<td style="font-family:Oxanium;font-weight:700;color:'+(isC?'#00e676':'#ff6b6b')+'">'+(isC?'+':'-')+'$'+(m.monto||0).toLocaleString('es-MX')+'</td>'
+          +'<td style="font-family:Saira;font-weight:700;color:'+(isC?'#00e676':'#ff6b6b')+'">'+(isC?'+':'-')+'$'+(m.monto||0).toLocaleString('es-MX')+'</td>'
           +'<td style="color:var(--muted)">'+(m.descripcion||'-')+'</td>'
           +'<td style="color:var(--muted)">'+fecha+'</td>'
           +'</tr>';
@@ -4013,9 +4013,9 @@ function admLoadTop(){
       var color=i===0?'#ffd700':i===1?'#c0c0c0':i===2?'#cd7f32':'var(--muted)';
       h+='<div style="display:flex;align-items:center;gap:.6rem;padding:.55rem .65rem;background:rgba(255,255,255,.02);border-radius:8px;border:1px solid rgba(255,255,255,.05)">'
         +'<div style="width:26px;text-align:center;font-size:'+(i<3?'1rem':'.8rem')+';color:'+color+';font-weight:700;flex-shrink:0">'+medal+'</div>'
-        +'<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-size:.62rem;font-weight:700;color:#fff;flex-shrink:0">'+u.username.charAt(0).toUpperCase()+'</div>'
+        +'<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Saira;font-size:.62rem;font-weight:700;color:#fff;flex-shrink:0">'+u.username.charAt(0).toUpperCase()+'</div>'
         +'<div style="flex:1;font-size:.82rem;font-weight:700;color:#fff">'+u.username+'</div>'
-        +'<div style="font-family:Oxanium;font-size:.78rem;font-weight:900;color:'+(i===0?'#ffd700':'#00e676')+'">'+'$'+val.toLocaleString('es-MX')+'</div>'
+        +'<div style="font-family:Saira;font-size:.78rem;font-weight:900;color:'+(i===0?'#ffd700':'#00e676')+'">'+'$'+val.toLocaleString('es-MX')+'</div>'
         +'</div>';
     });
     el.innerHTML=h||'<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Sin datos</div>';
@@ -4725,13 +4725,13 @@ function admInactConfirmarUno(userId){
 
   overlay.innerHTML = '<div style="background:#0e1118;border:1.5px solid rgba(255,80,80,.4);border-radius:18px;padding:1.5rem;max-width:380px;width:100%">'
     + '<div style="font-size:1.8rem;text-align:center;margin-bottom:.5rem">&#128465;&#65039;</div>'
-    + '<div style="font-family:Oxanium;font-weight:900;font-size:1rem;color:#fff;text-align:center;margin-bottom:.5rem">Eliminar a '+_esc(u.username)+'</div>'
+    + '<div style="font-family:Saira;font-weight:900;font-size:1rem;color:#fff;text-align:center;margin-bottom:.5rem">Eliminar a '+_esc(u.username)+'</div>'
     + '<div style="font-size:.8rem;color:#8b93a3;text-align:center;line-height:1.6">Se borraran su perfil, pedidos, movimientos de saldo, likes enviados, tickets de soporte y resenas.</div>'
     + advertenciaSaldo
     + campoConfirmar
     + '<div style="display:flex;gap:.65rem;margin-top:1.2rem">'
-    + '<button id="inact-cancel-btn" style="flex:1;padding:.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#8b93a3;border-radius:11px;font-family:Poppins;font-weight:700;font-size:.82rem;cursor:pointer">Cancelar</button>'
-    + '<button id="inact-confirm-btn" style="flex:1;padding:.75rem;background:linear-gradient(135deg,#a30000,#ff6b6b);border:none;color:#fff;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.82rem;cursor:pointer">Eliminar</button>'
+    + '<button id="inact-cancel-btn" style="flex:1;padding:.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#8b93a3;border-radius:11px;font-family:Barlow;font-weight:700;font-size:.82rem;cursor:pointer">Cancelar</button>'
+    + '<button id="inact-confirm-btn" style="flex:1;padding:.75rem;background:linear-gradient(135deg,#a30000,#ff6b6b);border:none;color:#fff;border-radius:11px;font-family:Saira;font-weight:900;font-size:.82rem;cursor:pointer">Eliminar</button>'
     + '</div></div>';
 
   document.body.appendChild(overlay);
@@ -4757,12 +4757,12 @@ function admInactConfirmarMasivo(){
   overlay.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px)';
   overlay.innerHTML = '<div style="background:#0e1118;border:1.5px solid rgba(255,80,80,.4);border-radius:18px;padding:1.5rem;max-width:380px;width:100%">'
     + '<div style="font-size:1.8rem;text-align:center;margin-bottom:.5rem">&#128465;&#65039;</div>'
-    + '<div style="font-family:Oxanium;font-weight:900;font-size:1rem;color:#fff;text-align:center;margin-bottom:.7rem">Eliminacion masiva</div>'
+    + '<div style="font-family:Saira;font-weight:900;font-size:1rem;color:#fff;text-align:center;margin-bottom:.7rem">Eliminacion masiva</div>'
     + '<div style="font-size:.82rem;color:#c8d0e0;text-align:center;line-height:1.7">Vas a eliminar <b style="color:#fff">'+ids.length+' usuarios</b>.<br/>Saldo total de las cuentas: <b style="color:#ff6b6b">'+fmt(saldoTotal)+' MXN</b>.<br/><br/>Esta accion eliminara permanentemente sus cuentas y datos.</div>'
     + '<div style="margin-top:1rem"><label style="font-size:.72rem;color:#8b93a3;display:block;margin-bottom:.4rem">Escribe <b style="color:#ff6b6b">ELIMINAR</b> para confirmar</label><input id="inact-confirm-masivo-txt" type="text" class="finput" style="margin-bottom:0" placeholder="ELIMINAR"/></div>'
     + '<div style="display:flex;gap:.65rem;margin-top:1.2rem">'
-    + '<button id="inact-cancel-masivo-btn" style="flex:1;padding:.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#8b93a3;border-radius:11px;font-family:Poppins;font-weight:700;font-size:.82rem;cursor:pointer">Cancelar</button>'
-    + '<button id="inact-confirm-masivo-btn2" style="flex:1;padding:.75rem;background:linear-gradient(135deg,#a30000,#ff6b6b);border:none;color:#fff;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.82rem;cursor:pointer">Eliminar todos</button>'
+    + '<button id="inact-cancel-masivo-btn" style="flex:1;padding:.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#8b93a3;border-radius:11px;font-family:Barlow;font-weight:700;font-size:.82rem;cursor:pointer">Cancelar</button>'
+    + '<button id="inact-confirm-masivo-btn2" style="flex:1;padding:.75rem;background:linear-gradient(135deg,#a30000,#ff6b6b);border:none;color:#fff;border-radius:11px;font-family:Saira;font-weight:900;font-size:.82rem;cursor:pointer">Eliminar todos</button>'
     + '</div></div>';
 
   document.body.appendChild(overlay);
@@ -5093,7 +5093,7 @@ function renderCart(){
   }).join('');
 
   rows+='<div class="cart-total"><span>Total</span><span style="color:'+(enough?'#00e676':'#ff6b6b')+'">'+fmt(total)+'</span></div>';
-  rows+='<div style="display:flex;justify-content:space-between;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.18);border-radius:8px;padding:.5rem .85rem;margin:.5rem 0"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span style="font-family:Oxanium;font-weight:700;color:'+(enough?'#00e676':'#ff6b6b')+'">'+fmt(saldo)+'</span></div>';
+  rows+='<div style="display:flex;justify-content:space-between;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.18);border-radius:8px;padding:.5rem .85rem;margin:.5rem 0"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span style="font-family:Saira;font-weight:700;color:'+(enough?'#00e676':'#ff6b6b')+'">'+fmt(saldo)+'</span></div>';
   if(!authSession){
     rows+='<button onclick="closeCart();showAuthModal();" style="width:100%;padding:.72rem;background:linear-gradient(90deg,#0055cc,#22d3ee);color:#fff;border:none;border-radius:7px;font-weight:700;font-size:.9rem;cursor:pointer">Inicia sesion</button>';
   } else if(!enough){
@@ -5395,11 +5395,11 @@ function renderTopList(elId, data, colorFn, maxItems){
 
     html += '<div style="background:'+bg+';border:1px solid '+border+';border-radius:11px;padding:.75rem 1rem;display:flex;align-items:center;gap:.75rem;'+(i===0?'box-shadow:0 0 20px rgba(255,215,0,.08);':'')+'margin-bottom:.5rem">'
       + '<div style="width:30px;text-align:center;font-size:'+(i<3?'1.2rem':'.82rem')+';color:'+medalColor+';font-weight:700;flex-shrink:0">'+medal+'</div>'
-      + '<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-size:.72rem;font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+medalColor+'44">'+initial+'</div>'
+      + '<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Saira;font-size:.72rem;font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+medalColor+'44">'+initial+'</div>'
       + '<div style="flex:1;min-width:0">'
       + '<div style="font-size:.85rem;font-weight:700;color:#fff">'+item.username+(isMe?' <span style="font-size:.62rem;background:rgba(34,211,238,.15);color:var(--c1);padding:.1rem .35rem;border-radius:4px">Tu</span>':'')+' </div>'
       + '</div>'
-      + '<div style="text-align:right;flex-shrink:0;font-family:Oxanium;font-size:.82rem;font-weight:900;color:'+valueColor+'">$'+Math.round(value).toLocaleString('es-MX')+'</div>'
+      + '<div style="text-align:right;flex-shrink:0;font-family:Saira;font-size:.82rem;font-weight:900;color:'+valueColor+'">$'+Math.round(value).toLocaleString('es-MX')+'</div>'
       + '</div>';
   });
 
@@ -5497,14 +5497,22 @@ function loadTopDiamantes(){
   // regex), que era menos confiable.
   sb.rpc('top_puntos_ranking', { p_limit: 100 }).then(function(top){
     if(!Array.isArray(top) || !top.length){
-      el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Sin compras de diamantes validas aun</div>';
+      el.innerHTML = '<div class="tdm-empty">Sin compras de diamantes v\u00e1lidas a\u00fan</div>';
       var btn = document.getElementById('top-diam-vermas-btn'); if(btn) btn.style.display = 'none';
       return;
     }
     // Reordenar por diamantes (top_puntos_ranking ordena por puntos, que para
     // diamantes suele coincidir, pero re-ordenamos explicitamente por seguridad)
     var sorted = top.map(function(u){
-      return { username: u.username, diamantes: Number(u.diamantes)||0 };
+      // Se conservan campos extra SOLO para mostrarlos (si el RPC los trae)
+      var rec = (u.compras_validas != null) ? u.compras_validas
+              : (u.recargas != null) ? u.recargas
+              : (u.compras != null) ? u.compras
+              : (u.num_compras != null) ? u.num_compras : null;
+      return { username: u.username, diamantes: Number(u.diamantes)||0,
+               user_id: u.user_id || null, rango: u.rango || null,
+               avatar_url: u.avatar_url || null,
+               recargas: (rec == null ? null : (Number(rec)||0)) };
     }).filter(function(u){ return u.diamantes > 0; })
       .sort(function(a,b){ return b.diamantes - a.diamantes; });
 
@@ -5520,32 +5528,75 @@ function _renderTopDiamantesLista(){
   var el = document.getElementById('rank-list-top-diamantes');
   var btn = document.getElementById('top-diam-vermas-btn');
   if(!el) return;
-  var lista = _topDiamExpandido ? _topDiamData : _topDiamData.slice(0,3);
+  var data = _topDiamData || [];
+  var fmt = function(n){ return (Number(n)||0).toLocaleString('es-MX'); };
+  var meName = (typeof authSession !== 'undefined' && authSession) ? authSession.username : null;
+  var meId   = (typeof authSession !== 'undefined' && authSession) ? authSession.id : null;
+  var esYo = function(it){ return (meId && it.user_id && it.user_id === meId) || (meName && it.username === meName); };
 
-  var medals = ['🥇','🥈','🥉'];
-  var html = '';
-  lista.forEach(function(item, i){
-    var medal = i < 3 ? medals[i] : (i+1)+'.';
-    var medalColor = i < 3 ? (i===0?'#ffd700':i===1?'#c0c0c0':'#cd7f32') : 'var(--muted)';
-    var initial = (item.username || 'U').charAt(0).toUpperCase();
-    var isMe = authSession && authSession.username === item.username;
-    var bg = i === 0 ? 'rgba(255,215,0,.06)' : 'rgba(255,255,255,.02)';
-    var border = i === 0 ? 'rgba(255,215,0,.25)' : 'rgba(255,255,255,.06)';
+  // Linea secundaria: recargas si el RPC las trae; si no, el rango
+  function subLine(it){
+    if(it.recargas != null && it.recargas > 0) return fmt(it.recargas) + (it.recargas === 1 ? ' recarga' : ' recargas');
+    var info = (typeof RANGOS_INFO !== 'undefined' && it.rango) ? RANGOS_INFO[it.rango] : null;
+    return info ? (info.icono + ' ' + info.nombre) : 'diamantes comprados';
+  }
+  function avatar(it, style){
+    var ini = _esc((it.username || 'U').charAt(0).toUpperCase());
+    var inner = ini;
+    if(it.avatar_url && /^https?:\/\//i.test(it.avatar_url)){
+      inner = '<img src="'+_esc(it.avatar_url)+'" alt="" loading="lazy" onerror="this.parentNode.textContent=this.parentNode.getAttribute(\'data-i\')">';
+    }
+    return '<div class="tdm-av" data-i="'+ini+'"'+(style?' style="'+style+'"':'')+'>'+inner+'</div>';
+  }
 
-    html += '<div style="background:'+bg+';border:1px solid '+border+';border-radius:11px;padding:.75rem 1rem;display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem">'
-      + '<div style="width:30px;text-align:center;font-size:'+(i<3?'1.2rem':'.82rem')+';color:'+medalColor+';font-weight:700;flex-shrink:0">'+medal+'</div>'
-      + '<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-size:.72rem;font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+medalColor+'44">'+initial+'</div>'
-      + '<div style="flex:1;min-width:0">'
-      + '<div style="font-size:.85rem;font-weight:700;color:#fff">'+_esc(item.username)+(isMe?' <span style="font-size:.62rem;background:rgba(34,211,238,.15);color:var(--c1);padding:.1rem .35rem;border-radius:4px">Tu</span>':'')+'</div>'
-      + '</div>'
-      + '<div style="text-align:right;flex-shrink:0;font-family:Oxanium;font-size:.9rem;font-weight:900;color:'+(i===0?'#ffd700':'#67e8f9')+'">'+item.diamantes.toLocaleString('es-MX')+' \uD83D\uDC8E</div>'
+  // ── Resumen ──
+  var totalDia = 0, totalRec = 0, hayRec = false;
+  data.forEach(function(it){ totalDia += it.diamantes; if(it.recargas != null){ hayRec = true; totalRec += it.recargas; } });
+  var html = '<div class="tdm-stats">'
+    + '<div class="tdm-stat"><span class="tdm-stat-n">'+fmt(totalDia)+'</span><span class="tdm-stat-l">\uD83D\uDC8E diamantes</span></div>'
+    + (hayRec ? '<div class="tdm-stat"><span class="tdm-stat-n">'+fmt(totalRec)+'</span><span class="tdm-stat-l">\u26A1 recargas</span></div>' : '')
+    + '<div class="tdm-stat"><span class="tdm-stat-n">'+fmt(data.length)+'</span><span class="tdm-stat-l">\uD83D\uDC65 compradores</span></div>'
+    + '</div>';
+
+  // ── Podio (orden visual: 2 - 1 - 3) ──
+  var medals = ['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49'];
+  var rings  = ['#ffd700','#c9d1db','#cd7f32'];
+  var top3 = data.slice(0,3);
+  var orden = top3.length >= 3 ? [1,0,2] : (top3.length === 2 ? [1,0] : [0]);
+  html += '<div class="tdm-podium n'+top3.length+'">';
+  orden.forEach(function(idx){
+    var it = top3[idx]; if(!it) return;
+    var me = esYo(it);
+    html += '<div class="tdm-pc p'+(idx+1)+(me?' me':'')+'">'
+      + '<span class="tdm-medal">'+medals[idx]+'</span>'
+      + avatar(it, '--ring:'+rings[idx])
+      + '<div class="tdm-name">'+_esc(it.username)+(me?'<span class="tdm-me">T\u00fa</span>':'')+'</div>'
+      + '<div class="tdm-dia">'+fmt(it.diamantes)+'<span class="tdm-gem">\uD83D\uDC8E</span></div>'
+      + '<div class="tdm-sub">'+subLine(it)+'</div>'
       + '</div>';
   });
+  html += '</div>';
+
+  // ── Resto del ranking (4, 5, 6...) solo si esta expandido ──
+  if(_topDiamExpandido && data.length > 3){
+    html += '<div class="tdm-list">';
+    data.slice(3).forEach(function(it, j){
+      var me = esYo(it);
+      html += '<div class="tdm-row'+(me?' me':'')+'">'
+        + '<div class="tdm-pos">'+(j+4)+'</div>'
+        + avatar(it)
+        + '<div class="tdm-row-mid"><div class="tdm-name">'+_esc(it.username)+(me?'<span class="tdm-me">T\u00fa</span>':'')+'</div>'
+        + '<div class="tdm-sub">'+subLine(it)+'</div></div>'
+        + '<div class="tdm-dia">'+fmt(it.diamantes)+'<span class="tdm-gem">\uD83D\uDC8E</span></div>'
+        + '</div>';
+    });
+    html += '</div>';
+  }
   el.innerHTML = html;
 
   if(btn){
-    btn.style.display = (_topDiamData.length > 3) ? 'inline-flex' : 'none';
-    btn.childNodes[0].textContent = _topDiamExpandido ? 'Ver menos ' : 'Ver m\u00e1s ';
+    btn.style.display = (data.length > 3) ? 'inline-flex' : 'none';
+    btn.childNodes[0].textContent = _topDiamExpandido ? 'Ver menos ' : ('Ver m\u00e1s ('+(data.length-3)+') ');
     var icon = document.getElementById('top-diam-vermas-icon');
     if(icon) icon.style.transform = _topDiamExpandido ? 'rotate(180deg)' : 'none';
   }
@@ -5615,9 +5666,9 @@ function loadTopHabibis(){
 
         html += '<div style="background:'+bg+';border:1px solid '+border+';border-radius:10px;padding:.85rem 1rem;display:flex;align-items:center;gap:.8rem;box-shadow:'+(i===0?'0 0 20px rgba(255,215,0,.1);':'')+'transition:all .2s">'
           + '<div style="width:32px;text-align:center;font-size:1.3rem;flex-shrink:0">'+medal+'</div>'
-          + '<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-size:.75rem;font-weight:900;color:#fff;flex-shrink:0">'+initial+'</div>'
+          + '<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Saira;font-size:.75rem;font-weight:900;color:#fff;flex-shrink:0">'+initial+'</div>'
           + '<div style="flex:1"><div style="font-size:.88rem;font-weight:700;color:#fff">'+item.username+(isMe?' 👤':'')+' </div><div style="font-size:.65rem;color:var(--muted)">Dinero: $'+item.value.toLocaleString('es-MX')+'</div></div>'
-          + '<div style="text-align:right;flex-shrink:0"><div style="font-family:Oxanium;font-size:.95rem;font-weight:900;color:'+medalColor+'">$'+item.value.toLocaleString('es-MX')+'</div><div style="font-size:.6rem;color:var(--muted)">MX</div></div>'
+          + '<div style="text-align:right;flex-shrink:0"><div style="font-family:Saira;font-size:.95rem;font-weight:900;color:'+medalColor+'">$'+item.value.toLocaleString('es-MX')+'</div><div style="font-size:.6rem;color:var(--muted)">MX</div></div>'
           + '</div>';
       });
 
@@ -5841,12 +5892,12 @@ function loadDiamondTop(){
 
         html += '<div style="background:'+bg+';border:1px solid '+border+';border-radius:11px;padding:'+(isTop1?'.85rem .9rem':'.65rem .9rem')+';display:flex;align-items:center;gap:.75rem;'+(isTop1?'box-shadow:0 0 18px rgba(255,215,0,.1);':'')+'">'
           + '<div style="width:26px;text-align:center;font-size:'+(i<3?'1.2rem':'.85rem')+';font-weight:900;color:'+rankColor+';flex-shrink:0">'+rank+'</div>'
-          + '<div style="width:'+avSize+';height:'+avSize+';border-radius:11px;background:linear-gradient(135deg,#67e8f9,#0e7490);display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-size:'+(isTop1?'.9rem':'.78rem')+';font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+rankColor+'44">'+initial+'</div>'
+          + '<div style="width:'+avSize+';height:'+avSize+';border-radius:11px;background:linear-gradient(135deg,#67e8f9,#0e7490);display:flex;align-items:center;justify-content:center;font-family:Saira;font-size:'+(isTop1?'.9rem':'.78rem')+';font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+rankColor+'44">'+initial+'</div>'
           + '<div style="flex:1;min-width:0">'
           + '<div style="font-size:'+(isTop1?'1rem':'.85rem')+';font-weight:'+(isTop1?'900':'700')+';color:#fff">'+item.username+'</div>'
           + '<div style="font-size:.62rem;color:var(--muted)">diamantes comprados</div>'
           + '</div>'
-          + '<div style="text-align:right;flex-shrink:0;font-family:Oxanium;font-size:'+(isTop1?'1.05rem':'.88rem')+';font-weight:900;color:'+(isTop1?'#ffd700':'#67e8f9')+'">'+item.diamonds.toLocaleString('es-MX')+' 💎</div>'
+          + '<div style="text-align:right;flex-shrink:0;font-family:Saira;font-size:'+(isTop1?'1.05rem':'.88rem')+';font-weight:900;color:'+(isTop1?'#ffd700':'#67e8f9')+'">'+item.diamonds.toLocaleString('es-MX')+' 💎</div>'
           + '</div>';
       });
 
@@ -5956,12 +6007,12 @@ function loadMillonarioTop(){
 
         html += '<div style="background:'+bg+';border:1px solid '+border+';border-radius:11px;padding:'+(isTop1?'.85rem .9rem':'.65rem .9rem')+';display:flex;align-items:center;gap:.75rem;'+(isTop1?'box-shadow:0 0 18px rgba(255,215,0,.12);':'')+'">'
           + '<div style="width:26px;text-align:center;font-size:'+(i<3?'1.2rem':'.85rem')+';font-weight:900;color:'+rankColor+';flex-shrink:0">'+rank+'</div>'
-          + '<div style="width:'+avSize+';height:'+avSize+';border-radius:11px;background:linear-gradient(135deg,#ffd700,#f0a000);display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-size:'+(isTop1?'.9rem':'.78rem')+';font-weight:900;color:#1a0a00;flex-shrink:0;border:2px solid '+rankColor+'44">'+initial+'</div>'
+          + '<div style="width:'+avSize+';height:'+avSize+';border-radius:11px;background:linear-gradient(135deg,#ffd700,#f0a000);display:flex;align-items:center;justify-content:center;font-family:Saira;font-size:'+(isTop1?'.9rem':'.78rem')+';font-weight:900;color:#1a0a00;flex-shrink:0;border:2px solid '+rankColor+'44">'+initial+'</div>'
           + '<div style="flex:1;min-width:0">'
           + '<div style="font-size:'+(isTop1?'1rem':'.85rem')+';font-weight:'+(isTop1?'900':'700')+';color:#fff">'+item.username+'</div>'
           + '<div style="font-size:.62rem;color:var(--muted)">gastado en total</div>'
           + '</div>'
-          + '<div style="text-align:right;flex-shrink:0;font-family:Oxanium;font-size:'+(isTop1?'1.05rem':'.88rem')+';font-weight:900;color:'+(isTop1?'#ffd700':'#f0a000')+'">$'+Math.round(item.monto).toLocaleString('es-MX')+'</div>'
+          + '<div style="text-align:right;flex-shrink:0;font-family:Saira;font-size:'+(isTop1?'1.05rem':'.88rem')+';font-weight:900;color:'+(isTop1?'#ffd700':'#f0a000')+'">$'+Math.round(item.monto).toLocaleString('es-MX')+'</div>'
           + '</div>';
       });
 
@@ -6072,12 +6123,12 @@ function loadLikerTop(){
 
         html += '<div style="background:'+bg+';border:1px solid '+border+';border-radius:11px;padding:'+(isTop1?'.85rem .9rem':'.65rem .9rem')+';display:flex;align-items:center;gap:.75rem;'+(isTop1?'box-shadow:0 0 18px rgba(255,77,166,.12);':'')+'">'
           + '<div style="width:26px;text-align:center;font-size:'+(i<3?'1.2rem':'.85rem')+';font-weight:900;color:'+rankColor+';flex-shrink:0">'+rank+'</div>'
-          + '<div style="width:'+avSize+';height:'+avSize+';border-radius:11px;background:linear-gradient(135deg,#ff4da6,#d6249f);display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-size:'+(isTop1?'.9rem':'.78rem')+';font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+rankColor+'44">'+initial+'</div>'
+          + '<div style="width:'+avSize+';height:'+avSize+';border-radius:11px;background:linear-gradient(135deg,#ff4da6,#d6249f);display:flex;align-items:center;justify-content:center;font-family:Saira;font-size:'+(isTop1?'.9rem':'.78rem')+';font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+rankColor+'44">'+initial+'</div>'
           + '<div style="flex:1;min-width:0">'
           + '<div style="font-size:'+(isTop1?'1rem':'.85rem')+';font-weight:'+(isTop1?'900':'700')+';color:#fff">'+item.username+'</div>'
           + '<div style="font-size:.62rem;color:var(--muted)">likes comprados</div>'
           + '</div>'
-          + '<div style="text-align:right;flex-shrink:0;font-family:Oxanium;font-size:'+(isTop1?'1.05rem':'.88rem')+';font-weight:900;color:'+(isTop1?'#ff4da6':'#d6249f')+'">'+item.likes.toLocaleString('es-MX')+' 👍</div>'
+          + '<div style="text-align:right;flex-shrink:0;font-family:Saira;font-size:'+(isTop1?'1.05rem':'.88rem')+';font-weight:900;color:'+(isTop1?'#ff4da6':'#d6249f')+'">'+item.likes.toLocaleString('es-MX')+' 👍</div>'
           + '</div>';
       });
 
@@ -6112,8 +6163,15 @@ setInterval(function(){
 var WA_CHANNEL = 'https://whatsapp.com/channel/0029VbCXQVjJENyAgAoJLJ3g';
 
 function showWelcome(){
+  // "No mostrar más por hoy": si ya lo pidió hoy, no se vuelve a abrir
+  try { if(localStorage.getItem('ciberstore_welcome_hoy') === new Date().toDateString()) return; } catch(e){}
   var el = document.getElementById('welcome-modal');
   if(el){ el.style.display = 'flex'; }
+}
+
+function closeWelcomeHoy(){
+  try { localStorage.setItem('ciberstore_welcome_hoy', new Date().toDateString()); } catch(e){}
+  closeWelcome();
 }
 
 function closeWelcome(){
@@ -6415,16 +6473,16 @@ function _mostrarPinesEntregados(pines, tipo){
   pines.forEach(function(p, i){
     lista += '<div style="display:flex;align-items:center;gap:.5rem;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.25);border-radius:10px;padding:.7rem .85rem;margin-bottom:.5rem">'
       + '<div style="flex:1;min-width:0"><div style="font-size:.62rem;color:var(--muted);text-transform:uppercase">PIN '+(i+1)+'</div>'
-      + '<div id="pincode-'+i+'" style="font-family:Oxanium;font-weight:700;font-size:.92rem;color:#fff;word-break:break-all">'+p.codigo+'</div></div>'
-      + '<button onclick="_copiarUnPin(\''+String(p.codigo).replace(/'/g,"") +'\',this)" style="flex-shrink:0;background:rgba(0,230,118,.15);border:1px solid rgba(0,230,118,.4);color:#25d366;border-radius:8px;padding:.5rem .8rem;font-family:Poppins;font-weight:700;font-size:.72rem;cursor:pointer">Copiar</button>'
+      + '<div id="pincode-'+i+'" style="font-family:Saira;font-weight:700;font-size:.92rem;color:#fff;word-break:break-all">'+p.codigo+'</div></div>'
+      + '<button onclick="_copiarUnPin(\''+String(p.codigo).replace(/'/g,"") +'\',this)" style="flex-shrink:0;background:rgba(0,230,118,.15);border:1px solid rgba(0,230,118,.4);color:#25d366;border-radius:8px;padding:.5rem .8rem;font-family:Barlow;font-weight:700;font-size:.72rem;cursor:pointer">Copiar</button>'
       + '</div>';
   });
 
   box.innerHTML = '<div style="font-size:1.8rem;margin-bottom:.4rem;text-align:center">\u2705</div>'
-    + '<div style="font-family:Oxanium;font-weight:800;font-size:1rem;color:#25d366;text-align:center;margin-bottom:.25rem">'+pines.length+' PIN(es) de '+tipo+'</div>'
+    + '<div style="font-family:Saira;font-weight:800;font-size:1rem;color:#25d366;text-align:center;margin-bottom:.25rem">'+pines.length+' PIN(es) de '+tipo+'</div>'
     + '<div style="font-size:.72rem;color:var(--muted);text-align:center;margin-bottom:1rem">Copia cada uno y canjealo en redeempins.com</div>'
     + lista
-    + '<button onclick="copiarPin()" style="width:100%;margin-top:.5rem;padding:.7rem;background:rgba(0,230,118,.12);border:1px solid rgba(0,230,118,.3);color:#25d366;border-radius:9px;font-family:Poppins;font-weight:700;font-size:.8rem;cursor:pointer">\u{1F4CB} Copiar todos</button>';
+    + '<button onclick="copiarPin()" style="width:100%;margin-top:.5rem;padding:.7rem;background:rgba(0,230,118,.12);border:1px solid rgba(0,230,118,.3);color:#25d366;border-radius:9px;font-family:Barlow;font-weight:700;font-size:.8rem;cursor:pointer">\u{1F4CB} Copiar todos</button>';
 
   box.style.display = 'block';
   box.scrollIntoView({behavior:'smooth',block:'center'});
@@ -7139,7 +7197,7 @@ function _mostrarRetiroEnviado(monto, montoMxn, recibeMxn, metodo, destino){
   cont.innerHTML =
     '<div style="background:linear-gradient(160deg,#0a0e14,#0a0f14);border:2px solid rgba(37,211,102,.35);border-radius:18px;padding:1.75rem 1.25rem;text-align:center">'
     + '<div style="font-size:2.8rem;margin-bottom:.5rem">\uD83D\uDCB8</div>'
-    + '<div style="font-family:Oxanium;font-weight:900;font-size:1.2rem;color:#25d366;margin-bottom:.35rem;letter-spacing:.5px">SOLICITUD ENVIADA</div>'
+    + '<div style="font-family:Saira;font-weight:900;font-size:1.2rem;color:#25d366;margin-bottom:.35rem;letter-spacing:.5px">SOLICITUD ENVIADA</div>'
     + '<div style="font-size:.8rem;color:var(--muted);margin-bottom:1.35rem">Estamos revisando tu retiro</div>'
     + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
     +   _filaRecibo('\uD83D\uDCB0 Solicitas', sym+monto.toLocaleString('es-MX',{maximumFractionDigits:2})+suf)
@@ -7150,7 +7208,7 @@ function _mostrarRetiroEnviado(monto, montoMxn, recibeMxn, metodo, destino){
     +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha+' \u00B7 '+hora, true)
     + '</div>'
     + '<div style="background:rgba(255,180,60,.08);border:1px solid rgba(255,180,60,.25);border-radius:10px;padding:.75rem .9rem;margin-top:1rem;font-size:.73rem;color:#22d3ee;line-height:1.55">\u23F3 Procesamos los retiros en <b>24-48 hrs habiles</b>. El saldo se descuenta cuando aprobamos la solicitud.</div>'
-    + '<button onclick="var o=document.getElementById(\'recibo-retiro-ov\'); if(o) o.remove();" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Entendido</button>'
+    + '<button onclick="var o=document.getElementById(\'recibo-retiro-ov\'); if(o) o.remove();" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Barlow;font-weight:700;font-size:.9rem;cursor:pointer">Entendido</button>'
     + '</div>';
 }
 
@@ -7572,7 +7630,7 @@ function _cargarSaldoYMovimientos(){
         h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:.42rem .55rem;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px">'
           +'<div style="min-width:0;flex:1"><div style="font-size:.75rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis">'+(m.descripcion||m.tipo)+'</div>'
           +'<div style="font-size:.62rem;color:var(--muted)">'+f2+'</div></div>'
-          +'<div style="font-family:Oxanium;font-size:.75rem;font-weight:700;color:'+color+';flex-shrink:0;margin-left:.5rem">'+signo+'$'+(m.monto||0).toLocaleString('es-MX')+'</div>'
+          +'<div style="font-family:Saira;font-size:.75rem;font-weight:700;color:'+color+';flex-shrink:0;margin-left:.5rem">'+signo+'$'+(m.monto||0).toLocaleString('es-MX')+'</div>'
           +'</div>';
       });
       movs.innerHTML=h;
@@ -7611,8 +7669,8 @@ function renderCreadoresTabla(){
     var bg = (i % 2 === 0) ? 'rgba(255,255,255,.015)' : 'transparent';
     var esUltimo = (i === CREADORES_PREMIOS.length - 1);
     html += '<div style="display:grid;grid-template-columns:1.3fr 1fr;padding:.85rem 1rem;background:'+bg+';'+(esUltimo?'background:rgba(255,207,64,.06);':'')+'border-bottom:'+(esUltimo?'none':'1px solid rgba(255,255,255,.05)')+'">';
-    html += '<div style="font-family:Oxanium;font-weight:700;font-size:.85rem;color:'+(esUltimo?'#67e8f9':'#fff')+';display:flex;align-items:center">'+p.label+'</div>';
-    html += '<div style="font-family:Oxanium;font-weight:800;font-size:.92rem;color:'+(esUltimo?'#67e8f9':'#22d3ee')+';display:flex;align-items:center;gap:.35rem">'+p.diamantes.toLocaleString('es-MX')+' \u{1F48E}</div>';
+    html += '<div style="font-family:Saira;font-weight:700;font-size:.85rem;color:'+(esUltimo?'#67e8f9':'#fff')+';display:flex;align-items:center">'+p.label+'</div>';
+    html += '<div style="font-family:Saira;font-weight:800;font-size:.92rem;color:'+(esUltimo?'#67e8f9':'#22d3ee')+';display:flex;align-items:center;gap:.35rem">'+p.diamantes.toLocaleString('es-MX')+' \u{1F48E}</div>';
     html += '</div>';
   });
   cont.innerHTML = html;
@@ -7906,9 +7964,9 @@ function _mostrarAvisoModal(titulo, texto, color){
     +     '<svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
     +   '</div>'
     + '</div>'
-    + '<div style="font-family:Oxanium,sans-serif;font-weight:900;font-size:1.2rem;color:'+color+';margin-bottom:.7rem;letter-spacing:.5px">'+titulo+'</div>'
+    + '<div style="font-family:Saira,sans-serif;font-weight:900;font-size:1.2rem;color:'+color+';margin-bottom:.7rem;letter-spacing:.5px">'+titulo+'</div>'
     + '<div style="font-size:.86rem;color:#c5cad6;line-height:1.65;margin-bottom:1.5rem">'+texto+'</div>'
-    + '<button class="av-btn" onclick="_cerrarAvisoModal()" style="width:100%;padding:.95rem;background:linear-gradient(135deg,'+color+',' +color+'cc);color:#06080f;border:none;border-radius:14px;font-family:Oxanium,sans-serif;font-weight:900;font-size:.92rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 8px 24px '+color+'33">Entendido</button>';
+    + '<button class="av-btn" onclick="_cerrarAvisoModal()" style="width:100%;padding:.95rem;background:linear-gradient(135deg,'+color+',' +color+'cc);color:#06080f;border:none;border-radius:14px;font-family:Saira,sans-serif;font-weight:900;font-size:.92rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 8px 24px '+color+'33">Entendido</button>';
   ov.appendChild(c);
 }
 
@@ -8016,8 +8074,8 @@ function abrirDiamDetalle(idx){
     + '<div style="background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:18px;padding:1.35rem">'
     + (p.img ? '<img src="'+p.img+'" alt="'+p.nombre+'" style="width:150px;display:block;margin:0 auto 1rem;border-radius:12px" onerror="this.style.display=\'none\'"/>' : '')
     + '<div style="text-align:center;margin-bottom:1.15rem">'
-    +   '<div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.15rem;color:#fff;margin-bottom:.2rem">'+p.nombre+'</div>'
-    +   '<div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.9rem;color:#fff">'+fmt(p.precio)+'</div>'
+    +   '<div style="font-family:Barlow,sans-serif;font-weight:700;font-size:1.15rem;color:#fff;margin-bottom:.2rem">'+p.nombre+'</div>'
+    +   '<div style="font-family:Barlow,sans-serif;font-weight:700;font-size:1.9rem;color:#fff">'+fmt(p.precio)+'</div>'
     +   '<div style="font-size:.78rem;color:#6b7280;margin-top:.15rem">Pago con saldo</div>'
     + '</div>'
     + _avisoEntrega(p)
@@ -8026,7 +8084,7 @@ function abrirDiamDetalle(idx){
     + '<div style="display:flex;justify-content:space-between;background:rgba(34,211,238,.05);border:1px solid rgba(34,211,238,.15);border-radius:11px;padding:.65rem 1rem;margin:.3rem 0 .8rem"><span style="font-size:.76rem;color:#6b7280">Tu saldo</span><span style="font-weight:600;color:'+(alcanza?'#22d3ee':'#ff6b6b')+';font-size:.85rem">'+fmt(saldo)+'</span></div>'
     + (alcanza ? '' : '<div style="background:rgba(255,60,60,.08);border:1px solid rgba(255,60,60,.25);border-radius:10px;padding:.65rem .85rem;font-size:.77rem;color:#ff6b6b;margin-bottom:.75rem">Saldo insuficiente. <span onclick="goPage(\'saldo\')" style="text-decoration:underline;cursor:pointer">Recarga aqui</span></div>')
     + '<div class="ddet-msg" id="diam-msg"></div>'
-    + '<button id="diam-btn" onclick="confirmarDiamCompra()" style="width:100%;padding:.9rem;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.42);color:#22d3ee;border-radius:13px;font-family:Poppins;font-weight:600;font-size:.92rem;cursor:pointer">Comprar con saldo</button>'
+    + '<button id="diam-btn" onclick="confirmarDiamCompra()" style="width:100%;padding:.9rem;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.42);color:#22d3ee;border-radius:13px;font-family:Barlow;font-weight:600;font-size:.92rem;cursor:pointer">Comprar con saldo</button>'
     + '</div>';
 
   document.getElementById('diam-catalogo').style.display='none';
@@ -8120,7 +8178,7 @@ function _mostrarReciboProceso(p, ffId, ord){
   det.innerHTML =
     '<div style="background:linear-gradient(160deg,rgba(255,180,60,.08),rgba(255,255,255,.02));border:2px solid rgba(255,180,60,.35);border-radius:18px;padding:1.75rem 1.35rem;text-align:center;max-width:420px;margin:0 auto">'
     + '<div style="font-size:2.8rem;margin-bottom:.5rem">\u23F3</div>'
-    + '<div style="font-family:Oxanium;font-weight:900;font-size:1.25rem;color:#22d3ee;margin-bottom:.35rem;letter-spacing:.5px">RECARGA EN PROCESO</div>'
+    + '<div style="font-family:Saira;font-weight:900;font-size:1.25rem;color:#22d3ee;margin-bottom:.35rem;letter-spacing:.5px">RECARGA EN PROCESO</div>'
     + '<div style="font-size:.8rem;color:var(--muted);margin-bottom:1.35rem">Tu pedido se esta procesando, te lo acreditamos pronto</div>'
 
     // Barra de progreso animada
@@ -8136,7 +8194,7 @@ function _mostrarReciboProceso(p, ffId, ord){
     +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' \u00B7 \uD83D\uDD52 ' + hora, true)
     + '</div>'
 
-    + '<button onclick="cerrarDiamDetalle()" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Volver al catalogo</button>'
+    + '<button onclick="cerrarDiamDetalle()" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Barlow;font-weight:700;font-size:.9rem;cursor:pointer">Volver al catalogo</button>'
     + '</div>';
 
   det.style.display = '';
@@ -8408,12 +8466,12 @@ function _mostrarConfirmacionIdNoVerificado(p, ffId, btnOriginal, msgOriginal){
     '<div style="background:#0e1118;border:1.5px solid rgba(255,180,60,.45);border-radius:18px;padding:1.4rem;max-width:380px;width:100%;max-height:90vh;overflow-y:auto">'
     + '<div style="text-align:center;margin-bottom:1rem">'
     +   '<div style="font-size:2rem;margin-bottom:.4rem">\u26A0\uFE0F</div>'
-    +   '<div style="font-family:Oxanium;font-weight:900;font-size:1.05rem;color:#ffb84d">ID NO VERIFICADO</div>'
+    +   '<div style="font-family:Saira;font-weight:900;font-size:1.05rem;color:#ffb84d">ID NO VERIFICADO</div>'
     +   '<div style="font-size:.8rem;color:#9aa4b2;margin-top:.4rem;line-height:1.5">No pudimos confirmar que este ID pertenezca a un jugador de Free Fire.</div>'
     + '</div>'
     + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:.7rem .9rem;margin-bottom:1rem;text-align:center">'
     +   '<div style="font-size:.65rem;color:#6b7280;text-transform:uppercase;letter-spacing:1px">ID ingresado</div>'
-    +   '<div style="font-family:Oxanium;font-weight:800;font-size:1.1rem;color:#fff;margin-top:.15rem">'+_esc(ffId)+'</div>'
+    +   '<div style="font-family:Saira;font-weight:800;font-size:1.1rem;color:#fff;margin-top:.15rem">'+_esc(ffId)+'</div>'
     + '</div>'
     + '<div style="background:rgba(255,80,80,.08);border:1px solid rgba(255,80,80,.3);border-radius:12px;padding:.85rem .95rem;margin-bottom:1rem;font-size:.75rem;color:#ffb3b3;line-height:1.55">'
     +   '<b style="color:#ff6b6b">IMPORTANTE:</b> Puedes continuar con este ID bajo tu responsabilidad. Si el ID ingresado es incorrecto, la recarga podr&iacute;a no llegar al jugador correcto y no podremos garantizar la entrega ni hacernos responsables por errores ocasionados por un ID incorrecto.'
@@ -8423,8 +8481,8 @@ function _mostrarConfirmacionIdNoVerificado(p, ffId, btnOriginal, msgOriginal){
     +   '<span style="font-size:.75rem;color:#c9d1e0;line-height:1.5">Entiendo que si proporcion&eacute; un ID incorrecto, la recarga puede no entregarse y acepto continuar.</span>'
     + '</label>'
     + '<div style="display:flex;gap:.65rem">'
-    +   '<button id="id-noverif-cancel" style="flex:1;padding:.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#8b93a3;border-radius:11px;font-family:Poppins;font-weight:700;font-size:.82rem;cursor:pointer">Cancelar</button>'
-    +   '<button id="btn-continuar-noverif" disabled style="flex:1.4;padding:.75rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#4b5563;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.8rem;cursor:not-allowed">CONTINUAR CON LA RECARGA</button>'
+    +   '<button id="id-noverif-cancel" style="flex:1;padding:.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#8b93a3;border-radius:11px;font-family:Barlow;font-weight:700;font-size:.82rem;cursor:pointer">Cancelar</button>'
+    +   '<button id="btn-continuar-noverif" disabled style="flex:1.4;padding:.75rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#4b5563;border-radius:11px;font-family:Saira;font-weight:900;font-size:.8rem;cursor:not-allowed">CONTINUAR CON LA RECARGA</button>'
     + '</div></div>';
   document.body.appendChild(ov);
 
@@ -8443,10 +8501,10 @@ function _toggleBtnIdNoVerif(){
   if(!chk || !btn) return;
   if(chk.checked){
     btn.disabled = false;
-    btn.style.cssText = 'flex:1.4;padding:.75rem;background:linear-gradient(135deg,#a3690a,#ffb84d);border:none;color:#1a0f00;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.8rem;cursor:pointer';
+    btn.style.cssText = 'flex:1.4;padding:.75rem;background:linear-gradient(135deg,#a3690a,#ffb84d);border:none;color:#1a0f00;border-radius:11px;font-family:Saira;font-weight:900;font-size:.8rem;cursor:pointer';
   } else {
     btn.disabled = true;
-    btn.style.cssText = 'flex:1.4;padding:.75rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#4b5563;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.8rem;cursor:not-allowed';
+    btn.style.cssText = 'flex:1.4;padding:.75rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#4b5563;border-radius:11px;font-family:Saira;font-weight:900;font-size:.8rem;cursor:not-allowed';
   }
 }
 
@@ -8463,10 +8521,10 @@ function _mostrarConfirmacionFinalNoVerificado(p, ffId){
     '<div style="background:#0e1118;border:1.5px solid rgba(255,180,60,.45);border-radius:18px;padding:1.4rem;max-width:360px;width:100%">'
     + '<div style="text-align:center;margin-bottom:1rem">'
     +   '<div style="font-size:1.8rem;margin-bottom:.4rem">\u26A0\uFE0F</div>'
-    +   '<div style="font-family:Oxanium;font-weight:900;font-size:1rem;color:#ffb84d">ID NO VERIFICADO</div>'
+    +   '<div style="font-family:Saira;font-weight:900;font-size:1rem;color:#ffb84d">ID NO VERIFICADO</div>'
     + '</div>'
     + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:.75rem .9rem;margin-bottom:1rem">'
-    +   '<div style="display:flex;justify-content:space-between;font-size:.78rem;padding:.3rem 0"><span style="color:#6b7280">ID de jugador</span><span style="color:#fff;font-weight:700;font-family:Oxanium">'+_esc(ffId)+'</span></div>'
+    +   '<div style="display:flex;justify-content:space-between;font-size:.78rem;padding:.3rem 0"><span style="color:#6b7280">ID de jugador</span><span style="color:#fff;font-weight:700;font-family:Saira">'+_esc(ffId)+'</span></div>'
     +   '<div style="display:flex;justify-content:space-between;font-size:.78rem;padding:.3rem 0;border-top:1px solid rgba(255,255,255,.06)"><span style="color:#6b7280">Estado</span><span style="color:#ffb84d;font-weight:700">No se pudo verificar</span></div>'
     + '</div>'
     + '<div style="font-size:.76rem;color:#c9d1e0;text-align:center;margin-bottom:1.1rem">Revisa cuidadosamente tu ID antes de confirmar.</div>'
@@ -8475,8 +8533,8 @@ function _mostrarConfirmacionFinalNoVerificado(p, ffId){
     +   '<span style="font-size:.76rem;color:#c9d1e0;line-height:1.5">Confirmo que el ID ingresado es correcto.</span>'
     + '</label>'
     + '<div style="display:flex;gap:.65rem">'
-    +   '<button id="id-final-cancel" style="flex:1;padding:.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#8b93a3;border-radius:11px;font-family:Poppins;font-weight:700;font-size:.82rem;cursor:pointer">Cancelar</button>'
-    +   '<button id="btn-confirmar-final" disabled style="flex:1.4;padding:.75rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#4b5563;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.8rem;cursor:not-allowed">CONFIRMAR RECARGA</button>'
+    +   '<button id="id-final-cancel" style="flex:1;padding:.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#8b93a3;border-radius:11px;font-family:Barlow;font-weight:700;font-size:.82rem;cursor:pointer">Cancelar</button>'
+    +   '<button id="btn-confirmar-final" disabled style="flex:1.4;padding:.75rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#4b5563;border-radius:11px;font-family:Saira;font-weight:900;font-size:.8rem;cursor:not-allowed">CONFIRMAR RECARGA</button>'
     + '</div></div>';
   document.body.appendChild(ov);
 
@@ -8505,10 +8563,10 @@ function _toggleBtnFinalNoVerif(){
   if(!chk || !btn) return;
   if(chk.checked){
     btn.disabled = false;
-    btn.style.cssText = 'flex:1.4;padding:.75rem;background:linear-gradient(135deg,#a3690a,#ffb84d);border:none;color:#1a0f00;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.8rem;cursor:pointer';
+    btn.style.cssText = 'flex:1.4;padding:.75rem;background:linear-gradient(135deg,#a3690a,#ffb84d);border:none;color:#1a0f00;border-radius:11px;font-family:Saira;font-weight:900;font-size:.8rem;cursor:pointer';
   } else {
     btn.disabled = true;
-    btn.style.cssText = 'flex:1.4;padding:.75rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#4b5563;border-radius:11px;font-family:Oxanium;font-weight:900;font-size:.8rem;cursor:not-allowed';
+    btn.style.cssText = 'flex:1.4;padding:.75rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#4b5563;border-radius:11px;font-family:Saira;font-weight:900;font-size:.8rem;cursor:not-allowed';
   }
 }
 
@@ -8565,7 +8623,7 @@ function cargarWalletPerfil(){
           + '<div style="width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0">'+ico+'</div>'
           + '<div style="flex:1;min-width:0"><div style="font-size:.82rem;font-weight:600;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(m.descripcion||m.tipo)+'</div>'
           + '<div style="font-size:.68rem;color:var(--muted)">'+hora+'</div></div>'
-          + '<div style="text-align:right;flex-shrink:0"><div style="font-family:Oxanium;font-weight:700;font-size:.85rem;color:'+color+'">'+signo+fmt(m.monto||0)+'</div></div>'
+          + '<div style="text-align:right;flex-shrink:0"><div style="font-family:Saira;font-weight:700;font-size:.85rem;color:'+color+'">'+signo+fmt(m.monto||0)+'</div></div>'
           + '</div>';
       });
       movs.innerHTML = h;
@@ -8607,7 +8665,7 @@ function verProductosRA(){
     var pins = prods.filter(function(p){ return (p.type||p.tipo)==='pin'; });
     var otros = prods.filter(function(p){ return (p.type||p.tipo)!=='recharge' && (p.type||p.tipo)!=='pin'; });
 
-    var html = '<div style="font-family:Oxanium;font-weight:800;color:#22d3ee;margin-bottom:.75rem">'+prods.length+' PRODUCTOS ('+recargas.length+' recargas, '+pins.length+' pins)</div>';
+    var html = '<div style="font-family:Saira;font-weight:800;color:#22d3ee;margin-bottom:.75rem">'+prods.length+' PRODUCTOS ('+recargas.length+' recargas, '+pins.length+' pins)</div>';
 
     function pintar(lista, titulo, color){
       if(!lista.length) return '';
@@ -8953,15 +9011,15 @@ function _generarComprobanteCanvas(){
   ctx.beginPath(); ctx.arc(W/2, 175, 52, 0, Math.PI*2); ctx.fillStyle='#16a34a'; ctx.fill();
   ctx.strokeStyle='#fff'; ctx.lineWidth=8; ctx.lineCap='round'; ctx.lineJoin='round';
   ctx.beginPath(); ctx.moveTo(W/2-24, 175); ctx.lineTo(W/2-6, 193); ctx.lineTo(W/2+26, 158); ctx.stroke();
-  ctx.textAlign='center'; ctx.fillStyle='#fff'; ctx.font='bold 44px Poppins, sans-serif';
+  ctx.textAlign='center'; ctx.fillStyle='#fff'; ctx.font='bold 44px Barlow, sans-serif';
   ctx.fillText(c.titulo, W/2, 285);
-  ctx.fillStyle='#8b93a3'; ctx.font='24px Poppins, sans-serif';
+  ctx.fillStyle='#8b93a3'; ctx.font='24px Barlow, sans-serif';
   ctx.fillText('Los diamantes ya estan en tu cuenta', W/2, 325);
   _rr(ctx, 80, 370, W-160, 130, 20); ctx.fillStyle='rgba(56,189,248,.06)'; ctx.fill();
   ctx.strokeStyle='rgba(255,255,255,.08)'; ctx.lineWidth=1.5; ctx.stroke();
-  ctx.textAlign='left'; ctx.fillStyle='#fff'; ctx.font='bold 68px Poppins, sans-serif';
+  ctx.textAlign='left'; ctx.fillStyle='#fff'; ctx.font='bold 68px Barlow, sans-serif';
   ctx.fillText(c.total, 230, 455);
-  ctx.fillStyle='#8b93a3'; ctx.font='bold 22px Poppins, sans-serif';
+  ctx.fillStyle='#8b93a3'; ctx.font='bold 22px Barlow, sans-serif';
   ctx.fillText('DIAMANTES', 232, 485);
   ctx.font='60px serif'; ctx.fillText('\uD83D\uDC8E', 130, 465);
   var rows = [
@@ -8973,15 +9031,15 @@ function _generarComprobanteCanvas(){
   ];
   var y = 560;
   rows.forEach(function(r){
-    ctx.textAlign='left'; ctx.fillStyle='#9aa4b2'; ctx.font='24px Poppins, sans-serif';
+    ctx.textAlign='left'; ctx.fillStyle='#9aa4b2'; ctx.font='24px Barlow, sans-serif';
     ctx.fillText(r[0], 90, y);
-    ctx.textAlign='right'; ctx.fillStyle='#fff'; ctx.font='600 25px Poppins, sans-serif';
+    ctx.textAlign='right'; ctx.fillStyle='#fff'; ctx.font='600 25px Barlow, sans-serif';
     ctx.fillText(r[1], W-90, y);
     ctx.strokeStyle='rgba(255,255,255,.06)'; ctx.lineWidth=1;
     ctx.beginPath(); ctx.moveTo(90, y+22); ctx.lineTo(W-90, y+22); ctx.stroke();
     y += 62;
   });
-  ctx.textAlign='center'; ctx.fillStyle='#5a6478'; ctx.font='20px Poppins, sans-serif';
+  ctx.textAlign='center'; ctx.fillStyle='#5a6478'; ctx.font='20px Barlow, sans-serif';
   ctx.fillText('ciberstore.lat \u00B7 ' + c.txId, W/2, H-80);
   return cv;
 }
@@ -9103,7 +9161,7 @@ function _mostrarReciboScar(ffId, user, ord){
   wrap.innerHTML =
     '<div style="background:linear-gradient(160deg,rgba(255,180,60,.08),rgba(255,255,255,.02));border:2px solid rgba(255,180,60,.35);border-radius:18px;padding:2rem 1.35rem;text-align:center;max-width:440px;margin:2rem auto">'
     + '<div style="font-size:3rem;margin-bottom:.5rem">\u2705</div>'
-    + '<div style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#25d366;margin-bottom:.35rem;letter-spacing:.5px">PEDIDO CONFIRMADO</div>'
+    + '<div style="font-family:Saira;font-weight:900;font-size:1.3rem;color:#25d366;margin-bottom:.35rem;letter-spacing:.5px">PEDIDO CONFIRMADO</div>'
     + '<div style="font-size:.82rem;color:var(--muted);margin-bottom:1.5rem">Tu SCAR Evolutiva esta en proceso</div>'
     + '<div style="background:rgba(0,0,0,.25);border-radius:99px;height:10px;overflow:hidden;margin-bottom:1.5rem"><div style="height:100%;width:25%;border-radius:99px;background:linear-gradient(90deg,#22d3ee,#ff9900);box-shadow:0 0 12px rgba(255,180,60,.5)"></div></div>'
     + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
@@ -9116,7 +9174,7 @@ function _mostrarReciboScar(ffId, user, ord){
     +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' \u00B7 ' + hora, true)
     + '</div>'
     + '<div style="font-size:.75rem;color:#22d3ee;margin-top:1rem;line-height:1.5">Te contactaremos por WhatsApp. La skin llega en 2-3 semanas al correo de tu cuenta.</div>'
-    + '<button onclick="goPage(\'home\')" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Volver al inicio</button>'
+    + '<button onclick="goPage(\'home\')" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Barlow;font-weight:700;font-size:.9rem;cursor:pointer">Volver al inicio</button>'
     + '</div>';
   wrap.scrollIntoView({ behavior:'smooth', block:'start' });
 }
@@ -9205,31 +9263,31 @@ function renderClanes(){
   cont.innerHTML = CLANES.map(function(c){
     return '<div style="background:linear-gradient(160deg,rgba(255,179,0,.08),rgba(20,15,8,.4));border:1px solid rgba(255,179,0,.3);border-radius:20px;overflow:hidden">'
       + '<div style="position:relative;background:radial-gradient(circle at center,rgba(255,179,0,.12),transparent);padding:1.5rem 1.5rem 0">'
-      +   '<div style="position:absolute;top:1rem;right:1rem;background:linear-gradient(90deg,#ffb300,#ff8800);color:#fff;font-family:Oxanium;font-weight:800;font-size:.68rem;padding:.35rem .85rem;border-radius:99px;letter-spacing:.5px;z-index:2;box-shadow:0 4px 14px rgba(255,179,0,.4)">'+(c.vendido?'VENDIDO':'NIVEL 7')+'</div>'
+      +   '<div style="position:absolute;top:1rem;right:1rem;background:linear-gradient(90deg,#ffb300,#ff8800);color:#fff;font-family:Saira;font-weight:800;font-size:.68rem;padding:.35rem .85rem;border-radius:99px;letter-spacing:.5px;z-index:2;box-shadow:0 4px 14px rgba(255,179,0,.4)">'+(c.vendido?'VENDIDO':'NIVEL 7')+'</div>'
       +   '<img src="'+c.img+'" alt="'+c.nombre+'" style="width:100%;border-radius:14px;display:block'+(c.vendido?";filter:grayscale(85%) brightness(.55)":"")+'" onerror="this.style.display=\'none\'"/>'
-      +   (c.vendido ? '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-12deg);background:rgba(255,68,68,.92);color:#fff;font-family:Oxanium;font-weight:900;font-size:1.5rem;letter-spacing:4px;padding:.5rem 2rem;border-radius:8px;z-index:3;box-shadow:0 8px 30px rgba(0,0,0,.6)">VENDIDO</div>' : '')
+      +   (c.vendido ? '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-12deg);background:rgba(255,68,68,.92);color:#fff;font-family:Saira;font-weight:900;font-size:1.5rem;letter-spacing:4px;padding:.5rem 2rem;border-radius:8px;z-index:3;box-shadow:0 8px 30px rgba(0,0,0,.6)">VENDIDO</div>' : '')
       + '</div>'
       + '<div style="padding:1.5rem">'
-      +   '<div style="font-family:Oxanium;font-weight:800;font-size:1.4rem;color:#fff;margin-bottom:.75rem">&#129409; '+c.nombre+'</div>'
+      +   '<div style="font-family:Saira;font-weight:800;font-size:1.4rem;color:#fff;margin-bottom:.75rem">&#129409; '+c.nombre+'</div>'
       +   '<div style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.35rem">'
       +     '<div style="display:flex;align-items:center;gap:.6rem;font-size:.85rem;color:#e8ecf4"><span style="color:#ffb300">&#127894;</span> Nivel: <b>'+c.nivel+'</b></div>'
       +     '<div style="display:flex;align-items:center;gap:.6rem;font-size:.85rem;color:#e8ecf4"><span style="color:#ffb300">&#128081;</span> Honor aprox: <b>'+c.honor+'</b></div>'
       +   '</div>'
       +   '<div style="display:flex;align-items:baseline;gap:.5rem;margin-bottom:1.35rem;padding:1rem;background:rgba(255,179,0,.06);border:1px solid rgba(255,179,0,.2);border-radius:12px">'
       +     '<span style="font-size:.75rem;color:var(--muted)">Precio:</span>'
-      +     '<span style="font-family:Oxanium;font-weight:900;font-size:1.7rem;color:#ffb300">'+fmt(c.precio)+'</span>'
+      +     '<span style="font-family:Saira;font-weight:900;font-size:1.7rem;color:#ffb300">'+fmt(c.precio)+'</span>'
       +   '</div>'
       +   (c.vendido ? '' :
-            '<div style="font-family:Oxanium;font-weight:700;font-size:.95rem;color:#fff;margin-bottom:.85rem">Datos para la entrega</div>'
+            '<div style="font-family:Saira;font-weight:700;font-size:.95rem;color:#fff;margin-bottom:.85rem">Datos para la entrega</div>'
       +   '<label class="flabel">ID de la cuenta a entregar *</label>'
       +   '<input class="finput" id="clan-id-'+c.id+'" type="text" placeholder="ID de tu cuenta de Free Fire"/>'
       +   '<label class="flabel">Usuario del panel *</label>'
       +   '<input class="finput" id="clan-user-'+c.id+'" type="text" placeholder="Tu usuario de CiberStore"/>'
       +   '<label class="flabel">WhatsApp *</label>'
       +   '<input class="finput" id="clan-wa-'+c.id+'" type="text" placeholder="Tu numero de WhatsApp"/>'
-      +   '<div style="display:flex;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;margin:1rem 0"><span style="font-size:.8rem;color:var(--muted)">Tu saldo</span><span id="clan-saldo-'+c.id+'" style="font-family:Oxanium;font-weight:700;color:#25d366">'+fmt(0)+'</span></div>'
+      +   '<div style="display:flex;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;margin:1rem 0"><span style="font-size:.8rem;color:var(--muted)">Tu saldo</span><span id="clan-saldo-'+c.id+'" style="font-family:Saira;font-weight:700;color:#25d366">'+fmt(0)+'</span></div>'
       +   '<div id="clan-err-'+c.id+'" style="display:none;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.3);color:#ff6b6b;border-radius:9px;padding:.7rem .9rem;font-size:.8rem;margin-bottom:.85rem"></div>')
-      +   (c.vendido ? '<div style="width:100%;padding:1rem;background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.3);color:#ff6b6b;border-radius:12px;font-family:Oxanium;font-weight:900;font-size:.95rem;letter-spacing:.5px;text-align:center;box-sizing:border-box">VENDIDO - NO DISPONIBLE</div>' : '') + (c.vendido ? '' : '<button onclick="comprarClan(\''+c.id+'\')" style="width:100%;padding:1rem;background:linear-gradient(135deg,#ffb300,#ff8800);color:#fff;border:none;border-radius:12px;font-family:Oxanium;font-weight:900;font-size:.95rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(255,179,0,.3)">&#129409; COMPRAR CON SALDO</button>')
+      +   (c.vendido ? '<div style="width:100%;padding:1rem;background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.3);color:#ff6b6b;border-radius:12px;font-family:Saira;font-weight:900;font-size:.95rem;letter-spacing:.5px;text-align:center;box-sizing:border-box">VENDIDO - NO DISPONIBLE</div>' : '') + (c.vendido ? '' : '<button onclick="comprarClan(\''+c.id+'\')" style="width:100%;padding:1rem;background:linear-gradient(135deg,#ffb300,#ff8800);color:#fff;border:none;border-radius:12px;font-family:Saira;font-weight:900;font-size:.95rem;letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 20px rgba(255,179,0,.3)">&#129409; COMPRAR CON SALDO</button>')
       +   (c.vendido ? '' : '<div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.85rem;line-height:1.5">Despues de pagar, te contactaremos por WhatsApp (o tu a nosotros) para coordinar la entrega del clan.</div>')
       + '</div>'
       + '</div>';
@@ -9292,7 +9350,7 @@ function _mostrarReciboClan(c, ffId, user, ord){
   cont.innerHTML =
     '<div style="grid-column:1/-1;background:linear-gradient(160deg,rgba(37,211,102,.08),rgba(255,255,255,.02));border:2px solid rgba(37,211,102,.35);border-radius:18px;padding:2rem 1.35rem;text-align:center;max-width:440px;margin:1rem auto">'
     + '<div style="font-size:3rem;margin-bottom:.5rem">\u2705</div>'
-    + '<div style="font-family:Oxanium;font-weight:900;font-size:1.3rem;color:#25d366;margin-bottom:.35rem;letter-spacing:.5px">PEDIDO CONFIRMADO</div>'
+    + '<div style="font-family:Saira;font-weight:900;font-size:1.3rem;color:#25d366;margin-bottom:.35rem;letter-spacing:.5px">PEDIDO CONFIRMADO</div>'
     + '<div style="font-size:.82rem;color:var(--muted);margin-bottom:1.5rem">Te contactaremos para entregar tu clan</div>'
     + '<div style="background:rgba(0,0,0,.25);border-radius:99px;height:10px;overflow:hidden;margin-bottom:1.5rem"><div style="height:100%;width:25%;border-radius:99px;background:linear-gradient(90deg,#ffb300,#ff8800);box-shadow:0 0 12px rgba(255,179,0,.5)"></div></div>'
     + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
@@ -9304,8 +9362,8 @@ function _mostrarReciboClan(c, ffId, user, ord){
     +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' \u00B7 ' + hora, true)
     + '</div>'
     + '<div style="font-size:.75rem;color:#ffb300;margin-top:1rem;line-height:1.5">Te contactaremos por WhatsApp para coordinar la entrega. Tambien puedes escribirnos tu.</div>'
-    + '<button onclick="openSmartWA()" style="width:100%;margin-top:1rem;padding:.9rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">\uD83D\uDCF1 Contactar por WhatsApp</button>'
-    + '<button onclick="goPage(\'home\')" style="width:100%;margin-top:.6rem;padding:.9rem;background:rgba(255,255,255,.05);color:#fff;border:1px solid var(--border);border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Volver al inicio</button>'
+    + '<button onclick="openSmartWA()" style="width:100%;margin-top:1rem;padding:.9rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:12px;font-family:Barlow;font-weight:700;font-size:.9rem;cursor:pointer">\uD83D\uDCF1 Contactar por WhatsApp</button>'
+    + '<button onclick="goPage(\'home\')" style="width:100%;margin-top:.6rem;padding:.9rem;background:rgba(255,255,255,.05);color:#fff;border:1px solid var(--border);border-radius:12px;font-family:Barlow;font-weight:700;font-size:.9rem;cursor:pointer">Volver al inicio</button>'
     + '</div>';
   cont.scrollIntoView({ behavior:'smooth', block:'start' });
 }
@@ -9480,9 +9538,9 @@ function _mostrarReembolsoEnviado(motivo){
   form.innerHTML =
     '<div style="text-align:center;padding:1.25rem .5rem">'
     + '<div style="font-size:2.4rem;margin-bottom:.5rem">\u2705</div>'
-    + '<div style="font-family:Oxanium;font-weight:900;font-size:1rem;color:#25d366;margin-bottom:.4rem">SOLICITUD ENVIADA</div>'
+    + '<div style="font-family:Saira;font-weight:900;font-size:1rem;color:#25d366;margin-bottom:.4rem">SOLICITUD ENVIADA</div>'
     + '<div style="font-size:.78rem;color:var(--muted);line-height:1.6;margin-bottom:1rem">Recibimos tu solicitud por <b style="color:#fff">'+motivo+'</b>.<br/>La revisaremos y te contactaremos por WhatsApp.</div>'
-    + '<button onclick="openSmartWA()" style="width:100%;padding:.85rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:11px;font-family:Poppins;font-weight:700;font-size:.85rem;cursor:pointer">\uD83D\uDCF1 Escribirnos por WhatsApp</button>'
+    + '<button onclick="openSmartWA()" style="width:100%;padding:.85rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:11px;font-family:Barlow;font-weight:700;font-size:.85rem;cursor:pointer">\uD83D\uDCF1 Escribirnos por WhatsApp</button>'
     + '</div>';
 }
 
@@ -9532,7 +9590,7 @@ function _tarjetaEntrega(p, estActual, rechazado){
   if(!rechazado){
     _ESTADOS_FLUJO.forEach(function(est){
       var activo = (est === estActual);
-      botones += '<button onclick="admSetEstado(\''+p.id+'\',\''+est+'\')" style="flex:1;min-width:70px;padding:.45rem .3rem;border-radius:8px;font-family:Oxanium;font-weight:700;font-size:.65rem;cursor:pointer;border:1px solid '
+      botones += '<button onclick="admSetEstado(\''+p.id+'\',\''+est+'\')" style="flex:1;min-width:70px;padding:.45rem .3rem;border-radius:8px;font-family:Saira;font-weight:700;font-size:.65rem;cursor:pointer;border:1px solid '
         + (activo?'#67e8f9;background:linear-gradient(90deg,#67e8f9,#0e7490);color:#fff':'rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:var(--muted)')+'">'
         + _ESTADOS_NOMBRE[est].replace(/[^\x00-\x7F ]/g,'').trim() + '</button>';
     });
@@ -9545,7 +9603,7 @@ function _tarjetaEntrega(p, estActual, rechazado){
     + '</div>'
     + (rechazado ? '<div style="font-size:.72rem;color:#ff6b6b">Pedido rechazado</div>'
        : '<div style="display:flex;gap:.35rem;flex-wrap:wrap">'+botones+'</div>'
-         + '<button onclick="admSetEstado(\''+p.id+'\',\'rechazado\')" style="width:100%;margin-top:.5rem;padding:.4rem;border-radius:8px;background:rgba(255,80,80,.08);border:1px solid rgba(255,80,80,.25);color:#ff6b6b;font-family:Oxanium;font-weight:700;font-size:.65rem;cursor:pointer">Rechazar pedido</button>')
+         + '<button onclick="admSetEstado(\''+p.id+'\',\'rechazado\')" style="width:100%;margin-top:.5rem;padding:.4rem;border-radius:8px;background:rgba(255,80,80,.08);border:1px solid rgba(255,80,80,.25);color:#ff6b6b;font-family:Saira;font-weight:700;font-size:.65rem;cursor:pointer">Rechazar pedido</button>')
     + '</div>';
 }
 
@@ -10383,8 +10441,8 @@ function renderLikesPlanes(){
   cont.innerHTML = LIKES_PLANES.map(function(p){
     return '<div style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:.9rem 1rem">'
       + '<div style="width:42px;height:42px;flex-shrink:0;border-radius:11px;background:'+p.color+'1a;border:1px solid '+p.color+'44;display:flex;align-items:center;justify-content:center;font-size:1.2rem">'+p.icono+'</div>'
-      + '<div style="flex:1;min-width:0"><div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:1rem;color:'+p.color+';letter-spacing:.5px">'+p.nombre+'</div><div style="font-size:.74rem;color:#6b7280">'+p.ids+'</div></div>'
-      + '<div style="text-align:right;flex-shrink:0"><div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.25rem;color:#fff;line-height:1">$'+p.precio+'</div><div style="font-size:.6rem;color:#6b7280;letter-spacing:.5px">MXN / MES</div></div>'
+      + '<div style="flex:1;min-width:0"><div style="font-family:Saira,sans-serif;font-weight:800;font-size:1rem;color:'+p.color+';letter-spacing:.5px">'+p.nombre+'</div><div style="font-size:.74rem;color:#6b7280">'+p.ids+'</div></div>'
+      + '<div style="text-align:right;flex-shrink:0"><div style="font-family:Barlow,sans-serif;font-weight:700;font-size:1.25rem;color:#fff;line-height:1">$'+p.precio+'</div><div style="font-size:.6rem;color:#6b7280;letter-spacing:.5px">MXN / MES</div></div>'
       + '<button onclick="comprarPlanLikesWA(\''+p.id+'\')" style="flex-shrink:0;width:38px;height:38px;border-radius:10px;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.35);color:#25d366;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="#25d366"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.4A10 10 0 1 0 12 2zm4.4 12.1c-.2-.1-1.4-.7-1.6-.8s-.4-.1-.6.1-.6.8-.8 1-.3.2-.6.1a6.6 6.6 0 0 1-3.2-2.8c-.2-.4.2-.4.6-1.2a.6.6 0 0 0 0-.6l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 2.9 2.9 0 0 0-.9 2.2 5.1 5.1 0 0 0 1 2.7 11.5 11.5 0 0 0 4.5 4 5 5 0 0 0 3 .7 2.6 2.6 0 0 0 1.7-1.2 2.1 2.1 0 0 0 .1-1.2z"/></svg></button>'
       + '</div>';
   }).join('');
@@ -10571,7 +10629,7 @@ function _pintarIdsLikes(){
   if(!_lkIds.length){
     cont.innerHTML = '<div style="border:1px dashed rgba(255,255,255,.12);border-radius:14px;padding:2rem 1rem;text-align:center">'
       + '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ffb84d" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:.5rem"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg>'
-      + '<div style="font-family:Poppins;font-weight:600;color:#9aa3b0;font-size:.9rem">Sin IDs registrados</div>'
+      + '<div style="font-family:Barlow;font-weight:600;color:#9aa3b0;font-size:.9rem">Sin IDs registrados</div>'
       + '<div style="font-size:.76rem;color:#6b7280;margin-top:.2rem">Toca "Agregar ID" para comenzar</div></div>';
     return;
   }
@@ -10579,7 +10637,7 @@ function _pintarIdsLikes(){
     var ult = x.ultimo_envio ? new Date(x.ultimo_envio).toLocaleDateString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : 'Aun sin envios';
     return '<div style="display:flex;align-items:center;gap:.8rem;background:rgba(255,255,255,.03);border-radius:12px;padding:.8rem .9rem;margin-bottom:.5rem">'
       + '<div style="width:38px;height:38px;flex-shrink:0;border-radius:10px;background:rgba(37,211,102,.1);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="#25d366"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 5.5 6 5.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.5 0 5 3.5 3.5 6.5C19 16.5 12 21 12 21z"/></svg></div>'
-      + '<div style="flex:1;min-width:0"><div style="font-family:Oxanium;font-weight:700;color:#fff;font-size:.92rem">'+(x.ff_nombre||'ID '+x.ff_id)+'</div><div style="font-size:.7rem;color:#6b7280">ID '+x.ff_id+' \u00b7 '+ult+'</div></div>'
+      + '<div style="flex:1;min-width:0"><div style="font-family:Saira;font-weight:700;color:#fff;font-size:.92rem">'+(x.ff_nombre||'ID '+x.ff_id)+'</div><div style="font-size:.7rem;color:#6b7280">ID '+x.ff_id+' \u00b7 '+ult+'</div></div>'
       + '<button onclick="quitarIdLikes('+x.id+')" style="flex-shrink:0;width:32px;height:32px;border-radius:9px;background:rgba(255,60,60,.08);border:1px solid rgba(255,60,60,.22);color:#ff6b6b;cursor:pointer;font-size:1rem">\u00d7</button>'
       + '</div>';
   }).join('');
@@ -10726,22 +10784,22 @@ function enviarLikesManual(){
         card.innerHTML =
           '<div style="background:rgba(37,211,102,.06);border:1px solid rgba(37,211,102,.3);border-radius:15px;padding:1.1rem 1rem">'
           + '<div style="display:flex;align-items:center;gap:.85rem;margin-bottom:1rem">'
-          +   '<div style="width:46px;height:46px;flex-shrink:0;border-radius:12px;background:linear-gradient(135deg,#128c3e,#25d366);display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-weight:800;font-size:1.3rem;color:#fff">'+inicial+'</div>'
+          +   '<div style="width:46px;height:46px;flex-shrink:0;border-radius:12px;background:linear-gradient(135deg,#128c3e,#25d366);display:flex;align-items:center;justify-content:center;font-family:Saira;font-weight:800;font-size:1.3rem;color:#fff">'+inicial+'</div>'
           +   '<div style="flex:1;min-width:0">'
-          +     '<div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1rem;color:#fff;word-break:break-word">'+(res.nombre||'Jugador')+'</div>'
+          +     '<div style="font-family:Barlow,sans-serif;font-weight:700;font-size:1rem;color:#fff;word-break:break-word">'+(res.nombre||'Jugador')+'</div>'
           +     '<div style="font-size:.72rem;color:#6b7280">UID '+uid+' \u00b7 '+(res.region||region)+'</div>'
           +   '</div>'
           +   '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>'
           + '</div>'
           + '<div style="display:flex;align-items:center;gap:.5rem">'
-          +   '<div style="flex:1;text-align:center;background:rgba(255,255,255,.03);border-radius:11px;padding:.7rem"><div style="font-size:.62rem;color:#6b7280;letter-spacing:.5px;margin-bottom:.15rem">ANTES</div><div style="font-family:Oxanium;font-weight:800;font-size:1.15rem;color:#9aa3b0">'+(res.antes||'-')+'</div></div>'
+          +   '<div style="flex:1;text-align:center;background:rgba(255,255,255,.03);border-radius:11px;padding:.7rem"><div style="font-size:.62rem;color:#6b7280;letter-spacing:.5px;margin-bottom:.15rem">ANTES</div><div style="font-family:Saira;font-weight:800;font-size:1.15rem;color:#9aa3b0">'+(res.antes||'-')+'</div></div>'
           +   '<div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center"><span style="font-size:.7rem;color:#25d366;font-weight:700">+'+res.enviadas+'</span><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>'
-          +   '<div style="flex:1;text-align:center;background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.25);border-radius:11px;padding:.7rem"><div style="font-size:.62rem;color:#25d366;letter-spacing:.5px;margin-bottom:.15rem">DESPUES</div><div style="font-family:Oxanium;font-weight:800;font-size:1.15rem;color:#25d366">'+(res.despues||'-')+'</div></div>'
+          +   '<div style="flex:1;text-align:center;background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.25);border-radius:11px;padding:.7rem"><div style="font-size:.62rem;color:#25d366;letter-spacing:.5px;margin-bottom:.15rem">DESPUES</div><div style="font-family:Saira;font-weight:800;font-size:1.15rem;color:#25d366">'+(res.despues||'-')+'</div></div>'
           + '</div>'
           + '<div style="text-align:center;margin-top:.85rem;font-size:.78rem;color:#25d366;font-weight:600">\u2764\uFE0F '+res.enviadas+' likes enviados con exito</div>'
           + '<div style="display:flex;gap:.6rem;margin-top:1rem">'
-          +   '<button onclick="descargarImagenLikes()" style="flex:1;padding:.7rem;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.35);color:#25d366;border-radius:11px;font-family:Poppins,sans-serif;font-weight:700;font-size:.78rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.4rem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Descargar</button>'
-          +   '<button onclick="compartirImagenLikes()" style="flex:1;padding:.7rem;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.35);color:#22d3ee;border-radius:11px;font-family:Poppins,sans-serif;font-weight:700;font-size:.78rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.4rem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Compartir</button>'
+          +   '<button onclick="descargarImagenLikes()" style="flex:1;padding:.7rem;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.35);color:#25d366;border-radius:11px;font-family:Barlow,sans-serif;font-weight:700;font-size:.78rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.4rem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Descargar</button>'
+          +   '<button onclick="compartirImagenLikes()" style="flex:1;padding:.7rem;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.35);color:#22d3ee;border-radius:11px;font-family:Barlow,sans-serif;font-weight:700;font-size:.78rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.4rem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Compartir</button>'
           + '</div>'
           + '</div>';
         // Guardar datos para generar la imagen
@@ -10801,9 +10859,9 @@ function _lkVerificarPerfil(uid){
       var ini = ((res.nombre||'?').charAt(0)||'?').toUpperCase();
       perfil.innerHTML =
         '<div style="display:flex;align-items:center;gap:.8rem;background:linear-gradient(135deg,rgba(37,211,102,.1),rgba(34,211,238,.04));border:1px solid rgba(37,211,102,.3);border-radius:14px;padding:.85rem .95rem">'
-        + '<div style="width:44px;height:44px;flex-shrink:0;border-radius:12px;background:linear-gradient(135deg,#0e7490,#22d3ee);display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-weight:800;font-size:1.3rem;color:#fff;box-shadow:0 3px 12px rgba(34,211,238,.3)">'+ini+'</div>'
+        + '<div style="width:44px;height:44px;flex-shrink:0;border-radius:12px;background:linear-gradient(135deg,#0e7490,#22d3ee);display:flex;align-items:center;justify-content:center;font-family:Saira;font-weight:800;font-size:1.3rem;color:#fff;box-shadow:0 3px 12px rgba(34,211,238,.3)">'+ini+'</div>'
         + '<div style="flex:1;min-width:0">'
-        +   '<div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1rem;color:#fff;word-break:break-word">'+(res.nombre||'Jugador')+'</div>'
+        +   '<div style="font-family:Barlow,sans-serif;font-weight:700;font-size:1rem;color:#fff;word-break:break-word">'+(res.nombre||'Jugador')+'</div>'
         +   '<div style="display:flex;align-items:center;gap:.4rem;margin-top:.15rem"><span style="font-size:.65rem;color:#9aa3b0;border:1px solid rgba(255,255,255,.14);border-radius:6px;padding:.1rem .45rem;font-weight:600">'+(res.region||'?')+'</span>'+(res.nivel?('<span style="font-size:.7rem;color:#6b7280">Nivel '+res.nivel+'</span>'):'')+'</div>'
         + '</div>'
         + '<div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:.15rem"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg><span style="font-size:.58rem;color:#25d366;font-weight:700">LISTO</span></div>'
@@ -10885,9 +10943,9 @@ function _pintarTopLikes(arr, nombres){
     return '<div style="display:flex;align-items:center;justify-content:space-between;gap:.8rem;background:'+fondo+';border:1px solid '+borde+';border-radius:14px;padding:1rem 1.05rem">'
       + '<div style="display:flex;align-items:center;gap:.7rem;min-width:0">'
       +   (medalla || '<span style="width:20px;flex-shrink:0"></span>')
-      +   '<span style="font-family:Poppins,sans-serif;font-weight:600;font-size:1rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+pos+'. '+nombre+(esYo?' <span style=\'font-size:.62rem;color:#25d366\'>(tu)</span>':'')+'</span>'
+      +   '<span style="font-family:Barlow,sans-serif;font-weight:600;font-size:1rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+pos+'. '+nombre+(esYo?' <span style=\'font-size:.62rem;color:#25d366\'>(tu)</span>':'')+'</span>'
       + '</div>'
-      + '<div style="text-align:right;flex-shrink:0"><div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:1.15rem;color:#25d366;line-height:1">'+x.total.toLocaleString('es-MX')+'</div><div style="font-size:.58rem;color:#6b7280;letter-spacing:.5px">LIKES ENVIADOS</div></div>'
+      + '<div style="text-align:right;flex-shrink:0"><div style="font-family:Saira,sans-serif;font-weight:800;font-size:1.15rem;color:#25d366;line-height:1">'+x.total.toLocaleString('es-MX')+'</div><div style="font-size:.58rem;color:#6b7280;letter-spacing:.5px">LIKES ENVIADOS</div></div>'
       + '</div>';
   }).join('');
 }
@@ -11182,16 +11240,16 @@ function _mostrarBioLargaLink(ord){
   ov.innerHTML = '<div class="modal" style="max-width:420px">'
     + '<div style="padding:1.8rem 1.5rem;text-align:center">'
     +   '<div style="width:64px;height:64px;margin:0 auto 1rem;border-radius:18px;background:linear-gradient(160deg,#25d366,#0d7a35);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(37,211,102,.4)"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>'
-    +   '<div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.2rem;color:#fff;margin-bottom:.4rem">Compra exitosa!</div>'
+    +   '<div style="font-family:Barlow,sans-serif;font-weight:700;font-size:1.2rem;color:#fff;margin-bottom:.4rem">Compra exitosa!</div>'
     +   '<div style="font-size:.82rem;color:#9aa3b0;line-height:1.5;margin-bottom:1.3rem">Aqui esta tu enlace para BIO LARGA. Uselo hasta 5 veces al dia.</div>'
     +   '<div style="background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.3);border-radius:12px;padding:1rem;margin-bottom:1rem">'
     +     '<a href="' + BIOLARGA_LINK + '" target="_blank" style="font-family:monospace;font-size:.95rem;color:#25d366;word-break:break-all;text-decoration:none;font-weight:700">' + BIOLARGA_LINK + '</a>'
     +   '</div>'
     +   '<div style="display:flex;gap:.6rem">'
-    +     '<button onclick="_copiarBioLink()" style="flex:1;padding:.85rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:11px;font-family:Poppins;font-weight:700;font-size:.85rem;cursor:pointer">Copiar</button>'
-    +     '<button onclick="window.open(BIOLARGA_LINK,\'_blank\')" style="flex:1;padding:.85rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:11px;font-family:Poppins;font-weight:700;font-size:.85rem;cursor:pointer">Abrir enlace</button>'
+    +     '<button onclick="_copiarBioLink()" style="flex:1;padding:.85rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:11px;font-family:Barlow;font-weight:700;font-size:.85rem;cursor:pointer">Copiar</button>'
+    +     '<button onclick="window.open(BIOLARGA_LINK,\'_blank\')" style="flex:1;padding:.85rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:11px;font-family:Barlow;font-weight:700;font-size:.85rem;cursor:pointer">Abrir enlace</button>'
     +   '</div>'
-    +   '<button onclick="document.getElementById(\'biolarga-modal\').classList.remove(\'show\')" style="width:100%;margin-top:.7rem;padding:.7rem;background:none;border:none;color:#6b7280;font-family:Poppins;font-size:.8rem;cursor:pointer">Cerrar</button>'
+    +   '<button onclick="document.getElementById(\'biolarga-modal\').classList.remove(\'show\')" style="width:100%;margin-top:.7rem;padding:.7rem;background:none;border:none;color:#6b7280;font-family:Barlow;font-size:.8rem;cursor:pointer">Cerrar</button>'
     +   '<div style="font-size:.68rem;color:#4a5568;margin-top:.8rem">Pedido #' + ord + '</div>'
     + '</div></div>';
   ov.classList.add('show');
@@ -11233,8 +11291,8 @@ function renderLikes2k(){
   if(!cont) return;
   cont.innerHTML = LIKES2K_PAQUETES.map(function(p, i){
     var derecha = p.cotizar
-      ? '<div style="text-align:right;flex-shrink:0"><div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:.82rem;color:#22d3ee;line-height:1.1">COTIZAR</div><div style="font-size:.55rem;color:#6b7280;letter-spacing:.5px">WhatsApp</div></div>'
-      : '<div style="text-align:right;flex-shrink:0"><div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.2rem;color:#25d366;line-height:1">'+fmt(p.mxn)+'</div></div>';
+      ? '<div style="text-align:right;flex-shrink:0"><div style="font-family:Saira,sans-serif;font-weight:800;font-size:.82rem;color:#22d3ee;line-height:1.1">COTIZAR</div><div style="font-size:.55rem;color:#6b7280;letter-spacing:.5px">WhatsApp</div></div>'
+      : '<div style="text-align:right;flex-shrink:0"><div style="font-family:Barlow,sans-serif;font-weight:700;font-size:1.2rem;color:#25d366;line-height:1">'+fmt(p.mxn)+'</div></div>';
     var subtitulo = p.cotizar
       ? '<div style="font-size:.62rem;color:#22d3ee;margin-top:.15rem">Precio y tiempo segun disponibilidad</div>'
       : '<div style="font-size:.62rem;color:#6b7280;margin-top:.15rem">Entrega: <span style="color:#ffb84d">'+p.dias+'</span></div>';
@@ -11243,7 +11301,7 @@ function renderLikes2k(){
     return '<div onclick="comprarLikes2k('+i+')" style="display:flex;align-items:center;justify-content:space-between;gap:.7rem;background:rgba(255,255,255,.022);border:1px solid '+borde+';border-radius:14px;padding:.95rem 1.1rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor=\''+hover+'\'" onmouseout="this.style.borderColor=\''+borde+'\'">'
       + '<div style="display:flex;align-items:center;gap:.8rem">'
       +   '<div style="width:44px;height:44px;flex-shrink:0;border-radius:12px;background:rgba(255,180,60,.12);border:1px solid rgba(255,180,60,.3);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="#ffb84d"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 5.5 6 5.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.5 0 5 3.5 3.5 6.5C19 16.5 12 21 12 21z"/></svg></div>'
-      +   '<div><div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:1.2rem;color:#fff;line-height:1">'+p.likes+' <span style="font-size:.72rem;color:#ffb84d">LIKES</span></div>'+subtitulo+'</div>'
+      +   '<div><div style="font-family:Saira,sans-serif;font-weight:800;font-size:1.2rem;color:#fff;line-height:1">'+p.likes+' <span style="font-size:.72rem;color:#ffb84d">LIKES</span></div>'+subtitulo+'</div>'
       + '</div>'
       + derecha
       + '</div>';
@@ -11507,22 +11565,22 @@ function _pintarTopCompras(cont, arr, nombres, colorHex, unidad){
     if(pos === 1) medalla = '<svg width="18" height="18" viewBox="0 0 24 24" fill="#ffd700" style="flex-shrink:0"><path d="M13 2 L15.5 8 L22 8.5 L17 13 L18.5 20 L13 16.5 L7.5 20 L9 13 L4 8.5 L10.5 8 Z"/></svg>';
     else if(pos === 2) medalla = '<svg width="16" height="16" viewBox="0 0 24 24" fill="#c0c0c0" style="flex-shrink:0"><circle cx="12" cy="12" r="9"/></svg>';
     else if(pos === 3) medalla = '<svg width="16" height="16" viewBox="0 0 24 24" fill="#cd7f32" style="flex-shrink:0"><circle cx="12" cy="12" r="9"/></svg>';
-    else medalla = '<span style="width:18px;flex-shrink:0;text-align:center;font-family:Oxanium;font-weight:700;color:#6b7280;font-size:.8rem">'+pos+'</span>';
+    else medalla = '<span style="width:18px;flex-shrink:0;text-align:center;font-family:Saira;font-weight:700;color:#6b7280;font-size:.8rem">'+pos+'</span>';
 
     var borde = esYo ? colorHex+'66' : 'rgba(255,255,255,.06)';
     var fondo = esYo ? colorHex+'12' : 'rgba(255,255,255,.02)';
 
     // Avatar placeholder con inicial (se reemplaza si carga el de FF)
     var inicial = (nombre.charAt(0)||'?').toUpperCase();
-    var avatar = '<div class="top-avatar" style="width:34px;height:34px;flex-shrink:0;border-radius:9px;background:'+colorHex+'22;border:1px solid '+colorHex+'44;display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-weight:800;font-size:.9rem;color:'+colorHex+';overflow:hidden">'+inicial+'</div>';
+    var avatar = '<div class="top-avatar" style="width:34px;height:34px;flex-shrink:0;border-radius:9px;background:'+colorHex+'22;border:1px solid '+colorHex+'44;display:flex;align-items:center;justify-content:center;font-family:Saira;font-weight:800;font-size:.9rem;color:'+colorHex+';overflow:hidden">'+inicial+'</div>';
 
     return '<div data-uid="'+x.user_id+'" style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;background:'+fondo+';border:1px solid '+borde+';border-radius:12px;padding:.8rem 1rem">'
       + '<div style="display:flex;align-items:center;gap:.55rem;min-width:0">'
       +   medalla
       +   avatar
-      +   '<span class="top-nombre" data-yo="'+(esYo?'1':'0')+'" style="font-family:Poppins,sans-serif;font-weight:600;font-size:.92rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+nombre+(esYo?' <span style=\'font-size:.6rem;color:'+colorHex+'\'>(tu)</span>':'')+'</span>'
+      +   '<span class="top-nombre" data-yo="'+(esYo?'1':'0')+'" style="font-family:Barlow,sans-serif;font-weight:600;font-size:.92rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+nombre+(esYo?' <span style=\'font-size:.6rem;color:'+colorHex+'\'>(tu)</span>':'')+'</span>'
       + '</div>'
-      + '<div style="text-align:right;flex-shrink:0"><span style="font-family:Oxanium,sans-serif;font-weight:800;font-size:1.1rem;color:'+colorHex+'">'+x.total+'</span> <span style="font-size:.58rem;color:#6b7280">'+unidad+'</span></div>'
+      + '<div style="text-align:right;flex-shrink:0"><span style="font-family:Saira,sans-serif;font-weight:800;font-size:1.1rem;color:'+colorHex+'">'+x.total+'</span> <span style="font-size:.58rem;color:#6b7280">'+unidad+'</span></div>'
       + '</div>';
   }).join('');
 }
@@ -11576,16 +11634,16 @@ function verificarPromoId(){
         try { fecha = new Date(rows[0].created_at).toLocaleDateString('es-MX'); } catch(e){}
         cont.innerHTML = '<div style="background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.3);border-radius:16px;padding:1.5rem;text-align:center">'
           + '<div style="width:60px;height:60px;margin:0 auto 1rem;border-radius:50%;background:rgba(255,107,107,.15);display:flex;align-items:center;justify-content:center"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></div>'
-          + '<div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.1rem;color:#ff6b6b;margin-bottom:.4rem">Ya uso promocion</div>'
+          + '<div style="font-family:Barlow,sans-serif;font-weight:700;font-size:1.1rem;color:#ff6b6b;margin-bottom:.4rem">Ya uso promocion</div>'
           + '<div style="font-size:.85rem;color:#9aa3b0;line-height:1.5">El ID <b style="color:#fff">' + ffId + '</b> ya utilizo una promocion de 1 vez por cuenta' + (fecha ? ' el ' + fecha : '') + '.</div>'
           + '</div>';
       } else {
         // Disponible
         cont.innerHTML = '<div style="background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.3);border-radius:16px;padding:1.5rem;text-align:center">'
           + '<div style="width:60px;height:60px;margin:0 auto 1rem;border-radius:50%;background:rgba(37,211,102,.15);display:flex;align-items:center;justify-content:center"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>'
-          + '<div style="font-family:Poppins,sans-serif;font-weight:700;font-size:1.1rem;color:#25d366;margin-bottom:.4rem">Disponible!</div>'
+          + '<div style="font-family:Barlow,sans-serif;font-weight:700;font-size:1.1rem;color:#25d366;margin-bottom:.4rem">Disponible!</div>'
           + '<div style="font-size:.85rem;color:#9aa3b0;line-height:1.5">El ID <b style="color:#fff">' + ffId + '</b> aun puede usar promociones de 1 vez por cuenta.</div>'
-          + '<button onclick="goPage(\'freefire\')" style="margin-top:1.1rem;padding:.7rem 1.6rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:11px;font-family:Poppins;font-weight:700;font-size:.85rem;cursor:pointer">Ver ofertas</button>'
+          + '<button onclick="goPage(\'freefire\')" style="margin-top:1.1rem;padding:.7rem 1.6rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:11px;font-family:Barlow;font-weight:700;font-size:.85rem;cursor:pointer">Ver ofertas</button>'
           + '</div>';
       }
     }).catch(function(e){
@@ -11634,7 +11692,7 @@ function admListarPromo(){
       cont.innerHTML = rows.map(function(r){
         var fecha=''; try{ fecha=new Date(r.created_at).toLocaleDateString('es-MX'); }catch(e){}
         return '<div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:.6rem .8rem">'
-          + '<div style="min-width:0"><div style="font-family:Oxanium;font-weight:700;color:#fff;font-size:.9rem">' + r.ff_id + '</div>' + (r.nota?'<div style="font-size:.68rem;color:#6b7280">'+r.nota+'</div>':'') + (fecha?'<div style="font-size:.6rem;color:#4a5568">'+fecha+'</div>':'') + '</div>'
+          + '<div style="min-width:0"><div style="font-family:Saira;font-weight:700;color:#fff;font-size:.9rem">' + r.ff_id + '</div>' + (r.nota?'<div style="font-size:.68rem;color:#6b7280">'+r.nota+'</div>':'') + (fecha?'<div style="font-size:.6rem;color:#4a5568">'+fecha+'</div>':'') + '</div>'
           + '<button onclick="admQuitarPromo(\'' + r.ff_id + '\')" style="flex-shrink:0;width:30px;height:30px;border-radius:8px;background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.3);color:#ff6b6b;cursor:pointer">&times;</button>'
           + '</div>';
       }).join('');
@@ -11692,10 +11750,10 @@ function _mostrarSaldoRecargado(monto, total){
   pop.innerHTML =
     '<div style="background:linear-gradient(160deg,#0d1f14,#0a0e13);border:1px solid rgba(37,211,102,.45);border-radius:22px;padding:2.2rem 1.8rem;text-align:center;max-width:340px;width:88%;box-shadow:0 20px 60px rgba(37,211,102,.25);animation:srPop .4s cubic-bezier(.2,1.2,.4,1)">'
     + '<div style="width:76px;height:76px;margin:0 auto 1.2rem;border-radius:50%;background:rgba(37,211,102,.15);border:2px solid rgba(37,211,102,.5);display:flex;align-items:center;justify-content:center;animation:srPulse 1.6s ease-out infinite"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>'
-    + '<div style="font-family:Oxanium,sans-serif;font-weight:900;font-size:1.4rem;color:#25d366;letter-spacing:.5px;margin-bottom:.4rem">SALDO RECARGADO</div>'
+    + '<div style="font-family:Saira,sans-serif;font-weight:900;font-size:1.4rem;color:#25d366;letter-spacing:.5px;margin-bottom:.4rem">SALDO RECARGADO</div>'
     + '<div style="font-size:.9rem;color:#c9d1e0;margin-bottom:1.3rem">Se acreditaron <b style="color:#fff">$' + Math.round(monto).toLocaleString('es-MX') + ' MX</b> a tu cuenta</div>'
-    + '<div style="background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:1rem;margin-bottom:1.3rem"><div style="font-size:.62rem;color:#6b7280;text-transform:uppercase;letter-spacing:1px;margin-bottom:.3rem">Tu saldo actual</div><div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:1.9rem;color:#fff">$' + Math.round(total).toLocaleString('es-MX') + ' <span style="font-size:.9rem;color:#6b7280">MX</span></div></div>'
-    + '<button onclick="document.getElementById(\'saldo-recargado-pop\').remove()" style="width:100%;padding:.9rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:12px;font-family:Oxanium,sans-serif;font-weight:900;font-size:.9rem;letter-spacing:.5px;cursor:pointer">\u00a1PERFECTO!</button>'
+    + '<div style="background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:1rem;margin-bottom:1.3rem"><div style="font-size:.62rem;color:#6b7280;text-transform:uppercase;letter-spacing:1px;margin-bottom:.3rem">Tu saldo actual</div><div style="font-family:Saira,sans-serif;font-weight:800;font-size:1.9rem;color:#fff">$' + Math.round(total).toLocaleString('es-MX') + ' <span style="font-size:.9rem;color:#6b7280">MX</span></div></div>'
+    + '<button onclick="document.getElementById(\'saldo-recargado-pop\').remove()" style="width:100%;padding:.9rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:12px;font-family:Saira,sans-serif;font-weight:900;font-size:.9rem;letter-spacing:.5px;cursor:pointer">\u00a1PERFECTO!</button>'
     + '</div>';
   document.body.appendChild(pop);
 
@@ -11949,8 +12007,8 @@ function renderActasGrid(){
   grid.innerHTML = ACTAS_TIPOS.map(function(a){
     return '<div onclick="actaSeleccionar(\''+a.id+'\')" id="acta-op-'+a.id+'" style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.025);border:1.5px solid rgba(255,255,255,.08);border-radius:14px;padding:1rem;cursor:pointer;transition:all .2s">'
       + '<div style="width:44px;height:44px;flex-shrink:0;border-radius:12px;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.25);display:flex;align-items:center;justify-content:center;font-size:1.35rem">'+a.ico+'</div>'
-      + '<div style="flex:1;min-width:0"><div style="font-family:Oxanium,sans-serif;font-weight:800;font-size:.95rem;color:#fff">Acta de '+a.nombre+'</div><div style="font-size:.7rem;color:#8b93a3;margin-top:.15rem">Certificada y oficial</div></div>'
-      + '<div style="font-family:Oxanium,sans-serif;font-weight:900;font-size:1.05rem;color:#22d3ee;flex-shrink:0">$'+a.precio+' MX</div>'
+      + '<div style="flex:1;min-width:0"><div style="font-family:Saira,sans-serif;font-weight:800;font-size:.95rem;color:#fff">Acta de '+a.nombre+'</div><div style="font-size:.7rem;color:#8b93a3;margin-top:.15rem">Certificada y oficial</div></div>'
+      + '<div style="font-family:Saira,sans-serif;font-weight:900;font-size:1.05rem;color:#22d3ee;flex-shrink:0">$'+a.precio+' MX</div>'
       + '</div>';
   }).join('');
 }
@@ -12033,7 +12091,7 @@ function _mostrarReciboActa(nombre, estado, ord){
   ok.innerHTML =
     '<div style="background:linear-gradient(160deg,rgba(37,211,102,.08),rgba(255,255,255,.02));border:2px solid rgba(37,211,102,.35);border-radius:18px;padding:2rem 1.35rem;text-align:center;max-width:440px;margin:1rem auto">'
     + '<div style="font-size:3rem;margin-bottom:.5rem">\u2705</div>'
-    + '<div style="font-family:Oxanium,sans-serif;font-weight:900;font-size:1.3rem;color:#25d366;margin-bottom:.35rem;letter-spacing:.5px">SOLICITUD RECIBIDA</div>'
+    + '<div style="font-family:Saira,sans-serif;font-weight:900;font-size:1.3rem;color:#25d366;margin-bottom:.35rem;letter-spacing:.5px">SOLICITUD RECIBIDA</div>'
     + '<div style="font-size:.82rem;color:var(--muted);margin-bottom:1.5rem">Tu acta esta en proceso</div>'
     + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
     +   _filaRecibo('\uD83D\uDCCB Solicitud', '#'+ord)
@@ -12044,7 +12102,7 @@ function _mostrarReciboActa(nombre, estado, ord){
     +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' \u00B7 ' + hora, true)
     + '</div>'
     + '<div style="font-size:.75rem;color:#22d3ee;margin-top:1rem;line-height:1.5">Te contactaremos por WhatsApp para completar la entrega de tu acta.</div>'
-    + '<button onclick="goPage(\'home\')" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#22d3ee);color:#fff;border:none;border-radius:12px;font-family:Poppins;font-weight:700;font-size:.9rem;cursor:pointer">Volver al inicio</button>'
+    + '<button onclick="goPage(\'home\')" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#22d3ee);color:#fff;border:none;border-radius:12px;font-family:Barlow;font-weight:700;font-size:.9rem;cursor:pointer">Volver al inicio</button>'
     + '</div>';
   ok.scrollIntoView({ behavior:'smooth', block:'center' });
 }
