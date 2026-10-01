@@ -12129,6 +12129,13 @@ var BOYAAH_METODOS = [
 ];
 
 var _boyaahCant = {};          // { b30: 2, b90: 1 }
+
+// Venta de medallas (precio y medallas FIJOS por paquete)
+var BOYAAH_MED_POR_PAQ = 308;
+var BOYAAH_MED_PRECIO  = 655;   // MXN por paquete
+var BOYAAH_MED_MAX     = 999;
+var _boyaahMedPaq = 1;          // valor del selector [-] n [+]
+var _boyaahMedEnPedido = false; // si los paquetes ya forman parte del pedido
 var _boyaahMetodo = BOYAAH_METODOS[0].id;
 var _boyaahFotoB64 = '';
 var _boyaahUltimoWA = '';
@@ -12169,15 +12176,88 @@ function _boyaahItems(){
   return BOYAAH_PASES.filter(function(p){ return _boyaahCant[p.id] > 0; })
     .map(function(p){ var q=_boyaahCant[p.id]; return { p:p, q:q, sub:q*p.precio }; });
 }
-function _boyaahTotal(){ return _boyaahItems().reduce(function(a,i){ return a+i.sub; },0); }
+function _boyaahMed(){
+  if(!_boyaahMedEnPedido || _boyaahMedPaq < 1) return null;
+  return { q:_boyaahMedPaq, medallas:BOYAAH_MED_POR_PAQ*_boyaahMedPaq, sub:BOYAAH_MED_PRECIO*_boyaahMedPaq };
+}
+function _boyaahTotalPases(){ return _boyaahItems().reduce(function(a,i){ return a+i.sub; },0); }
+function _boyaahTotal(){ var m=_boyaahMed(); return _boyaahTotalPases() + (m ? m.sub : 0); }
+function _boyaahN(n){ return (Number(n)||0).toLocaleString('es-MX'); }
+
+// ── Tarjeta de medallas ──
+function boyaahRenderMedallas(){
+  var el = document.getElementById('boyaah-med'); if(!el) return;
+  var q = _boyaahMedPaq;
+  el.innerHTML = '<div class="boyaah-med-card'+(_boyaahMedEnPedido?' sel':'')+'">'
+    + '<div class="boyaah-med-top">'
+    +   '<div class="boyaah-med-ico">\uD83C\uDFC5</div>'
+    +   '<div class="boyaah-med-info"><div class="boyaah-med-name">'+_boyaahN(BOYAAH_MED_POR_PAQ)+' Medallas</div>'
+    +   '<div class="boyaah-med-price">\uD83D\uDCB0 $'+_boyaahN(BOYAAH_MED_PRECIO)+' MXN <small>por paquete</small></div></div>'
+    + '</div>'
+    + '<div class="boyaah-med-row"><span class="boyaah-med-lbl">Cantidad de paquetes</span>'
+    +   '<div class="boyaah-med-qty">'
+    +     '<button type="button" class="boyaah-qbtn" aria-label="Quitar un paquete" onclick="boyaahMedCambiar(-1)"'+(q<=1?' disabled':'')+'>&minus;</button>'
+    +     '<input class="boyaah-med-inp" id="boyaah-med-inp" type="number" inputmode="numeric" min="1" max="'+BOYAAH_MED_MAX+'" value="'+q+'" aria-label="Cantidad de paquetes" oninput="boyaahMedEscribir(this.value)" onblur="this.value=_boyaahMedPaq">'
+    +     '<button type="button" class="boyaah-qbtn plus" aria-label="Agregar un paquete" onclick="boyaahMedCambiar(1)"'+(q>=BOYAAH_MED_MAX?' disabled':'')+'>+</button>'
+    +   '</div></div>'
+    + '<div class="boyaah-med-tot">'
+    +   '<div class="boyaah-med-t"><b id="boyaah-med-t-paq">'+_boyaahN(q)+'</b><span>\uD83D\uDCE6 paquete'+(q===1?'':'s')+'</span></div>'
+    +   '<div class="boyaah-med-t"><b id="boyaah-med-t-med">'+_boyaahN(BOYAAH_MED_POR_PAQ*q)+'</b><span>\uD83C\uDFC5 medallas</span></div>'
+    +   '<div class="boyaah-med-t gold"><b id="boyaah-med-t-tot">$'+_boyaahN(BOYAAH_MED_PRECIO*q)+'</b><span>\uD83D\uDCB0 a pagar</span></div>'
+    + '</div>'
+    + '<button type="button" class="boyaah-med-add'+(_boyaahMedEnPedido?' on':'')+'" onclick="boyaahMedToggle()">'
+    +   (_boyaahMedEnPedido ? '\u2713 Agregado al pedido &middot; Quitar' : 'Agregar medallas al pedido')
+    + '</button>'
+    + '</div>';
+}
+// Actualiza solo los números (para no perder el foco mientras escribe)
+function _boyaahMedPintarTotales(){
+  var q=_boyaahMedPaq, a=document.getElementById('boyaah-med-t-paq'), b=document.getElementById('boyaah-med-t-med'), c=document.getElementById('boyaah-med-t-tot');
+  if(a) a.textContent=_boyaahN(q); if(b) b.textContent=_boyaahN(BOYAAH_MED_POR_PAQ*q); if(c) c.textContent='$'+_boyaahN(BOYAAH_MED_PRECIO*q);
+}
+function boyaahMedCambiar(d){
+  var q = _boyaahMedPaq + d;
+  if(q < 1) q = 1; if(q > BOYAAH_MED_MAX) q = BOYAAH_MED_MAX;
+  _boyaahMedPaq = q;
+  boyaahRenderMedallas(); boyaahRenderResumen();
+}
+function boyaahMedEscribir(v){
+  var q = parseInt(v, 10);
+  if(isNaN(q) || q < 1) return;           // permite borrar mientras escribe
+  if(q > BOYAAH_MED_MAX) q = BOYAAH_MED_MAX;
+  _boyaahMedPaq = q;
+  _boyaahMedPintarTotales(); boyaahRenderResumen();
+}
+function boyaahMedToggle(){
+  _boyaahMedEnPedido = !_boyaahMedEnPedido;
+  boyaahRenderMedallas(); boyaahRenderResumen();
+  if(_boyaahMedEnPedido) _boyaahToast('\uD83C\uDFC5 ' + _boyaahN(BOYAAH_MED_POR_PAQ*_boyaahMedPaq) + ' medallas agregadas al pedido');
+}
 
 function boyaahRenderResumen(){
   var el = document.getElementById('boyaah-resumen'); if(!el) return;
-  var items = _boyaahItems();
-  if(!items.length){ el.innerHTML = '<div class="boyaah-empty">Aún no eliges pases. Usa <b style="color:#67e8f9">+</b> en las tarjetas de arriba.</div>'; return; }
-  el.innerHTML = items.map(function(i){
-    return '<div class="boyaah-line"><span>'+i.q+' &times; '+_boyaahEsc(i.p.nombre)+'<br><small>'+i.p.minutos+' min c/u &middot; $'+i.p.precio+' c/u</small></span><b>$'+i.sub+'</b></div>';
-  }).join('') + '<div class="boyaah-total"><span>Total a pagar</span><b>$'+_boyaahTotal()+' MXN</b></div>';
+  var items = _boyaahItems(), med = _boyaahMed();
+  if(!items.length && !med){ el.innerHTML = '<div class="boyaah-empty">Aún no eliges productos. Usa <b style="color:#67e8f9">+</b> en los pases o agrega medallas.</div>'; return; }
+  var h = '';
+  if(items.length){
+    h += '<div class="boyaah-rsec">\uD83C\uDF9F\uFE0F Pases seleccionados</div>';
+    h += items.map(function(i){
+      return '<div class="boyaah-line"><span>'+i.q+' &times; '+_boyaahEsc(i.p.nombre)+'<br><small>'+i.p.minutos+' min c/u &middot; $'+i.p.precio+' c/u</small></span><b>$'+_boyaahN(i.sub)+'</b></div>';
+    }).join('');
+  }
+  if(med){
+    h += '<div class="boyaah-rsec gold">\uD83C\uDFC5 Paquetes de medallas</div>';
+    h += '<div class="boyaah-line"><span>'+med.q+' &times; '+BOYAAH_MED_POR_PAQ+' Medallas<br><small>$'+_boyaahN(BOYAAH_MED_PRECIO)+' por paquete</small></span><b>$'+_boyaahN(med.sub)+'</b></div>';
+  }
+  var nPases = items.reduce(function(a,i){ return a+i.q; },0);
+  h += '<div class="boyaah-kvbox">';
+  if(items.length && med) h += '<div class="boyaah-kv"><span>\uD83C\uDF9F\uFE0F Pases</span><b>'+_boyaahN(nPases)+'</b></div>';
+  if(med) h += '<div class="boyaah-kv"><span>\uD83D\uDCE6 Paquetes de medallas</span><b>'+_boyaahN(med.q)+'</b></div>'
+             + '<div class="boyaah-kv"><span>\uD83C\uDFC5 Total de medallas</span><b>'+_boyaahN(med.medallas)+'</b></div>';
+  if(items.length && med) h += '<div class="boyaah-kv"><span>\uD83D\uDCE6 Total de artículos</span><b>'+_boyaahN(nPases+med.q)+'</b></div>';
+  h += '</div>';
+  h += '<div class="boyaah-total"><span>\uD83D\uDCB0 Total general a pagar</span><b>$'+_boyaahN(_boyaahTotal())+' MXN</b></div>';
+  el.innerHTML = h;
 }
 
 function boyaahRenderMetodos(){
@@ -12251,7 +12331,8 @@ function boyaahEnviar(){
   var obs = ((document.getElementById('boyaah-obs')||{}).value||'').trim();
   var focus = function(id){ var e=document.getElementById(id); if(e){ e.scrollIntoView({behavior:'smooth',block:'center'}); if(e.focus) e.focus(); } };
 
-  if(!items.length){ _boyaahToast('Elige al menos un pase'); focus('boyaah-grid'); return; }
+  var med = _boyaahMed();
+  if(!items.length && !med){ _boyaahToast('Elige al menos un pase o agrega medallas'); focus('boyaah-grid'); return; }
   if(nombre.length < 2){ _boyaahToast('Escribe tu nombre o usuario'); focus('boyaah-nombre'); return; }
   if(wa.replace(/\D/g,'').length < 10){ _boyaahToast('Escribe un WhatsApp válido (10 dígitos o más)'); focus('boyaah-wa'); return; }
   if(!_boyaahFotoB64){ _boyaahToast('\u26A0 Sube tu comprobante de pago'); focus('boyaah-up'); return; }
@@ -12263,13 +12344,19 @@ function boyaahEnviar(){
   var lineas = items.map(function(i){
     return '\u2022 ' + i.q + ' x ' + i.p.nombre + ' (' + i.p.minutos + ' min c/u) = $' + i.sub + ' MXN';
   });
-  var msg = '*SOLICITUD PASES BOYAAH - Folio ' + folio + '*\n\n'
+  var nPases = items.reduce(function(a,i){ return a+i.q; },0);
+  var titulo = (items.length && med) ? 'PASES BOYAAH + MEDALLAS' : (med ? 'VENTA DE MEDALLAS' : 'PASES BOYAAH');
+  var medLinea = med ? ('\u2022 ' + med.q + ' x Paquete de ' + BOYAAH_MED_POR_PAQ + ' Medallas ($' + _boyaahN(BOYAAH_MED_PRECIO) + ' c/u) = $' + _boyaahN(med.sub) + ' MXN') : '';
+  var msg = '*SOLICITUD ' + titulo + ' - Folio ' + folio + '*\n\n'
     + 'Nombre/usuario: ' + nombre + '\n'
     + 'WhatsApp: ' + wa + '\n\n'
-    + '*Pases:*\n' + lineas.join('\n') + '\n\n'
-    + '*Total a pagar: $' + total + ' MXN*\n'
+    + (items.length ? ('*Pases seleccionados:*\n' + lineas.join('\n') + '\n\n') : '')
+    + (med ? ('*Paquetes de medallas:*\n' + medLinea + '\n'
+           + 'Total de medallas: ' + _boyaahN(med.medallas) + '\n\n') : '')
+    + ((items.length && med) ? ('Total de articulos: ' + (nPases + med.q) + ' (' + nPases + ' pases + ' + med.q + ' paquetes)\n') : '')
+    + '*Total general a pagar: $' + _boyaahN(total) + ' MXN*\n'
     + 'Metodo de pago: ' + metodo.nombre + '\n'
-    + 'Tiempo de entrega: ' + BOYAAH_ENTREGA + '\n'
+    + (items.length ? ('Tiempo de entrega (pases): ' + BOYAAH_ENTREGA + '\n') : '')
     + (obs ? ('Observaciones: ' + obs + '\n') : '')
     + '\n\uD83D\uDCCE Adjunto mi comprobante de pago en este chat.';
 
@@ -12286,7 +12373,9 @@ function boyaahEnviar(){
 
   var usuario = (typeof authSession !== 'undefined' && authSession && authSession.username) ? authSession.username : nombre;
   var detalle = 'Folio ' + folio + ' | Cliente: ' + nombre + ' | WhatsApp: ' + wa + ' | '
-    + lineas.join(' | ').replace(/\u2022 /g,'') + ' | Metodo: ' + metodo.nombre
+    + (lineas.length ? (lineas.join(' | ').replace(/\u2022 /g,'') + ' | ') : '')
+    + (med ? (medLinea.replace(/\u2022 /g,'') + ' | Total medallas: ' + _boyaahN(med.medallas) + ' | ') : '')
+    + 'TOTAL: $' + _boyaahN(total) + ' MXN | Metodo: ' + metodo.nombre
     + ' | Entrega: ' + BOYAAH_ENTREGA + (obs ? (' | Obs: ' + obs) : '') + ' | NO USA SALDO';
   var fin = function(ok){
     _boyaahEnviando = false; if(btn) btn.disabled = false;
@@ -12302,7 +12391,7 @@ function boyaahEnviar(){
       body: JSON.stringify({
         usuario: usuario,
         username: usuario,
-        metodo: 'PEDIDO: Pases Boyaah (' + metodo.nombre + ')',
+        metodo: 'PEDIDO: ' + ((items.length && med) ? 'Pases Boyaah + Medallas' : (med ? 'Medallas' : 'Pases Boyaah')) + ' (' + metodo.nombre + ')',
         monto: '$' + total + ' MXN - Folio ' + folio,
         monto_acreditar: 0,
         extra: detalle,
@@ -12323,18 +12412,18 @@ function boyaahMostrarConfirmacion(folio){
 }
 function boyaahAbrirWA(){ if(_boyaahUltimoWA) window.open(_boyaahUltimoWA, '_blank'); }
 function boyaahNuevo(){
-  _boyaahCant = {}; _boyaahUltimoWA = '';
+  _boyaahCant = {}; _boyaahUltimoWA = ''; _boyaahMedPaq = 1; _boyaahMedEnPedido = false;
   ['boyaah-obs'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
   boyaahQuitarFoto();
   var f = document.getElementById('boyaah-form-area'), d = document.getElementById('boyaah-done');
   if(d) d.style.display = 'none'; if(f) f.style.display = 'block';
-  boyaahRenderPases(); boyaahRenderResumen();
+  boyaahRenderPases(); boyaahRenderMedallas(); boyaahRenderResumen();
   window.scrollTo(0,0);
 }
 
 function boyaahInit(){
   if(!document.getElementById('page-boyaah')) return;
-  boyaahRenderPases(); boyaahRenderResumen(); boyaahRenderMetodos();
+  boyaahRenderPases(); boyaahRenderMedallas(); boyaahRenderResumen(); boyaahRenderMetodos();
 }
 if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boyaahInit);
 else boyaahInit();

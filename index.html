@@ -3050,6 +3050,42 @@ textarea.boyaah-inp{resize:vertical;min-height:70px}
   .boyaah-qbtn{width:32px}
   .boyaah-price{font-size:1.35rem}
 }
+
+/* ---------- VENTA DE MEDALLAS ---------- */
+.boyaah-divider{display:flex;align-items:center;margin:.4rem 0 1.4rem}
+.boyaah-divider span{flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(255,196,0,.45),transparent)}
+.boyaah-sechead{display:flex;align-items:center;gap:.75rem;margin-bottom:1rem}
+.boyaah-sechead-ico{width:46px;height:46px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.4rem;background:radial-gradient(circle at 30% 30%,rgba(255,215,0,.35),rgba(180,120,0,.1));border:1px solid rgba(255,196,0,.4);box-shadow:0 0 22px -4px rgba(255,196,0,.45)}
+.boyaah-sechead-t{font-family:Saira,sans-serif;font-weight:900;font-size:clamp(1.1rem,4.8vw,1.45rem);color:#fff;margin:0;line-height:1.05}
+.boyaah-sechead-s{font-family:Barlow,sans-serif;font-size:.84rem;color:#8b93a3;margin-top:.2rem;line-height:1.35}
+.boyaah-med{margin-bottom:1.6rem}
+.boyaah-med-card{background:linear-gradient(180deg,rgba(255,196,0,.07),rgba(255,255,255,.015) 65%);border:1px solid rgba(255,196,0,.28);border-radius:20px;padding:1.2rem 1rem;transition:border-color .2s,box-shadow .2s}
+.boyaah-med-card.sel{border-color:rgba(255,196,0,.7);box-shadow:0 12px 34px -14px rgba(255,180,0,.6)}
+.boyaah-med-top{display:flex;align-items:center;gap:.9rem;flex-wrap:wrap}
+.boyaah-med-ico{width:64px;height:64px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:2rem;background:radial-gradient(circle at 30% 30%,rgba(255,226,122,.45),rgba(217,154,0,.15));border:2px solid rgba(255,196,0,.55)}
+.boyaah-med-info{flex:1;min-width:150px}
+.boyaah-med-name{font-family:Saira,sans-serif;font-weight:900;font-size:1.35rem;color:#fff;line-height:1.1}
+.boyaah-med-price{font-family:Saira,sans-serif;font-weight:900;font-size:1.25rem;color:#ffd24a;margin-top:.2rem}
+.boyaah-med-price small{font-family:Barlow,sans-serif;font-size:.78rem;color:#8b93a3;font-weight:600}
+.boyaah-med-row{display:flex;align-items:center;justify-content:space-between;gap:.8rem;margin-top:1rem;flex-wrap:wrap}
+.boyaah-med-lbl{font-family:Barlow,sans-serif;font-weight:700;font-size:.85rem;color:#cbd5e1}
+.boyaah-med-qty{display:flex;align-items:center;gap:.35rem;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:.25rem}
+.boyaah-med-qty .boyaah-qbtn.plus{background:linear-gradient(135deg,#d99a00,#ffd24a);color:#1a1000}
+.boyaah-med-inp{width:64px;background:transparent;border:none;color:#fff;text-align:center;font-family:Saira,sans-serif;font-weight:800;font-size:1.15rem;outline:none;-moz-appearance:textfield}
+.boyaah-med-inp::-webkit-outer-spin-button,.boyaah-med-inp::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.boyaah-med-tot{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem;margin-top:1rem}
+.boyaah-med-t{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:.7rem .35rem;text-align:center;min-width:0}
+.boyaah-med-t b{display:block;font-family:Saira,sans-serif;font-weight:900;font-size:clamp(1rem,4.4vw,1.25rem);color:#fff;line-height:1.1;overflow-wrap:anywhere}
+.boyaah-med-t.gold b{color:#ffd24a}
+.boyaah-med-t span{display:block;font-family:Barlow,sans-serif;font-size:.72rem;color:#8b93a3;margin-top:.25rem}
+.boyaah-med-add{width:100%;margin-top:1rem;padding:.9rem;border-radius:14px;border:none;cursor:pointer;font-family:Saira,sans-serif;font-weight:800;font-size:.98rem;background:linear-gradient(135deg,#ffd24a,#d99a00);color:#1a1000;box-shadow:0 10px 26px -10px rgba(255,180,0,.6)}
+.boyaah-med-add.on{background:transparent;color:#ffd24a;border:1px solid rgba(255,196,0,.45);box-shadow:none}
+.boyaah-med-add:focus-visible,.boyaah-med-inp:focus-visible{outline:2px solid #ffd24a;outline-offset:2px}
+.boyaah-rsec{font-family:Barlow,sans-serif;font-weight:800;font-size:.8rem;color:#67e8f9;letter-spacing:.4px;margin:.6rem 0 .1rem}
+.boyaah-rsec.gold{color:#ffd24a}
+.boyaah-kv{display:flex;justify-content:space-between;gap:.6rem;padding:.35rem 0;font-family:Barlow,sans-serif;font-size:.88rem;color:#cbd5e1}
+.boyaah-kv b{font-family:Saira,sans-serif;color:#fff;white-space:nowrap}
+.boyaah-kvbox{margin-top:.6rem;padding-top:.4rem;border-top:1px dashed rgba(255,255,255,.12)}
 </style>
 </head>
 <body>
@@ -5420,13 +5456,24 @@ textarea.boyaah-inp{resize:vertical;min-height:70px}
   <div class="ph">
     <div class="stag">Free Fire &middot; Pases</div>
     <h2 class="ptitle">&#127903;&#65039; PASES <span>BOYAAH</span></h2>
-    <p class="psub">Elige tus pases, paga por transferencia y envía tu solicitud por WhatsApp.</p>
+    <p class="psub">Elige pases y medallas, paga por transferencia y envía tu solicitud por WhatsApp.</p>
   </div>
 
   <div class="boyaah-wrap">
     <div class="boyaah-hint">&#128161;<span>Puedes <b>combinar varios pases</b> en un mismo pedido. Usa <b>+</b> y <b>&minus;</b> en cada tarjeta.</span></div>
 
     <div class="boyaah-grid" id="boyaah-grid"></div>
+
+    <!-- ═══ VENTA DE MEDALLAS (independiente, mismo pedido / comprobante / WhatsApp) ═══ -->
+    <div class="boyaah-divider" role="separator"><span></span></div>
+    <div class="boyaah-sechead">
+      <div class="boyaah-sechead-ico">&#127941;</div>
+      <div>
+        <h3 class="boyaah-sechead-t">VENTA DE MEDALLAS</h3>
+        <div class="boyaah-sechead-s">Paquetes de 308 medallas. Puedes sumarlos a tus pases en el mismo pedido.</div>
+      </div>
+    </div>
+    <div class="boyaah-med" id="boyaah-med"></div>
 
     <div id="boyaah-form-area">
       <!-- 1. Resumen -->
