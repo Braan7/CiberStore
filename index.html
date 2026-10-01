@@ -2979,6 +2979,78 @@ h1,h2,h3,.ptitle,.hero h1{letter-spacing:-.01em}
 }
 @media (prefers-reduced-motion:reduce){.wch-card,.wch-gem{animation:none}}
 </style>
+<!-- ═══ PASES BOYAAH (estilos aislados boyaah-*) ═══ -->
+<style id="boyaah-styles">
+#page-boyaah .boyaah-wrap{max-width:760px;margin:0 auto;padding:0 1.1rem 3rem;box-sizing:border-box}
+#page-boyaah *{box-sizing:border-box}
+.boyaah-hint{display:flex;align-items:center;gap:.6rem;background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:14px;padding:.75rem .9rem;margin-bottom:1rem;font-family:Barlow,sans-serif;font-size:.88rem;color:#cfe9f2;line-height:1.4}
+.boyaah-hint b{color:#67e8f9}
+.boyaah-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem;margin-bottom:1.5rem}
+@media (min-width:760px){.boyaah-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.boyaah-card{position:relative;background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015));border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:1rem .85rem .9rem;text-align:center;transition:border-color .2s,box-shadow .2s;min-width:0}
+.boyaah-card.sel{border-color:rgba(34,211,238,.6);box-shadow:0 10px 30px -12px rgba(34,211,238,.55),inset 0 1px 0 rgba(34,211,238,.18)}
+.boyaah-badge{position:absolute;top:.6rem;right:.6rem;min-width:24px;height:24px;padding:0 .4rem;border-radius:999px;background:#22d3ee;color:#04121a;font-family:Saira,sans-serif;font-weight:900;font-size:.78rem;display:none;align-items:center;justify-content:center}
+.boyaah-card.sel .boyaah-badge{display:inline-flex}
+.boyaah-time{width:62px;height:62px;margin:0 auto .65rem;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 30% 30%,rgba(103,232,249,.3),rgba(8,145,178,.1));border:2px solid rgba(34,211,238,.45);box-shadow:0 0 18px -4px rgba(34,211,238,.6)}
+.boyaah-time-n{font-family:Saira,sans-serif;font-weight:900;font-size:1.25rem;color:#fff;line-height:1}
+.boyaah-time-u{font-family:Barlow,sans-serif;font-weight:700;font-size:.62rem;color:#67e8f9;letter-spacing:1px}
+.boyaah-name{font-family:Barlow,sans-serif;font-weight:800;font-size:.92rem;color:#fff;line-height:1.2}
+.boyaah-price{font-family:Saira,sans-serif;font-weight:900;font-size:1.55rem;color:#67e8f9;margin:.35rem 0 .1rem;text-shadow:0 0 14px rgba(34,211,238,.35);line-height:1.1}
+.boyaah-price small{font-size:.62em;color:#8b93a3;font-weight:700;text-shadow:none}
+.boyaah-meta{font-family:Barlow,sans-serif;font-size:.76rem;color:#8b93a3;line-height:1.35}
+.boyaah-meta b{color:#cbd5e1;font-weight:700}
+.boyaah-qty{display:flex;align-items:center;justify-content:space-between;gap:.3rem;margin-top:.8rem;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.25rem}
+.boyaah-qbtn{width:38px;height:36px;border:none;border-radius:9px;background:rgba(255,255,255,.07);color:#fff;font-size:1.2rem;font-weight:700;cursor:pointer;line-height:1;flex-shrink:0}
+.boyaah-qbtn.plus{background:linear-gradient(135deg,#0891b2,#22d3ee);color:#04121a}
+.boyaah-qbtn:disabled{opacity:.35;cursor:default}
+.boyaah-qn{font-family:Saira,sans-serif;font-weight:800;font-size:1.05rem;color:#fff;min-width:24px;text-align:center}
+.boyaah-panel{background:linear-gradient(180deg,rgba(8,20,32,.9),rgba(4,8,14,.95));border:1px solid rgba(34,211,238,.14);border-radius:20px;padding:1.15rem 1rem;margin-bottom:1rem}
+.boyaah-ptitle{display:flex;align-items:center;gap:.5rem;font-family:Saira,sans-serif;font-weight:800;font-size:1.02rem;color:#fff;margin-bottom:.85rem}
+.boyaah-step{width:24px;height:24px;border-radius:50%;background:rgba(34,211,238,.14);border:1px solid rgba(34,211,238,.4);color:#67e8f9;font-size:.75rem;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.boyaah-empty{text-align:center;color:#8b93a3;font-family:Barlow,sans-serif;font-size:.88rem;padding:.6rem 0}
+.boyaah-line{display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.55rem 0;border-bottom:1px solid rgba(255,255,255,.06);font-family:Barlow,sans-serif;font-size:.9rem;color:#e5e7eb}
+.boyaah-line span:first-child{min-width:0;overflow-wrap:anywhere}
+.boyaah-line small{color:#8b93a3}
+.boyaah-line b{font-family:Saira,sans-serif;color:#fff;white-space:nowrap}
+.boyaah-total{display:flex;align-items:center;justify-content:space-between;padding-top:.75rem;font-family:Barlow,sans-serif;font-weight:700;color:#cbd5e1}
+.boyaah-total b{font-family:Saira,sans-serif;font-weight:900;font-size:1.45rem;color:#67e8f9}
+.boyaah-lbl{display:block;font-family:Barlow,sans-serif;font-weight:700;font-size:.82rem;color:#cbd5e1;margin:0 0 .35rem}
+.boyaah-lbl em{font-style:normal;color:#6b7280;font-weight:500}
+.boyaah-inp{width:100%;background:rgba(255,255,255,.03);border:1.5px solid rgba(34,211,238,.2);color:#fff;border-radius:12px;padding:.75rem .9rem;font-family:Barlow,sans-serif;font-size:16px;margin-bottom:.85rem;outline:none;transition:border-color .2s}
+.boyaah-inp:focus{border-color:#22d3ee}
+textarea.boyaah-inp{resize:vertical;min-height:70px}
+.boyaah-pay{border:1.5px solid rgba(255,255,255,.1);border-radius:14px;padding:.85rem .9rem;margin-bottom:.6rem;cursor:pointer;background:rgba(255,255,255,.02)}
+.boyaah-pay.sel{border-color:rgba(37,211,102,.55);background:rgba(37,211,102,.05)}
+.boyaah-pay-h{display:flex;align-items:center;gap:.6rem;font-family:Saira,sans-serif;font-weight:800;font-size:1rem;color:#fff}
+.boyaah-pay-dot{width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,.3);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.boyaah-pay.sel .boyaah-pay-dot{border-color:#25d366}
+.boyaah-pay.sel .boyaah-pay-dot::after{content:"";width:8px;height:8px;border-radius:50%;background:#25d366}
+.boyaah-pay-row{display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin-top:.5rem;font-family:Barlow,sans-serif;font-size:.86rem;color:#9aa4b2;flex-wrap:wrap}
+.boyaah-pay-row b{color:#fff;font-family:Saira,sans-serif;font-weight:700;overflow-wrap:anywhere}
+.boyaah-copy{background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.35);color:#4ade80;border-radius:9px;padding:.35rem .7rem;font-family:Barlow,sans-serif;font-weight:700;font-size:.78rem;cursor:pointer}
+.boyaah-up{border:2px dashed rgba(34,211,238,.3);border-radius:14px;padding:1.2rem .8rem;text-align:center;cursor:pointer;background:rgba(34,211,238,.03);font-family:Barlow,sans-serif;color:#9aa4b2;font-size:.88rem}
+.boyaah-up b{display:block;color:#fff;font-size:.95rem;margin:.3rem 0 .15rem}
+.boyaah-prev{display:none;text-align:center}
+.boyaah-prev img{max-width:100%;max-height:280px;border-radius:12px;border:1px solid rgba(255,255,255,.1);display:block;margin:0 auto .5rem}
+.boyaah-prev-name{font-family:Barlow,sans-serif;font-size:.8rem;color:#4ade80;overflow-wrap:anywhere}
+.boyaah-prev-rm{margin-top:.5rem;background:none;border:1px solid rgba(255,80,80,.35);color:#ff8080;border-radius:9px;padding:.35rem .8rem;font-family:Barlow,sans-serif;font-weight:700;font-size:.78rem;cursor:pointer}
+.boyaah-send{width:100%;display:flex;align-items:center;justify-content:center;gap:.5rem;padding:1rem;border:none;border-radius:16px;background:linear-gradient(135deg,#34e37a,#16a34a);color:#04140a;font-family:Saira,sans-serif;font-weight:800;font-size:1rem;cursor:pointer;box-shadow:0 12px 30px -10px rgba(37,211,102,.6)}
+.boyaah-send:disabled{opacity:.55;cursor:default}
+.boyaah-note{display:flex;gap:.55rem;margin-top:.8rem;background:rgba(255,204,0,.06);border:1px solid rgba(255,204,0,.25);border-radius:12px;padding:.7rem .8rem;font-family:Barlow,sans-serif;font-size:.82rem;color:#e8d9a0;line-height:1.4}
+.boyaah-done{display:none;text-align:center}
+.boyaah-done-ico{font-size:2.6rem}
+.boyaah-done h3{font-family:Saira,sans-serif;font-weight:900;font-size:1.3rem;color:#fff;margin:.3rem 0 .2rem}
+.boyaah-done p{font-family:Barlow,sans-serif;font-size:.9rem;color:#9aa4b2;line-height:1.5;margin:.3rem 0}
+.boyaah-done .boyaah-folio{font-family:Saira,sans-serif;font-weight:800;color:#67e8f9;font-size:1.05rem}
+.boyaah-btn2{width:100%;margin-top:.6rem;padding:.85rem;border-radius:14px;background:transparent;border:1px solid rgba(255,255,255,.14);color:#fff;font-family:Barlow,sans-serif;font-weight:700;font-size:.92rem;cursor:pointer}
+.boyaah-qbtn:focus-visible,.boyaah-send:focus-visible,.boyaah-btn2:focus-visible,.boyaah-copy:focus-visible,.boyaah-pay:focus-visible,.boyaah-up:focus-visible{outline:2px solid #67e8f9;outline-offset:2px}
+@media (max-width:360px){
+  .boyaah-grid{gap:.5rem}
+  .boyaah-card{padding:.85rem .55rem .75rem}
+  .boyaah-qbtn{width:32px}
+  .boyaah-price{font-size:1.35rem}
+}
+</style>
 </head>
 <body>
   <!-- 🎉 POPUP DE BIENVENIDA / CANAL (rediseño) -->
@@ -3059,6 +3131,7 @@ h1,h2,h3,.ptitle,.hero h1{letter-spacing:-.01em}
     <div class="nav-item" id="ni-api" onclick="goPage('api')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v4M15 3v4M9 17v4M15 17v4M3 9h4M3 15h4M17 9h4M17 15h4"/><rect x="7" y="7" width="10" height="10" rx="2"/></svg></div> API Revendedores <span class="nb" style="background:rgba(34,211,238,.15);border:1px solid rgba(34,211,238,.3);color:#22d3ee">API</span></div>
     <div class="nav-item" id="ni-pasesff" onclick="openPaseFFModal()"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 21c-4-3-8-6.5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 19 10c0 1.7-.7 3.2-1.8 4.5"/><path d="m14 14 2 2 4-4"/></svg></div> Pases FF <span class="nb" style="background:rgba(255,180,60,.15);border:1px solid rgba(255,180,60,.35);color:#ffb84d">TARDADO</span></div>
     <div class="nav-item" id="ni-actas" onclick="goPage('actas')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2h8l4 4v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M9 9h6M9 13h6M9 17h4"/></svg></div> Actas Oficiales</div>
+    <div class="nav-item" id="ni-boyaah" onclick="goPage('boyaah')"><div class="nav-ico" style="font-size:1rem">&#127903;&#65039;</div> Pases Boyaah <span class="nb" style="background:rgba(34,211,238,.15);border:1px solid rgba(34,211,238,.3);color:#67e8f9">NEW</span></div>
     <!-- IDs ocultos preservados para no romper funciones/JS que puedan referenciarlos -->
     <div class="nav-item" id="ni-diamantes" onclick="goPage('diamantes')" style="display:none"><div class="nav-ico">&#128142;</div> Diamantes FF</div>
     <div class="nav-item" id="ni-honor" onclick="goPage('honor')" style="display:none"><div class="nav-ico">&#127942;</div> Honor de Clan</div>
@@ -5339,6 +5412,79 @@ h1,h2,h3,.ptitle,.hero h1{letter-spacing:-.01em}
     <!-- Confirmación (tras solicitar) -->
     <div id="actas-ok" style="display:none"></div>
 
+  </div>
+</div>
+
+<!-- ═══ PASES BOYAAH ═══ (seccion independiente: NO usa saldo) -->
+<div class="page" id="page-boyaah">
+  <div class="ph">
+    <div class="stag">Free Fire &middot; Pases</div>
+    <h2 class="ptitle">&#127903;&#65039; PASES <span>BOYAAH</span></h2>
+    <p class="psub">Elige tus pases, paga por transferencia y envía tu solicitud por WhatsApp.</p>
+  </div>
+
+  <div class="boyaah-wrap">
+    <div class="boyaah-hint">&#128161;<span>Puedes <b>combinar varios pases</b> en un mismo pedido. Usa <b>+</b> y <b>&minus;</b> en cada tarjeta.</span></div>
+
+    <div class="boyaah-grid" id="boyaah-grid"></div>
+
+    <div id="boyaah-form-area">
+      <!-- 1. Resumen -->
+      <div class="boyaah-panel">
+        <div class="boyaah-ptitle"><span class="boyaah-step">1</span> Tu pedido</div>
+        <div id="boyaah-resumen"></div>
+      </div>
+
+      <!-- 2. Datos -->
+      <div class="boyaah-panel">
+        <div class="boyaah-ptitle"><span class="boyaah-step">2</span> Tus datos</div>
+        <label class="boyaah-lbl" for="boyaah-nombre">Nombre o usuario</label>
+        <input class="boyaah-inp" id="boyaah-nombre" type="text" maxlength="60" placeholder="Ej. Ciber_Juan" autocomplete="name">
+        <label class="boyaah-lbl" for="boyaah-wa">WhatsApp</label>
+        <input class="boyaah-inp" id="boyaah-wa" type="tel" inputmode="tel" maxlength="20" placeholder="Ej. 55 1234 5678" autocomplete="tel">
+        <label class="boyaah-lbl" for="boyaah-obs">Observaciones <em>(opcional)</em></label>
+        <textarea class="boyaah-inp" id="boyaah-obs" maxlength="300" placeholder="Algo que debamos saber de tu pedido"></textarea>
+      </div>
+
+      <!-- 3. Pago -->
+      <div class="boyaah-panel">
+        <div class="boyaah-ptitle"><span class="boyaah-step">3</span> Método de pago</div>
+        <div id="boyaah-metodos"></div>
+      </div>
+
+      <!-- 4. Comprobante -->
+      <div class="boyaah-panel">
+        <div class="boyaah-ptitle"><span class="boyaah-step">4</span> &#128206; Subir comprobante de pago</div>
+        <input type="file" id="boyaah-foto" accept="image/*" style="display:none" onchange="boyaahOnFoto(this)">
+        <div class="boyaah-up" id="boyaah-up" role="button" tabindex="0" onclick="document.getElementById('boyaah-foto').click()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
+          <div style="font-size:1.6rem">&#128247;</div>
+          <b>Toca para elegir la foto</b>
+          Captura o foto de tu transferencia (JPG, PNG)
+        </div>
+        <div class="boyaah-prev" id="boyaah-prev">
+          <img id="boyaah-prev-img" alt="Vista previa del comprobante">
+          <div class="boyaah-prev-name" id="boyaah-prev-name"></div>
+          <button type="button" class="boyaah-prev-rm" onclick="boyaahQuitarFoto()">Cambiar foto</button>
+        </div>
+      </div>
+
+      <button type="button" class="boyaah-send" id="boyaah-send" onclick="boyaahEnviar()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21c5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2zm0 18.15a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.23 8.23 0 1 1 6.98 3.86z"/></svg>
+        Enviar solicitud por WhatsApp
+      </button>
+      <div class="boyaah-note">&#9888;&#65039;<span>WhatsApp no permite adjuntar archivos automáticamente. Al abrirse el chat, <b>adjunta tu comprobante manualmente</b> antes de enviar el mensaje.</span></div>
+    </div>
+
+    <!-- Confirmación -->
+    <div class="boyaah-panel boyaah-done" id="boyaah-done">
+      <div class="boyaah-done-ico">&#9989;</div>
+      <h3>Solicitud lista</h3>
+      <p>Folio: <span class="boyaah-folio" id="boyaah-done-folio"></span></p>
+      <p id="boyaah-done-tg"></p>
+      <p><b style="color:#ffd76a">Importante:</b> en el chat de WhatsApp que se abrió, <b style="color:#fff">adjunta la foto de tu comprobante</b> y envía el mensaje. Tiempo de entrega: 25 a 30 minutos.</p>
+      <button type="button" class="boyaah-send" onclick="boyaahAbrirWA()">Abrir WhatsApp de nuevo</button>
+      <button type="button" class="boyaah-btn2" onclick="boyaahNuevo()">Hacer otro pedido</button>
+    </div>
   </div>
 </div>
 

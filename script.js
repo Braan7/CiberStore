@@ -12106,3 +12106,235 @@ function _mostrarReciboActa(nombre, estado, ord){
     + '</div>';
   ok.scrollIntoView({ behavior:'smooth', block:'center' });
 }
+
+
+// ═══════════════════════ PASES BOYAAH ═══════════════════════
+// Seccion 100% independiente del saldo: NO descuenta, NO cobra y NO modifica
+// el balance. Solo arma la solicitud, registra el comprobante (aviso al
+// Telegram del admin, con monto_acreditar 0) y abre WhatsApp.
+var BOYAAH_PASES = [
+  { id:'b30',  nombre:'Pase Boyaah 30 min',  minutos:30,  precio:17 },
+  { id:'b60',  nombre:'Pase Boyaah 60 min',  minutos:60,  precio:18 },
+  { id:'b90',  nombre:'Pase Boyaah 90 min',  minutos:90,  precio:19 },
+  { id:'b120', nombre:'Pase Boyaah 120 min', minutos:120, precio:25 }
+];
+var BOYAAH_ENTREGA = '25 a 30 minutos';
+
+// Métodos de pago. Para agregar el segundo método, solo añade otro objeto
+// a este arreglo (id, nombre, filas, copiar); la interfaz lo muestra solo.
+var BOYAAH_METODOS = [
+  { id:'klar', nombre:'Klar',
+    filas:[ {k:'Titular', v:'Francisco Menesses'}, {k:'CLABE', v:'661180006413009414'} ],
+    copiar:'661180006413009414' }
+];
+
+var _boyaahCant = {};          // { b30: 2, b90: 1 }
+var _boyaahMetodo = BOYAAH_METODOS[0].id;
+var _boyaahFotoB64 = '';
+var _boyaahUltimoWA = '';
+var _boyaahEnviando = false;
+
+function _boyaahEsc(s){ return String(s==null?'':s).replace(/[<>&"']/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c];}); }
+function _boyaahToast(m,d){ if(typeof showToast==='function') showToast(m,d||3000); else alert(m); }
+
+function boyaahRenderPases(){
+  var g = document.getElementById('boyaah-grid'); if(!g) return;
+  g.innerHTML = BOYAAH_PASES.map(function(p){
+    var q = _boyaahCant[p.id] || 0;
+    return '<div class="boyaah-card'+(q>0?' sel':'')+'" id="boyaah-card-'+p.id+'">'
+      + '<span class="boyaah-badge">'+q+'</span>'
+      + '<div class="boyaah-time"><span class="boyaah-time-n">'+p.minutos+'</span><span class="boyaah-time-u">MIN</span></div>'
+      + '<div class="boyaah-name">'+_boyaahEsc(p.nombre)+'</div>'
+      + '<div class="boyaah-price">$'+p.precio+' <small>MXN</small></div>'
+      + '<div class="boyaah-meta">Tiempo incluido: <b>'+p.minutos+' min</b></div>'
+      + '<div class="boyaah-meta">&#9201;&#65039; Entrega: <b>'+BOYAAH_ENTREGA+'</b></div>'
+      + '<div class="boyaah-qty">'
+      +   '<button type="button" class="boyaah-qbtn" aria-label="Quitar uno" onclick="boyaahCambiar(\''+p.id+'\',-1)"'+(q<=0?' disabled':'')+'>&minus;</button>'
+      +   '<span class="boyaah-qn" aria-live="polite">'+q+'</span>'
+      +   '<button type="button" class="boyaah-qbtn plus" aria-label="Agregar uno" onclick="boyaahCambiar(\''+p.id+'\',1)">+</button>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function boyaahCambiar(id, d){
+  var q = (_boyaahCant[id] || 0) + d;
+  if(q < 0) q = 0; if(q > 20) { q = 20; _boyaahToast('Máximo 20 por pase'); }
+  if(q === 0) delete _boyaahCant[id]; else _boyaahCant[id] = q;
+  boyaahRenderPases();
+  boyaahRenderResumen();
+}
+
+function _boyaahItems(){
+  return BOYAAH_PASES.filter(function(p){ return _boyaahCant[p.id] > 0; })
+    .map(function(p){ var q=_boyaahCant[p.id]; return { p:p, q:q, sub:q*p.precio }; });
+}
+function _boyaahTotal(){ return _boyaahItems().reduce(function(a,i){ return a+i.sub; },0); }
+
+function boyaahRenderResumen(){
+  var el = document.getElementById('boyaah-resumen'); if(!el) return;
+  var items = _boyaahItems();
+  if(!items.length){ el.innerHTML = '<div class="boyaah-empty">Aún no eliges pases. Usa <b style="color:#67e8f9">+</b> en las tarjetas de arriba.</div>'; return; }
+  el.innerHTML = items.map(function(i){
+    return '<div class="boyaah-line"><span>'+i.q+' &times; '+_boyaahEsc(i.p.nombre)+'<br><small>'+i.p.minutos+' min c/u &middot; $'+i.p.precio+' c/u</small></span><b>$'+i.sub+'</b></div>';
+  }).join('') + '<div class="boyaah-total"><span>Total a pagar</span><b>$'+_boyaahTotal()+' MXN</b></div>';
+}
+
+function boyaahRenderMetodos(){
+  var el = document.getElementById('boyaah-metodos'); if(!el) return;
+  el.innerHTML = BOYAAH_METODOS.map(function(m){
+    var sel = m.id === _boyaahMetodo;
+    return '<div class="boyaah-pay'+(sel?' sel':'')+'" role="radio" aria-checked="'+sel+'" tabindex="0" onclick="boyaahElegirMetodo(\''+m.id+'\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();boyaahElegirMetodo(\''+m.id+'\');}">'
+      + '<div class="boyaah-pay-h"><span class="boyaah-pay-dot"></span>'+_boyaahEsc(m.nombre)+'</div>'
+      + m.filas.map(function(f){ return '<div class="boyaah-pay-row"><span>'+_boyaahEsc(f.k)+'</span><b>'+_boyaahEsc(f.v)+'</b></div>'; }).join('')
+      + (m.copiar ? '<div class="boyaah-pay-row" style="justify-content:flex-end"><button type="button" class="boyaah-copy" onclick="event.stopPropagation();boyaahCopiar(\''+m.id+'\',this)">&#128203; Copiar CLABE</button></div>' : '')
+      + '</div>';
+  }).join('');
+}
+function boyaahElegirMetodo(id){ _boyaahMetodo = id; boyaahRenderMetodos(); }
+function _boyaahMetodoSel(){ for(var i=0;i<BOYAAH_METODOS.length;i++){ if(BOYAAH_METODOS[i].id===_boyaahMetodo) return BOYAAH_METODOS[i]; } return BOYAAH_METODOS[0]; }
+
+function boyaahCopiar(id, btn){
+  var m = null; BOYAAH_METODOS.forEach(function(x){ if(x.id===id) m=x; });
+  if(!m || !m.copiar) return;
+  var ok = function(){ if(btn){ var t=btn.innerHTML; btn.innerHTML='&#10003; Copiada'; setTimeout(function(){ btn.innerHTML=t; },2200); } };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(m.copiar).then(ok).catch(function(){ _boyaahToast('Copia manualmente: '+m.copiar, 5000); });
+  } else { _boyaahToast('Copia manualmente: '+m.copiar, 5000); }
+}
+
+// ── Comprobante: vista previa + compresión ligera (para que el envío no pese) ──
+function boyaahOnFoto(input){
+  var f = input.files && input.files[0];
+  if(!f) return;
+  if(!/^image\//i.test(f.type)){ _boyaahToast('El comprobante debe ser una imagen'); input.value=''; return; }
+  if(f.size > 15*1024*1024){ _boyaahToast('La imagen es muy pesada (máx. 15 MB)'); input.value=''; return; }
+  var reader = new FileReader();
+  reader.onload = function(ev){
+    var raw = ev.target.result;
+    var img = new Image();
+    img.onload = function(){
+      var b64 = raw;
+      try {
+        var max = 1600, w = img.width, h = img.height;
+        if(w > max || h > max){ var r = Math.min(max/w, max/h); w = Math.round(w*r); h = Math.round(h*r); }
+        var c = document.createElement('canvas'); c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        var j = c.toDataURL('image/jpeg', 0.85);
+        if(j && j.length < raw.length) b64 = j;
+      } catch(e){}
+      _boyaahFotoB64 = b64;
+      var pv = document.getElementById('boyaah-prev'), up = document.getElementById('boyaah-up');
+      document.getElementById('boyaah-prev-img').src = raw;
+      document.getElementById('boyaah-prev-name').textContent = '\u2713 ' + f.name;
+      if(pv) pv.style.display = 'block'; if(up) up.style.display = 'none';
+    };
+    img.onerror = function(){ _boyaahToast('No se pudo leer la imagen'); boyaahQuitarFoto(); };
+    img.src = raw;
+  };
+  reader.onerror = function(){ _boyaahToast('No se pudo leer la imagen'); };
+  reader.readAsDataURL(f);
+}
+function boyaahQuitarFoto(){
+  _boyaahFotoB64 = '';
+  var i = document.getElementById('boyaah-foto'); if(i) i.value = '';
+  var pv = document.getElementById('boyaah-prev'), up = document.getElementById('boyaah-up');
+  if(pv) pv.style.display = 'none'; if(up) up.style.display = 'block';
+}
+
+// ── Envío ──
+function boyaahEnviar(){
+  if(_boyaahEnviando) return;
+  var items = _boyaahItems();
+  var nombre = ((document.getElementById('boyaah-nombre')||{}).value||'').trim();
+  var wa = ((document.getElementById('boyaah-wa')||{}).value||'').trim();
+  var obs = ((document.getElementById('boyaah-obs')||{}).value||'').trim();
+  var focus = function(id){ var e=document.getElementById(id); if(e){ e.scrollIntoView({behavior:'smooth',block:'center'}); if(e.focus) e.focus(); } };
+
+  if(!items.length){ _boyaahToast('Elige al menos un pase'); focus('boyaah-grid'); return; }
+  if(nombre.length < 2){ _boyaahToast('Escribe tu nombre o usuario'); focus('boyaah-nombre'); return; }
+  if(wa.replace(/\D/g,'').length < 10){ _boyaahToast('Escribe un WhatsApp válido (10 dígitos o más)'); focus('boyaah-wa'); return; }
+  if(!_boyaahFotoB64){ _boyaahToast('\u26A0 Sube tu comprobante de pago'); focus('boyaah-up'); return; }
+
+  var metodo = _boyaahMetodoSel();
+  var total = _boyaahTotal();
+  var folio = 'BY-' + Date.now().toString(36).toUpperCase().slice(-6);
+
+  var lineas = items.map(function(i){
+    return '\u2022 ' + i.q + ' x ' + i.p.nombre + ' (' + i.p.minutos + ' min c/u) = $' + i.sub + ' MXN';
+  });
+  var msg = '*SOLICITUD PASES BOYAAH - Folio ' + folio + '*\n\n'
+    + 'Nombre/usuario: ' + nombre + '\n'
+    + 'WhatsApp: ' + wa + '\n\n'
+    + '*Pases:*\n' + lineas.join('\n') + '\n\n'
+    + '*Total a pagar: $' + total + ' MXN*\n'
+    + 'Metodo de pago: ' + metodo.nombre + '\n'
+    + 'Tiempo de entrega: ' + BOYAAH_ENTREGA + '\n'
+    + (obs ? ('Observaciones: ' + obs + '\n') : '')
+    + '\n\uD83D\uDCCE Adjunto mi comprobante de pago en este chat.';
+
+  // 1) Abrir WhatsApp de inmediato (dentro del clic, para que el navegador no lo bloquee)
+  _boyaahUltimoWA = 'https://wa.me/' + (typeof WA !== 'undefined' ? WA : '573180051415') + '?text=' + encodeURIComponent(msg);
+  window.open(_boyaahUltimoWA, '_blank');
+
+  // 2) Registrar la solicitud + comprobante en el Telegram del admin (sin saldo)
+  _boyaahEnviando = true;
+  var btn = document.getElementById('boyaah-send'); if(btn) btn.disabled = true;
+  var tgEl = document.getElementById('boyaah-done-tg');
+  if(tgEl) tgEl.textContent = 'Registrando tu comprobante...';
+  boyaahMostrarConfirmacion(folio);
+
+  var usuario = (typeof authSession !== 'undefined' && authSession && authSession.username) ? authSession.username : nombre;
+  var detalle = 'Folio ' + folio + ' | Cliente: ' + nombre + ' | WhatsApp: ' + wa + ' | '
+    + lineas.join(' | ').replace(/\u2022 /g,'') + ' | Metodo: ' + metodo.nombre
+    + ' | Entrega: ' + BOYAAH_ENTREGA + (obs ? (' | Obs: ' + obs) : '') + ' | NO USA SALDO';
+  var fin = function(ok){
+    _boyaahEnviando = false; if(btn) btn.disabled = false;
+    if(tgEl) tgEl.innerHTML = ok
+      ? '<span style="color:#4ade80">\u2713 Comprobante registrado con tu folio.</span>'
+      : '<span style="color:#ffb4b4">No pudimos registrar el comprobante en línea. No pasa nada: adjúntalo en WhatsApp.</span>';
+  };
+  try {
+    if(typeof NOTIF_RECARGA_URL === 'undefined') { fin(false); return; }
+    fetch(NOTIF_RECARGA_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        usuario: usuario,
+        username: usuario,
+        metodo: 'PEDIDO: Pases Boyaah (' + metodo.nombre + ')',
+        monto: '$' + total + ' MXN - Folio ' + folio,
+        monto_acreditar: 0,
+        extra: detalle,
+        foto_base64: _boyaahFotoB64
+      })
+    }).then(function(r){ return r.json().catch(function(){ return { success: r.ok }; }); })
+      .then(function(res){ fin(!!(res && res.success)); })
+      .catch(function(){ fin(false); });
+  } catch(e){ fin(false); }
+}
+
+function boyaahMostrarConfirmacion(folio){
+  var f = document.getElementById('boyaah-form-area'), d = document.getElementById('boyaah-done');
+  var fo = document.getElementById('boyaah-done-folio');
+  if(fo) fo.textContent = folio;
+  if(f) f.style.display = 'none';
+  if(d){ d.style.display = 'block'; d.scrollIntoView({behavior:'smooth', block:'center'}); }
+}
+function boyaahAbrirWA(){ if(_boyaahUltimoWA) window.open(_boyaahUltimoWA, '_blank'); }
+function boyaahNuevo(){
+  _boyaahCant = {}; _boyaahUltimoWA = '';
+  ['boyaah-obs'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+  boyaahQuitarFoto();
+  var f = document.getElementById('boyaah-form-area'), d = document.getElementById('boyaah-done');
+  if(d) d.style.display = 'none'; if(f) f.style.display = 'block';
+  boyaahRenderPases(); boyaahRenderResumen();
+  window.scrollTo(0,0);
+}
+
+function boyaahInit(){
+  if(!document.getElementById('page-boyaah')) return;
+  boyaahRenderPases(); boyaahRenderResumen(); boyaahRenderMetodos();
+}
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boyaahInit);
+else boyaahInit();
