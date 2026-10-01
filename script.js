@@ -3463,7 +3463,7 @@ function admToggleNav(force){
 }
 
 function admFullTab(tab){
-  var tabs=['stats','users','pedidos','saldos','top','puntos','codigos','chat','resenas','soporte','inactivos','config'];
+  var tabs=['stats','users','pedidos','saldos','top','puntos','codigos','chat','resenas','soporte','inactivos','seguridad','config'];
   tabs.forEach(function(t){
     var btn=document.getElementById('admn-'+t);
     var sec=document.getElementById('adms-'+t);
@@ -3481,6 +3481,7 @@ function admFullTab(tab){
   if(tab==='resenas') admLoadResenas();
   if(tab==='soporte') admSopCargarLista();
   if(tab==='inactivos') admInactCargar();
+  if(tab==='seguridad') admSegCargar();
   // Cerrar el drawer al elegir una opción en móvil
   if(window.innerWidth < 901) admToggleNav(false);
 }
@@ -12427,3 +12428,195 @@ function boyaahInit(){
 }
 if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boyaahInit);
 else boyaahInit();
+
+
+// ═══════════════════════ SEGURIDAD · IP + DISPOSITIVOS ═══════════════════════
+// Registro silencioso (antifraude). NO pide permisos, NO usa GPS, NO toca
+// login/saldo/compras. Solo guarda una fila en la tabla `seguridad_sesiones`
+// por usuario+huella cada ~12 h, para que el admin revise cuentas duplicadas.
+var SEG_TABLA = 'seguridad_sesiones';
+var _segInfoCache = null;   // { ip, ciudad, region, pais } de esta carga
+var _segHuella = null;      // id de dispositivo (estable por navegador)
+var _segYaRegistrado = {};  // evita repetir en la misma carga
+
+// ── Huella del dispositivo: estable y sin permisos ──
+function _segCalcularHuella(){
+  if(_segHuella) return _segHuella;
+  try { var guardada = localStorage.getItem('cs_dev_fp'); if(guardada){ _segHuella = guardada; return guardada; } } catch(e){}
+  var n = navigator;
+  var partes = [
+    n.userAgent || '', n.platform || '', n.language || '',
+    (n.languages ? n.languages.join(',') : ''),
+    (screen.width + 'x' + screen.height + 'x' + (screen.colorDepth||'')),
+    (n.hardwareConcurrency || ''), (n.deviceMemory || ''),
+    (n.maxTouchPoints || ''),
+    (Intl.DateTimeFormat().resolvedOptions().timeZone || '')
+  ].join('|');
+  // Canvas fingerprint (ligero)
+  try {
+    var c = document.createElement('canvas'); var ctx = c.getContext('2d');
+    ctx.textBaseline = 'top'; ctx.font = "14px 'Arial'";
+    ctx.fillStyle = '#f60'; ctx.fillRect(0,0,100,20);
+    ctx.fillStyle = '#069'; ctx.fillText('CiberStore', 2, 2);
+    partes += '|' + c.toDataURL().slice(-48);
+  } catch(e){}
+  // Hash corto y estable
+  var h = 5381;
+  for(var i=0;i<partes.length;i++){ h = ((h<<5)+h+partes.charCodeAt(i))>>>0; }
+  var fp = 'FP-' + h.toString(36).toUpperCase();
+  try { localStorage.setItem('cs_dev_fp', fp); } catch(e){}
+  _segHuella = fp; return fp;
+}
+
+// ── Nombre legible del dispositivo (desde el user agent) ──
+function _segDispositivo(){
+  var ua = navigator.userAgent || '';
+  var os = 'Desconocido';
+  if(/Windows/i.test(ua)) os = 'Windows';
+  else if(/Android/i.test(ua)) os = 'Android';
+  else if(/iPhone|iPad|iPod/i.test(ua)) os = 'iOS';
+  else if(/Mac OS X/i.test(ua)) os = 'Mac';
+  else if(/Linux/i.test(ua)) os = 'Linux';
+  var nav = 'Navegador';
+  if(/Edg\//i.test(ua)) nav = 'Edge';
+  else if(/OPR\/|Opera/i.test(ua)) nav = 'Opera';
+  else if(/Chrome\//i.test(ua)) nav = 'Chrome';
+  else if(/Firefox\//i.test(ua)) nav = 'Firefox';
+  else if(/Safari\//i.test(ua)) nav = 'Safari';
+  var tipo = /Mobile|Android|iPhone|iPod/i.test(ua) ? 'Móvil' : (/iPad|Tablet/i.test(ua) ? 'Tablet' : 'PC');
+  return tipo + ' · ' + os + ' · ' + nav;
+}
+
+// ── IP + ubicación aproximada (API gratuita, sin key) ──
+function _segObtenerIP(){
+  if(_segInfoCache) return Promise.resolve(_segInfoCache);
+  return fetch('https://ipwho.is/?fields=ip,city,region,country,success')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      _segInfoCache = (d && d.success !== false)
+        ? { ip: d.ip||'', ciudad: d.city||'', region: d.region||'', pais: d.country||'' }
+        : { ip:'', ciudad:'', region:'', pais:'' };
+      return _segInfoCache;
+    })
+    .catch(function(){ _segInfoCache = { ip:'', ciudad:'', region:'', pais:'' }; return _segInfoCache; });
+}
+
+// ── Registrar la sesión (si hay usuario logueado) ──
+function segRegistrarSesion(){
+  if(typeof authSession === 'undefined' || !authSession || !authSession.id) return;
+  if(typeof sb === 'undefined' || !sb.post) return;
+  var uid = authSession.id;
+  var fp = _segCalcularHuella();
+  // No repetir el mismo user+huella en < 12 h (control local)
+  var marca = 'cs_seg_' + uid + '_' + fp;
+  try {
+    var ult = parseInt(localStorage.getItem(marca) || '0', 10);
+    if(Date.now() - ult < 12*60*60*1000) return;
+  } catch(e){}
+  if(_segYaRegistrado[marca]) return;
+  _segYaRegistrado[marca] = true;
+
+  _segObtenerIP().then(function(info){
+    var fila = {
+      user_id: uid,
+      username: authSession.username || '',
+      huella: fp,
+      ip: info.ip || '',
+      ciudad: info.ciudad || '',
+      region: info.region || '',
+      pais: info.pais || '',
+      dispositivo: _segDispositivo(),
+      user_agent: (navigator.userAgent || '').slice(0, 400)
+    };
+    sb.post(SEG_TABLA, fila).then(function(){
+      try { localStorage.setItem(marca, String(Date.now())); } catch(e){}
+    }).catch(function(e){ console.warn('[SEG] no se registró (¿falta la tabla?):', e); _segYaRegistrado[marca] = false; });
+  });
+}
+
+// Vigilante: cuando aparece un usuario logueado, registra una vez
+(function(){
+  var ultimo = null;
+  setInterval(function(){
+    if(typeof authSession !== 'undefined' && authSession && authSession.id){
+      if(ultimo !== authSession.id){ ultimo = authSession.id; setTimeout(segRegistrarSesion, 1500); }
+    } else { ultimo = null; }
+  }, 2000);
+})();
+
+// ─────────────── PANEL ADMIN · tabla de seguridad ───────────────
+var _segFilas = [];
+
+function admSegCargar(){
+  var body = document.getElementById('seg-tabla-body');
+  var res = document.getElementById('seg-resumen');
+  if(!body) return;
+  body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem">Cargando...</td></tr>';
+  if(res) res.textContent = 'Cargando...';
+
+  var cargar = (typeof sbGetAll === 'function')
+    ? sbGetAll(SEG_TABLA, '*', 'order=created_at.desc')
+    : sb.get(SEG_TABLA, 'select=*&order=created_at.desc&limit=1000');
+
+  Promise.resolve(cargar).then(function(rows){
+    _segFilas = Array.isArray(rows) ? rows : [];
+    // Detectar huellas e IPs compartidas por varias cuentas (posible fraude)
+    var porHuella = {}, porIP = {};
+    _segFilas.forEach(function(r){
+      var u = r.username || r.user_id;
+      if(r.huella){ (porHuella[r.huella] = porHuella[r.huella] || {})[u] = 1; }
+      if(r.ip){ (porIP[r.ip] = porIP[r.ip] || {})[u] = 1; }
+    });
+    _segHuellasRiesgo = {}; _segIPsRiesgo = {};
+    Object.keys(porHuella).forEach(function(k){ if(Object.keys(porHuella[k]).length > 1) _segHuellasRiesgo[k] = Object.keys(porHuella[k]).length; });
+    Object.keys(porIP).forEach(function(k){ if(Object.keys(porIP[k]).length > 1) _segIPsRiesgo[k] = Object.keys(porIP[k]).length; });
+    admSegFiltrar();
+  }).catch(function(e){
+    console.error('[SEG] error al cargar:', e);
+    body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#ff6b6b;padding:2rem">No se pudo cargar. ¿Ya creaste la tabla <b>seguridad_sesiones</b> en Supabase?</td></tr>';
+    if(res) res.textContent = '';
+  });
+}
+
+var _segHuellasRiesgo = {}, _segIPsRiesgo = {};
+
+function admSegFiltrar(){
+  var body = document.getElementById('seg-tabla-body');
+  var res = document.getElementById('seg-resumen');
+  if(!body) return;
+  var q = ((document.getElementById('seg-buscar')||{}).value||'').trim().toLowerCase();
+  var filas = _segFilas.filter(function(r){
+    if(!q) return true;
+    return [r.username, r.ip, r.ciudad, r.region, r.pais, r.dispositivo, r.huella]
+      .join(' ').toLowerCase().indexOf(q) >= 0;
+  });
+
+  var nHuellas = Object.keys(_segHuellasRiesgo).length;
+  var nIPs = Object.keys(_segIPsRiesgo).length;
+  if(res){
+    res.innerHTML = _segFilas.length + ' registros · ' + filas.length + ' mostrados'
+      + (nHuellas ? ' · <span style="color:#ffb020">' + nHuellas + ' huella(s) en varias cuentas</span>' : '')
+      + (nIPs ? ' · <span style="color:#ffb020">' + nIPs + ' IP(s) compartida(s)</span>' : '');
+  }
+
+  if(!filas.length){
+    body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem">Sin registros</td></tr>';
+    return;
+  }
+
+  body.innerHTML = filas.map(function(r){
+    var f = r.created_at ? new Date(r.created_at).toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '-';
+    var ubic = [r.ciudad, r.region, r.pais].filter(Boolean).join(', ') || '-';
+    var ipRojo = r.ip && _segIPsRiesgo[r.ip];
+    var fpRojo = r.huella && _segHuellasRiesgo[r.huella];
+    var warn = '<span style="color:#ffb020" title="Compartida por varias cuentas"> ⚠</span>';
+    return '<tr>'
+      + '<td style="white-space:nowrap">' + f + '</td>'
+      + '<td>' + _esc(r.username || r.user_id || '-') + '</td>'
+      + '<td style="white-space:nowrap">' + _esc(r.ip || '-') + (ipRojo ? warn + ' <span style="font-size:.6rem;color:#ffb020">('+_segIPsRiesgo[r.ip]+')</span>' : '') + '</td>'
+      + '<td>' + _esc(ubic) + '</td>'
+      + '<td>' + _esc(r.dispositivo || '-') + '</td>'
+      + '<td style="white-space:nowrap;font-family:Saira;font-size:.72rem">' + _esc(r.huella || '-') + (fpRojo ? warn + ' <span style="font-size:.6rem;color:#ffb020">('+_segHuellasRiesgo[r.huella]+')</span>' : '') + '</td>'
+      + '</tr>';
+  }).join('');
+}

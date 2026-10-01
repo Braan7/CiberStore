@@ -6781,6 +6781,7 @@ textarea.boyaah-inp{resize:vertical;min-height:70px}
       <button class="adm-nav-btn"        id="admn-resenas" onclick="admFullTab('resenas')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 14.5 9l6 .8-4.3 4.1 1 6-5.2-2.8L7 20l1-6-4.3-4.2 6-.8L12 3.5z"/></svg> Rese&ntilde;as</button>
       <button class="adm-nav-btn"        id="admn-soporte" onclick="admFullTab('soporte')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Soporte <span id="adm-soporte-badge" style="display:none;background:#ff6b6b;color:#fff;font-size:.6rem;font-weight:800;border-radius:99px;padding:.1rem .4rem;margin-left:.3rem"></span></button>
       <button class="adm-nav-btn"        id="admn-inactivos" onclick="admFullTab('inactivos')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m22 11-3 3-1.5-1.5"/></svg> Gesti&oacute;n de Usuarios</button>
+      <button class="adm-nav-btn"        id="admn-seguridad" onclick="admFullTab('seguridad')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Seguridad</button>
     </div>
 
     <div class="adm-nav-foot">
@@ -7188,6 +7189,28 @@ textarea.boyaah-inp{resize:vertical;min-height:70px}
   </div>
 
 
+
+  <!-- ══ SEGURIDAD (registro IP + dispositivos) ══ -->
+  <div class="adm-section" id="adms-seguridad">
+    <div class="adm-card-title">&#128737;&#65039; Seguridad &middot; IP y dispositivos</div>
+
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-bottom:.9rem">
+      <input id="seg-buscar" type="text" placeholder="Buscar usuario, IP o ciudad" oninput="admSegFiltrar()" style="flex:1;min-width:160px;background:#10131f;border:1px solid rgba(255,255,255,.1);color:#fff;border-radius:9px;padding:.55rem .8rem;font-family:Barlow;font-size:.85rem;outline:none">
+      <button onclick="admSegCargar()" style="padding:.55rem 1rem;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.25);color:#22d3ee;border-radius:9px;font-family:Barlow;font-weight:700;font-size:.82rem;cursor:pointer">&#8635; Recargar</button>
+    </div>
+
+    <div id="seg-resumen" style="font-size:.8rem;color:var(--muted);margin-bottom:.9rem">Cargando...</div>
+
+    <div style="overflow-x:auto">
+      <table class="adm-table">
+        <thead><tr><th>Fecha</th><th>Usuario</th><th>IP</th><th>Ubicaci&oacute;n</th><th>Dispositivo</th><th>Huella</th></tr></thead>
+        <tbody id="seg-tabla-body"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+    <div style="font-size:.7rem;color:var(--muted);margin-top:.8rem;line-height:1.5">
+      &#9888;&#65039; La misma <b>huella</b> en varias cuentas, o muchas cuentas desde una misma <b>IP</b>, pueden indicar cuentas duplicadas. La ubicaci&oacute;n es aproximada (por IP), no GPS.
+    </div>
+  </div>
 
   <!-- ══ CREAR USUARIO ══ -->
   <div class="adm-section" id="adms-nuevo">
