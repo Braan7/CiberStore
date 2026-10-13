@@ -12620,3 +12620,122 @@ function admSegFiltrar(){
       + '</tr>';
   }).join('');
 }
+
+
+// ═══════════════════════ PAGOS DESACTIVADOS (interruptor) ═══════════════════════
+// Con PAGOS_DESACTIVADOS = true se ocultan TODOS los métodos de pago de la página
+// (Billetera, hoja de recarga, modal USDT, cajas de pago de pedidos, FAQ y Klar de
+// Boyaah). No se borra código: para volver a activarlos, cambia a false.
+// No toca saldo, compras con saldo, login ni precios.
+var PAGOS_DESACTIVADOS = true;
+
+(function(){
+  if(!PAGOS_DESACTIVADOS) return;
+  var MSG = 'Por el momento no hay métodos de pago disponibles.';
+
+  // Estilos
+  var st = document.createElement('style'); st.id = 'pagos-off-css';
+  st.textContent =
+    '#sheet-recarga,#sheet-metodo,#modal-binance,#hcff-paybox-binance,#bpaybox-binance{display:none!important}'
+  + '.pagos-aviso{display:flex;gap:.75rem;align-items:flex-start;background:rgba(255,184,77,.07);border:1px solid rgba(255,184,77,.3);border-radius:16px;padding:1rem;margin:1rem 0;font-family:Barlow,sans-serif;font-size:.9rem;line-height:1.45;color:#e8d9a0}'
+  + '.pagos-aviso .pa-ico{font-size:1.5rem;line-height:1}'
+  + '.pagos-aviso b{display:block;font-family:Saira,sans-serif;font-weight:800;color:#ffd24a;margin-bottom:.15rem}';
+  document.head.appendChild(st);
+
+  function aviso(){
+    var d = document.createElement('div'); d.className = 'pagos-aviso';
+    d.innerHTML = '<span class="pa-ico">&#128179;</span><div><b>Pagos no disponibles</b>' + MSG + '</div>';
+    return d;
+  }
+  function toast(){ if(typeof showToast === 'function') showToast(MSG, 3500); }
+
+  // Los puntos de entrada a los pagos avisan en lugar de abrirse
+  ['abrirRecargaSheet','abrirMetodoSheet','openBinanceModal','recElegirMetodo','rcElegirMetodo'].forEach(function(n){
+    if(typeof window[n] === 'function') window[n] = function(){ toast(); };
+  });
+
+  function aplicar(){
+    // Billetera: se queda el saldo actual; se oculta todo lo de recargar y pagar
+    var ps = document.querySelector('#page-saldo > div');
+    var bal = ps ? ps.querySelector('.wl-balance') : null;
+    if(bal){
+      var n = bal.nextElementSibling;
+      while(n){ var nx = n.nextElementSibling; n.style.display = 'none'; n = nx; }
+      ps.appendChild(aviso());
+    }
+
+    // Boyaah: sin método de pago no hay comprobante ni envío
+    var bm = document.getElementById('boyaah-metodos');
+    var pm = bm ? bm.closest('.boyaah-panel') : null;
+    if(pm){
+      var up = document.getElementById('boyaah-up');
+      var pc = up ? up.closest('.boyaah-panel') : null;
+      var send = document.getElementById('boyaah-send');
+      pm.parentNode.insertBefore(aviso(), pm);
+      pm.style.display = 'none';
+      if(pc) pc.style.display = 'none';
+      if(send){
+        if(send.nextElementSibling && send.nextElementSibling.classList.contains('boyaah-note')) send.nextElementSibling.style.display = 'none';
+        send.style.display = 'none';
+      }
+    }
+
+    // FAQ "Como pago?"
+    document.querySelectorAll('.faq-item').forEach(function(it){
+      var q = it.querySelector('.faq-q');
+      if(q && /^\s*Como pago/i.test(q.textContent)){
+        var a = it.querySelector('.faq-a-inner'); if(a) a.textContent = MSG;
+      }
+    });
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', aplicar); else aplicar();
+})();
+
+
+// ═══════════════════════ VENTAS SUSPENDIDAS (bloqueo de compras) ═══════════════════════
+// Se controla con VENTAS_SUSPENDIDAS (definida en index.html). Si no existe, por seguridad
+// se asume suspendido. No toca login, registro, saldo visible, soporte ni el panel admin.
+// Capas: (1) clics en botones de compra, (2) funciones de compra, (3) verificación y
+// descuento de saldo. Es un bloqueo del lado del navegador (ver nota al entregar).
+(function(){
+  var ON = (typeof VENTAS_SUSPENDIDAS === 'undefined') ? true : !!VENTAS_SUSPENDIDAS;
+  if(!ON) return;
+
+  var MSG = '\u26D4 Ventas suspendidas por el momento';
+  var _ult = 0;
+  function aviso(){
+    var t = Date.now(); if(t - _ult < 800) return; _ult = t;   // evita toasts repetidos
+    if(typeof showToast === 'function') showToast(MSG, 3500); else alert(MSG);
+  }
+
+  // (2) Funciones de compra y de procesamiento: avisan y no hacen nada
+  var NOMBRES = [
+    'addToCart','checkoutCart','submitCart',
+    'submitProd','submitLikes','submitPaseFF','submitHonorCuenta','submitBundle','submitAC80','submitFrag',
+    'submitLk2k','submitLk200','submitLk2kSaldo','submitLk200Saldo','submitBonusSaldo','submitIlimSaldo','submitV1Saldo','submitPinSaldo',
+    'buyLikesBasico','buyLikesInstant',
+    'comprarMembresia','comprarCuentaRandom','comprarPubgPC','comprarDeltaForce','comprarScar','comprarClan','comprarPase',
+    'comprarPlanLikesWA','comprarBioLarga','comprarLikes2k','comprarFragU','comprarArchivo','comprarActa',
+    'confirmarCompraPinApi','confirmarDiamCompra','_procesarCompraDiam',
+    '_ejecutarRecargaVerificada','_procesarRecargaAutomatica','_paseffProcesar','_honorProcesarPagina','lanzarGrupoHonor',
+    'boyaahEnviar'
+  ];
+  NOMBRES.forEach(function(n){ if(typeof window[n] === 'function') window[n] = function(){ aviso(); }; });
+
+  // (3) Verificación y descuento de saldo: ninguna compra puede cobrar
+  if(typeof window.verificarSaldoFresco === 'function') window.verificarSaldoFresco = function(){ aviso(); };
+  if(typeof window.addSpend === 'function') window.addSpend = function(){ aviso(); };
+
+  // (1) Clics sobre botones de compra (antes de que lleguen a su onclick)
+  var RE = /\b(addToCart|checkoutCart|comprar[A-Za-z0-9_]*|buy[A-Z][A-Za-z0-9_]*|submit(?:Prod|Likes|PaseFF|HonorCuenta|Bundle|AC80|Frag|Cart|Lk2k|Lk200|Lk2kSaldo|Lk200Saldo|BonusSaldo|IlimSaldo|V1Saldo|PinSaldo)|confirmarCompraPinApi|confirmarDiamCompra|boyaahEnviar)\s*\(/;
+  document.addEventListener('click', function(e){
+    var t = (e.target && e.target.closest) ? e.target.closest('[onclick]') : null;
+    while(t){
+      if(RE.test(t.getAttribute('onclick') || '')){
+        e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+        aviso(); return;
+      }
+      t = (t.parentElement && t.parentElement.closest) ? t.parentElement.closest('[onclick]') : null;
+    }
+  }, true);
+})();
