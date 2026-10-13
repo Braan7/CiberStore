@@ -3087,61 +3087,15 @@ textarea.boyaah-inp{resize:vertical;min-height:70px}
 .boyaah-kv b{font-family:Saira,sans-serif;color:#fff;white-space:nowrap}
 .boyaah-kvbox{margin-top:.6rem;padding-top:.4rem;border-top:1px dashed rgba(255,255,255,.12)}
 </style>
-<!-- ═══ AVISO DE CIERRE / DEUDA (pantalla completa) ═══ -->
-<style id="cierre-styles">
-html.cierre-on,html.cierre-on body{overflow:hidden!important}
-#cierre-aviso{position:fixed;inset:0;z-index:2147483000;background:
-  radial-gradient(circle at 15% 0%,rgba(34,211,238,.16),transparent 45%),
-  radial-gradient(circle at 90% 100%,rgba(255,184,77,.11),transparent 45%),#05080f;
-  overflow-y:auto;-webkit-overflow-scrolling:touch;display:none}
-#cierre-aviso *{box-sizing:border-box}
-.cierre-wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:max(1.1rem,env(safe-area-inset-top)) 1rem max(1.5rem,env(safe-area-inset-bottom))}
-.cierre-card{width:100%;max-width:520px;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));border:1px solid rgba(34,211,238,.2);border-radius:26px;padding:1.6rem 1.25rem 1.4rem;box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 60px -25px rgba(34,211,238,.35);font-family:Barlow,sans-serif;color:#cbd5e1}
-.cierre-ico{width:64px;height:64px;margin:0 auto .9rem;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:1.9rem;background:radial-gradient(circle at 30% 30%,rgba(255,215,0,.3),rgba(180,120,0,.08));border:1px solid rgba(255,196,0,.4);box-shadow:0 0 28px -4px rgba(255,196,0,.4)}
-.cierre-pill{display:table;margin:0 auto .8rem;padding:.3rem .75rem;border-radius:999px;background:rgba(255,184,77,.08);border:1px solid rgba(255,184,77,.4);color:#ffb84d;font-weight:800;font-size:.7rem;letter-spacing:1.4px}
-.cierre-pill i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#ffb84d;box-shadow:0 0 8px #ffb84d;margin-right:.45rem;vertical-align:1px}
-.cierre-h{font-family:Saira,sans-serif;font-weight:900;font-size:clamp(1.7rem,8vw,2.2rem);line-height:1.05;color:#fff;text-align:center;margin:0}
-.cierre-h span{color:#ffd24a}
-.cierre-sub{text-align:center;color:#8b93a3;font-size:.92rem;margin:.45rem 0 1.2rem}
-.cierre-p{font-size:.95rem;line-height:1.6;margin:0 0 .85rem;color:#b6bfcc}
-.cierre-p b{color:#fff}
-.cierre-box{background:rgba(34,211,238,.05);border:1px solid rgba(34,211,238,.22);border-radius:18px;padding:1rem .95rem;margin:1.1rem 0}
-.cierre-box-t{font-family:Saira,sans-serif;font-weight:800;font-size:1rem;color:#67e8f9;margin-bottom:.35rem}
-.cierre-box-s{font-size:.88rem;line-height:1.5;color:#9aa4b2;margin-bottom:.8rem}
-.cierre-step{display:flex;gap:.7rem;align-items:flex-start;padding:.6rem 0;border-top:1px solid rgba(255,255,255,.06);font-size:.92rem;line-height:1.45;color:#e5e7eb}
-.cierre-step:first-of-type{border-top:none}
-.cierre-n{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(34,211,238,.14);border:1px solid rgba(34,211,238,.4);color:#67e8f9;font-family:Saira,sans-serif;font-weight:800;font-size:.8rem}
-.cierre-step small{display:block;color:#8b93a3;font-size:.8rem;margin-top:.1rem}
-.cierre-wa{display:flex;align-items:center;justify-content:center;gap:.55rem;width:100%;padding:1rem;margin-top:.9rem;border-radius:16px;background:linear-gradient(135deg,#34e37a,#16a34a);color:#04140a!important;text-decoration:none;font-family:Saira,sans-serif;font-weight:800;font-size:1.02rem;box-shadow:0 12px 30px -8px rgba(37,211,102,.6)}
-.cierre-wa:active{transform:scale(.98)}
-.cierre-wa:focus-visible{outline:2px solid #67e8f9;outline-offset:2px}
-.cierre-prog{margin-top:1.2rem;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:1rem .95rem}
-.cierre-prog-h{display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;flex-wrap:wrap;margin-bottom:.7rem}
-.cierre-prog-l{font-family:Barlow,sans-serif;font-weight:700;font-size:.85rem;color:#9aa4b2}
-.cierre-prog-v{font-family:Saira,sans-serif;font-weight:800;font-size:1rem;color:#fff}
-.cierre-prog-v b{color:#4ade80}
-.cierre-bar{position:relative;height:16px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden;border:1px solid rgba(255,255,255,.06)}
-.cierre-fill{height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#16a34a,#34e37a);box-shadow:0 0 16px rgba(52,227,122,.55);transition:width 1.4s cubic-bezier(.2,.8,.2,1)}
-.cierre-pct{text-align:right;font-family:Saira,sans-serif;font-weight:900;font-size:1.3rem;color:#4ade80;margin-top:.5rem}
-.cierre-thx{text-align:center;color:#6b7280;font-size:.8rem;margin-top:1.1rem}
-@media (prefers-reduced-motion:reduce){.cierre-fill{transition:none}}
-
-.cierre-card{position:relative}
-.cierre-x{position:absolute;top:.8rem;right:.8rem;width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(10,16,26,.6);color:#fff;font-size:1.4rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.cierre-x:focus-visible,.cierre-ok:focus-visible{outline:2px solid #67e8f9;outline-offset:2px}
-.cierre-ok{width:100%;margin-top:1rem;padding:.9rem;border-radius:16px;background:transparent;border:1px solid rgba(255,255,255,.14);color:#fff;font-family:Barlow,sans-serif;font-weight:700;font-size:.95rem;cursor:pointer}
-#cierre-aviso.cierre-full .cierre-x,#cierre-aviso.cierre-full .cierre-ok{display:none}
-
-/* Banner "Ventas suspendidas" (arriba de toda la tienda) */
+<!-- ═══ VENTAS RESTRINGIDAS: banner + bot en el menú ═══ -->
+<style id="vs-styles">
 .vs-banner{display:flex;align-items:center;gap:.7rem;padding:.65rem .9rem;background:linear-gradient(90deg,rgba(255,80,60,.2),rgba(255,184,77,.14));border-bottom:1px solid rgba(255,120,80,.4);font-family:Barlow,sans-serif;color:#ffd9c2;position:relative;z-index:101}
 .vs-banner-ico{font-size:1.3rem;flex-shrink:0}
 .vs-banner-t{flex:1;min-width:0;line-height:1.25}
 .vs-banner-t b{display:block;font-family:Saira,sans-serif;font-weight:900;font-size:.95rem;letter-spacing:.6px;color:#fff}
 .vs-banner-t span{display:block;font-size:.78rem;color:#f3c9b0}
-.vs-banner-btn{flex-shrink:0;padding:.5rem .8rem;border-radius:10px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;font-family:Barlow,sans-serif;font-weight:800;font-size:.78rem;cursor:pointer}
+.vs-banner-btn{flex-shrink:0;display:inline-flex;align-items:center;gap:.35rem;padding:.55rem .85rem;border-radius:10px;background:linear-gradient(135deg,#2aabee,#1c86c7);color:#fff!important;text-decoration:none;font-family:Saira,sans-serif;font-weight:800;font-size:.8rem;box-shadow:0 8px 20px -10px rgba(42,171,238,.8)}
 .vs-banner-btn:focus-visible{outline:2px solid #67e8f9;outline-offset:2px}
-
-/* Menú: bot temporal de Telegram */
 .nav-item.vs-bot{text-decoration:none;margin:.55rem .55rem .2rem;background:linear-gradient(135deg,rgba(34,211,238,.14),rgba(34,158,217,.08))!important;border:1px solid rgba(34,211,238,.45)!important;color:#cfe9f2!important;box-shadow:0 8px 24px -12px rgba(34,211,238,.6)}
 .vs-bot .nav-ico{background:rgba(34,211,238,.18)!important;font-size:1.2rem}
 .vs-bot-txt{min-width:0;display:flex;flex-direction:column;gap:.1rem;line-height:1.25}
@@ -3151,112 +3105,18 @@ html.cierre-on,html.cierre-on body{overflow:hidden!important}
 </style>
 </head>
 <body>
-  <!-- ═══ AVISO DE CIERRE / DEUDA ═══ (se activa/desactiva con CIERRE_ACTIVO, abajo) -->
-  <div id="cierre-aviso" role="dialog" aria-modal="true" aria-labelledby="cierre-titulo">
-    <div class="cierre-wrap">
-      <div class="cierre-card">
-        <button type="button" class="cierre-x" onclick="cierreCerrar()" aria-label="Cerrar">&times;</button>
-        <div class="cierre-ico">&#128736;&#65039;</div>
-        <div class="cierre-pill"><i></i>COMUNICADO OFICIAL</div>
-        <h1 class="cierre-h" id="cierre-titulo">Ventas <span>suspendidas</span></h1>
-        <p class="cierre-sub">Tienda en pausa por pago de deudas</p>
-
-        <p class="cierre-p">Debido a la <b>gran cantidad de dinero que la tienda adeuda</b>, tomamos la decisi&oacute;n de <b>suspender todas las ventas</b>. Por ahora <b>no se aceptan compras ni recargas</b> en la tienda.</p>
-        <p class="cierre-p">Estamos pagando lo pendiente <b>poco a poco</b>, conforme se va recaudando dinero con recargas y compras dentro y fuera del juego. Gracias por tu paciencia y tu confianza.</p>
-
-        <div class="cierre-box">
-          <div class="cierre-box-t">&#128176; &iquest;Tienes saldo pendiente?</div>
-          <div class="cierre-box-s">&Uacute;nete al grupo de WhatsApp y env&iacute;a lo siguiente para registrar tu saldo:</div>
-          <div class="cierre-step"><span class="cierre-n">1</span><div>Una <b>foto de tu usuario</b><small>Captura donde se vea tu nombre de usuario.</small></div></div>
-          <div class="cierre-step"><span class="cierre-n">2</span><div>Una <b>foto de tu saldo</b><small>Tal como te aparece en tu panel (Billetera).</small></div></div>
-          <a class="cierre-wa" id="cierre-wa" href="https://chat.whatsapp.com/HIh3q29bdClFTxl7ONkTih" target="_blank" rel="noopener noreferrer">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21c5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2zm0 18.15a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.23 8.23 0 1 1 6.98 3.86z"/></svg>
-            Unirme al grupo de WhatsApp
-          </a>
-        </div>
-
-        <div class="cierre-prog">
-          <div class="cierre-prog-h">
-            <span class="cierre-prog-l">Saldo recuperado</span>
-            <span class="cierre-prog-v"><b id="cierre-rec">$0 MXN</b> de <span id="cierre-tot">$0 MXN</span></span>
-          </div>
-          <div class="cierre-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="cierre-bar"><div class="cierre-fill" id="cierre-fill"></div></div>
-          <div class="cierre-pct" id="cierre-pct">0%</div>
-        </div>
-
-        <button type="button" class="cierre-ok" onclick="cierreCerrar()">Entendido, ver la p&aacute;gina</button>
-        <div class="cierre-thx">CiberStore</div>
-      </div>
-    </div>
-  </div>
   <script>
   /* ════════ AJUSTA AQUÍ ════════
-     VENTAS_SUSPENDIDAS        true  = no se puede comprar nada (banner + bloqueo de compras).
-                               false = tienda normal (se quita banner y aviso).
-     CIERRE_PANTALLA_COMPLETA  true  = el aviso tapa toda la página (sin tienda).
-                               false = página abierta, con banner y aviso que se puede cerrar.
-     CIERRE_MODAL_AUTO         true  = el aviso sale una vez por visita (se puede cerrar).
-     CIERRE_RECUPERADO         sube este número conforme vayas pagando.
+     VENTAS_SUSPENDIDAS  true  = no se puede comprar nada (banner "Ventas restringidas" + bloqueo).
+                         false = tienda normal (se quitan el banner y el bot del menú).
      Para entrar tú al panel admin: abre el sitio con  ?admin=1  (se abre solo el login de admin) */
   var VENTAS_SUSPENDIDAS = true;
-  var CIERRE_PANTALLA_COMPLETA = false;
-  var CIERRE_MODAL_AUTO = true;
-  var CIERRE_RECUPERADO = 4360;
-  var CIERRE_TOTAL = 18160;
-  var CIERRE_WHATSAPP = 'https://chat.whatsapp.com/HIh3q29bdClFTxl7ONkTih';
   (function(){
-    var el = document.getElementById('cierre-aviso'); if(!el) return;
-    if(!VENTAS_SUSPENDIDAS){
-      // Los elementos del banner y del menú aún no existen en este punto: se ocultan con una regla CSS
-      var st = document.createElement('style'); st.textContent = '#cierre-aviso,#vs-banner,#vs-bot{display:none!important}'; document.head.appendChild(st);
-      window.cierreAbrir = window.cierreCerrar = function(){}; return;
-    }
-
-    // Con ventas suspendidas se quitan la franja promocional y las "compras recientes" (texto fijo)
-    var st2 = document.createElement('style'); st2.textContent = '#banner-txt,.ticker{display:none!important}'; document.head.appendChild(st2);
-
-    var urlAdmin = /[?&]admin=1(&|$)/.test(location.search);
-    var bypass = urlAdmin;
-    try { if(bypass) sessionStorage.setItem('cierre_bypass','1'); else bypass = sessionStorage.getItem('cierre_bypass') === '1'; } catch(e){}
-
-    // Números del avance
-    var fmt = function(n){ return '$' + Number(n).toLocaleString('es-MX') + ' MXN'; };
-    var pct = CIERRE_TOTAL > 0 ? Math.max(0, Math.min(100, CIERRE_RECUPERADO / CIERRE_TOTAL * 100)) : 0;
-    var set = function(id, t){ var e = document.getElementById(id); if(e) e.textContent = t; };
-    set('cierre-rec', fmt(CIERRE_RECUPERADO)); set('cierre-tot', fmt(CIERRE_TOTAL)); set('cierre-pct', Math.round(pct) + '%');
-    var wa = document.getElementById('cierre-wa'); if(wa) wa.href = CIERRE_WHATSAPP;
-    var bar = document.getElementById('cierre-bar'); if(bar) bar.setAttribute('aria-valuenow', String(Math.round(pct)));
-    if(CIERRE_PANTALLA_COMPLETA) el.classList.add('cierre-full');
-
-    function inertar(){
-      if(el.style.display !== 'block') return;
-      Array.prototype.forEach.call(document.body.children, function(c){ if(c !== el && c.tagName !== 'SCRIPT') c.setAttribute('inert', ''); });
-    }
-    function abrir(){
-      el.style.display = 'block';
-      document.documentElement.classList.add('cierre-on');
-      inertar();
-      // Si se abre mientras la página aún carga, se vuelve a aplicar al terminar
-      if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inertar);
-      var f = document.getElementById('cierre-fill'); if(f){ f.style.width = '0'; requestAnimationFrame(function(){ requestAnimationFrame(function(){ f.style.width = pct + '%'; }); }); }
-    }
-    function cerrar(){
-      if(CIERRE_PANTALLA_COMPLETA && !bypass) return;
-      el.style.display = 'none';
-      document.documentElement.classList.remove('cierre-on');
-      Array.prototype.forEach.call(document.body.children, function(c){ c.removeAttribute('inert'); });
-      try { sessionStorage.setItem('cierre_visto','1'); } catch(e){}
-    }
-    window.cierreAbrir = abrir; window.cierreCerrar = cerrar;
-    document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && el.style.display === 'block') cerrar(); });
-
-    if(bypass){
-      // Con ?admin=1 se abre solo el acceso al panel admin
-      if(urlAdmin) window.addEventListener('load', function(){ setTimeout(function(){ if(typeof openFullAdmin === 'function') openFullAdmin(); }, 700); });
-      return;
-    }
-    var visto = false; try { visto = sessionStorage.getItem('cierre_visto') === '1'; } catch(e){}
-    if(CIERRE_PANTALLA_COMPLETA || (CIERRE_MODAL_AUTO && !visto)) abrir();
+    var css = document.createElement('style');
+    if(!VENTAS_SUSPENDIDAS){ css.textContent = '#vs-banner,#vs-bot{display:none!important}'; document.head.appendChild(css); return; }
+    css.textContent = '#banner-txt,.ticker{display:none!important}';   // franja promocional y "compras recientes"
+    document.head.appendChild(css);
+    if(/[?&]admin=1(&|$)/.test(location.search)) window.addEventListener('load', function(){ setTimeout(function(){ if(typeof openFullAdmin === 'function') openFullAdmin(); }, 700); });
   })();
   </script>
 
@@ -3319,7 +3179,7 @@ html.cierre-on,html.cierre-on body{overflow:hidden!important}
   <div class="sb-nav">
     <a class="nav-item vs-bot" id="vs-bot" href="https://t.me/csdiamff_bot" target="_blank" rel="noopener noreferrer">
       <div class="nav-ico">&#129302;</div>
-      <div class="vs-bot-txt"><b>Bot temporal de Telegram</b><span>Para generar ganancias y pagar la deuda</span><em>@csdiamff_bot</em></div>
+      <div class="vs-bot-txt"><b>Bot temporal de Telegram</b><span>Proyecto temporal para recaudar fondos</span><em>@csdiamff_bot</em></div>
     </a>
     <div class="sb-section">Principal</div>
     <div class="nav-item active" id="ni-home" onclick="goPage('home')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></div> Inicio</div>
@@ -3383,11 +3243,11 @@ html.cierre-on,html.cierre-on body{overflow:hidden!important}
     <div class="sb-brand-terms" onclick="goPage('terminos');closeSB&&closeSB()">T&eacute;rminos y pol&iacute;tica de reembolso</div>
   </div>
 </div>
-<!-- ═══ BANNER VENTAS SUSPENDIDAS ═══ -->
+<!-- ═══ BANNER VENTAS RESTRINGIDAS ═══ -->
 <div class="vs-banner" id="vs-banner" role="status">
   <span class="vs-banner-ico">&#9940;</span>
-  <div class="vs-banner-t"><b>VENTAS SUSPENDIDAS</b><span>No se aceptan compras ni recargas por ahora.</span></div>
-  <button type="button" class="vs-banner-btn" onclick="cierreAbrir()">Ver aviso</button>
+  <div class="vs-banner-t"><b>VENTAS RESTRINGIDAS</b><span>Para recaudar fondos estamos de socios con un proyecto temporal.</span></div>
+  <a class="vs-banner-btn" href="https://t.me/csdiamff_bot" target="_blank" rel="noopener noreferrer">&#9992;&#65039; @csdiamff_bot</a>
 </div>
 <div class="topbar topbar--v2">
   <button class="hamburger" onclick="toggleSB()"><span></span><span></span><span></span></button>

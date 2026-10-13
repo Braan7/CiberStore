@@ -12701,7 +12701,7 @@ var PAGOS_DESACTIVADOS = true;
   var ON = (typeof VENTAS_SUSPENDIDAS === 'undefined') ? true : !!VENTAS_SUSPENDIDAS;
   if(!ON) return;
 
-  var MSG = '\u26D4 Ventas suspendidas por el momento';
+  var MSG = '\u26D4 Ventas restringidas por el momento';
   var _ult = 0;
   function aviso(){
     var t = Date.now(); if(t - _ult < 800) return; _ult = t;   // evita toasts repetidos
@@ -12721,6 +12721,9 @@ var PAGOS_DESACTIVADOS = true;
     'boyaahEnviar'
   ];
   NOMBRES.forEach(function(n){ if(typeof window[n] === 'function') window[n] = function(){ aviso(); }; });
+
+  // El popup de "únete al canal" promociona ofertas: no se muestra mientras las ventas estén restringidas
+  if(typeof window.showWelcome === 'function') window.showWelcome = function(){};
 
   // (3) Verificación y descuento de saldo: ninguna compra puede cobrar
   if(typeof window.verificarSaldoFresco === 'function') window.verificarSaldoFresco = function(){ aviso(); };
