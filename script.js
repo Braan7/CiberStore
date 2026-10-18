@@ -12742,3 +12742,134 @@ var PAGOS_DESACTIVADOS = true;
     }
   }, true);
 })();
+
+
+// ═══════════════════════ HACKS FF · flujo de selección ═══════════════════════
+// Menú → HACKS FF → ¿Qué quieres hacer? → Qué quieres comprar → Dispositivo → Juego → Catálogo.
+// Solo navegación y catálogo: NO usa saldo ni cobra. "Pedir" abre WhatsApp con el mensaje armado.
+// Para agregar mods de otro juego/dispositivo, llena el arreglo `mods` correspondiente.
+var HX_MODS_FF_ANDROID = [
+  {n:'BALA MOD',d:8,p:0.60},{n:'BR MODS - ROOT',d:3,p:2.40},{n:'DRIP CLIENT',d:5,p:1.80},{n:'HG MODS',d:4,p:2.10},
+  {n:'HG PROXY',d:4,p:2.10},{n:'PATO REGEDIT',d:2,p:3.60},{n:'PATOTEAM FF',d:4,p:5.40},{n:'PRIME HOK',d:4,p:2.70},
+  {n:'RAPID CORE - ROOT',d:4,p:1.50},{n:'REAPER X PRO - ROOT',d:3,p:6.00},{n:'SILENT CHEAT',d:5,p:2.40}
+];
+var HX_JUEGOS_ANDROID = [
+  {id:'ff',n:'Free Fire',mods:HX_MODS_FF_ANDROID},{id:'8bp',n:'8 Ball Pool',mods:[]},{id:'bs',n:'Blood Strike',mods:[]},
+  {id:'cert',n:'Certificados',mods:[]},{id:'codm',n:'CODM',mods:[]},{id:'df',n:'Delta Force',mods:[]},
+  {id:'ml',n:'Mobile Legends',mods:[]},{id:'pubg',n:'PUBG',mods:[]}
+];
+var HX_DISPOSITIVOS = [
+  {id:'ios',n:'iOS',s:'iPhone e IPA',ico:'phone'},{id:'android',n:'Android',s:'Apps y móviles',ico:'phone'},{id:'pc',n:'PC',s:'Windows y paneles',ico:'pc'}
+];
+var _hxPaso = 'inicio', _hxCtx = {}, _hxPila = [], _hxUltFoco = null;
+
+function _hxE(s){ return String(s==null?'':s).replace(/[<>&"']/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c];}); }
+function _hxIco(k){
+  var a='width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+  var m={
+    bag:'<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>',
+    crown:'<path d="m2 8 4 4 6-8 6 8 4-4-2 12H4z"/>',
+    login:'<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>',
+    pad:'<line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><circle cx="15" cy="13" r="1"/><circle cx="18" cy="11" r="1"/><path d="M17.3 5H6.7a4 4 0 0 0-3.9 3.2l-1.5 7A3 3 0 0 0 4.2 19a3 3 0 0 0 2.3-1.1L8 16h8l1.5 1.9a3 3 0 0 0 2.3 1.1 3 3 0 0 0 2.9-3.8l-1.5-7A4 4 0 0 0 17.3 5z"/>',
+    card:'<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>',
+    phone:'<rect x="6" y="2" width="12" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/>',
+    pc:'<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+    box:'<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5"/><line x1="12" y1="13" x2="12" y2="21"/>',
+    wa:'<path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21c5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2z"/>'
+  };
+  return '<svg '+a+'>'+(m[k]||m.box)+'</svg>';
+}
+var _HX_ARR = '<svg class="hx-arr" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+
+function _hxOpt(ico, tono, titulo, sub, onclick, extra){
+  return '<button type="button" class="hx-opt'+(extra||'')+'" onclick="'+onclick+'"><span class="hx-ico '+tono+'">'+_hxIco(ico)+'</span><span class="hx-txt"><span class="hx-t">'+titulo+'</span><span class="hx-d" style="display:block">'+sub+'</span></span>'+_HX_ARR+'</button>';
+}
+function _hxHead(titulo, sub){ return '<div class="hx-eye">HACKS FF</div><h2 class="hx-h" id="hx-title">'+titulo+'</h2>'+(sub?'<p class="hx-s">'+sub+'</p>':''); }
+function _hxLogoColor(n){ var h=0; for(var i=0;i<n.length;i++) h=(h*31+n.charCodeAt(i))>>>0; var a=h%360; return 'linear-gradient(135deg,hsl('+a+',70%,38%),hsl('+((a+50)%360)+',75%,28%))'; }
+function _hxIniciales(n){ var p=n.replace(/[^A-Za-z0-9 ]/g,' ').trim().split(/\s+/); return p[0].slice(0,2).toUpperCase(); }
+
+function hxRender(){
+  var body = document.getElementById('hx-body'), foot = document.getElementById('hx-foot'); if(!body) return;
+  var h = '', P = _hxPaso, C = _hxCtx;
+  if(P === 'inicio'){
+    h = _hxHead('¿Qué quieres hacer?','Elige cómo quieres continuar en CiberStore.')
+      + '<div class="hx-grid">'
+      + _hxOpt('bag','','Comprar ahora','Mods, hacks y recargas.',"hxIr('compra')",' big')
+      + '</div><div class="hx-grid c2 r1m" style="margin-top:.7rem">'
+      + _hxOpt('crown','gold','Crear cuenta','Regístrate y usa tu saldo en la tienda.',"hxCuenta('register')")
+      + _hxOpt('login','','Ya tengo cuenta','Entra y usa tu saldo en la tienda.',"hxCuenta('login')")
+      + '</div>';
+  } else if(P === 'compra'){
+    h = _hxHead('Qué quieres comprar')
+      + '<div class="hx-grid c2">'
+      + _hxOpt('pad','','Hacks y otros mods','Dispositivo, luego el juego, luego el catálogo.',"hxIr('dispositivo')",' col')
+      + _hxOpt('card','','Productos digitales','Recargas y servicios de la tienda.',"hxProductos()",' col')
+      + '</div>';
+  } else if(P === 'dispositivo'){
+    h = _hxHead('Elige tu dispositivo')
+      + '<div class="hx-grid c3">'
+      + HX_DISPOSITIVOS.map(function(d){ return _hxOpt(d.ico,'',_hxE(d.n),_hxE(d.s),"hxDisp('"+d.id+"')",' col'); }).join('')
+      + '</div>';
+  } else if(P === 'juegos'){
+    h = _hxHead('Qué juego quieres','Estos son los juegos de otros mods para ANDROID.')
+      + '<div class="hx-grid c2">'
+      + HX_JUEGOS_ANDROID.map(function(g){
+          var n = g.mods.length, sub = n ? (n+' mods en ANDROID') : 'Próximamente';
+          return _hxOpt('pad','',_hxE(g.n),sub,"hxJuego('"+g.id+"')",' col');
+        }).join('')
+      + '</div>';
+  } else if(P === 'lista'){
+    var g = HX_JUEGOS_ANDROID.filter(function(x){return x.id===C.juego;})[0] || HX_JUEGOS_ANDROID[0];
+    h = _hxHead(_hxE(g.n)+' · ANDROID')
+      + '<div class="hx-grid c2 cm">'
+      + g.mods.map(function(m,i){
+          return '<button type="button" class="hx-opt hx-mod" onclick="hxMod('+i+')"><span class="hx-logo" style="background:'+_hxLogoColor(m.n)+'">'+_hxE(_hxIniciales(m.n))+'</span><span class="hx-txt"><span class="hx-t">'+_hxE(m.n)+'</span><span class="hx-d" style="display:block">'+m.d+' duraciones · android</span><span class="hx-price" style="display:block">$'+m.p.toFixed(2)+'</span></span></button>';
+        }).join('')
+      + '</div>';
+  } else if(P === 'mod'){
+    var g2 = HX_JUEGOS_ANDROID.filter(function(x){return x.id===C.juego;})[0] || HX_JUEGOS_ANDROID[0], m2 = g2.mods[C.mod] || g2.mods[0];
+    h = _hxHead(_hxE(m2.n), _hxE(g2.n)+' · ANDROID')
+      + '<div class="hx-detail"><span class="hx-logo" style="width:76px;height:76px;font-size:1.3rem;background:'+_hxLogoColor(m2.n)+'">'+_hxE(_hxIniciales(m2.n))+'</span><div><div class="hx-d">'+m2.d+' duraciones disponibles</div><div class="hx-price" style="font-size:1.6rem">$'+m2.p.toFixed(2)+' USD</div></div></div>'
+      + '<div class="hx-note">La duración, el precio final y la forma de pago se confirman por WhatsApp.</div>'
+      + '<button type="button" class="hx-cta" onclick="hxPedir()">'+_hxIco('wa').replace('fill="none"','fill="currentColor" stroke="none"')+' Pedir por WhatsApp</button>';
+  } else if(P === 'pronto'){
+    h = _hxHead(_hxE(C.disp||'Este dispositivo'),'')
+      + '<div class="hx-note">Aún no hay catálogo disponible para este dispositivo.</div>';
+  }
+  body.innerHTML = h; body.scrollTop = 0;
+  if(foot) foot.style.display = _hxPila.length ? 'block' : 'none';
+}
+function hxIr(paso, ctx){ _hxPila.push({p:_hxPaso,c:_hxCtx}); _hxPaso = paso; _hxCtx = Object.assign({}, _hxCtx, ctx||{}); hxRender(); }
+function hxAtras(){ var a = _hxPila.pop(); if(!a) return; _hxPaso = a.p; _hxCtx = a.c; hxRender(); }
+function hxDisp(id){
+  if(id === 'android') return hxIr('juegos', {disp:'Android'});
+  var d = HX_DISPOSITIVOS.filter(function(x){return x.id===id;})[0]; hxIr('pronto', {disp:d ? d.n : ''});
+}
+function hxJuego(id){
+  var g = HX_JUEGOS_ANDROID.filter(function(x){return x.id===id;})[0];
+  if(g && g.mods.length) return hxIr('lista', {juego:id});
+  hxIr('pronto', {disp:(g?g.n:'Este juego')+' · ANDROID'});
+}
+function hxMod(i){ hxIr('mod', {mod:i}); }
+function hxPedir(){
+  var g = HX_JUEGOS_ANDROID.filter(function(x){return x.id===_hxCtx.juego;})[0], m = g && g.mods[_hxCtx.mod]; if(!m) return;
+  var msg = 'Hola! Quiero pedir el mod *' + m.n + '* (' + g.n + ' · Android).\nPrecio de referencia: $' + m.p.toFixed(2) + ' USD.\nDuraciones disponibles: ' + m.d + '.\n¿Me confirman duración y forma de pago?';
+  window.open('https://wa.me/' + (typeof WA !== 'undefined' ? WA : '573180051415') + '?text=' + encodeURIComponent(msg), '_blank', 'noopener');
+}
+function hxCuenta(tab){ hxCerrar(); if(typeof showAuthModal === 'function'){ showAuthModal(); if(typeof authTab === 'function') authTab(tab); } }
+function hxProductos(){ hxCerrar(); if(typeof goPage === 'function') goPage('home'); }
+function hxAbrir(){
+  var ov = document.getElementById('hx-modal'); if(!ov) return;
+  _hxUltFoco = document.activeElement; _hxPaso = 'inicio'; _hxCtx = {}; _hxPila = []; hxRender();
+  ov.style.display = 'flex'; document.documentElement.style.overflow = 'hidden';
+  var x = ov.querySelector('.hx-x'); if(x) x.focus();
+}
+function hxCerrar(){
+  var ov = document.getElementById('hx-modal'); if(!ov) return;
+  ov.style.display = 'none'; document.documentElement.style.overflow = '';
+  if(_hxUltFoco && _hxUltFoco.focus) try{ _hxUltFoco.focus(); }catch(e){}
+}
+document.addEventListener('keydown', function(e){
+  var ov = document.getElementById('hx-modal');
+  if(e.key === 'Escape' && ov && ov.style.display === 'flex'){ if(_hxPila.length) hxAtras(); else hxCerrar(); }
+});

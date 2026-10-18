@@ -3576,6 +3576,53 @@ body:not(.light-mode) .page>.ph,body:not(.light-mode) .page-wrap>.ph{margin-bott
 /* Evita que "MÁS VENDIDO" tape la etiqueta AUTO */
 body:not(.light-mode) .ds-prod-badge+.rc-badge{top:34px!important}
 
+/* ═══════════ MENÚ más limpio + HACKS FF (flujo) ═══════════ */
+#ni-diamantes,#ni-codigos,#ni-pasesff,#ni-boyaah,#ni-honor-cuenta{display:none!important}
+
+.hx-ov{position:fixed;inset:0;z-index:9600;display:none;align-items:center;justify-content:center;padding:max(.8rem,env(safe-area-inset-top)) .8rem max(.8rem,env(safe-area-inset-bottom));background:rgba(4,7,16,.84);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.hx-box{position:relative;width:min(780px,100%);max-height:min(92vh,860px);display:flex;flex-direction:column;border-radius:28px;overflow:hidden;
+  background:radial-gradient(520px 260px at 90% -10%,rgba(139,92,246,.22),transparent 70%),radial-gradient(420px 240px at 0% 0%,rgba(34,211,238,.14),transparent 70%),linear-gradient(180deg,#0F1832,#0A1126);
+  border:1px solid rgba(140,170,255,.22);box-shadow:0 44px 100px -34px rgba(0,0,0,.9),0 0 70px -34px rgba(91,140,255,.6);animation:csPop .32s cubic-bezier(.2,.8,.2,1);font-family:"Barlow","Segoe UI",system-ui,sans-serif;color:#EAF0FF}
+.hx-x{position:absolute;top:.85rem;right:.85rem;z-index:3;width:40px;height:40px;border-radius:13px;border:1px solid rgba(140,170,255,.2);background:rgba(10,16,30,.6);color:#fff;font-size:1.5rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.hx-x:hover{background:rgba(244,63,157,.18)}
+.hx-body{padding:1.5rem 1.3rem 1.1rem;overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1}
+.hx-eye{font-weight:800;font-size:.7rem;letter-spacing:2.4px;color:#ffd24a;text-transform:uppercase;display:flex;align-items:center;gap:.5rem;padding-right:3rem}
+.hx-eye::before{content:"";width:7px;height:7px;border-radius:50%;background:#ffd24a;box-shadow:0 0 10px #ffd24a}
+.hx-h{font-family:"Saira","Segoe UI",system-ui,sans-serif;font-weight:900;font-size:clamp(1.7rem,7vw,2.6rem);line-height:1.04;letter-spacing:-.015em;color:#fff;margin:.45rem 0 .5rem;padding-right:2.4rem}
+.hx-s{color:#9aa8c9;font-size:.95rem;line-height:1.5;margin:0 0 1.1rem;max-width:52ch}
+.hx-grid{display:grid;gap:.7rem}
+.hx-grid.c2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.hx-grid.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:560px){.hx-grid.c3{grid-template-columns:1fr}.hx-grid.cm{grid-template-columns:1fr}}
+.hx-opt{display:flex;align-items:center;gap:.9rem;width:100%;text-align:left;padding:.95rem .9rem;border-radius:20px;cursor:pointer;color:#fff;font-family:inherit;
+  background:linear-gradient(180deg,rgba(24,36,74,.6),rgba(13,20,42,.7));border:1px solid rgba(140,170,255,.16);transition:transform .22s cubic-bezier(.2,.8,.2,1),border-color .2s,box-shadow .25s,background .2s}
+.hx-opt:hover{transform:translateY(-3px);border-color:rgba(34,211,238,.55);box-shadow:0 18px 38px -20px rgba(34,211,238,.5);background:linear-gradient(180deg,rgba(30,44,90,.7),rgba(15,24,50,.8))}
+.hx-opt:active{transform:scale(.985)}
+.hx-opt.big{padding:1.15rem .95rem;background:linear-gradient(135deg,rgba(60,40,130,.45),rgba(13,20,42,.75));border-color:rgba(139,92,246,.5)}
+.hx-opt.col{flex-direction:column;align-items:flex-start;gap:.7rem}
+.hx-opt[disabled]{opacity:.55;cursor:default}
+.hx-opt[disabled]:hover{transform:none;border-color:rgba(140,170,255,.16);box-shadow:none}
+.hx-ico{width:48px;height:48px;border-radius:15px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#c9b8ff;background:rgba(139,92,246,.16);border:1px solid rgba(139,92,246,.3)}
+.hx-ico.gold{color:#ffd24a;background:rgba(255,210,74,.1);border-color:rgba(255,210,74,.3)}
+.hx-ico.cy{color:#67e8f9;background:rgba(34,211,238,.1);border-color:rgba(34,211,238,.28)}
+.hx-t{font-family:"Saira","Segoe UI",system-ui,sans-serif;font-weight:800;font-size:1rem;color:#fff;line-height:1.2}
+.hx-d{font-size:.84rem;color:#8e9ab8;margin-top:.2rem;line-height:1.35}
+.hx-txt{flex:1;min-width:0}
+.hx-arr{color:#7f8fb8;flex-shrink:0}
+.hx-mod{padding:.75rem}
+.hx-logo{width:60px;height:60px;border-radius:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:"Saira","Segoe UI",sans-serif;font-weight:900;font-size:1.05rem;color:#fff;letter-spacing:.5px;text-shadow:0 2px 8px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.14)}
+.hx-price{font-family:"Saira","Segoe UI",sans-serif;font-weight:900;font-size:1.05rem;margin-top:.25rem;background:linear-gradient(135deg,#22d3ee,#5b8cff 55%,#8b5cf6);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.hx-foot{padding:.8rem 1.3rem 1rem;border-top:1px solid rgba(140,170,255,.12);background:rgba(7,11,24,.4)}
+.hx-back{padding:.7rem 1.1rem;border-radius:14px;border:1px solid rgba(140,170,255,.22);background:rgba(140,170,255,.07);color:#dbe6ff;font-family:inherit;font-weight:700;font-size:.95rem;cursor:pointer}
+.hx-back:hover{background:rgba(34,211,238,.12);border-color:rgba(34,211,238,.45)}
+.hx-cta{display:flex;align-items:center;justify-content:center;gap:.55rem;width:100%;padding:1rem;margin-top:1rem;border:0;border-radius:16px;cursor:pointer;background:linear-gradient(135deg,#34e37a,#16a34a);color:#04140a;font-family:"Saira","Segoe UI",sans-serif;font-weight:800;font-size:1.02rem;box-shadow:0 14px 32px -12px rgba(37,211,102,.7)}
+.hx-note{margin-top:.9rem;padding:.8rem .9rem;border-radius:14px;background:rgba(255,184,77,.07);border:1px solid rgba(255,184,77,.28);color:#e8d9a0;font-size:.85rem;line-height:1.45}
+.hx-detail{display:flex;gap:1rem;align-items:center;margin:.5rem 0 .2rem}
+.hx-x:focus-visible,.hx-opt:focus-visible,.hx-back:focus-visible,.hx-cta:focus-visible{outline:2px solid #67e8f9;outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.hx-box{animation:none}.hx-opt{transition:none}}
+@media (max-width:560px){.hx-grid.r1m{grid-template-columns:1fr}}
+.hx-h+.hx-grid{margin-top:1rem}
+
 </style>
 </head>
 <body>
@@ -3669,6 +3716,7 @@ body:not(.light-mode) .ds-prod-badge+.rc-badge{top:34px!important}
 
     <div class="sb-section">Juegos</div>
     <div class="nav-item" id="ni-freefire" onclick="goPage('freefire')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c-2 3-4 5-4 8a4 4 0 0 0 8 0c0-1-.4-1.8-1-2.5.3 1.5-.3 2.5-1.3 2.5-1.2 0-1.5-1-1-2 .8-1.5.3-3.3-.7-6z"/><path d="M8 15a6 6 0 0 0 12 0c0-1.5-.5-2.8-1.3-4"/></svg></div> Free Fire <span class="nb" style="background:rgba(225,29,46,.15);border:1px solid rgba(225,29,46,.35);color:#ff6b6b">CAT&Aacute;LOGO</span></div>
+    <div class="nav-item" id="ni-hackff" onclick="closeSB();hxAbrir()"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><circle cx="15" cy="13" r="1"/><circle cx="18" cy="11" r="1"/><path d="M17.3 5H6.7a4 4 0 0 0-3.9 3.2l-1.5 7A3 3 0 0 0 4.2 19a3 3 0 0 0 2.3-1.1L8 16h8l1.5 1.9a3 3 0 0 0 2.3 1.1 3 3 0 0 0 2.9-3.8l-1.5-7A4 4 0 0 0 17.3 5z"/></svg></div> HACKS FF <span class="nb" style="background:rgba(34,211,238,.15);border:1px solid rgba(34,211,238,.3);color:#67e8f9">NUEVO</span></div>
     <div class="nav-item" id="ni-deltaforce" onclick="goPage('deltaforce')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6l-8-4z"/><path d="M9 12l2 2 4-4"/></svg></div> Delta Force <span class="nb" style="background:rgba(255,208,0,.15);border:1px solid rgba(255,208,0,.35);color:#ffd000">NUEVO</span></div>
 
     <div class="sb-section">Servicios</div>
@@ -3850,20 +3898,8 @@ body:not(.light-mode) .ds-prod-badge+.rc-badge{top:34px!important}
     </div>
 
     <!-- Videojuegos y plataformas próximamente -->
-    <div style="margin:1.9rem 0 .9rem">
-      <div style="font-family:Saira;font-size:1.05rem;font-weight:900;color:#fff;display:flex;align-items:center;gap:.5rem">&#128679; Pr&oacute;ximamente</div>
-      <div style="font-size:.76rem;color:#6b7280;margin-top:.2rem">Servicios en construcci&oacute;n que estamos preparando</div>
-    </div>
-    <div style="display:none;flex-wrap:wrap;gap:.55rem" id="svc-proximamente-wrap"></div>
-
-    <!-- Redes sociales / servicios digitales -->
-    <div style="margin:1.9rem 0 .9rem">
-      <div style="font-family:Saira;font-size:1.05rem;font-weight:900;color:#fff;display:flex;align-items:center;gap:.5rem">&#127760; Redes Sociales &amp; Servicios Digitales</div>
-      <div style="font-size:.76rem;color:#6b7280;margin-top:.2rem">TikTok, Instagram, YouTube y m&aacute;s</div>
-    </div>
-    <div style="display:flex;flex-wrap:wrap;gap:.55rem" id="svc-digital">
-      <div style="color:#6b7280;font-size:.78rem">Cargando...</div>
-    </div>
+    <!-- (Próximamente / Redes sociales y servicios digitales: quitados de la portada; contenedores ocultos porque el JS escribe en ellos) -->
+    <div style="display:none" aria-hidden="true"><div id="svc-proximamente-wrap"></div><div id="svc-digital"></div></div>
 
     <!-- Resumen de cuenta -->
     <div style="margin:1.9rem 0 .9rem;font-size:.78rem;color:#6b7280;letter-spacing:1.2px">RESUMEN DE TU CUENTA</div>
@@ -7955,6 +7991,14 @@ body:not(.light-mode) .ds-prod-badge+.rc-badge{top:34px!important}
     </div>
   </div>
 
+</div>
+<!-- ═══ HACKS FF · flujo de selección ═══ -->
+<div class="hx-ov" id="hx-modal" role="dialog" aria-modal="true" aria-labelledby="hx-title" style="display:none" onclick="if(event.target===this)hxCerrar()">
+  <div class="hx-box">
+    <button type="button" class="hx-x" onclick="hxCerrar()" aria-label="Cerrar">&times;</button>
+    <div class="hx-body" id="hx-body"></div>
+    <div class="hx-foot" id="hx-foot" style="display:none"><button type="button" class="hx-back" onclick="hxAtras()">&#8249;&nbsp; Atr&aacute;s</button></div>
+  </div>
 </div>
 <script src="supabase.js"></script>
 <script src="supabase_integration.js"></script>
