@@ -12631,7 +12631,7 @@ var PAGOS_DESACTIVADOS = true;
 
 (function(){
   if(!PAGOS_DESACTIVADOS) return;
-  var MSG = 'Por el momento no hay métodos de pago disponibles.';
+  var MSG = 'Buscamos banca, ya que la nuestra está llena.';
 
   // Estilos
   var st = document.createElement('style'); st.id = 'pagos-off-css';
@@ -12644,7 +12644,7 @@ var PAGOS_DESACTIVADOS = true;
 
   function aviso(){
     var d = document.createElement('div'); d.className = 'pagos-aviso';
-    d.innerHTML = '<span class="pa-ico">&#128179;</span><div><b>Pagos no disponibles</b>' + MSG + '</div>';
+    d.innerHTML = '<span class="pa-ico">&#128179;</span><div><b>Método de pago</b>' + MSG + '</div>';
     return d;
   }
   function toast(){ if(typeof showToast === 'function') showToast(MSG, 3500); }
