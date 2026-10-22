@@ -12873,3 +12873,263 @@ document.addEventListener('keydown', function(e){
   var ov = document.getElementById('hx-modal');
   if(e.key === 'Escape' && ov && ov.style.display === 'flex'){ if(_hxPila.length) hxAtras(); else hxCerrar(); }
 });
+
+
+// ═══════════════════════ RECARGA MANUAL (diamantes y pines · sin saldo · sin API) ═══════════════════════
+// RECARGA_MANUAL = true : diamantes y pines se piden pagando directo y subiendo el comprobante.
+//   - NO se descuenta ni se usa el saldo.
+//   - NO se llama a la API del proveedor (recarga automática / PORTERO de pines): queda apagada.
+//   - El comprobante llega a tu Telegram y el pedido se registra para que lo hagas a mano.
+// RECARGA_MANUAL = false: vuelve todo al modo automático original (el código de la API sigue intacto).
+// MANUAL_METODOS: datos de pago que se muestran al cliente. Mientras esté vacío se muestra
+//   "Buscamos banca..." y no se puede enviar. Ejemplo:
+//   {id:'banco1', nombre:'Banco X', filas:[{k:'Titular',v:'Nombre'},{k:'CLABE',v:'000000000000000000'}], copiar:'000000000000000000'}
+var RECARGA_MANUAL = true;
+var MANUAL_METODOS = [
+  {id:'mercadopago', nombre:'Mercado Pago',
+   filas:[{k:'Titular',v:'Yareni Eli'},{k:'CLABE',v:'722969013471390726'},{k:'Concepto',v:'Comida o Escuela'}],
+   copiar:'722969013471390726', copiarLabel:'Copiar CLABE'}
+];
+
+var _manOrden = null, _manMetodo = null, _manFoto = '', _manFotoNom = '', _manEnviando = false, _manUltFoco = null;
+
+(function(){
+  if(!RECARGA_MANUAL) return;
+  var MSG = '\u26D4 La recarga automática está apagada. Pide tu recarga con comprobante.';
+
+  // (A) Red de seguridad: ninguna compra de diamantes/pines llega a la API del proveedor
+  var _fetch = window.fetch;
+  window.fetch = function(url, opts){
+    try{
+      if(opts && typeof opts.body === 'string'){
+        var u = String(url), b = null;
+        if(typeof COMPRAR_RECARGA_URL !== 'undefined' && u === COMPRAR_RECARGA_URL){
+          b = JSON.parse(opts.body);
+          if(b && b.action === 'comprar' && b.package_id != null) return Promise.resolve(new Response(JSON.stringify({success:false,error:'Recarga automatica desactivada'}),{status:200,headers:{'Content-Type':'application/json'}}));
+        } else if(typeof PORTERO_URL !== 'undefined' && u === PORTERO_URL){
+          b = JSON.parse(opts.body);
+          if(b && b.quantity != null) return Promise.resolve(new Response(JSON.stringify({success:false,error:'Compra automatica de pines desactivada'}),{status:200,headers:{'Content-Type':'application/json'}}));
+        }
+      }
+    }catch(e){}
+    return _fetch.apply(this, arguments);
+  };
+
+  // (B) Puntos de entrada: llevan al pedido manual
+  window.confirmarDiamCompra = function(){ manualContinuarDiam(); };
+  window._procesarRecargaAutomatica = function(p, ffId){ if(p) manualAbrir({tipo:'diamantes', nombre:p.nombre, cantidad:p.diamantes, precio:p.precio, ffId:ffId||''}); };
+  window._ejecutarRecargaVerificada = window._procesarRecargaAutomatica;
+  window.confirmarCompraPinApi = function(){
+    var p = (typeof PINES_API !== 'undefined' && _pinApiIdxActual !== null) ? PINES_API[_pinApiIdxActual] : null; if(!p) return;
+    var min = p.min || 1;
+    if(_pinApiCantActual < min){ var e = document.getElementById('pinapi-m-err'); if(e){ e.textContent = 'La cantidad mínima para este producto es '+min+' pines.'; e.style.display = 'block'; } return; }
+    manualAbrir({tipo:'pines', nombre:p.nombre, cantidad:_pinApiCantActual, precio:p.precio * _pinApiCantActual});
+  };
+  window.submitPinSaldo = function(){
+    var idx = parseInt((document.getElementById('pin-plan')||{}).value), cant = parseInt((document.getElementById('pin-cantidad')||{}).value) || 3;
+    var err = document.getElementById('pin-err');
+    if(cant < 3){ if(err){ err.textContent = 'La compra de pines al mayoreo es mínimo 3 pines.'; err.style.display = 'block'; } return; }
+    if(cant > 10) cant = 10;
+    if(isNaN(idx) || !PINES_API[idx]){ if(err){ err.textContent = 'Elige un producto.'; err.style.display = 'block'; } return; }
+    if(err) err.style.display = 'none';
+    manualAbrir({tipo:'pines', nombre:PINES_API[idx].nombre, cantidad:cant, precio:_calcularTotalPin(idx, cant).total});
+  };
+
+  // Detalle de diamantes: se reemplaza por la versión "sin saldo"
+  var _abrirDiam = window.abrirDiamDetalle;
+  window.abrirDiamDetalle = function(idx){
+    _abrirDiam(idx);
+    try{ manualRenderDiamDetalle(); }catch(e){ console.error('[MANUAL] detalle:', e); }
+  };
+  // Modal de pines: se quita el saldo y se cambia el texto del botón
+  var _abrirPin = window.abrirPinApiModal;
+  window.abrirPinApiModal = function(idx){
+    _abrirPin(idx);
+    try{
+      var s = document.getElementById('pinapi-m-saldo'); if(s && s.parentElement) s.parentElement.style.display = 'none';
+      var b = document.getElementById('pinapi-submit-btn'); if(b) b.textContent = 'Continuar al pago';
+    }catch(e){}
+  };
+
+  // (C) Textos: ya no es "automático/instantáneo" ni se paga con saldo
+  var st = document.createElement('style'); st.textContent = '.rc-badge.auto{display:none!important}#banner-txt{display:none!important}'; document.head.appendChild(st);
+  var REEMPL = [[/entrega autom[aá]tica 24\/7\.?/gi,'Entrega manual.'],[/entrega autom[aá]tica/gi,'Entrega manual'],[/recarga instant[aá]nea directa a tu id/gi,'Recarga manual a tu ID'],[/recarga instant[aá]nea/gi,'Recarga manual'],[/^\s*autom[aá]tica\s*$/i,'manual'],[/al instante/gi,'con entrega manual'],[/Comprar y recibir PIN/g,'Continuar al pago'],[/Entrega autom&aacute;tica/g,'Entrega manual']];
+  function parchear(){
+    ['page-diamantes','page-pines','modal-pinapi'].forEach(function(id){
+      var root = document.getElementById(id); if(!root) return;
+      var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), n, cambios = [];
+      while(n = w.nextNode()){ var t = n.nodeValue, o = t; REEMPL.forEach(function(r){ t = t.replace(r[0], r[1]); }); if(t !== o) cambios.push([n, t]); }
+      cambios.forEach(function(c){ c[0].nodeValue = c[1]; });
+      root.querySelectorAll('div,span,p').forEach(function(e){
+        if(e.children.length === 0 && /^\s*Tu saldo disponible\s*$/i.test(e.textContent) && e.parentElement) e.parentElement.style.display = 'none';
+      });
+    });
+  }
+  function faqManual(){
+    document.querySelectorAll('.faq-item').forEach(function(it){
+      var q = it.querySelector('.faq-q');
+      if(q && /^\s*Como pago/i.test(q.textContent)){ var a = it.querySelector('.faq-a-inner'); if(a) a.textContent = 'En diamantes y pines pagas por transferencia: eliges tu paquete, ves los datos de pago y subes tu comprobante. La recarga se hace manualmente cuando lo revisamos.'; }
+    });
+  }
+  setTimeout(faqManual, 400); window.addEventListener('load', function(){ setTimeout(faqManual, 400); });
+  var _t = null;
+  function programar(){ clearTimeout(_t); _t = setTimeout(parchear, 120); }
+  ['page-diamantes','page-pines'].forEach(function(id){ var r = document.getElementById(id); if(r) new MutationObserver(programar).observe(r, {childList:true, subtree:true}); });
+  document.addEventListener('DOMContentLoaded', parchear); parchear();
+})();
+
+function _manEsc(s){ return String(s==null?'':s).replace(/[<>&"']/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c];}); }
+function _manToast(m,d){ if(typeof showToast === 'function') showToast(m, d||3500); else alert(m); }
+function _manMXN(n){ return '$' + Number(n).toLocaleString('es-MX') + ' MXN'; }
+
+// ── Detalle de diamantes (sin saldo) ──
+function manualRenderDiamDetalle(){
+  var p = _diamSeleccionado, det = document.getElementById('diam-detalle'); if(!p || !det) return;
+  det.innerHTML =
+    '<button class="ddet-back" onclick="cerrarDiamDetalle()" style="background:none;border:none;color:#6b7280;font-size:.85rem;cursor:pointer;margin-bottom:1rem;padding:0">&#8592; Volver al catalogo</button>'
+    + '<div class="mn-dcard">'
+    + (p.img ? '<img src="'+_manEsc(p.img)+'" alt="'+_manEsc(p.nombre)+'" style="width:150px;display:block;margin:0 auto 1rem;border-radius:12px" onerror="this.style.display=\'none\'"/>' : '')
+    + '<div class="mn-dname">'+_manEsc(p.nombre)+'</div>'
+    + '<div class="mn-dprice">'+_manEsc(typeof fmt === 'function' ? fmt(p.precio) : _manMXN(p.precio))+'</div>'
+    + '<div class="mn-dtag">PAGO MANUAL · SIN SALDO</div>'
+    + (typeof _avisoEntrega === 'function' ? _avisoEntrega(p) : '')
+    + '<label class="flabel">Tu ID de Free Fire *</label>'
+    + '<input class="finput" id="diam-ffid" type="text" inputmode="numeric" placeholder="Ej: 123456789"/>'
+    + '<div class="mn-note">Pagas directo y subes tu comprobante. La recarga se hace <b>manualmente</b> cuando lo revisemos. No se usa tu saldo y tu compra cuenta para el Top de compradores.</div>'
+    + '<button type="button" class="mn-send" onclick="manualContinuarDiam()">Continuar al pago &#8594;</button>'
+    + '</div>';
+}
+function manualContinuarDiam(){
+  if(typeof authSession === 'undefined' || !authSession){ _manToast('Inicia sesión para comprar'); setTimeout(function(){ if(typeof showAuthModal === 'function') showAuthModal(); }, 600); return; }
+  var p = _diamSeleccionado; if(!p) return;
+  var ffId = ((document.getElementById('diam-ffid')||{}).value || '').trim();
+  if(!ffId){ _manToast('Escribe tu ID de Free Fire'); return; }
+  manualAbrir({tipo:'diamantes', nombre:p.nombre, cantidad:p.diamantes, precio:p.precio, ffId:ffId});
+}
+
+// ── Modal de pedido manual ──
+function manualAbrir(o){
+  if(typeof authSession === 'undefined' || !authSession){ _manToast('Inicia sesión para comprar'); setTimeout(function(){ if(typeof showAuthModal === 'function') showAuthModal(); }, 600); return; }
+  _manOrden = o; _manMetodo = MANUAL_METODOS.length ? MANUAL_METODOS[0].id : null; _manFoto = ''; _manFotoNom = ''; _manEnviando = false;
+  var esDiam = o.tipo === 'diamantes', b = document.getElementById('man-body'), ov = document.getElementById('man-modal'); if(!b || !ov) return;
+  b.innerHTML =
+    '<div class="mn-eye">PEDIDO MANUAL · SIN SALDO</div><h2 class="mn-h" id="man-title">Pagar y enviar comprobante</h2>'
+    + '<div class="mn-sum">'
+    +   '<div class="mn-row"><span>Producto</span><b>'+_manEsc(o.nombre)+'</b></div>'
+    +   '<div class="mn-row"><span>'+(esDiam?'Diamantes':'Cantidad de pines')+'</span><b>'+_manEsc(o.cantidad)+'</b></div>'
+    +   (esDiam ? '<div class="mn-row"><span>ID de Free Fire</span><b>'+_manEsc(o.ffId)+'</b></div>' : '')
+    +   '<div class="mn-row tot"><span>Total a pagar</span><b>'+_manEsc(_manMXN(o.precio))+'</b></div>'
+    + '</div>'
+    + (esDiam ? '' : '<label class="mn-lbl" for="man-wa">Tu WhatsApp (para entregarte los pines) *</label><input class="mn-inp" id="man-wa" type="tel" inputmode="tel" maxlength="20" placeholder="Ej. 55 1234 5678" autocomplete="tel">')
+    + '<div class="mn-sec">Método de pago</div><div id="man-metodos"></div>'
+    + '<div class="mn-sec">Comprobante de pago</div>'
+    + '<input type="file" id="man-foto" accept="image/*" style="display:none" onchange="manualOnFoto(this)">'
+    + '<div class="mn-up" id="man-up" role="button" tabindex="0" onclick="document.getElementById(\'man-foto\').click()" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}"><div style="font-size:1.5rem">&#128247;</div><b>Toca para elegir la foto</b>Captura de tu pago (JPG, PNG)</div>'
+    + '<div class="mn-prev" id="man-prev"><img id="man-prev-img" alt="Vista previa del comprobante"><small id="man-prev-nom"></small><button type="button" onclick="manualQuitarFoto()">Cambiar foto</button></div>'
+    + '<div class="mn-note">No se usa tu saldo. La recarga se hace <b>manualmente</b> cuando revisemos tu comprobante.'+(esDiam?' Tu compra cuenta para el Top de compradores.':'')+'</div>'
+    + '<button type="button" class="mn-send" id="man-send" onclick="manualEnviar()">Enviar comprobante y pedir '+(esDiam?'recarga':'pines')+'</button>';
+  manualPintarMetodos();
+  _manUltFoco = document.activeElement;
+  ov.style.display = 'flex'; document.documentElement.style.overflow = 'hidden';
+  var x = ov.querySelector('.mn-x'); if(x) x.focus();
+}
+function manualPintarMetodos(){
+  var el = document.getElementById('man-metodos'), btn = document.getElementById('man-send'); if(!el) return;
+  if(!MANUAL_METODOS.length){
+    el.innerHTML = '<div class="mn-warn"><span style="font-size:1.4rem">&#128179;</span><div><b>Método de pago</b>Buscamos banca, ya que la nuestra está llena.</div></div>';
+    if(btn) btn.disabled = true; return;
+  }
+  if(btn) btn.disabled = false;
+  el.innerHTML = MANUAL_METODOS.map(function(m){
+    var sel = m.id === _manMetodo;
+    return '<div class="mn-pay'+(sel?' sel':'')+'" role="radio" aria-checked="'+sel+'" tabindex="0" onclick="manualElegirMetodo(\''+_manEsc(m.id)+'\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();manualElegirMetodo(\''+_manEsc(m.id)+'\');}">'
+      + '<div class="mn-pay-h">'+_manEsc(m.nombre)+'</div>'
+      + (m.filas||[]).map(function(f){ return '<div class="mn-pay-r"><span>'+_manEsc(f.k)+'</span><b>'+_manEsc(f.v)+'</b></div>'; }).join('')
+      + (m.copiar ? '<div class="mn-pay-r" style="justify-content:flex-end"><button type="button" class="mn-copy" onclick="event.stopPropagation();manualCopiar(\''+_manEsc(m.id)+'\',this)">&#128203; '+_manEsc(m.copiarLabel||'Copiar')+'</button></div>' : '')
+      + '</div>';
+  }).join('');
+}
+function manualElegirMetodo(id){ _manMetodo = id; manualPintarMetodos(); }
+function manualCopiar(id, btn){
+  var m = null; MANUAL_METODOS.forEach(function(x){ if(x.id === id) m = x; }); if(!m || !m.copiar) return;
+  var ok = function(){ if(btn){ var t = btn.innerHTML; btn.innerHTML = '&#10003; Copiado'; setTimeout(function(){ btn.innerHTML = t; }, 2000); } };
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(m.copiar).then(ok).catch(function(){ _manToast('Copia manualmente: '+m.copiar, 5000); });
+  else _manToast('Copia manualmente: '+m.copiar, 5000);
+}
+function manualOnFoto(input){
+  var f = input.files && input.files[0]; if(!f) return;
+  if(!/^image\//i.test(f.type)){ _manToast('El comprobante debe ser una imagen'); input.value = ''; return; }
+  if(f.size > 15*1024*1024){ _manToast('La imagen es muy pesada (máx. 15 MB)'); input.value = ''; return; }
+  var rd = new FileReader();
+  rd.onload = function(ev){
+    var raw = ev.target.result, img = new Image();
+    img.onload = function(){
+      var b64 = raw;
+      try{ var max = 1600, w = img.width, h = img.height; if(w > max || h > max){ var r = Math.min(max/w, max/h); w = Math.round(w*r); h = Math.round(h*r); }
+        var c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(img, 0, 0, w, h);
+        var j = c.toDataURL('image/jpeg', 0.85); if(j && j.length < raw.length) b64 = j; }catch(e){}
+      _manFoto = b64; _manFotoNom = f.name;
+      var pv = document.getElementById('man-prev'), up = document.getElementById('man-up');
+      document.getElementById('man-prev-img').src = raw; document.getElementById('man-prev-nom').textContent = '\u2713 ' + f.name;
+      if(pv) pv.style.display = 'block'; if(up) up.style.display = 'none';
+    };
+    img.onerror = function(){ _manToast('No se pudo leer la imagen'); manualQuitarFoto(); };
+    img.src = raw;
+  };
+  rd.onerror = function(){ _manToast('No se pudo leer la imagen'); };
+  rd.readAsDataURL(f);
+}
+function manualQuitarFoto(){
+  _manFoto = ''; _manFotoNom = ''; var i = document.getElementById('man-foto'); if(i) i.value = '';
+  var pv = document.getElementById('man-prev'), up = document.getElementById('man-up'); if(pv) pv.style.display = 'none'; if(up) up.style.display = 'block';
+}
+function manualCerrar(){
+  var ov = document.getElementById('man-modal'); if(!ov) return;
+  ov.style.display = 'none'; document.documentElement.style.overflow = '';
+  if(_manUltFoco && _manUltFoco.focus) try{ _manUltFoco.focus(); }catch(e){}
+}
+document.addEventListener('keydown', function(e){ var ov = document.getElementById('man-modal'); if(e.key === 'Escape' && ov && ov.style.display === 'flex') manualCerrar(); });
+
+// ── Envío: comprobante primero; el pedido solo se registra si el comprobante llegó ──
+function manualEnviar(){
+  if(_manEnviando) return;
+  var o = _manOrden; if(!o) return;
+  if(typeof authSession === 'undefined' || !authSession){ _manToast('Inicia sesión para comprar'); return; }
+  if(!MANUAL_METODOS.length){ _manToast('Aún no hay método de pago disponible'); return; }
+  var met = null; MANUAL_METODOS.forEach(function(m){ if(m.id === _manMetodo) met = m; }); if(!met) met = MANUAL_METODOS[0];
+  var esDiam = o.tipo === 'diamantes', wa = '';
+  if(!esDiam){
+    wa = ((document.getElementById('man-wa')||{}).value || '').trim();
+    if(wa.replace(/\D/g,'').length < 10){ _manToast('Escribe tu WhatsApp (10 dígitos o más)'); var w = document.getElementById('man-wa'); if(w) w.focus(); return; }
+  }
+  if(!_manFoto){ _manToast('\u26A0 Sube tu comprobante de pago'); var u = document.getElementById('man-up'); if(u) u.scrollIntoView({behavior:'smooth', block:'center'}); return; }
+
+  _manEnviando = true;
+  var btn = document.getElementById('man-send'); if(btn){ btn.disabled = true; btn.textContent = 'Enviando...'; }
+  var ord = (typeof getNextOrder === 'function') ? getNextOrder() : Date.now().toString().slice(-5);
+  var user = authSession.username || 'Cliente';
+  var detalle = 'Pedido #' + ord + ' | ' + o.nombre + ' | ' + (esDiam ? ('Diamantes: '+o.cantidad+' | ID FF: '+o.ffId) : ('Pines: '+o.cantidad+' | WhatsApp: '+wa)) + ' | Total: ' + _manMXN(o.precio) + ' | Método: ' + met.nombre + ' | SIN SALDO · RECARGA MANUAL';
+  fetch(NOTIF_RECARGA_URL, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ usuario:user, username:user, metodo:'PEDIDO MANUAL (sin saldo): ' + (esDiam?'Diamantes':'Pines') + ' - ' + met.nombre, monto:_manMXN(o.precio) + ' - Pedido #' + ord, monto_acreditar:0, extra:detalle, foto_base64:_manFoto })
+  }).then(function(r){ return r.json(); }).then(function(res){
+    if(res && res.success){
+      if(typeof registrarPedido === 'function') registrarPedido(o.nombre + ' (MANUAL)', o.cantidad, esDiam ? 'diamantes' : 'otro', esDiam ? o.ffId : '', o.precio, 0);
+      manualMostrarOk(ord, o);
+    } else {
+      _manEnviando = false; if(btn){ btn.disabled = false; btn.textContent = 'Enviar comprobante y pedir ' + (esDiam?'recarga':'pines'); }
+      _manToast('No se pudo enviar el comprobante. Intenta otra vez.', 4500); console.error('[MANUAL] respuesta:', res);
+    }
+  }).catch(function(err){
+    _manEnviando = false; if(btn){ btn.disabled = false; btn.textContent = 'Enviar comprobante y pedir ' + (esDiam?'recarga':'pines'); }
+    _manToast('Error de conexión. Intenta otra vez.', 4500); console.error('[MANUAL]', err);
+  });
+}
+function manualMostrarOk(ord, o){
+  var b = document.getElementById('man-body'); if(!b) return;
+  b.innerHTML = '<div class="mn-ok"><div class="ic">&#9989;</div><h3>¡Pedido enviado!</h3><p>Pedido <b style="color:#67e8f9">#'+_manEsc(ord)+'</b> · '+_manEsc(o.nombre)+'</p>'
+    + '<p>Revisaremos tu comprobante y haremos la '+(o.tipo==='diamantes'?'recarga':'entrega')+' <b style="color:#fff">manualmente</b>. Puedes ver el estado en <b style="color:#fff">Mis compras</b>.</p>'
+    + '<button type="button" class="mn-send" onclick="manualCerrar();if(typeof goPage===\'function\')goPage(\'miscompras\')">Ver mis compras</button>'
+    + '<button type="button" class="mn-ghost" onclick="manualCerrar();if(typeof cerrarDiamDetalle===\'function\')try{cerrarDiamDetalle()}catch(e){}">Cerrar</button></div>';
+  _manEnviando = false;
+}

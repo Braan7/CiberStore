@@ -3623,6 +3623,54 @@ body:not(.light-mode) .ds-prod-badge+.rc-badge{top:34px!important}
 @media (max-width:560px){.hx-grid.r1m{grid-template-columns:1fr}}
 .hx-h+.hx-grid{margin-top:1rem}
 
+/* ═══════════ PEDIDO MANUAL (diamantes y pines, sin saldo) ═══════════ */
+.mn-ov{position:fixed;inset:0;z-index:9700;display:none;align-items:center;justify-content:center;padding:max(.8rem,env(safe-area-inset-top)) .8rem max(.8rem,env(safe-area-inset-bottom));background:rgba(4,7,16,.86);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.mn-box{position:relative;width:min(560px,100%);max-height:min(94vh,900px);display:flex;flex-direction:column;border-radius:26px;overflow:hidden;font-family:"Barlow","Segoe UI",system-ui,sans-serif;color:#EAF0FF;
+  background:radial-gradient(480px 240px at 90% -10%,rgba(139,92,246,.22),transparent 70%),radial-gradient(420px 240px at 0% 0%,rgba(34,211,238,.14),transparent 70%),linear-gradient(180deg,#0F1832,#0A1126);
+  border:1px solid rgba(140,170,255,.22);box-shadow:0 44px 100px -34px rgba(0,0,0,.9),0 0 70px -34px rgba(91,140,255,.6)}
+.mn-x{position:absolute;top:.8rem;right:.8rem;z-index:3;width:40px;height:40px;border-radius:13px;border:1px solid rgba(140,170,255,.2);background:rgba(10,16,30,.6);color:#fff;font-size:1.5rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.mn-body{padding:1.4rem 1.2rem 1.3rem;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.mn-eye{font-weight:800;font-size:.68rem;letter-spacing:2.2px;color:#ffd24a;text-transform:uppercase;padding-right:3rem}
+.mn-h{font-family:"Saira","Segoe UI",system-ui,sans-serif;font-weight:900;font-size:clamp(1.4rem,6vw,1.9rem);line-height:1.1;color:#fff;margin:.35rem 0 1rem;padding-right:2.4rem}
+.mn-sum{background:rgba(140,170,255,.05);border:1px solid rgba(140,170,255,.16);border-radius:16px;padding:.35rem .9rem;margin-bottom:1rem}
+.mn-row{display:flex;justify-content:space-between;gap:.8rem;padding:.55rem 0;border-bottom:1px solid rgba(140,170,255,.08);font-size:.9rem;color:#b4c0e2}
+.mn-row:last-child{border-bottom:none}
+.mn-row b{color:#fff;font-weight:700;text-align:right;overflow-wrap:anywhere}
+.mn-row.tot b{font-family:"Saira","Segoe UI",sans-serif;font-weight:900;font-size:1.25rem;background:linear-gradient(135deg,#22d3ee,#5b8cff 55%,#8b5cf6);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.mn-sec{font-family:"Saira","Segoe UI",sans-serif;font-weight:800;font-size:.95rem;color:#fff;margin:1.1rem 0 .5rem}
+.mn-lbl{display:block;font-weight:700;font-size:.78rem;letter-spacing:.8px;color:#a9b6d6;text-transform:uppercase;margin:.2rem 0 .35rem}
+.mn-inp{width:100%;background:rgba(10,17,38,.78);border:1.5px solid rgba(140,170,255,.2);color:#fff;border-radius:13px;padding:.75rem .9rem;font-family:inherit;font-size:16px;outline:none}
+.mn-inp:focus{border-color:#22d3ee;box-shadow:0 0 0 4px rgba(34,211,238,.14)}
+.mn-warn{display:flex;gap:.7rem;align-items:flex-start;background:rgba(255,184,77,.07);border:1px solid rgba(255,184,77,.3);border-radius:16px;padding:.9rem;font-size:.9rem;line-height:1.45;color:#e8d9a0}
+.mn-warn b{display:block;font-family:"Saira","Segoe UI",sans-serif;font-weight:800;color:#ffd24a;margin-bottom:.1rem}
+.mn-pay{border:1.5px solid rgba(255,255,255,.1);border-radius:14px;padding:.8rem .9rem;margin-bottom:.55rem;cursor:pointer;background:rgba(255,255,255,.02)}
+.mn-pay.sel{border-color:rgba(34,211,238,.55);background:rgba(34,211,238,.06)}
+.mn-pay-h{font-family:"Saira","Segoe UI",sans-serif;font-weight:800;color:#fff}
+.mn-pay-r{display:flex;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin-top:.4rem;font-size:.86rem;color:#9aa4b2}
+.mn-pay-r b{color:#fff;overflow-wrap:anywhere}
+.mn-copy{background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.35);color:#67e8f9;border-radius:9px;padding:.3rem .65rem;font-weight:700;font-size:.78rem;cursor:pointer}
+.mn-up{border:2px dashed rgba(34,211,238,.3);border-radius:14px;padding:1.1rem .8rem;text-align:center;cursor:pointer;background:rgba(34,211,238,.03);color:#9aa4b2;font-size:.88rem}
+.mn-up b{display:block;color:#fff;font-size:.95rem;margin:.25rem 0 .1rem}
+.mn-prev{display:none;text-align:center}
+.mn-prev img{max-width:100%;max-height:240px;border-radius:12px;border:1px solid rgba(255,255,255,.1);display:block;margin:0 auto .5rem}
+.mn-prev small{display:block;color:#4ade80;overflow-wrap:anywhere}
+.mn-prev button{margin-top:.5rem;background:none;border:1px solid rgba(255,80,80,.35);color:#ff8080;border-radius:9px;padding:.35rem .8rem;font-weight:700;font-size:.78rem;cursor:pointer}
+.mn-note{margin-top:1rem;padding:.8rem .9rem;border-radius:14px;background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.22);font-size:.84rem;line-height:1.5;color:#bfe9f5}
+.mn-send{display:flex;align-items:center;justify-content:center;width:100%;margin-top:1rem;padding:1rem;border:0;border-radius:16px;cursor:pointer;background:linear-gradient(135deg,#22d3ee,#5b8cff 55%,#8b5cf6);color:#04101c;-webkit-text-fill-color:#04101c;font-family:"Saira","Segoe UI",sans-serif;font-weight:800;font-size:1rem;box-shadow:0 14px 32px -12px rgba(91,140,255,.8)}
+.mn-send:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
+.mn-ok{text-align:center;padding:.5rem 0}
+.mn-ok .ic{font-size:2.8rem}
+.mn-ok h3{font-family:"Saira","Segoe UI",sans-serif;font-weight:900;font-size:1.4rem;color:#fff;margin:.3rem 0}
+.mn-ok p{color:#9aa8c9;font-size:.92rem;line-height:1.5;margin:.3rem 0}
+.mn-ghost{width:100%;margin-top:.7rem;padding:.85rem;border-radius:14px;background:transparent;border:1px solid rgba(255,255,255,.16);color:#fff;font-weight:700;cursor:pointer;font-family:inherit}
+.mn-x:focus-visible,.mn-send:focus-visible,.mn-ghost:focus-visible,.mn-pay:focus-visible,.mn-up:focus-visible{outline:2px solid #67e8f9;outline-offset:2px}
+/* Detalle de diamantes en modo manual */
+.mn-dcard{background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.065);border-radius:18px;padding:1.35rem}
+.mn-dname{font-family:"Barlow","Segoe UI",sans-serif;font-weight:700;font-size:1.15rem;color:#fff;text-align:center}
+.mn-dprice{font-family:"Saira","Segoe UI",sans-serif;font-weight:900;font-size:1.9rem;text-align:center;color:#fff;margin:.2rem 0}
+.mn-dtag{display:table;margin:.2rem auto 1rem;padding:.25rem .7rem;border-radius:999px;background:rgba(255,210,74,.1);border:1px solid rgba(255,210,74,.35);color:#ffd24a;font-weight:800;font-size:.72rem;letter-spacing:1px}
+@media (prefers-reduced-motion:reduce){.mn-box{animation:none}}
+
 </style>
 </head>
 <body>
@@ -7998,6 +8046,13 @@ body:not(.light-mode) .ds-prod-badge+.rc-badge{top:34px!important}
     <button type="button" class="hx-x" onclick="hxCerrar()" aria-label="Cerrar">&times;</button>
     <div class="hx-body" id="hx-body"></div>
     <div class="hx-foot" id="hx-foot" style="display:none"><button type="button" class="hx-back" onclick="hxAtras()">&#8249;&nbsp; Atr&aacute;s</button></div>
+  </div>
+</div>
+<!-- ═══ PEDIDO MANUAL (diamantes y pines, sin saldo) ═══ -->
+<div class="mn-ov" id="man-modal" role="dialog" aria-modal="true" aria-labelledby="man-title" style="display:none" onclick="if(event.target===this)manualCerrar()">
+  <div class="mn-box">
+    <button type="button" class="mn-x" onclick="manualCerrar()" aria-label="Cerrar">&times;</button>
+    <div class="mn-body" id="man-body"></div>
   </div>
 </div>
 <script src="supabase.js"></script>
