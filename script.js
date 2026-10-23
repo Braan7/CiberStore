@@ -12885,13 +12885,14 @@ document.addEventListener('keydown', function(e){
 //   "Buscamos banca..." y no se puede enviar. Ejemplo:
 //   {id:'banco1', nombre:'Banco X', filas:[{k:'Titular',v:'Nombre'},{k:'CLABE',v:'000000000000000000'}], copiar:'000000000000000000'}
 var RECARGA_MANUAL = true;
-var MANUAL_METODOS = [
-  {id:'mercadopago', nombre:'Mercado Pago',
-   filas:[{k:'Titular',v:'Yareni Eli'},{k:'CLABE',v:'722969013471390726'},{k:'Concepto',v:'Comida o Escuela'}],
-   copiar:'722969013471390726', copiarLabel:'Copiar CLABE'}
-];
+var HEY_BANCO = {id:'heybanco', nombre:'Hey Banco',
+   filas:[{k:'Titular',v:'Yamileth Ez'},{k:'CLABE',v:'167078000087693211'}],
+   copiar:'167078000087693211', copiarLabel:'Copiar CLABE'};
+var MANUAL_METODOS = [HEY_BANCO];
+// Métodos para RECARGAR SALDO (Billetera / botón Depositar)
+var SALDO_METODOS = [HEY_BANCO];
 
-var _manOrden = null, _manMetodo = null, _manFoto = '', _manFotoNom = '', _manEnviando = false, _manUltFoco = null;
+var _manLista = [], _manOrden = null, _manMetodo = null, _manFoto = '', _manFotoNom = '', _manEnviando = false, _manUltFoco = null;
 
 (function(){
   if(!RECARGA_MANUAL) return;
@@ -12968,7 +12969,7 @@ var _manOrden = null, _manMetodo = null, _manFoto = '', _manFotoNom = '', _manEn
   function faqManual(){
     document.querySelectorAll('.faq-item').forEach(function(it){
       var q = it.querySelector('.faq-q');
-      if(q && /^\s*Como pago/i.test(q.textContent)){ var a = it.querySelector('.faq-a-inner'); if(a) a.textContent = 'En diamantes y pines pagas por transferencia: eliges tu paquete, ves los datos de pago y subes tu comprobante. La recarga se hace manualmente cuando lo revisamos.'; }
+      if(q && /^\s*Como pago/i.test(q.textContent)){ var a = it.querySelector('.faq-a-inner'); if(a) a.textContent = 'En diamantes y pines pagas por transferencia: eliges tu paquete, ves los datos de pago y subes tu comprobante. La recarga se hace manualmente cuando lo revisamos. Para recargar saldo, entra a Billetera, pon el monto y sube tu comprobante.'; }
     });
   }
   setTimeout(faqManual, 400); window.addEventListener('load', function(){ setTimeout(faqManual, 400); });
@@ -13009,38 +13010,53 @@ function manualContinuarDiam(){
 
 // ── Modal de pedido manual ──
 function manualAbrir(o){
-  if(typeof authSession === 'undefined' || !authSession){ _manToast('Inicia sesión para comprar'); setTimeout(function(){ if(typeof showAuthModal === 'function') showAuthModal(); }, 600); return; }
-  _manOrden = o; _manMetodo = MANUAL_METODOS.length ? MANUAL_METODOS[0].id : null; _manFoto = ''; _manFotoNom = ''; _manEnviando = false;
-  var esDiam = o.tipo === 'diamantes', b = document.getElementById('man-body'), ov = document.getElementById('man-modal'); if(!b || !ov) return;
+  if(typeof authSession === 'undefined' || !authSession){ _manToast('Inicia sesión para continuar'); setTimeout(function(){ if(typeof showAuthModal === 'function') showAuthModal(); }, 600); return; }
+  _manOrden = o; _manLista = (o.tipo === 'saldo') ? SALDO_METODOS : MANUAL_METODOS;
+  _manMetodo = _manLista.length ? _manLista[0].id : null; _manFoto = ''; _manFotoNom = ''; _manEnviando = false;
+  var esDiam = o.tipo === 'diamantes', esSaldo = o.tipo === 'saldo', b = document.getElementById('man-body'), ov = document.getElementById('man-modal'); if(!b || !ov) return;
+  var resumen;
+  if(esSaldo){
+    resumen = '<label class="mn-lbl" for="man-monto">¿Cuánto quieres recargar? (MXN) *</label>'
+      + '<input class="mn-inp" id="man-monto" type="number" inputmode="decimal" min="10" step="1" placeholder="Ej. 100" oninput="manualMontoCambia()">'
+      + '<div class="mn-chips">' + [50,100,200,500].map(function(n){ return '<button type="button" class="mn-chip" onclick="manualMonto('+n+')">$'+n+'</button>'; }).join('') + '</div>'
+      + '<div class="mn-sum" style="margin-top:.8rem"><div class="mn-row tot"><span>Debes transferir</span><b id="man-total">$0 MXN</b></div></div>';
+  } else {
+    resumen = '<div class="mn-sum">'
+      + '<div class="mn-row"><span>Producto</span><b>'+_manEsc(o.nombre)+'</b></div>'
+      + '<div class="mn-row"><span>'+(esDiam?'Diamantes':'Cantidad de pines')+'</span><b>'+_manEsc(o.cantidad)+'</b></div>'
+      + (esDiam ? '<div class="mn-row"><span>ID de Free Fire</span><b>'+_manEsc(o.ffId)+'</b></div>' : '')
+      + '<div class="mn-row tot"><span>Total a pagar</span><b>'+_manEsc(_manMXN(o.precio))+'</b></div></div>'
+      + (esDiam ? '' : '<label class="mn-lbl" for="man-wa">Tu WhatsApp (para entregarte los pines) *</label><input class="mn-inp" id="man-wa" type="tel" inputmode="tel" maxlength="20" placeholder="Ej. 55 1234 5678" autocomplete="tel">');
+  }
+  var nota = esSaldo
+    ? 'Transfiere <b>exactamente</b> el monto que escribiste y sube tu comprobante. Acreditamos tu saldo <b>manualmente</b> cuando lo revisemos.'
+    : 'No se usa tu saldo. La recarga se hace <b>manualmente</b> cuando revisemos tu comprobante.' + (esDiam ? ' Tu compra cuenta para el Top de compradores.' : '');
+  var btnTxt = esSaldo ? 'Enviar comprobante y recargar saldo' : ('Enviar comprobante y pedir ' + (esDiam ? 'recarga' : 'pines'));
   b.innerHTML =
-    '<div class="mn-eye">PEDIDO MANUAL · SIN SALDO</div><h2 class="mn-h" id="man-title">Pagar y enviar comprobante</h2>'
-    + '<div class="mn-sum">'
-    +   '<div class="mn-row"><span>Producto</span><b>'+_manEsc(o.nombre)+'</b></div>'
-    +   '<div class="mn-row"><span>'+(esDiam?'Diamantes':'Cantidad de pines')+'</span><b>'+_manEsc(o.cantidad)+'</b></div>'
-    +   (esDiam ? '<div class="mn-row"><span>ID de Free Fire</span><b>'+_manEsc(o.ffId)+'</b></div>' : '')
-    +   '<div class="mn-row tot"><span>Total a pagar</span><b>'+_manEsc(_manMXN(o.precio))+'</b></div>'
-    + '</div>'
-    + (esDiam ? '' : '<label class="mn-lbl" for="man-wa">Tu WhatsApp (para entregarte los pines) *</label><input class="mn-inp" id="man-wa" type="tel" inputmode="tel" maxlength="20" placeholder="Ej. 55 1234 5678" autocomplete="tel">')
+    '<div class="mn-eye">'+(esSaldo ? 'RECARGA DE SALDO' : 'PEDIDO MANUAL · SIN SALDO')+'</div><h2 class="mn-h" id="man-title">'+(esSaldo ? 'Recargar saldo' : 'Pagar y enviar comprobante')+'</h2>'
+    + resumen
     + '<div class="mn-sec">Método de pago</div><div id="man-metodos"></div>'
     + '<div class="mn-sec">Comprobante de pago</div>'
     + '<input type="file" id="man-foto" accept="image/*" style="display:none" onchange="manualOnFoto(this)">'
     + '<div class="mn-up" id="man-up" role="button" tabindex="0" onclick="document.getElementById(\'man-foto\').click()" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}"><div style="font-size:1.5rem">&#128247;</div><b>Toca para elegir la foto</b>Captura de tu pago (JPG, PNG)</div>'
     + '<div class="mn-prev" id="man-prev"><img id="man-prev-img" alt="Vista previa del comprobante"><small id="man-prev-nom"></small><button type="button" onclick="manualQuitarFoto()">Cambiar foto</button></div>'
-    + '<div class="mn-note">No se usa tu saldo. La recarga se hace <b>manualmente</b> cuando revisemos tu comprobante.'+(esDiam?' Tu compra cuenta para el Top de compradores.':'')+'</div>'
-    + '<button type="button" class="mn-send" id="man-send" onclick="manualEnviar()">Enviar comprobante y pedir '+(esDiam?'recarga':'pines')+'</button>';
+    + '<div class="mn-note">'+nota+'</div>'
+    + '<button type="button" class="mn-send" id="man-send" onclick="manualEnviar()" data-txt="'+_manEsc(btnTxt)+'">'+_manEsc(btnTxt)+'</button>';
   manualPintarMetodos();
   _manUltFoco = document.activeElement;
   ov.style.display = 'flex'; document.documentElement.style.overflow = 'hidden';
   var x = ov.querySelector('.mn-x'); if(x) x.focus();
 }
+function manualMonto(n){ var i = document.getElementById('man-monto'); if(i){ i.value = n; manualMontoCambia(); } }
+function manualMontoCambia(){ var i = document.getElementById('man-monto'), t = document.getElementById('man-total'); if(!i || !t) return; var v = parseFloat(i.value); t.textContent = _manMXN(isNaN(v) || v < 0 ? 0 : v); }
 function manualPintarMetodos(){
   var el = document.getElementById('man-metodos'), btn = document.getElementById('man-send'); if(!el) return;
-  if(!MANUAL_METODOS.length){
+  if(!_manLista.length){
     el.innerHTML = '<div class="mn-warn"><span style="font-size:1.4rem">&#128179;</span><div><b>Método de pago</b>Buscamos banca, ya que la nuestra está llena.</div></div>';
     if(btn) btn.disabled = true; return;
   }
   if(btn) btn.disabled = false;
-  el.innerHTML = MANUAL_METODOS.map(function(m){
+  el.innerHTML = _manLista.map(function(m){
     var sel = m.id === _manMetodo;
     return '<div class="mn-pay'+(sel?' sel':'')+'" role="radio" aria-checked="'+sel+'" tabindex="0" onclick="manualElegirMetodo(\''+_manEsc(m.id)+'\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();manualElegirMetodo(\''+_manEsc(m.id)+'\');}">'
       + '<div class="mn-pay-h">'+_manEsc(m.nombre)+'</div>'
@@ -13051,7 +13067,7 @@ function manualPintarMetodos(){
 }
 function manualElegirMetodo(id){ _manMetodo = id; manualPintarMetodos(); }
 function manualCopiar(id, btn){
-  var m = null; MANUAL_METODOS.forEach(function(x){ if(x.id === id) m = x; }); if(!m || !m.copiar) return;
+  var m = null; _manLista.forEach(function(x){ if(x.id === id) m = x; }); if(!m || !m.copiar) return;
   var ok = function(){ if(btn){ var t = btn.innerHTML; btn.innerHTML = '&#10003; Copiado'; setTimeout(function(){ btn.innerHTML = t; }, 2000); } };
   if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(m.copiar).then(ok).catch(function(){ _manToast('Copia manualmente: '+m.copiar, 5000); });
   else _manToast('Copia manualmente: '+m.copiar, 5000);
@@ -13094,42 +13110,69 @@ document.addEventListener('keydown', function(e){ var ov = document.getElementBy
 function manualEnviar(){
   if(_manEnviando) return;
   var o = _manOrden; if(!o) return;
-  if(typeof authSession === 'undefined' || !authSession){ _manToast('Inicia sesión para comprar'); return; }
-  if(!MANUAL_METODOS.length){ _manToast('Aún no hay método de pago disponible'); return; }
-  var met = null; MANUAL_METODOS.forEach(function(m){ if(m.id === _manMetodo) met = m; }); if(!met) met = MANUAL_METODOS[0];
-  var esDiam = o.tipo === 'diamantes', wa = '';
-  if(!esDiam){
+  if(typeof authSession === 'undefined' || !authSession){ _manToast('Inicia sesión para continuar'); return; }
+  if(!_manLista.length){ _manToast('Aún no hay método de pago disponible'); return; }
+  var met = null; _manLista.forEach(function(m){ if(m.id === _manMetodo) met = m; }); if(!met) met = _manLista[0];
+  var esDiam = o.tipo === 'diamantes', esSaldo = o.tipo === 'saldo', wa = '', monto = 0;
+  if(esSaldo){
+    monto = parseFloat((document.getElementById('man-monto')||{}).value);
+    if(isNaN(monto) || monto < 10){ _manToast('Escribe el monto a recargar (mínimo $10 MXN)'); var mi = document.getElementById('man-monto'); if(mi) mi.focus(); return; }
+  } else if(!esDiam){
     wa = ((document.getElementById('man-wa')||{}).value || '').trim();
     if(wa.replace(/\D/g,'').length < 10){ _manToast('Escribe tu WhatsApp (10 dígitos o más)'); var w = document.getElementById('man-wa'); if(w) w.focus(); return; }
   }
   if(!_manFoto){ _manToast('\u26A0 Sube tu comprobante de pago'); var u = document.getElementById('man-up'); if(u) u.scrollIntoView({behavior:'smooth', block:'center'}); return; }
 
   _manEnviando = true;
-  var btn = document.getElementById('man-send'); if(btn){ btn.disabled = true; btn.textContent = 'Enviando...'; }
-  var ord = (typeof getNextOrder === 'function') ? getNextOrder() : Date.now().toString().slice(-5);
-  var user = authSession.username || 'Cliente';
-  var detalle = 'Pedido #' + ord + ' | ' + o.nombre + ' | ' + (esDiam ? ('Diamantes: '+o.cantidad+' | ID FF: '+o.ffId) : ('Pines: '+o.cantidad+' | WhatsApp: '+wa)) + ' | Total: ' + _manMXN(o.precio) + ' | Método: ' + met.nombre + ' | SIN SALDO · RECARGA MANUAL';
-  fetch(NOTIF_RECARGA_URL, {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ usuario:user, username:user, metodo:'PEDIDO MANUAL (sin saldo): ' + (esDiam?'Diamantes':'Pines') + ' - ' + met.nombre, monto:_manMXN(o.precio) + ' - Pedido #' + ord, monto_acreditar:0, extra:detalle, foto_base64:_manFoto })
-  }).then(function(r){ return r.json(); }).then(function(res){
+  var btn = document.getElementById('man-send'), txt0 = btn ? btn.getAttribute('data-txt') : ''; if(btn){ btn.disabled = true; btn.textContent = 'Enviando...'; }
+  var user = authSession.username || 'Cliente', ord = '', payload;
+  var titular = ''; (met.filas || []).forEach(function(f){ if(/titular/i.test(f.k)) titular = f.v; });
+  if(esSaldo){
+    payload = { usuario:user, username:user, metodo:'Transferencia Bancaria', monto:_manMXN(monto), monto_acreditar:monto,
+      extra:'Recarga de saldo | ' + met.nombre + (titular ? ' (' + titular + ')' : ''), foto_base64:_manFoto };
+  } else {
+    ord = (typeof getNextOrder === 'function') ? getNextOrder() : Date.now().toString().slice(-5);
+    var detalle = 'Pedido #' + ord + ' | ' + o.nombre + ' | ' + (esDiam ? ('Diamantes: '+o.cantidad+' | ID FF: '+o.ffId) : ('Pines: '+o.cantidad+' | WhatsApp: '+wa)) + ' | Total: ' + _manMXN(o.precio) + ' | Método: ' + met.nombre + ' | SIN SALDO · RECARGA MANUAL';
+    payload = { usuario:user, username:user, metodo:'PEDIDO MANUAL (sin saldo): ' + (esDiam?'Diamantes':'Pines') + ' - ' + met.nombre, monto:_manMXN(o.precio) + ' - Pedido #' + ord, monto_acreditar:0, extra:detalle, foto_base64:_manFoto };
+  }
+  var liberar = function(){ _manEnviando = false; if(btn){ btn.disabled = false; btn.textContent = txt0; } };
+  fetch(NOTIF_RECARGA_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })
+  .then(function(r){ return r.json(); }).then(function(res){
     if(res && res.success){
-      if(typeof registrarPedido === 'function') registrarPedido(o.nombre + ' (MANUAL)', o.cantidad, esDiam ? 'diamantes' : 'otro', esDiam ? o.ffId : '', o.precio, 0);
-      manualMostrarOk(ord, o);
-    } else {
-      _manEnviando = false; if(btn){ btn.disabled = false; btn.textContent = 'Enviar comprobante y pedir ' + (esDiam?'recarga':'pines'); }
-      _manToast('No se pudo enviar el comprobante. Intenta otra vez.', 4500); console.error('[MANUAL] respuesta:', res);
-    }
-  }).catch(function(err){
-    _manEnviando = false; if(btn){ btn.disabled = false; btn.textContent = 'Enviar comprobante y pedir ' + (esDiam?'recarga':'pines'); }
-    _manToast('Error de conexión. Intenta otra vez.', 4500); console.error('[MANUAL]', err);
-  });
+      if(!esSaldo && typeof registrarPedido === 'function') registrarPedido(o.nombre + ' (MANUAL)', o.cantidad, esDiam ? 'diamantes' : 'otro', esDiam ? o.ffId : '', o.precio, 0);
+      manualMostrarOk(ord, o, monto);
+    } else { liberar(); _manToast('No se pudo enviar el comprobante. Intenta otra vez.', 4500); console.error('[MANUAL] respuesta:', res); }
+  }).catch(function(err){ liberar(); _manToast('Error de conexión. Intenta otra vez.', 4500); console.error('[MANUAL]', err); });
 }
-function manualMostrarOk(ord, o){
+function manualMostrarOk(ord, o, monto){
   var b = document.getElementById('man-body'); if(!b) return;
-  b.innerHTML = '<div class="mn-ok"><div class="ic">&#9989;</div><h3>¡Pedido enviado!</h3><p>Pedido <b style="color:#67e8f9">#'+_manEsc(ord)+'</b> · '+_manEsc(o.nombre)+'</p>'
-    + '<p>Revisaremos tu comprobante y haremos la '+(o.tipo==='diamantes'?'recarga':'entrega')+' <b style="color:#fff">manualmente</b>. Puedes ver el estado en <b style="color:#fff">Mis compras</b>.</p>'
-    + '<button type="button" class="mn-send" onclick="manualCerrar();if(typeof goPage===\'function\')goPage(\'miscompras\')">Ver mis compras</button>'
-    + '<button type="button" class="mn-ghost" onclick="manualCerrar();if(typeof cerrarDiamDetalle===\'function\')try{cerrarDiamDetalle()}catch(e){}">Cerrar</button></div>';
+  if(o.tipo === 'saldo'){
+    b.innerHTML = '<div class="mn-ok"><div class="ic">&#9989;</div><h3>¡Comprobante enviado!</h3><p>Recibimos tu comprobante por <b style="color:#67e8f9">'+_manEsc(_manMXN(monto))+'</b>.</p>'
+      + '<p>Acreditaremos tu saldo <b style="color:#fff">manualmente</b> cuando lo revisemos.</p>'
+      + '<button type="button" class="mn-send" onclick="manualCerrar();if(typeof goPage===\'function\')goPage(\'saldo\')">Ir a Billetera</button>'
+      + '<button type="button" class="mn-ghost" onclick="manualCerrar()">Cerrar</button></div>';
+  } else {
+    b.innerHTML = '<div class="mn-ok"><div class="ic">&#9989;</div><h3>¡Pedido enviado!</h3><p>Pedido <b style="color:#67e8f9">#'+_manEsc(ord)+'</b> · '+_manEsc(o.nombre)+'</p>'
+      + '<p>Revisaremos tu comprobante y haremos la '+(o.tipo==='diamantes'?'recarga':'entrega')+' <b style="color:#fff">manualmente</b>. Puedes ver el estado en <b style="color:#fff">Mis compras</b>.</p>'
+      + '<button type="button" class="mn-send" onclick="manualCerrar();if(typeof goPage===\'function\')goPage(\'miscompras\')">Ver mis compras</button>'
+      + '<button type="button" class="mn-ghost" onclick="manualCerrar();if(typeof cerrarDiamDetalle===\'function\')try{cerrarDiamDetalle()}catch(e){}">Cerrar</button></div>';
+  }
   _manEnviando = false;
 }
+
+// ═══ Recarga de saldo con transferencia + comprobante (mientras los pagos automáticos están apagados) ═══
+// El comprobante llega a tu Telegram con el monto a acreditar; tú acreditas el saldo a mano.
+function saldoAbrir(){ manualAbrir({tipo:'saldo'}); }
+(function(){
+  if(typeof PAGOS_DESACTIVADOS === 'undefined' || !PAGOS_DESACTIVADOS || !SALDO_METODOS.length) return;
+  ['abrirRecargaSheet','abrirMetodoSheet','openBinanceModal','recElegirMetodo','rcElegirMetodo'].forEach(function(n){ if(typeof window[n] === 'function') window[n] = function(){ saldoAbrir(); }; });
+  function cta(){
+    var root = document.getElementById('page-saldo'); if(!root || root.querySelector('#sal-cta')) return;
+    var av = root.querySelector('.pagos-aviso'); if(!av) return;
+    var d = document.createElement('div'); d.className = 'sal-cta'; d.id = 'sal-cta';
+    d.innerHTML = '<div class="sal-cta-t">&#128179; Recargar saldo</div><div class="sal-cta-s">Pon el monto, transfiere y sube tu comprobante. Acreditamos tu saldo manualmente cuando lo revisemos.</div><button type="button" class="mn-send" onclick="saldoAbrir()">Recargar saldo</button>';
+    av.parentNode.replaceChild(d, av);
+  }
+  setTimeout(cta, 500); window.addEventListener('load', function(){ setTimeout(cta, 700); });
+  var r = document.getElementById('page-saldo'); if(r) new MutationObserver(function(){ setTimeout(cta, 50); }).observe(r, {childList:true, subtree:true});
+})();
