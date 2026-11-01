@@ -12884,30 +12884,37 @@ document.addEventListener('keydown', function(e){
 // MANUAL_METODOS: datos de pago que se muestran al cliente. Mientras esté vacío se muestra
 //   "Buscamos banca..." y no se puede enviar. Ejemplo:
 //   {id:'banco1', nombre:'Banco X', filas:[{k:'Titular',v:'Nombre'},{k:'CLABE',v:'000000000000000000'}], copiar:'000000000000000000'}
-var RECARGA_MANUAL = true;
+// Diamantes: false = automático con saldo (API prendida) · true = pedido manual con comprobante, sin saldo ni API
+var RECARGA_MANUAL_DIAMANTES = false;
+// Pines: true = pedido manual con comprobante, sin saldo ni API · false = automático con saldo
+var RECARGA_MANUAL_PINES = true;
+var RECARGA_MANUAL = RECARGA_MANUAL_DIAMANTES || RECARGA_MANUAL_PINES;
+var KLAR = {id:'klar', nombre:'Klar',
+   filas:[{k:'Titular',v:'Francisco Menesses'},{k:'CLABE',v:'661180006413009414'}],
+   copiar:'661180006413009414', copiarLabel:'Copiar CLABE'};
 var HEY_BANCO = {id:'heybanco', nombre:'Hey Banco',
-   filas:[{k:'Titular',v:'Yamileth Ez'},{k:'CLABE',v:'167078000087693211'}],
+   filas:[{k:'Titular',v:'Yamileth Z'},{k:'CLABE',v:'167078000087693211'}],
    copiar:'167078000087693211', copiarLabel:'Copiar CLABE'};
-var MANUAL_METODOS = [HEY_BANCO];
+var MANUAL_METODOS = [KLAR, HEY_BANCO];
 // Métodos para RECARGAR SALDO (Billetera / botón Depositar)
-var SALDO_METODOS = [HEY_BANCO];
+var SALDO_METODOS = [KLAR, HEY_BANCO];
 
 var _manLista = [], _manOrden = null, _manMetodo = null, _manFoto = '', _manFotoNom = '', _manEnviando = false, _manUltFoco = null;
 
 (function(){
-  if(!RECARGA_MANUAL) return;
-  var MSG = '\u26D4 La recarga automática está apagada. Pide tu recarga con comprobante.';
+  var D = RECARGA_MANUAL_DIAMANTES, P = RECARGA_MANUAL_PINES;
+  if(!D && !P) return;
 
-  // (A) Red de seguridad: ninguna compra de diamantes/pines llega a la API del proveedor
+  // (A) Red de seguridad: lo que está en manual no llega a la API del proveedor
   var _fetch = window.fetch;
   window.fetch = function(url, opts){
     try{
       if(opts && typeof opts.body === 'string'){
         var u = String(url), b = null;
-        if(typeof COMPRAR_RECARGA_URL !== 'undefined' && u === COMPRAR_RECARGA_URL){
+        if(D && typeof COMPRAR_RECARGA_URL !== 'undefined' && u === COMPRAR_RECARGA_URL){
           b = JSON.parse(opts.body);
           if(b && b.action === 'comprar' && b.package_id != null) return Promise.resolve(new Response(JSON.stringify({success:false,error:'Recarga automatica desactivada'}),{status:200,headers:{'Content-Type':'application/json'}}));
-        } else if(typeof PORTERO_URL !== 'undefined' && u === PORTERO_URL){
+        } else if(P && typeof PORTERO_URL !== 'undefined' && u === PORTERO_URL){
           b = JSON.parse(opts.body);
           if(b && b.quantity != null) return Promise.resolve(new Response(JSON.stringify({success:false,error:'Compra automatica de pines desactivada'}),{status:200,headers:{'Content-Type':'application/json'}}));
         }
@@ -12916,60 +12923,72 @@ var _manLista = [], _manOrden = null, _manMetodo = null, _manFoto = '', _manFoto
     return _fetch.apply(this, arguments);
   };
 
-  // (B) Puntos de entrada: llevan al pedido manual
-  window.confirmarDiamCompra = function(){ manualContinuarDiam(); };
-  window._procesarRecargaAutomatica = function(p, ffId){ if(p) manualAbrir({tipo:'diamantes', nombre:p.nombre, cantidad:p.diamantes, precio:p.precio, ffId:ffId||''}); };
-  window._ejecutarRecargaVerificada = window._procesarRecargaAutomatica;
-  window.confirmarCompraPinApi = function(){
-    var p = (typeof PINES_API !== 'undefined' && _pinApiIdxActual !== null) ? PINES_API[_pinApiIdxActual] : null; if(!p) return;
-    var min = p.min || 1;
-    if(_pinApiCantActual < min){ var e = document.getElementById('pinapi-m-err'); if(e){ e.textContent = 'La cantidad mínima para este producto es '+min+' pines.'; e.style.display = 'block'; } return; }
-    manualAbrir({tipo:'pines', nombre:p.nombre, cantidad:_pinApiCantActual, precio:p.precio * _pinApiCantActual});
-  };
-  window.submitPinSaldo = function(){
-    var idx = parseInt((document.getElementById('pin-plan')||{}).value), cant = parseInt((document.getElementById('pin-cantidad')||{}).value) || 3;
-    var err = document.getElementById('pin-err');
-    if(cant < 3){ if(err){ err.textContent = 'La compra de pines al mayoreo es mínimo 3 pines.'; err.style.display = 'block'; } return; }
-    if(cant > 10) cant = 10;
-    if(isNaN(idx) || !PINES_API[idx]){ if(err){ err.textContent = 'Elige un producto.'; err.style.display = 'block'; } return; }
-    if(err) err.style.display = 'none';
-    manualAbrir({tipo:'pines', nombre:PINES_API[idx].nombre, cantidad:cant, precio:_calcularTotalPin(idx, cant).total});
-  };
+  // (B) Puntos de entrada: llevan al pedido manual (solo de lo que está en manual)
+  if(D){
+    window.confirmarDiamCompra = function(){ manualContinuarDiam(); };
+    window._procesarRecargaAutomatica = function(p, ffId){ if(p) manualAbrir({tipo:'diamantes', nombre:p.nombre, cantidad:p.diamantes, precio:p.precio, ffId:ffId||''}); };
+    window._ejecutarRecargaVerificada = window._procesarRecargaAutomatica;
+    var _abrirDiam = window.abrirDiamDetalle;
+    window.abrirDiamDetalle = function(idx){
+      _abrirDiam(idx);
+      try{ manualRenderDiamDetalle(); }catch(e){ console.error('[MANUAL] detalle:', e); }
+    };
+  }
+  if(P){
+    window.confirmarCompraPinApi = function(){
+      var p = (typeof PINES_API !== 'undefined' && _pinApiIdxActual !== null) ? PINES_API[_pinApiIdxActual] : null; if(!p) return;
+      var min = p.min || 1;
+      if(_pinApiCantActual < min){ var e = document.getElementById('pinapi-m-err'); if(e){ e.textContent = 'La cantidad mínima para este producto es '+min+' pines.'; e.style.display = 'block'; } return; }
+      manualAbrir({tipo:'pines', nombre:p.nombre, cantidad:_pinApiCantActual, precio:p.precio * _pinApiCantActual});
+    };
+    window.submitPinSaldo = function(){
+      var idx = parseInt((document.getElementById('pin-plan')||{}).value), cant = parseInt((document.getElementById('pin-cantidad')||{}).value) || 3;
+      var err = document.getElementById('pin-err');
+      if(cant < 3){ if(err){ err.textContent = 'La compra de pines al mayoreo es mínimo 3 pines.'; err.style.display = 'block'; } return; }
+      if(cant > 10) cant = 10;
+      if(isNaN(idx) || !PINES_API[idx]){ if(err){ err.textContent = 'Elige un producto.'; err.style.display = 'block'; } return; }
+      if(err) err.style.display = 'none';
+      manualAbrir({tipo:'pines', nombre:PINES_API[idx].nombre, cantidad:cant, precio:_calcularTotalPin(idx, cant).total});
+    };
+    var _abrirPin = window.abrirPinApiModal;
+    window.abrirPinApiModal = function(idx){
+      _abrirPin(idx);
+      try{
+        var s = document.getElementById('pinapi-m-saldo'); if(s && s.parentElement) s.parentElement.style.display = 'none';
+        var b = document.getElementById('pinapi-submit-btn'); if(b) b.textContent = 'Continuar al pago';
+      }catch(e){}
+    };
+  }
 
-  // Detalle de diamantes: se reemplaza por la versión "sin saldo"
-  var _abrirDiam = window.abrirDiamDetalle;
-  window.abrirDiamDetalle = function(idx){
-    _abrirDiam(idx);
-    try{ manualRenderDiamDetalle(); }catch(e){ console.error('[MANUAL] detalle:', e); }
-  };
-  // Modal de pines: se quita el saldo y se cambia el texto del botón
-  var _abrirPin = window.abrirPinApiModal;
-  window.abrirPinApiModal = function(idx){
-    _abrirPin(idx);
-    try{
-      var s = document.getElementById('pinapi-m-saldo'); if(s && s.parentElement) s.parentElement.style.display = 'none';
-      var b = document.getElementById('pinapi-submit-btn'); if(b) b.textContent = 'Continuar al pago';
-    }catch(e){}
-  };
-
-  // (C) Textos: ya no es "automático/instantáneo" ni se paga con saldo
-  var st = document.createElement('style'); st.textContent = '.rc-badge.auto{display:none!important}#banner-txt{display:none!important}'; document.head.appendChild(st);
-  var REEMPL = [[/entrega autom[aá]tica 24\/7\.?/gi,'Entrega manual.'],[/entrega autom[aá]tica/gi,'Entrega manual'],[/recarga instant[aá]nea directa a tu id/gi,'Recarga manual a tu ID'],[/recarga instant[aá]nea/gi,'Recarga manual'],[/^\s*autom[aá]tica\s*$/i,'manual'],[/al instante/gi,'con entrega manual'],[/Comprar y recibir PIN/g,'Continuar al pago'],[/Entrega autom&aacute;tica/g,'Entrega manual']];
+  // (C) Textos: solo se cambian donde algo está en manual
+  var st = document.createElement('style'); st.textContent = (D ? '.rc-badge.auto{display:none!important}' : '') + '#banner-txt{display:none!important}'; document.head.appendChild(st);
+  var RA = [[/entrega autom[aá]tica 24\/7\.?/gi,'Entrega manual.'],[/entrega autom[aá]tica/gi,'Entrega manual']];
+  var RD = [[/recarga instant[aá]nea directa a tu id/gi,'Recarga manual a tu ID'],[/recarga instant[aá]nea/gi,'Recarga manual']];
+  var RP = [[/al instante/gi,'con entrega manual'],[/Comprar y recibir PIN/g,'Continuar al pago']];
+  var MAP = {};
+  if(D){ MAP['page-diamantes'] = RA.concat(RD); }
+  if(D && P){ MAP['page-pines'] = RA.concat(RD, RP); } else if(D){ MAP['page-pines'] = RA.concat(RD); } else if(P){ MAP['page-pines'] = RP; }
+  if(P){ MAP['modal-pinapi'] = RA.concat(RP); }
   function parchear(){
-    ['page-diamantes','page-pines','modal-pinapi'].forEach(function(id){
+    Object.keys(MAP).forEach(function(id){
       var root = document.getElementById(id); if(!root) return;
-      var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), n, cambios = [];
-      while(n = w.nextNode()){ var t = n.nodeValue, o = t; REEMPL.forEach(function(r){ t = t.replace(r[0], r[1]); }); if(t !== o) cambios.push([n, t]); }
+      var reglas = MAP[id], w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), n, cambios = [];
+      while(n = w.nextNode()){ var t = n.nodeValue, o = t; reglas.forEach(function(r){ t = t.replace(r[0], r[1]); }); if(t !== o) cambios.push([n, t]); }
       cambios.forEach(function(c){ c[0].nodeValue = c[1]; });
-      root.querySelectorAll('div,span,p').forEach(function(e){
-        if(e.children.length === 0 && /^\s*Tu saldo disponible\s*$/i.test(e.textContent) && e.parentElement) e.parentElement.style.display = 'none';
-      });
+      if(P && id === 'modal-pinapi'){
+        root.querySelectorAll('div,span,p').forEach(function(e){
+          if(e.children.length === 0 && /^\s*Tu saldo disponible\s*$/i.test(e.textContent) && e.parentElement) e.parentElement.style.display = 'none';
+        });
+      }
     });
   }
   function faqManual(){
+    var txt = 'Primero recargas tu saldo en Billetera: transfieres a una de nuestras cuentas y subes tu comprobante. '
+      + (D ? 'Los diamantes se piden pagando directo con comprobante (sin usar saldo) y los recargamos manualmente. ' : 'Con tu saldo compras diamantes y llegan de forma automática. ')
+      + (P ? 'Los pines se piden pagando directo con comprobante (sin usar saldo) y los entregamos manualmente.' : 'Con tu saldo también compras pines.');
     document.querySelectorAll('.faq-item').forEach(function(it){
       var q = it.querySelector('.faq-q');
-      if(q && /^\s*Como pago/i.test(q.textContent)){ var a = it.querySelector('.faq-a-inner'); if(a) a.textContent = 'En diamantes y pines pagas por transferencia: eliges tu paquete, ves los datos de pago y subes tu comprobante. La recarga se hace manualmente cuando lo revisamos. Para recargar saldo, entra a Billetera, pon el monto y sube tu comprobante.'; }
+      if(q && /^\s*Como pago/i.test(q.textContent)){ var a = it.querySelector('.faq-a-inner'); if(a) a.textContent = txt; }
     });
   }
   setTimeout(faqManual, 400); window.addEventListener('load', function(){ setTimeout(faqManual, 400); });
@@ -13067,7 +13086,7 @@ function manualPintarMetodos(){
 }
 function manualElegirMetodo(id){ _manMetodo = id; manualPintarMetodos(); }
 function manualCopiar(id, btn){
-  var m = null; _manLista.forEach(function(x){ if(x.id === id) m = x; }); if(!m || !m.copiar) return;
+  var m = null; _manLista.concat(SALDO_METODOS, MANUAL_METODOS).forEach(function(x){ if(x.id === id) m = x; }); if(!m || !m.copiar) return;
   var ok = function(){ if(btn){ var t = btn.innerHTML; btn.innerHTML = '&#10003; Copiado'; setTimeout(function(){ btn.innerHTML = t; }, 2000); } };
   if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(m.copiar).then(ok).catch(function(){ _manToast('Copia manualmente: '+m.copiar, 5000); });
   else _manToast('Copia manualmente: '+m.copiar, 5000);
@@ -13170,9 +13189,23 @@ function saldoAbrir(){ manualAbrir({tipo:'saldo'}); }
     var root = document.getElementById('page-saldo'); if(!root || root.querySelector('#sal-cta')) return;
     var av = root.querySelector('.pagos-aviso'); if(!av) return;
     var d = document.createElement('div'); d.className = 'sal-cta'; d.id = 'sal-cta';
-    d.innerHTML = '<div class="sal-cta-t">&#128179; Recargar saldo</div><div class="sal-cta-s">Pon el monto, transfiere y sube tu comprobante. Acreditamos tu saldo manualmente cuando lo revisemos.</div><button type="button" class="mn-send" onclick="saldoAbrir()">Recargar saldo</button>';
+    var bancos = SALDO_METODOS.map(function(m){
+      return '<div class="mn-pay"><div class="mn-pay-h">'+_manEsc(m.nombre)+'</div>'
+        + (m.filas||[]).map(function(f){ return '<div class="mn-pay-r"><span>'+_manEsc(f.k)+'</span><b>'+_manEsc(f.v)+'</b></div>'; }).join('')
+        + (m.copiar ? '<div class="mn-pay-r" style="justify-content:flex-end"><button type="button" class="mn-copy" onclick="manualCopiar(\''+_manEsc(m.id)+'\',this)">&#128203; '+_manEsc(m.copiarLabel||'Copiar')+'</button></div>' : '')
+        + '</div>';
+    }).join('');
+    d.innerHTML = '<div class="sal-cta-t">Depositar saldo</div><div class="sal-cta-s">Transfiere a una de estas cuentas, sube tu comprobante y acreditamos tu saldo cuando lo revisemos.</div>' + bancos + '<button type="button" class="mn-send" onclick="saldoAbrir()">Ya pagu&eacute; &middot; subir comprobante</button>';
     av.parentNode.replaceChild(d, av);
   }
   setTimeout(cta, 500); window.addEventListener('load', function(){ setTimeout(cta, 700); });
   var r = document.getElementById('page-saldo'); if(r) new MutationObserver(function(){ setTimeout(cta, 50); }).observe(r, {childList:true, subtree:true});
+})();
+
+
+// ── Sitio solo en tema oscuro (el tema claro no está diseñado) ──
+(function(){
+  try{ localStorage.setItem('cs_theme','dark'); }catch(e){}
+  if(document.body) document.body.classList.remove('light-mode');
+  window.toggleTheme = function(){};
 })();
