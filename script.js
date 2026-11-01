@@ -3463,7 +3463,7 @@ function admToggleNav(force){
 }
 
 function admFullTab(tab){
-  var tabs=['stats','users','pedidos','saldos','top','puntos','codigos','chat','resenas','soporte','inactivos','seguridad','config'];
+  var tabs=['stats','users','pedidos','saldos','top','puntos','codigos','chat','resenas','soporte','inactivos','seguridad','recargas','config'];
   tabs.forEach(function(t){
     var btn=document.getElementById('admn-'+t);
     var sec=document.getElementById('adms-'+t);
@@ -3482,6 +3482,7 @@ function admFullTab(tab){
   if(tab==='soporte') admSopCargarLista();
   if(tab==='inactivos') admInactCargar();
   if(tab==='seguridad') admSegCargar();
+  if(tab==='recargas') admCrtCargar();
   // Cerrar el drawer al elegir una opción en móvil
   if(window.innerWidth < 901) admToggleNav(false);
 }
@@ -12884,8 +12885,8 @@ document.addEventListener('keydown', function(e){
 // MANUAL_METODOS: datos de pago que se muestran al cliente. Mientras esté vacío se muestra
 //   "Buscamos banca..." y no se puede enviar. Ejemplo:
 //   {id:'banco1', nombre:'Banco X', filas:[{k:'Titular',v:'Nombre'},{k:'CLABE',v:'000000000000000000'}], copiar:'000000000000000000'}
-// Diamantes: false = automático con saldo (API prendida) · true = pedido manual con comprobante, sin saldo ni API
-var RECARGA_MANUAL_DIAMANTES = false;
+// Diamantes: true = carrito de recargas pagado directo con comprobante (sin saldo); tú confirmas el pago en el panel y se recarga por API si hay saldo del proveedor, o a mano · false = automático con saldo
+var RECARGA_MANUAL_DIAMANTES = true;
 // Pines: true = pedido manual con comprobante, sin saldo ni API · false = automático con saldo
 var RECARGA_MANUAL_PINES = true;
 var RECARGA_MANUAL = RECARGA_MANUAL_DIAMANTES || RECARGA_MANUAL_PINES;
@@ -12911,7 +12912,7 @@ var _manLista = [], _manOrden = null, _manMetodo = null, _manFoto = '', _manFoto
     try{
       if(opts && typeof opts.body === 'string'){
         var u = String(url), b = null;
-        if(D && typeof COMPRAR_RECARGA_URL !== 'undefined' && u === COMPRAR_RECARGA_URL){
+        if(D && !window.__RC_ADMIN_API && typeof COMPRAR_RECARGA_URL !== 'undefined' && u === COMPRAR_RECARGA_URL){
           b = JSON.parse(opts.body);
           if(b && b.action === 'comprar' && b.package_id != null) return Promise.resolve(new Response(JSON.stringify({success:false,error:'Recarga automatica desactivada'}),{status:200,headers:{'Content-Type':'application/json'}}));
         } else if(P && typeof PORTERO_URL !== 'undefined' && u === PORTERO_URL){
@@ -12925,14 +12926,17 @@ var _manLista = [], _manOrden = null, _manMetodo = null, _manFoto = '', _manFoto
 
   // (B) Puntos de entrada: llevan al pedido manual (solo de lo que está en manual)
   if(D){
-    window.confirmarDiamCompra = function(){ manualContinuarDiam(); };
-    window._procesarRecargaAutomatica = function(p, ffId){ if(p) manualAbrir({tipo:'diamantes', nombre:p.nombre, cantidad:p.diamantes, precio:p.precio, ffId:ffId||''}); };
+    // Diamantes: carrito de recargas sin saldo (ver módulo CARRITO DE RECARGAS más abajo)
+    window.confirmarDiamCompra = function(){ crtAddDesdeDetalle(true); };
+    window._procesarRecargaAutomatica = function(p, ffId){ crtAddProducto(p, ffId); };
     window._ejecutarRecargaVerificada = window._procesarRecargaAutomatica;
     var _abrirDiam = window.abrirDiamDetalle;
     window.abrirDiamDetalle = function(idx){
       _abrirDiam(idx);
-      try{ manualRenderDiamDetalle(); }catch(e){ console.error('[MANUAL] detalle:', e); }
+      try{ crtRenderDetalle(); }catch(e){ console.error('[CARRITO] detalle:', e); }
     };
+    var _gp = window.goPage;
+    window.goPage = function(){ var r = _gp.apply(this, arguments); try{ crtBarra(); }catch(e){} return r; };
   }
   if(P){
     window.confirmarCompraPinApi = function(){
@@ -12966,7 +12970,7 @@ var _manLista = [], _manOrden = null, _manMetodo = null, _manFoto = '', _manFoto
   var RD = [[/recarga instant[aá]nea directa a tu id/gi,'Recarga manual a tu ID'],[/recarga instant[aá]nea/gi,'Recarga manual']];
   var RP = [[/al instante/gi,'con entrega manual'],[/Comprar y recibir PIN/g,'Continuar al pago']];
   var MAP = {};
-  if(D){ MAP['page-diamantes'] = RA.concat(RD); }
+  if(D){ MAP['page-diamantes'] = RA.concat(RD, [[/^\s*Comprar\s*$/,'Agregar'],[/y tu saldo devuelto/gi,'y se te devolverá tu pago']]); }
   if(D && P){ MAP['page-pines'] = RA.concat(RD, RP); } else if(D){ MAP['page-pines'] = RA.concat(RD); } else if(P){ MAP['page-pines'] = RP; }
   if(P){ MAP['modal-pinapi'] = RA.concat(RP); }
   function parchear(){
@@ -12984,7 +12988,7 @@ var _manLista = [], _manOrden = null, _manMetodo = null, _manFoto = '', _manFoto
   }
   function faqManual(){
     var txt = 'Primero recargas tu saldo en Billetera: transfieres a una de nuestras cuentas y subes tu comprobante. '
-      + (D ? 'Los diamantes se piden pagando directo con comprobante (sin usar saldo) y los recargamos manualmente. ' : 'Con tu saldo compras diamantes y llegan de forma automática. ')
+      + (D ? 'Los diamantes se piden desde el carrito: pagas directo (sin usar saldo), subes tu comprobante y los recargamos en cuanto lo confirmamos. ' : 'Con tu saldo compras diamantes y llegan de forma automática. ')
       + (P ? 'Los pines se piden pagando directo con comprobante (sin usar saldo) y los entregamos manualmente.' : 'Con tu saldo también compras pines.');
     document.querySelectorAll('.faq-item').forEach(function(it){
       var q = it.querySelector('.faq-q');
@@ -13209,3 +13213,360 @@ function saldoAbrir(){ manualAbrir({tipo:'saldo'}); }
   if(document.body) document.body.classList.remove('light-mode');
   window.toggleTheme = function(){};
 })();
+
+
+// ═══════════════════════ CARRITO DE RECARGAS DE DIAMANTES (sin saldo) ═══════════════════════
+// Con RECARGA_MANUAL_DIAMANTES = true los diamantes se piden desde un carrito:
+//   el cliente paga directo (Klar / Hey Banco), sube su comprobante y llega a tu Telegram.
+//   Tú confirmas el pago en el panel admin → pestaña "Recargas": se intenta recargar con la API
+//   del proveedor y, si no hay saldo o no está disponible, queda marcada para hacerla a mano.
+//   Cada recarga completada registra el pedido y otorga los puntos del Top.
+// Requiere la tabla `recargas_manuales` (archivo recargas_manuales.sql).
+var CRT_TABLA = 'recargas_manuales', CRT_PID_BASE = 1000000, CRT_MAX = 30;
+var _crtCart = [], _crtModo = 'mismo', _crtIdUnico = '', _crtIds = {}, _crtMetodo = null, _crtFoto = '', _crtFotoRaw = '', _crtFotoNom = '', _crtEnviando = false, _crtFoco = null;
+try{ _crtCart = JSON.parse(localStorage.getItem('cs_rcart') || '[]'); if(!Array.isArray(_crtCart)) _crtCart = []; }catch(e){ _crtCart = []; }
+
+function _crtOn(){ return (typeof RECARGA_MANUAL_DIAMANTES !== 'undefined') && RECARGA_MANUAL_DIAMANTES; }
+function crtProductos(){ try{ return _getDiamProductos(_diamTipoActual) || []; }catch(e){ return []; } }
+function crtIdxPorKey(k){ var l = crtProductos(); for(var i = 0; i < l.length; i++){ if(l[i].key === k) return i; } return -1; }
+function crtUnidades(){ return _crtCart.reduce(function(a,i){ return a + i.q; }, 0); }
+function crtTotal(){ return _crtCart.reduce(function(a,i){ return a + i.q * i.p; }, 0); }
+function crtGuardar(){ try{ localStorage.setItem('cs_rcart', JSON.stringify(_crtCart)); }catch(e){} crtBarra(); }
+function crtUUID(){ return (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : ('cs-' + Date.now() + '-' + Math.random().toString(36).slice(2)); }
+
+function crtAddProducto(p, ffId){
+  var i = crtIdxPorKey(p && p.key); if(i < 0) return;
+  if(ffId) _crtIdUnico = ffId;
+  if(crtAdd(i, 1)) crtAbrirCarrito();
+}
+function crtAdd(i, q){
+  var p = crtProductos()[i]; if(!p) return false; q = q || 1;
+  if(crtUnidades() + q > CRT_MAX){ _manToast('Máximo ' + CRT_MAX + ' recargas por pedido'); return false; }
+  var ex = null; _crtCart.forEach(function(x){ if(x.k === p.key) ex = x; });
+  if(ex) ex.q += q;
+  else _crtCart.push({k:p.key, n:p.nombre, d:p.diamantes, p:p.precio, q:q, pk:p.package_id || null, ck:p.catalog_id || null, man:!!(p.tipo === 'manual' || !p.package_id), pase:!!p.esPase});
+  crtGuardar(); return true;
+}
+function crtCambiarQ(k, d){
+  _crtCart.forEach(function(x){ if(x.k === k){
+    if(d > 0 && crtUnidades() >= CRT_MAX){ _manToast('Máximo ' + CRT_MAX + ' recargas por pedido'); return; }
+    x.q = Math.max(0, x.q + d);
+  } });
+  _crtCart = _crtCart.filter(function(x){ return x.q > 0; }); crtGuardar(); crtRender();
+}
+function crtQuitar(k){ _crtCart = _crtCart.filter(function(x){ return x.k !== k; }); crtGuardar(); crtRender(); }
+function crtSyncPrecios(){
+  var l = crtProductos();
+  _crtCart.forEach(function(x){ l.forEach(function(p){ if(p.key === x.k){ x.p = p.precio; x.n = p.nombre; x.d = p.diamantes; x.pk = p.package_id || null; x.ck = p.catalog_id || null; } }); });
+  crtGuardar();
+}
+function crtUnidadesLista(){ var u = []; _crtCart.forEach(function(x){ for(var n = 0; n < x.q; n++) u.push(x); }); return u; }
+
+// ── Barra inferior (solo en la página de diamantes) ──
+function crtBarra(){
+  var bar = document.getElementById('crt-bar'); if(!bar) return;
+  var pg = document.getElementById('page-diamantes'), act = !!(pg && pg.classList.contains('active'));
+  if(!_crtOn() || !act){ bar.style.display = 'none'; return; }
+  var u = crtUnidades(), c = document.getElementById('crt-bar-c'), t = document.getElementById('crt-bar-t');
+  if(c) c.style.display = u ? 'flex' : 'none';
+  if(t) t.textContent = u ? ('\uD83D\uDED2 ' + u + ' · ' + _manMXN(crtTotal())) : '';
+  bar.style.display = 'flex';
+}
+// Botón "Agregar" de las tarjetas del catálogo
+document.addEventListener('click', function(e){
+  if(!_crtOn()) return;
+  var b = e.target.closest ? e.target.closest('#page-diamantes .rc-card .rc-btn') : null; if(!b) return;
+  var card = b.closest('.rc-card'), m = ((card && card.getAttribute('onclick')) || '').match(/abrirDiamDetalle\((\d+)\)/); if(!m) return;
+  e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+  var i = parseInt(m[1], 10), p = crtProductos()[i];
+  if(crtAdd(i, 1)) _manToast('\u2705 Agregado: ' + (p ? p.nombre : 'recarga') + ' (' + crtUnidades() + ' en el carrito)');
+}, true);
+
+// ── Detalle de un paquete (con carrito) ──
+function crtRenderDetalle(){
+  var p = _diamSeleccionado, det = document.getElementById('diam-detalle'); if(!p || !det) return;
+  det.innerHTML =
+    '<button class="ddet-back" onclick="cerrarDiamDetalle()" style="background:none;border:none;color:#6b7280;font-size:.85rem;cursor:pointer;margin-bottom:1rem;padding:0">&#8592; Volver al catalogo</button>'
+    + '<div class="mn-dcard">'
+    + (p.img ? '<img src="' + _manEsc(p.img) + '" alt="' + _manEsc(p.nombre) + '" style="width:150px;display:block;margin:0 auto 1rem;border-radius:12px" onerror="this.style.display=\'none\'"/>' : '')
+    + '<div class="mn-dname">' + _manEsc(p.nombre) + '</div>'
+    + '<div class="mn-dprice">' + _manEsc(typeof fmt === 'function' ? fmt(p.precio) : _manMXN(p.precio)) + '</div>'
+    + '<div class="mn-dtag">PAGO DIRECTO · SIN SALDO</div>'
+    + (typeof _avisoEntrega === 'function' ? _avisoEntrega(p) : '')
+    + '<div class="mn-note">Agrega las recargas que quieras al carrito. Al final eliges si van a un solo ID o a varios, pagas y subes tu comprobante.</div>'
+    + '<button type="button" class="mn-send" onclick="crtAddDesdeDetalle(false)">Agregar al carrito</button>'
+    + '<button type="button" class="mn-ghost" onclick="crtAddDesdeDetalle(true)">Pagar solo esta &#8594;</button>'
+    + '</div>';
+}
+function crtAddDesdeDetalle(abrir){
+  var p = _diamSeleccionado; if(!p) return;
+  var i = crtIdxPorKey(p.key); if(i < 0) return;
+  if(!crtAdd(i, 1)) return;
+  try{ cerrarDiamDetalle(); }catch(e){}
+  if(abrir) crtAbrirCarrito(); else _manToast('\u2705 Agregado al carrito (' + crtUnidades() + ')');
+}
+
+// ── Modal del carrito ──
+function crtAbrir(){ var ov = document.getElementById('crt-modal'); if(!ov) return; _crtFoco = document.activeElement; ov.style.display = 'flex'; document.documentElement.style.overflow = 'hidden'; var x = ov.querySelector('.mn-x'); if(x) x.focus(); }
+function crtCerrar(){ var ov = document.getElementById('crt-modal'); if(!ov) return; ov.style.display = 'none'; document.documentElement.style.overflow = ''; if(_crtFoco && _crtFoco.focus) try{ _crtFoco.focus(); }catch(e){} }
+document.addEventListener('keydown', function(e){ var ov = document.getElementById('crt-modal'); if(e.key === 'Escape' && ov && ov.style.display === 'flex') crtCerrar(); });
+function crtAbrirCarrito(){ crtSyncPrecios(); _crtEnviando = false; if(!_crtMetodo && MANUAL_METODOS.length) _crtMetodo = MANUAL_METODOS[0].id; crtRender(); crtAbrir(); }
+function crtModo(m){ _crtModo = m; crtRender(); }
+function crtElegirMetodo(id){ _crtMetodo = id; crtRender(); }
+function crtCopiarPrimero(){ var v = _crtIds[0] || ''; var n = crtUnidades(); for(var i = 1; i < n; i++) _crtIds[i] = v; crtRender(); }
+
+function crtRender(){
+  var b = document.getElementById('crt-body'); if(!b) return;
+  var cab = '<div class="mn-eye">RECARGA DE DIAMANTES · SIN SALDO</div><h2 class="mn-h" id="crt-title">Tu carrito</h2>';
+  if(!_crtCart.length){
+    b.innerHTML = cab + '<div class="mn-warn"><span style="font-size:1.4rem">&#128722;</span><div><b>Carrito vacío</b>Agrega recargas desde el catálogo de diamantes.</div></div><button type="button" class="mn-send" onclick="crtCerrar()">Ver catálogo</button>';
+    return;
+  }
+  var uni = crtUnidadesLista(), h = cab;
+  h += '<div class="crt-items">' + _crtCart.map(function(x){
+    var k = _manEsc(x.k).replace(/'/g, '');
+    return '<div class="crt-it"><div class="crt-it-i"><b>' + _manEsc(x.n) + '</b><small>' + _manEsc(_manMXN(x.p)) + ' c/u' + (x.pase ? ' · se manda por regalo (1 a 4 días)' : '') + '</small></div>'
+      + '<div class="crt-q"><button type="button" aria-label="Quitar uno" onclick="crtCambiarQ(\'' + k + '\',-1)">&minus;</button><span>' + x.q + '</span><button type="button" aria-label="Agregar uno" onclick="crtCambiarQ(\'' + k + '\',1)">+</button></div>'
+      + '<div class="crt-sub">' + _manEsc(_manMXN(x.p * x.q)) + '</div>'
+      + '<button type="button" class="crt-del" aria-label="Quitar del carrito" onclick="crtQuitar(\'' + k + '\')">Quitar</button></div>';
+  }).join('') + '</div>';
+
+  h += '<div class="mn-sec">¿A qué ID(s) recargamos?</div><div class="crt-modos" role="radiogroup">'
+    + '<button type="button" class="crt-modo' + (_crtModo === 'mismo' ? ' sel' : '') + '" role="radio" aria-checked="' + (_crtModo === 'mismo') + '" onclick="crtModo(\'mismo\')"><b>Recargar todo al mismo ID</b><small>Todas las recargas del carrito van a una sola cuenta.</small></button>'
+    + '<button type="button" class="crt-modo' + (_crtModo === 'diferentes' ? ' sel' : '') + '" role="radio" aria-checked="' + (_crtModo === 'diferentes') + '" onclick="crtModo(\'diferentes\')"><b>Recargar a diferentes IDs</b><small>Pon un ID distinto para cada recarga.</small></button></div>';
+  if(_crtModo === 'mismo'){
+    h += '<label class="mn-lbl" for="crt-id-unico" style="margin-top:.8rem">ID de Free Fire *</label><input class="mn-inp" id="crt-id-unico" type="text" inputmode="numeric" maxlength="15" placeholder="Ej: 123456789" value="' + _manEsc(_crtIdUnico) + '" oninput="_crtIdUnico=this.value">';
+  } else {
+    h += '<div style="margin-top:.8rem">' + uni.map(function(u, n){
+      return '<label class="mn-lbl" for="crt-id-' + n + '">' + (n + 1) + '. ' + _manEsc(u.n) + '</label><input class="mn-inp" id="crt-id-' + n + '" type="text" inputmode="numeric" maxlength="15" placeholder="ID de Free Fire" value="' + _manEsc(_crtIds[n] || '') + '" oninput="_crtIds[' + n + ']=this.value" style="margin-bottom:.6rem">';
+    }).join('') + (uni.length > 1 ? '<button type="button" class="mn-chip" onclick="crtCopiarPrimero()">Copiar el primero a todos</button>' : '') + '</div>';
+  }
+
+  h += '<div class="mn-sum" style="margin-top:1rem"><div class="mn-row"><span>Recargas</span><b>' + uni.length + '</b></div><div class="mn-row tot"><span>Total a pagar</span><b>' + _manEsc(_manMXN(crtTotal())) + '</b></div></div>';
+
+  h += '<div class="mn-sec">Método de pago</div>';
+  if(!MANUAL_METODOS.length){
+    h += '<div class="mn-warn"><span style="font-size:1.4rem">&#128179;</span><div><b>Método de pago</b>Buscamos banca, ya que la nuestra está llena.</div></div>';
+  } else {
+    h += MANUAL_METODOS.map(function(m){
+      var sel = m.id === _crtMetodo, id = _manEsc(m.id);
+      return '<div class="mn-pay' + (sel ? ' sel' : '') + '" role="radio" aria-checked="' + sel + '" tabindex="0" onclick="crtElegirMetodo(\'' + id + '\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();crtElegirMetodo(\'' + id + '\');}">'
+        + '<div class="mn-pay-h">' + _manEsc(m.nombre) + '</div>'
+        + (m.filas || []).map(function(f){ return '<div class="mn-pay-r"><span>' + _manEsc(f.k) + '</span><b>' + _manEsc(f.v) + '</b></div>'; }).join('')
+        + (m.copiar ? '<div class="mn-pay-r" style="justify-content:flex-end"><button type="button" class="mn-copy" onclick="event.stopPropagation();manualCopiar(\'' + id + '\',this)">&#128203; ' + _manEsc(m.copiarLabel || 'Copiar') + '</button></div>' : '')
+        + '</div>';
+    }).join('');
+  }
+  h += '<div class="mn-sec">Comprobante de pago</div>'
+    + '<input type="file" id="crt-foto" accept="image/*" style="display:none" onchange="crtOnFoto(this)">'
+    + '<div class="mn-up" id="crt-up" role="button" tabindex="0" style="' + (_crtFotoRaw ? 'display:none' : '') + '" onclick="document.getElementById(\'crt-foto\').click()" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}"><div style="font-size:1.5rem">&#128247;</div><b>Toca para elegir la foto</b>Captura de tu pago (JPG, PNG)</div>'
+    + '<div class="mn-prev" id="crt-prev" style="' + (_crtFotoRaw ? 'display:block' : '') + '"><img id="crt-prev-img" alt="Vista previa del comprobante" src="' + (_crtFotoRaw || '') + '"><small id="crt-prev-nom">' + (_crtFotoNom ? '\u2713 ' + _manEsc(_crtFotoNom) : '') + '</small><button type="button" onclick="crtQuitarFoto()">Cambiar foto</button></div>'
+    + '<div class="mn-note">Transfiere el total exacto y sube tu comprobante. Cuando confirmemos tu pago hacemos las recargas y cuentan para el Top de compradores. No se usa tu saldo.</div>'
+    + '<button type="button" class="mn-send" id="crt-send" onclick="crtEnviar()"' + (MANUAL_METODOS.length ? '' : ' disabled') + '>Enviar comprobante y pedir recargas</button>';
+  b.innerHTML = h;
+}
+function crtOnFoto(input){
+  var f = input.files && input.files[0]; if(!f) return;
+  if(!/^image\//i.test(f.type)){ _manToast('El comprobante debe ser una imagen'); input.value = ''; return; }
+  if(f.size > 15 * 1024 * 1024){ _manToast('La imagen es muy pesada (máx. 15 MB)'); input.value = ''; return; }
+  var rd = new FileReader();
+  rd.onload = function(ev){
+    var raw = ev.target.result, img = new Image();
+    img.onload = function(){
+      var b64 = raw;
+      try{ var max = 1600, w = img.width, h = img.height; if(w > max || h > max){ var r = Math.min(max / w, max / h); w = Math.round(w * r); h = Math.round(h * r); }
+        var c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(img, 0, 0, w, h);
+        var j = c.toDataURL('image/jpeg', 0.85); if(j && j.length < raw.length) b64 = j; }catch(e){}
+      _crtFoto = b64; _crtFotoRaw = raw; _crtFotoNom = f.name;
+      var pv = document.getElementById('crt-prev'), up = document.getElementById('crt-up');
+      document.getElementById('crt-prev-img').src = raw; document.getElementById('crt-prev-nom').textContent = '\u2713 ' + f.name;
+      if(pv) pv.style.display = 'block'; if(up) up.style.display = 'none';
+    };
+    img.onerror = function(){ _manToast('No se pudo leer la imagen'); crtQuitarFoto(); };
+    img.src = raw;
+  };
+  rd.onerror = function(){ _manToast('No se pudo leer la imagen'); };
+  rd.readAsDataURL(f);
+}
+function crtQuitarFoto(){ _crtFoto = ''; _crtFotoRaw = ''; _crtFotoNom = ''; var i = document.getElementById('crt-foto'); if(i) i.value = ''; var pv = document.getElementById('crt-prev'), up = document.getElementById('crt-up'); if(pv) pv.style.display = 'none'; if(up) up.style.display = 'block'; }
+
+// ── Envío: se registra el pedido y luego se manda el comprobante a Telegram ──
+function crtEnviar(){
+  if(_crtEnviando) return;
+  if(typeof authSession === 'undefined' || !authSession){ _manToast('Inicia sesión para continuar'); setTimeout(function(){ if(typeof showAuthModal === 'function') showAuthModal(); }, 600); return; }
+  if(!_crtCart.length){ _manToast('Tu carrito está vacío'); return; }
+  if(!MANUAL_METODOS.length){ _manToast('Aún no hay método de pago disponible'); return; }
+  var met = null; MANUAL_METODOS.forEach(function(m){ if(m.id === _crtMetodo) met = m; }); if(!met) met = MANUAL_METODOS[0];
+  var uni = crtUnidadesLista(), ids = [];
+  for(var n = 0; n < uni.length; n++){ ids.push(((_crtModo === 'mismo') ? _crtIdUnico : (_crtIds[n] || '')).toString().replace(/\s+/g, '')); }
+  for(var k = 0; k < ids.length; k++){
+    if(!/^\d{5,15}$/.test(ids[k])){
+      _manToast(_crtModo === 'mismo' ? 'Revisa tu ID de Free Fire (solo números)' : ('Revisa el ID de la recarga ' + (k + 1) + ' (solo números)'), 4500);
+      var el = document.getElementById(_crtModo === 'mismo' ? 'crt-id-unico' : 'crt-id-' + k); if(el){ el.scrollIntoView({behavior:'smooth', block:'center'}); el.focus(); } return;
+    }
+  }
+  if(!_crtFoto){ _manToast('\u26A0 Sube tu comprobante de pago'); var u = document.getElementById('crt-up'); if(u) u.scrollIntoView({behavior:'smooth', block:'center'}); return; }
+
+  _crtEnviando = true;
+  var btn = document.getElementById('crt-send'); if(btn){ btn.disabled = true; btn.textContent = 'Enviando...'; }
+  var items = uni.map(function(x, i){ return {i:i, k:x.k, nombre:x.n, diamantes:x.d, precio:x.p, package_id:x.pk, catalog_id:x.ck, manual:!!x.man, pase:!!x.pase, ff_id:ids[i], estado:'pendiente', idem:crtUUID()}; });
+  var total = crtTotal(), liberar = function(){ _crtEnviando = false; var b2 = document.getElementById('crt-send'); if(b2){ b2.disabled = false; b2.textContent = 'Enviar comprobante y pedir recargas'; } };
+
+  sb.post(CRT_TABLA, {user_id:authSession.id, username:authSession.username, items:items, total:total, metodo:met.nombre, modo_ids:_crtModo, estado:'pendiente'}).then(function(r){
+    var row = Array.isArray(r) ? r[0] : r;
+    if(!row || row.id == null) throw new Error('sin id');
+    var rid = row.id, user = authSession.username || 'Cliente';
+    var resumen = (_crtModo === 'mismo')
+      ? ('ID ' + ids[0] + ': ' + _crtCart.map(function(x){ return x.n + (x.q > 1 ? ' x' + x.q : ''); }).join(', '))
+      : items.map(function(it, i){ return (i + 1) + ') ' + it.nombre + ' → ' + it.ff_id; }).join(' | ');
+    var payload = { usuario:user, username:user, metodo:'PEDIDO MANUAL (sin saldo): Diamantes - ' + met.nombre, monto:_manMXN(total) + ' - Pedido R' + rid, monto_acreditar:0,
+      extra:'Pedido R' + rid + ' | ' + uni.length + ' recarga' + (uni.length === 1 ? '' : 's') + ' | ' + (_crtModo === 'mismo' ? 'MISMO ID' : 'IDs DIFERENTES') + ' | ' + resumen + ' | Total: ' + _manMXN(total) + ' | SIN SALDO · confirmar en panel admin → Recargas', foto_base64:_crtFoto };
+    return fetch(NOTIF_RECARGA_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)}).then(function(r2){ return r2.json(); }).then(function(res){
+      if(res && res.success){ crtMostrarOk(rid, uni.length, total); }
+      else {
+        // el comprobante no llegó: se cancela el pedido para que no quede colgado en el panel
+        sb.patch(CRT_TABLA, {estado:'cancelada', nota:'No se pudo enviar el comprobante', updated_at:new Date().toISOString()}, 'id=eq.' + rid).catch(function(){});
+        liberar(); _manToast('No se pudo enviar el comprobante. Intenta otra vez.', 4500);
+      }
+    });
+  }).catch(function(err){
+    console.error('[CARRITO]', err); liberar();
+    _manToast('No se pudo registrar tu pedido. Intenta otra vez o escríbenos por WhatsApp.', 5500);
+  });
+}
+function crtMostrarOk(rid, n, total){
+  _crtCart = []; _crtIds = {}; _crtIdUnico = ''; _crtFoto = ''; _crtFotoRaw = ''; _crtFotoNom = ''; _crtEnviando = false; crtGuardar();
+  var b = document.getElementById('crt-body'); if(!b) return;
+  b.innerHTML = '<div class="mn-ok"><div class="ic">&#9989;</div><h3>¡Pedido enviado!</h3><p>Pedido <b style="color:#67e8f9">R' + _manEsc(rid) + '</b> · ' + n + ' recarga' + (n === 1 ? '' : 's') + ' · ' + _manEsc(_manMXN(total)) + '</p>'
+    + '<p>Confirmaremos tu pago y haremos tus recargas. Puedes ver el estado en <b style="color:#fff">Mis recargas</b>.</p>'
+    + '<button type="button" class="mn-send" onclick="crtAbrirHistorial()">Ver mis recargas</button><button type="button" class="mn-ghost" onclick="crtCerrar()">Cerrar</button></div>';
+}
+
+// ── Historial del cliente ──
+var CRT_ESTADO_TXT = {pendiente:'En revisión', proceso:'En proceso', manual:'En proceso', verificar:'En proceso', completada:'Recargada \u2705', rechazada:'Rechazada', cancelada:'Cancelada', atencion:'En proceso'};
+function crtAbrirHistorial(){
+  var b = document.getElementById('crt-body'); if(!b) return;
+  if(typeof authSession === 'undefined' || !authSession){ _manToast('Inicia sesión para ver tus recargas'); setTimeout(function(){ if(typeof showAuthModal === 'function') showAuthModal(); }, 600); return; }
+  b.innerHTML = '<div class="mn-eye">TUS PEDIDOS</div><h2 class="mn-h" id="crt-title">Mis recargas</h2><div class="mn-note">Cargando...</div>'; crtAbrir();
+  sb.get(CRT_TABLA, 'user_id=eq.' + authSession.id + '&estado=neq.cancelada&order=created_at.desc&limit=15').then(function(rows){
+    rows = Array.isArray(rows) ? rows : [];
+    var h = '<div class="mn-eye">TUS PEDIDOS</div><h2 class="mn-h" id="crt-title">Mis recargas</h2>';
+    if(!rows.length) h += '<div class="mn-note">Todavía no tienes pedidos de recarga.</div>';
+    rows.forEach(function(r){
+      var f = r.created_at ? new Date(r.created_at).toLocaleString('es-MX', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}) : '';
+      h += '<div class="mn-sum" style="margin-bottom:.7rem"><div class="mn-row"><span>Pedido R' + _manEsc(r.id) + ' · ' + _manEsc(f) + '</span><b>' + _manEsc(_manMXN(r.total)) + '</b></div>'
+        + (r.items || []).map(function(it){ return '<div class="mn-row"><span>' + _manEsc(it.nombre) + '<br><small style="color:#7f8fb8">ID ' + _manEsc(it.ff_id) + '</small></span><b>' + _manEsc(CRT_ESTADO_TXT[it.estado] || it.estado) + '</b></div>'; }).join('') + '</div>';
+    });
+    h += '<button type="button" class="mn-ghost" onclick="crtCerrar()">Cerrar</button>';
+    b.innerHTML = h;
+  }).catch(function(){ b.innerHTML = '<div class="mn-eye">TUS PEDIDOS</div><h2 class="mn-h" id="crt-title">Mis recargas</h2><div class="mn-warn"><span style="font-size:1.4rem">&#9888;&#65039;</span><div><b>No se pudo cargar</b>Intenta de nuevo en un momento.</div></div><button type="button" class="mn-ghost" onclick="crtCerrar()">Cerrar</button>'; });
+}
+
+// ═══════════ PANEL ADMIN · pestaña "Recargas" ═══════════
+var _crtaFilas = [], _crtaBusy = {};
+function admCrtCargar(){
+  var el = document.getElementById('crta-lista'); if(!el) return;
+  el.innerHTML = '<div class="crta-vacio">Cargando...</div>';
+  sb.get(CRT_TABLA, 'select=*&order=created_at.desc&limit=100').then(function(rows){ _crtaFilas = Array.isArray(rows) ? rows : []; admCrtRender(); })
+    .catch(function(e){ console.error('[RECARGAS]', e); el.innerHTML = '<div class="crta-vacio" style="color:#ff6b6b">No se pudo cargar. ¿Ya creaste la tabla <b>recargas_manuales</b> en Supabase? (archivo recargas_manuales.sql)</div>'; });
+}
+function _crtaChip(e){ var t = {pendiente:'Por confirmar', proceso:'En proceso (proveedor)', manual:'Hacer a mano', verificar:'Verificar', completada:'Completada', rechazada:'Rechazada', cancelada:'Cancelada', atencion:'Requiere atención'}; return '<span class="crta-chip e-' + _manEsc(e) + '">' + _manEsc(t[e] || e) + '</span>'; }
+function admCrtRender(){
+  var el = document.getElementById('crta-lista'); if(!el) return;
+  var f = (document.getElementById('crta-filtro') || {}).value || 'activas';
+  var filas = _crtaFilas.filter(function(r){ if(r.estado === 'cancelada') return f === 'todas'; return f === 'todas' ? true : (r.estado === 'pendiente' || r.estado === 'atencion'); });
+  var res = document.getElementById('crta-resumen'); if(res) res.textContent = _crtaFilas.filter(function(r){ return r.estado === 'pendiente' || r.estado === 'atencion'; }).length + ' por atender · ' + filas.length + ' mostrados';
+  if(!filas.length){ el.innerHTML = '<div class="crta-vacio">Sin pedidos</div>'; return; }
+  el.innerHTML = filas.map(function(r){
+    var busy = !!_crtaBusy[r.id], its = r.items || [], hayPend = its.some(function(x){ return x.estado === 'pendiente'; }), abierto = r.estado !== 'completada' && r.estado !== 'rechazada' && r.estado !== 'cancelada';
+    var fecha = r.created_at ? new Date(r.created_at).toLocaleString('es-MX', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}) : '';
+    return '<div class="crta-card"><div class="crta-h"><b>R' + _manEsc(r.id) + '</b> · ' + _manEsc(r.username || '') + ' <span class="crta-f">' + _manEsc(fecha) + '</span>' + _crtaChip(r.estado) + '</div>'
+      + '<div class="crta-meta">' + _manEsc(r.modo_ids === 'mismo' ? 'Mismo ID' : 'IDs diferentes') + ' · ' + _manEsc(r.metodo || '') + ' · <b>' + _manEsc(_manMXN(r.total)) + '</b></div>'
+      + '<div class="crta-items">' + its.map(function(it, i){
+          var bt = '';
+          if(!busy){
+            if(it.estado === 'manual') bt = '<button type="button" onclick="admCrtHecha(' + r.id + ',' + i + ')">Ya la hice \u2713</button>';
+            else if(it.estado === 'verificar') bt = '<button type="button" onclick="admCrtReintentar(' + r.id + ',' + i + ')">Reintentar API</button><button type="button" onclick="admCrtHecha(' + r.id + ',' + i + ')">Ya está recargada \u2713</button>';
+            else if(it.estado === 'proceso') bt = '<button type="button" onclick="admCrtHecha(' + r.id + ',' + i + ')">Marcar completada \u2713</button>';
+          }
+          return '<div class="crta-it"><div class="crta-it-t"><span>' + (i + 1) + '. ' + _manEsc(it.nombre) + ' → <b>' + _manEsc(it.ff_id) + '</b></span>' + _crtaChip(it.estado) + '</div>'
+            + (it.detalle ? '<small class="crta-det">' + _manEsc(it.detalle) + '</small>' : '') + (bt ? '<div class="crta-bt">' + bt + '</div>' : '') + '</div>';
+        }).join('') + '</div>'
+      + (abierto ? '<div class="crta-act">'
+          + (hayPend ? '<button type="button" class="crta-ok" ' + (busy ? 'disabled' : '') + ' onclick="admCrtAprobar(' + r.id + ')">' + (busy ? 'Procesando...' : '\u2705 Confirmar pago y recargar') + '</button>' : '')
+          + '<button type="button" class="crta-no" ' + (busy ? 'disabled' : '') + ' onclick="admCrtRechazar(' + r.id + ')">Rechazar</button></div>' : '')
+      + '</div>';
+  }).join('');
+}
+function _crtaFila(id){ var x = null; _crtaFilas.forEach(function(r){ if(String(r.id) === String(id)) x = r; }); return x; }
+function _crtaEstadoFila(row){ var st = (row.items || []).map(function(x){ return x.estado; }); if(st.every(function(s){ return s === 'completada'; })) return 'completada'; if(st.every(function(s){ return s === 'pendiente'; })) return 'pendiente'; return 'atencion'; }
+function admCrtGuardar(row){
+  if(row.estado !== 'rechazada') row.estado = _crtaEstadoFila(row);
+  return sb.patch(CRT_TABLA, {items:row.items, estado:row.estado, updated_at:new Date().toISOString()}, 'id=eq.' + row.id);
+}
+// registrarPedido() original usa la sesión del cliente; aquí se manda con el usuario del pedido
+function _crtaRegistrarPedido(username, producto, cantidad, ffId, precio){
+  try{ fetch(NOTIF_PEDIDO_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:username, producto:producto, cantidad:String(cantidad), tipo:'diamantes', ff_id:ffId || '', precio:precio || 0, progreso_total:0})}).catch(function(e){ console.warn('[PEDIDO]', e); }); }catch(e){}
+}
+function _crtaCompletarItem(row, i, modo, darPuntos){
+  var it = row.items[i];
+  if(!it.reg){ _crtaRegistrarPedido(row.username, it.nombre + ' (' + modo + ')', it.diamantes, it.ff_id, it.precio); it.reg = true; }
+  if(darPuntos && !it.pts && row.user_id && typeof sb !== 'undefined' && sb.rpc){
+    sb.rpc('otorgar_puntos_pedido', {p_user_id:row.user_id, p_pedido_id:CRT_PID_BASE + Number(row.id) * 100 + i, p_diamantes:Number(it.diamantes) || 0}).catch(function(e){ console.error('[PUNTOS]', e); });
+    it.pts = true;
+  }
+}
+function _crtaClasificar(res){
+  if(res && res.success && (res.status === 'COMPLETED' || res.status === 'PENDING')) return {estado: res.status === 'COMPLETED' ? 'completada' : 'proceso', det:'Proveedor: ' + res.status};
+  var errTxt = String((res && (res.error || res.status)) || 'sin confirmar'), code = String((res && res.code) || '');
+  if(code === 'DUPLICATE_REQUEST' || code === 'PROVIDER_ERROR') return {estado:'verificar', det:code + ': ' + errTxt + ' (revisa en el proveedor antes de recargar a mano)'};
+  var sinFondos = (code === 'PURCHASE_FAILED' || code === 'PRODUCT_INACTIVE' || code === 'ENDPOINT_DISABLED') || (!code && /saldo insuficiente|insufficient|fondos insuficientes|sin fondos|credito insuficiente|balance too low|no balance|limite excedido|no disponible|not available|no encontrado|not found|sin stock|out of stock/i.test(errTxt));
+  if(sinFondos) return {estado:'manual', det:'Sin saldo o no disponible en el proveedor: ' + errTxt};
+  return {estado:'verificar', det:'Respuesta ambigua: ' + errTxt + ' (revisa en el proveedor antes de recargar a mano)'};
+}
+function _crtaProcesarItem(row, i){
+  var it = row.items[i];
+  if(it.manual || !it.package_id || !it.catalog_id){ it.estado = 'manual'; it.detalle = 'Producto sin API: hazla a mano'; return admCrtGuardar(row); }
+  return fetch(COMPRAR_RECARGA_URL, {method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'comprar', package_id:it.package_id, catalog_id:it.catalog_id, player_id:it.ff_id, client_name:row.username, idempotency_key:it.idem})})
+    .then(function(r){ return r.json(); })
+    .then(function(res){ var c = _crtaClasificar(res); it.estado = c.estado; it.detalle = c.det; })
+    .catch(function(){ it.estado = 'verificar'; it.detalle = 'Sin respuesta de la API: revisa en el proveedor antes de recargar a mano'; })
+    .then(function(){
+      if(it.estado === 'completada') _crtaCompletarItem(row, i, 'AUTO', true);
+      else if(it.estado === 'proceso') _crtaCompletarItem(row, i, 'AUTO', false);
+      return admCrtGuardar(row);
+    });
+}
+function _crtaCorrer(row, idxs){
+  _crtaBusy[row.id] = true; admCrtRender(); window.__RC_ADMIN_API = true;
+  var seq = Promise.resolve();
+  idxs.forEach(function(i){ seq = seq.then(function(){ return _crtaProcesarItem(row, i); }); });
+  return seq.catch(function(e){ console.error('[RECARGAS]', e); alert('Hubo un error al guardar el avance. Pulsa Actualizar y revisa el pedido antes de repetir.'); })
+    .then(function(){ window.__RC_ADMIN_API = false; delete _crtaBusy[row.id]; admCrtRender(); });
+}
+function admCrtAprobar(id){
+  var row = _crtaFila(id); if(!row || _crtaBusy[id]) return;
+  var idxs = []; (row.items || []).forEach(function(x, i){ if(x.estado === 'pendiente') idxs.push(i); }); if(!idxs.length) return;
+  if(!confirm('¿Ya verificaste que el pago de este pedido llegó a tu cuenta?\n\nSe intentará hacer ' + idxs.length + ' recarga(s) con la API del proveedor. Las que no se puedan (sin saldo o no disponibles) quedarán marcadas para hacerlas a mano.')) return;
+  _crtaCorrer(row, idxs);
+}
+function admCrtReintentar(id, i){
+  var row = _crtaFila(id); if(!row || _crtaBusy[id]) return;
+  if(!confirm('Se reenviará la misma solicitud al proveedor con la misma clave (si ya se hizo, el proveedor lo detecta como duplicado y no cobra dos veces). ¿Continuar?')) return;
+  row.items[i].estado = 'pendiente'; _crtaCorrer(row, [i]);
+}
+function admCrtHecha(id, i){
+  var row = _crtaFila(id); if(!row || _crtaBusy[id]) return; var it = row.items[i];
+  if(!confirm('¿Confirmas que esta recarga ya está hecha?\n' + it.nombre + ' → ' + it.ff_id)) return;
+  _crtaCompletarItem(row, i, it.estado === 'proceso' ? 'AUTO' : 'MANUAL', true);
+  it.estado = 'completada'; it.detalle = (it.detalle ? it.detalle + ' · ' : '') + 'Confirmada por el admin';
+  admCrtGuardar(row).catch(function(e){ console.error(e); alert('No se pudo guardar. Pulsa Actualizar.'); }).then(admCrtRender);
+}
+function admCrtRechazar(id){
+  var row = _crtaFila(id); if(!row || _crtaBusy[id]) return;
+  if(!confirm('¿Rechazar este pedido? Las recargas pendientes se marcarán como rechazadas. (Si el cliente ya pagó, el reembolso lo haces tú por fuera.)')) return;
+  row.items.forEach(function(x){ if(x.estado === 'pendiente' || x.estado === 'manual' || x.estado === 'verificar') x.estado = 'rechazada'; });
+  row.estado = 'rechazada';
+  admCrtGuardar(row).catch(function(e){ console.error(e); alert('No se pudo guardar. Pulsa Actualizar.'); }).then(admCrtRender);
+}

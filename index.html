@@ -3782,6 +3782,59 @@ body:not(.light-mode) .hm-tt small,body:not(.light-mode) .hm-tt b{font-weight:in
 body:not(.light-mode) .hm-tt small{font-weight:400!important}
 body:not(.light-mode) .hm-tt b{font-weight:600!important}
 
+/* ═══════════ CARRITO DE RECARGAS + PANEL "RECARGAS" ═══════════ */
+.crt-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(.9rem + env(safe-area-inset-bottom));z-index:700;width:min(520px,calc(100% - 1.6rem));display:flex;gap:.5rem}
+.crt-bar button{border:0;border-radius:14px;cursor:pointer;font-family:inherit;font-weight:600;font-size:.92rem;padding:.8rem .9rem;box-shadow:0 14px 34px -12px rgba(0,0,0,.8)}
+.crt-bar-c{flex:1;display:flex;align-items:center;justify-content:space-between;gap:.6rem;background:linear-gradient(135deg,#22d3ee,#5b8cff 60%,#8b5cf6);color:#04101c}
+.crt-bar-c b{font-weight:700}
+.crt-bar-h{background:rgba(13,20,42,.96);color:#dbe6ff;border:1px solid rgba(140,170,255,.28)!important}
+.crt-items{display:grid;gap:.55rem;margin-bottom:.4rem}
+.crt-it{display:grid;grid-template-columns:1fr auto;gap:.4rem .7rem;align-items:center;padding:.7rem .8rem;border-radius:14px;background:rgba(140,170,255,.05);border:1px solid rgba(140,170,255,.14);position:relative}
+.crt-it-i b{display:block;font-size:.95rem;color:#fff;font-weight:600;padding-right:1.6rem}
+.crt-it-i small{display:block;font-size:.78rem;color:#8E9AB8;margin-top:.1rem}
+.crt-q{display:flex;align-items:center;gap:.35rem}
+.crt-q button{width:32px;height:32px;border-radius:10px;border:1px solid rgba(140,170,255,.25);background:rgba(140,170,255,.08);color:#fff;font-size:1.1rem;cursor:pointer;line-height:1}
+.crt-q span{min-width:26px;text-align:center;font-weight:600;color:#fff}
+.crt-sub{grid-column:1/-1;text-align:right;font-weight:600;color:#67e8f9;font-size:.95rem}
+.crt-del{position:absolute;top:.4rem;right:.5rem;width:28px;height:28px;border:0;background:none;color:#8E9AB8;font-size:1.3rem;cursor:pointer;line-height:1}
+.crt-del:hover{color:#ff8fb8}
+.crt-modos{display:grid;gap:.55rem}
+.crt-modo{text-align:left;padding:.8rem .9rem;border-radius:14px;cursor:pointer;color:#fff;font-family:inherit;background:rgba(255,255,255,.02);border:1.5px solid rgba(255,255,255,.1)}
+.crt-modo b{display:block;font-weight:600;font-size:.95rem}
+.crt-modo small{display:block;font-size:.8rem;color:#8E9AB8;margin-top:.15rem}
+.crt-modo.sel{border-color:rgba(34,211,238,.6);background:rgba(34,211,238,.07)}
+.crt-bar button:focus-visible,.crt-modo:focus-visible,.crt-q button:focus-visible{outline:2px solid #67e8f9;outline-offset:2px}
+
+/* Panel admin · Recargas */
+.crta-card{background:rgba(255,255,255,.03);border:1px solid rgba(140,170,255,.16);border-radius:14px;padding:.9rem;margin-bottom:.8rem}
+.crta-h{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;color:#fff;font-size:.95rem}
+.crta-f{color:#8E9AB8;font-size:.78rem}
+.crta-meta{color:#9aa8c9;font-size:.82rem;margin:.35rem 0 .6rem}
+.crta-items{display:grid;gap:.45rem}
+.crta-it{padding:.55rem .65rem;border-radius:10px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.06)}
+.crta-it-t{display:flex;justify-content:space-between;gap:.5rem;align-items:center;flex-wrap:wrap;color:#e5e7eb;font-size:.88rem}
+.crta-det{display:block;color:#8E9AB8;font-size:.76rem;margin-top:.25rem;line-height:1.35}
+.crta-bt,.crta-act{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.5rem}
+.crta-bt button,.crta-act button{padding:.5rem .8rem;border-radius:10px;border:1px solid rgba(140,170,255,.28);background:rgba(140,170,255,.08);color:#e6edff;font-family:inherit;font-weight:600;font-size:.82rem;cursor:pointer}
+.crta-act .crta-ok{background:linear-gradient(135deg,#22d3ee,#5b8cff 60%,#8b5cf6);color:#04101c;border:0}
+.crta-act .crta-no{border-color:rgba(255,80,110,.4);color:#ff8fb8}
+.crta-act button:disabled{opacity:.5;cursor:not-allowed}
+.crta-chip{display:inline-block;padding:.12rem .55rem;border-radius:999px;font-size:.7rem;font-weight:600;background:rgba(140,170,255,.1);border:1px solid rgba(140,170,255,.25);color:#cbd5e1}
+.crta-chip.e-completada{background:rgba(52,227,122,.1);border-color:rgba(52,227,122,.4);color:#5df0a0}
+.crta-chip.e-pendiente{background:rgba(255,210,74,.1);border-color:rgba(255,210,74,.4);color:#ffd24a}
+.crta-chip.e-manual,.crta-chip.e-verificar,.crta-chip.e-atencion,.crta-chip.e-proceso{background:rgba(255,140,60,.1);border-color:rgba(255,140,60,.45);color:#ffb070}
+.crta-chip.e-rechazada,.crta-chip.e-cancelada{background:rgba(255,80,110,.1);border-color:rgba(255,80,110,.4);color:#ff8fb8}
+.crta-vacio{text-align:center;color:#8E9AB8;padding:2rem .5rem;font-size:.9rem}
+@media (prefers-reduced-motion:reduce){.crt-bar button{transition:none}}
+
+.crt-bar-c{font-size:.88rem}
+.crt-bar-c span,.crt-bar-c b{white-space:nowrap}
+.crt-bar-h{flex:0 0 auto}
+
+.crt-it-i b{padding-right:0!important}
+.crt-del{position:static!important;grid-column:1;grid-row:2;justify-self:start;width:auto!important;height:auto!important;padding:.2rem 0!important;font-size:.8rem!important;font-family:inherit;color:#8E9AB8;text-decoration:underline}
+.crt-sub{grid-column:2!important;grid-row:2;text-align:right}
+
 #theme-btn,.theme-btn{display:none!important}
 </style>
 </head>
@@ -7385,6 +7438,7 @@ body:not(.light-mode) .hm-tt b{font-weight:600!important}
       <button class="adm-nav-btn"        id="admn-soporte" onclick="admFullTab('soporte')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Soporte <span id="adm-soporte-badge" style="display:none;background:#ff6b6b;color:#fff;font-size:.6rem;font-weight:800;border-radius:99px;padding:.1rem .4rem;margin-left:.3rem"></span></button>
       <button class="adm-nav-btn"        id="admn-inactivos" onclick="admFullTab('inactivos')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m22 11-3 3-1.5-1.5"/></svg> Gesti&oacute;n de Usuarios</button>
       <button class="adm-nav-btn"        id="admn-seguridad" onclick="admFullTab('seguridad')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Seguridad</button>
+      <button class="adm-nav-btn" id="admn-recargas" onclick="admFullTab('recargas')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M2 9h20"/></svg> Recargas</button>
     </div>
 
     <div class="adm-nav-foot">
@@ -7815,6 +7869,18 @@ body:not(.light-mode) .hm-tt b{font-weight:600!important}
     </div>
   </div>
 
+  <!-- ══ RECARGAS MANUALES (carrito de diamantes) ══ -->
+  <div class="adm-section" id="adms-recargas">
+    <div class="adm-card-title">&#128142; Recargas manuales de diamantes</div>
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-bottom:.8rem">
+      <select id="crta-filtro" onchange="admCrtRender()" style="background:#10131f;border:1px solid rgba(255,255,255,.1);color:#fff;border-radius:9px;padding:.55rem .8rem;font-size:.85rem"><option value="activas">Por atender</option><option value="todas">Todas</option></select>
+      <button onclick="admCrtCargar()" style="padding:.55rem 1rem;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.25);color:#22d3ee;border-radius:9px;font-weight:700;font-size:.82rem;cursor:pointer">&#8635; Actualizar</button>
+      <span id="crta-resumen" style="font-size:.8rem;color:var(--muted)"></span>
+    </div>
+    <div id="crta-lista"><div class="crta-vacio">Presiona Actualizar</div></div>
+    <div style="font-size:.72rem;color:var(--muted);margin-top:.8rem;line-height:1.5">Revisa en tu banco que el pago llegó y luego pulsa <b>Confirmar pago y recargar</b>. Si el proveedor no tiene saldo o el paquete no está disponible, la recarga queda marcada para que la hagas a mano.</div>
+  </div>
+
   <!-- ══ CREAR USUARIO ══ -->
   <div class="adm-section" id="adms-nuevo">
     <div class="adm-card" style="border-color:rgba(0,230,118,.2)">
@@ -8046,6 +8112,14 @@ body:not(.light-mode) .hm-tt b{font-weight:600!important}
     <button type="button" class="mn-x" onclick="manualCerrar()" aria-label="Cerrar">&times;</button>
     <div class="mn-body" id="man-body"></div>
   </div>
+</div>
+<!-- ═══ CARRITO DE RECARGAS (diamantes, sin saldo) ═══ -->
+<div class="mn-ov" id="crt-modal" role="dialog" aria-modal="true" aria-labelledby="crt-title" style="display:none" onclick="if(event.target===this)crtCerrar()">
+  <div class="mn-box"><button type="button" class="mn-x" onclick="crtCerrar()" aria-label="Cerrar">&times;</button><div class="mn-body" id="crt-body"></div></div>
+</div>
+<div class="crt-bar" id="crt-bar" style="display:none">
+  <button type="button" class="crt-bar-c" id="crt-bar-c" onclick="crtAbrirCarrito()"><span id="crt-bar-t"></span><b>Ver carrito &#8594;</b></button>
+  <button type="button" class="crt-bar-h" onclick="crtAbrirHistorial()">Mis recargas</button>
 </div>
 <script src="supabase.js"></script>
 <script src="supabase_integration.js"></script>
