@@ -13570,3 +13570,142 @@ function admCrtRechazar(id){
   row.estado = 'rechazada';
   admCrtGuardar(row).catch(function(e){ console.error(e); alert('No se pudo guardar. Pulsa Actualizar.'); }).then(admCrtRender);
 }
+
+
+// ═══════════════════════ OFERTA EXCLUSIVA · PASE BOYAAH (Inicio) ═══════════════════════
+// Pedido manual: el cliente elige cantidad, mismo ID o IDs diferentes, paga (Klar / Hey Banco) y sube
+// su comprobante. Te llega a Telegram con el detalle y tú envías los pases a mano. No usa saldo ni API.
+// Mayoreo: agrega escalones en `mayoreo`, por ejemplo  mayoreo:[{min:5, precio:20}, {min:10, precio:18}]
+// (a partir de `min` pases, cada uno sale a `precio`). Vacío = precio fijo.
+var OFERTA_PASE = { activa:true, nombre:'Pase Boyaah', precio:22, max:30, mayoreo:[] };
+var _ofxQ = 1, _ofxModo = 'mismo', _ofxIdUnico = '', _ofxIds = {}, _ofxMetodo = null, _ofxFoto = '', _ofxFotoRaw = '', _ofxFotoNom = '', _ofxEnviando = false, _ofxFoco = null;
+
+function ofxPrecioUnit(q){ var p = OFERTA_PASE.precio; (OFERTA_PASE.mayoreo || []).forEach(function(t){ if(q >= t.min && t.precio < p) p = t.precio; }); return p; }
+function ofxTotal(q){ return ofxPrecioUnit(q) * q; }
+function ofxTextoMayoreo(){ var t = (OFERTA_PASE.mayoreo || []).slice().sort(function(a, b){ return a.min - b.min; }); return t.length ? ('Mayoreo: ' + t.map(function(x){ return x.min + '+ a $' + x.precio + ' c/u'; }).join(' · ')) : ''; }
+function ofxPintarCard(){
+  var c = document.getElementById('ofx-boyaah'); if(!c) return;
+  if(!OFERTA_PASE.activa){ c.style.display = 'none'; return; }
+  var n = document.getElementById('ofx-precio'); if(n) n.textContent = '$' + OFERTA_PASE.precio;
+  var s = document.getElementById('ofx-sub'); if(s){ var m = ofxTextoMayoreo(); s.textContent = m || 'Pídelo para uno o varios IDs'; }
+}
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ofxPintarCard); else ofxPintarCard();
+
+function ofxAbrir(){
+  _ofxQ = 1; _ofxEnviando = false; if(!_ofxMetodo && MANUAL_METODOS.length) _ofxMetodo = MANUAL_METODOS[0].id;
+  ofxRender();
+  var ov = document.getElementById('ofx-modal'); if(!ov) return; _ofxFoco = document.activeElement; ov.style.display = 'flex'; document.documentElement.style.overflow = 'hidden';
+  var x = ov.querySelector('.mn-x'); if(x) x.focus();
+}
+function ofxCerrar(){ var ov = document.getElementById('ofx-modal'); if(!ov) return; ov.style.display = 'none'; document.documentElement.style.overflow = ''; if(_ofxFoco && _ofxFoco.focus) try{ _ofxFoco.focus(); }catch(e){} }
+document.addEventListener('keydown', function(e){ var ov = document.getElementById('ofx-modal'); if(e.key === 'Escape' && ov && ov.style.display === 'flex') ofxCerrar(); });
+function ofxCambiarQ(d){ var q = _ofxQ + d; if(q < 1) q = 1; if(q > OFERTA_PASE.max){ q = OFERTA_PASE.max; _manToast('Máximo ' + OFERTA_PASE.max + ' pases por pedido'); } _ofxQ = q; ofxRender(); }
+function ofxModo(m){ _ofxModo = m; ofxRender(); }
+function ofxElegirMetodo(id){ _ofxMetodo = id; ofxRender(); }
+function ofxCopiarPrimero(){ var v = _ofxIds[0] || ''; for(var i = 1; i < _ofxQ; i++) _ofxIds[i] = v; ofxRender(); }
+
+function ofxRender(){
+  var b = document.getElementById('ofx-body'); if(!b) return;
+  var pu = ofxPrecioUnit(_ofxQ), total = pu * _ofxQ, h = '';
+  h += '<div class="mn-eye">OFERTA EXCLUSIVA</div><h2 class="mn-h" id="ofx-title">' + _manEsc(OFERTA_PASE.nombre) + '</h2>';
+  h += '<div class="crt-it"><div class="crt-it-i"><b>' + _manEsc(OFERTA_PASE.nombre) + '</b><small>' + _manEsc(_manMXN(pu)) + ' c/u' + (pu < OFERTA_PASE.precio ? ' · precio de mayoreo' : '') + '</small></div>'
+    + '<div class="crt-q"><button type="button" aria-label="Quitar uno" onclick="ofxCambiarQ(-1)">&minus;</button><span>' + _ofxQ + '</span><button type="button" aria-label="Agregar uno" onclick="ofxCambiarQ(1)">+</button></div>'
+    + '<div class="crt-sub" style="grid-column:1/-1;grid-row:auto">' + _manEsc(_manMXN(total)) + '</div></div>';
+  var m = ofxTextoMayoreo(); if(m) h += '<div class="mn-note" style="margin-top:.6rem">' + _manEsc(m) + '</div>';
+
+  h += '<div class="mn-sec">¿A qué ID(s) lo mandamos?</div><div class="crt-modos" role="radiogroup">'
+    + '<button type="button" class="crt-modo' + (_ofxModo === 'mismo' ? ' sel' : '') + '" role="radio" aria-checked="' + (_ofxModo === 'mismo') + '" onclick="ofxModo(\'mismo\')"><b>Todos al mismo ID</b><small>Todos los pases van a una sola cuenta.</small></button>'
+    + '<button type="button" class="crt-modo' + (_ofxModo === 'diferentes' ? ' sel' : '') + '" role="radio" aria-checked="' + (_ofxModo === 'diferentes') + '" onclick="ofxModo(\'diferentes\')"><b>A diferentes IDs</b><small>Pon un ID distinto para cada pase.</small></button></div>';
+  if(_ofxModo === 'mismo'){
+    h += '<label class="mn-lbl" for="ofx-id-unico" style="margin-top:.8rem">ID de Free Fire *</label><input class="mn-inp" id="ofx-id-unico" type="text" inputmode="numeric" maxlength="15" placeholder="Ej: 123456789" value="' + _manEsc(_ofxIdUnico) + '" oninput="_ofxIdUnico=this.value">';
+  } else {
+    h += '<div style="margin-top:.8rem">';
+    for(var n = 0; n < _ofxQ; n++){
+      h += '<label class="mn-lbl" for="ofx-id-' + n + '">Pase ' + (n + 1) + '</label><input class="mn-inp" id="ofx-id-' + n + '" type="text" inputmode="numeric" maxlength="15" placeholder="ID de Free Fire" value="' + _manEsc(_ofxIds[n] || '') + '" oninput="_ofxIds[' + n + ']=this.value" style="margin-bottom:.6rem">';
+    }
+    if(_ofxQ > 1) h += '<button type="button" class="mn-chip" onclick="ofxCopiarPrimero()">Copiar el primero a todos</button>';
+    h += '</div>';
+  }
+
+  h += '<div class="mn-sum" style="margin-top:1rem"><div class="mn-row"><span>Pases</span><b>' + _ofxQ + '</b></div><div class="mn-row tot"><span>Total a pagar</span><b>' + _manEsc(_manMXN(total)) + '</b></div></div>';
+  h += '<div class="mn-sec">Método de pago</div>';
+  if(!MANUAL_METODOS.length){
+    h += '<div class="mn-warn"><span style="font-size:1.4rem">&#128179;</span><div><b>Método de pago</b>Buscamos banca, ya que la nuestra está llena.</div></div>';
+  } else {
+    h += MANUAL_METODOS.map(function(mt){
+      var sel = mt.id === _ofxMetodo, id = _manEsc(mt.id);
+      return '<div class="mn-pay' + (sel ? ' sel' : '') + '" role="radio" aria-checked="' + sel + '" tabindex="0" onclick="ofxElegirMetodo(\'' + id + '\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();ofxElegirMetodo(\'' + id + '\');}">'
+        + '<div class="mn-pay-h">' + _manEsc(mt.nombre) + '</div>'
+        + (mt.filas || []).map(function(f){ return '<div class="mn-pay-r"><span>' + _manEsc(f.k) + '</span><b>' + _manEsc(f.v) + '</b></div>'; }).join('')
+        + (mt.copiar ? '<div class="mn-pay-r" style="justify-content:flex-end"><button type="button" class="mn-copy" onclick="event.stopPropagation();manualCopiar(\'' + id + '\',this)">&#128203; ' + _manEsc(mt.copiarLabel || 'Copiar') + '</button></div>' : '')
+        + '</div>';
+    }).join('');
+  }
+  h += '<div class="mn-sec">Comprobante de pago</div>'
+    + '<input type="file" id="ofx-foto" accept="image/*" style="display:none" onchange="ofxOnFoto(this)">'
+    + '<div class="mn-up" id="ofx-up" role="button" tabindex="0" style="' + (_ofxFotoRaw ? 'display:none' : '') + '" onclick="document.getElementById(\'ofx-foto\').click()" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}"><div style="font-size:1.5rem">&#128247;</div><b>Toca para elegir la foto</b>Captura de tu pago (JPG, PNG)</div>'
+    + '<div class="mn-prev" id="ofx-prev" style="' + (_ofxFotoRaw ? 'display:block' : '') + '"><img id="ofx-prev-img" alt="Vista previa del comprobante" src="' + (_ofxFotoRaw || '') + '"><small id="ofx-prev-nom">' + (_ofxFotoNom ? '\u2713 ' + _manEsc(_ofxFotoNom) : '') + '</small><button type="button" onclick="ofxQuitarFoto()">Cambiar foto</button></div>'
+    + '<div class="mn-note">Transfiere el total exacto y sube tu comprobante. Cuando confirmemos tu pago te mandamos tus pases. No se usa tu saldo.</div>'
+    + '<button type="button" class="mn-send" id="ofx-send" onclick="ofxEnviar()"' + (MANUAL_METODOS.length ? '' : ' disabled') + '>Enviar comprobante y pedir mis pases</button>';
+  b.innerHTML = h;
+}
+function ofxOnFoto(input){
+  var f = input.files && input.files[0]; if(!f) return;
+  if(!/^image\//i.test(f.type)){ _manToast('El comprobante debe ser una imagen'); input.value = ''; return; }
+  if(f.size > 15 * 1024 * 1024){ _manToast('La imagen es muy pesada (máx. 15 MB)'); input.value = ''; return; }
+  var rd = new FileReader();
+  rd.onload = function(ev){
+    var raw = ev.target.result, img = new Image();
+    img.onload = function(){
+      var b64 = raw;
+      try{ var max = 1600, w = img.width, h = img.height; if(w > max || h > max){ var r = Math.min(max / w, max / h); w = Math.round(w * r); h = Math.round(h * r); }
+        var c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(img, 0, 0, w, h);
+        var j = c.toDataURL('image/jpeg', 0.85); if(j && j.length < raw.length) b64 = j; }catch(e){}
+      _ofxFoto = b64; _ofxFotoRaw = raw; _ofxFotoNom = f.name;
+      var pv = document.getElementById('ofx-prev'), up = document.getElementById('ofx-up');
+      document.getElementById('ofx-prev-img').src = raw; document.getElementById('ofx-prev-nom').textContent = '\u2713 ' + f.name;
+      if(pv) pv.style.display = 'block'; if(up) up.style.display = 'none';
+    };
+    img.onerror = function(){ _manToast('No se pudo leer la imagen'); ofxQuitarFoto(); };
+    img.src = raw;
+  };
+  rd.onerror = function(){ _manToast('No se pudo leer la imagen'); };
+  rd.readAsDataURL(f);
+}
+function ofxQuitarFoto(){ _ofxFoto = ''; _ofxFotoRaw = ''; _ofxFotoNom = ''; var i = document.getElementById('ofx-foto'); if(i) i.value = ''; var pv = document.getElementById('ofx-prev'), up = document.getElementById('ofx-up'); if(pv) pv.style.display = 'none'; if(up) up.style.display = 'block'; }
+
+function ofxEnviar(){
+  if(_ofxEnviando) return;
+  if(typeof authSession === 'undefined' || !authSession){ _manToast('Inicia sesión para continuar'); setTimeout(function(){ if(typeof showAuthModal === 'function') showAuthModal(); }, 600); return; }
+  if(!MANUAL_METODOS.length){ _manToast('Aún no hay método de pago disponible'); return; }
+  var met = null; MANUAL_METODOS.forEach(function(m){ if(m.id === _ofxMetodo) met = m; }); if(!met) met = MANUAL_METODOS[0];
+  var ids = [];
+  for(var n = 0; n < _ofxQ; n++){ ids.push(((_ofxModo === 'mismo') ? _ofxIdUnico : (_ofxIds[n] || '')).toString().replace(/\s+/g, '')); }
+  for(var k = 0; k < ids.length; k++){
+    if(!/^\d{5,15}$/.test(ids[k])){
+      _manToast(_ofxModo === 'mismo' ? 'Revisa tu ID de Free Fire (solo números)' : ('Revisa el ID del pase ' + (k + 1) + ' (solo números)'), 4500);
+      var el = document.getElementById(_ofxModo === 'mismo' ? 'ofx-id-unico' : 'ofx-id-' + k); if(el){ el.scrollIntoView({behavior:'smooth', block:'center'}); el.focus(); } return;
+    }
+  }
+  if(!_ofxFoto){ _manToast('\u26A0 Sube tu comprobante de pago'); var u = document.getElementById('ofx-up'); if(u) u.scrollIntoView({behavior:'smooth', block:'center'}); return; }
+
+  _ofxEnviando = true;
+  var btn = document.getElementById('ofx-send'); if(btn){ btn.disabled = true; btn.textContent = 'Enviando...'; }
+  var pu = ofxPrecioUnit(_ofxQ), total = pu * _ofxQ, user = authSession.username || 'Cliente';
+  var cod = 'BY-' + Date.now().toString(36).toUpperCase().slice(-6);
+  var resumen = (_ofxModo === 'mismo') ? ('ID ' + ids[0] + ' x' + _ofxQ) : ids.map(function(id, i){ return (i + 1) + ') ' + id; }).join(' | ');
+  var payload = { usuario:user, username:user, metodo:'PEDIDO MANUAL (sin saldo): ' + OFERTA_PASE.nombre + ' - ' + met.nombre, monto:_manMXN(total) + ' - Pedido ' + cod, monto_acreditar:0,
+    extra:'Pedido ' + cod + ' | ' + OFERTA_PASE.nombre + ' x' + _ofxQ + ' | ' + (_ofxModo === 'mismo' ? 'MISMO ID' : 'IDs DIFERENTES') + ' | ' + resumen + ' | ' + _manMXN(pu) + ' c/u | Total: ' + _manMXN(total) + ' | SIN SALDO · enviar los pases a mano', foto_base64:_ofxFoto };
+  fetch(NOTIF_RECARGA_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)}).then(function(r){ return r.json(); }).then(function(res){
+    if(res && res.success){
+      ids.forEach(function(id){ if(typeof NOTIF_PEDIDO_URL !== 'undefined'){ try{ fetch(NOTIF_PEDIDO_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:user, producto:OFERTA_PASE.nombre + ' (MANUAL)', cantidad:'1', tipo:'otro', ff_id:id, precio:pu, progreso_total:0})}).catch(function(){}); }catch(e){} } });
+      ofxMostrarOk(cod, _ofxQ, total);
+    } else { _ofxEnviando = false; if(btn){ btn.disabled = false; btn.textContent = 'Enviar comprobante y pedir mis pases'; } _manToast('No se pudo enviar el comprobante. Intenta otra vez.', 4500); }
+  }).catch(function(){ _ofxEnviando = false; if(btn){ btn.disabled = false; btn.textContent = 'Enviar comprobante y pedir mis pases'; } _manToast('Error de conexión. Intenta otra vez.', 4500); });
+}
+function ofxMostrarOk(cod, n, total){
+  _ofxIds = {}; _ofxIdUnico = ''; _ofxFoto = ''; _ofxFotoRaw = ''; _ofxFotoNom = ''; _ofxEnviando = false;
+  var b = document.getElementById('ofx-body'); if(!b) return;
+  b.innerHTML = '<div class="mn-ok"><div class="ic">&#9989;</div><h3>¡Pedido enviado!</h3><p>Pedido <b style="color:#67e8f9">' + _manEsc(cod) + '</b> · ' + n + ' pase' + (n === 1 ? '' : 's') + ' · ' + _manEsc(_manMXN(total)) + '</p>'
+    + '<p>Confirmaremos tu pago y te mandaremos tus pases.</p><button type="button" class="mn-send" onclick="ofxCerrar()">Listo</button></div>';
+}
