@@ -3835,6 +3835,35 @@ body:not(.light-mode) .hm-tt b{font-weight:600!important}
 .crt-del{position:static!important;grid-column:1;grid-row:2;justify-self:start;width:auto!important;height:auto!important;padding:.2rem 0!important;font-size:.8rem!important;font-family:inherit;color:#8E9AB8;text-decoration:underline}
 .crt-sub{grid-column:2!important;grid-row:2;text-align:right}
 
+/* ═══════════ OFERTA EXCLUSIVA (Inicio) ═══════════ */
+.ofx{position:relative;overflow:hidden;margin:1rem 0 0;padding:1.05rem 1.05rem 1.1rem;border-radius:18px;isolation:isolate;
+  background:linear-gradient(135deg,#1a1240 0%,#0f1b45 55%,#2a1659 100%);
+  box-shadow:0 14px 38px -14px rgba(255,190,60,.55),0 0 34px -6px rgba(139,92,246,.55);animation:ofxGlow 2.8s ease-in-out infinite}
+.ofx::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:2px;pointer-events:none;z-index:2;
+  background:linear-gradient(110deg,#ffd24a,#22d3ee,#8b5cf6,#ffd24a);background-size:300% 100%;animation:ofxBorde 4s linear infinite;
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.ofx-shine{position:absolute;inset:0;pointer-events:none;z-index:1;background:linear-gradient(115deg,transparent 38%,rgba(255,255,255,.2) 50%,transparent 62%);transform:translateX(-130%);animation:ofxBrillo 3.4s ease-in-out infinite}
+@keyframes ofxBorde{0%{background-position:0 0}100%{background-position:300% 0}}
+@keyframes ofxBrillo{0%,35%{transform:translateX(-130%)}75%,100%{transform:translateX(130%)}}
+@keyframes ofxGlow{0%,100%{box-shadow:0 14px 38px -14px rgba(255,190,60,.45),0 0 26px -8px rgba(139,92,246,.5)}50%{box-shadow:0 14px 44px -10px rgba(255,200,70,.8),0 0 42px -4px rgba(34,211,238,.6)}}
+@keyframes ofxPop{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.ofx-top{position:relative;z-index:3;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.8rem}
+.ofx-tag{padding:.28rem .7rem;border-radius:999px;background:linear-gradient(135deg,#ffe27a,#f59e0b);color:#1a1000;font-size:.72rem;font-weight:700;letter-spacing:1.2px;box-shadow:0 6px 16px -6px rgba(245,158,11,.8)}
+.ofx-pop{padding:.28rem .65rem;border-radius:999px;background:linear-gradient(135deg,#ff4d8d,#f43f5e);color:#fff;font-size:.7rem;font-weight:700;letter-spacing:1px;animation:ofxPop 1.8s ease-in-out infinite}
+.ofx-body{position:relative;z-index:3;display:flex;align-items:center;gap:.85rem}
+.ofx-ico{width:54px;height:54px;border-radius:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.7rem;background:rgba(255,210,74,.12);border:1px solid rgba(255,210,74,.4)}
+.ofx-txt{flex:1;min-width:0}
+.ofx-name{font-size:1.2rem;font-weight:600;color:#fff;line-height:1.2}
+.ofx-sub{font-size:.82rem;color:#b9c6ee;margin-top:.2rem;line-height:1.35}
+.ofx-price{text-align:right;flex-shrink:0;line-height:1}
+.ofx-price b{display:block;font-size:2rem;font-weight:600;color:#ffd24a;font-variant-numeric:tabular-nums}
+.ofx-price small{display:block;font-size:.72rem;color:#d7cfa0;margin-top:.2rem;letter-spacing:.5px}
+.ofx-btn{position:relative;z-index:3;width:100%;margin-top:.95rem;padding:.8rem;border:0;border-radius:13px;cursor:pointer;font-size:.98rem;font-weight:600;color:#04101c;-webkit-text-fill-color:#04101c;background:linear-gradient(135deg,#ffe27a,#f59e0b);box-shadow:0 10px 24px -10px rgba(245,158,11,.9);transition:transform .18s,filter .2s}
+.ofx-btn:hover{transform:translateY(-1px);filter:brightness(1.07)}
+.ofx-btn:active{transform:scale(.985)}
+.ofx-btn:focus-visible{outline:2px solid #67e8f9;outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.ofx,.ofx::before,.ofx-shine,.ofx-pop{animation:none}.ofx-shine{display:none}}
+
 #theme-btn,.theme-btn{display:none!important}
 </style>
 </head>
@@ -4042,6 +4071,18 @@ body:not(.light-mode) .hm-tt b{font-weight:600!important}
         <button type="button" class="hm-btn g" onclick="goPage('transferir')">Transferir</button>
       </div>
     </div>
+
+    <!-- OFERTA EXCLUSIVA: Pase Boyaah -->
+    <section class="ofx" id="ofx-boyaah" aria-label="Oferta exclusiva">
+      <div class="ofx-shine"></div>
+      <div class="ofx-top"><span class="ofx-tag">OFERTA EXCLUSIVA</span><span class="ofx-pop">POPULAR</span></div>
+      <div class="ofx-body">
+        <div class="ofx-ico">&#127903;&#65039;</div>
+        <div class="ofx-txt"><div class="ofx-name">Pase Boyaah</div><div class="ofx-sub" id="ofx-sub">P&iacute;delo para uno o varios IDs</div></div>
+        <div class="ofx-price"><b id="ofx-precio">$22</b><small>MXN</small></div>
+      </div>
+      <button type="button" class="ofx-btn" onclick="ofxAbrir()">Pedir ahora</button>
+    </section>
 
     <h2 class="hm-h">&iquest;Qu&eacute; necesitas?</h2>
     <div class="hm-grid">
@@ -8120,6 +8161,10 @@ body:not(.light-mode) .hm-tt b{font-weight:600!important}
 <div class="crt-bar" id="crt-bar" style="display:none">
   <button type="button" class="crt-bar-c" id="crt-bar-c" onclick="crtAbrirCarrito()"><span id="crt-bar-t"></span><b>Ver carrito &#8594;</b></button>
   <button type="button" class="crt-bar-h" onclick="crtAbrirHistorial()">Mis recargas</button>
+</div>
+<!-- ═══ OFERTA EXCLUSIVA · PASE BOYAAH ═══ -->
+<div class="mn-ov" id="ofx-modal" role="dialog" aria-modal="true" aria-labelledby="ofx-title" style="display:none" onclick="if(event.target===this)ofxCerrar()">
+  <div class="mn-box"><button type="button" class="mn-x" onclick="ofxCerrar()" aria-label="Cerrar">&times;</button><div class="mn-body" id="ofx-body"></div></div>
 </div>
 <script src="supabase.js"></script>
 <script src="supabase_integration.js"></script>
