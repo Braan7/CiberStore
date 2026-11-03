@@ -277,7 +277,7 @@ var obStep = 0;
 /* \u2500\u2500 CURRENCY / LANG \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 var LANG     = localStorage.getItem('cs_lang')     || 'es';
 var CURRENCY = localStorage.getItem('cs_currency') || 'MXN';
-var USD_MXN  = 17; // 1 USD = 17 MXN
+var USD_MXN  = 18.7;   // solo de respaldo: el valor real llega de la API de tipo de cambio // 1 USD = 17 MXN
 var RETIRO_COMISION = 0.15; // 15% de comision por retiro
 // Catalogo amplio de monedas: bandera, nombre, simbolo. Las tasas reales llegan de la API.
 var CURRENCY_LIST = [
@@ -332,6 +332,7 @@ function actualizarTiposDeCambio(){
       });
       // USD_MXN = cuantos MXN es 1 USD (para conversiones internas de USDT)
       if(r.USD) USD_MXN = 1 / r.USD;
+      if(typeof recalcularPreciosDiamantes === 'function') recalcularPreciosDiamantes();
       // Guardar en cache local con fecha
       try {
         localStorage.setItem('cs_rates', JSON.stringify({ rates: RATES, usd_mxn: USD_MXN, ts: Date.now() }));
@@ -7797,14 +7798,22 @@ var _diamSeleccionado = null;
 // ═══════════ RECARGAS AUTOMÁTICAS (Recargas América type=recharge) ═══════════
 // package_id = el ID de Recargas América | precio = costo USD × 20 (redondeado)
 var RECARGAS_AUTO = [
-  { package_id:351, catalog_id:5,  sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.655,  precio:12.5,   img:'img/diam-100.png'  },
-  { package_id:348, catalog_id:6,  sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:1.9649, precio:38.3,   img:'img/diam-310.png'  },
-  { package_id:350, catalog_id:7,  sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.3222, precio:64.06,   img:'img/diam-520.png'  },
-  { package_id:347, catalog_id:8,  sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.1709,  precio:118.13,  img:'img/diam-1060.png' },
-  { package_id:346, catalog_id:9,  sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:12.2471,precio:233.39,  img:'img/diam-2180.png' },
-  { package_id:349, catalog_id:10, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:31.1701,precio:596.41,  img:'img/diam-5600.png' },
+  { package_id:351, catalog_id:5,  sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.655, precioUSD:0.6699, precio:12.53,   img:'img/diam-100.png'  },
+  { package_id:348, catalog_id:6,  sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:1.9649, precioUSD:2.0098, precio:37.58,   img:'img/diam-310.png'  },
+  { package_id:350, catalog_id:7,  sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.3222, precioUSD:3.3976, precio:63.54,   img:'img/diam-520.png'  },
+  { package_id:347, catalog_id:8,  sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.1709, precioUSD:6.3109, precio:118.01,  img:'img/diam-1060.png' },
+  { package_id:346, catalog_id:9,  sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:12.2471, precioUSD:12.5209, precio:234.14,  img:'img/diam-2180.png' },
+  { package_id:349, catalog_id:10, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:31.1701, precioUSD:32.8646, precio:614.57,  img:'img/diam-5600.png' },
   { package_id:null, catalog_id:null, nombre:'11.200 Diamantes + 1.120 Bono', diamantes:12320, costoUSD:66.32, precio:1300, manual:true }
 ];
+// Precios de los diamantes: se fijan en USD (precioUSD) y el precio en MXN se recalcula con el tipo de cambio del dia.
+// Cada vez que llega una tasa nueva (al abrir y cada 6 horas) se actualizan; las demas monedas se convierten desde ese MXN.
+function recalcularPreciosDiamantes(){
+  if(!(USD_MXN > 0)) return;
+  RECARGAS_AUTO.forEach(function(r){ if(r.precioUSD) r.precio = Math.round(r.precioUSD * USD_MXN * 100) / 100; });
+}
+recalcularPreciosDiamantes();
+
 
 
 // Devuelve la imagen del diamante según la cantidad total
