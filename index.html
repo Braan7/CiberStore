@@ -3957,6 +3957,33 @@ body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill
   body:not(.light-mode) .mn-pay-r b{overflow-wrap:anywhere;text-align:left;font-size:.82rem}
 }
 
+/* ═══════════ RECARGAS Y GIFT CARDS ═══════════ */
+.jg-bar{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin:.4rem 0 1rem}
+.jg-q{flex:1 1 240px;max-width:440px;background:rgba(10,17,38,.8);border:1.5px solid rgba(140,170,255,.22);color:#fff;border-radius:12px;padding:.7rem .9rem;font-size:16px;font-family:inherit}
+.jg-q:focus{outline:none;border-color:#22d3ee}
+.jg-n{color:#8E9AB8;font-size:.85rem}
+.jg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:.85rem}
+@media (max-width:599px){.jg-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem}}
+.jg-card{display:flex;flex-direction:column;align-items:stretch;text-align:left;gap:.15rem;padding:.7rem;border-radius:16px;cursor:pointer;font-family:inherit;color:#fff;background:linear-gradient(180deg,rgba(24,36,76,.6),rgba(12,20,44,.72));border:1px solid rgba(140,170,255,.16);transition:transform .2s,border-color .2s}
+.jg-card:hover{transform:translateY(-2px);border-color:rgba(34,211,238,.5)}
+.jg-card:active{transform:scale(.985)}
+.jg-card:focus-visible{outline:2px solid #67e8f9;outline-offset:2px}
+.jg-img{position:relative;display:flex;align-items:center;justify-content:center;aspect-ratio:1/1;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,hsl(var(--h) 65% 36%),hsl(calc(var(--h) + 45) 65% 20%))}
+.jg-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.jg-ini{font-size:1.7rem;font-weight:600;color:rgba(255,255,255,.92);letter-spacing:1px}
+.jg-name{font-weight:600;font-size:.95rem;line-height:1.25;margin-top:.5rem;color:#fff}
+.jg-price{color:#8E9AB8;font-size:.85rem}
+.jg-chip{align-self:flex-start;margin-top:.2rem;padding:.12rem .55rem;border-radius:999px;font-size:.68rem;font-weight:600;background:rgba(255,210,74,.1);border:1px solid rgba(255,210,74,.4);color:#ffd24a}
+.jg-vacio{grid-column:1/-1;text-align:center;color:#8E9AB8;padding:2rem .5rem}
+.jg-hero{display:flex;justify-content:center;margin:.2rem 0 1rem}
+.jg-img-lg{width:120px;height:120px;aspect-ratio:auto}
+.jg-img-lg .jg-ini{font-size:2.2rem}
+.jg-prod{display:flex;align-items:center;gap:.6rem;padding:.6rem .7rem;margin-bottom:.45rem;border-radius:12px;background:rgba(140,170,255,.06);border:1px solid rgba(140,170,255,.14)}
+.jg-prod span{flex:1;color:#e5e7eb}
+.jg-prod b{color:#67e8f9;font-weight:600}
+.jg-pedir{padding:.4rem .8rem;border-radius:10px;font-weight:600;font-size:.82rem;text-decoration:none;color:#04101c;background:linear-gradient(135deg,#22d3ee,#5b8cff 60%,#8b5cf6)}
+.jg-wa{display:flex;align-items:center;justify-content:center;text-decoration:none}
+
 #theme-btn,.theme-btn{display:none!important}
 </style>
 </head>
@@ -4050,7 +4077,10 @@ body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill
     <div class="nav-item" id="ni-hackff" onclick="closeSB();hxAbrir()"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><circle cx="15" cy="13" r="1"/><circle cx="18" cy="11" r="1"/><path d="M17.3 5H6.7a4 4 0 0 0-3.9 3.2l-1.5 7A3 3 0 0 0 4.2 19a3 3 0 0 0 2.3-1.1L8 16h8l1.5 1.9a3 3 0 0 0 2.3 1.1 3 3 0 0 0 2.9-3.8l-1.5-7A4 4 0 0 0 17.3 5z"/></svg></div> HACKS FF <span class="nb" style="background:rgba(34,211,238,.15);border:1px solid rgba(34,211,238,.3);color:#67e8f9">NUEVO</span></div>
     <div class="nav-item" id="ni-deltaforce" onclick="goPage('deltaforce')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6l-8-4z"/><path d="M9 12l2 2 4-4"/></svg></div> Delta Force <span class="nb" style="background:rgba(255,208,0,.15);border:1px solid rgba(255,208,0,.35);color:#ffd000">NUEVO</span></div>
 
-    <div class="sb-section">Servicios</div>
+    <div class="sb-section">Recargas y gift cards</div>
+      <div class="nav-item" id="ni-recargas" onclick="goPage('recargas')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><circle cx="15" cy="13" r="1"/><circle cx="18" cy="11" r="1"/><rect x="2" y="6" width="20" height="12" rx="4"/></svg></div> Recargas <span class="nb" style="background:rgba(34,211,238,.15);border:1px solid rgba(34,211,238,.3);color:#22d3ee">NUEVO</span></div>
+      <div class="nav-item" id="ni-giftcards" onclick="goPage('giftcards')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div> Gift Cards <span class="nb" style="background:rgba(34,211,238,.15);border:1px solid rgba(34,211,238,.3);color:#22d3ee">NUEVO</span></div>
+      <div class="sb-section">Servicios</div>
     <div class="nav-item" id="ni-likes" onclick="goPage('likes2k')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v10H4a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1z"/><path d="M7 11l3.5-7a1.5 1.5 0 0 1 2.7 1.3L12 9h6.3a2 2 0 0 1 1.9 2.6l-2 6.5a2 2 0 0 1-1.9 1.4H7"/></svg></div> Likes</div>
     <div class="nav-item" id="ni-pines" onclick="goPage('pines')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h4M6 14h2"/><circle cx="16" cy="12" r="2.5"/></svg></div> Pines de Free Fire <span class="nb" style="background:rgba(255,204,0,.15);border:1px solid rgba(255,204,0,.3);color:#ffcc00">NEW</span></div>
     <div class="nav-item" id="ni-api" onclick="goPage('api')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v4M15 3v4M9 17v4M15 17v4M3 9h4M3 15h4M17 9h4M17 15h4"/><rect x="7" y="7" width="10" height="10" rx="2"/></svg></div> API Revendedores <span class="nb" style="background:rgba(34,211,238,.15);border:1px solid rgba(34,211,238,.3);color:#22d3ee">API</span></div>
@@ -6562,6 +6592,22 @@ body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill
 
 
 <!-- ═══════════════════ CENTRO DE SOPORTE ═══════════════════ -->
+<div class="page" id="page-recargas">
+  <div class="ph"><div class="stag">Recargas</div><h2 class="ptitle">Recargas <span>de videojuegos</span></h2><p class="psub">Elige tu juego. Estamos agregando m&aacute;s cada semana.</p></div>
+  <div class="page-wrap">
+    <div class="jg-bar"><input id="jg-q-recargas" class="jg-q" type="search" placeholder="Buscar juego" oninput="jgRender('recargas')" aria-label="Buscar juego" autocomplete="off"><span class="jg-n" id="jg-n-recargas"></span></div>
+    <div class="jg-grid" id="jg-grid-recargas"></div>
+  </div>
+</div>
+
+<div class="page" id="page-giftcards">
+  <div class="ph"><div class="stag">Gift Cards</div><h2 class="ptitle">Gift Cards <span>y tarjetas digitales</span></h2><p class="psub">Tarjetas de plataformas y juegos. Estamos agregando m&aacute;s cada semana.</p></div>
+  <div class="page-wrap">
+    <div class="jg-bar"><input id="jg-q-giftcards" class="jg-q" type="search" placeholder="Buscar juego" oninput="jgRender('giftcards')" aria-label="Buscar juego" autocomplete="off"><span class="jg-n" id="jg-n-giftcards"></span></div>
+    <div class="jg-grid" id="jg-grid-giftcards"></div>
+  </div>
+</div>
+
 <div class="page" id="page-soporte">
   <div class="ph">
     <div class="stag">Centro de soporte</div>
@@ -8267,6 +8313,10 @@ body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill
 <!-- ═══ OFERTA EXCLUSIVA · PASE BOYAAH ═══ -->
 <div class="mn-ov" id="ofx-modal" role="dialog" aria-modal="true" aria-labelledby="ofx-title" style="display:none" onclick="if(event.target===this)ofxCerrar()">
   <div class="mn-box"><button type="button" class="mn-x" onclick="ofxCerrar()" aria-label="Cerrar">&times;</button><div class="mn-body" id="ofx-body"></div></div>
+</div>
+<!-- ═══ RECARGAS / GIFT CARDS: detalle de un juego ═══ -->
+<div class="mn-ov" id="jg-modal" role="dialog" aria-modal="true" aria-labelledby="jg-title" style="display:none" onclick="if(event.target===this)jgCerrar()">
+  <div class="mn-box"><button type="button" class="mn-x" onclick="jgCerrar()" aria-label="Cerrar">&times;</button><div class="mn-body" id="jg-body"></div></div>
 </div>
 <script src="supabase.js"></script>
 <script src="supabase_integration.js"></script>
