@@ -3878,6 +3878,85 @@ body:not(.light-mode) .hm-tt b{font-weight:600!important}
 .ofx-btn:focus-visible{outline:2px solid #67e8f9;outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.ofx,.ofx::before,.ofx-shine,.ofx-pop{animation:none}.ofx-shine{display:none}}
 
+/* ═══════════ RESPONSIVO: PC · TABLET · CELULAR ═══════════ */
+:root{--cs-w:1120px}
+
+/* 1) Encabezados y contenido comparten el mismo ancho y el mismo borde izquierdo */
+body:not(.light-mode) .ph{max-width:var(--cs-w)!important;margin:0 auto!important;padding:1.4rem 1.2rem .4rem!important}
+body:not(.light-mode) .page-wrap{max-width:var(--cs-w)!important;margin:0 auto!important;padding:.4rem 1.2rem 2.5rem!important}
+body:not(.light-mode) #diam-catalogo{max-width:none!important;margin:0!important}
+body:not(.light-mode) #diam-catalogo>div:not(.dcat-head):not(.dcat-grid):not(.diam-mem-grid){max-width:none!important}
+body:not(.light-mode) .dcat-grid,body:not(.light-mode) .diam-mem-grid{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))!important;gap:.8rem!important}
+@media (max-width:599px){
+  body:not(.light-mode) .ph{padding:1.1rem 1rem .3rem!important}
+  body:not(.light-mode) .page-wrap{padding:.3rem 1rem 2rem!important}
+  body:not(.light-mode) .dcat-grid,body:not(.light-mode) .diam-mem-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:.6rem!important}
+}
+
+/* 2) Inicio: en PC saldo y oferta van lado a lado; el resto usa todo el ancho */
+body:not(.light-mode) .hm-wrap{max-width:var(--cs-w)!important;padding:1.2rem 1.2rem 2.5rem}
+body:not(.light-mode) .hm-wallet,body:not(.light-mode) .ofx{display:flex;flex-direction:column;justify-content:space-between}
+@media (min-width:900px){
+  body:not(.light-mode) .hm-wrap{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:1.2rem;align-items:stretch}
+  body:not(.light-mode) .hm-wrap>*{grid-column:1/-1;min-width:0}
+  body:not(.light-mode) .hm-wrap>.hm-wallet,body:not(.light-mode) .hm-wrap>.ofx{grid-column:auto;margin-top:0!important}
+  body:not(.light-mode) .svc-grid{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))!important}
+  body:not(.light-mode) .hm-bots{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+  body:not(.light-mode) .ds-support-grid{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))!important}
+}
+@media (max-width:380px){
+  body:not(.light-mode) .hm-wrap{padding:1rem .85rem 2.5rem}
+  body:not(.light-mode) .hm-tile{padding:.65rem .6rem;gap:.5rem}
+  body:not(.light-mode) .hm-ico{width:34px;height:34px;flex:0 0 34px}
+  body:not(.light-mode) .hm-tile b{font-size:.84rem}
+  body:not(.light-mode) .hm-tile small{font-size:.7rem}
+}
+
+/* 3) Menú lateral: lista cómoda, etiquetas en una línea y pie compacto */
+body:not(.light-mode) .sidebar{width:min(320px,88vw)!important;display:flex;flex-direction:column;height:100dvh;max-height:100dvh}
+body:not(.light-mode) .sb-nav{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-bottom:.5rem}
+body:not(.light-mode) .sb-nav .nav-item{display:flex;align-items:center;gap:.65rem;min-height:42px;padding:.4rem .7rem;line-height:1.2}
+body:not(.light-mode) .sb-nav .nav-ico{flex:0 0 32px;width:32px;height:32px;display:flex;align-items:center;justify-content:center}
+body:not(.light-mode) .sb-nav .nav-ico:not(:has(svg)){filter:grayscale(1) brightness(1.8)}
+body:not(.light-mode) .sb-nav .nav-item .nb{margin-left:auto;flex-shrink:0;white-space:nowrap;padding:.12rem .5rem;font-size:.62rem;letter-spacing:.3px}
+body:not(.light-mode) #ni-api:not(.active){background:transparent!important;border-color:transparent!important;box-shadow:none!important}
+body:not(.light-mode) .sb-brand{padding:.6rem 1rem .8rem!important}
+@media (max-height:900px){body:not(.light-mode) .sb-brand-desc{display:none}body:not(.light-mode) .sb-brand{padding:.5rem 1rem!important}}
+@media (max-height:900px){
+  body:not(.light-mode) .sb-brand{display:none}
+  body:not(.light-mode) .sb-footer{display:flex;gap:.4rem;padding:.5rem .6rem}
+  body:not(.light-mode) .sb-footer-item{flex:1;justify-content:center;padding:.45rem .3rem;font-size:.78rem}
+}
+
+/* 4) WhatsApp: en celular a la derecha y sin la etiqueta que tapaba el contenido */
+@media (max-width:640px){
+  body:not(.light-mode) .wa-response-badge{display:none!important}
+  body:not(.light-mode) .wa-float{left:auto!important;right:.9rem!important;bottom:calc(1rem + env(safe-area-inset-bottom))!important;width:46px!important;height:46px!important}
+  .crt-bar{bottom:calc(4.6rem + env(safe-area-inset-bottom))}
+}
+
+/* 5) Billetera: saldo legible (sin degradado que cortaba letras) y dos columnas en PC */
+body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill-color:#fff!important;color:#fff!important;font-size:2rem!important;font-weight:600!important;white-space:nowrap;text-shadow:none!important}
+@media (min-width:600px) and (max-width:899px){body:not(.light-mode) #page-saldo>div[style*="max-width"]{max-width:640px!important}}
+@media (min-width:900px){
+  body:not(.light-mode) #page-saldo>div[style*="max-width"]{max-width:var(--cs-w)!important;padding:1.6rem 1.2rem 3rem!important;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:1.2rem 1.6rem;align-items:start}
+  body:not(.light-mode) #page-saldo>div[style*="max-width"]>:first-child{grid-column:1/-1}
+  body:not(.light-mode) #page-saldo>div[style*="max-width"]>.wl-balance{grid-column:1;margin:0!important}
+  body:not(.light-mode) #page-saldo>div[style*="max-width"]>#sal-cta{grid-column:2;grid-row:2/span 4;margin:0!important}
+}
+
+/* 6) Celulares muy chicos (320 a 360 px) */
+@media (max-width:360px){
+  body:not(.light-mode) .topbar.topbar--v2{padding-left:.45rem!important;padding-right:.45rem!important;gap:.25rem!important}
+  body:not(.light-mode) .topbar.topbar--v2 .hamburger,body:not(.light-mode) .topbar.topbar--v2 .topbar-ico-btn,body:not(.light-mode) .topbar.topbar--v2 .cart-btn{width:32px!important;min-width:0!important;height:32px!important}
+  body:not(.light-mode) .topbar.topbar--v2 .topbar-logo{font-size:.86rem!important}
+  body:not(.light-mode) .hm-hi{flex-direction:column;align-items:flex-start;gap:.15rem}
+  body:not(.light-mode) .wl-bal-amount{font-size:1.55rem!important}
+  body:not(.light-mode) .wl-balance>div:first-child>div:last-child{display:none!important}
+  body:not(.light-mode) .mn-pay-r{flex-wrap:wrap;gap:.1rem .6rem}
+  body:not(.light-mode) .mn-pay-r b{overflow-wrap:anywhere;text-align:left;font-size:.82rem}
+}
+
 #theme-btn,.theme-btn{display:none!important}
 </style>
 </head>
@@ -3951,7 +4030,7 @@ body:not(.light-mode) .hm-tt b{font-weight:600!important}
 <div class="sidebar" id="sidebar">
   <div class="sb-top"><div class="sb-logo"><span class="sb-logo-mark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg></span><span class="l1">CIBER</span><span class="l2">STORE</span></div><button class="sb-close" onclick="closeSB()">&#215;</button></div>
   <div class="sb-user" id="sb-user">
-    <div class="sb-user-row"><div class="sb-av" id="sb-av">V</div><div><div class="sb-uname" id="sb-uname">Visitante</div><div class="sb-uspent" id="sb-uspent">$0 MX gastado</div></div></div>
+    <div class="sb-user-row"><div class="sb-av" id="sb-av">V</div><div><div class="sb-uname" id="sb-uname">Visitante</div><div class="sb-uspent" id="sb-uspent">$0 MXN gastado</div></div></div>
     <div class="sb-prog"><div class="sb-prog-fill" id="sb-prog-fill" style="width:0%"></div></div>
   </div>
   <div class="sb-nav">
@@ -4746,7 +4825,7 @@ body:not(.light-mode) .hm-tt b{font-weight:600!important}
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,rgba(255,180,40,.09),rgba(255,180,40,.03));border:1px solid rgba(255,180,40,.25);border-radius:14px;padding:.85rem 1.1rem;margin-top:1.1rem">
         <span style="font-size:.76rem;color:#a8adb8;font-weight:600">Tu saldo disponible</span>
-        <span id="pin-api-saldo" style="font-family:Saira,sans-serif;font-weight:900;color:#ffcc33;font-size:1rem">$0 MX</span>
+        <span id="pin-api-saldo" style="font-family:Saira,sans-serif;font-weight:900;color:#ffcc33;font-size:1rem">$0 MXN</span>
       </div>
     </div>
 
@@ -4795,8 +4874,8 @@ body:not(.light-mode) .hm-tt b{font-weight:600!important}
 
           <div id="pin-descuento-row" style="display:none;justify-content:space-between;align-items:center;background:linear-gradient(135deg,rgba(37,211,102,.1),rgba(37,211,102,.03));border:1px solid rgba(37,211,102,.28);border-radius:11px;padding:.6rem .9rem;margin-bottom:.5rem"><span style="font-size:.74rem;color:#25d366;font-weight:700">&#127881; Descuento por volumen</span><span id="pin-descuento-val" style="font-family:Saira;font-weight:800;color:#25d366;font-size:.85rem">-0%</span></div>
 
-          <div style="display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,rgba(255,204,0,.08),rgba(255,204,0,.02));border:1px solid rgba(255,204,0,.22);border-radius:11px;padding:.7rem 1rem;margin-bottom:.55rem"><span style="font-size:.75rem;color:#a8adb8;font-weight:600">Total a pagar</span><span id="pin-total-val" style="font-family:Saira;font-weight:900;color:#ffcc00;font-size:1rem">$0 MX</span></div>
-          <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:.7rem 1rem;margin-bottom:.7rem"><span style="font-size:.75rem;color:#a8adb8;font-weight:600">Tu saldo</span><span id="pin-saldo-val" style="font-family:Saira;font-weight:800;color:#fff;font-size:.9rem">$0 MX</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,rgba(255,204,0,.08),rgba(255,204,0,.02));border:1px solid rgba(255,204,0,.22);border-radius:11px;padding:.7rem 1rem;margin-bottom:.55rem"><span style="font-size:.75rem;color:#a8adb8;font-weight:600">Total a pagar</span><span id="pin-total-val" style="font-family:Saira;font-weight:900;color:#ffcc00;font-size:1rem">$0 MXN</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:.7rem 1rem;margin-bottom:.7rem"><span style="font-size:.75rem;color:#a8adb8;font-weight:600">Tu saldo</span><span id="pin-saldo-val" style="font-family:Saira;font-weight:800;color:#fff;font-size:.9rem">$0 MXN</span></div>
 
           <div id="pin-err" style="display:none;color:#ff6b6b;font-size:.78rem;font-weight:600;margin-bottom:.65rem;background:rgba(255,60,60,.08);border:1px solid rgba(255,60,60,.25);border-radius:10px;padding:.6rem .85rem"></div>
 
@@ -5107,7 +5186,7 @@ body:not(.light-mode) .hm-tt b{font-weight:600!important}
         <div class="pf-av" id="pf-avatar">?</div>
         <div class="pf-uname" id="pf-username">-</div>
         <div class="pf-tier" id="pf-tier-badge" style="display:none"></div>
-        <div class="pf-spent" id="pf-saldo-display" style="color:#00e676;font-family:Saira;font-size:1.1rem;font-weight:700;margin:.3rem 0">$0 MX</div>
+        <div class="pf-spent" id="pf-saldo-display" style="color:#00e676;font-family:Saira;font-size:1.1rem;font-weight:700;margin:.3rem 0">$0 MXN</div>
         <div style="font-size:.72rem;color:var(--muted)" id="pf-role-display">Cargando...</div>
       </div>
       <div class="pf-stats">
@@ -5147,7 +5226,7 @@ body:not(.light-mode) .hm-tt b{font-weight:600!important}
       <div style="position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between">
         <div>
           <div class="wl-bal-label">Saldo actual</div>
-          <div class="wl-bal-amount" id="saldo-page-balance">$0 MX</div>
+          <div class="wl-bal-amount" id="saldo-page-balance">$0 MXN</div>
         </div>
         <div style="width:56px;height:56px;border-radius:16px;background:rgba(34,211,238,.15);border:1px solid rgba(34,211,238,.35);display:flex;align-items:center;justify-content:center">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18M16 14.5h2"/></svg>
@@ -5273,7 +5352,7 @@ body:not(.light-mode) .hm-tt b{font-weight:600!important}
     <div style="background:linear-gradient(160deg,rgba(0,230,118,.06),rgba(255,255,255,.02));border:1px solid rgba(0,230,118,.2);border-radius:16px;padding:1.1rem 1.25rem;margin-bottom:1.25rem">
       <div style="font-family:Saira;font-size:.72rem;font-weight:700;color:#00e676;margin-bottom:.75rem;display:flex;align-items:center;gap:.45rem">&#128176; Saldo disponible</div>
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem">
-        <div style="font-family:Saira;font-size:2rem;font-weight:900;color:#00e676" id="pf-saldo-big">$0 MX</div>
+        <div style="font-family:Saira;font-size:2rem;font-weight:900;color:#00e676" id="pf-saldo-big">$0 MXN</div>
         <button onclick="goPage('saldo')" style="padding:.5rem 1.1rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:7px;font-family:Saira;font-weight:800;font-size:.78rem;cursor:pointer;letter-spacing:1px">+ Recargar</button>
       </div>
       <div style="font-family:Saira;font-size:.7rem;color:var(--muted);margin-top:.65rem;letter-spacing:.5px">HISTORIAL DE MOVIMIENTOS</div>
@@ -5483,7 +5562,7 @@ body:not(.light-mode) .hm-tt b{font-weight:600!important}
         <div class="ps-pay-ico">$</div>
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:.5rem"><span style="font-size:.9rem;font-weight:700;color:#fff">Saldo de cuenta</span><span class="ps-pay-badge" id="paseff-pay-badge">LISTO</span></div>
-          <div style="font-size:.75rem;color:#8b93a3;margin-top:.1rem">Saldo disponible: <span id="paseff-m-saldo" style="font-weight:700;color:#fff">$0 MX</span></div>
+          <div style="font-size:.75rem;color:#8b93a3;margin-top:.1rem">Saldo disponible: <span id="paseff-m-saldo" style="font-weight:700;color:#fff">$0 MXN</span></div>
         </div>
       </div>
 
@@ -5563,7 +5642,7 @@ body:not(.light-mode) .hm-tt b{font-weight:600!important}
         </div>
         <div style="background:rgba(0,0,0,.25);border-radius:10px;padding:.85rem 1rem;text-align:center">
           <div style="font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.25rem">&#128142; Tu saldo disponible</div>
-          <div style="font-family:Saira;font-size:1.8rem;font-weight:900;color:#00f5ff" id="transfer-saldo-disp">$0 MX</div>
+          <div style="font-family:Saira;font-size:1.8rem;font-weight:900;color:#00f5ff" id="transfer-saldo-disp">$0 MXN</div>
         </div>
       </div>
       <!-- Info -->
@@ -6096,7 +6175,7 @@ body:not(.light-mode) .hm-tt b{font-weight:600!important}
     <!-- Saldo -->
     <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:.9rem 1.1rem;margin-bottom:1.3rem">
       <span style="font-size:.8rem;color:#6b7280">Tu saldo disponible</span>
-      <span id="l2k-saldo" style="font-family:Saira;font-weight:800;font-size:1.1rem;color:#25d366">$0 MX</span>
+      <span id="l2k-saldo" style="font-family:Saira;font-weight:800;font-size:1.1rem;color:#25d366">$0 MXN</span>
     </div>
 
     <!-- Beneficios -->
@@ -6146,7 +6225,7 @@ body:not(.light-mode) .hm-tt b{font-weight:600!important}
         <label class="flabel">WhatsApp de contacto *</label>
         <input class="finput" id="actas-wa" type="text" placeholder="Tu número de WhatsApp"/>
 
-        <div style="display:flex;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;margin:1rem 0"><span style="font-size:.8rem;color:var(--muted)">Tu saldo</span><span id="actas-saldo" style="font-family:Saira;font-weight:700;color:#25d366">$0 MX</span></div>
+        <div style="display:flex;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;margin:1rem 0"><span style="font-size:.8rem;color:var(--muted)">Tu saldo</span><span id="actas-saldo" style="font-family:Saira;font-weight:700;color:#25d366">$0 MXN</span></div>
 
         <div id="actas-err" style="display:none;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.3);color:#ff6b6b;border-radius:9px;padding:.7rem .9rem;font-size:.8rem;margin-bottom:.85rem"></div>
 
@@ -6295,7 +6374,7 @@ body:not(.light-mode) .hm-tt b{font-weight:600!important}
     <!-- Saldo disponible -->
     <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:.9rem 1.1rem;margin-bottom:1.3rem">
       <span style="font-size:.8rem;color:#6b7280">Tu saldo disponible</span>
-      <span id="biolarga-saldo" style="font-family:Saira;font-weight:800;font-size:1.1rem;color:#25d366">$0 MX</span>
+      <span id="biolarga-saldo" style="font-family:Saira;font-weight:800;font-size:1.1rem;color:#25d366">$0 MXN</span>
     </div>
 
     <!-- Como funciona -->
@@ -6382,7 +6461,7 @@ body:not(.light-mode) .hm-tt b{font-weight:600!important}
 
     <div id="archivos-saldo-box" style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.9rem 1.1rem;text-align:center">
       <div style="font-size:.62rem;color:#6b7280;text-transform:uppercase;letter-spacing:1px;margin-bottom:.2rem">Tu saldo</div>
-      <div id="archivos-saldo-val" style="font-family:Saira,sans-serif;font-weight:800;font-size:1.4rem;color:#fff">$0 MX</div>
+      <div id="archivos-saldo-val" style="font-family:Saira,sans-serif;font-weight:800;font-size:1.4rem;color:#fff">$0 MXN</div>
     </div>
   </div>
 </div>
@@ -6453,7 +6532,7 @@ body:not(.light-mode) .hm-tt b{font-weight:600!important}
         <div style="font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:.2rem">Referidos</div>
       </div>
       <div style="background:#0b0b0b;border:1px solid rgba(0,230,118,.15);border-radius:12px;padding:1rem;text-align:center">
-        <div style="font-family:Saira;font-size:1.4rem;font-weight:900;color:#00e676" id="ref-earned">$0 MX</div>
+        <div style="font-family:Saira;font-size:1.4rem;font-weight:900;color:#00e676" id="ref-earned">$0 MXN</div>
         <div style="font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:.2rem">Ganado</div>
       </div>
     </div>
@@ -6653,7 +6732,7 @@ body:not(.light-mode) .hm-tt b{font-weight:600!important}
         <input class="finput" id="scar-wa" type="text" placeholder="Tu numero de WhatsApp"/>
 
         <!-- Saldo -->
-        <div style="display:flex;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;margin:1rem 0"><span style="font-size:.8rem;color:var(--muted)">Tu saldo</span><span id="scar-saldo" style="font-family:Saira;font-weight:700;color:#25d366">$0 MX</span></div>
+        <div style="display:flex;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;margin:1rem 0"><span style="font-size:.8rem;color:var(--muted)">Tu saldo</span><span id="scar-saldo" style="font-family:Saira;font-weight:700;color:#25d366">$0 MXN</span></div>
 
         <div id="scar-err" style="display:none;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.3);color:#ff6b6b;border-radius:9px;padding:.7rem .9rem;font-size:.8rem;margin-bottom:.85rem"></div>
 
@@ -6737,7 +6816,7 @@ body:not(.light-mode) .hm-tt b{font-weight:600!important}
     <div style="background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:1.2rem;margin-bottom:1rem">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
         <span style="font-size:.8rem;color:#6b7280">Tu saldo</span>
-        <span id="fragu-saldo" style="font-family:Saira;font-weight:700;color:#25d366">$0 MX</span>
+        <span id="fragu-saldo" style="font-family:Saira;font-weight:700;color:#25d366">$0 MXN</span>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;padding-top:.7rem;border-top:1px solid rgba(255,255,255,.08)">
         <span style="font-family:Barlow;font-weight:600;color:#fff">Total a pagar</span>
@@ -6815,7 +6894,7 @@ body:not(.light-mode) .hm-tt b{font-weight:600!important}
       <!-- Saldo display -->
       <div style="background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.18);border-radius:8px;padding:.6rem .85rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
         <span style="font-size:.72rem;color:var(--muted)">Tu saldo disponible</span>
-        <span style="font-family:Saira;font-weight:700;color:#00e676;font-size:.9rem" id="cart-saldo-disp">$0 MX</span>
+        <span style="font-family:Saira;font-weight:700;color:#00e676;font-size:.9rem" id="cart-saldo-disp">$0 MXN</span>
       </div>
       <!-- ID fields -->
       <label style="display:block;font-size:.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#5a6580;margin-bottom:.2rem">Tu ID de Free Fire</label>
