@@ -1,6 +1,6 @@
 /* CiberStore v1779504760 */
 /* \u2500\u2500 DATA \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-var WA = '817094322677';
+var WA = '573180051415';
 
 /* Fallback if supabase_integration.js not loaded yet */
 if(typeof getSpent === 'undefined'){
@@ -13858,3 +13858,101 @@ function ofxMostrarOk(cod, n, total){
   b.innerHTML = '<div class="mn-ok"><div class="ic">&#9989;</div><h3>¡Pedido enviado!</h3><p>Pedido <b style="color:#67e8f9">' + _manEsc(cod) + '</b> · ' + n + ' pase' + (n === 1 ? '' : 's') + ' · ' + _manEsc(_manMXN(total)) + '</p>'
     + '<p>Confirmaremos tu pago y te mandaremos tus pases.</p><button type="button" class="mn-send" onclick="ofxCerrar()">Listo</button></div>';
 }
+
+
+// ═══════════════════════ RECARGAS Y GIFT CARDS (menú lateral) ═══════════════════════
+// Cada juego es un objeto: { id, n:'Nombre', img:'ruta/de/la/imagen.webp', productos:[ {n:'60 UC', mxn:19}, {n:'325 UC', usd:4.1} ] }
+//   · img: cuando subas la imagen a tu repositorio, pon aquí su ruta (ej. 'img/juegos/pubg-mobile.webp'). Vacío = se muestra la inicial.
+//   · productos: mientras esté vacío el juego aparece "En construcción" con precio "—". Con productos muestra "Desde $X" y la lista.
+//     Cada producto lleva su precio en pesos (mxn) o en dólares (usd, que se convierte al tipo de cambio del día).
+var JG_RECARGAS = [
+  { id:'blood-strike',     n:'Blood Strike',          img:'', productos:[] },
+  { id:'pubg-mobile',      n:'PUBG Mobile',           img:'', productos:[] },
+  { id:'arena-breakout',   n:'Arena Breakout',        img:'', productos:[] },
+  { id:'ea-fc-mobile',     n:'EA Sports FC Mobile',   img:'', productos:[] },
+  { id:'valorant',         n:'Valorant',              img:'', productos:[] },
+  { id:'call-of-duty-mobile', n:'Call of Duty Mobile',img:'', productos:[] },
+  { id:'rainbow-six-mobile',  n:'Rainbow Six Mobile', img:'', productos:[] },
+  { id:'garena-delta-force',  n:'Garena Delta Force', img:'', productos:[] },
+  { id:'modern-strike-online',n:'Modern Strike Online',img:'', productos:[] },
+  { id:'clash-royale',     n:'Clash Royale',          img:'', productos:[] },
+  { id:'football-master-2',n:'Football Master 2',     img:'', productos:[] }
+];
+var JG_GIFTCARDS = [
+  { id:'steam-wallet',     n:'Steam Wallet',          img:'', productos:[] },
+  { id:'netflix',          n:'Netflix',               img:'', productos:[] },
+  { id:'roblox',           n:'Roblox',                img:'', productos:[] },
+  { id:'robux',            n:'Robux',                 img:'', productos:[] },
+  { id:'app-store-itunes', n:'App Store & iTunes',    img:'', productos:[] },
+  { id:'amazon',           n:'Amazon',                img:'', productos:[] },
+  { id:'playstation',      n:'PlayStation',           img:'', productos:[] },
+  { id:'xbox',             n:'Xbox',                  img:'', productos:[] },
+  { id:'google-play',      n:'Google Play',           img:'', productos:[] },
+  { id:'minecraft-minecoins', n:'Minecraft Minecoins',img:'', productos:[] },
+  { id:'minecraft-java-bedrock', n:'Minecraft Java & Bedrock', img:'', productos:[] },
+  { id:'discord',          n:'Discord',               img:'', productos:[] },
+  { id:'fortnite',         n:'Fortnite',              img:'', productos:[] },
+  { id:'xbox-game-pass',   n:'Xbox Game Pass',        img:'', productos:[] },
+  { id:'pubg-mobile-gc',   n:'PUBG Mobile',           img:'', productos:[] },
+  { id:'apex-legends-mobile', n:'Apex Legends Mobile',img:'', productos:[] },
+  { id:'apex-legends-xbox',n:'Apex Legends (Xbox)',   img:'', productos:[] },
+  { id:'candy-crush',      n:'Candy Crush',           img:'', productos:[] },
+  { id:'ea-fc-26',         n:'EA Sports FC 26 (EA Points)', img:'', productos:[] },
+  { id:'battlefield-6',    n:'Battlefield 6',         img:'', productos:[] },
+  { id:'microsoft-windows',n:'Microsoft Windows',     img:'', productos:[] },
+  { id:'ea-fc-24',         n:'EA Sports FC 24 (EA Points)', img:'', productos:[] }
+];
+function _jgLista(tipo){ return tipo === 'recargas' ? JG_RECARGAS : JG_GIFTCARDS; }
+function _jgHue(id){ var h = 0; for(var i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) % 360; return h; }
+function _jgIniciales(n){ var p = String(n).replace(/[()&]/g, ' ').trim().split(/\s+/).filter(function(x){ return /[A-Za-z0-9]/.test(x); }); return ((p[0] || '?').charAt(0) + (p[1] ? p[1].charAt(0) : '')).toUpperCase(); }
+function _jgMXN(p){ return p.mxn != null ? Number(p.mxn) : (p.usd != null ? Math.round(Number(p.usd) * USD_MXN * 100) / 100 : null); }
+function _jgDesde(g){ var v = (g.productos || []).map(_jgMXN).filter(function(x){ return x != null && x > 0; }); return v.length ? Math.min.apply(null, v) : null; }
+function _jgImg(g){
+  var base = '<span class="jg-ini" aria-hidden="true">' + _manEsc(_jgIniciales(g.n)) + '</span>';
+  return g.img ? '<img src="' + _manEsc(g.img) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' + base : base;
+}
+function jgRender(tipo){
+  var cont = document.getElementById('jg-grid-' + tipo); if(!cont) return;
+  var q = ((document.getElementById('jg-q-' + tipo) || {}).value || '').trim().toLowerCase();
+  var lista = _jgLista(tipo).filter(function(g){ return !q || g.n.toLowerCase().indexOf(q) >= 0; });
+  var n = document.getElementById('jg-n-' + tipo); if(n) n.textContent = lista.length + (lista.length === 1 ? ' juego' : ' juegos');
+  if(!lista.length){ cont.innerHTML = '<div class="jg-vacio">No encontré ese juego.</div>'; return; }
+  cont.innerHTML = lista.map(function(g){
+    var d = _jgDesde(g);
+    return '<button type="button" class="jg-card" onclick="jgAbrir(\'' + tipo + '\',\'' + g.id + '\')" aria-label="' + _manEsc(g.n) + '">'
+      + '<span class="jg-img" style="--h:' + _jgHue(g.id) + '">' + _jgImg(g) + '</span>'
+      + '<span class="jg-name">' + _manEsc(g.n) + '</span>'
+      + (d != null ? '<span class="jg-price">Desde ' + _manEsc(fmt(d)) + '</span>' : '<span class="jg-price">&mdash;</span><span class="jg-chip">En construcci&oacute;n</span>')
+      + '</button>';
+  }).join('');
+}
+function _jgWA(texto){
+  return (typeof WA !== 'undefined' && WA) ? 'https://wa.me/' + WA + '?text=' + encodeURIComponent(texto) : '';
+}
+function jgAbrir(tipo, id){
+  var g = null; _jgLista(tipo).forEach(function(x){ if(x.id === id) g = x; }); if(!g) return;
+  var b = document.getElementById('jg-body'), ov = document.getElementById('jg-modal'); if(!b || !ov) return;
+  var h = '<div class="mn-eye">' + (tipo === 'recargas' ? 'RECARGAS' : 'GIFT CARDS') + '</div><h2 class="mn-h" id="jg-title">' + _manEsc(g.n) + '</h2>';
+  h += '<div class="jg-hero"><span class="jg-img jg-img-lg" style="--h:' + _jgHue(g.id) + '">' + _jgImg(g) + '</span></div>';
+  if(g.productos && g.productos.length){
+    h += '<div class="mn-note" style="margin-bottom:.7rem">Elige tu paquete y te atendemos por WhatsApp.</div>';
+    h += g.productos.map(function(p){
+      var mxn = _jgMXN(p), url = _jgWA('Hola, quiero ' + g.n + ' - ' + p.n + (mxn ? ' (' + _manMXN(mxn) + ')' : ''));
+      return '<div class="jg-prod"><span>' + _manEsc(p.n) + '</span><b>' + (mxn ? _manEsc(fmt(mxn)) : '&mdash;') + '</b>'
+        + (url ? '<a class="jg-pedir" href="' + _manEsc(url) + '" target="_blank" rel="noopener noreferrer">Pedir</a>' : '') + '</div>';
+    }).join('');
+  } else {
+    var url = _jgWA('Hola, me interesa ' + g.n + '. ¿Cuándo estará disponible?');
+    h += '<div class="mn-warn"><span style="font-size:1.4rem">&#128679;</span><div><b>En construcci&oacute;n</b>Estamos preparando ' + _manEsc(g.n) + '. Muy pronto podr&aacute;s comprarlo aqu&iacute;.</div></div>';
+    if(url) h += '<a class="mn-send jg-wa" href="' + _manEsc(url) + '" target="_blank" rel="noopener noreferrer">Preguntar por WhatsApp</a>';
+  }
+  h += '<button type="button" class="mn-ghost" onclick="jgCerrar()">Cerrar</button>';
+  b.innerHTML = h; ov.style.display = 'flex'; document.documentElement.style.overflow = 'hidden';
+  var x = ov.querySelector('.mn-x'); if(x) x.focus();
+}
+function jgCerrar(){ var ov = document.getElementById('jg-modal'); if(ov) ov.style.display = 'none'; document.documentElement.style.overflow = ''; }
+document.addEventListener('keydown', function(e){ var ov = document.getElementById('jg-modal'); if(e.key === 'Escape' && ov && ov.style.display === 'flex') jgCerrar(); });
+function jgRenderTodo(){ jgRender('recargas'); jgRender('giftcards'); }
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', jgRenderTodo); else jgRenderTodo();
+// si cambia el tipo de cambio o la moneda, los precios "Desde" se repintan
+(function(){ var f = window.actualizarTiposDeCambio; if(typeof f === 'function'){ window.actualizarTiposDeCambio = function(){ var r = f.apply(this, arguments); try{ if(r && r.then) r.then(jgRenderTodo); }catch(e){} return r; }; } })();
