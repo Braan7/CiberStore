@@ -13878,11 +13878,54 @@ var JG_RECARGAS = [
   { id:'clash-royale',     n:'Clash Royale',          img:'', productos:[] },
   { id:'football-master-2',n:'Football Master 2',     img:'', productos:[] }
 ];
+// Margen extra (en %) sobre los precios en USD de las gift cards. 0 = el precio tal cual. Ej.: 5 suma 5 %.
+var GC_MARGEN_PCT = 0;
+// Mostrar también los juegos que aún están "En construcción". false = solo los que ya tienen precios.
+var JG_MOSTRAR_PROXIMAMENTE = true;
 var JG_GIFTCARDS = [
+  { id:'robux', n:'Robux', img:'', subcats:[
+    { id:'mexico', n:'México', titulo:'Gift Card Roblox (MXN)', nota:'Se entrega un código para cuentas de México. Se canjea en tu cuenta de Roblox y no pide usuario ni contraseña.', productos:[
+        {n: "Roblox $100 MXN", usd: 6.1025, agotado: false},
+        {n: "Roblox $200 MXN", usd: 11.8307, agotado: false},
+        {n: "Roblox $300 MXN", usd: 17.2457, agotado: false},
+        {n: "Roblox $400 MXN", usd: 26.0018, agotado: false},
+        {n: "Roblox $500 MXN", usd: 33.0025, agotado: false},
+        {n: "Roblox $600 MXN", usd: 33.4755, agotado: false},
+        {n: "Roblox $700 MXN", usd: 44.0033, agotado: false},
+        {n: "Roblox $800 MXN", usd: 50.1361, agotado: false},
+        {n: "Roblox $900 MXN", usd: 55.844, agotado: false},
+        {n: "Roblox $1,000 MXN", usd: 61.8268, agotado: false},
+        {n: "Roblox $1,250 MXN", usd: 77.0059, agotado: false},
+        {n: "Roblox $1,500 MXN", usd: 92.0071, agotado: false},
+        {n: "Roblox $1,750 MXN", usd: 107.0083, agotado: false},
+        {n: "Roblox $2,000 MXN", usd: 122.0093, agotado: false},
+        {n: "Roblox $2,500 MXN", usd: 152.425, agotado: false},
+        {n: "Roblox $3,000 MXN", usd: 182.5099, agotado: false}
+      ] },
+    { id:'latam', n:'LATAM', titulo:'Robux (LATAM)', nota:'Se entrega un código para canjear en tu cuenta de Roblox. No pide usuario ni contraseña.', productos:[
+        {n: "800 Robux", usd: 10.3929, agotado: false},
+        {n: "1,000 Robux", usd: 13.5157, agotado: false},
+        {n: "2,000 Robux", usd: 25.0198, agotado: false},
+        {n: "2,500 Robux", usd: 28.7498, agotado: true},
+        {n: "3,000 Robux", usd: 37.7592, agotado: true},
+        {n: "4,500 Robux", usd: 51.7018, agotado: false},
+        {n: "10,000 Robux", usd: 104.3004, agotado: false}
+      ] }
+  ] },
+  { id:'netflix', n:'Netflix', img:'', subcats:[
+    { id:'us', n:'Estados Unidos', titulo:'Netflix (US)', nota:'Entrega por PIN: se entrega un código para cuentas de Estados Unidos.', productos:[
+        {n: "Netflix $15 USD", usd: 16.8323, agotado: false},
+        {n: "Netflix $20 USD", usd: 21.3728, agotado: false},
+        {n: "Netflix $25 USD", usd: 26.0647, agotado: false},
+        {n: "Netflix $30 USD", usd: 31.488, agotado: false},
+        {n: "Netflix $40 USD", usd: 41.9483, agotado: false},
+        {n: "Netflix $50 USD", usd: 49.3448, agotado: false},
+        {n: "Netflix $60 USD", usd: 59.513, agotado: false},
+        {n: "Netflix $75 USD", usd: 75.5561, agotado: false},
+        {n: "Netflix $100 USD", usd: 97.846, agotado: false}
+      ] }
+  ] },
   { id:'steam-wallet',     n:'Steam Wallet',          img:'', productos:[] },
-  { id:'netflix',          n:'Netflix',               img:'', productos:[] },
-  { id:'roblox',           n:'Roblox',                img:'', productos:[] },
-  { id:'robux',            n:'Robux',                 img:'', productos:[] },
   { id:'app-store-itunes', n:'App Store & iTunes',    img:'', productos:[] },
   { id:'amazon',           n:'Amazon',                img:'', productos:[] },
   { id:'playstation',      n:'PlayStation',           img:'', productos:[] },
@@ -13905,8 +13948,11 @@ var JG_GIFTCARDS = [
 function _jgLista(tipo){ return tipo === 'recargas' ? JG_RECARGAS : JG_GIFTCARDS; }
 function _jgHue(id){ var h = 0; for(var i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) % 360; return h; }
 function _jgIniciales(n){ var p = String(n).replace(/[()&]/g, ' ').trim().split(/\s+/).filter(function(x){ return /[A-Za-z0-9]/.test(x); }); return ((p[0] || '?').charAt(0) + (p[1] ? p[1].charAt(0) : '')).toUpperCase(); }
-function _jgMXN(p){ return p.mxn != null ? Number(p.mxn) : (p.usd != null ? Math.round(Number(p.usd) * USD_MXN * 100) / 100 : null); }
-function _jgDesde(g){ var v = (g.productos || []).map(_jgMXN).filter(function(x){ return x != null && x > 0; }); return v.length ? Math.min.apply(null, v) : null; }
+function _jgUSD(p){ return p.usd != null ? Math.round(Number(p.usd) * (1 + (GC_MARGEN_PCT || 0) / 100) * 10000) / 10000 : null; }
+function _jgMXN(p){ return p.mxn != null ? Number(p.mxn) : (p.usd != null ? Math.round(_jgUSD(p) * USD_MXN * 100) / 100 : null); }
+function _jgTodosProd(g){ if(g.subcats){ var a = []; g.subcats.forEach(function(s){ a = a.concat(s.productos || []); }); return a; } return g.productos || []; }
+function _jgActivo(g){ return _jgTodosProd(g).length > 0; }
+function _jgDesde(g){ var v = _jgTodosProd(g).filter(function(p){ return !p.agotado; }).map(_jgMXN).filter(function(x){ return x != null && x > 0; }); return v.length ? Math.min.apply(null, v) : null; }
 function _jgImg(g){
   var base = '<span class="jg-ini" aria-hidden="true">' + _manEsc(_jgIniciales(g.n)) + '</span>';
   return g.img ? '<img src="' + _manEsc(g.img) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' + base : base;
@@ -13914,7 +13960,8 @@ function _jgImg(g){
 function jgRender(tipo){
   var cont = document.getElementById('jg-grid-' + tipo); if(!cont) return;
   var q = ((document.getElementById('jg-q-' + tipo) || {}).value || '').trim().toLowerCase();
-  var lista = _jgLista(tipo).filter(function(g){ return !q || g.n.toLowerCase().indexOf(q) >= 0; });
+  var lista = _jgLista(tipo).filter(function(g){ return (JG_MOSTRAR_PROXIMAMENTE || _jgActivo(g)) && (!q || g.n.toLowerCase().indexOf(q) >= 0); });
+  lista.sort(function(a, b){ return (_jgActivo(b) ? 1 : 0) - (_jgActivo(a) ? 1 : 0); });
   var n = document.getElementById('jg-n-' + tipo); if(n) n.textContent = lista.length + (lista.length === 1 ? ' juego' : ' juegos');
   if(!lista.length){ cont.innerHTML = '<div class="jg-vacio">No encontré ese juego.</div>'; return; }
   cont.innerHTML = lista.map(function(g){
@@ -13922,7 +13969,7 @@ function jgRender(tipo){
     return '<button type="button" class="jg-card" onclick="jgAbrir(\'' + tipo + '\',\'' + g.id + '\')" aria-label="' + _manEsc(g.n) + '">'
       + '<span class="jg-img" style="--h:' + _jgHue(g.id) + '">' + _jgImg(g) + '</span>'
       + '<span class="jg-name">' + _manEsc(g.n) + '</span>'
-      + (d != null ? '<span class="jg-price">Desde ' + _manEsc(fmt(d)) + '</span>' : '<span class="jg-price">&mdash;</span><span class="jg-chip">En construcci&oacute;n</span>')
+      + (d != null ? '<span class="jg-price">Desde ' + _manEsc(fmt(d)) + '</span>' + (g.subcats ? '<span class="jg-chip jg-ok">Disponible</span>' : '') : '<span class="jg-price">&mdash;</span><span class="jg-chip">En construcci&oacute;n</span>')
       + '</button>';
   }).join('');
 }
@@ -13931,6 +13978,7 @@ function _jgWA(texto){
 }
 function jgAbrir(tipo, id){
   var g = null; _jgLista(tipo).forEach(function(x){ if(x.id === id) g = x; }); if(!g) return;
+  if(g.subcats){ jgAbrirCat(tipo, id); return; }
   var b = document.getElementById('jg-body'), ov = document.getElementById('jg-modal'); if(!b || !ov) return;
   var h = '<div class="mn-eye">' + (tipo === 'recargas' ? 'RECARGAS' : 'GIFT CARDS') + '</div><h2 class="mn-h" id="jg-title">' + _manEsc(g.n) + '</h2>';
   h += '<div class="jg-hero"><span class="jg-img jg-img-lg" style="--h:' + _jgHue(g.id) + '">' + _jgImg(g) + '</span></div>';
@@ -13952,7 +14000,151 @@ function jgAbrir(tipo, id){
 }
 function jgCerrar(){ var ov = document.getElementById('jg-modal'); if(ov) ov.style.display = 'none'; document.documentElement.style.overflow = ''; }
 document.addEventListener('keydown', function(e){ var ov = document.getElementById('jg-modal'); if(e.key === 'Escape' && ov && ov.style.display === 'flex') jgCerrar(); });
-function jgRenderTodo(){ jgRender('recargas'); jgRender('giftcards'); }
+function jgRenderTodo(){ jgRender('recargas'); jgRender('giftcards'); if(_jgVista) jgRenderVista(); }
 if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', jgRenderTodo); else jgRenderTodo();
 // si cambia el tipo de cambio o la moneda, los precios "Desde" se repintan
 (function(){ var f = window.actualizarTiposDeCambio; if(typeof f === 'function'){ window.actualizarTiposDeCambio = function(){ var r = f.apply(this, arguments); try{ if(r && r.then) r.then(jgRenderTodo); }catch(e){} return r; }; } })();
+
+
+// ── Vista de una categoría con subcategorías (Robux, Netflix): pestañas + productos ──
+var _jgVista = null, _jgSub = {};
+function _jgBuscar(tipo, id){ var g = null; _jgLista(tipo).forEach(function(x){ if(x.id === id) g = x; }); return g; }
+function jgAbrirCat(tipo, id){
+  var g = _jgBuscar(tipo, id); if(!g || !g.subcats) return;
+  _jgVista = {tipo: tipo, id: id}; if(!_jgSub[id]) _jgSub[id] = g.subcats[0].id;
+  var bar = document.querySelector('#page-' + tipo + ' .jg-bar'), grid = document.getElementById('jg-grid-' + tipo), v = document.getElementById('jg-vista-' + tipo);
+  if(bar) bar.style.display = 'none'; if(grid) grid.style.display = 'none'; if(v) v.style.display = 'block';
+  jgRenderVista(); window.scrollTo(0, 0);
+}
+function jgVolver(tipo){
+  _jgVista = null;
+  var bar = document.querySelector('#page-' + tipo + ' .jg-bar'), grid = document.getElementById('jg-grid-' + tipo), v = document.getElementById('jg-vista-' + tipo);
+  if(bar) bar.style.display = ''; if(grid) grid.style.display = ''; if(v){ v.style.display = 'none'; v.innerHTML = ''; }
+  window.scrollTo(0, 0);
+}
+function jgSub(id, sub){ _jgSub[id] = sub; jgRenderVista(); }
+function jgRenderVista(){
+  if(!_jgVista) return;
+  var tipo = _jgVista.tipo, g = _jgBuscar(tipo, _jgVista.id), v = document.getElementById('jg-vista-' + tipo); if(!g || !v) return;
+  var sc = g.subcats.filter(function(s){ return s.id === _jgSub[g.id]; })[0] || g.subcats[0];
+  var h = '<button type="button" class="jg-back" onclick="jgVolver(\'' + tipo + '\')">&#8592; ' + (tipo === 'recargas' ? 'Recargas' : 'Gift Cards') + '</button>'
+    + '<h2 class="jg-vt">' + _manEsc(g.n) + '</h2>';
+  if(g.subcats.length > 1){
+    h += '<div class="jg-tabs" role="tablist" aria-label="Región">' + g.subcats.map(function(s){
+      var sel = s.id === sc.id;
+      return '<button type="button" role="tab" class="jg-tab' + (sel ? ' sel' : '') + '" aria-selected="' + sel + '" onclick="jgSub(\'' + g.id + '\',\'' + s.id + '\')">' + _manEsc(s.n) + '</button>';
+    }).join('') + '</div>';
+  }
+  h += '<div class="jg-sub">' + _manEsc(sc.titulo || sc.n) + '</div>';
+  if(sc.nota) h += '<div class="jg-nota">' + _manEsc(sc.nota) + '</div>';
+  var mostrarUSD = (typeof CURRENCY !== 'undefined') && CURRENCY !== 'USD';
+  h += '<div class="jg-pgrid">' + sc.productos.map(function(p, i){
+    var mxn = _jgMXN(p), usd = _jgUSD(p);
+    return '<div class="jg-pc' + (p.agotado ? ' ag' : '') + '"><div class="jg-pn">' + _manEsc(p.n) + '</div>'
+      + '<div class="jg-pp">' + _manEsc(fmt(mxn)) + '</div>'
+      + (mostrarUSD && usd != null ? '<div class="jg-pu">US$ ' + usd.toFixed(2) + '</div>' : '')
+      + (p.agotado ? '<button type="button" class="jg-comprar" disabled>Agotado</button>'
+                   : '<button type="button" class="jg-comprar" onclick="gcPedir(\'' + tipo + '\',\'' + g.id + '\',\'' + sc.id + '\',' + i + ')">Comprar</button>')
+      + '</div>';
+  }).join('') + '</div>';
+  v.innerHTML = h;
+}
+
+// ── Pedido de una gift card: cantidad, WhatsApp, pago (Klar / Hey Banco) y comprobante → Telegram ──
+// Sin saldo ni API: tú envías el código a mano cuando confirmas el pago.
+var _gc = null, _gcQ = 1, _gcWA = '', _gcMetodo = null, _gcFoto = '', _gcFotoRaw = '', _gcFotoNom = '', _gcEnviando = false, _gcFoco = null;
+function gcPedir(tipo, catId, subId, idx){
+  var g = _jgBuscar(tipo, catId), sc = g && g.subcats ? g.subcats.filter(function(s){ return s.id === subId; })[0] : null, p = sc ? sc.productos[idx] : null; if(!p || p.agotado) return;
+  _gc = {cat: g.n, sub: sc.n, p: p, mxn: _jgMXN(p), usd: _jgUSD(p), nota: sc.nota};
+  _gcQ = 1; _gcEnviando = false; if(!_gcMetodo && MANUAL_METODOS.length) _gcMetodo = MANUAL_METODOS[0].id;
+  gcRender();
+  var ov = document.getElementById('gc-modal'); if(!ov) return; _gcFoco = document.activeElement; ov.style.display = 'flex'; document.documentElement.style.overflow = 'hidden';
+  var x = ov.querySelector('.mn-x'); if(x) x.focus();
+}
+function gcCerrar(){ var ov = document.getElementById('gc-modal'); if(!ov) return; ov.style.display = 'none'; document.documentElement.style.overflow = ''; if(_gcFoco && _gcFoco.focus) try{ _gcFoco.focus(); }catch(e){} }
+document.addEventListener('keydown', function(e){ var ov = document.getElementById('gc-modal'); if(e.key === 'Escape' && ov && ov.style.display === 'flex') gcCerrar(); });
+function gcQ(d){ var q = _gcQ + d; if(q < 1) q = 1; if(q > 10){ q = 10; _manToast('Máximo 10 por pedido'); } _gcQ = q; gcRender(); }
+function gcMetodo(id){ _gcMetodo = id; gcRender(); }
+function _gcTotal(){ return Math.round(_gc.mxn * _gcQ * 100) / 100; }
+function gcRender(){
+  var b = document.getElementById('gc-body'); if(!b || !_gc) return;
+  var total = _gcTotal(), h = '<div class="mn-eye">GIFT CARD · ' + _manEsc(String(_gc.cat).toUpperCase()) + ' · ' + _manEsc(String(_gc.sub).toUpperCase()) + '</div><h2 class="mn-h" id="gc-title">' + _manEsc(_gc.p.n) + '</h2>';
+  h += '<div class="crt-it"><div class="crt-it-i"><b>' + _manEsc(_gc.p.n) + '</b><small>' + _manEsc(_manMXN(_gc.mxn)) + ' c/u · US$ ' + _gc.usd.toFixed(2) + '</small></div>'
+    + '<div class="crt-q"><button type="button" aria-label="Quitar uno" onclick="gcQ(-1)">&minus;</button><span>' + _gcQ + '</span><button type="button" aria-label="Agregar uno" onclick="gcQ(1)">+</button></div>'
+    + '<div class="crt-sub" style="grid-column:1/-1;grid-row:auto">' + _manEsc(_manMXN(total)) + '</div></div>';
+  if(_gc.nota) h += '<div class="mn-note" style="margin-top:.6rem">' + _manEsc(_gc.nota) + '</div>';
+  h += '<label class="mn-lbl" for="gc-wa" style="margin-top:.9rem">Tu WhatsApp (para enviarte el código) *</label><input class="mn-inp" id="gc-wa" type="tel" inputmode="tel" maxlength="20" placeholder="Ej. 55 1234 5678" autocomplete="tel" value="' + _manEsc(_gcWA) + '" oninput="_gcWA=this.value">';
+  h += '<div class="mn-sum" style="margin-top:1rem"><div class="mn-row"><span>Cantidad</span><b>' + _gcQ + '</b></div><div class="mn-row tot"><span>Total a pagar</span><b>' + _manEsc(_manMXN(total)) + '</b></div></div>';
+  h += '<div class="mn-sec">Método de pago</div>';
+  if(!MANUAL_METODOS.length){
+    h += '<div class="mn-warn"><span style="font-size:1.4rem">&#128179;</span><div><b>Método de pago</b>Buscamos banca, ya que la nuestra está llena.</div></div>';
+  } else {
+    h += MANUAL_METODOS.map(function(mt){
+      var sel = mt.id === _gcMetodo, id = _manEsc(mt.id);
+      return '<div class="mn-pay' + (sel ? ' sel' : '') + '" role="radio" aria-checked="' + sel + '" tabindex="0" onclick="gcMetodo(\'' + id + '\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();gcMetodo(\'' + id + '\');}">'
+        + '<div class="mn-pay-h">' + _manEsc(mt.nombre) + '</div>'
+        + (mt.filas || []).map(function(f){ return '<div class="mn-pay-r"><span>' + _manEsc(f.k) + '</span><b>' + _manEsc(f.v) + '</b></div>'; }).join('')
+        + (mt.copiar ? '<div class="mn-pay-r" style="justify-content:flex-end"><button type="button" class="mn-copy" onclick="event.stopPropagation();manualCopiar(\'' + id + '\',this)">&#128203; ' + _manEsc(mt.copiarLabel || 'Copiar') + '</button></div>' : '')
+        + '</div>';
+    }).join('');
+  }
+  h += '<div class="mn-sec">Comprobante de pago</div>'
+    + '<input type="file" id="gc-foto" accept="image/*" style="display:none" onchange="gcOnFoto(this)">'
+    + '<div class="mn-up" id="gc-up" role="button" tabindex="0" style="' + (_gcFotoRaw ? 'display:none' : '') + '" onclick="document.getElementById(\'gc-foto\').click()" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}"><div style="font-size:1.5rem">&#128247;</div><b>Toca para elegir la foto</b>Captura de tu pago (JPG, PNG)</div>'
+    + '<div class="mn-prev" id="gc-prev" style="' + (_gcFotoRaw ? 'display:block' : '') + '"><img id="gc-prev-img" alt="Vista previa del comprobante" src="' + (_gcFotoRaw || '') + '"><small id="gc-prev-nom">' + (_gcFotoNom ? '\u2713 ' + _manEsc(_gcFotoNom) : '') + '</small><button type="button" onclick="gcQuitarFoto()">Cambiar foto</button></div>'
+    + '<div class="mn-note">Transfiere el total exacto y sube tu comprobante. Cuando confirmemos tu pago te enviamos tu código por WhatsApp. No se usa tu saldo.</div>'
+    + '<button type="button" class="mn-send" id="gc-send" onclick="gcEnviar()"' + (MANUAL_METODOS.length ? '' : ' disabled') + '>Enviar comprobante y pedir mi código</button>';
+  b.innerHTML = h;
+}
+function gcOnFoto(input){
+  var f = input.files && input.files[0]; if(!f) return;
+  if(!/^image\//i.test(f.type)){ _manToast('El comprobante debe ser una imagen'); input.value = ''; return; }
+  if(f.size > 15 * 1024 * 1024){ _manToast('La imagen es muy pesada (máx. 15 MB)'); input.value = ''; return; }
+  var rd = new FileReader();
+  rd.onload = function(ev){
+    var raw = ev.target.result, img = new Image();
+    img.onload = function(){
+      var b64 = raw;
+      try{ var max = 1600, w = img.width, h = img.height; if(w > max || h > max){ var r = Math.min(max / w, max / h); w = Math.round(w * r); h = Math.round(h * r); }
+        var c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(img, 0, 0, w, h);
+        var j = c.toDataURL('image/jpeg', 0.85); if(j && j.length < raw.length) b64 = j; }catch(e){}
+      _gcFoto = b64; _gcFotoRaw = raw; _gcFotoNom = f.name;
+      var pv = document.getElementById('gc-prev'), up = document.getElementById('gc-up');
+      document.getElementById('gc-prev-img').src = raw; document.getElementById('gc-prev-nom').textContent = '\u2713 ' + f.name;
+      if(pv) pv.style.display = 'block'; if(up) up.style.display = 'none';
+    };
+    img.onerror = function(){ _manToast('No se pudo leer la imagen'); gcQuitarFoto(); };
+    img.src = raw;
+  };
+  rd.onerror = function(){ _manToast('No se pudo leer la imagen'); };
+  rd.readAsDataURL(f);
+}
+function gcQuitarFoto(){ _gcFoto = ''; _gcFotoRaw = ''; _gcFotoNom = ''; var i = document.getElementById('gc-foto'); if(i) i.value = ''; var pv = document.getElementById('gc-prev'), up = document.getElementById('gc-up'); if(pv) pv.style.display = 'none'; if(up) up.style.display = 'block'; }
+function gcEnviar(){
+  if(_gcEnviando || !_gc) return;
+  if(typeof authSession === 'undefined' || !authSession){ _manToast('Inicia sesión para continuar'); setTimeout(function(){ if(typeof showAuthModal === 'function') showAuthModal(); }, 600); return; }
+  if(!MANUAL_METODOS.length){ _manToast('Aún no hay método de pago disponible'); return; }
+  var met = null; MANUAL_METODOS.forEach(function(m){ if(m.id === _gcMetodo) met = m; }); if(!met) met = MANUAL_METODOS[0];
+  var wa = String(_gcWA || '').replace(/[\s()+-]/g, '');
+  if(!/^\d{8,15}$/.test(wa)){ _manToast('Escribe tu WhatsApp con lada (solo números)', 4500); var el = document.getElementById('gc-wa'); if(el){ el.scrollIntoView({behavior:'smooth', block:'center'}); el.focus(); } return; }
+  if(!_gcFoto){ _manToast('\u26A0 Sube tu comprobante de pago'); var u = document.getElementById('gc-up'); if(u) u.scrollIntoView({behavior:'smooth', block:'center'}); return; }
+  _gcEnviando = true;
+  var btn = document.getElementById('gc-send'); if(btn){ btn.disabled = true; btn.textContent = 'Enviando...'; }
+  var total = _gcTotal(), user = authSession.username || 'Cliente', cod = 'GC-' + Date.now().toString(36).toUpperCase().slice(-6);
+  var nombre = 'Gift Card ' + _gc.cat + ' ' + _gc.sub + ' - ' + _gc.p.n;
+  var payload = { usuario:user, username:user, metodo:'PEDIDO MANUAL (sin saldo): ' + nombre + ' - ' + met.nombre, monto:_manMXN(total) + ' - Pedido ' + cod, monto_acreditar:0,
+    extra:'Pedido ' + cod + ' | ' + nombre + ' x' + _gcQ + ' | ' + _manMXN(_gc.mxn) + ' c/u (US$ ' + _gc.usd.toFixed(2) + ') | Total: ' + _manMXN(total) + ' | WhatsApp: +' + wa + ' | SIN SALDO · enviar el código a mano', foto_base64:_gcFoto };
+  var liberar = function(){ _gcEnviando = false; var b2 = document.getElementById('gc-send'); if(b2){ b2.disabled = false; b2.textContent = 'Enviar comprobante y pedir mi código'; } };
+  fetch(NOTIF_RECARGA_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)}).then(function(r){ return r.json(); }).then(function(res){
+    if(res && res.success){
+      if(typeof NOTIF_PEDIDO_URL !== 'undefined'){ try{ fetch(NOTIF_PEDIDO_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:user, producto:nombre + ' (MANUAL)', cantidad:String(_gcQ), tipo:'otro', ff_id:'', precio:_gc.mxn, progreso_total:0})}).catch(function(){}); }catch(e){} }
+      gcOk(cod, _gcQ, total);
+    } else { liberar(); _manToast('No se pudo enviar el comprobante. Intenta otra vez.', 4500); }
+  }).catch(function(){ liberar(); _manToast('Error de conexión. Intenta otra vez.', 4500); });
+}
+function gcOk(cod, n, total){
+  _gcFoto = ''; _gcFotoRaw = ''; _gcFotoNom = ''; _gcEnviando = false;
+  var b = document.getElementById('gc-body'); if(!b) return;
+  b.innerHTML = '<div class="mn-ok"><div class="ic">&#9989;</div><h3>¡Pedido enviado!</h3><p>Pedido <b style="color:#67e8f9">' + _manEsc(cod) + '</b> · ' + n + ' · ' + _manEsc(_manMXN(total)) + '</p>'
+    + '<p>Confirmaremos tu pago y te enviaremos tu código por WhatsApp.</p><button type="button" class="mn-send" onclick="gcCerrar()">Listo</button></div>';
+}
