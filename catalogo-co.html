@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Catálogo de Central One · IDs</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#070B18;color:#EAF0FF;font-family:"Barlow","Segoe UI",system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.45;padding:1rem}
+.w{max-width:760px;margin:0 auto}
+h1{font-size:1.35rem;font-weight:600;margin:.2rem 0 .3rem}
+h2{font-size:1.05rem;font-weight:600;margin:1.4rem 0 .6rem}
+p.s{color:#8E9AB8;margin:.2rem 0 1rem;font-size:.9rem}
+.c{background:rgba(20,30,62,.6);border:1px solid rgba(140,170,255,.16);border-radius:14px;padding:.85rem;margin-bottom:.6rem}
+label{display:block;font-size:.78rem;color:#a9b6d6;margin:.2rem 0 .3rem;letter-spacing:.3px}
+input{width:100%;background:rgba(10,17,38,.8);border:1.5px solid rgba(140,170,255,.22);color:#fff;border-radius:11px;padding:.7rem .8rem;font-size:16px;font-family:inherit}
+input:focus{outline:none;border-color:#22d3ee}
+button{font-family:inherit;font-size:.9rem;font-weight:600;border-radius:11px;padding:.65rem .9rem;cursor:pointer;border:1px solid rgba(140,170,255,.3);background:rgba(140,170,255,.1);color:#e6edff}
+button.p{background:linear-gradient(135deg,#22d3ee,#5b8cff 60%,#8b5cf6);color:#04101c;border:0}
+.row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
+.m{color:#8E9AB8;font-size:.82rem;margin-top:.2rem}
+.id{display:flex;gap:.5rem;align-items:center;margin-top:.5rem;flex-wrap:wrap}
+code{background:rgba(0,0,0,.35);padding:.25rem .45rem;border-radius:7px;font-size:.78rem;word-break:break-all;color:#67e8f9}
+.b{display:inline-block;margin-left:.4rem;padding:.1rem .5rem;border-radius:999px;font-size:.7rem;background:rgba(52,227,122,.12);border:1px solid rgba(52,227,122,.4);color:#5df0a0}
+.x{display:inline-block;padding:.1rem .5rem;border-radius:999px;font-size:.7rem;background:rgba(255,140,60,.12);border:1px solid rgba(255,140,60,.45);color:#ffb070}
+.err{background:rgba(255,80,110,.1);border:1px solid rgba(255,80,110,.35);color:#ffb4c4;border-radius:11px;padding:.6rem .75rem;margin-top:.6rem}
+.ok{background:rgba(52,227,122,.1);border:1px solid rgba(52,227,122,.35);color:#8ff0b5;border-radius:11px;padding:.6rem .75rem;margin-top:.6rem}
+pre{background:rgba(0,0,0,.35);padding:.6rem;border-radius:10px;overflow-x:auto;font-size:.78rem;color:#67e8f9;margin:.5rem 0 0}
+n{display:block;font-weight:600}
+</style>
+</head>
+<body>
+<div class="w">
+  <h1>Catálogo de Central One</h1>
+  <p class="s">Aquí ves cada producto con su ID para copiarlo. Usa el mismo token que pusiste en Vercel como <b>CO_ADMIN_TOKEN</b>. La llave del proveedor nunca pasa por esta página.</p>
+
+  <div class="c">
+    <label for="tok">Token de administrador</label>
+    <input id="tok" type="password" autocomplete="off" placeholder="Pega aquí tu CO_ADMIN_TOKEN">
+    <div class="row"><button class="p" id="ver">Ver catálogo</button></div>
+    <div id="msg"></div>
+  </div>
+
+  <div id="map"></div>
+
+  <div id="lista-w" style="display:none">
+    <h2>Todos los productos <span id="cuenta" class="m"></span></h2>
+    <label for="q">Buscar (por nombre, SKU o región)</label>
+    <input id="q" type="text" value="free fire" placeholder="Ej: free fire, 110, LATAM">
+    <div id="lista" style="margin-top:.7rem"></div>
+  </div>
+</div>
+<script>
+var ITEMS = [], MAPA = {};
+function esc(s){ return String(s == null ? '' : s).replace(/[<>&"']/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function msg(t, tipo){ document.getElementById('msg').innerHTML = t ? '<div class="' + (tipo || 'err') + '">' + esc(t) + '</div>' : ''; }
+function llamar(accion){
+  var t = document.getElementById('tok').value.trim() || (function(){ try{ return sessionStorage.getItem('co_admin_token') || ''; }catch(e){ return ''; } })();
+  if(!t) return Promise.resolve({ok:false, code:'no_autorizado', message:'Falta el token'});
+  return fetch('/api/co', {method:'POST', headers:{'Content-Type':'application/json', 'x-admin-token':t}, body:JSON.stringify({action:accion})})
+    .then(function(r){ return r.json().then(function(j){ if(r.status === 401) j.code = 'no_autorizado'; if(r.status === 404) return {ok:false, code:'sin_servidor'}; if(j.ok){ try{ sessionStorage.setItem('co_admin_token', t); }catch(e){} } return j; }, function(){ return {ok:false, code:'respuesta_invalida'}; }); })
+    .catch(function(){ return {ok:false, code:'red'}; });
+}
+function errTxt(r){
+  var m = {no_autorizado:'Token incorrecto o faltante.', sin_servidor:'No encuentro /api/co. ¿Ya subiste api/co.js a tu repositorio y Vercel terminó de desplegar?', red:'No se pudo conectar.', config:r.message, invalid_api_key:'La llave del proveedor no es válida (revisa CO_API_KEY en Vercel).', insufficient_scope:'La llave no tiene el permiso catalog:read.'};
+  return m[r.code] || ((r.code || 'error') + (r.message ? ': ' + r.message : ''));
+}
+function copiar(txt, btn){
+  var ok = function(){ var t = btn.textContent; btn.textContent = '¡Copiado!'; setTimeout(function(){ btn.textContent = t; }, 1500); };
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok, function(){ prompt('Copia manualmente:', txt); });
+  else prompt('Copia manualmente:', txt);
+}
+function pintarMapa(r){
+  var w = document.getElementById('map'); if(!r || !r.ok){ w.innerHTML = ''; return; }
+  var ok = {}, hayMal = false, filas = r.paquetes.map(function(p){
+    if(p.product_id) MAPA[p.product_id] = p.diamantes;
+    if(p.estado === 'ok') ok[p.diamantes] = p.product_id; else hayMal = true;
+    return '<div class="c"><n>' + esc(p.diamantes) + ' diamantes ' + (p.estado === 'ok' ? '<span class="b">OK</span>' : '<span class="x">' + esc(p.estado.replace(/_/g, ' ')) + '</span>') + '</n>'
+      + '<div class="m">' + (p.nombre ? esc(p.nombre) + ' · SKU ' + esc(p.sku || '') + ' · US$ ' + esc(p.precio) + ' (ref. ' + esc(p.ref) + ')' : 'No lo encontré en el catálogo') + '</div>'
+      + (p.product_id ? '<div class="id"><code>' + esc(p.product_id) + '</code><button data-copy="' + esc(p.product_id) + '">Copiar ID</button></div>' : '') + '</div>';
+  }).join('');
+  var json = JSON.stringify(ok);
+  w.innerHTML = '<h2>Los 6 paquetes de diamantes (Free Fire LATAM)</h2>' + filas
+    + '<div class="c"><n>CO_MAP</n><div class="m">Solo lo necesitas si la detección automática eligió mal o no encontró algún paquete. Se pega en Vercel como variable <b>CO_MAP</b>.' + (hayMal ? ' Aquí solo van los paquetes marcados OK: completa a mano los que falten con el ID correcto de la lista de abajo.' : '') + '</div><pre>' + esc(json) + '</pre><div class="row"><button id="cpmap">Copiar CO_MAP</button></div></div>';
+  document.getElementById('cpmap').onclick = function(){ copiar(json, this); };
+}
+function pintarLista(){
+  var q = document.getElementById('q').value.trim().toLowerCase(), partes = q.split(/\s+/).filter(Boolean);
+  var f = ITEMS.filter(function(x){ var t = (x.nombre + ' ' + x.sku + ' ' + (x.region || '') + ' ' + (x.familia || '')).toLowerCase(); return partes.every(function(p){ return t.indexOf(p) >= 0; }); });
+  document.getElementById('cuenta').textContent = '(' + f.length + ' de ' + ITEMS.length + ')';
+  document.getElementById('lista').innerHTML = f.slice(0, 200).map(function(x){
+    var par = MAPA[x.product_id];
+    return '<div class="c"><n>' + esc(x.nombre) + (par ? '<span class="b">→ ' + esc(par) + ' diamantes</span>' : '') + '</n>'
+      + '<div class="m">SKU ' + esc(x.sku) + ' · ' + esc(x.region || '—') + ' · ' + esc(x.categoria || x.tipo || '') + ' · US$ ' + esc(x.precio || '—') + ' · ' + (x.in_stock === false ? 'sin stock' : 'en stock') + '</div>'
+      + '<div class="id"><code>' + esc(x.product_id) + '</code><button data-copy="' + esc(x.product_id) + '">Copiar ID</button></div></div>';
+  }).join('') + (f.length > 200 ? '<div class="m">Mostrando 200. Afina la búsqueda para ver el resto.</div>' : '');
+}
+document.addEventListener('click', function(e){ var b = e.target.closest && e.target.closest('button[data-copy]'); if(b) copiar(b.getAttribute('data-copy'), b); });
+document.getElementById('q').addEventListener('input', pintarLista);
+document.getElementById('ver').addEventListener('click', function(){
+  msg('Cargando...', 'ok');
+  Promise.all([llamar('paquetes'), llamar('catalogo')]).then(function(rs){
+    var p = rs[0], c = rs[1];
+    if(!c.ok){ msg(errTxt(c), 'err'); document.getElementById('lista-w').style.display = 'none'; document.getElementById('map').innerHTML = ''; return; }
+    msg('Conexión correcta. ' + c.total + ' productos en tu catálogo.', 'ok');
+    MAPA = {}; pintarMapa(p); ITEMS = c.items; document.getElementById('lista-w').style.display = 'block'; pintarLista();
+  });
+});
+</script>
+</body>
+</html>
