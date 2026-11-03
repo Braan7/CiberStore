@@ -1,6 +1,6 @@
 /* CiberStore v1779504760 */
 /* \u2500\u2500 DATA \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-var WA = '573180051415';
+var WA = '817094322677';
 
 /* Fallback if supabase_integration.js not loaded yet */
 if(typeof getSpent === 'undefined'){
@@ -8400,7 +8400,7 @@ function _ejecutarRecargaVerificada(p, ffId, nombre, verificationStatus, btn, ms
           if(typeof sb!=='undefined' && sb.rpc && authSession && authSession.id){
             sb.rpc('revertir_puntos_pedido', { p_user_id: authSession.id, p_pedido_id: ord, p_motivo: 'Recarga rechazada - sin fondos del proveedor' }).catch(function(){});
           }
-          if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\uD83D\uDEA8 <b>RECARGA RECHAZADA - SIN FONDOS</b>\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\u2705 Saldo reembolsado al cliente ('+fmt(p.precio)+')\n\n\u26A0\uFE0F <b>RECARGA TU CUENTA DEL PROVEEDOR</b>', p.precio, ord);
+          if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\uD83D\uDEA8 <b>RECARGA RECHAZADA - '+(/pausa|l[i\u00ED]mite|por hora/i.test(errTxt)?'LIMITE DE GASTO ALCANZADO':'SIN FONDOS')+'</b>\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\u2705 Saldo reembolsado al cliente ('+fmt(p.precio)+')\n\n\u26A0\uFE0F <b>'+(/pausa|l[i\u00ED]mite|por hora/i.test(errTxt)?'SUBE EL TOPE EN VERCEL: CO_LIMITE_DIA_USD / CO_LIMITE_USUARIO_HORA':'RECARGA TU CUENTA DEL PROVEEDOR')+'</b>', p.precio, ord);
         }).catch(function(e){
           // El reembolso NO se pudo completar — el cliente SIGUE sin su dinero.
           // No decir "reembolsado" en Telegram: avisar con urgencia real para
