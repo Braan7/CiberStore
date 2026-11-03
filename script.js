@@ -13485,9 +13485,9 @@ function admCrtRender(){
       + '<div class="crta-items">' + its.map(function(it, i){
           var bt = '';
           if(!busy){
-            if(it.estado === 'manual') bt = '<button type="button" onclick="admCrtHecha(' + r.id + ',' + i + ')">Ya la hice \u2713</button>';
+            if(it.estado === 'manual') bt = '<button type="button" onclick="admCrtReintentar(' + r.id + ',' + i + ')">Reintentar API</button><button type="button" onclick="admCrtHecha(' + r.id + ',' + i + ')">Ya la hice \u2713</button>';
             else if(it.estado === 'verificar') bt = '<button type="button" onclick="admCrtReintentar(' + r.id + ',' + i + ')">Reintentar API</button><button type="button" onclick="admCrtHecha(' + r.id + ',' + i + ')">Ya está recargada \u2713</button>';
-            else if(it.estado === 'proceso') bt = '<button type="button" onclick="admCrtHecha(' + r.id + ',' + i + ')">Marcar completada \u2713</button>';
+            else if(it.estado === 'proceso') bt = (it.co ? '<button type="button" onclick="admCoActualizar(' + r.id + ',' + i + ')">Actualizar estado</button>' : '') + '<button type="button" onclick="admCrtHecha(' + r.id + ',' + i + ')">Marcar completada \u2713</button>';
           }
           return '<div class="crta-it"><div class="crta-it-t"><span>' + (i + 1) + '. ' + _manEsc(it.nombre) + ' → <b>' + _manEsc(it.ff_id) + '</b></span>' + _crtaChip(it.estado) + '</div>'
             + (it.detalle ? '<small class="crta-det">' + _manEsc(it.detalle) + '</small>' : '') + (bt ? '<div class="crta-bt">' + bt + '</div>' : '') + '</div>';
@@ -13526,6 +13526,9 @@ function _crtaClasificar(res){
 }
 function _crtaProcesarItem(row, i){
   var it = row.items[i];
+  if(typeof CO_ACTIVO !== 'undefined' && CO_ACTIVO && !it.pase && CO_PAQUETES.indexOf(Number(it.diamantes)) >= 0){
+    return _crtaProcesarCO(row, i).then(function(){ return admCrtGuardar(row); });
+  }
   if(it.manual || !it.package_id || !it.catalog_id){ it.estado = 'manual'; it.detalle = 'Producto sin API: hazla a mano'; return admCrtGuardar(row); }
   return fetch(COMPRAR_RECARGA_URL, {method:'POST', headers:{'Content-Type':'application/json'},
       body:JSON.stringify({action:'comprar', package_id:it.package_id, catalog_id:it.catalog_id, player_id:it.ff_id, client_name:row.username, idempotency_key:it.idem})})
@@ -13570,6 +13573,127 @@ function admCrtRechazar(id){
   row.estado = 'rechazada';
   admCrtGuardar(row).catch(function(e){ console.error(e); alert('No se pudo guardar. Pulsa Actualizar.'); }).then(admCrtRender);
 }
+
+
+// ═══════════════════════ PROVEEDOR CENTRAL ONE (vía tu servidor /api/co) ═══════════════════════
+// Solo para los 6 paquetes de diamantes de Free Fire LATAM. La llave del proveedor vive en Vercel
+// (api/co.js); este código solo habla con /api/co usando TU token de administrador, que el panel pide
+// una vez por sesión y guarda solo en esta pestaña. CO_ACTIVO = false → vuelve al proveedor anterior.
+var CO_ACTIVO = true;
+var CO_URL = '/api/co';
+var CO_PAQUETES = [110, 341, 572, 1166, 2398, 6160];
+var CO_PAUSA_MS = 3200;   // la API permite 20 pedidos por minuto
+var _coAvisoT = 0;
+
+function coToken(){
+  var t = ''; try{ t = sessionStorage.getItem('co_admin_token') || ''; }catch(e){}
+  if(!t){ t = (prompt('Token de administrador de Central One (el que pusiste en Vercel como CO_ADMIN_TOKEN). Se guarda solo en esta pestaña:') || '').trim(); if(t){ try{ sessionStorage.setItem('co_admin_token', t); }catch(e){} } }
+  return t;
+}
+function admCoTokenReset(){ try{ sessionStorage.removeItem('co_admin_token'); }catch(e){} var o = document.getElementById('crta-prov-out'); if(o) o.innerHTML = '<div class="crta-det">Token olvidado. Te lo pediré en la siguiente acción.</div>'; }
+function coCall(action, data){
+  var tok = coToken();
+  if(!tok) return Promise.resolve({ok:false, http:0, code:'no_autorizado', message:'Falta el token de administrador'});
+  return fetch(CO_URL, {method:'POST', headers:{'Content-Type':'application/json', 'x-admin-token':tok}, body:JSON.stringify(Object.assign({action:action}, data || {}))})
+    .then(function(r){ return r.json().then(function(j){ return j; }, function(){ return {ok:false, http:r.status, code:'respuesta_invalida', message:'Respuesta inválida del servidor (' + r.status + ')'}; })
+      .then(function(j){ if(r.status === 401){ try{ sessionStorage.removeItem('co_admin_token'); }catch(e){} } if(r.status === 404) return {ok:false, http:404, code:'sin_servidor', message:'No existe /api/co en tu sitio'}; return j; }); })
+    .catch(function(){ return {ok:false, http:0, code:'red', message:'No se pudo conectar con /api/co'}; });
+}
+function _coErrTxt(r){
+  var c = (r && r.code) || '';
+  if(c === 'no_autorizado') return 'Token incorrecto o faltante.';
+  if(c === 'config') return r.message;
+  if(c === 'sin_servidor') return 'No encuentro /api/co. ¿Subiste api/co.js a tu repositorio y Vercel ya terminó de desplegar?';
+  if(c === 'red') return 'No se pudo conectar con /api/co.';
+  if(c === 'invalid_api_key') return 'La llave del proveedor no es válida (revisa CO_API_KEY en Vercel).';
+  if(c === 'insufficient_scope') return 'La llave no tiene el permiso necesario (necesita catalog:read, balance:read, orders:read y orders:write).';
+  return (c || 'error') + (r && r.message ? ': ' + r.message : '');
+}
+function _coAvisoConfig(r){ if(Date.now() - _coAvisoT < 5000) return; _coAvisoT = Date.now(); alert('Central One no está listo: ' + _coErrTxt(r) + '\n\nLas recargas de este pedido quedaron pendientes; no se cobró nada.'); }
+
+// ── Panel: probar conexión y ver paquetes ──
+function admCoProbar(){
+  var o = document.getElementById('crta-prov-out'); if(!o) return; o.innerHTML = '<div class="crta-det">Probando...</div>';
+  coCall('ping').then(function(p){
+    if(!p.ok){ o.innerHTML = '<div class="crta-bad">' + _manEsc(_coErrTxt(p)) + '</div>'; return; }
+    return coCall('balance').then(function(b){
+      o.innerHTML = b.ok ? '<div class="crta-okb">\u2705 Conexión correcta · Saldo disponible: <b>' + _manEsc(b.available) + ' ' + _manEsc(b.currency) + '</b> · Retenido: ' + _manEsc(b.held) + '</div>' : '<div class="crta-bad">' + _manEsc(_coErrTxt(b)) + '</div>';
+    });
+  });
+}
+function admCoPaquetes(){
+  var o = document.getElementById('crta-prov-out'); if(!o) return; o.innerHTML = '<div class="crta-det">Leyendo el catálogo...</div>';
+  coCall('paquetes').then(function(r){
+    if(!r.ok){ o.innerHTML = '<div class="crta-bad">' + _manEsc(_coErrTxt(r)) + '</div>'; return; }
+    var ET = {ok:'OK', no_detectado:'No detectado', precio_fuera_de_rango:'Precio raro', sin_stock:'Sin stock'};
+    var h = '<div class="crta-det">Revisa que cada paquete apunte al producto correcto antes de usar dinero real.</div><div class="crta-tabw"><table class="crta-tab"><thead><tr><th>Diamantes</th><th>Producto en Central One</th><th>Precio US$</th><th>Estado</th></tr></thead><tbody>'
+      + r.paquetes.map(function(p){ return '<tr><td>' + _manEsc(p.diamantes) + '</td><td>' + (p.nombre ? _manEsc(p.nombre) + '<br><small>' + _manEsc(p.sku || '') + (p.via === 'CO_MAP' ? ' · fijado a mano' : '') + '</small>' : '—') + '</td><td>' + (p.precio ? _manEsc(p.precio) + '<br><small>ref. ' + _manEsc(p.ref) + '</small>' : '—') + '</td><td><span class="crta-chip e-' + (p.estado === 'ok' ? 'completada' : 'manual') + '">' + _manEsc(ET[p.estado] || p.estado) + '</span></td></tr>'; }).join('')
+      + '</tbody></table></div>';
+    if(r.paquetes.some(function(p){ return p.estado !== 'ok'; })) h += '<div class="crta-bad" style="margin-top:.5rem">Lo que no salga OK no se comprará solo. Busca el producto correcto aquí abajo y fíjalo en Vercel con la variable <b>CO_MAP</b> (por ejemplo {"110":"el-product_id"}).</div>';
+    h += '<details class="crta-det" style="margin-top:.5rem"><summary>Productos de Free Fire que ve tu cuenta (' + r.candidatos.length + ')</summary>'
+      + r.candidatos.map(function(c){ return '<div class="crta-cand"><b>' + _manEsc(c.nombre) + '</b> · ' + _manEsc(c.region || '') + ' · ' + _manEsc(c.precio || '') + ' US$<br><small>' + _manEsc(c.product_id) + '</small></div>'; }).join('') + '</details>';
+    o.innerHTML = h;
+  });
+}
+
+// ── Procesar un item con Central One ──
+function _crtaClasificarCO(it, r){
+  if(r && r.ok && r.order){
+    it.co = {id:r.order.id, ref:r.order.reference_code, total:r.order.total_sale_amount, cur:r.order.currency, t0:Date.now(), chk:0};
+    it.estado = 'proceso'; it.detalle = 'Central One: pedido ' + r.order.reference_code + ' creado · costo ' + r.order.total_sale_amount + ' ' + r.order.currency + ' · en proceso'; return 'ok';
+  }
+  var code = (r && r.code) || '', http = (r && r.http) || 0, msg = (r && r.message) || '';
+  if(code === 'no_autorizado' || code === 'config' || code === 'invalid_api_key' || code === 'insufficient_scope' || code === 'sin_servidor' || http === 401 || http === 403){ _coAvisoConfig(r); return 'cfg'; }
+  if(code === 'rate_limited' || http === 429){ it.estado = 'pendiente'; it.detalle = 'Central One: límite de uso. Espera ' + ((r && r.retry_after) || 60) + ' s y vuelve a confirmar.'; return 'espera'; }
+  if(code === 'insufficient_balance'){ it.estado = 'manual'; it.detalle = 'Sin saldo en Central One: recarga tu saldo del proveedor y pulsa "Reintentar API", o hazla a mano.'; it.idem = crtUUID(); return 'manual'; }
+  if(code === 'idempotency_key_reused' || http === 422){ it.estado = 'verificar'; it.detalle = 'Central One: clave repetida. Revisa el pedido en el portal del proveedor antes de hacer nada.'; return 'verificar'; }
+  if(code === 'insufficient_stock' || code === 'no_detectado' || code === 'precio_fuera_de_rango' || code === 'campo_requerido' || code === 'paquete_no_permitido' || code === 'invalid_request' || code === 'id_invalido' || http === 400 || http === 404 || http === 409){
+    it.estado = 'manual'; it.detalle = 'Central One no la tomó (' + (msg || code) + '). Hazla a mano o reintenta más tarde.'; it.idem = crtUUID(); return 'manual';
+  }
+  // 5xx, mantenimiento, tiempo agotado, sin red…: pudo haberse creado. Reintentar usa la MISMA clave y no duplica.
+  it.estado = 'verificar'; it.detalle = 'Sin respuesta clara de Central One (' + (code || http) + '). Revisa el portal antes de recargar a mano; "Reintentar API" usa la misma clave y no duplica.'; return 'verificar';
+}
+function _crtaProcesarCO(row, i){
+  var it = row.items[i];
+  var fin = function(v){ return CO_PAUSA_MS ? new Promise(function(res){ setTimeout(function(){ res(v); }, CO_PAUSA_MS); }) : v; };
+  return coCall('validate', {diamantes:it.diamantes, player_id:it.ff_id}).then(function(v){
+    if(v && v.ok && v.status === 'invalid'){ it.estado = 'verificar'; it.detalle = 'Central One: el ID ' + it.ff_id + ' no existe para este producto. Confírmalo con el cliente antes de recargar.'; return 'invalido'; }
+    // "unverified" NO significa que no exista: se sigue. Errores de configuración o de producto se tratan igual que al comprar.
+    if(v && !v.ok && ['no_autorizado','config','invalid_api_key','insufficient_scope','sin_servidor','no_detectado','precio_fuera_de_rango','campo_requerido','paquete_no_permitido','insufficient_stock','id_invalido'].indexOf(v.code) >= 0) return _crtaClasificarCO(it, v);
+    return coCall('order', {diamantes:it.diamantes, player_id:it.ff_id, idempotency_key:it.idem, note:'CS R' + row.id + '-' + (i + 1)}).then(function(r){ return _crtaClasificarCO(it, r); });
+  }).then(fin);
+}
+
+// ── Seguimiento del estado en Central One ──
+function _coEstadoItem(row, i){
+  var it = row.items[i]; if(!it.co || !it.co.id) return Promise.resolve(false);
+  return coCall('status', {order_id:it.co.id}).then(function(r){
+    it.co.chk = Date.now();
+    if(!r || !r.ok) return false;
+    var o = r.order || {}, ln = (o.items && o.items[0]) || {}, st = ln.status || o.status;
+    if(st === 'completed' || o.status === 'completed'){ it.estado = 'completada'; it.detalle = 'Central One: completada (' + it.co.ref + ')'; _crtaCompletarItem(row, i, 'AUTO', true); return true; }
+    if(st === 'failed' || st === 'cancelled' || o.status === 'failed' || o.status === 'cancelled'){
+      var f = ln.failure || o.failure || {};
+      it.estado = 'manual'; it.co.fallido = true; it.idem = crtUUID();
+      it.detalle = 'Central One: no se entregó' + (f.message_es ? ' — ' + f.message_es : '') + (f.action ? ' (acción: ' + f.action + ')' : '') + '. Se liberó la retención; hazla a mano o reintenta.'; return true;
+    }
+    if(st === 'refunded'){ it.estado = 'verificar'; it.detalle = 'Central One: la línea se reembolsó después de entregarse. Revisa el portal.'; return true; }
+    return false;
+  });
+}
+function admCoActualizar(id, i){
+  var row = _crtaFila(id); if(!row || _crtaBusy[id]) return;
+  _coEstadoItem(row, i).then(function(cambio){ if(cambio) return admCrtGuardar(row); _manToast('Sigue en proceso en Central One'); }).catch(function(){}).then(admCrtRender);
+}
+// Cada 30 s los primeros 5 minutos y luego cada 5 minutos (lo que pide la documentación); solo con la pestaña Recargas a la vista
+function admCoPollTick(){
+  var sec = document.getElementById('adms-recargas'); if(!sec || sec.offsetParent === null || document.hidden) return;
+  var cola = [];
+  (_crtaFilas || []).forEach(function(r){ if(_crtaBusy[r.id]) return; (r.items || []).forEach(function(it, i){
+    if(it.estado === 'proceso' && it.co && it.co.id){ var edad = Date.now() - it.co.t0, cada = edad < 300000 ? 30000 : 300000; if(Date.now() - (it.co.chk || 0) >= cada) cola.push([r, i]); } }); });
+  cola.slice(0, 15).reduce(function(p, x){ return p.then(function(){ return _coEstadoItem(x[0], x[1]).then(function(ch){ if(ch) return admCrtGuardar(x[0]); }); }); }, Promise.resolve()).then(admCrtRender).catch(function(){});
+}
+var _coPollT = setInterval(admCoPollTick, 30000);
 
 
 // ═══════════════════════ OFERTA EXCLUSIVA · PASE BOYAAH (Inicio) ═══════════════════════

@@ -3835,6 +3835,20 @@ body:not(.light-mode) .hm-tt b{font-weight:600!important}
 .crt-del{position:static!important;grid-column:1;grid-row:2;justify-self:start;width:auto!important;height:auto!important;padding:.2rem 0!important;font-size:.8rem!important;font-family:inherit;color:#8E9AB8;text-decoration:underline}
 .crt-sub{grid-column:2!important;grid-row:2;text-align:right}
 
+.crta-prov{background:rgba(34,211,238,.05);border:1px solid rgba(34,211,238,.22);border-radius:14px;padding:.8rem;margin-bottom:.9rem}
+.crta-prov-h{color:#fff;font-size:.95rem;margin-bottom:.5rem}
+.crta-prov-b{display:flex;flex-wrap:wrap;gap:.45rem}
+.crta-prov-b button{padding:.5rem .8rem;border-radius:10px;border:1px solid rgba(140,170,255,.28);background:rgba(140,170,255,.08);color:#e6edff;font-family:inherit;font-weight:600;font-size:.82rem;cursor:pointer}
+#crta-prov-out{margin-top:.6rem;font-size:.84rem;color:#cbd5e1;line-height:1.45}
+.crta-okb{background:rgba(52,227,122,.1);border:1px solid rgba(52,227,122,.35);border-radius:10px;padding:.55rem .7rem;color:#8ff0b5}
+.crta-bad{background:rgba(255,80,110,.1);border:1px solid rgba(255,80,110,.35);border-radius:10px;padding:.55rem .7rem;color:#ffb4c4}
+.crta-tabw{overflow-x:auto}
+.crta-tab{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:.5rem}
+.crta-tab th{text-align:left;color:#8fb4ff;font-weight:600;padding:.35rem .4rem;border-bottom:1px solid rgba(140,170,255,.2)}
+.crta-tab td{padding:.45rem .4rem;border-bottom:1px solid rgba(140,170,255,.08);vertical-align:top;color:#e5e7eb}
+.crta-tab small,.crta-cand small{color:#8E9AB8;word-break:break-all}
+.crta-cand{padding:.35rem 0;border-bottom:1px solid rgba(140,170,255,.08);font-size:.8rem}
+
 /* ═══════════ OFERTA EXCLUSIVA (Inicio) ═══════════ */
 .ofx{position:relative;overflow:hidden;margin:1rem 0 0;padding:1.05rem 1.05rem 1.1rem;border-radius:18px;isolation:isolate;
   background:linear-gradient(135deg,#1a1240 0%,#0f1b45 55%,#2a1659 100%);
@@ -7917,6 +7931,15 @@ body:not(.light-mode) .hm-tt b{font-weight:600!important}
       <select id="crta-filtro" onchange="admCrtRender()" style="background:#10131f;border:1px solid rgba(255,255,255,.1);color:#fff;border-radius:9px;padding:.55rem .8rem;font-size:.85rem"><option value="activas">Por atender</option><option value="todas">Todas</option></select>
       <button onclick="admCrtCargar()" style="padding:.55rem 1rem;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.25);color:#22d3ee;border-radius:9px;font-weight:700;font-size:.82rem;cursor:pointer">&#8635; Actualizar</button>
       <span id="crta-resumen" style="font-size:.8rem;color:var(--muted)"></span>
+    </div>
+    <div class="crta-prov">
+      <div class="crta-prov-h"><b>Proveedor Central One</b></div>
+      <div class="crta-prov-b">
+        <button type="button" onclick="admCoProbar()">Probar conexión y saldo</button>
+        <button type="button" onclick="admCoPaquetes()">Ver paquetes detectados</button>
+        <button type="button" onclick="admCoTokenReset()">Olvidar token</button>
+      </div>
+      <div id="crta-prov-out"></div>
     </div>
     <div id="crta-lista"><div class="crta-vacio">Presiona Actualizar</div></div>
     <div style="font-size:.72rem;color:var(--muted);margin-top:.8rem;line-height:1.5">Revisa en tu banco que el pago llegó y luego pulsa <b>Confirmar pago y recargar</b>. Si el proveedor no tiene saldo o el paquete no está disponible, la recarga queda marcada para que la hagas a mano.</div>
