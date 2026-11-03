@@ -13883,7 +13883,7 @@ var GC_MARGEN_PCT = 0;
 // Mostrar también los juegos que aún están "En construcción". false = solo los que ya tienen precios.
 var JG_MOSTRAR_PROXIMAMENTE = true;
 var JG_GIFTCARDS = [
-  { id:'robux', n:'Robux', img:'', subcats:[
+  { id:'robux', n:'Robux', img:['img/roblox.jpg','img/roblox.JPG','img/Roblox.jpg','ROBYX-PANER.PNG','robux-banner.png'], subcats:[
     { id:'mexico', n:'México', titulo:'ROBLOX', nota:'Se entrega un código para cuentas de México.\nSe entrega un código para canjear en la cuenta de Roblox. No pide usuario ni contraseña', productos:[
         {"n": "100 MXN", "region": "MXN", "usd": 6.1025, "usd4": "6.1025", "agotado": false},
         {"n": "200 MXN", "region": "MXN", "usd": 11.8307, "usd4": "11.8307", "agotado": false},
@@ -13960,9 +13960,19 @@ function _jgMXN(p){ return p.mxn != null ? Number(p.mxn) : (p.usd != null ? Math
 function _jgTodosProd(g){ if(g.subcats){ var a = []; g.subcats.forEach(function(s){ a = a.concat(s.productos || []); }); return a; } return g.productos || []; }
 function _jgActivo(g){ return _jgTodosProd(g).length > 0; }
 function _jgDesde(g){ var v = _jgTodosProd(g).filter(function(p){ return !p.agotado; }).map(_jgMXN).filter(function(x){ return x != null && x > 0; }); return v.length ? Math.min.apply(null, v) : null; }
+function _jgSrcs(g){ return Array.isArray(g.img) ? g.img : (g.img ? [g.img] : []); }
+// Si la primera ruta no existe, prueba las siguientes; si ninguna existe, se queda la inicial.
+function jgImgFalla(im){
+  var r = []; try{ r = JSON.parse(im.getAttribute('data-s') || '[]'); }catch(e){}
+  if(r.length){ im.setAttribute('data-s', JSON.stringify(r.slice(1))); im.src = r[0]; } else { im.style.display = 'none'; }
+}
+function _jgImgTag(g, cls){
+  var s = _jgSrcs(g); if(!s.length) return '';
+  return '<img class="' + cls + '" src="' + _manEsc(s[0]) + '" alt="" loading="lazy" data-s="' + _manEsc(JSON.stringify(s.slice(1))) + '" onerror="jgImgFalla(this)" onload="if(this.parentNode)this.parentNode.classList.add(\'tiene\')">';
+}
 function _jgImg(g){
   var base = '<span class="jg-ini" aria-hidden="true">' + _manEsc(_jgIniciales(g.n)) + '</span>';
-  return g.img ? '<img src="' + _manEsc(g.img) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' + base : base;
+  return _jgImgTag(g, '') + base;
 }
 function jgRender(tipo){
   var cont = document.getElementById('jg-grid-' + tipo); if(!cont) return;
@@ -14035,6 +14045,7 @@ function jgRenderVista(){
   var tipo = _jgVista.tipo, g = _jgBuscar(tipo, _jgVista.id), v = document.getElementById('jg-vista-' + tipo); if(!g || !v) return;
   var sc = g.subcats.filter(function(s){ return s.id === _jgSub[g.id]; })[0] || g.subcats[0];
   var h = '<button type="button" class="jg-back" onclick="jgVolver(\'' + tipo + '\')">&#8592; ' + (tipo === 'recargas' ? 'Recargas' : 'Gift Cards') + '</button>'
+    + (_jgSrcs(g).length ? '<div class="jg-bn">' + _jgImgTag(g, 'jg-banner') + '</div>' : '')
     + '<h2 class="jg-vt">' + _manEsc(g.n) + '</h2>';
   if(g.subcats.length > 1){
     h += '<div class="jg-tabs" role="tablist" aria-label="Región">' + g.subcats.map(function(s){
