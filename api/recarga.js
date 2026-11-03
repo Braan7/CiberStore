@@ -6,8 +6,8 @@
 //
 // ⚠ Este endpoint lo puede llamar cualquiera que conozca la dirección (igual que rapid-handler), así
 // que lleva FUSIBLES que limitan lo máximo que se puede perder si alguien lo abusa:
-//   · tope de gasto por día en US$ (CO_LIMITE_DIA_USD, por defecto 40), leído del propio proveedor
-//   · tope de recargas por usuario por hora (CO_LIMITE_USUARIO_HORA, por defecto 8)
+//   · tope de gasto por día en US$ (CO_LIMITE_DIA_USD, por defecto 40), leído del propio proveedor. Pon 0 = sin tope
+//   · tope de recargas por usuario por hora (CO_LIMITE_USUARIO_HORA, por defecto 8). Pon 0 = sin tope
 //   · solo los 6 paquetes de diamantes, y solo si el precio del proveedor es el esperado
 //   · interruptor de emergencia: CO_AUTO_ACTIVO=0 apaga todo al instante
 //
@@ -214,8 +214,8 @@ module.exports = async function handler(req, res){
     const rev = await revisarPedidos(cliente, key);
     if(!rev.ok) return enviar(res, NO_HECHO('No se pudo verificar el límite de gasto', 'ENDPOINT_DISABLED'));
     if(rev.existente) return enviar(res, mapearOrden(rev.existente));
-    if(rev.total + d.precio > LIM_DIA) return enviar(res, NO_HECHO('Recargas automáticas en pausa por hoy. Intenta más tarde o contacta al administrador', 'ENDPOINT_DISABLED'));
-    if(rev.delUsuario >= LIM_USER_H) return enviar(res, NO_HECHO('Alcanzaste el límite de recargas por hora. Intenta más tarde', 'ENDPOINT_DISABLED'));
+    if(LIM_DIA > 0 && rev.total + d.precio > LIM_DIA) return enviar(res, NO_HECHO('Recargas automáticas en pausa por hoy. Intenta más tarde o contacta al administrador', 'ENDPOINT_DISABLED'));
+    if(LIM_USER_H > 0 && rev.delUsuario >= LIM_USER_H) return enviar(res, NO_HECHO('Alcanzaste el límite de recargas por hora. Intenta más tarde', 'ENDPOINT_DISABLED'));
 
     const r = await co('/orders', { method: 'POST', headers: { 'Idempotency-Key': key },
       body: { items: [{ catalog_item_id: d.item.product_id, quantity: 1, target_payload: tg }], note: ('CS|' + cliente + '|' + key).slice(0, 400) } });
