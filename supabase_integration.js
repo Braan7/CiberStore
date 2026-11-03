@@ -74,7 +74,7 @@ function tgNotifyPurchase(username, product, amount, orderId){
     + '\uD83D\uDC64 Cliente: <b>' + username + '</b>\n'
     + '\uD83D\uDECD\uFE0F ' + product + '\n'
     + linea + '\n'
-    + '\uD83D\uDCB5 Total: <b>$' + amount.toLocaleString('es-MX') + ' MX</b>\n'
+    + '\uD83D\uDCB5 Total: <b>$' + amount.toLocaleString('es-MX') + ' MXN</b>\n'
     + '\uD83D\uDCCB Pedido: <b>#' + orderId + '</b>\n'
     + '\uD83D\uDCC5 ' + fecha + ' \u00B7 \uD83D\uDD52 ' + hora + '\n'
     + linea;
@@ -86,7 +86,7 @@ function tgNotifyRecarga(username, monto, metodo, txid, waNum){
   var msg = '\uD83D\uDCB3 <b>Solicitud de recarga - CiberStore</b>\n\n'
     + '\uD83D\uDC64 Usuario: <b>' + username + '</b>\n'
     + '\uD83D\uDCF1 WhatsApp: +' + (waNum || '-') + '\n'
-    + '\uD83D\uDCB0 Monto: <b>$' + montoNum.toLocaleString('es-MX') + ' MX</b>\n'
+    + '\uD83D\uDCB0 Monto: <b>$' + montoNum.toLocaleString('es-MX') + ' MXN</b>\n'
     + '\uD83C\uDFE6 Metodo: ' + (metodo || '-') + '\n'
     + '\uD83D\uDD11 TXID: ' + (txid || '-') + '\n'
     + '\uD83D\uDD50 ' + new Date().toLocaleString('es-MX') + '\n\n'
@@ -1261,7 +1261,7 @@ function sendDailyReport(){
         var fecha = today.toLocaleDateString('es-MX',{weekday:'long',day:'2-digit',month:'long'});
         var msg = '\uD83D\uDCCA <b>Reporte Diario - CiberStore</b>\n'
           + '\uD83D\uDCC5 ' + fecha + '\n\n'
-          + '\uD83D\uDCB0 Ventas del dia: <b>$' + totalVentas.toLocaleString('es-MX') + ' MX</b>\n'
+          + '\uD83D\uDCB0 Ventas del dia: <b>$' + totalVentas.toLocaleString('es-MX') + ' MXN</b>\n'
           + '\uD83D\uDED2 Pedidos: <b>' + numPedidos + '</b>\n'
           + '\uD83D\uDC65 Nuevos registros: <b>' + nuevoReg + '</b>\n\n'
           + (numPedidos===0 ? '\uD83D\uDE34 Sin pedidos ayer.' : '\uD83D\uDD25 Buen dia de ventas!');
