@@ -12,7 +12,7 @@ if(typeof getSpent === 'undefined'){
 var _addSpendBusy = false; // Lock para evitar descuentos simultaneos/dobles
 
 function _refreshSaldoUI(saldo){
-  var s = '$' + Math.round(saldo).toLocaleString('es-MX') + ' MX';
+  var s = fmt(saldo);
   ['saldo-page-balance','modal-saldo-amt','frag-saldo-disp','lk200-saldo-val','lk2k-saldo-val','renta-bot-saldo','bonus-saldo-val','ilim-saldo-val','v1-saldo-val','pin-saldo-val','pin-api-saldo','archivos-saldo-val'].forEach(function(id){
     var el = document.getElementById(id);
     if(el) el.textContent = s;
@@ -106,7 +106,7 @@ function _guardarNuevoSaldo(userId, newSaldo, amount, description, saldoActual){
     sbUpdateProfile(userId, {saldo: newSaldo}).then(function(){
       registrarMov();
       console.log('[ADDSPEND] OK. Nuevo saldo: $'+newSaldo);
-      showToast('✓ Compra registrada. Saldo: $'+Math.round(newSaldo).toLocaleString('es-MX')+' MX');
+      showToast('✓ Compra registrada. Saldo: $'+Math.round(newSaldo).toLocaleString('es-MX')+' MXN');
       _addSpendBusy = false;
     }).catch(function(e){
       // Revertir si falla
@@ -120,7 +120,7 @@ function _guardarNuevoSaldo(userId, newSaldo, amount, description, saldoActual){
     // Fallback si no existe sbUpdateProfile: usar sb.patch sin comillas
     sb.patch('profiles', {saldo: newSaldo}, 'id=eq.'+userId).then(function(){
       registrarMov();
-      showToast('✓ Compra registrada. Saldo: $'+Math.round(newSaldo).toLocaleString('es-MX')+' MX');
+      showToast('✓ Compra registrada. Saldo: $'+Math.round(newSaldo).toLocaleString('es-MX')+' MXN');
       _addSpendBusy = false;
     }).catch(function(e){
       console.error('[ADDSPEND] Error (fallback):', e);
@@ -719,7 +719,7 @@ function updateSidebarUser(){
   var mp=document.getElementById('mem-pill');
   if(av) av.textContent=uname.charAt(0).toUpperCase();
   if(un) un.textContent=uname;
-  if(us) us.textContent='$'+spent.toLocaleString('es-MX')+' MX gastado';
+  if(us) us.textContent='$'+spent.toLocaleString('es-MX')+' MXN gastado';
   if(pf){
     var pct=nextTier?Math.min(100,Math.round(((spent-tier.threshold)/(nextTier.threshold-tier.threshold))*100)):100;
     pf.style.width=pct+'%';
@@ -780,7 +780,7 @@ function updateAuthUI(){
     if(pillAv)   pillAv.textContent   = authSession.username.charAt(0).toUpperCase();
     if(pillName) pillName.textContent = authSession.username;
     var saldo    = authSession.saldo || 0;
-    var saldoFmt = '$' + saldo.toLocaleString('es-MX') + ' MX';
+    var saldoFmt = fmt(saldo);
     ['pf-saldo-display','pf-saldo-big','saldo-page-balance'].forEach(function(id){
       var el=document.getElementById(id); if(el) el.textContent=saldoFmt;
     });
@@ -921,7 +921,7 @@ function enviarComprobanteWA(){
   var msg  = '*Solicitud de Recarga - CiberStore*\n\n'
     + 'Usuario: ' + user + '\n'
     + (wa ? 'WhatsApp: +' + wa + '\n' : '')
-    + 'Monto: $' + parseFloat(monto).toLocaleString('es-MX') + ' MX\n'
+    + 'Monto: $' + parseFloat(monto).toLocaleString('es-MX') + ' MXN\n'
     + 'Metodo: ' + metodo + '\n'
     + 'TXID/Referencia: ' + txid + '\n'
     + (nota ? 'Nota: ' + nota + '\n' : '')
@@ -1293,14 +1293,14 @@ function renderProds(){
     +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Elige tu paquete</label>'
     +'<select id="ilim-plan" style="width:100%;background:#0a0a0a;border:1px solid rgba(34,211,238,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Barlow,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box">';
   for(var a=0;a<PRODUCTS.length;a++){
-    rows+='<option value="'+PRODUCTS[a].total+'|'+PRODUCTS[a].prices[0]+'">'+PRODUCTS[a].name+' diamantes \u2014 '+fmt(PRODUCTS[a].prices[0])+' MX</option>';
+    rows+='<option value="'+PRODUCTS[a].total+'|'+PRODUCTS[a].prices[0]+'">'+PRODUCTS[a].name+' diamantes \u2014 '+fmt(PRODUCTS[a].prices[0])+' MXN</option>';
   }
   rows+='</select>'
     +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Tu ID de Free Fire</label>'
     +'<input id="ilim-id" type="text" placeholder="Ej: 123456789" style="width:100%;background:#0a0a0a;border:1px solid rgba(34,211,238,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Barlow,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box"/>'
     +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Nombre en el juego</label>'
     +'<input id="ilim-nombre" type="text" placeholder="Tu nickname" style="width:100%;background:#0a0a0a;border:1px solid rgba(34,211,238,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Barlow,sans-serif;font-size:.88rem;margin-bottom:.65rem;box-sizing:border-box"/>'
-    +'<div style="display:flex;justify-content:space-between;background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.18);border-radius:8px;padding:.45rem .85rem;margin-bottom:.5rem"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span id="ilim-saldo-val" style="font-family:Saira;font-weight:700;color:#22d3ee;font-size:.82rem">$0 MX</span></div>'
+    +'<div style="display:flex;justify-content:space-between;background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.18);border-radius:8px;padding:.45rem .85rem;margin-bottom:.5rem"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span id="ilim-saldo-val" style="font-family:Saira;font-weight:700;color:#22d3ee;font-size:.82rem">$0 MXN</span></div>'
     +'<div id="ilim-err" style="display:none;color:#ff6b6b;font-size:.75rem;margin-bottom:.5rem"></div>'
     +'<button onclick="submitIlimSaldo()" style="width:100%;padding:.78rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:10px;font-family:Barlow,sans-serif;font-weight:900;font-size:.9rem;cursor:pointer">\uD83D\uDD12 Confirmar con saldo</button>'
     +'<button onclick="cotizarIlim()" style="width:100%;padding:.62rem;margin-top:.5rem;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.3);color:#22d3ee;border-radius:10px;font-family:Barlow;font-weight:900;font-size:.82rem;cursor:pointer">\uD83D\uDCAC O cotizar por WhatsApp</button>'
@@ -1331,14 +1331,14 @@ function renderProds(){
     +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Elige tu paquete</label>'
     +'<select id="v1-plan" style="width:100%;background:#0a1f14;border:1px solid rgba(0,230,118,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Barlow,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box">';
   for(var b=0;b<PRODUCTS_1VEZ.length;b++){
-    rows+='<option value="'+PRODUCTS_1VEZ[b].total+'|'+PRODUCTS_1VEZ[b].prices[0]+'">'+PRODUCTS_1VEZ[b].name+' diamantes \u2014 '+fmt(PRODUCTS_1VEZ[b].prices[0])+' MX</option>';
+    rows+='<option value="'+PRODUCTS_1VEZ[b].total+'|'+PRODUCTS_1VEZ[b].prices[0]+'">'+PRODUCTS_1VEZ[b].name+' diamantes \u2014 '+fmt(PRODUCTS_1VEZ[b].prices[0])+' MXN</option>';
   }
   rows+='</select>'
     +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Tu ID de Free Fire</label>'
     +'<input id="v1-id" type="text" placeholder="Ej: 123456789" style="width:100%;background:#0a1f14;border:1px solid rgba(0,230,118,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Barlow,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box"/>'
     +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Nombre en el juego</label>'
     +'<input id="v1-nombre" type="text" placeholder="Tu nickname" style="width:100%;background:#0a1f14;border:1px solid rgba(0,230,118,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Barlow,sans-serif;font-size:.88rem;margin-bottom:.65rem;box-sizing:border-box"/>'
-    +'<div style="display:flex;justify-content:space-between;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.18);border-radius:8px;padding:.45rem .85rem;margin-bottom:.5rem"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span id="v1-saldo-val" style="font-family:Saira;font-weight:700;color:#00e676;font-size:.82rem">$0 MX</span></div>'
+    +'<div style="display:flex;justify-content:space-between;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.18);border-radius:8px;padding:.45rem .85rem;margin-bottom:.5rem"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span id="v1-saldo-val" style="font-family:Saira;font-weight:700;color:#00e676;font-size:.82rem">$0 MXN</span></div>'
     +'<div id="v1-err" style="display:none;color:#ff6b6b;font-size:.75rem;margin-bottom:.5rem"></div>'
     +'<button onclick="submitV1Saldo()" style="width:100%;padding:.78rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:10px;font-family:Barlow,sans-serif;font-weight:900;font-size:.9rem;cursor:pointer">\uD83D\uDD12 Confirmar con saldo</button>'
     +'</div>'
@@ -1417,7 +1417,7 @@ function renderMems(){
       +'<div class="mc-name" style="color:'+tier.color+'">'+tier.name+'</div>'
       +'<div class="mc-disc" style="color:'+tier.color+'">'+tier.disc+'%</div>'
       +'<div class="mc-disc-sub">de descuento</div>'
-      +'<div class="mc-req">Desde $'+tier.threshold.toLocaleString('es-MX')+' MX gastado</div>'
+      +'<div class="mc-req">Desde $'+tier.threshold.toLocaleString('es-MX')+' MXN gastado</div>'
       +'<ul class="mc-perks">'
       +tier.perks.map(function(pk){return '<li>\u2714 '+pk+'</li>';}).join('')
       +'</ul>'
@@ -1439,7 +1439,7 @@ function renderWallet(){
     +'<div class="w-lvl" style="color:'+tier.color+'">'+tier.icon+' '+tier.name+'</div></div>'
     +'</div>'
     +'<div class="prog-track"><div class="prog-fill" style="width:'+pct+'%;background:linear-gradient(90deg,'+tier.color+','+tier.color+'cc)"></div></div>'
-    +(nextTier?'<div style="font-size:.72rem;color:var(--muted);text-align:right">$'+((nextTier.threshold-spent).toLocaleString('es-MX'))+' MX para '+nextTier.name+'</div>':'<div style="font-size:.72rem;color:'+tier.color+';text-align:right">\uD83C\uDFC6 Nivel maximo!</div>')
+    +(nextTier?'<div style="font-size:.72rem;color:var(--muted);text-align:right">$'+((nextTier.threshold-spent).toLocaleString('es-MX'))+' MXN para '+nextTier.name+'</div>':'<div style="font-size:.72rem;color:'+tier.color+';text-align:right">\uD83C\uDFC6 Nivel maximo!</div>')
     +'<div class="tier-pills">'
     +TIERS.map(function(tr,idx){return '<span class="tier-pill" style="color:'+tr.color+';border-color:'+tr.color+'44;background:'+tr.colorBg+'">'+(idx<=tIdx?'\u2714':'')+' '+tr.name+'</span>';}).join('')
     +'</div>';
@@ -1475,16 +1475,16 @@ function renderPerfil(){
   if(!authSession){
     if(av)   av.textContent  = '?';
     if(un)   un.textContent  = 'Sin sesion';
-    if(sdo)  sdo.textContent = '$0 MX';
-    if(sdb)  sdb.textContent = '$0 MX';
-    if(sbp)  sbp.textContent = '$0 MX';
+    if(sdo)  sdo.textContent = '$0 MXN';
+    if(sdb)  sdb.textContent = '$0 MXN';
+    if(sbp)  sbp.textContent = '$0 MXN';
     if(rol)  rol.textContent = 'Invitado';
     if(movs) movs.innerHTML  = '<div style="text-align:center;padding:1rem;color:var(--muted);font-size:.78rem">Inicia sesion para ver tu historial</div>';
     return;
   }
   var u        = authSession;
   var saldo    = u.saldo || 0;
-  var saldoFmt = '$' + saldo.toLocaleString('es-MX') + ' MX';
+  var saldoFmt = fmt(saldo);
   var fecha    = u.created_at ? new Date(u.created_at).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'}) : '-';
   var roleStr  = u.role === 'admin' ? 'Admin' : 'Usuario';
   if(av)   av.textContent   = u.username.charAt(0).toUpperCase();
@@ -1810,8 +1810,8 @@ function submitLikes(){
  */
 function updateModalBalance(){
   setTimeout(function(){
-    var saldoMX = authSession ? Math.round(authSession.saldo || 0) : 0;
-    var saldoStr = '$' + saldoMX.toLocaleString('es-MX') + ' MX';
+    var saldoMX = authSession ? (authSession.saldo || 0) : 0;
+    var saldoStr = fmt(saldoMX);
     
     // Modal principal
     var ms = document.getElementById('modal-saldo-amt');
@@ -1858,7 +1858,7 @@ function seleccionarHonorRegion(idx){
   if(!h) return;
   document.getElementById('honor-sel-flag').textContent = h.flag;
   document.getElementById('honor-sel-name').textContent = h.region;
-  document.getElementById('honor-sel-precio').textContent = fmt(h.precio) + ' MX';
+  document.getElementById('honor-sel-precio').textContent = fmt(h.precio) + ' MXN';
   var drop = document.getElementById('honor-region-drop');
   var sel = document.getElementById('honor-region-select');
   if(drop) drop.classList.remove('open');
@@ -1897,7 +1897,7 @@ function lanzarGrupoHonor(){
   verificarSaldoFresco(precioHonor, function(alcanza, saldoReal){
     if(!alcanza){
       showToast('Saldo insuficiente. Tienes ' + fmt(saldoReal) + ' y necesitas ' + fmt(precioHonor), 3500);
-      if(btn){ btn.disabled=false; btn.innerHTML='\u26A1 Grupo inicial ('+fmt(precioHonor)+' MX)'; }
+      if(btn){ btn.disabled=false; btn.innerHTML='\u26A1 Grupo inicial ('+fmt(precioHonor)+' MXN)'; }
       setTimeout(function(){ goPage('saldo'); }, 1500);
       return;
     }
@@ -1926,7 +1926,7 @@ function lanzarGrupoHonor(){
 
     document.getElementById('honor-confirm-no').onclick = function(){
       ov.remove();
-      if(btn){ btn.disabled=false; btn.innerHTML='\u26A1 Grupo inicial ('+fmt(precioHonor)+' MX)'; }
+      if(btn){ btn.disabled=false; btn.innerHTML='\u26A1 Grupo inicial ('+fmt(precioHonor)+' MXN)'; }
     };
     document.getElementById('honor-confirm-si').onclick = function(){
       ov.remove();
@@ -1954,7 +1954,7 @@ function _honorProcesarPagina(h, clan, idClan, precioHonor, btn){
 
   setTimeout(function(){
     _comprandoHonor = false;
-    if(btn){ btn.disabled=false; btn.innerHTML='\u26A1 Grupo inicial ('+fmt(precioHonor)+' MX)'; }
+    if(btn){ btn.disabled=false; btn.innerHTML='\u26A1 Grupo inicial ('+fmt(precioHonor)+' MXN)'; }
     if(typeof _refreshSaldoUI === 'function') _refreshSaldoUI(authSession.saldo||0);
     // Limpiar campos para un siguiente pedido
     var elClan = document.getElementById('honor-p-clan'); if(elClan) elClan.value = '';
@@ -3610,7 +3610,7 @@ function admRenderChart(canvas){
       var pad=32;
       var totalVentas=sales.reduce(function(a,b){return a+b;},0);
       var ct=document.getElementById('adm-chart-total');
-      if(ct) ct.textContent='Total semana: $'+totalVentas.toLocaleString('es-MX')+' MX';
+      if(ct) ct.textContent='Total semana: $'+totalVentas.toLocaleString('es-MX')+' MXN';
       ctx.clearRect(0,0,W,H);
       for(var k=0;k<7;k++){
         var x=pad+k*((W-pad*2)/7);
@@ -4125,8 +4125,8 @@ function admSendReporte(){
         '*Reporte CiberStore - '+fechaRep+'*',
         '',
         'Usuarios: '+(users?users.length:0),
-        'Saldo total: $'+total.toLocaleString('es-MX')+' MX',
-        'Ventas hoy: $'+ventasHoy.toLocaleString('es-MX')+' MX',
+        'Saldo total: $'+total.toLocaleString('es-MX')+' MXN',
+        'Ventas hoy: $'+ventasHoy.toLocaleString('es-MX')+' MXN',
         'Pedidos hoy: '+(movs?movs.length:0),
         '',
         'Panel: ciberstore.lat'
@@ -4889,8 +4889,8 @@ function openAC80Modal(product, price){
   var id  = document.getElementById('ac80-id');
   var nom = document.getElementById('ac80-nombre');
   if(pn)  pn.textContent  = 'AC80 - ' + product;
-  if(pp)  pp.textContent  = '$' + price.toLocaleString('es-MX') + ' MX';
-  if(sal) sal.textContent = '$' + (authSession.saldo||0).toLocaleString('es-MX') + ' MX';
+  if(pp)  pp.textContent  = '$' + price.toLocaleString('es-MX') + ' MXN';
+  if(sal) sal.textContent = '$' + (authSession.saldo||0).toLocaleString('es-MX') + ' MXN';
   if(err) err.style.display = 'none';
   if(id)  id.value  = '';
   if(nom) nom.value = '';
@@ -4914,7 +4914,7 @@ function submitAC80(){
   var saldo = authSession ? (authSession.saldo||0) : 0;
   if(saldo < ac80CurrentPrice){
     if(err){
-      err.textContent = 'Saldo insuficiente ($' + saldo.toLocaleString('es-MX') + ' MX). Recarga tu cuenta.';
+      err.textContent = 'Saldo insuficiente ($' + saldo.toLocaleString('es-MX') + ' MXN). Recarga tu cuenta.';
       err.style.display = 'block';
     }
     return;
@@ -4927,7 +4927,7 @@ function submitAC80(){
     '*PEDIDO #' + ord + ' - CiberStore*',
     '',
     'Producto: AC80 - ' + ac80CurrentProduct,
-    'Precio: $' + ac80CurrentPrice.toLocaleString('es-MX') + ' MX',
+    'Precio: $' + ac80CurrentPrice.toLocaleString('es-MX') + ' MXN',
     'Metodo: Saldo de la pagina',
     '',
     'ID Free Fire: ' + ffId,
@@ -4964,15 +4964,15 @@ function refreshUserBalance(){
       
       // Actualizar en sidebar
       var sbEl = document.getElementById('saldo-page-balance');
-      if(sbEl) sbEl.textContent = '$' + Math.round(newSaldo).toLocaleString('es-MX') + ' MX';
+      if(sbEl) sbEl.textContent = fmt(newSaldo);
       
       // Actualizar en modal
       var ms = document.getElementById('modal-saldo-amt');
-      if(ms) ms.textContent = '$' + Math.round(newSaldo).toLocaleString('es-MX') + ' MX';
+      if(ms) ms.textContent = fmt(newSaldo);
       
       // Actualizar en modal de fragmentos
       var fs = document.getElementById('frag-saldo-disp');
-      if(fs) fs.textContent = '$' + Math.round(newSaldo).toLocaleString('es-MX') + ' MX';
+      if(fs) fs.textContent = fmt(newSaldo);
       
       console.log('[BALANCE] Saldo actualizado: $'+newSaldo.toLocaleString('es-MX'));
     }
@@ -5005,7 +5005,7 @@ function openFragModal(frags, diam, usd, mxn){
   var fs = document.getElementById('frag-saldo-disp');
   if(eq)  eq.textContent  = frags.toLocaleString('es-MX');
   if(ed)  ed.textContent  = diam.toLocaleString('es-MX') + ' 💎';
-  if(eu)  eu.textContent  = '$' + mxn.toLocaleString('es-MX') + ' MX';
+  if(eu)  eu.textContent  = '$' + mxn.toLocaleString('es-MX') + ' MXN';
   if(em)  em.textContent  = '';
   if(err) err.style.display = 'none';
   if(fi)  fi.value  = '';
@@ -5013,13 +5013,13 @@ function openFragModal(frags, diam, usd, mxn){
   if(fp)  fp.selectedIndex = 0;
   // Cargar saldo actual
   if(fs && authSession && authSession.saldo !== undefined){
-    fs.textContent = '$' + Math.round(authSession.saldo).toLocaleString('es-MX') + ' MX';
+    fs.textContent = '$' + Math.round(authSession.saldo).toLocaleString('es-MX') + ' MXN';
   } else if(fs && window.sb && authSession){
     // Si no hay saldo en sesión, cargar de Supabase
     sb.get('profiles', 'select=saldo&id=eq."'+authSession.id+'"').then(function(result){
       if(result && result[0]){
         var saldo = result[0].saldo || 0;
-        if(fs) fs.textContent = '$' + Math.round(saldo).toLocaleString('es-MX') + ' MX';
+        if(fs) fs.textContent = '$' + Math.round(saldo).toLocaleString('es-MX') + ' MXN';
       }
     });
   }
@@ -5109,7 +5109,7 @@ function renderCart(){
     rows+='<button onclick="closeCart();showAuthModal();" style="width:100%;padding:.72rem;background:linear-gradient(90deg,#0055cc,#22d3ee);color:#fff;border:none;border-radius:7px;font-weight:700;font-size:.9rem;cursor:pointer">Inicia sesion</button>';
   } else if(!enough){
     var falta=total-saldo;
-    rows+='<div style="font-size:.78rem;color:#ff6b6b;margin-bottom:.5rem">Saldo insuficiente. Te faltan $'+falta.toLocaleString('es-MX')+' MX.</div>';
+    rows+='<div style="font-size:.78rem;color:#ff6b6b;margin-bottom:.5rem">Saldo insuficiente. Te faltan $'+falta.toLocaleString('es-MX')+' MXN.</div>';
     rows+='<button onclick="closeCart();goPage(String.fromCharCode(115,97,108,100,111));" style="width:100%;padding:.72rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:7px;font-weight:700;font-size:.9rem;cursor:pointer">Recargar saldo</button>';
   } else {
     rows+='<div id="cart-err" style="color:#ff6b6b;font-size:.75rem;margin-bottom:.4rem;display:none"></div>';
@@ -5141,7 +5141,7 @@ function submitCart(){
 
   var total=c.reduce(function(s,i){return s+i.price;},0);
   var saldo=authSession.saldo||0;
-  if(saldo<total){ showErr('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MX). Recarga tu cuenta.'); return; }
+  if(saldo<total){ showErr('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MXN). Recarga tu cuenta.'); return; }
   // Anti-doble-click
   if(btn && btn.disabled) return;
   if(btn){ btn.disabled=true; setTimeout(function(){ if(btn) btn.disabled=false; }, 4000); }
@@ -5318,7 +5318,7 @@ function submitLk2kSaldo(){
   if(!plan){ showErr('Selecciona un plan'); return; }
   var saldo = authSession.saldo||0;
   if(saldo < plan.precio){
-    showErr('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MX). Recarga tu cuenta.');
+    showErr('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MXN). Recarga tu cuenta.');
     return;
   }
   var ord = getNextOrder();
@@ -5351,7 +5351,7 @@ function submitLk200Saldo(){
   if(!plan){ showErr('Selecciona un plan'); return; }
   var saldo = authSession.saldo||0;
   if(saldo < plan.precio){
-    showErr('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MX). Recarga tu cuenta.');
+    showErr('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MXN). Recarga tu cuenta.');
     return;
   }
   var ord = getNextOrder();
@@ -5748,7 +5748,7 @@ document.addEventListener('DOMContentLoaded', function(){
 function updateLikesSaldo(){
   if(!authSession) return;
   var saldo = authSession.saldo || 0;
-  var saldoStr = '$' + Math.round(saldo).toLocaleString('es-MX') + ' MX';
+  var saldoStr = fmt(saldo);
   
   // Campos del formulario de saldo (básicos y 2k)
   var lk200 = document.getElementById('lk200-saldo-val');
@@ -6301,7 +6301,7 @@ function submitBonusSaldo(){
 
   var saldo = authSession.saldo || 0;
   if(saldo < plan.precio){
-    showErr('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MX). Recarga tu cuenta.');
+    showErr('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MXN). Recarga tu cuenta.');
     return;
   }
   if(err) err.style.display='none';
@@ -6367,7 +6367,7 @@ function _procesarCompraDiam(planVal, idEl, nomEl, errEl, etiqueta){
   if(!ffNom){ showErr('Ingresa tu nombre en el juego'); return; }
 
   var saldo=authSession.saldo||0;
-  if(saldo<precio){ showErr('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MX). Recarga tu cuenta.'); return; }
+  if(saldo<precio){ showErr('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MXN). Recarga tu cuenta.'); return; }
   if(err) err.style.display='none';
 
   var ord=getNextOrder();
@@ -6454,7 +6454,7 @@ function loadPines(){
       var opts = '';
       Object.keys(porTipo).forEach(function(k){
         var t = porTipo[k];
-        opts += '<option value="'+t.tipo+'|'+t.precio+'">'+t.tipo+' — $'+t.precio+' MX ('+t.count+' disp.)</option>';
+        opts += '<option value="'+t.tipo+'|'+t.precio+'">'+t.tipo+' — $'+t.precio+' MXN ('+t.count+' disp.)</option>';
       });
       sel.innerHTML = opts;
     }
@@ -7622,12 +7622,12 @@ function _cargarSaldoYMovimientos(){
   var sdb = document.getElementById('pf-saldo-big');
   var movs = document.getElementById('pf-movimientos');
   if(!authSession){
-    if(sdb) sdb.textContent='$0 MX';
+    if(sdb) sdb.textContent='$0 MXN';
     if(movs) movs.innerHTML='<div style="text-align:center;padding:1rem;color:var(--muted);font-size:.78rem">Inicia sesion para ver tu historial</div>';
     return;
   }
   var saldo = authSession.saldo || 0;
-  if(sdb) sdb.textContent = '$'+saldo.toLocaleString('es-MX')+' MX';
+  if(sdb) sdb.textContent = '$'+saldo.toLocaleString('es-MX')+' MXN';
 
   if(movs && authSession.id && typeof sbGetMovimientos === 'function'){
     sbGetMovimientos(authSession.id).then(function(rows){
@@ -8721,7 +8721,7 @@ function loadPinesMayoreo(){
   // Llenar el selector con los productos de PINES_API
   var opts = '';
   PINES_API.forEach(function(p, i){
-    opts += '<option value="'+i+'">'+p.diamantes+' diamantes — $'+p.precio.toFixed(2).replace(/\.00$/,'')+' MX c/u</option>';
+    opts += '<option value="'+i+'">'+p.diamantes+' diamantes — $'+p.precio.toFixed(2).replace(/\.00$/,'')+' MXN c/u</option>';
   });
   sel.innerHTML = opts;
 
@@ -8761,7 +8761,7 @@ function _updatePinTotal(){
 
   var el = document.getElementById('pin-total-val');
   var descEl = document.getElementById('pin-descuento-row');
-  if(isNaN(idx) || !PINES_API[idx]){ if(el) el.textContent='$0 MX'; if(descEl) descEl.style.display='none'; return; }
+  if(isNaN(idx) || !PINES_API[idx]){ if(el) el.textContent='$0 MXN'; if(descEl) descEl.style.display='none'; return; }
 
   var c = _calcularTotalPin(idx, cant);
 
@@ -8776,7 +8776,7 @@ function _updatePinTotal(){
     }
   }
 
-  if(el) el.textContent = '$'+c.total.toLocaleString('es-MX')+' MX';
+  if(el) el.textContent = '$'+c.total.toLocaleString('es-MX')+' MXN';
 }
 
 function _cambiarCantPin(delta){
@@ -8809,7 +8809,7 @@ function submitPinSaldo(){
   var total = calc.total;
   var saldo = authSession.saldo||0;
 
-  if(saldo < total){ showErr('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MX). Necesitas $'+total.toLocaleString('es-MX')+' MX.'); return; }
+  if(saldo < total){ showErr('Saldo insuficiente ($'+saldo.toLocaleString('es-MX')+' MXN). Necesitas $'+total.toLocaleString('es-MX')+' MXN.'); return; }
   if(err) err.style.display='none';
 
   _comprandoPin = true;
@@ -11209,7 +11209,7 @@ var _biolargaBusy = false;
 
 function _refreshBioLargaSaldo(){
   var el = document.getElementById('biolarga-saldo');
-  if(el) el.textContent = authSession ? ('$' + (authSession.saldo||0) + ' MX') : '$0 MX';
+  if(el) el.textContent = authSession ? ('$' + (authSession.saldo||0) + ' MXN') : '$0 MXN';
 }
 
 function comprarBioLarga(){
@@ -11218,12 +11218,12 @@ function comprarBioLarga(){
 
   var saldo = authSession.saldo || 0;
   if(saldo < BIOLARGA_PRECIO){
-    showToast('Saldo insuficiente. Necesitas $' + BIOLARGA_PRECIO + ' MX', 3500);
+    showToast('Saldo insuficiente. Necesitas $' + BIOLARGA_PRECIO + ' MXN', 3500);
     setTimeout(function(){ goPage('saldo'); }, 900);
     return;
   }
 
-  if(!confirm('Comprar BIO LARGA por $' + BIOLARGA_PRECIO + ' MX?\n\nSe descontara de tu saldo y recibiras el enlace.')) return;
+  if(!confirm('Comprar BIO LARGA por $' + BIOLARGA_PRECIO + ' MXN?\n\nSe descontara de tu saldo y recibiras el enlace.')) return;
 
   _biolargaBusy = true;
   var btn = document.getElementById('biolarga-btn');
@@ -11302,7 +11302,7 @@ var _l2kBusy = false;
 
 function _refreshL2kSaldo(){
   var el = document.getElementById('l2k-saldo');
-  if(el) el.textContent = authSession ? ('$' + (authSession.saldo||0) + ' MX') : '$0 MX';
+  if(el) el.textContent = authSession ? ('$' + (authSession.saldo||0) + ' MXN') : '$0 MXN';
 }
 
 function renderLikes2k(){
@@ -11346,12 +11346,12 @@ function comprarLikes2k(i){
 
   var saldo = authSession.saldo || 0;
   if(saldo < p.mxn){
-    showToast('Saldo insuficiente. Necesitas $' + p.mxn + ' MX', 3500);
+    showToast('Saldo insuficiente. Necesitas $' + p.mxn + ' MXN', 3500);
     setTimeout(function(){ goPage('saldo'); }, 900);
     return;
   }
 
-  if(!confirm('Comprar ' + p.likes + ' LIKES por $' + p.mxn + ' MX?\n\nID: ' + ffId + '\nEntrega aprox: ' + p.dias + '.')) return;
+  if(!confirm('Comprar ' + p.likes + ' LIKES por $' + p.mxn + ' MXN?\n\nID: ' + ffId + '\nEntrega aprox: ' + p.dias + '.')) return;
 
   _l2kBusy = true;
   var ord = (typeof getNextOrder === 'function') ? getNextOrder() : Math.floor(Math.random()*9000+1000);
@@ -11415,7 +11415,7 @@ function _fraguActualizar(){
   if(el=document.getElementById('fragu-caja-sub')) el.textContent = '$' + subCaja.toFixed(2).replace('.00','');
   if(el=document.getElementById('fragu-frag-sub')) el.textContent = '$' + subFrag.toFixed(2).replace('.00','');
   if(el=document.getElementById('fragu-total')) el.textContent = '$' + total.toFixed(2).replace('.00','');
-  if(el=document.getElementById('fragu-saldo')) el.textContent = authSession ? ('$' + (authSession.saldo||0) + ' MX') : '$0 MX';
+  if(el=document.getElementById('fragu-saldo')) el.textContent = authSession ? ('$' + (authSession.saldo||0) + ' MXN') : '$0 MXN';
 }
 
 function comprarFragU(){
@@ -11440,7 +11440,7 @@ function comprarFragU(){
 
   var saldo = authSession.saldo || 0;
   if(saldo < totalRedondeado){
-    showToast('Saldo insuficiente. Necesitas $' + totalRedondeado + ' MX', 3500);
+    showToast('Saldo insuficiente. Necesitas $' + totalRedondeado + ' MXN', 3500);
     setTimeout(function(){ goPage('saldo'); }, 900);
     return;
   }
@@ -11450,7 +11450,7 @@ function comprarFragU(){
   if(_fraguCant.frag > 0) detalle.push(_fraguCant.frag + 'x Fragmento Universal');
   var detalleTxt = detalle.join(' + ');
 
-  if(!confirm('Comprar:\n' + detalleTxt + '\n\nTotal: $' + totalRedondeado + ' MX\nID: ' + ffId)) return;
+  if(!confirm('Comprar:\n' + detalleTxt + '\n\nTotal: $' + totalRedondeado + ' MXN\nID: ' + ffId)) return;
 
   _fraguBusy = true;
   var btn = document.getElementById('fragu-btn');
@@ -11770,7 +11770,7 @@ function _mostrarSaldoRecargado(monto, total){
     '<div style="background:linear-gradient(160deg,#0d1f14,#0a0e13);border:1px solid rgba(37,211,102,.45);border-radius:22px;padding:2.2rem 1.8rem;text-align:center;max-width:340px;width:88%;box-shadow:0 20px 60px rgba(37,211,102,.25);animation:srPop .4s cubic-bezier(.2,1.2,.4,1)">'
     + '<div style="width:76px;height:76px;margin:0 auto 1.2rem;border-radius:50%;background:rgba(37,211,102,.15);border:2px solid rgba(37,211,102,.5);display:flex;align-items:center;justify-content:center;animation:srPulse 1.6s ease-out infinite"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>'
     + '<div style="font-family:Saira,sans-serif;font-weight:900;font-size:1.4rem;color:#25d366;letter-spacing:.5px;margin-bottom:.4rem">SALDO RECARGADO</div>'
-    + '<div style="font-size:.9rem;color:#c9d1e0;margin-bottom:1.3rem">Se acreditaron <b style="color:#fff">$' + Math.round(monto).toLocaleString('es-MX') + ' MX</b> a tu cuenta</div>'
+    + '<div style="font-size:.9rem;color:#c9d1e0;margin-bottom:1.3rem">Se acreditaron <b style="color:#fff">$' + Math.round(monto).toLocaleString('es-MX') + ' MXN</b> a tu cuenta</div>'
     + '<div style="background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:1rem;margin-bottom:1.3rem"><div style="font-size:.62rem;color:#6b7280;text-transform:uppercase;letter-spacing:1px;margin-bottom:.3rem">Tu saldo actual</div><div style="font-family:Saira,sans-serif;font-weight:800;font-size:1.9rem;color:#fff">$' + Math.round(total).toLocaleString('es-MX') + ' <span style="font-size:.9rem;color:#6b7280">MX</span></div></div>'
     + '<button onclick="document.getElementById(\'saldo-recargado-pop\').remove()" style="width:100%;padding:.9rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:12px;font-family:Saira,sans-serif;font-weight:900;font-size:.9rem;letter-spacing:.5px;cursor:pointer">\u00a1PERFECTO!</button>'
     + '</div>';
@@ -11844,7 +11844,7 @@ var _archivoBusy = false;
 
 function _refreshArchivosSaldo(){
   var el = document.getElementById('archivos-saldo-val');
-  if(el && authSession) el.textContent = '$' + Math.round(authSession.saldo||0).toLocaleString('es-MX') + ' MX';
+  if(el && authSession) el.textContent = '$' + Math.round(authSession.saldo||0).toLocaleString('es-MX') + ' MXN';
 }
 
 function comprarArchivo(plan){
@@ -11857,12 +11857,12 @@ function comprarArchivo(plan){
 
   var saldo = authSession.saldo || 0;
   if(saldo < precio){
-    showToast('Saldo insuficiente. Necesitas $' + precio + ' MX', 3500);
+    showToast('Saldo insuficiente. Necesitas $' + precio + ' MXN', 3500);
     setTimeout(function(){ goPage('saldo'); }, 900);
     return;
   }
 
-  if(!confirm('Comprar PROXY iOS VIP - ' + planTxt + ' por $' + precio + ' MX?\n\nSe descontara de tu saldo y coordinaremos la activacion contigo.\n\nRecuerda: no nos hacemos responsables de cuentas baneadas o suspendidas.')) return;
+  if(!confirm('Comprar PROXY iOS VIP - ' + planTxt + ' por $' + precio + ' MXN?\n\nSe descontara de tu saldo y coordinaremos la activacion contigo.\n\nRecuerda: no nos hacemos responsables de cuentas baneadas o suspendidas.')) return;
 
   _archivoBusy = true;
   var ord = (typeof getNextOrder === 'function') ? getNextOrder() : Math.floor(Math.random()*9000+1000);
@@ -11911,7 +11911,7 @@ function admExportarSaldos(formato){
     var clientesReales = clientes.filter(function(r){ return !esAdmin(r); }).length;
 
     if(info){
-      info.innerHTML = '<b style="color:#25d366">' + clientesReales + ' clientes</b> &middot; Saldo total (sin admin): <b style="color:#fff">$' + Math.round(totalSaldo).toLocaleString('es-MX') + ' MX</b>';
+      info.innerHTML = '<b style="color:#25d366">' + clientesReales + ' clientes</b> &middot; Saldo total (sin admin): <b style="color:#fff">$' + Math.round(totalSaldo).toLocaleString('es-MX') + ' MXN</b>';
     }
 
     if(formato === 'csv'){
@@ -11938,7 +11938,7 @@ function admExportarSaldos(formato){
 
     } else if(formato === 'texto'){
       var txt = clientes.map(function(r){
-        return (r.username||'') + ' \u2192 $' + (Number(r.saldo)||0) + ' MX';
+        return (r.username||'') + ' \u2192 $' + (Number(r.saldo)||0) + ' MXN';
       }).join('\n');
       if(log){
         log.style.display = 'block';
@@ -11947,7 +11947,7 @@ function admExportarSaldos(formato){
 
     } else if(formato === 'copiar'){
       var txt2 = clientes.map(function(r){
-        return (r.username||'') + ' \u2192 $' + (Number(r.saldo)||0) + ' MX';
+        return (r.username||'') + ' \u2192 $' + (Number(r.saldo)||0) + ' MXN';
       }).join('\n');
       if(navigator.clipboard && navigator.clipboard.writeText){
         navigator.clipboard.writeText(txt2).then(function(){
@@ -11963,7 +11963,7 @@ function admExportarSaldos(formato){
 
     } else if(formato === 'whatsapp'){
       var fechaWA = new Date().toLocaleDateString('es-MX');
-      var encabezado = '*SALDOS CIBERSTORE*\n' + fechaWA + '\n' + clientesReales + ' clientes \u00b7 Total: $' + Math.round(totalSaldo).toLocaleString('es-MX') + ' MX\n\n';
+      var encabezado = '*SALDOS CIBERSTORE*\n' + fechaWA + '\n' + clientesReales + ' clientes \u00b7 Total: $' + Math.round(totalSaldo).toLocaleString('es-MX') + ' MXN\n\n';
       var lineasWA = clientes.map(function(r){
         return (r.username||'') + ': $' + (Number(r.saldo)||0);
       }).join('\n');
@@ -12027,7 +12027,7 @@ function renderActasGrid(){
     return '<div onclick="actaSeleccionar(\''+a.id+'\')" id="acta-op-'+a.id+'" style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.025);border:1.5px solid rgba(255,255,255,.08);border-radius:14px;padding:1rem;cursor:pointer;transition:all .2s">'
       + '<div style="width:44px;height:44px;flex-shrink:0;border-radius:12px;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.25);display:flex;align-items:center;justify-content:center;font-size:1.35rem">'+a.ico+'</div>'
       + '<div style="flex:1;min-width:0"><div style="font-family:Saira,sans-serif;font-weight:800;font-size:.95rem;color:#fff">Acta de '+a.nombre+'</div><div style="font-size:.7rem;color:#8b93a3;margin-top:.15rem">Certificada y oficial</div></div>'
-      + '<div style="font-family:Saira,sans-serif;font-weight:900;font-size:1.05rem;color:#22d3ee;flex-shrink:0">$'+a.precio+' MX</div>'
+      + '<div style="font-family:Saira,sans-serif;font-weight:900;font-size:1.05rem;color:#22d3ee;flex-shrink:0">$'+a.precio+' MXN</div>'
       + '</div>';
   }).join('');
 }
@@ -12048,7 +12048,7 @@ function actaSeleccionar(id){
   var sel = document.getElementById('actas-tipo-sel');
   if(sel) sel.textContent = _actaSel.nombre;
   var pb = document.getElementById('actas-precio-btn');
-  if(pb) pb.textContent = '$'+_actaSel.precio+' MX';
+  if(pb) pb.textContent = '$'+_actaSel.precio+' MXN';
   _updateActaSaldo();
   if(form) form.scrollIntoView({ behavior:'smooth', block:'center' });
 }
