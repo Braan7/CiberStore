@@ -302,6 +302,12 @@ var CURRENCY_LIST = [
   { code:'BOB', name:'Bolivia',        flag:'\uD83C\uDDE7\uD83C\uDDF4', sym:'Bs'  },
   { code:'DOP', name:'Rep. Dominicana',flag:'\uD83C\uDDE9\uD83C\uDDF4', sym:'RD$' },
   { code:'VES', name:'Venezuela',      flag:'\uD83C\uDDFB\uD83C\uDDEA', sym:'Bs'  },
+  { code:'PYG', name:'Paraguay',    flag:'\uD83C\uDDF5\uD83C\uDDFE', sym:'\u20b2' },
+  { code:'CRC', name:'Costa Rica',  flag:'\uD83C\uDDE8\uD83C\uDDF7', sym:'\u20a1' },
+  { code:'NIO', name:'Nicaragua',   flag:'\uD83C\uDDF3\uD83C\uDDEE', sym:'C$' },
+  { code:'PAB', name:'Panam\u00e1',     flag:'\uD83C\uDDF5\uD83C\uDDE6', sym:'B/.' },
+  { code:'CUP', name:'Cuba',        flag:'\uD83C\uDDE8\uD83C\uDDFA', sym:'$' },
+  { code:'HTG', name:'Hait\u00ed',      flag:'\uD83C\uDDED\uD83C\uDDF9', sym:'G' },
   { code:'KRW', name:'Corea del Sur',  flag:'\uD83C\uDDF0\uD83C\uDDF7', sym:'\u20a9'   }
 ];
 var RATES = { MXN:1 };
@@ -386,13 +392,15 @@ function _inicioPeriodo(period){
 
 function fmt(mxn){
   if(!mxn&&mxn!==0) return '';
-  var rate=RATES[CURRENCY]||1, sym=CUR_SYM[CURRENCY]||'$', suf=CUR_SUF[CURRENCY]||'';
+  var cur=CURRENCY;
+  if(cur!=='MXN' && (RATES[cur]||1)===1) cur='MXN'; // la tasa aun no llego: se muestra en pesos antes que un monto equivocado
+  var rate=RATES[cur]||1, sym=CUR_SYM[cur]||'$', suf=CUR_SUF[cur]||'';
   var val=mxn*rate, str;
-  // Si el monto en MXN tiene decimales (ej: 13.50), mostrarlos
+  // Si el monto en MXN tiene decimales (ej: 12.50), mostrarlos
   var tieneDecimal = (Math.round(mxn*100) % 100) !== 0;
-  if(CURRENCY==='MXN') str=sym+(tieneDecimal ? val.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2}) : Math.round(val).toLocaleString('es-MX'));
-  else if(CURRENCY==='ARS') str=sym+Math.round(val).toLocaleString('es-AR');
-  else str=sym+val.toFixed(2);
+  if(cur==='MXN') str=sym+(tieneDecimal ? val.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2}) : Math.round(val).toLocaleString('es-MX'));
+  else if(cur==='ARS') str=sym+Math.round(val).toLocaleString('es-AR');
+  else str=sym+(Math.abs(val)>=1000 ? Math.round(val).toLocaleString('es-MX') : val.toFixed(2));
   return str+suf;
 }
 
@@ -7789,12 +7797,12 @@ var _diamSeleccionado = null;
 // ═══════════ RECARGAS AUTOMÁTICAS (Recargas América type=recharge) ═══════════
 // package_id = el ID de Recargas América | precio = costo USD × 20 (redondeado)
 var RECARGAS_AUTO = [
-  { package_id:351, catalog_id:5,  sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.712,  precio:15,   img:'img/diam-100.png'  },
-  { package_id:348, catalog_id:6,  sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:2.1374, precio:45,   img:'img/diam-310.png'  },
-  { package_id:350, catalog_id:7,  sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.6164, precio:75,   img:'img/diam-520.png'  },
-  { package_id:347, catalog_id:8,  sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.706,  precio:145,  img:'img/diam-1060.png' },
-  { package_id:346, catalog_id:9,  sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:13.3209,precio:250,  img:'img/diam-2180.png' },
-  { package_id:349, catalog_id:10, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:33.8848,precio:650,  img:'img/diam-5600.png' },
+  { package_id:351, catalog_id:5,  sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.655,  precio:12.5,   img:'img/diam-100.png'  },
+  { package_id:348, catalog_id:6,  sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:1.9649, precio:38.3,   img:'img/diam-310.png'  },
+  { package_id:350, catalog_id:7,  sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.3222, precio:64.06,   img:'img/diam-520.png'  },
+  { package_id:347, catalog_id:8,  sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.1709,  precio:118.13,  img:'img/diam-1060.png' },
+  { package_id:346, catalog_id:9,  sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:12.2471,precio:233.39,  img:'img/diam-2180.png' },
+  { package_id:349, catalog_id:10, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:31.1701,precio:596.41,  img:'img/diam-5600.png' },
   { package_id:null, catalog_id:null, nombre:'11.200 Diamantes + 1.120 Bono', diamantes:12320, costoUSD:66.32, precio:1300, manual:true }
 ];
 
@@ -8241,7 +8249,7 @@ function _procesarRecargaAutomatica(p, ffId){
     if(msg){ msg.innerHTML = _rcEstadoHTML('pending', '\u23F3 RECARGA EN PROCESO', 'Validando tu ID de Free Fire, por favor espera...'); }
 
   // Paso 1: validar que el ID exista
-  fetch(COMPRAR_RECARGA_URL, {
+  fetchRecargaAuto(COMPRAR_RECARGA_URL, {
     method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({ action:'validar', product_id:p.package_id, service_user_id:ffId })
   }).then(function(r){ return r.json(); }).then(function(val){
@@ -8295,7 +8303,7 @@ function _ejecutarRecargaVerificada(p, ffId, nombre, verificationStatus, btn, ms
   var idempotencyKey = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : ('cs-'+ord+'-'+Date.now());
 
   // Paso 3: hacer la recarga automática — SIEMPRE con el ffId exacto que escribio el usuario
-  fetch(COMPRAR_RECARGA_URL, {
+  fetchRecargaAuto(COMPRAR_RECARGA_URL, {
     method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({ action:'comprar', package_id:p.package_id, catalog_id:p.catalog_id, sku:p.sku, player_id:ffId, client_name:authSession.username, idempotency_key:idempotencyKey })
   }).then(function(r){ return r.json(); }).then(function(res){
@@ -8303,7 +8311,7 @@ function _ejecutarRecargaVerificada(p, ffId, nombre, verificationStatus, btn, ms
       registrarPedido(p.nombre+' (AUTO'+(esVerificado?'':' - ID NO VERIFICADO')+')', p.diamantes, 'diamantes', ffId, p.precio, 0);
       if(typeof tgNotifyPurchase==='function'){
         var infoJugador = esVerificado ? ('\uD83D\uDC64 Nombre IG: '+nombre) : '\u26A0\uFE0F ID SIN VERIFICAR - cliente confirmo bajo su responsabilidad';
-        var infoVia = res.via ? ('\n\uD83D\uDD17 Via: '+(res.via==='catalog'?'Catalogo Unificado':'API pines')) : '';
+        var infoVia = res.via ? ('\n\uD83D\uDD17 Via: '+(res.via==='catalog'?'Catalogo Unificado':(res.via&&String(res.via).indexOf('Central One')===0?res.via:'API pines'))) : '';
         tgNotifyPurchase(authSession.username, '\u26A1 Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n'+infoJugador+infoVia, p.precio, ord);
       }
       // Puntos de ranking: SOLO cuando el proveedor confirma COMPLETED de verdad.
@@ -12885,8 +12893,16 @@ document.addEventListener('keydown', function(e){
 // MANUAL_METODOS: datos de pago que se muestran al cliente. Mientras esté vacío se muestra
 //   "Buscamos banca..." y no se puede enviar. Ejemplo:
 //   {id:'banco1', nombre:'Banco X', filas:[{k:'Titular',v:'Nombre'},{k:'CLABE',v:'000000000000000000'}], copiar:'000000000000000000'}
-// Diamantes: true = carrito de recargas pagado directo con comprobante (sin saldo); tú confirmas el pago en el panel y se recarga por API si hay saldo del proveedor, o a mano · false = automático con saldo
-var RECARGA_MANUAL_DIAMANTES = true;
+// Diamantes: false = AUTOMÁTICO con saldo (ingresan ID, se verifica y se recarga solo, con Central One) · true = carrito manual con comprobante y confirmación tuya en el panel
+// Recargas automáticas con Central One (api/recarga.js). false = vuelve al proveedor anterior (rapid-handler)
+var CO_AUTO_ACTIVO = true;
+var RECARGA_AUTO_URL = '/api/recarga';
+var CO_AUTO_PKGS = [351, 348, 350, 347, 346, 349];   // los 6 paquetes de diamantes de la tienda
+function fetchRecargaAuto(url, opts){
+  try{ var b = JSON.parse(opts.body), id = (b.package_id != null) ? b.package_id : b.product_id; if(CO_AUTO_ACTIVO && CO_AUTO_PKGS.indexOf(Number(id)) >= 0) return fetch(RECARGA_AUTO_URL, opts); }catch(e){}
+  return fetch(url, opts);
+}
+var RECARGA_MANUAL_DIAMANTES = false;
 // Pines: true = pedido manual con comprobante, sin saldo ni API · false = automático con saldo
 var RECARGA_MANUAL_PINES = true;
 var RECARGA_MANUAL = RECARGA_MANUAL_DIAMANTES || RECARGA_MANUAL_PINES;
@@ -13004,7 +13020,7 @@ var _manLista = [], _manOrden = null, _manMetodo = null, _manFoto = '', _manFoto
 
 function _manEsc(s){ return String(s==null?'':s).replace(/[<>&"']/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c];}); }
 function _manToast(m,d){ if(typeof showToast === 'function') showToast(m, d||3500); else alert(m); }
-function _manMXN(n){ return '$' + Number(n).toLocaleString('es-MX') + ' MXN'; }
+function _manMXN(n){ n = Number(n) || 0; var d = (Math.round(n * 100) % 100) !== 0; return '$' + n.toLocaleString('es-MX', {minimumFractionDigits: d ? 2 : 0, maximumFractionDigits: 2}) + ' MXN'; }
 
 // ── Detalle de diamantes (sin saldo) ──
 function manualRenderDiamDetalle(){
@@ -13230,7 +13246,7 @@ function _crtOn(){ return (typeof RECARGA_MANUAL_DIAMANTES !== 'undefined') && R
 function crtProductos(){ try{ return _getDiamProductos(_diamTipoActual) || []; }catch(e){ return []; } }
 function crtIdxPorKey(k){ var l = crtProductos(); for(var i = 0; i < l.length; i++){ if(l[i].key === k) return i; } return -1; }
 function crtUnidades(){ return _crtCart.reduce(function(a,i){ return a + i.q; }, 0); }
-function crtTotal(){ return _crtCart.reduce(function(a,i){ return a + i.q * i.p; }, 0); }
+function crtTotal(){ return Math.round(_crtCart.reduce(function(a,i){ return a + i.q * i.p; }, 0) * 100) / 100; }
 function crtGuardar(){ try{ localStorage.setItem('cs_rcart', JSON.stringify(_crtCart)); }catch(e){} crtBarra(); }
 function crtUUID(){ return (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : ('cs-' + Date.now() + '-' + Math.random().toString(36).slice(2)); }
 
