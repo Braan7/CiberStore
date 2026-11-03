@@ -148,6 +148,13 @@ module.exports = async function handler(req, res){
         return enviar(res, 200, { ok: true, tolerancia: TOL, paquetes: Object.keys(m).map(k => { const { _item, ...limpio } = m[k]; return limpio; }),
           candidatos: c.items.filter(it => /free\s*fire/i.test((it.product_family_name || '') + ' ' + (it.name || ''))).slice(0, 60).map(lim) });
       }
+      case 'catalogo': {
+        // Solo lectura: todos los productos de tu catálogo con su product_id (para consultarlos y fijar CO_MAP)
+        const c = await catalogo(); if(!c.ok) return enviar(res, 200, c);
+        return enviar(res, 200, { ok: true, total: c.items.length, items: c.items.slice(0, 1000).map(x => ({
+          product_id: x.product_id, nombre: x.name, sku: x.sku, familia: x.product_family_name, categoria: x.category, tipo: x.product_type,
+          region: x.region, precio: x.reseller_price, moneda: x.currency, in_stock: x.in_stock, campos: x.target_fields })) });
+      }
       case 'validate':
       case 'order': {
         const diam = Number(b.diamantes), pid = String(b.player_id || '').trim();
