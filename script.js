@@ -13884,45 +13884,52 @@ var GC_MARGEN_PCT = 0;
 var JG_MOSTRAR_PROXIMAMENTE = true;
 var JG_GIFTCARDS = [
   { id:'robux', n:'Robux', img:'', subcats:[
-    { id:'mexico', n:'México', titulo:'Gift Card Roblox (MXN)', nota:'Se entrega un código para cuentas de México. Se canjea en tu cuenta de Roblox y no pide usuario ni contraseña.', productos:[
-        {n: "Roblox $100 MXN", usd: 6.1025, agotado: false},
-        {n: "Roblox $200 MXN", usd: 11.8307, agotado: false},
-        {n: "Roblox $300 MXN", usd: 17.2457, agotado: false},
-        {n: "Roblox $400 MXN", usd: 26.0018, agotado: false},
-        {n: "Roblox $500 MXN", usd: 33.0025, agotado: false},
-        {n: "Roblox $600 MXN", usd: 33.4755, agotado: false},
-        {n: "Roblox $700 MXN", usd: 44.0033, agotado: false},
-        {n: "Roblox $800 MXN", usd: 50.1361, agotado: false},
-        {n: "Roblox $900 MXN", usd: 55.844, agotado: false},
-        {n: "Roblox $1,000 MXN", usd: 61.8268, agotado: false},
-        {n: "Roblox $1,250 MXN", usd: 77.0059, agotado: false},
-        {n: "Roblox $1,500 MXN", usd: 92.0071, agotado: false},
-        {n: "Roblox $1,750 MXN", usd: 107.0083, agotado: false},
-        {n: "Roblox $2,000 MXN", usd: 122.0093, agotado: false},
-        {n: "Roblox $2,500 MXN", usd: 152.425, agotado: false},
-        {n: "Roblox $3,000 MXN", usd: 182.5099, agotado: false}
+    { id:'mexico', n:'México', titulo:'ROBLOX', nota:'Se entrega un código para cuentas de México.\nSe entrega un código para canjear en la cuenta de Roblox. No pide usuario ni contraseña', productos:[
+        {"n": "100 MXN", "region": "MXN", "usd": 6.1025, "usd4": "6.1025", "agotado": false},
+        {"n": "200 MXN", "region": "MXN", "usd": 11.8307, "usd4": "11.8307", "agotado": false},
+        {"n": "300 MXN", "region": "MXN", "usd": 17.2457, "usd4": "17.2457", "agotado": false},
+        {"n": "400 MXN", "region": "MXN", "usd": 26.0018, "usd4": "26.0018", "agotado": false},
+        {"n": "500 MXN", "region": "MXN", "usd": 33.0025, "usd4": "33.0025", "agotado": false},
+        {"n": "600 MXN", "region": "MXN", "usd": 33.4755, "usd4": "33.4755", "agotado": false},
+        {"n": "700 MXN", "region": "MXN", "usd": 44.0033, "usd4": "44.0033", "agotado": false},
+        {"n": "800 MXN", "region": "MXN", "usd": 50.1361, "usd4": "50.1361", "agotado": false},
+        {"n": "900 MXN", "region": "MXN", "usd": 55.844, "usd4": "55.8440", "agotado": false},
+        {"n": "1000 MXN", "region": "MXN", "usd": 61.8268, "usd4": "61.8268", "agotado": false},
+        {"n": "1250 MXN", "region": "MXN", "usd": 77.0059, "usd4": "77.0059", "agotado": false},
+        {"n": "1500 MXN", "region": "MXN", "usd": 92.0071, "usd4": "92.0071", "agotado": false},
+        {"n": "1750 MXN", "region": "MXN", "usd": 107.0083, "usd4": "107.0083", "agotado": false},
+        {"n": "2000 MXN", "region": "MXN", "usd": 122.0093, "usd4": "122.0093", "agotado": false},
+        {"n": "2500 MXN", "region": "MXN", "usd": 152.425, "usd4": "152.4250", "agotado": false},
+        {"n": "3000 MXN", "region": "MXN", "usd": 182.5099, "usd4": "182.5099", "agotado": false}
       ] },
-    { id:'latam', n:'LATAM', titulo:'Robux (LATAM)', nota:'Se entrega un código para canjear en tu cuenta de Roblox. No pide usuario ni contraseña.', productos:[
-        {n: "800 Robux", usd: 10.3929, agotado: false},
-        {n: "1,000 Robux", usd: 13.5157, agotado: false},
-        {n: "2,000 Robux", usd: 25.0198, agotado: false},
-        {n: "2,500 Robux", usd: 28.7498, agotado: true},
-        {n: "3,000 Robux", usd: 37.7592, agotado: true},
-        {n: "4,500 Robux", usd: 51.7018, agotado: false},
-        {n: "10,000 Robux", usd: 104.3004, agotado: false}
+    { id:'latam', n:'LATAM', titulo:'ROBUX', nota:'Se entrega un código para canjear en la cuenta de Roblox. No pide usuario ni contraseña', productos:[
+        {"n": "800 Robux", "region": "LATAM", "usd": 10.3929, "usd4": "10.3929", "agotado": false, "grupo": "Lista 1"},
+        {"n": "1000 Robux", "region": "LATAM", "usd": 14.5157, "usd4": "14.5157", "agotado": false, "grupo": "Lista 1"},
+        {"n": "2000 Robux", "region": "LATAM", "usd": 26.0198, "usd4": "26.0198", "agotado": false, "grupo": "Lista 1"},
+        {"n": "2500 Robux", "region": "LATAM", "usd": 29.7498, "usd4": "29.7498", "agotado": true, "grupo": "Lista 1"},
+        {"n": "3000 Robux", "region": "LATAM", "usd": 37.7592, "usd4": "37.7592", "agotado": true, "grupo": "Lista 1"},
+        {"n": "4500 Robux", "region": "LATAM", "usd": 51.7018, "usd4": "51.7018", "agotado": false, "grupo": "Lista 1"},
+        {"n": "10000 Robux", "region": "LATAM", "usd": 105.3004, "usd4": "105.3004", "agotado": false, "grupo": "Lista 1"},
+        {"n": "800 Robux", "region": "LATAM", "usd": 10.3929, "usd4": "10.3929", "agotado": false, "grupo": "Lista 2"},
+        {"n": "1000 Robux", "region": "LATAM", "usd": 13.5157, "usd4": "13.5157", "agotado": false, "grupo": "Lista 2"},
+        {"n": "2000 Robux", "region": "LATAM", "usd": 25.0198, "usd4": "25.0198", "agotado": false, "grupo": "Lista 2"},
+        {"n": "2500 Robux", "region": "LATAM", "usd": 28.7498, "usd4": "28.7498", "agotado": true, "grupo": "Lista 2"},
+        {"n": "3000 Robux", "region": "LATAM", "usd": 37.7592, "usd4": "37.7592", "agotado": true, "grupo": "Lista 2"},
+        {"n": "4500 Robux", "region": "LATAM", "usd": 51.7018, "usd4": "51.7018", "agotado": false, "grupo": "Lista 2"},
+        {"n": "10000 Robux", "region": "LATAM", "usd": 104.3004, "usd4": "104.3004", "agotado": false, "grupo": "Lista 2"}
       ] }
   ] },
   { id:'netflix', n:'Netflix', img:'', subcats:[
-    { id:'us', n:'Estados Unidos', titulo:'Netflix (US)', nota:'Entrega por PIN: se entrega un código para cuentas de Estados Unidos.', productos:[
-        {n: "Netflix $15 USD", usd: 16.8323, agotado: false},
-        {n: "Netflix $20 USD", usd: 21.3728, agotado: false},
-        {n: "Netflix $25 USD", usd: 26.0647, agotado: false},
-        {n: "Netflix $30 USD", usd: 31.488, agotado: false},
-        {n: "Netflix $40 USD", usd: 41.9483, agotado: false},
-        {n: "Netflix $50 USD", usd: 49.3448, agotado: false},
-        {n: "Netflix $60 USD", usd: 59.513, agotado: false},
-        {n: "Netflix $75 USD", usd: 75.5561, agotado: false},
-        {n: "Netflix $100 USD", usd: 97.846, agotado: false}
+    { id:'us', n:'Estados Unidos', titulo:'NETFLIX', nota:'ENTREGA PIN\nSe entrega un código para cuentas de Estados Unidos.', productos:[
+        {"n": "Netflix (US) · 15 USD", "region": "US", "usd": 16.8323, "usd4": "16.8323", "agotado": false},
+        {"n": "Netflix (US) · 20 USD", "region": "US", "usd": 21.3728, "usd4": "21.3728", "agotado": false},
+        {"n": "Netflix (US) · 25 USD", "region": "US", "usd": 26.0647, "usd4": "26.0647", "agotado": false},
+        {"n": "Netflix (US) · 30 USD", "region": "US", "usd": 31.488, "usd4": "31.4880", "agotado": false},
+        {"n": "Netflix (US) · 40 USD", "region": "US", "usd": 41.9483, "usd4": "41.9483", "agotado": false},
+        {"n": "Netflix (US) · 50 USD", "region": "US", "usd": 49.3448, "usd4": "49.3448", "agotado": false},
+        {"n": "Netflix (US) · 60 USD", "region": "US", "usd": 59.513, "usd4": "59.5130", "agotado": false},
+        {"n": "Netflix (US) · 75 USD", "region": "US", "usd": 75.5561, "usd4": "75.5561", "agotado": false},
+        {"n": "Netflix (US) · 100 USD", "region": "US", "usd": 97.846, "usd4": "97.8460", "agotado": false}
       ] }
   ] },
   { id:'steam-wallet',     n:'Steam Wallet',          img:'', productos:[] },
@@ -14037,16 +14044,24 @@ function jgRenderVista(){
   }
   h += '<div class="jg-sub">' + _manEsc(sc.titulo || sc.n) + '</div>';
   if(sc.nota) h += '<div class="jg-nota">' + _manEsc(sc.nota) + '</div>';
-  var mostrarUSD = (typeof CURRENCY !== 'undefined') && CURRENCY !== 'USD';
-  h += '<div class="jg-pgrid">' + sc.productos.map(function(p, i){
+  var mostrarUSD = (typeof CURRENCY !== 'undefined') && CURRENCY !== 'USD', grupoAct = null, abierto = false;
+  sc.productos.forEach(function(p, i){
+    if(!abierto || p.grupo !== grupoAct){
+      if(abierto) h += '</div>';
+      grupoAct = p.grupo; abierto = true;
+      if(p.grupo) h += '<div class="jg-grp">' + _manEsc(p.grupo) + '</div>';
+      h += '<div class="jg-pgrid">';
+    }
     var mxn = _jgMXN(p), usd = _jgUSD(p);
-    return '<div class="jg-pc' + (p.agotado ? ' ag' : '') + '"><div class="jg-pn">' + _manEsc(p.n) + '</div>'
+    h += '<div class="jg-pc' + (p.agotado ? ' ag' : '') + '"><div class="jg-pn">' + _manEsc(p.n) + '</div>'
+      + (p.region ? '<div class="jg-rg">REGIÓN: ' + _manEsc(p.region) + '</div>' : '')
       + '<div class="jg-pp">' + _manEsc(fmt(mxn)) + '</div>'
-      + (mostrarUSD && usd != null ? '<div class="jg-pu">US$ ' + usd.toFixed(2) + '</div>' : '')
-      + (p.agotado ? '<button type="button" class="jg-comprar" disabled>Agotado</button>'
+      + (mostrarUSD && usd != null ? '<div class="jg-pu">US$ ' + usd.toFixed(4) + '</div>' : '')
+      + (p.agotado ? '<div class="jg-ss">SIN STOCK</div><button type="button" class="jg-comprar" disabled>Agotado</button>'
                    : '<button type="button" class="jg-comprar" onclick="gcPedir(\'' + tipo + '\',\'' + g.id + '\',\'' + sc.id + '\',' + i + ')">Comprar</button>')
       + '</div>';
-  }).join('') + '</div>';
+  });
+  if(abierto) h += '</div>';
   v.innerHTML = h;
 }
 
@@ -14068,8 +14083,8 @@ function gcMetodo(id){ _gcMetodo = id; gcRender(); }
 function _gcTotal(){ return Math.round(_gc.mxn * _gcQ * 100) / 100; }
 function gcRender(){
   var b = document.getElementById('gc-body'); if(!b || !_gc) return;
-  var total = _gcTotal(), h = '<div class="mn-eye">GIFT CARD · ' + _manEsc(String(_gc.cat).toUpperCase()) + ' · ' + _manEsc(String(_gc.sub).toUpperCase()) + '</div><h2 class="mn-h" id="gc-title">' + _manEsc(_gc.p.n) + '</h2>';
-  h += '<div class="crt-it"><div class="crt-it-i"><b>' + _manEsc(_gc.p.n) + '</b><small>' + _manEsc(_manMXN(_gc.mxn)) + ' c/u · US$ ' + _gc.usd.toFixed(2) + '</small></div>'
+  var total = _gcTotal(), h = '<div class="mn-eye">GIFT CARD · ' + _manEsc(String(_gc.cat).toUpperCase()) + ' · ' + _manEsc(String(_gc.sub).toUpperCase()) + '</div><h2 class="mn-h" id="gc-title">' + _manEsc(_gc.cat + ' ' + _gc.sub + ' · ' + _gc.p.n) + '</h2>';
+  h += '<div class="crt-it"><div class="crt-it-i"><b>' + _manEsc(_gc.p.n) + '</b><small>' + _manEsc(_manMXN(_gc.mxn)) + ' c/u · US$ ' + _gc.usd.toFixed(4) + '</small></div>'
     + '<div class="crt-q"><button type="button" aria-label="Quitar uno" onclick="gcQ(-1)">&minus;</button><span>' + _gcQ + '</span><button type="button" aria-label="Agregar uno" onclick="gcQ(1)">+</button></div>'
     + '<div class="crt-sub" style="grid-column:1/-1;grid-row:auto">' + _manEsc(_manMXN(total)) + '</div></div>';
   if(_gc.nota) h += '<div class="mn-note" style="margin-top:.6rem">' + _manEsc(_gc.nota) + '</div>';
@@ -14133,7 +14148,7 @@ function gcEnviar(){
   var total = _gcTotal(), user = authSession.username || 'Cliente', cod = 'GC-' + Date.now().toString(36).toUpperCase().slice(-6);
   var nombre = 'Gift Card ' + _gc.cat + ' ' + _gc.sub + ' - ' + _gc.p.n;
   var payload = { usuario:user, username:user, metodo:'PEDIDO MANUAL (sin saldo): ' + nombre + ' - ' + met.nombre, monto:_manMXN(total) + ' - Pedido ' + cod, monto_acreditar:0,
-    extra:'Pedido ' + cod + ' | ' + nombre + ' x' + _gcQ + ' | ' + _manMXN(_gc.mxn) + ' c/u (US$ ' + _gc.usd.toFixed(2) + ') | Total: ' + _manMXN(total) + ' | WhatsApp: +' + wa + ' | SIN SALDO · enviar el código a mano', foto_base64:_gcFoto };
+    extra:'Pedido ' + cod + ' | ' + nombre + ' x' + _gcQ + ' | ' + _manMXN(_gc.mxn) + ' c/u (US$ ' + _gc.usd.toFixed(4) + ') | Total: ' + _manMXN(total) + ' | WhatsApp: +' + wa + ' | SIN SALDO · enviar el código a mano', foto_base64:_gcFoto };
   var liberar = function(){ _gcEnviando = false; var b2 = document.getElementById('gc-send'); if(b2){ b2.disabled = false; b2.textContent = 'Enviar comprobante y pedir mi código'; } };
   fetch(NOTIF_RECARGA_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)}).then(function(r){ return r.json(); }).then(function(res){
     if(res && res.success){
