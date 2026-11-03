@@ -3984,6 +3984,27 @@ body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill
 .jg-pedir{padding:.4rem .8rem;border-radius:10px;font-weight:600;font-size:.82rem;text-decoration:none;color:#04101c;background:linear-gradient(135deg,#22d3ee,#5b8cff 60%,#8b5cf6)}
 .jg-wa{display:flex;align-items:center;justify-content:center;text-decoration:none}
 
+/* Vista de categoría (Robux, Netflix) y tarjetas de producto */
+.jg-back{background:none;border:0;color:#8E9AB8;font-family:inherit;font-size:.92rem;cursor:pointer;padding:.3rem 0;margin-bottom:.4rem}
+.jg-back:hover{color:#67e8f9}
+.jg-vt{font-size:1.5rem;font-weight:600;color:#fff;margin:.2rem 0 .8rem}
+.jg-tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.9rem}
+.jg-tab{padding:.6rem 1.2rem;border-radius:999px;cursor:pointer;font-family:inherit;font-weight:600;font-size:.95rem;color:#cbd5e1;background:rgba(140,170,255,.08);border:1px solid rgba(140,170,255,.25)}
+.jg-tab.sel{color:#04101c;background:linear-gradient(135deg,#22d3ee,#5b8cff 60%,#8b5cf6);border-color:transparent}
+.jg-tab:focus-visible,.jg-comprar:focus-visible,.jg-back:focus-visible{outline:2px solid #67e8f9;outline-offset:2px}
+.jg-sub{color:#e5e7eb;font-weight:600;font-size:1.02rem;margin-bottom:.5rem}
+.jg-nota{background:rgba(34,211,238,.07);border:1px solid rgba(34,211,238,.25);color:#b8eaf5;border-radius:12px;padding:.65rem .8rem;font-size:.88rem;line-height:1.45;margin-bottom:1rem}
+.jg-pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.8rem}
+@media (max-width:599px){.jg-pgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem}}
+.jg-pc{display:flex;flex-direction:column;gap:.15rem;padding:.9rem .8rem;border-radius:16px;background:linear-gradient(180deg,rgba(24,36,76,.6),rgba(12,20,44,.72));border:1px solid rgba(140,170,255,.16)}
+.jg-pc.ag{opacity:.55}
+.jg-pn{font-weight:600;color:#fff;font-size:1rem;line-height:1.25}
+.jg-pp{font-size:1.3rem;font-weight:600;color:#67e8f9;margin-top:.25rem;font-variant-numeric:tabular-nums}
+.jg-pu{font-size:.78rem;color:#8E9AB8}
+.jg-comprar{margin-top:.6rem;padding:.65rem;border:0;border-radius:11px;cursor:pointer;font-family:inherit;font-weight:600;font-size:.92rem;color:#04101c;background:linear-gradient(135deg,#22d3ee,#5b8cff 60%,#8b5cf6)}
+.jg-comprar:disabled{cursor:not-allowed;color:#8E9AB8;background:rgba(140,170,255,.1)}
+.jg-chip.jg-ok{background:rgba(52,227,122,.1);border-color:rgba(52,227,122,.4);color:#5df0a0}
+
 #theme-btn,.theme-btn{display:none!important}
 </style>
 </head>
@@ -6597,6 +6618,7 @@ body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill
   <div class="page-wrap">
     <div class="jg-bar"><input id="jg-q-recargas" class="jg-q" type="search" placeholder="Buscar juego" oninput="jgRender('recargas')" aria-label="Buscar juego" autocomplete="off"><span class="jg-n" id="jg-n-recargas"></span></div>
     <div class="jg-grid" id="jg-grid-recargas"></div>
+    <div class="jg-vista" id="jg-vista-recargas" style="display:none"></div>
   </div>
 </div>
 
@@ -6605,6 +6627,7 @@ body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill
   <div class="page-wrap">
     <div class="jg-bar"><input id="jg-q-giftcards" class="jg-q" type="search" placeholder="Buscar juego" oninput="jgRender('giftcards')" aria-label="Buscar juego" autocomplete="off"><span class="jg-n" id="jg-n-giftcards"></span></div>
     <div class="jg-grid" id="jg-grid-giftcards"></div>
+    <div class="jg-vista" id="jg-vista-giftcards" style="display:none"></div>
   </div>
 </div>
 
@@ -8317,6 +8340,10 @@ body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill
 <!-- ═══ RECARGAS / GIFT CARDS: detalle de un juego ═══ -->
 <div class="mn-ov" id="jg-modal" role="dialog" aria-modal="true" aria-labelledby="jg-title" style="display:none" onclick="if(event.target===this)jgCerrar()">
   <div class="mn-box"><button type="button" class="mn-x" onclick="jgCerrar()" aria-label="Cerrar">&times;</button><div class="mn-body" id="jg-body"></div></div>
+</div>
+<!-- ═══ GIFT CARD: pedido con comprobante ═══ -->
+<div class="mn-ov" id="gc-modal" role="dialog" aria-modal="true" aria-labelledby="gc-title" style="display:none" onclick="if(event.target===this)gcCerrar()">
+  <div class="mn-box"><button type="button" class="mn-x" onclick="gcCerrar()" aria-label="Cerrar">&times;</button><div class="mn-body" id="gc-body"></div></div>
 </div>
 <script src="supabase.js"></script>
 <script src="supabase_integration.js"></script>
