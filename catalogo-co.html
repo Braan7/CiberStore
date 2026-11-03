@@ -44,6 +44,8 @@ n{display:block;font-weight:600}
 
   <div id="map"></div>
 
+  <div id="juegos"></div>
+
   <div id="lista-w" style="display:none">
     <h2>Todos los productos <span id="cuenta" class="m"></span></h2>
     <label for="q">Buscar (por nombre, SKU o región)</label>
@@ -97,6 +99,70 @@ function pintarLista(){
   }).join('') + (f.length > 200 ? '<div class="m">Mostrando 200. Afina la búsqueda para ver el resto.</div>' : '');
 }
 document.addEventListener('click', function(e){ var b = e.target.closest && e.target.closest('button[data-copy]'); if(b) copiar(b.getAttribute('data-copy'), b); });
+
+// ── Buscador de "mis juegos": recargas y gift cards que quiero vender ──
+var MIS_JUEGOS = [
+  ['Recargas','Blood Strike',/blood\s*strike/],
+  ['Recargas','PUBG Mobile',/pubg/],
+  ['Recargas','Arena Breakout',/arena\s*breakout/],
+  ['Recargas','EA Sports FC Mobile',/fc\s*mobile|eafc\s*mobile/],
+  ['Recargas','Valorant',/valorant/],
+  ['Recargas','Call of Duty Mobile',/call\s*of\s*duty|\bcodm\b|cod\s*mobile/],
+  ['Recargas','Rainbow Six Mobile',/rainbow\s*six|\br6\b/],
+  ['Recargas','Garena Delta Force',/delta\s*force/],
+  ['Recargas','Modern Strike Online',/modern\s*strike/],
+  ['Recargas','Clash Royale',/clash\s*royale/],
+  ['Recargas','Football Master 2',/football\s*master/],
+  ['Gift Cards','Steam Wallet',/steam/],
+  ['Gift Cards','Netflix',/netflix/],
+  ['Gift Cards','Roblox',/roblox/],
+  ['Gift Cards','Robux',/robux/],
+  ['Gift Cards','App Store & iTunes',/app\s*store|itunes|apple/],
+  ['Gift Cards','Amazon',/amazon/],
+  ['Gift Cards','PlayStation',/playstation|\bpsn\b|\bps[45]\b/],
+  ['Gift Cards','Xbox',/xbox/],
+  ['Gift Cards','Google Play',/google\s*play/],
+  ['Gift Cards','Minecraft Minecoins',/minecoin|minecraft.*coin/],
+  ['Gift Cards','Minecraft Java & Bedrock',/minecraft.*(java|bedrock)|java.*bedrock/],
+  ['Gift Cards','Discord',/discord/],
+  ['Gift Cards','Fortnite',/fortnite|v-?bucks/],
+  ['Gift Cards','Xbox Game Pass',/game\s*pass/],
+  ['Gift Cards','PUBG Mobile (gift card)',/pubg/],
+  ['Gift Cards','Apex Legends Mobile',/apex.*mobile/],
+  ['Gift Cards','Apex Legends (Xbox)',/apex/],
+  ['Gift Cards','Candy Crush',/candy\s*crush/],
+  ['Gift Cards','EA Sports FC 26 (EA Points)',/fc\s*26/],
+  ['Gift Cards','Battlefield 6',/battlefield/],
+  ['Gift Cards','Microsoft Windows',/windows|microsoft/],
+  ['Gift Cards','EA Sports FC 24 (EA Points)',/fc\s*24/]
+];
+var DETALLES = [], RESUMEN = '';
+function lineaProd(x){ return [x.nombre, x.region || '-', 'US$ ' + (x.precio || '-'), x.in_stock === false ? 'SIN STOCK' : 'en stock', x.product_id].join(' | '); }
+function pintarJuegos(){
+  var w = document.getElementById('juegos'); if(!ITEMS.length){ w.innerHTML = ''; return; }
+  DETALLES = []; var txt = [], ult = '', h = '<h2>Mis juegos: recargas y gift cards</h2><p class="s">Busco cada juego en tu catálogo. Si uno sale con muchos productos mezclados (por ejemplo PUBG, que puede traer recargas y gift cards), revisa la lista de abajo.</p>';
+  MIS_JUEGOS.forEach(function(j, i){
+    if(j[0] !== ult){ ult = j[0]; h += '<h2>' + esc(ult) + '</h2>'; txt.push('', ult.toUpperCase()); }
+    var m = ITEMS.filter(function(x){ return j[2].test((x.nombre + ' ' + x.sku + ' ' + (x.familia || '')).toLowerCase()); });
+    var precios = m.map(function(x){ return parseFloat(x.precio); }).filter(function(n){ return n > 0; });
+    var regs = {}; m.forEach(function(x){ if(x.region) regs[x.region] = 1; });
+    var fam = {}; m.forEach(function(x){ if(x.familia) fam[x.familia] = 1; });
+    var rango = precios.length ? 'US$ ' + Math.min.apply(null, precios).toFixed(2) + ' a ' + Math.max.apply(null, precios).toFixed(2) : '';
+    var linea = j[1] + ': ' + (m.length ? m.length + ' productos · ' + rango + ' · regiones: ' + (Object.keys(regs).join(', ') || '-') + ' · familia: ' + (Object.keys(fam).slice(0, 3).join(', ') || '-') : 'NO ENCONTRADO');
+    txt.push('- ' + linea);
+    DETALLES[i] = j[1].toUpperCase() + '\n' + (m.length ? m.map(lineaProd).join('\n') : '(no encontrado)');
+    h += '<div class="c"><n>' + esc(j[1]) + ' ' + (m.length ? '<span class="b">' + m.length + ' productos</span>' : '<span class="x">no encontrado</span>') + '</n>'
+      + '<div class="m">' + (m.length ? esc(rango) + ' · ' + esc(Object.keys(regs).join(', ') || '—') : 'No hay nada con ese nombre en tu catálogo (puede llamarse distinto: búscalo abajo).') + '</div>'
+      + (m.length ? '<details class="m" style="margin-top:.4rem"><summary>Ver productos</summary>' + m.slice(0, 60).map(function(x){ return '<div style="padding:.3rem 0;border-bottom:1px solid rgba(140,170,255,.1)">' + esc(x.nombre) + '<br><small>' + esc(x.region || '—') + ' · US$ ' + esc(x.precio || '—') + (x.in_stock === false ? ' · sin stock' : '') + '</small></div>'; }).join('') + (m.length > 60 ? '<div class="m">Mostrando 60 de ' + m.length + '</div>' : '') + '</details>'
+        + '<div class="row"><button data-jg="' + i + '">Copiar detalle con IDs</button></div>' : '') + '</div>';
+  });
+  RESUMEN = 'RESUMEN DE MI CATÁLOGO DE CENTRAL ONE' + txt.join('\n');
+  h = '<div class="c"><n>Copiar para mandárselo a Claude</n><div class="row"><button class="p" id="cpres">Copiar resumen</button><button id="cptodo">Copiar todo el detalle (con IDs)</button></div><div class="m">El resumen es corto. El detalle trae cada producto con su ID y puede ser muy largo.</div></div>' + h;
+  w.innerHTML = h;
+  document.getElementById('cpres').onclick = function(){ copiar(RESUMEN, this); };
+  document.getElementById('cptodo').onclick = function(){ copiar(RESUMEN + '\n\n' + MIS_JUEGOS.map(function(j, i){ return DETALLES[i]; }).join('\n\n'), this); };
+}
+document.addEventListener('click', function(e){ var b = e.target.closest && e.target.closest('button[data-jg]'); if(b) copiar(DETALLES[Number(b.getAttribute('data-jg'))], b); });
 document.getElementById('q').addEventListener('input', pintarLista);
 document.getElementById('ver').addEventListener('click', function(){
   msg('Cargando...', 'ok');
@@ -104,7 +170,7 @@ document.getElementById('ver').addEventListener('click', function(){
     var p = rs[0], c = rs[1];
     if(!c.ok){ msg(errTxt(c), 'err'); document.getElementById('lista-w').style.display = 'none'; document.getElementById('map').innerHTML = ''; return; }
     msg('Conexión correcta. ' + c.total + ' productos en tu catálogo.', 'ok');
-    MAPA = {}; pintarMapa(p); ITEMS = c.items; document.getElementById('lista-w').style.display = 'block'; pintarLista();
+    MAPA = {}; pintarMapa(p); ITEMS = c.items; document.getElementById('lista-w').style.display = 'block'; pintarLista(); pintarJuegos();
   });
 });
 </script>
