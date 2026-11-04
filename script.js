@@ -3192,7 +3192,7 @@ function openSmartWA(){
 /* \u2500\u2500 PWA SERVICE WORKER \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
-    navigator.serviceWorker.register('sw.js').catch(function(){});
+    navigator.serviceWorker.register('sw.js', {updateViaCache:'none'}).then(function(r){ setInterval(function(){ r.update().catch(function(){}); }, 1800000); }).catch(function(){});
   });
 }
 
@@ -8328,7 +8328,7 @@ function _ejecutarRecargaVerificada(p, ffId, nombre, verificationStatus, btn, ms
       // COMPLETED por otro medio, otorgar_puntos_pedido() puede llamarse de nuevo
       // con el mismo pedido_id sin duplicar (UNIQUE lo protege).
       if(res.status==='COMPLETED' && typeof sb!=='undefined' && sb.rpc && authSession && authSession.id){
-        sb.rpc('otorgar_puntos_pedido', { p_user_id: authSession.id, p_pedido_id: ord, p_diamantes: p.diamantes })
+        (csRegistrarVentaDiamantes(authSession.id, ord, p.diamantes), sb.rpc('otorgar_puntos_pedido', { p_user_id: authSession.id, p_pedido_id: ord, p_diamantes: p.diamantes }))
           .then(function(pts){ if(pts) console.log('[PUNTOS] +'+pts+' puntos otorgados, pedido #'+ord); })
           .catch(function(e){ console.error('[PUNTOS] Error otorgando:', e); });
       }
@@ -8398,9 +8398,9 @@ function _ejecutarRecargaVerificada(p, ffId, nombre, verificationStatus, btn, ms
           // otorgado puntos antes, los revierte. Si nunca otorgo puntos (caso
           // normal aqui), el RPC simplemente devuelve 0 sin hacer nada.
           if(typeof sb!=='undefined' && sb.rpc && authSession && authSession.id){
-            sb.rpc('revertir_puntos_pedido', { p_user_id: authSession.id, p_pedido_id: ord, p_motivo: 'Recarga rechazada - sin fondos del proveedor' }).catch(function(){});
+            csAnularVentaDiamantes(authSession.id, ord); sb.rpc('revertir_puntos_pedido', { p_user_id: authSession.id, p_pedido_id: ord, p_motivo: 'Recarga rechazada - sin fondos del proveedor' }).catch(function(){});
           }
-          if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\uD83D\uDEA8 <b>RECARGA RECHAZADA - '+(/pausa|l[i\u00ED]mite|por hora/i.test(errTxt)?'LIMITE DE GASTO ALCANZADO':'SIN FONDOS')+'</b>\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\u2705 Saldo reembolsado al cliente ('+fmt(p.precio)+')\n\n\u26A0\uFE0F <b>'+(/pausa|l[i\u00ED]mite|por hora/i.test(errTxt)?'SUBE EL TOPE EN VERCEL: CO_LIMITE_DIA_USD / CO_LIMITE_USUARIO_HORA':'RECARGA TU CUENTA DEL PROVEEDOR')+'</b>', p.precio, ord);
+          if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\uD83D\uDEA8 <b>RECARGA RECHAZADA - '+(/desactualizada/i.test(errTxt)?'CLIENTE CON VERSION ANTIGUA':(/pausa|l[i\u00ED]mite|por hora/i.test(errTxt)?'LIMITE DE GASTO ALCANZADO':'SIN FONDOS'))+'</b>\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\u2705 Saldo reembolsado al cliente ('+fmt(p.precio)+')\n\n\u26A0\uFE0F <b>'+(/desactualizada/i.test(errTxt)?'SIN ACCION: el cliente debe actualizar la pagina (ya se le devolvio el saldo)':(/pausa|l[i\u00ED]mite|por hora/i.test(errTxt)?'SUBE EL TOPE EN VERCEL: CO_LIMITE_DIA_USD / CO_LIMITE_USUARIO_HORA':'RECARGA TU CUENTA DEL PROVEEDOR'))+'</b>', p.precio, ord);
         }).catch(function(e){
           // El reembolso NO se pudo completar — el cliente SIGUE sin su dinero.
           // No decir "reembolsado" en Telegram: avisar con urgencia real para
@@ -8433,7 +8433,7 @@ function _ejecutarRecargaVerificada(p, ffId, nombre, verificationStatus, btn, ms
 
           registrarPedido(p.nombre+' (AUTO - NO DISPONIBLE, devuelto)', p.diamantes, 'diamantes', ffId, 0, 0);
           if(typeof sb!=='undefined' && sb.rpc && authSession && authSession.id){
-            sb.rpc('revertir_puntos_pedido', { p_user_id: authSession.id, p_pedido_id: ord, p_motivo: 'Producto no disponible - devuelto' }).catch(function(){});
+            csAnularVentaDiamantes(authSession.id, ord); sb.rpc('revertir_puntos_pedido', { p_user_id: authSession.id, p_pedido_id: ord, p_motivo: 'Producto no disponible - devuelto' }).catch(function(){});
           }
           if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F NO DISPONIBLE - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\u2705 SALDO DEVUELTO automaticamente ('+fmt(p.precio)+')', p.precio, ord);
         }).catch(function(e){
@@ -12908,7 +12908,7 @@ var CO_AUTO_ACTIVO = true;
 var RECARGA_AUTO_URL = '/api/recarga';
 var CO_AUTO_PKGS = [351, 348, 350, 347, 346, 349];   // los 6 paquetes de diamantes de la tienda
 function fetchRecargaAuto(url, opts){
-  try{ var b = JSON.parse(opts.body), id = (b.package_id != null) ? b.package_id : b.product_id; if(CO_AUTO_ACTIVO && CO_AUTO_PKGS.indexOf(Number(id)) >= 0) return fetch(RECARGA_AUTO_URL, opts); }catch(e){}
+  try{ var b = JSON.parse(opts.body), id = (b.package_id != null) ? b.package_id : b.product_id; if(CO_AUTO_ACTIVO && CO_AUTO_PKGS.indexOf(Number(id)) >= 0){ var o2 = Object.assign({}, opts); o2.headers = Object.assign({}, opts.headers || {}); if(typeof CS_BUILD !== 'undefined') o2.headers['X-CS-Build'] = CS_BUILD; return fetch(RECARGA_AUTO_URL, o2); } }catch(e){}
   return fetch(url, opts);
 }
 var RECARGA_MANUAL_DIAMANTES = false;
@@ -13537,7 +13537,7 @@ function _crtaCompletarItem(row, i, modo, darPuntos){
   var it = row.items[i];
   if(!it.reg){ _crtaRegistrarPedido(row.username, it.nombre + ' (' + modo + ')', it.diamantes, it.ff_id, it.precio); it.reg = true; }
   if(darPuntos && !it.pts && row.user_id && typeof sb !== 'undefined' && sb.rpc){
-    sb.rpc('otorgar_puntos_pedido', {p_user_id:row.user_id, p_pedido_id:CRT_PID_BASE + Number(row.id) * 100 + i, p_diamantes:Number(it.diamantes) || 0}).catch(function(e){ console.error('[PUNTOS]', e); });
+    (csRegistrarVentaDiamantes(row.user_id, CRT_PID_BASE + Number(row.id) * 100 + i, Number(it.diamantes) || 0), sb.rpc('otorgar_puntos_pedido', {p_user_id:row.user_id, p_pedido_id:CRT_PID_BASE + Number(row.id) * 100 + i, p_diamantes:Number(it.diamantes) || 0})).catch(function(e){ console.error('[PUNTOS]', e); });
     it.pts = true;
   }
 }
@@ -14185,3 +14185,197 @@ function fmtDiam(p){
   }
   return fmt(p.precio);
 }
+
+
+// ═══════════════════════ RANKING DE DIAMANTES (página "Ranking & Premios") ═══════════════════════
+// Solo el top 10 de compradores de diamantes: histórico, hoy, semana y mes (hora de México), desde el 3 de nov. de 2026.
+// Cuentan únicamente recargas completadas; las rechazadas o reembolsadas se anulan.
+// Requiere haber corrido ranking_diamantes.sql en Supabase.
+var RANKING_SOLO_DIAMANTES = true;   // true: la página muestra solo este ranking · false: vuelve todo lo anterior (puntos, premios, likers…)
+var RK_PERIODOS = [ {id:'historico', n:'Histórico'}, {id:'dia', n:'Hoy'}, {id:'semana', n:'Semana'}, {id:'mes', n:'Mes'} ];
+var RK_MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+var _rkPer = 'historico', _rkCache = {}, _rkTotal = null, _rkSeq = 0;
+
+// ── Registro de ventas (se llama junto a los puntos) ──
+function csRegistrarVentaDiamantes(uid, pedido, diamantes){
+  try{ if(typeof sb !== 'undefined' && sb.rpc && uid && pedido != null) sb.rpc('registrar_venta_diamantes', {p_user_id:String(uid), p_pedido_id:Number(pedido), p_diamantes:Number(diamantes)}).catch(function(e){ console.warn('[RANKING] no se pudo registrar la venta:', e); }); }catch(e){}
+}
+function csAnularVentaDiamantes(uid, pedido){
+  try{ if(typeof sb !== 'undefined' && sb.rpc && uid && pedido != null) sb.rpc('anular_venta_diamantes', {p_user_id:String(uid), p_pedido_id:Number(pedido)}).catch(function(){}); }catch(e){}
+}
+
+// ── Fechas en hora de México (UTC-6 todo el año) ──
+function _rkAhoraMX(){ return new Date(Date.now() - 6 * 3600 * 1000); }
+function _rkFecha(d){ return d.getUTCDate() + ' de ' + RK_MESES[d.getUTCMonth()]; }
+function rkInfoTexto(per){
+  var d = _rkAhoraMX();
+  if(per === 'dia') return 'Hoy, ' + _rkFecha(d) + ' · se reinicia a las 00:00 (hora de México)';
+  if(per === 'semana'){ var lun = new Date(d.getTime() - ((d.getUTCDay() + 6) % 7) * 86400000); return 'Semana del lunes ' + _rkFecha(lun) + ' · se reinicia cada lunes'; }
+  if(per === 'mes') return RK_MESES[d.getUTCMonth()].charAt(0).toUpperCase() + RK_MESES[d.getUTCMonth()].slice(1) + ' ' + d.getUTCFullYear() + ' · se reinicia el día 1';
+  return 'Desde el 3 de noviembre de 2026';
+}
+function _rkNum(n){ return (Number(n) || 0).toLocaleString('es-MX'); }
+
+function rkRenderTabs(){
+  var t = document.getElementById('rk-tabs'); if(!t) return;
+  t.innerHTML = RK_PERIODOS.map(function(p){
+    var sel = p.id === _rkPer;
+    return '<button type="button" role="tab" class="rk-tab' + (sel ? ' sel' : '') + '" aria-selected="' + sel + '" onclick="rkTab(\'' + p.id + '\')">' + p.n + '</button>';
+  }).join('');
+  var i = document.getElementById('rk-info'); if(i) i.textContent = rkInfoTexto(_rkPer);
+}
+function rkRenderLista(rows){
+  var ul = document.getElementById('rk-list'); if(!ul) return;
+  var yo = (typeof authSession !== 'undefined' && authSession && authSession.username) ? String(authSession.username).toLowerCase() : '', medallas = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'], h = '';
+  for(var i = 0; i < 10; i++){
+    var r = rows[i], pos = i + 1, cls = 'rk-row' + (i < 3 ? ' top' + pos : '');
+    if(r){
+      var esYo = yo && String(r.username).toLowerCase() === yo;
+      h += '<li class="' + cls + (esYo ? ' yo' : '') + '"><span class="rk-pos">' + (medallas[i] || ('#' + pos)) + '</span>'
+        + '<span class="rk-nom">' + _manEsc(r.username) + (esYo ? ' <em>(tú)</em>' : '') + '<small>' + _rkNum(r.compras) + ' recarga' + (Number(r.compras) === 1 ? '' : 's') + '</small></span>'
+        + '<span class="rk-val">' + _rkNum(r.diamantes) + ' <i>\uD83D\uDC8E</i></span></li>';
+    } else {
+      h += '<li class="rk-row libre"><span class="rk-pos">#' + pos + '</span><span class="rk-nom">Lugar libre<small>¡Puede ser el tuyo!</small></span><span class="rk-val">&mdash;</span></li>';
+    }
+  }
+  ul.innerHTML = h;
+}
+function rkRenderTotal(t){
+  var n = document.getElementById('rk-total-n'), s = document.getElementById('rk-total-s'); if(!n) return;
+  if(!t){ n.textContent = '—'; if(s) s.textContent = ''; return; }
+  n.textContent = _rkNum(t.diamantes);
+  if(s) s.textContent = _rkNum(t.compras) + ' recarga' + (Number(t.compras) === 1 ? '' : 's') + ' completadas desde el 3 de noviembre de 2026';
+}
+function rkPreparando(){
+  var ul = document.getElementById('rk-list'); if(ul) ul.innerHTML = '<li class="rk-vacio">El ranking se está preparando. Vuelve en un momento.</li>';
+  rkRenderTotal(null);
+}
+function rkCargar(forzar){
+  if(!RANKING_SOLO_DIAMANTES) return;
+  rkRenderTabs();
+  if(typeof sb === 'undefined' || !sb.rpc){ rkPreparando(); return; }
+  var per = _rkPer, c = _rkCache[per], seq = ++_rkSeq;
+  if(c && !forzar && Date.now() - c.t < 30000){ rkRenderLista(c.rows); rkRenderTotal(_rkTotal); return; }
+  if(c) rkRenderLista(c.rows); else { var ul = document.getElementById('rk-list'); if(ul) ul.innerHTML = '<li class="rk-vacio">Cargando…</li>'; }
+  Promise.all([ sb.rpc('ranking_diamantes', {p_periodo:per, p_limite:10}), sb.rpc('total_diamantes_vendidos', {p_periodo:'historico'}) ]).then(function(rs){
+    if(seq !== _rkSeq) return;   // el cliente ya cambió de pestaña
+    var rows = rs[0], tot = rs[1];
+    if(!Array.isArray(rows)){ rkPreparando(); return; }
+    _rkCache[per] = {t:Date.now(), rows:rows}; _rkTotal = (Array.isArray(tot) && tot[0]) ? tot[0] : {diamantes:0, compras:0};
+    rkRenderLista(rows); rkRenderTotal(_rkTotal);
+  }).catch(function(e){ if(seq !== _rkSeq) return; console.warn('[RANKING]', e); rkPreparando(); });
+}
+function rkTab(id){ _rkPer = id; rkCargar(false); }
+
+// La página usa estas funciones al abrirse: con el ranking nuevo se salta la carga de las tablas viejas
+(function(){
+  function aplicarModo(){
+    var n = document.getElementById('rk-nuevo'), v = document.getElementById('rk-viejo'); if(!n || !v) return;
+    n.style.display = RANKING_SOLO_DIAMANTES ? '' : 'none'; v.style.display = RANKING_SOLO_DIAMANTES ? 'none' : '';
+    if(RANKING_SOLO_DIAMANTES){ var ps = document.querySelector('#page-ranking .psub'); if(ps) ps.textContent = 'Los 10 mayores compradores de diamantes. Se actualiza en tiempo real.'; rkRenderTabs(); }
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', aplicarModo); else aplicarModo();
+  if(RANKING_SOLO_DIAMANTES){
+    var _ini = window.initRankingPage;
+    window.initRankingPage = function(){ rkCargar(true); return true; };
+    window.cargarTotalesGlobales = function(){};
+    window.cargarTopPuntos = function(){};
+    window.cargarPremios = function(){};
+  }
+  setInterval(function(){ var p = document.getElementById('page-ranking'); if(RANKING_SOLO_DIAMANTES && p && p.classList.contains('active') && document.visibilityState === 'visible') rkCargar(true); }, 60000);
+})();
+
+
+// ═══════════ Aviso grande de precio especial (página de Diamantes) ═══════════
+function vipWA(){
+  if(typeof WA === 'undefined' || !WA) return;
+  window.open('https://wa.me/' + WA + '?text=' + encodeURIComponent('Hola, quiero recargar más de $1,000 USD y conocer el precio especial en diamantes'), '_blank', 'noopener');
+}
+function vipPintar(){
+  var e = document.getElementById('vip-eq'); if(!e) return;
+  var cur = (typeof CURRENCY !== 'undefined') ? CURRENCY : 'MXN';
+  e.textContent = (cur === 'USD' || typeof fmt !== 'function' || !(USD_MXN > 0)) ? '' : ('Equivale a unos ' + fmt(1000 * USD_MXN));
+}
+(function(){
+  var f = window.renderDiamCatalogo;
+  if(typeof f === 'function') window.renderDiamCatalogo = function(){ var r = f.apply(this, arguments); try{ vipPintar(); }catch(e){} return r; };
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', vipPintar); else vipPintar();
+})();
+
+
+// ═══════════════════════ CONTROL DE VERSIÓN: nada de comprar con una tienda vieja ═══════════════════════
+// Cada vez que subes la tienda, index.html trae una "huella" nueva (CS_BUILD). Esta pieza compara la huella de la página
+// que el cliente tiene abierta con la que hay publicada. Si son distintas: bloquea la pantalla con un aviso y la actualiza sola
+// (espera a que termine cualquier compra que esté en curso para no cortarla).
+var _csViejo = false, _csChequeando = false, _csUltimo = 0, _csTimerRecarga = null, _csNuevo = null;
+function _csParse(txt){ var m = String(txt || '').match(/name="cs-build" content="([^"]+)"/); return m ? m[1] : null; }
+// Lee solo el principio de la página publicada (donde está la huella), no el archivo entero
+function csLeerBuild(){
+  var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null, url = location.origin + location.pathname + '?cs_check=' + Date.now();
+  return fetch(url, {cache:'no-store', signal: ctrl ? ctrl.signal : undefined}).then(function(r){
+    if(!r.ok) return null;
+    if(!r.body || !r.body.getReader || typeof TextDecoder === 'undefined') return r.text().then(_csParse);
+    var rd = r.body.getReader(), dec = new TextDecoder(), acc = '';
+    function paso(){
+      return rd.read().then(function(x){
+        if(x.done) return _csParse(acc);
+        acc += dec.decode(x.value, {stream:true});
+        var b = _csParse(acc); if(b){ if(ctrl) try{ ctrl.abort(); }catch(e){} return b; }
+        if(acc.length > 400000){ if(ctrl) try{ ctrl.abort(); }catch(e){} return null; }
+        return paso();
+      });
+    }
+    return paso();
+  });
+}
+function csVerificarVersion(forzar){
+  if(_csViejo || _csChequeando || typeof CS_BUILD === 'undefined') return Promise.resolve(false);
+  if(!forzar && Date.now() - _csUltimo < 10000) return Promise.resolve(false);
+  _csChequeando = true; _csUltimo = Date.now();
+  return csLeerBuild().then(function(b){
+    _csChequeando = false;
+    if(b && b !== CS_BUILD){ csMarcarViejo(b); return true; }
+    return false;
+  }).catch(function(){ _csChequeando = false; return false; });   // sin red o error: no se molesta al cliente
+}
+function _csOperacionEnCurso(){
+  var f = ['_comprandoDiam', '_addSpendBusy', '_crtEnviando', '_ofxEnviando', '_gcEnviando', '_manEnviando'];
+  for(var i = 0; i < f.length; i++){ try{ if(window[f[i]] === true || (typeof eval(f[i]) !== 'undefined' && eval(f[i]) === true)) return true; }catch(e){} }
+  return false;
+}
+function csUrlNueva(){
+  var q = location.search.replace(/([?&])cs_v=[^&]*&?/g, '$1').replace(/[?&]$/, '');
+  return location.pathname + (q ? q + '&' : '?') + 'cs_v=' + encodeURIComponent(_csNuevo || Date.now()) + location.hash;
+}
+function csActualizarAhora(){ location.replace(csUrlNueva()); }
+function csMarcarViejo(nuevo){
+  if(_csViejo) return; _csViejo = true; _csNuevo = nuevo;
+  var ov = document.getElementById('cs-actualizar');
+  if(!ov){
+    ov = document.createElement('div'); ov.id = 'cs-actualizar'; ov.setAttribute('role', 'alertdialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-labelledby', 'cs-act-t');
+    ov.innerHTML = '<div class="cs-act-box"><div class="cs-act-spin" aria-hidden="true"></div><h2 id="cs-act-t">Nueva versión disponible</h2><p id="cs-act-m">Estamos actualizando la tienda para que tengas los precios y las funciones más recientes.</p><button type="button" id="cs-act-b" onclick="csActualizarAhora()">Actualizar ahora</button></div>';
+    document.body.appendChild(ov);
+  }
+  ov.style.display = 'flex'; document.documentElement.style.overflow = 'hidden';
+  var t0 = Date.now(), m = document.getElementById('cs-act-m');
+  clearInterval(_csTimerRecarga);
+  _csTimerRecarga = setInterval(function(){
+    var libre = !_csOperacionEnCurso(), espera = Date.now() - t0;
+    if(libre && espera > 2500){ clearInterval(_csTimerRecarga); csActualizarAhora(); return; }
+    if(!libre && m) m.textContent = 'Estamos terminando tu operación y enseguida se actualiza la tienda. No cierres esta ventana.';
+    if(espera > 90000){ clearInterval(_csTimerRecarga); csActualizarAhora(); }   // por si algo se quedó colgado
+  }, 500);
+}
+// Limpia el parámetro cs_v de la dirección una vez cargada la versión nueva
+(function(){ try{ if(/[?&]cs_v=/.test(location.search)){ var q = location.search.replace(/([?&])cs_v=[^&]*&?/g, '$1').replace(/[?&]$/, ''); history.replaceState(null, '', location.pathname + q + location.hash); } }catch(e){} })();
+// Cuándo revisar: al abrir, cada minuto, al volver a la pestaña, al recuperar internet y al volver con el botón "atrás"
+setTimeout(function(){ csVerificarVersion(true); }, 4000);
+setInterval(function(){ if(document.visibilityState === 'visible') csVerificarVersion(); }, 60000);
+document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible') csVerificarVersion(); });
+window.addEventListener('pageshow', function(e){ if(e.persisted) csVerificarVersion(true); });
+window.addEventListener('online', function(){ csVerificarVersion(true); });
+// Antes de cualquier compra se vuelve a revisar (sin frenar la compra si no hay red)
+['confirmarDiamCompra', 'manualEnviar', 'crtEnviar', 'ofxEnviar', 'gcEnviar'].forEach(function(n){
+  var f = window[n]; if(typeof f !== 'function') return;
+  window[n] = function(){ if(_csViejo){ return; } csVerificarVersion(true); return f.apply(this, arguments); };
+});
