@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<meta name="cs-build" content="e3fe245107">
+<script>var CS_BUILD="e3fe245107";</script>
 <meta charset="UTF-8"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -4015,6 +4017,67 @@ body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill
 .jg-bn:empty{display:none}
 .jg-banner{display:block;width:100%;height:auto;max-height:240px;object-fit:cover}
 
+/* Aviso de nueva versión */
+#cs-actualizar{position:fixed;inset:0;z-index:2147483000;display:none;align-items:center;justify-content:center;padding:1.2rem;background:rgba(4,8,20,.92);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.cs-act-box{width:min(420px,100%);text-align:center;padding:1.6rem 1.3rem;border-radius:20px;background:linear-gradient(180deg,#14214a,#0b1330);border:1px solid rgba(34,211,238,.4);box-shadow:0 30px 80px -20px rgba(0,0,0,.9)}
+.cs-act-box h2{margin:.7rem 0 .4rem;font-size:1.25rem;font-weight:600;color:#fff}
+.cs-act-box p{margin:0 0 1.1rem;color:#b9c6ee;font-size:.95rem;line-height:1.45}
+.cs-act-box button{width:100%;padding:.85rem;border:0;border-radius:13px;font-family:inherit;font-weight:600;font-size:1rem;cursor:pointer;color:#04101c;background:linear-gradient(135deg,#22d3ee,#5b8cff 60%,#8b5cf6)}
+.cs-act-box button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.cs-act-spin{width:38px;height:38px;margin:0 auto;border-radius:50%;border:3px solid rgba(34,211,238,.25);border-top-color:#22d3ee;animation:csSpin .9s linear infinite}
+@keyframes csSpin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.cs-act-spin{animation:none}}
+/* Barra de idioma / moneda debajo del buscador: se quita (la moneda se cambia desde el botón de arriba) */
+.selbar{display:none!important}
+
+/* ═══════════ RANKING DE DIAMANTES ═══════════ */
+.rk-wrap{max-width:760px;margin:0 auto;padding:1.2rem 5vw 3rem}
+.rk-total{display:flex;align-items:center;gap:1rem;padding:1.1rem 1.2rem;border-radius:18px;margin-bottom:1.4rem;background:linear-gradient(135deg,rgba(34,211,238,.14),rgba(139,92,246,.14));border:1px solid rgba(34,211,238,.35)}
+.rk-total-ico{font-size:2.4rem;line-height:1}
+.rk-total-n{font-size:2.1rem;font-weight:600;color:#fff;line-height:1.1;font-variant-numeric:tabular-nums}
+.rk-total-t{color:#cfe9f4;font-size:.98rem;font-weight:600;margin-top:.1rem}
+.rk-total-s{color:#8E9AB8;font-size:.78rem;margin-top:.2rem}
+.rk-h{font-size:1.15rem;font-weight:600;color:#fff;margin:0 0 .8rem}
+.rk-tabs{display:flex;gap:.45rem;flex-wrap:wrap;margin-bottom:.7rem}
+.rk-tab{padding:.55rem 1.05rem;border-radius:999px;cursor:pointer;font-family:inherit;font-weight:600;font-size:.9rem;color:#cbd5e1;background:rgba(140,170,255,.08);border:1px solid rgba(140,170,255,.25)}
+.rk-tab.sel{color:#04101c;background:linear-gradient(135deg,#ffe27a,#f59e0b);border-color:transparent}
+.rk-tab:focus-visible{outline:2px solid #67e8f9;outline-offset:2px}
+.rk-info{color:#8E9AB8;font-size:.82rem;margin-bottom:.9rem}
+.rk-list{list-style:none;margin:0;padding:0;display:grid;gap:.5rem}
+.rk-row{display:flex;align-items:center;gap:.8rem;padding:.75rem .9rem;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07)}
+.rk-row.top1{background:linear-gradient(135deg,rgba(255,210,74,.16),rgba(255,255,255,.03));border-color:rgba(255,210,74,.5)}
+.rk-row.top2{background:linear-gradient(135deg,rgba(203,213,225,.12),rgba(255,255,255,.03));border-color:rgba(203,213,225,.4)}
+.rk-row.top3{background:linear-gradient(135deg,rgba(205,127,50,.15),rgba(255,255,255,.03));border-color:rgba(205,127,50,.45)}
+.rk-row.yo{box-shadow:0 0 0 2px rgba(34,211,238,.6)}
+.rk-row.libre{opacity:.55;border-style:dashed}
+.rk-pos{flex:0 0 34px;text-align:center;font-size:1.25rem;color:#8E9AB8;font-weight:600}
+.rk-nom{flex:1;min-width:0;color:#fff;font-weight:600;font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rk-nom em{color:#67e8f9;font-style:normal;font-weight:500;font-size:.8rem}
+.rk-nom small{display:block;color:#8E9AB8;font-weight:400;font-size:.72rem}
+.rk-val{flex:0 0 auto;color:#67e8f9;font-weight:600;font-size:1.05rem;font-variant-numeric:tabular-nums}
+.rk-val i{font-style:normal}
+.rk-vacio{padding:1.6rem .5rem;text-align:center;color:#8E9AB8}
+.rk-nota{margin:1rem 0 0;color:#8E9AB8;font-size:.78rem;line-height:1.5}
+@media (min-width:900px){.rk-wrap{max-width:var(--cs-w,1120px)}.rk-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* ═══════════ DIAMANTES: aviso de precio especial por recarga grande ═══════════ */
+.vip{position:relative;overflow:hidden;isolation:isolate;margin:0 0 1.2rem;padding:1.4rem 1.3rem 1.3rem;border-radius:22px;text-align:center;
+  background:linear-gradient(135deg,#2a0f5c 0%,#5b1b8f 45%,#a21caf 100%);box-shadow:0 18px 46px -16px rgba(236,72,153,.6),0 0 40px -8px rgba(245,158,11,.5);animation:vipGlow 3s ease-in-out infinite}
+.vip::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:2.5px;pointer-events:none;z-index:2;background:linear-gradient(110deg,#ffd24a,#ff4d8d,#22d3ee,#ffd24a);background-size:300% 100%;animation:ofxBorde 4s linear infinite;-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.vip-shine{position:absolute;inset:0;pointer-events:none;z-index:1;background:linear-gradient(115deg,transparent 38%,rgba(255,255,255,.22) 50%,transparent 62%);transform:translateX(-130%);animation:ofxBrillo 3.4s ease-in-out infinite}
+@keyframes vipGlow{0%,100%{box-shadow:0 18px 46px -16px rgba(236,72,153,.5),0 0 30px -10px rgba(245,158,11,.4)}50%{box-shadow:0 18px 54px -12px rgba(236,72,153,.85),0 0 48px -4px rgba(245,158,11,.7)}}
+.vip>*{position:relative;z-index:3}
+.vip-tag{display:inline-block;padding:.3rem .85rem;border-radius:999px;background:linear-gradient(135deg,#ffe27a,#f59e0b);color:#1a1000;font-size:.74rem;font-weight:700;letter-spacing:1.3px}
+.vip-t{margin:.8rem 0 .3rem;color:#fff;font-size:clamp(1.55rem,5.2vw,2.3rem);font-weight:600;line-height:1.15}
+.vip-t b{color:#ffd24a;font-weight:700}
+.vip-s{color:#f3e8ff;font-size:clamp(1rem,3.4vw,1.2rem);line-height:1.4}
+.vip-s b{color:#fff}
+.vip-eq{margin-top:.35rem;color:#e9d5ff;font-size:.85rem}
+.vip-btn{margin-top:1rem;padding:.95rem 1.4rem;border:0;border-radius:14px;cursor:pointer;font-family:inherit;font-size:1.02rem;font-weight:700;color:#1a1000;background:linear-gradient(135deg,#ffe27a,#f59e0b);box-shadow:0 12px 26px -10px rgba(245,158,11,.9);width:min(100%,380px)}
+.vip-btn:hover{filter:brightness(1.07)}
+.vip-btn:focus-visible{outline:2px solid #fff;outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.vip,.vip::before,.vip-shine{animation:none}.vip-shine{display:none}}
+
 #theme-btn,.theme-btn{display:none!important}
 </style>
 </head>
@@ -4613,6 +4676,15 @@ body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill
 
 
   <div class="page-wrap" style="max-width:760px;margin:0 auto;padding:0 5vw 3rem">
+    <section class="vip" id="vip-banner" aria-label="Precio especial por recarga grande">
+      <div class="vip-shine"></div>
+      <span class="vip-tag">PRECIO ESPECIAL</span>
+      <div class="vip-t">&iquest;Recargas m&aacute;s de <b>$1,000 USD</b>?</div>
+      <div class="vip-s">Tus diamantes te salen a un <b>precio m&aacute;s econ&oacute;mico</b></div>
+      <div class="vip-eq" id="vip-eq"></div>
+      <button type="button" class="vip-btn" onclick="vipWA()">Quiero mi precio especial</button>
+    </section>
+
     <!-- Selector de tipo -->
     <div style="display:none;gap:.5rem;margin-bottom:1.5rem;background:rgba(0,0,0,.25);padding:.35rem;border-radius:12px">
       <button id="dtab-ilim" onclick="setDiamTipo('ilim')" class="dtab-btn active">&#127873; Con Bono</button>
@@ -7218,6 +7290,17 @@ body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill
     <h2 class="ptitle">🏆 Ranking &amp; <span style="color:#ff9900">Premios</span></h2>
     <p class="psub">Compite por el TOP 1 y gana premios. Datos en tiempo real de todos los clientes.</p>
   </div>
+<!-- ═══ RANKING DE DIAMANTES (nuevo, desde el 3 de nov. de 2026) ═══ -->
+<div id="rk-nuevo" class="rk-wrap">
+  <div class="rk-total" id="rk-total"><div class="rk-total-ico" aria-hidden="true">&#128142;</div><div><div class="rk-total-n" id="rk-total-n">&mdash;</div><div class="rk-total-t">diamantes vendidos en general</div><div class="rk-total-s" id="rk-total-s"></div></div></div>
+  <h3 class="rk-h">Top 10 compradores de diamantes</h3>
+  <div class="rk-tabs" id="rk-tabs" role="tablist" aria-label="Periodo del ranking"></div>
+  <div class="rk-info" id="rk-info"></div>
+  <ol class="rk-list" id="rk-list" aria-live="polite"><li class="rk-vacio">Cargando&hellip;</li></ol>
+  <p class="rk-nota">Solo cuentan recargas de diamantes completadas: las rechazadas o reembolsadas no suman. Ranking nuevo desde el 3 de noviembre de 2026. D&iacute;a, semana y mes con hora de M&eacute;xico.</p>
+</div>
+<div id="rk-viejo" style="display:none" aria-hidden="true">
+
 
   <!-- ═══ MI RANGO Y PUNTOS ═══ -->
   <div style="max-width:900px;margin:0 auto;padding:1.25rem 5vw 0">
@@ -7509,6 +7592,7 @@ body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill
 
 
   </div>
+</div><!-- /rk-viejo -->
 </div>
 
 <!-- EXIT POPUP -->
@@ -8355,9 +8439,9 @@ body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill
 <div class="mn-ov" id="gc-modal" role="dialog" aria-modal="true" aria-labelledby="gc-title" style="display:none" onclick="if(event.target===this)gcCerrar()">
   <div class="mn-box"><button type="button" class="mn-x" onclick="gcCerrar()" aria-label="Cerrar">&times;</button><div class="mn-body" id="gc-body"></div></div>
 </div>
-<script src="supabase.js"></script>
-<script src="supabase_integration.js"></script>
-<script src="script.js"></script>
+<script src="supabase.js?v=e3fe245107"></script>
+<script src="supabase_integration.js?v=e3fe245107"></script>
+<script src="script.js?v=e3fe245107"></script>
 
 <!-- BARRA DE NAVEGACION INFERIOR -->
 
