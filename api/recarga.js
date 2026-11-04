@@ -10,6 +10,8 @@
 //   · tope de recargas por usuario por hora (CO_LIMITE_USUARIO_HORA, por defecto 8). Pon 0 = sin tope
 //   · solo los 6 paquetes de diamantes, y solo si el precio del proveedor es el esperado
 //   · interruptor de emergencia: CO_AUTO_ACTIVO=0 apaga todo al instante
+//   · versión: solo compran las páginas actuales (mandan su huella X-CS-Build); una página vieja es rechazada y se le devuelve el saldo.
+//     CO_EXIGIR_VERSION=0 desactiva esta revisión.
 //
 // Variables de entorno en Vercel:
 //   CO_API_KEY             (la misma de api/co.js)
@@ -199,6 +201,9 @@ module.exports = async function handler(req, res){
     if(b.action !== 'comprar') return enviar(res, NO_HECHO('Acción desconocida', 'ENDPOINT_DISABLED'));
 
     // ── comprar ──
+    // Versión de la tienda: las páginas actuales mandan su huella (X-CS-Build). Una página vieja no la manda y no puede comprar.
+    if(!/^(0|false|off|no)$/i.test(String(process.env.CO_EXIGIR_VERSION || '1')) && !/^[a-f0-9]{10}$/.test(String(req.headers['x-cs-build'] || '')))
+      return enviar(res, NO_HECHO('Tu versión de la tienda está desactualizada. Actualiza la página (recárgala) y vuelve a intentar. No se te cobró.', 'ENDPOINT_DISABLED'));
     const cliente = String(b.client_name || '').trim(), key = String(b.idempotency_key || '');
     if(!/^[A-Za-z0-9_.-]{2,40}$/.test(cliente)) return enviar(res, NO_HECHO('Usuario inválido', 'ENDPOINT_DISABLED'));
     if(!/^[A-Za-z0-9_-]{8,128}$/.test(key)) return enviar(res, NO_HECHO('Clave de pedido inválida', 'ENDPOINT_DISABLED'));
