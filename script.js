@@ -2835,20 +2835,21 @@ function toggleFaq(el){
 
 /* \u2500\u2500 SEARCH \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 var SEARCH_INDEX=[
-  {name:'Diamantes FF',sub:'desde $17 MX',ico:'\uD83D\uDC8E',page:'diamantes'},
-  {name:'Likes Perfil',sub:'220 likes/dia desde $79 MX',ico:'\uD83D\uDC4D',page:'likes'},
-  {name:'Honor de Clan',sub:'4 regiones desde $160 MX',ico:'\uD83C\uDFC6',page:'honor'},
-  {name:'Experiencia Cuenta FF',sub:'50K EXP/dia desde $200 MX',ico:'\uD83C\uDF71',page:'honorcuenta'},
-  {name:'Venta de Clanes',sub:'Nivel 7 $500-$5,000 MX',ico:'\uD83C\uDFF0',page:'clanes'},
-  {name:'Codigos FF',sub:'Proximamente',ico:'\uD83C\uDF9F',page:'codigos'},
-  {name:'Cajas Evolutiva',sub:'Proximamente',ico:'\uD83C\uDF81',page:'cajas'},
-  {name:'Recargar Saldo',sub:'STORI + Binance',ico:'\uD83D\uDCB0',page:'saldo'},
-  {name:'Mi Rango',sub:'Niveles y descuentos',ico:'\uD83D\uDC51',page:'membresia'},
-  {name:'Referidos',sub:'Gana descuentos',ico:'\uD83C\uDF81',page:'referidos'},
-  {name:'FAQ',sub:'Preguntas frecuentes',ico:'\u2753',page:'faq'},
-  {name:'Mi Perfil',sub:'Tu cuenta',ico:'\uD83D\uDC64',page:'perfil'},
-  {name:'Mis Compras',sub:'Historial',ico:'\uD83D\uDED2',page:'miscompras'},
-  {name:'Comunidad',sub:'Chat',ico:'\uD83D\uDCAC',page:'comunidad'}
+ {name:'Diamantes Free Fire',sub:'Recarga directa a tu ID',ico:'\uD83D\uDC8E',page:'diamantes'},
+ {name:'Tarjetas',sub:'Semanal y mensual',ico:'\uD83C\uDFAB',page:'tarjetas'},
+ {name:'Subidas de nivel',sub:'Paquetes del nivel 6 al 30',ico:'\uD83D\uDCC8',page:'niveles'},
+ {name:'Recargas',sub:'Videojuegos',ico:'\uD83C\uDFAE',page:'recargas'},
+ {name:'Gift Cards',sub:'Robux, Netflix y m\u00E1s',ico:'\uD83C\uDF81',page:'giftcards'},
+ {name:'Likes Perfil',sub:'Para tu perfil',ico:'\uD83D\uDC4D',page:'likes'},
+ {name:'Venta de Clanes',sub:'Nivel 7',ico:'\uD83C\uDFF0',page:'clanes'},
+ {name:'Recargar Saldo',sub:'Transferencia bancaria',ico:'\uD83D\uDCB0',page:'saldo'},
+ {name:'Ranking',sub:'Top de compradores de diamantes',ico:'\uD83C\uDFC6',page:'ranking'},
+ {name:'Mi Rango',sub:'Niveles y descuentos',ico:'\uD83D\uDC51',page:'membresia'},
+ {name:'Referidos',sub:'Gana descuentos',ico:'\uD83C\uDF81',page:'referidos'},
+ {name:'FAQ',sub:'Preguntas frecuentes',ico:'\u2753',page:'faq'},
+ {name:'Mi Perfil',sub:'Tu cuenta',ico:'\uD83D\uDC64',page:'perfil'},
+ {name:'Mis Compras',sub:'Historial',ico:'\uD83D\uDED2',page:'miscompras'},
+ {name:'Comunidad',sub:'Chat',ico:'\uD83D\uDCAC',page:'comunidad'}
 ];
 function doSearch(q){
   var res=document.getElementById('search-results');
@@ -14303,6 +14304,162 @@ function vipPintar(){
 })();
 
 
+// ═══════════════════════ OTRAS COSAS: Tarjetas y Subidas de nivel (Free Fire) ═══════════════════════
+// Compra automática con tu saldo, igual que los diamantes: se valida el ID, se cobra el saldo, se recarga con Central One
+// (api/recarga.js) y, si el proveedor NO la hizo (ID que no existe, sin stock, etc.), el saldo se devuelve solo.
+// Los precios están en pesos (mxn). Para cambiarlos: edita el número y sube script.js. Deben coincidir con los de api/recarga.js
+// (ahí sirven para no vender por debajo del costo).
+var OT_PRODUCTOS = {
+  tarjetas: [
+    { clave:'tsb', n:'Tarjeta Semanal Básica', mxn:8 },
+    { clave:'ts',  n:'Tarjeta Semanal',        mxn:35 },
+    { clave:'tm',  n:'Tarjeta Mensual',        mxn:165 }
+  ],
+  niveles: [
+    { clave:'n6',  n:'Paquete Nivel 6',  mxn:4.5 },
+    { clave:'n10', n:'Paquete Nivel 10', mxn:10 },
+    { clave:'n15', n:'Paquete Nivel 15', mxn:10 },
+    { clave:'n20', n:'Paquete Nivel 20', mxn:10 },
+    { clave:'n25', n:'Paquete Nivel 25', mxn:10 },
+    { clave:'n30', n:'Paquete Nivel 30', mxn:12 }
+  ]
+};
+var OT_TITULO = { tarjetas:'Tarjetas', niveles:'Subidas de nivel' };
+var _ot = null, _otEnviando = false, _otFoco = null;
+
+function otRenderGrid(tipo){
+  var g = document.getElementById('ot-grid-' + tipo); if(!g) return;
+  g.innerHTML = (OT_PRODUCTOS[tipo] || []).map(function(p){
+    return '<div class="jg-pc"><div class="jg-pn">' + _manEsc(p.n) + '</div><div class="jg-pp">' + _manEsc(fmt(p.mxn)) + '</div><div class="jg-pu">Entrega autom&aacute;tica en tu ID</div>'
+      + '<button type="button" class="jg-comprar" onclick="otAbrir(\'' + tipo + '\',\'' + p.clave + '\')">Comprar</button></div>';
+  }).join('');
+}
+function otRenderTodo(){ otRenderGrid('tarjetas'); otRenderGrid('niveles'); }
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', otRenderTodo); else otRenderTodo();
+(function(){ var f = window.actualizarTiposDeCambio; if(typeof f === 'function') window.actualizarTiposDeCambio = function(){ var r = f.apply(this, arguments); try{ if(r && r.then) r.then(otRenderTodo); }catch(e){} return r; }; })();
+
+function otApi(body){
+  var h = {'Content-Type':'application/json'}; if(typeof CS_BUILD !== 'undefined') h['X-CS-Build'] = CS_BUILD;
+  return fetch(RECARGA_AUTO_URL, {method:'POST', headers:h, body:JSON.stringify(body)}).then(function(r){ return r.json(); });
+}
+function otAbrir(tipo, clave){
+  var p = null; (OT_PRODUCTOS[tipo] || []).forEach(function(x){ if(x.clave === clave) p = x; }); if(!p) return;
+  if(typeof authSession === 'undefined' || !authSession){ _manToast('Inicia sesión para comprar'); setTimeout(function(){ if(typeof showAuthModal === 'function') showAuthModal(); }, 600); return; }
+  _ot = {p:p, tipo:tipo, estado:'id', nombre:'', ok:false, id:''}; _otEnviando = false;
+  otRender();
+  var ov = document.getElementById('ot-modal'); if(!ov) return; _otFoco = document.activeElement; ov.style.display = 'flex'; document.documentElement.style.overflow = 'hidden';
+  var x = ov.querySelector('.mn-x'); if(x) x.focus();
+}
+function otCerrar(){
+  if(_otEnviando) return;   // no se cierra mientras se procesa
+  var ov = document.getElementById('ot-modal'); if(!ov) return; ov.style.display = 'none'; document.documentElement.style.overflow = ''; if(_otFoco && _otFoco.focus) try{ _otFoco.focus(); }catch(e){}
+}
+document.addEventListener('keydown', function(e){ var ov = document.getElementById('ot-modal'); if(e.key === 'Escape' && ov && ov.style.display === 'flex') otCerrar(); });
+
+function otRender(){
+  var b = document.getElementById('ot-body'); if(!b || !_ot) return;
+  var p = _ot.p, saldo = (authSession && authSession.saldo) || 0, h = '<div class="mn-eye">' + _manEsc(String(OT_TITULO[_ot.tipo] || '').toUpperCase()) + '</div><h2 class="mn-h" id="ot-title">' + _manEsc(p.n) + '</h2>';
+  if(_ot.estado === 'proc'){
+    b.innerHTML = h + '<div class="mn-note" style="text-align:center;padding:1.4rem .5rem"><span class="rc-spin"></span> ' + _manEsc(_ot.msg || 'Procesando tu recarga...') + '<br><small>No cierres esta ventana.</small></div>'; return;
+  }
+  if(_ot.estado === 'fin'){
+    b.innerHTML = h + '<div class="' + (_ot.tono === 'ok' ? 'mn-ok' : 'mn-warn') + '" style="margin:.4rem 0 1rem">' + _ot.html + '</div><button type="button" class="mn-send" onclick="otCerrar()">Listo</button>'; return;
+  }
+  h += '<div class="mn-sum"><div class="mn-row"><span>Precio</span><b>' + _manEsc(fmt(p.mxn)) + '</b></div><div class="mn-row"><span>Tu saldo</span><b>' + _manEsc(fmt(saldo)) + '</b></div></div>';
+  h += '<label class="mn-lbl" for="ot-id" style="margin-top:.9rem">ID de Free Fire *</label><input class="mn-inp" id="ot-id" type="text" inputmode="numeric" maxlength="15" placeholder="Ej: 123456789" value="' + _manEsc(_ot.id) + '" oninput="otCambioId(this.value)">';
+  if(_ot.estado === 'ok') h += '<div class="mn-note" style="color:#8ff0b5;border-color:rgba(52,227,122,.35)">\u2705 Cuenta encontrada: <b>' + _manEsc(_ot.nombre || 'jugador verificado') + '</b></div>';
+  if(_ot.estado === 'invalido') h += '<div class="mn-warn" style="margin-top:.6rem"><span style="font-size:1.3rem">\u274C</span><div><b>Ese ID no existe</b>Revisa que sea un ID de Free Fire de la región LATAM.</div></div>';
+  if(_ot.estado === 'sinver') h += '<div class="mn-warn" style="margin-top:.6rem"><span style="font-size:1.3rem">\u26A0\uFE0F</span><div><b>No pudimos verificar tu ID</b>Puedes continuar bajo tu responsabilidad: si el ID no existe, se te devuelve el saldo.</div></div>'
+    + '<label class="mn-note" style="display:flex;gap:.6rem;align-items:flex-start;cursor:pointer;margin-top:.6rem"><input type="checkbox" id="ot-conf" ' + (_ot.ok ? 'checked' : '') + ' onchange="_ot.ok=this.checked;otBoton()"><span>Confirmo que mi ID es correcto.</span></label>';
+  var puede = (_ot.estado === 'ok') || (_ot.estado === 'sinver' && _ot.ok);
+  h += '<button type="button" class="mn-ghost" id="ot-ver" onclick="otVerificar()" style="margin-top:.8rem">Verificar ID</button>'
+    + '<button type="button" class="mn-send" id="ot-buy" onclick="otComprar()" ' + (puede ? '' : 'disabled') + '>Comprar con saldo &middot; ' + _manEsc(fmt(p.mxn)) + '</button>'
+    + '<div class="mn-note" style="margin-top:.6rem">La entrega es automática. Si el proveedor no puede hacerla, tu saldo se devuelve solo.</div>';
+  b.innerHTML = h;
+}
+function otBoton(){ var bt = document.getElementById('ot-buy'); if(bt && _ot) bt.disabled = !((_ot.estado === 'ok') || (_ot.estado === 'sinver' && _ot.ok)); }
+function otCambioId(v){ _ot.id = String(v).replace(/\s+/g, ''); if(_ot.estado !== 'id'){ _ot.estado = 'id'; _ot.ok = false; _ot.nombre = ''; otRender(); var i = document.getElementById('ot-id'); if(i){ i.focus(); try{ i.setSelectionRange(i.value.length, i.value.length); }catch(e){} } } }
+function otVerificar(){
+  if(!_ot) return; var id = _ot.id;
+  if(!/^\d{5,15}$/.test(id)){ _manToast('Revisa tu ID de Free Fire (solo números)'); var i = document.getElementById('ot-id'); if(i) i.focus(); return; }
+  var bt = document.getElementById('ot-ver'); if(bt){ bt.disabled = true; bt.textContent = 'Verificando...'; }
+  otApi({action:'validar', producto:_ot.p.clave, player_id:id}).then(function(v){
+    if(!_ot || _ot.id !== id) return;
+    if(v && v.success && v.valido){ _ot.estado = 'ok'; _ot.nombre = v.nombre || ''; }
+    else if(v && v.success){ _ot.estado = 'invalido'; }
+    else { _ot.estado = 'sinver'; }
+    otRender();
+  }).catch(function(){ if(_ot){ _ot.estado = 'sinver'; otRender(); } });
+}
+
+// ── Compra: cobra saldo → recarga → si no se hizo, reembolsa ──
+function otComprar(){
+  if(_otEnviando || !_ot) return;
+  var p = _ot.p, ffId = _ot.id, verificado = (_ot.estado === 'ok'), nombre = _ot.nombre;
+  if(!(verificado || (_ot.estado === 'sinver' && _ot.ok))) return;
+  if(typeof authSession === 'undefined' || !authSession){ _manToast('Inicia sesión para comprar'); return; }
+  _otEnviando = true; _ot.estado = 'proc'; _ot.msg = 'Verificando tu saldo...'; otRender();
+  verificarSaldoFresco(p.mxn, function(alcanza, saldoReal){
+    if(!alcanza){
+      _otEnviando = false; _ot.estado = 'fin'; _ot.tono = 'err';
+      _ot.html = '<b>Saldo insuficiente</b><br>Tu saldo real es ' + _manEsc(fmt(saldoReal)) + '. <a href="#" onclick="otCerrar();goPage(\'saldo\');return false" style="color:#67e8f9">Recarga aquí</a>'; otRender(); return;
+    }
+    _ot.msg = 'Procesando tu recarga...'; otRender();
+    var ord = getNextOrder(), movId = null, cancelarPend = false, etiqueta = verificado ? (' (' + nombre + ')') : ' (SIN VERIFICAR)';
+    addSpend._onMovId = function(id){ movId = id; if(cancelarPend) _cancelarMovPorId(id); };
+    addSpend(p.mxn, p.n + ' (Recarga AUTO) - ID:' + ffId + etiqueta + ' - Pedido #' + ord);
+    var key = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : ('cs-' + ord + '-' + Date.now());
+    var tg = function(txt){ if(typeof tgNotifyPurchase === 'function') tgNotifyPurchase(authSession.username, txt, p.mxn, ord); };
+    var fin = function(tono, html){ _otEnviando = false; _ot.estado = 'fin'; _ot.tono = tono; _ot.html = html; otRender(); };
+    var verificar = function(titulo, errTxt, tipoPedido){
+      registrarPedido(p.n + ' (AUTO - ' + tipoPedido + ')', 1, 'otro', ffId, p.mxn, 0);
+      tg('\u26A0\uFE0F ' + titulo + ' - Recarga AUTO\n\uD83C\uDF81 Producto: ' + p.n + '\n\uD83C\uDFAE ID: ' + ffId + '\n\u2757 ' + errTxt + '\n\uD83D\uDD11 Key: ' + key);
+      fin('warn', '<b>\u23F3 En verificación</b><br>Tu recarga se está verificando. Si no llega en unos minutos, contacta al administrador con tu ID.');
+    };
+    otApi({action:'comprar', producto:p.clave, player_id:ffId, client_name:authSession.username, idempotency_key:key}).then(function(res){
+      if(res.success && (res.status === 'COMPLETED' || res.status === 'PENDING')){
+        registrarPedido(p.n + ' (AUTO' + (verificado ? '' : ' - ID NO VERIFICADO') + ')', 1, 'otro', ffId, p.mxn, 0);
+        tg('\u26A1 Recarga AUTO\n\uD83C\uDF81 Producto: ' + p.n + '\n\uD83C\uDFAE ID: ' + ffId + '\n' + (verificado ? ('\uD83D\uDC64 Nombre IG: ' + nombre) : '\u26A0\uFE0F ID SIN VERIFICAR - cliente confirmó bajo su responsabilidad') + (res.via ? ('\n\uD83D\uDD17 Via: ' + res.via) : ''));
+        fin(res.status === 'COMPLETED' ? 'ok' : 'warn', res.status === 'COMPLETED'
+          ? '<div class="ic">\u2705</div><h3>¡Recarga completada!</h3><p>' + _manEsc(p.n) + ' ya está en el ID <b>' + _manEsc(ffId) + '</b>.</p>'
+          : '<b>\u23F3 Recarga en proceso</b><br>' + _manEsc(p.n) + ' llegará al ID ' + _manEsc(ffId) + ' en unos minutos.');
+        showToast(res.status === 'COMPLETED' ? '\u2705 Recarga COMPLETADA!' : '\u23F3 Recarga en proceso...', 3000);
+        return;
+      }
+      var errTxt = String(res.error || res.status || 'sin confirmar'), code = String(res.code || '');
+      if(code === 'DUPLICATE_REQUEST'){ verificar('PEDIDO DUPLICADO (idempotencia)', errTxt, 'DUPLICADA, VERIFICAR'); return; }
+      if(code === 'PROVIDER_ERROR'){ verificar('PROVEEDOR CONTACTADO, VERIFICAR', errTxt, 'VERIFICAR'); return; }
+      if(code === 'PURCHASE_FAILED' || code === 'PRODUCT_INACTIVE' || code === 'ENDPOINT_DISABLED'){
+        // La recarga NO se hizo: se devuelve el saldo (y solo se avisa "reembolsado" si el reembolso realmente se completó)
+        _rpcAjustarSaldo(authSession.id, p.mxn).then(function(saldoNuevo){
+          var sn = Number(saldoNuevo) || 0; authSession.saldo = sn; _refreshSaldoUI(sn); if(typeof saveSession === 'function') saveSession(authSession);
+          if(typeof sbAddMovimiento === 'function') sbAddMovimiento(authSession.id, 'credito', p.mxn, 'Reembolso Pedido #' + ord + ' - recarga rechazada');
+          if(movId) _cancelarMovPorId(movId); else { cancelarPend = true; _cancelarMovimientoCompra(authSession.id, ord); }
+          registrarPedido(p.n + ' (RECHAZADA - reembolsado)', 1, 'otro', ffId, 0, 0);
+          var viejo = /desactualizada/i.test(errTxt), tope = /pausa|l[i\u00ED]mite|por hora/i.test(errTxt);
+          tg('\uD83D\uDEA8 <b>RECARGA RECHAZADA - ' + (viejo ? 'CLIENTE CON VERSION ANTIGUA' : (tope ? 'LIMITE DE GASTO ALCANZADO' : 'NO SE PUDO HACER')) + '</b>\n\uD83C\uDF81 Producto: ' + p.n + '\n\uD83C\uDFAE ID: ' + ffId + '\n\u2757 ' + errTxt + '\n\u2705 Saldo reembolsado al cliente (' + fmt(p.mxn) + ')');
+          fin('warn', '<b>No se pudo completar tu recarga</b><br>' + _manEsc(errTxt) + '<div style="margin-top:.8rem;padding:.7rem .9rem;border-radius:12px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);color:#25d366;font-weight:600">\u2705 Tu saldo fue reembolsado automáticamente</div>');
+          showToast('\u274C Recarga rechazada. Saldo reembolsado.', 5000);
+        }).catch(function(e){
+          // El reembolso falló: el cliente SIGUE sin su dinero. Se avisa con urgencia para reembolsarlo a mano.
+          console.error('[OTRAS] reembolso falló:', e);
+          registrarPedido(p.n + ' (RECHAZADA - REEMBOLSO FALLIDO, REVISAR)', 1, 'otro', ffId, p.mxn, 0);
+          tg('\uD83D\uDD25 <b>URGENTE: REEMBOLSO FALLIDO</b>\n\uD83C\uDF81 Producto: ' + p.n + '\n\uD83C\uDFAE ID: ' + ffId + '\n\u2757 Recarga rechazada: ' + errTxt + '\n\u274C El reembolso automático de ' + fmt(p.mxn) + ' AL CLIENTE FALLÓ\n\n\uD83D\uDEA8 <b>REEMBOLSA MANUALMENTE AL CLIENTE</b>');
+          fin('warn', '<b>No se pudo completar tu recarga</b><br>Estamos devolviendo tu saldo. Si no lo ves en unos minutos, contacta al administrador.');
+        });
+        return;
+      }
+      verificar('ERROR AMBIGUO', errTxt, 'VERIFICAR');
+    }).catch(function(e){
+      // Sin respuesta: no se sabe si se hizo. NUNCA se reembolsa sola: queda para revisión.
+      console.error('[OTRAS] sin respuesta:', e); verificar('SIN RESPUESTA DEL SERVIDOR', String((e && e.message) || e), 'VERIFICAR');
+    });
+  });
+}
+
+function obraWA(){ if(typeof WA !== 'undefined' && WA) window.open('https://wa.me/' + WA + '?text=' + encodeURIComponent('Hola, quiero que me avisen cuando esté lista la API para revendedores'), '_blank', 'noopener'); }
+
+
 // ═══════════════════════ CONTROL DE VERSIÓN: nada de comprar con una tienda vieja ═══════════════════════
 // Cada vez que subes la tienda, index.html trae una "huella" nueva (CS_BUILD). Esta pieza compara la huella de la página
 // que el cliente tiene abierta con la que hay publicada. Si son distintas: bloquea la pantalla con un aviso y la actualiza sola
@@ -14339,7 +14496,7 @@ function csVerificarVersion(forzar){
   }).catch(function(){ _csChequeando = false; return false; });   // sin red o error: no se molesta al cliente
 }
 function _csOperacionEnCurso(){
-  var f = ['_comprandoDiam', '_addSpendBusy', '_crtEnviando', '_ofxEnviando', '_gcEnviando', '_manEnviando'];
+  var f = ['_comprandoDiam', '_addSpendBusy', '_crtEnviando', '_ofxEnviando', '_gcEnviando', '_manEnviando', '_otEnviando'];
   for(var i = 0; i < f.length; i++){ try{ if(window[f[i]] === true || (typeof eval(f[i]) !== 'undefined' && eval(f[i]) === true)) return true; }catch(e){} }
   return false;
 }
