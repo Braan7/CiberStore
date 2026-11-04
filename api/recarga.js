@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════
-// api/recarga.js · Recargas AUTOMÁTICAS de diamantes con Central One (para tus clientes)
+// api/recarga.js · Recargas AUTOMÁTICAS con Central One (para tus clientes): diamantes, tarjetas y paquetes de nivel
 //
 // Habla el mismo "idioma" que tu antiguo rapid-handler (acciones validar y comprar), así tu tienda
 // sigue funcionando igual. La llave del proveedor vive SOLO aquí (variable CO_API_KEY de Vercel).
@@ -112,6 +112,50 @@ function armarTarget(it, playerId){
   return faltan ? null : payload;
 }
 
+// ── "Otras cosas": tarjetas y paquetes de nivel de Free Fire (se piden con "producto": clave) ──
+// Los precios son los de venta en MXN; solo sirven para proteger el margen (si el costo del proveedor los alcanza, ese producto se bloquea).
+const EXTRA = {
+  tsb: { titulo: 'Tarjeta Semanal Básica', precio: 8,   tipo: 'semanal_basica' },
+  ts:  { titulo: 'Tarjeta Semanal',        precio: 35,  tipo: 'semanal' },
+  tm:  { titulo: 'Tarjeta Mensual',        precio: 165, tipo: 'mensual' },
+  n6:  { titulo: 'Paquete Nivel 6',  precio: 4.5, nivel: 6 },
+  n10: { titulo: 'Paquete Nivel 10', precio: 10,  nivel: 10 },
+  n15: { titulo: 'Paquete Nivel 15', precio: 10,  nivel: 15 },
+  n20: { titulo: 'Paquete Nivel 20', precio: 10,  nivel: 20 },
+  n25: { titulo: 'Paquete Nivel 25', precio: 10,  nivel: 25 },
+  n30: { titulo: 'Paquete Nivel 30', precio: 12,  nivel: 30 }
+};
+const TC = Number(process.env.CO_TC || 19.5);
+const PROTEGER_MARGEN = !/^(0|false|off|no)$/i.test(String(process.env.CO_PROTEGER_MARGEN || '1'));
+const sinAcentos = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+function coincideExtra(p, it){
+  const t = sinAcentos((it.name || '') + ' ' + (it.sku || ''));
+  if(p.tipo){
+    const basica = /(basic|lite|light)/.test(t);
+    if(p.tipo === 'semanal_basica') return /(semanal|weekly)/.test(t) && basica;
+    if(p.tipo === 'semanal') return /(semanal|weekly)/.test(t) && !basica;
+    if(p.tipo === 'mensual') return /(mensual|monthly)/.test(t);
+  }
+  return new RegExp('(nivel|level|lvl|lv)\\.?\\s*' + p.nivel + '(?![0-9])').test(t) && !/(semanal|weekly|mensual|monthly|diamante|diamond)/.test(t);
+}
+// Igual que detectar(): devuelve { item, precio } o { error }. Si hay más de un candidato NO elige (salvo que lo fijes con CO_MAP).
+function elegirExtra(items, clave){
+  const p = EXTRA[clave]; let fijo = {}; try{ fijo = JSON.parse(process.env.CO_MAP || '{}'); }catch(e){}
+  let item = null;
+  if(fijo[clave]) item = items.find(x => x.product_id === fijo[clave]) || null;
+  else {
+    const cand = items.filter(it => esFFLatam(it) && coincideExtra(p, it));
+    if(cand.length > 1) return { error: 'Hay varios productos que coinciden: fija el correcto con CO_MAP' };
+    item = cand[0] || null;
+  }
+  if(!item) return { error: 'No se encontró el producto en el catálogo del proveedor' };
+  const precio = parseFloat(item.reseller_price);
+  if(!(precio > 0)) return { error: 'Precio del proveedor inválido' };
+  if(PROTEGER_MARGEN && p.precio < precio * TC) return { error: 'Producto no disponible por ahora' };
+  if(item.in_stock === false) return { error: 'Producto sin stock en el proveedor' };
+  return { item, precio };
+}
+
 // ── Respuestas en el formato de tu rapid-handler ──
 // PURCHASE_FAILED / ENDPOINT_DISABLED: no se hizo nada → tu tienda devuelve el saldo.
 // PROVIDER_ERROR / DUPLICATE_REQUEST: pudo haberse hecho → tu tienda NO devuelve y lo deja en revisión.
@@ -180,8 +224,9 @@ module.exports = async function handler(req, res){
       return enviar(res, m.success ? { success: true, status: m.status, reference: m.reference } : { success: true, status: 'FAILED', reference: m.reference, error: m.error });
     }
 
-    const diam = PKG[Number(b.package_id != null ? b.package_id : b.product_id)];
-    if(!diam) return enviar(res, NO_HECHO('Paquete no disponible para recarga automática', 'ENDPOINT_DISABLED'));
+    const extra = EXTRA[String(b.producto || '')] ? String(b.producto) : null;
+    const diam = extra ? null : PKG[Number(b.package_id != null ? b.package_id : b.product_id)];
+    if(!extra && !diam) return enviar(res, NO_HECHO('Paquete no disponible para recarga automática', 'ENDPOINT_DISABLED'));
     const pid = String(b.player_id != null ? b.player_id : b.service_user_id || '').trim();
 
     // ── validar ID ──
@@ -189,7 +234,7 @@ module.exports = async function handler(req, res){
       if(limite(ip, 'v', 30)) return enviar(res, { success: false, error: 'Demasiadas consultas, espera un momento' });
       if(!/^\d{5,15}$/.test(pid)) return enviar(res, { success: true, valido: false });
       const c = await catalogo(); if(!c.ok) return enviar(res, { success: false, error: 'No se pudo verificar' });
-      const d = detectar(c.items, diam); if(d.error) return enviar(res, { success: false, error: 'No se pudo verificar' });
+      const d = extra ? elegirExtra(c.items, extra) : detectar(c.items, diam); if(d.error) return enviar(res, { success: false, error: 'No se pudo verificar' });
       const tg = armarTarget(d.item, pid); if(!tg) return enviar(res, { success: false, error: 'No se pudo verificar' });
       const r = await co('/player/validate', { method: 'POST', body: { product_id: d.item.product_id, target_payload: tg } });
       if(r.status !== 200 || !r.json) return enviar(res, { success: false, error: 'No se pudo verificar' });
@@ -212,7 +257,7 @@ module.exports = async function handler(req, res){
 
     const u = await usuarioValido(cliente); if(!u.ok) return enviar(res, NO_HECHO(u.motivo, 'ENDPOINT_DISABLED'));
     const c = await catalogo(); if(!c.ok) return enviar(res, NO_HECHO('Proveedor no disponible', 'ENDPOINT_DISABLED'));
-    const d = detectar(c.items, diam); if(d.error) return enviar(res, NO_HECHO(d.error));
+    const d = extra ? elegirExtra(c.items, extra) : detectar(c.items, diam); if(d.error) return enviar(res, NO_HECHO(d.error));
     const tg = armarTarget(d.item, pid); if(!tg) return enviar(res, NO_HECHO('El proveedor pide datos que no se pueden completar'));
 
     // ¿Ya existe este mismo pedido? (reintento tras un corte): se devuelve su estado sin gastar de nuevo ni aplicar fusibles
