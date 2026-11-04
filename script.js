@@ -7798,12 +7798,12 @@ var _diamSeleccionado = null;
 // ═══════════ RECARGAS AUTOMÁTICAS (Recargas América type=recharge) ═══════════
 // package_id = el ID de Recargas América | precio = costo USD × 20 (redondeado)
 var RECARGAS_AUTO = [
-  { package_id:351, catalog_id:5,  sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.655, precioUSD:0.6699, precio:12.53,   img:'img/diam-100.png'  },
-  { package_id:348, catalog_id:6,  sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:1.9649, precioUSD:2.0098, precio:37.58,   img:'img/diam-310.png'  },
-  { package_id:350, catalog_id:7,  sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.3222, precioUSD:3.3976, precio:63.54,   img:'img/diam-520.png'  },
-  { package_id:347, catalog_id:8,  sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.1709, precioUSD:6.3109, precio:118.01,  img:'img/diam-1060.png' },
-  { package_id:346, catalog_id:9,  sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:12.2471, precioUSD:12.5209, precio:234.14,  img:'img/diam-2180.png' },
-  { package_id:349, catalog_id:10, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:31.1701, precioUSD:32.8646, precio:614.57,  img:'img/diam-5600.png' },
+  { package_id:351, catalog_id:5,  sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.6650, precioUSD:0.7089, precio:13.26,   img:'img/diam-100.png'  },
+  { package_id:348, catalog_id:6,  sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:1.9999, precioUSD:2.5058, precio:46.86,   img:'img/diam-310.png'  },
+  { package_id:350, catalog_id:7,  sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.3955, precioUSD:3.7045, precio:69.27,   img:'img/diam-520.png'  },
+  { package_id:347, catalog_id:8,  sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.3089, precioUSD:6.9598, precio:130.15,  img:'img/diam-1060.png' },
+  { package_id:346, catalog_id:9,  sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:12.5203, precioUSD:13.2068, precio:246.97,  img:'img/diam-2180.png' },
+  { package_id:349, catalog_id:10, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:31.8640, precioUSD:33.7098, precio:630.37,  img:'img/diam-5600.png' },
   { package_id:null, catalog_id:null, nombre:'11.200 Diamantes + 1.120 Bono', diamantes:12320, costoUSD:66.32, precio:1300, manual:true }
 ];
 // Precios de los diamantes: se fijan en USD (precioUSD) y el precio en MXN se recalcula con el tipo de cambio del dia.
@@ -7841,7 +7841,7 @@ function _getDiamProductos(tipo){
     return RECARGAS_AUTO.map(function(r){
       return {
         key:(r.manual?'man_':'auto_')+(r.package_id||r.diamantes),
-        nombre:r.nombre, diamantes:r.diamantes, precio:r.precio,
+        nombre:r.nombre, diamantes:r.diamantes, precio:r.precio, precioUSD:r.precioUSD,
         tipo:(r.manual?'manual':'auto'), package_id:r.package_id, catalog_id:r.catalog_id,
         badge:(r.manual?'MANUAL':'AUTO'),
         esPase:!!r.esPase,
@@ -7905,7 +7905,7 @@ function renderDiamCatalogo(){
       + badge
       + visual
       + '<div class="rc-name">'+p.nombre+'</div>'
-      + '<div class="rc-price">'+fmt(p.precio)+'</div>'
+      + '<div class="rc-price">'+fmtDiam(p)+'</div>'
       + '<button class="rc-btn ds-prod-btn" style="margin-top:.5rem">Comprar</button>'
       + '</div>';
   }).join('');
@@ -8094,7 +8094,7 @@ function abrirDiamDetalle(idx){
     + (p.img ? '<img src="'+p.img+'" alt="'+p.nombre+'" style="width:150px;display:block;margin:0 auto 1rem;border-radius:12px" onerror="this.style.display=\'none\'"/>' : '')
     + '<div style="text-align:center;margin-bottom:1.15rem">'
     +   '<div style="font-family:Barlow,sans-serif;font-weight:700;font-size:1.15rem;color:#fff;margin-bottom:.2rem">'+p.nombre+'</div>'
-    +   '<div style="font-family:Barlow,sans-serif;font-weight:700;font-size:1.9rem;color:#fff">'+fmt(p.precio)+'</div>'
+    +   '<div style="font-family:Barlow,sans-serif;font-weight:700;font-size:1.9rem;color:#fff">'+fmtDiam(p)+'</div>'
     +   '<div style="font-size:.78rem;color:#6b7280;margin-top:.15rem">Pago con saldo</div>'
     + '</div>'
     + _avisoEntrega(p)
@@ -8209,7 +8209,7 @@ function _mostrarReciboProceso(p, ffId, ord){
     +   _filaRecibo('\uD83D\uDCCB Pedido', '#'+ord)
     +   _filaRecibo('\uD83D\uDC8E Cantidad', p.nombre)
     +   _filaRecibo('\uD83C\uDFAE ID Free Fire', ffId)
-    +   _filaRecibo('\uD83D\uDCB5 Precio', fmt(p.precio))
+    +   _filaRecibo('\uD83D\uDCB5 Precio', fmtDiam(p))
     +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' \u00B7 \uD83D\uDD52 ' + hora, true)
     + '</div>'
 
@@ -8594,7 +8594,7 @@ function _toggleBtnFinalNoVerif(){
 function _refrescarDiamPrecios(){
   if(!_diamSeleccionado) return;
   var precioEl = document.querySelector('#diam-detalle .ddet-price');
-  if(precioEl) precioEl.innerHTML = fmt(_diamSeleccionado.precio);
+  if(precioEl) precioEl.innerHTML = fmtDiam(_diamSeleccionado);
   var saldo=(authSession&&authSession.saldo)?authSession.saldo:0;
   var subEl = document.querySelector('#dm-saldo .ddet-metodo-sub');
   if(subEl) subEl.textContent = '('+fmt(saldo)+')';
@@ -8954,7 +8954,7 @@ function _mostrarReciboRecarga(p, ffId, nombreJugador, status){
   // Guardar datos para el comprobante
   _ultimoComprobante = {
     total: totalDiam, base: base, bonus: bonus, nombre: p.nombre,
-    ffId: ffId, jugador: nombreJugador || '', precio: fmt(p.precio),
+    ffId: ffId, jugador: nombreJugador || '', precio: fmtDiam(p),
     fecha: fecha, dia: dia, hora: hora, titulo: titulo,
     txId: 'CS-' + Date.now().toString().slice(-8)
   };
@@ -8974,7 +8974,7 @@ function _mostrarReciboRecarga(p, ffId, nombreJugador, status){
     +   '<div class="cy-panel">'
     +     cyRow(bg(icDiam,'rgba(56,189,248,.1)'), 'Cantidad', p.nombre)
     +     cyRow(bg(icId,'rgba(255,255,255,.05)'), 'Free Fire ID', ffId + (nombreJugador ? '<br/><span style="color:#38bdf8">@'+nombreJugador+'</span>' : '<br/><span style="color:#ffb84d;font-size:.72em">&#9888; ID sin verificar</span>'), 'cyan')
-    +     cyRow(bg(icPrice,'rgba(74,222,128,.1)'), 'Precio', fmt(p.precio), 'green')
+    +     cyRow(bg(icPrice,'rgba(74,222,128,.1)'), 'Precio', fmtDiam(p), 'green')
     +     cyRow(bg(icCal,'rgba(56,189,248,.1)'), 'Fecha', fecha + ' \u00B7 ' + dia)
     +     cyRow(bg(icClock,'rgba(56,189,248,.1)'), 'Hora', hora)
     +   '</div>'
@@ -13039,7 +13039,7 @@ function manualRenderDiamDetalle(){
     + '<div class="mn-dcard">'
     + (p.img ? '<img src="'+_manEsc(p.img)+'" alt="'+_manEsc(p.nombre)+'" style="width:150px;display:block;margin:0 auto 1rem;border-radius:12px" onerror="this.style.display=\'none\'"/>' : '')
     + '<div class="mn-dname">'+_manEsc(p.nombre)+'</div>'
-    + '<div class="mn-dprice">'+_manEsc(typeof fmt === 'function' ? fmt(p.precio) : _manMXN(p.precio))+'</div>'
+    + '<div class="mn-dprice">'+_manEsc(typeof fmt === 'function' ? fmtDiam(p) : _manMXN(p.precio))+'</div>'
     + '<div class="mn-dtag">PAGO MANUAL · SIN SALDO</div>'
     + (typeof _avisoEntrega === 'function' ? _avisoEntrega(p) : '')
     + '<label class="flabel">Tu ID de Free Fire *</label>'
@@ -13315,7 +13315,7 @@ function crtRenderDetalle(){
     + '<div class="mn-dcard">'
     + (p.img ? '<img src="' + _manEsc(p.img) + '" alt="' + _manEsc(p.nombre) + '" style="width:150px;display:block;margin:0 auto 1rem;border-radius:12px" onerror="this.style.display=\'none\'"/>' : '')
     + '<div class="mn-dname">' + _manEsc(p.nombre) + '</div>'
-    + '<div class="mn-dprice">' + _manEsc(typeof fmt === 'function' ? fmt(p.precio) : _manMXN(p.precio)) + '</div>'
+    + '<div class="mn-dprice">' + _manEsc(typeof fmt === 'function' ? fmtDiam(p) : _manMXN(p.precio)) + '</div>'
     + '<div class="mn-dtag">PAGO DIRECTO · SIN SALDO</div>'
     + (typeof _avisoEntrega === 'function' ? _avisoEntrega(p) : '')
     + '<div class="mn-note">Agrega las recargas que quieras al carrito. Al final eliges si van a un solo ID o a varios, pagas y subes tu comprobante.</div>'
@@ -14173,4 +14173,15 @@ function gcOk(cod, n, total){
   var b = document.getElementById('gc-body'); if(!b) return;
   b.innerHTML = '<div class="mn-ok"><div class="ic">&#9989;</div><h3>¡Pedido enviado!</h3><p>Pedido <b style="color:#67e8f9">' + _manEsc(cod) + '</b> · ' + n + ' · ' + _manEsc(_manMXN(total)) + '</p>'
     + '<p>Confirmaremos tu pago y te enviaremos tu código por WhatsApp.</p><button type="button" class="mn-send" onclick="gcCerrar()">Listo</button></div>';
+}
+
+
+// Precio de un paquete de diamantes tal como se fijó en USD: en dólares se muestran los 4 decimales completos,
+// en las demás monedas se convierte desde el USD sin pasar por el redondeo a centavos de pesos.
+function fmtDiam(p){
+  if(p && p.precioUSD > 0){
+    if(CURRENCY === 'USD') return '$' + Number(p.precioUSD).toFixed(4) + ' USD';
+    if(CURRENCY !== 'MXN') return fmt(p.precioUSD * USD_MXN);
+  }
+  return fmt(p.precio);
 }
