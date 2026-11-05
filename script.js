@@ -14570,6 +14570,99 @@ if(SV_ON){
 }
 
 
+// ═══════════════════════ PROTECCIÓN DE SALDO CON EL PROVEEDOR ═══════════════════════
+// El servidor (api/recarga.js) revisa el saldo de Central One. Si baja del mínimo de seguridad, la tienda muestra un aviso en
+// Diamantes, Tarjetas y Subidas de nivel, no deja comprar y te llega un aviso por Telegram para que metas saldo.
+// Solo aplica en modo automático (con saldo). En el modo semiautomático (pago directo) decides tú al aceptar cada pedido.
+var _provPausa = false, _provMotivo = '', _provT = 0, _provBusy = null, _provChecando = false;
+var PROV_PAGINAS = ['diamantes', 'tarjetas', 'niveles'];
+function provActivo(){ return !(typeof _crtOn === 'function' && _crtOn()); }
+function provTexto(){
+  return (_provMotivo === 'apagado')
+    ? 'Las recargas automáticas están en mantenimiento. Vuelve en un momento y podrás comprar normal.'
+    : 'Estamos reponiendo saldo del sistema. Vuelve en unos minutos y podrás comprar normal.';
+}
+function provToast(){ if(typeof _manToast === 'function') _manToast('\uD83D\uDD27 Recargas en pausa por unos minutos. ' + provTexto(), 5200); }
+function provPintar(){
+  var on = _provPausa && provActivo();
+  document.body.classList.toggle('prov-pausa', on);
+  PROV_PAGINAS.forEach(function(p){
+    var pg = document.getElementById('page-' + p); if(!pg) return;
+    var el = document.getElementById('prov-aviso-' + p);
+    if(!el){
+      var wrap = pg.querySelector('.page-wrap'); if(!wrap) return;
+      el = document.createElement('div'); el.id = 'prov-aviso-' + p; el.className = 'prov-aviso'; el.setAttribute('role', 'alert'); el.style.display = 'none';
+      wrap.insertBefore(el, wrap.firstChild);
+    }
+    if(on){
+      el.innerHTML = '<div class="prov-ico" aria-hidden="true">\uD83D\uDD27</div><div><b>Recargas en pausa por unos minutos</b><span>' + provTexto() + '</span>'
+        + ((typeof WA !== 'undefined' && WA) ? '<a href="https://wa.me/' + WA + '" target="_blank" rel="noopener noreferrer">\u00BFEs urgente? Escr\u00EDbenos por WhatsApp</a>' : '') + '</div>';
+      el.style.display = 'flex';
+    } else el.style.display = 'none';
+    // los botones de comprar también se bloquean para teclado y lectores de pantalla
+    Array.prototype.forEach.call(pg.querySelectorAll('.rc-btn, .jg-comprar'), function(b){ if(on){ b.setAttribute('disabled', 'disabled'); b.setAttribute('data-prov', '1'); } else if(b.getAttribute('data-prov')){ b.removeAttribute('disabled'); b.removeAttribute('data-prov'); } });
+  });
+}
+function _provFijar(pausa, motivo){ _provPausa = !!pausa; _provMotivo = motivo || ''; provPintar(); }
+function provRevisar(forzar){
+  if(!provActivo()){ _provFijar(false); return Promise.resolve(false); }
+  if(_provBusy) return _provBusy;
+  if(!forzar && Date.now() - _provT < 20000) return Promise.resolve(_provPausa);
+  var h = {'Content-Type':'application/json'}; if(typeof CS_BUILD !== 'undefined') h['X-CS-Build'] = CS_BUILD;
+  _provBusy = fetch(RECARGA_AUTO_URL, {method:'POST', headers:h, body:JSON.stringify({action:'disponibilidad'})})
+    .then(function(r){ return r.json(); })
+    .then(function(j){ _provT = Date.now(); if(j && j.ok !== false && typeof j.disponible === 'boolean') _provFijar(!j.disponible, j.motivo); return _provPausa; })
+    .catch(function(){ return _provPausa; })      // si no se puede consultar NO se bloquea: el servidor igual protege al comprar
+    .then(function(v){ _provBusy = null; return v; });
+  return _provBusy;
+}
+// Navegar al detalle: con lo último que se sabe. Pagar: se vuelve a preguntar justo antes de cobrar.
+function _provGuardNav(nombre){
+  var f = window[nombre]; if(typeof f !== 'function') return;
+  window[nombre] = function(){ if(provActivo() && _provPausa){ provToast(); return; } return f.apply(this, arguments); };
+}
+function _provGuardPago(nombre){
+  var f = window[nombre]; if(typeof f !== 'function') return;
+  window[nombre] = function(){
+    var self = this, a = arguments;
+    if(!provActivo()) return f.apply(self, a);
+    if(_provPausa){ provToast(); return; }
+    if(_provChecando) return;
+    _provChecando = true;
+    provRevisar(true).then(function(p){ _provChecando = false; if(p){ provToast(); } else f.apply(self, a); });
+  };
+}
+['abrirDiamDetalle', 'otAbrir'].forEach(_provGuardNav);
+['confirmarDiamCompra', 'otComprar'].forEach(_provGuardPago);
+(function(){
+  var gp = window.goPage;
+  if(typeof gp === 'function') window.goPage = function(n){ var r = gp.apply(this, arguments); if(PROV_PAGINAS.indexOf(n) >= 0 || n === 'freefire'){ provPintar(); provRevisar(false); } return r; };
+  var rd = window.renderDiamCatalogo; if(typeof rd === 'function') window.renderDiamCatalogo = function(){ var r = rd.apply(this, arguments); try{ provPintar(); }catch(e){} return r; };
+  var ot = window.otRenderTodo; if(typeof ot === 'function') window.otRenderTodo = function(){ var r = ot.apply(this, arguments); try{ provPintar(); }catch(e){} return r; };
+})();
+setTimeout(function(){ provRevisar(true); }, 3500);
+setInterval(function(){ if(document.visibilityState === 'visible') provRevisar(true); }, 60000);
+document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible') provRevisar(false); });
+
+// ── Panel admin: estado de la protección y prueba del aviso de Telegram ──
+function admCoProteccion(){
+  var o = document.getElementById('crta-prot'); if(!o) return;
+  coCall('proteccion').then(function(r){
+    if(!r.ok){ o.innerHTML = ''; return; }
+    var via = r.via === 'telegram' ? 'tu bot de Telegram' : 'el mismo canal de tus comprobantes';
+    if(!(r.umbral > 0)) o.innerHTML = '<span style="color:#ffd24a">\u26A0\uFE0F Protecci\u00F3n de saldo APAGADA (CO_SALDO_MINIMO_USD = 0).</span>';
+    else if(!r.verificado) o.innerHTML = '<span style="color:#ffd24a">\u26A0\uFE0F No pude leer el saldo del proveedor ahora; la protecci\u00F3n sigue configurada en US$ ' + _manEsc(Number(r.umbral).toFixed(2)) + '.</span>';
+    else if(r.pausa) o.innerHTML = '<span style="color:#ffb4c4">\u26D4 <b>EN PAUSA</b>: saldo US$ ' + _manEsc(Number(r.saldo).toFixed(2)) + ' (m\u00EDnimo US$ ' + _manEsc(Number(r.umbral).toFixed(2)) + '). La tienda no deja comprar. <b>Mete saldo en Central One.</b></span>';
+    else o.innerHTML = '<span style="color:#8ff0b5">\uD83D\uDEE1\uFE0F Protecci\u00F3n activa: se pausa si el saldo baja de US$ ' + _manEsc(Number(r.umbral).toFixed(2)) + ' (ahora US$ ' + _manEsc(Number(r.saldo).toFixed(2)) + '). Aviso por ' + via + '.</span>';
+  });
+}
+function admCoProbarAlerta(){
+  _manToast('Enviando aviso de prueba...', 2500);
+  coCall('probar_alerta').then(function(r){ _manToast(r.ok ? '\u2705 Aviso enviado por ' + (r.via === 'telegram' ? 'Telegram' : 'Supabase') + '. Rev\u00EDsalo en tu Telegram.' : '\u274C No se pudo enviar el aviso (' + _manEsc(_coErrTxt(r)) + '). Revisa TG_BOT_TOKEN y TG_CHAT_ID en Vercel.', 6500); });
+}
+(function(){ var f = window.admCoResumen; if(typeof f === 'function') window.admCoResumen = function(){ var r = f.apply(this, arguments); try{ admCoProteccion(); }catch(e){} return r; }; })();
+
+
 // ═══════════════════════ CONTROL DE VERSIÓN: nada de comprar con una tienda vieja ═══════════════════════
 // Cada vez que subes la tienda, index.html trae una "huella" nueva (CS_BUILD). Esta pieza compara la huella de la página
 // que el cliente tiene abierta con la que hay publicada. Si son distintas: bloquea la pantalla con un aviso y la actualiza sola
