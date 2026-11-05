@@ -7799,19 +7799,23 @@ var _diamSeleccionado = null;
 // ═══════════ RECARGAS AUTOMÁTICAS (Recargas América type=recharge) ═══════════
 // package_id = el ID de Recargas América | precio = costo USD × 20 (redondeado)
 var RECARGAS_AUTO = [
-  { package_id:351, catalog_id:5,  sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.6650, precioUSD:0.7089, precio:13.26,   img:'img/diam-100.png'  },
-  { package_id:348, catalog_id:6,  sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:1.9999, precioUSD:2.5058, precio:46.86,   img:'img/diam-310.png'  },
-  { package_id:350, catalog_id:7,  sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.3955, precioUSD:3.7045, precio:69.27,   img:'img/diam-520.png'  },
-  { package_id:347, catalog_id:8,  sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.3089, precioUSD:6.9598, precio:130.15,  img:'img/diam-1060.png' },
-  { package_id:346, catalog_id:9,  sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:12.5203, precioUSD:13.2068, precio:246.97,  img:'img/diam-2180.png' },
-  { package_id:349, catalog_id:10, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:31.8640, precioUSD:33.7098, precio:630.37,  img:'img/diam-5600.png' },
+  { package_id:351, catalog_id:5,  sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.6650, precioUSD:0.6699, precioMXN:12.57, precio:12.57,   img:'img/diam-100.png'  },
+  { package_id:348, catalog_id:6,  sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:1.9999, precioUSD:2.0098, precioMXN:37.70, precio:37.70,   img:'img/diam-310.png'  },
+  { package_id:350, catalog_id:7,  sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.3955, precioUSD:3.3976, precioMXN:63.74, precio:63.74,   img:'img/diam-520.png'  },
+  { package_id:347, catalog_id:8,  sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.3089, precioUSD:6.3109, precioMXN:118.39, precio:118.39,  img:'img/diam-1060.png' },
+  { package_id:346, catalog_id:9,  sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:12.5203, precioUSD:12.5209, precioMXN:234.88, precio:234.88,  img:'img/diam-2180.png' },
+  { package_id:349, catalog_id:10, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:31.8640, precioUSD:31.8646, precioMXN:597.75, precio:597.75,  img:'img/diam-5600.png' },
   { package_id:null, catalog_id:null, nombre:'11.200 Diamantes + 1.120 Bono', diamantes:12320, costoUSD:66.32, precio:1300, manual:true }
 ];
-// Precios de los diamantes: se fijan en USD (precioUSD) y el precio en MXN se recalcula con el tipo de cambio del dia.
-// Cada vez que llega una tasa nueva (al abrir y cada 6 horas) se actualizan; las demas monedas se convierten desde ese MXN.
+// Precios de los diamantes: en USD (precioUSD) y en MXN (precioMXN) son FIJOS y salen de tu lista de precios.
+// Las demas monedas se convierten desde el precio en USD con el tipo de cambio del dia (al abrir y cada 6 horas).
+// Con PRECIOS_MXN_FIJOS = false el MXN vuelve a calcularse cada dia: precioUSD x tipo de cambio.
+var PRECIOS_MXN_FIJOS = true;
 function recalcularPreciosDiamantes(){
-  if(!(USD_MXN > 0)) return;
-  RECARGAS_AUTO.forEach(function(r){ if(r.precioUSD) r.precio = Math.round(r.precioUSD * USD_MXN * 100) / 100; });
+  RECARGAS_AUTO.forEach(function(r){
+    if(PRECIOS_MXN_FIJOS && r.precioMXN){ r.precio = r.precioMXN; return; }
+    if(USD_MXN > 0 && r.precioUSD) r.precio = Math.round(r.precioUSD * USD_MXN * 100) / 100;
+  });
 }
 recalcularPreciosDiamantes();
 
@@ -12912,7 +12916,7 @@ function fetchRecargaAuto(url, opts){
   try{ var b = JSON.parse(opts.body), id = (b.package_id != null) ? b.package_id : b.product_id; if(CO_AUTO_ACTIVO && CO_AUTO_PKGS.indexOf(Number(id)) >= 0){ var o2 = Object.assign({}, opts); o2.headers = Object.assign({}, opts.headers || {}); if(typeof CS_BUILD !== 'undefined') o2.headers['X-CS-Build'] = CS_BUILD; return fetch(RECARGA_AUTO_URL, o2); } }catch(e){}
   return fetch(url, opts);
 }
-var RECARGA_MANUAL_DIAMANTES = true;
+var RECARGA_MANUAL_DIAMANTES = false;
 // Pines: true = pedido manual con comprobante, sin saldo ni API · false = automático con saldo
 var RECARGA_MANUAL_PINES = true;
 var RECARGA_MANUAL = RECARGA_MANUAL_DIAMANTES || RECARGA_MANUAL_PINES;
@@ -13225,8 +13229,8 @@ function saldoAbrir(){ manualAbrir({tipo:'saldo'}); }
         + (m.copiar ? '<div class="mn-pay-r" style="justify-content:flex-end"><button type="button" class="mn-copy" onclick="manualCopiar(\''+_manEsc(m.id)+'\',this)">&#128203; '+_manEsc(m.copiarLabel||'Copiar')+'</button></div>' : '')
         + '</div>';
     }).join('');
-    d.innerHTML = '<div id="sv-aviso-saldo"></div><div class="sal-cta-t" style="margin-top:.9rem">Ya no hace falta recargar saldo</div><div class="sal-cta-s">Ahora pagas directo en cada compra: eliges tu paquete, transfieres y subes tu comprobante. En cuanto confirmamos tu pago, se recarga en tu ID.</div>'
-      + '<div class="sv-btns"><button type="button" class="mn-send" onclick="goPage(&#39;diamantes&#39;)">Comprar diamantes</button><button type="button" class="mn-ghost" onclick="goPage(&#39;tarjetas&#39;)">Tarjetas</button><button type="button" class="mn-ghost" onclick="goPage(&#39;niveles&#39;)">Subidas de nivel</button><button type="button" class="mn-ghost" onclick="if(typeof crtAbrirHistorial===&#39;function&#39;)crtAbrirHistorial()">Ver mis pedidos</button></div>';
+    d.innerHTML = (typeof RECARGA_MANUAL_DIAMANTES !== 'undefined' && RECARGA_MANUAL_DIAMANTES) ? ('<div id="sv-aviso-saldo"></div><div class="sal-cta-t" style="margin-top:.9rem">Ya no hace falta recargar saldo</div><div class="sal-cta-s">Ahora pagas directo en cada compra: eliges tu paquete, transfieres y subes tu comprobante. En cuanto confirmamos tu pago, se recarga en tu ID.</div>'
+      + '<div class="sv-btns"><button type="button" class="mn-send" onclick="goPage(&#39;diamantes&#39;)">Comprar diamantes</button><button type="button" class="mn-ghost" onclick="goPage(&#39;tarjetas&#39;)">Tarjetas</button><button type="button" class="mn-ghost" onclick="goPage(&#39;niveles&#39;)">Subidas de nivel</button><button type="button" class="mn-ghost" onclick="if(typeof crtAbrirHistorial===&#39;function&#39;)crtAbrirHistorial()">Ver mis pedidos</button></div>') : ('<div class="sal-cta-t">Depositar saldo</div><div class="sal-cta-s">Transfiere a una de estas cuentas, sube tu comprobante y acreditamos tu saldo cuando lo revisemos.</div>' + bancos + '<button type="button" class="mn-send" onclick="saldoAbrir()">Ya pagu&eacute; &middot; subir comprobante</button>');
     av.parentNode.replaceChild(d, av);
   }
   setTimeout(cta, 500); window.addEventListener('load', function(){ setTimeout(cta, 700); });
@@ -14324,26 +14328,34 @@ function vipPintar(){
 // (ahí sirven para no vender por debajo del costo).
 var OT_PRODUCTOS = {
   tarjetas: [
-    { clave:'tsb', n:'Tarjeta Semanal Básica', mxn:8 },
-    { clave:'ts',  n:'Tarjeta Semanal',        mxn:35 },
-    { clave:'tm',  n:'Tarjeta Mensual',        mxn:165 }
+    { clave:'tsb', n:'Tarjeta Semanal Básica', mxn:6.76,   usd:0.3605 },
+    { clave:'ts',  n:'Tarjeta Semanal',        mxn:28.98,  usd:1.5450 },
+    { clave:'pb',  n:'Pase Booyah',            mxn:20,     usd:1.1865 },
+    { clave:'tm',  n:'Tarjeta Mensual',        mxn:135.25, usd:7.2100 }
   ],
   niveles: [
-    { clave:'n6',  n:'Paquete Nivel 6',  mxn:4.5 },
-    { clave:'n10', n:'Paquete Nivel 10', mxn:10 },
-    { clave:'n15', n:'Paquete Nivel 15', mxn:10 },
-    { clave:'n20', n:'Paquete Nivel 20', mxn:10 },
-    { clave:'n25', n:'Paquete Nivel 25', mxn:10 },
-    { clave:'n30', n:'Paquete Nivel 30', mxn:12 }
+    { clave:'n6',  n:'Paquete de mejora de nivel · Nivel 6',  mxn:5.10,  usd:0.2719 },
+    { clave:'n10', n:'Paquete de subida de nivel · Nivel 10', mxn:8.10,  usd:0.4317 },
+    { clave:'n15', n:'Paquete de subida de nivel · Nivel 15', mxn:8.10,  usd:0.4317 },
+    { clave:'n20', n:'Paquete de subida de nivel · Nivel 20', mxn:8.10,  usd:0.4317 },
+    { clave:'n25', n:'Paquete de subida de nivel · Nivel 25', mxn:8.10,  usd:0.4317 },
+    { clave:'n30', n:'Paquete de subida de nivel · Nivel 30', mxn:11.00, usd:0.5864 }
   ]
 };
+// mxn = lo que se cobra (fijo). usd = precio en dólares (fijo). Las demás monedas se convierten desde el USD con el tipo de cambio del día.
+function otPrecioTxt(p){
+  if(typeof CURRENCY !== 'undefined' && CURRENCY === 'USD') return '$' + Number(p.usd).toFixed(4) + ' USD';
+  if(typeof CURRENCY !== 'undefined' && CURRENCY !== 'MXN' && USD_MXN > 0) return fmt(p.usd * USD_MXN);
+  return fmt(p.mxn);
+}
+var OT_AVISO_NIVEL = '\u26A0\uFE0F Solo se puede comprar si tu cuenta tiene el nivel que pide el paquete (depende de la membresía) y nunca la ha comprado.';
 var OT_TITULO = { tarjetas:'Tarjetas', niveles:'Subidas de nivel' };
 var _ot = null, _otEnviando = false, _otFoco = null;
 
 function otRenderGrid(tipo){
   var g = document.getElementById('ot-grid-' + tipo); if(!g) return;
-  g.innerHTML = (OT_PRODUCTOS[tipo] || []).map(function(p){
-    return '<div class="jg-pc"><div class="jg-pn">' + _manEsc(p.n) + '</div><div class="jg-pp">' + _manEsc(fmt(p.mxn)) + '</div><div class="jg-pu">Pago directo &middot; se recarga en tu ID</div>'
+  g.innerHTML = (tipo === 'niveles' ? '<div class="mn-note" style="grid-column:1/-1;margin:0 0 .2rem;color:#ffe9a8;border-color:rgba(255,210,74,.45)">' + OT_AVISO_NIVEL + '</div>' : '') + (OT_PRODUCTOS[tipo] || []).map(function(p){
+    return '<div class="jg-pc"><div class="jg-pn">' + _manEsc(p.n) + '</div><div class="jg-pp">' + _manEsc(otPrecioTxt(p)) + '</div><div class="jg-pu">' + ((typeof _crtOn === 'function' && _crtOn()) ? 'Pago directo &middot; se recarga en tu ID' : 'Entrega autom&aacute;tica en tu ID') + '</div>'
       + '<button type="button" class="jg-comprar" onclick="otAbrir(\'' + tipo + '\',\'' + p.clave + '\')">Comprar</button></div>';
   }).join('');
 }
@@ -14380,7 +14392,8 @@ function otRender(){
   if(_ot.estado === 'fin'){
     b.innerHTML = h + '<div class="' + (_ot.tono === 'ok' ? 'mn-ok' : 'mn-warn') + '" style="margin:.4rem 0 1rem">' + _ot.html + '</div><button type="button" class="mn-send" onclick="otCerrar()">Listo</button>'; return;
   }
-  h += '<div class="mn-sum"><div class="mn-row"><span>Precio</span><b>' + _manEsc(fmt(p.mxn)) + '</b></div><div class="mn-row"><span>Tu saldo</span><b>' + _manEsc(fmt(saldo)) + '</b></div></div>';
+  h += '<div class="mn-sum"><div class="mn-row"><span>Precio</span><b>' + _manEsc(otPrecioTxt(p)) + '</b></div><div class="mn-row"><span>Tu saldo</span><b>' + _manEsc(fmt(saldo)) + '</b></div></div>';
+  if(_ot.tipo === 'niveles') h += '<div class="mn-note" style="margin-top:.7rem;color:#ffe9a8;border-color:rgba(255,210,74,.45)">' + OT_AVISO_NIVEL + '</div>';
   h += '<label class="mn-lbl" for="ot-id" style="margin-top:.9rem">ID de Free Fire *</label><input class="mn-inp" id="ot-id" type="text" inputmode="numeric" maxlength="15" placeholder="Ej: 123456789" value="' + _manEsc(_ot.id) + '" oninput="otCambioId(this.value)">';
   if(_ot.estado === 'ok') h += '<div class="mn-note" style="color:#8ff0b5;border-color:rgba(52,227,122,.35)">\u2705 Cuenta encontrada: <b>' + _manEsc(_ot.nombre || 'jugador verificado') + '</b></div>';
   if(_ot.estado === 'invalido') h += '<div class="mn-warn" style="margin-top:.6rem"><span style="font-size:1.3rem">\u274C</span><div><b>Ese ID no existe</b>Revisa que sea un ID de Free Fire de la región LATAM.</div></div>';
@@ -14388,7 +14401,7 @@ function otRender(){
     + '<label class="mn-note" style="display:flex;gap:.6rem;align-items:flex-start;cursor:pointer;margin-top:.6rem"><input type="checkbox" id="ot-conf" ' + (_ot.ok ? 'checked' : '') + ' onchange="_ot.ok=this.checked;otBoton()"><span>Confirmo que mi ID es correcto.</span></label>';
   var puede = (_ot.estado === 'ok') || (_ot.estado === 'sinver' && _ot.ok);
   h += '<button type="button" class="mn-ghost" id="ot-ver" onclick="otVerificar()" style="margin-top:.8rem">Verificar ID</button>'
-    + '<button type="button" class="mn-send" id="ot-buy" onclick="otComprar()" ' + (puede ? '' : 'disabled') + '>Comprar con saldo &middot; ' + _manEsc(fmt(p.mxn)) + '</button>'
+    + '<button type="button" class="mn-send" id="ot-buy" onclick="otComprar()" ' + (puede ? '' : 'disabled') + '>Comprar con saldo &middot; ' + _manEsc(otPrecioTxt(p)) + '</button>'
     + '<div class="mn-note" style="margin-top:.6rem">La entrega es automática. Si el proveedor no puede hacerla, tu saldo se devuelve solo.</div>';
   b.innerHTML = h;
 }
@@ -14531,8 +14544,8 @@ function crtaBadgeTick(){
 }
 setInterval(crtaBadgeTick, 40000); setTimeout(crtaBadgeTick, 6000);
 
-// ── Saldo retirado de las compras: aviso para quien tiene saldo + contactos del administrador ──
-var SV_TEL = '+81 70-9432-2677', SV_WA = '817094322677';
+// ── Saldo retirado de las compras (SOLO en modo semiautomático: RECARGA_MANUAL_DIAMANTES = true) ──
+var SV_TEL = '+81 70-9432-2677', SV_WA = '817094322677', SV_ON = (typeof RECARGA_MANUAL_DIAMANTES !== 'undefined' && RECARGA_MANUAL_DIAMANTES);
 function saldoAvisoHTML(){
   var s = (typeof authSession !== 'undefined' && authSession) ? (Number(authSession.saldo) || 0) : 0; if(!(s > 0)) return '';
   var canal = (typeof WA_CHANNEL !== 'undefined' && WA_CHANNEL) ? WA_CHANNEL : '';
@@ -14543,11 +14556,18 @@ function saldoAvisoHTML(){
 function saldoAvisoRefrescar(){
   ['sv-aviso-home', 'sv-aviso-saldo'].forEach(function(id){ var e = document.getElementById(id); if(!e) return; var h = saldoAvisoHTML(); if(e.getAttribute('data-h') !== h){ e.innerHTML = h; e.setAttribute('data-h', h); } });
 }
-setInterval(saldoAvisoRefrescar, 1500);
-if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', saldoAvisoRefrescar); else saldoAvisoRefrescar();
-// "Recargar saldo" ya no abre el formulario de depósito: lleva a la Billetera, que explica cómo pagar ahora
-window.saldoAbrir = function(){ goPage('saldo'); };
-window.abrirRecargaSheet = window.saldoAbrir;
+function svAjustarTextos(){
+  var b = document.querySelector('.hm-wallet .hm-btn.p'); if(b){ b.textContent = 'Comprar diamantes'; b.setAttribute('onclick', "goPage('diamantes')"); }
+  Array.prototype.forEach.call(document.querySelectorAll('#page-home *'), function(e){ if(e.children.length === 0 && e.textContent.trim() === 'Depositar saldo') e.textContent = 'Cómo pagar'; });
+  ['tarjetas', 'niveles'].forEach(function(t){ var n = document.querySelector('#page-' + t + ' .rk-nota'); if(n) n.textContent = 'Agrega al carrito, paga por transferencia y sube tu comprobante. En cuanto lo confirmamos, se recarga directo en tu ID de Free Fire (LATAM). Si no se puede hacer, te devolvemos tu dinero.'; });
+}
+if(SV_ON){
+  setInterval(saldoAvisoRefrescar, 1500);
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ saldoAvisoRefrescar(); svAjustarTextos(); }); else { saldoAvisoRefrescar(); svAjustarTextos(); }
+  // "Recargar saldo" ya no abre el formulario de depósito: lleva a la Billetera, que explica cómo pagar ahora
+  window.saldoAbrir = function(){ goPage('saldo'); };
+  window.abrirRecargaSheet = window.saldoAbrir;
+}
 
 
 // ═══════════════════════ CONTROL DE VERSIÓN: nada de comprar con una tienda vieja ═══════════════════════
