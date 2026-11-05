@@ -8,6 +8,7 @@
 'use strict';
 const crypto = require('crypto');
 const C = require('./_comun.js');
+const A = require('./_alerta.js');
 
 function enviar(res, status, body){ res.statusCode = status; res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.setHeader('Cache-Control', 'no-store'); res.end(JSON.stringify(body)); }
 const iguales = (a, b) => { const x = Buffer.from(String(a)), y = Buffer.from(String(b)); return x.length === y.length && crypto.timingSafeEqual(x, y); };
@@ -31,6 +32,11 @@ module.exports = async function handler(req, res){
         const r = await C.co('/balance'); if(r.status !== 200 || !r.json) return enviar(res, 200, C.errProv(r));
         return enviar(res, 200, { ok: true, available: r.json.available_balance, held: r.json.held_balance, total: r.json.total_balance, currency: r.json.currency });
       }
+      case 'proteccion': {
+        A.invalidar(); const e = await A.estado(0);
+        return enviar(res, 200, { ok: true, umbral: A.umbral(), saldo: e.saldo, pausa: !!e.pausa, verificado: e.verificado, repite_cada_min: A.cadaMin(), via: (process.env.TG_BOT_TOKEN && process.env.TG_CHAT_ID) ? 'telegram' : 'supabase' });
+      }
+      case 'probar_alerta': { const r = await A.enviarPrueba(); return enviar(res, 200, { ok: !!r.enviado, via: r.via, http: r.http || null }); }
       case 'paquetes': {
         const c = await C.catalogo(); if(!c.ok) return enviar(res, 200, c);
         const det = C.detectar(c.items), lim = x => ({ product_id: x.product_id, nombre: x.name, sku: x.sku, region: x.region, precio: x.reseller_price, in_stock: x.in_stock });
