@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta name="cs-build" content="5bc782bfca">
-<script>var CS_BUILD="5bc782bfca";</script>
+<meta name="cs-build" content="13d2770e13">
+<script>var CS_BUILD="13d2770e13";</script>
 <meta charset="UTF-8"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -4103,6 +4103,16 @@ body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill
 .sv-btns{display:grid;gap:.5rem;margin-top:.9rem}
 .sv-btns .mn-ghost{margin:0}
 
+/* Protección de saldo con el proveedor */
+.prov-aviso{display:flex;gap:.8rem;align-items:flex-start;margin:0 0 1rem;padding:1rem 1.1rem;border-radius:16px;background:linear-gradient(135deg,rgba(255,170,40,.16),rgba(255,80,110,.12));border:1px solid rgba(255,190,70,.55);color:#ffe9c2;font-size:.9rem;line-height:1.5}
+.prov-aviso b{display:block;color:#fff;font-size:1.02rem;margin-bottom:.15rem}
+.prov-aviso span{display:block}
+.prov-aviso a{display:inline-block;margin-top:.5rem;color:#ffd24a;font-weight:600;text-decoration:underline}
+.prov-ico{font-size:1.6rem;line-height:1.2}
+body.prov-pausa #page-diamantes .rc-card,body.prov-pausa #page-diamantes .rc-btn,body.prov-pausa #ot-grid-tarjetas .jg-pc,body.prov-pausa #ot-grid-niveles .jg-pc{opacity:.42;filter:grayscale(.7);pointer-events:none;cursor:not-allowed}
+body.prov-pausa #page-tarjetas .jg-comprar,body.prov-pausa #page-niveles .jg-comprar{pointer-events:none}
+#crta-prot{margin:.5rem 0 0;font-size:.88rem;line-height:1.45}
+
 #theme-btn,.theme-btn{display:none!important}
 </style>
 </head>
@@ -8078,11 +8088,13 @@ body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill
       <div class="crta-prov-h"><b>Proveedor Central One</b></div>
       <div class="crta-prov-b">
         <button type="button" class="p" onclick="admCoResumen(true)">Ver saldo y costos</button>
+        <button type="button" onclick="admCoProbarAlerta()">Probar aviso de Telegram</button>
         <button type="button" onclick="admCoProbar()">Probar conexión y saldo</button>
         <button type="button" onclick="admCoPaquetes()">Ver paquetes detectados</button>
         <button type="button" onclick="admCoTokenReset()">Olvidar token</button>
       </div>
       <div id="crta-saldo-prov"></div>
+      <div id="crta-prot"></div>
       <div id="crta-prov-out"></div>
     </div>
     <div id="crta-lista"><div class="crta-vacio">Presiona Actualizar</div></div>
@@ -8345,9 +8357,9 @@ body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill
 <div class="mn-ov" id="ot-modal" role="dialog" aria-modal="true" aria-labelledby="ot-title" style="display:none" onclick="if(event.target===this)otCerrar()">
   <div class="mn-box"><button type="button" class="mn-x" onclick="otCerrar()" aria-label="Cerrar">&times;</button><div class="mn-body" id="ot-body"></div></div>
 </div>
-<script src="supabase.js?v=5bc782bfca"></script>
-<script src="supabase_integration.js?v=5bc782bfca"></script>
-<script src="script.js?v=5bc782bfca"></script>
+<script src="supabase.js?v=13d2770e13"></script>
+<script src="supabase_integration.js?v=13d2770e13"></script>
+<script src="script.js?v=13d2770e13"></script>
 
 <!-- BARRA DE NAVEGACION INFERIOR -->
 
