@@ -18,11 +18,13 @@
 //   CO_LIMITE_DIA_USD      tope diario de gasto en US$ (por defecto 40)
 //   CO_LIMITE_USUARIO_HORA recargas por usuario por hora (por defecto 8)
 //   CO_AUTO_ACTIVO         pon 0 para apagar las recargas automáticas
+//   CO_SALDO_MINIMO_USD    protección de saldo: si el proveedor baja a este saldo (por defecto US$ 5) se pausan las compras y te avisa por Telegram (ver api/_alerta.js)
 //   SUPABASE_URL y SUPABASE_ANON_KEY   (recomendado) comprueba que el usuario exista y no esté baneado
 //   (opcionales) CO_MAP, CO_TOLERANCIA, CO_REGION_REGEX, CO_BASE → igual que en api/co.js
 // ═══════════════════════════════════════════════════════════════════════════
 'use strict';
 
+const A = require('./_alerta.js');
 const BASE = (process.env.CO_BASE || 'https://portal.centraloneglobal.com/api/v1').replace(/\/+$/, '');
 const TOL = Number(process.env.CO_TOLERANCIA || 0.35);
 const LIM_DIA = Number(process.env.CO_LIMITE_DIA_USD || 40);
@@ -113,30 +115,33 @@ function armarTarget(it, playerId){
 }
 
 // ── "Otras cosas": tarjetas y paquetes de nivel de Free Fire (se piden con "producto": clave) ──
-// Los precios son los de venta en MXN; solo sirven para proteger el margen (si el costo del proveedor los alcanza, ese producto se bloquea).
+// "usd" es el precio de VENTA en dólares (el de tu lista); solo sirve para proteger el margen: si el proveedor cobra más que eso, ese producto se bloquea.
 const EXTRA = {
-  tsb: { titulo: 'Tarjeta Semanal Básica', precio: 8,   tipo: 'semanal_basica' },
-  ts:  { titulo: 'Tarjeta Semanal',        precio: 35,  tipo: 'semanal' },
-  tm:  { titulo: 'Tarjeta Mensual',        precio: 165, tipo: 'mensual' },
-  n6:  { titulo: 'Paquete Nivel 6',  precio: 4.5, nivel: 6 },
-  n10: { titulo: 'Paquete Nivel 10', precio: 10,  nivel: 10 },
-  n15: { titulo: 'Paquete Nivel 15', precio: 10,  nivel: 15 },
-  n20: { titulo: 'Paquete Nivel 20', precio: 10,  nivel: 20 },
-  n25: { titulo: 'Paquete Nivel 25', precio: 10,  nivel: 25 },
-  n30: { titulo: 'Paquete Nivel 30', precio: 12,  nivel: 30 }
+  tsb: { titulo: 'Tarjeta Semanal Básica', usd: 0.3605, tipo: 'semanal_basica' },
+  ts:  { titulo: 'Tarjeta Semanal',        usd: 1.5450, tipo: 'semanal' },
+  pb:  { titulo: 'Pase Booyah',            usd: 1.1865, tipo: 'booyah' },
+  tm:  { titulo: 'Tarjeta Mensual',        usd: 7.2100, tipo: 'mensual' },
+  n6:  { titulo: 'Paquete de mejora de nivel - Nivel 6',  usd: 0.2719, nivel: 6 },
+  n10: { titulo: 'Paquete de subida de nivel - Nivel 10', usd: 0.4317, nivel: 10 },
+  n15: { titulo: 'Paquete de subida de nivel - Nivel 15', usd: 0.4317, nivel: 15 },
+  n20: { titulo: 'Paquete de subida de nivel - Nivel 20', usd: 0.4317, nivel: 20 },
+  n25: { titulo: 'Paquete de subida de nivel - Nivel 25', usd: 0.4317, nivel: 25 },
+  n30: { titulo: 'Paquete de subida de nivel - Nivel 30', usd: 0.5864, nivel: 30 }
 };
 const TC = Number(process.env.CO_TC || 19.5);
 const PROTEGER_MARGEN = !/^(0|false|off|no)$/i.test(String(process.env.CO_PROTEGER_MARGEN || '1'));
 const sinAcentos = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+const BOOYAH = /b(?:oo|o)y(?:aa|a)h/;   // booyah, boyaah, boyah, booyaah
 function coincideExtra(p, it){
-  const t = sinAcentos((it.name || '') + ' ' + (it.sku || ''));
+  const t = sinAcentos((it.name || '') + ' ' + (it.sku || '')), booyah = BOOYAH.test(t);
   if(p.tipo){
     const basica = /(basic|lite|light)/.test(t);
-    if(p.tipo === 'semanal_basica') return /(semanal|weekly)/.test(t) && basica;
-    if(p.tipo === 'semanal') return /(semanal|weekly)/.test(t) && !basica;
-    if(p.tipo === 'mensual') return /(mensual|monthly)/.test(t);
+    if(p.tipo === 'booyah') return booyah && /(pase|pass)/.test(t);
+    if(p.tipo === 'semanal_basica') return /(semanal|weekly)/.test(t) && basica && !booyah;
+    if(p.tipo === 'semanal') return /(semanal|weekly)/.test(t) && !basica && !booyah;
+    if(p.tipo === 'mensual') return /(mensual|monthly)/.test(t) && !booyah;
   }
-  return new RegExp('(nivel|level|lvl|lv)\\.?\\s*' + p.nivel + '(?![0-9])').test(t) && !/(semanal|weekly|mensual|monthly|diamante|diamond)/.test(t);
+  return new RegExp('(nivel|level|lvl|lv)\\.?\\s*' + p.nivel + '(?![0-9])').test(t) && !/(semanal|weekly|mensual|monthly|diamante|diamond)/.test(t) && !booyah;
 }
 // Igual que detectar(): devuelve { item, precio } o { error }. Si hay más de un candidato NO elige (salvo que lo fijes con CO_MAP).
 function elegirExtra(items, clave){
@@ -151,7 +156,7 @@ function elegirExtra(items, clave){
   if(!item) return { error: 'No se encontró el producto en el catálogo del proveedor' };
   const precio = parseFloat(item.reseller_price);
   if(!(precio > 0)) return { error: 'Precio del proveedor inválido' };
-  if(PROTEGER_MARGEN && p.precio < precio * TC) return { error: 'Producto no disponible por ahora' };
+  if(PROTEGER_MARGEN && p.usd < precio) return { error: 'Producto no disponible por ahora' };   // el proveedor cobra más de lo que vendes
   if(item.in_stock === false) return { error: 'Producto sin stock en el proveedor' };
   return { item, precio };
 }
@@ -211,9 +216,19 @@ module.exports = async function handler(req, res){
   try{
     if(req.method !== 'POST') return enviar(res, NO_HECHO('Método no permitido', 'ENDPOINT_DISABLED'));
     if(!process.env.CO_API_KEY) return enviar(res, NO_HECHO('Recargas automáticas no configuradas', 'ENDPOINT_DISABLED'));
-    if(/^(0|false|off|no)$/i.test(String(process.env.CO_AUTO_ACTIVO || '1'))) return enviar(res, NO_HECHO('Las recargas automáticas están desactivadas por ahora', 'ENDPOINT_DISABLED'));
     const b = (req.body && typeof req.body === 'object') ? req.body : {};
     const ip = ipDe(req);
+    const apagado = /^(0|false|off|no)$/i.test(String(process.env.CO_AUTO_ACTIVO || '1'));
+
+    // ── ¿se puede comprar ahora? (la tienda lo consulta para mostrar la protección; NO devuelve el saldo, solo sí/no) ──
+    if(b.action === 'disponibilidad'){
+      if(apagado) return enviar(res, { ok: true, disponible: false, motivo: 'apagado' });
+      if(limite(ip, 'd', 60)) return enviar(res, { ok: true, disponible: true, verificado: false });
+      const e = await A.estado(0);
+      if(e.verificado && e.pausa) await A.avisarSaldoBajo(e.saldo, e.motivo); else if(e.verificado) await A.avisarRecuperado(e.saldo);
+      return enviar(res, { ok: true, disponible: !e.pausa, motivo: e.pausa ? 'saldo' : null, verificado: e.verificado });
+    }
+    if(apagado) return enviar(res, NO_HECHO('Las recargas automáticas están desactivadas por ahora', 'ENDPOINT_DISABLED'));
 
     // ── estado de un pedido (por si hace falta consultarlo después) ──
     if(b.action === 'estado'){
@@ -264,6 +279,9 @@ module.exports = async function handler(req, res){
     const rev = await revisarPedidos(cliente, key);
     if(!rev.ok) return enviar(res, NO_HECHO('No se pudo verificar el límite de gasto', 'ENDPOINT_DISABLED'));
     if(rev.existente) return enviar(res, mapearOrden(rev.existente));
+    // Protección de saldo con el proveedor: si queda poco (o no alcanza para este pedido) se pausa y se te avisa por Telegram
+    const sp = await A.estado(d.precio);
+    if(sp.pausa){ await A.avisarSaldoBajo(sp.saldo, sp.motivo); return enviar(res, NO_HECHO('Recargas en pausa por unos minutos: estamos reponiendo saldo del sistema. Intenta de nuevo en un rato.', 'ENDPOINT_DISABLED')); }
     if(LIM_DIA > 0 && rev.total + d.precio > LIM_DIA) return enviar(res, NO_HECHO('Recargas automáticas en pausa por hoy. Intenta más tarde o contacta al administrador', 'ENDPOINT_DISABLED'));
     if(LIM_USER_H > 0 && rev.delUsuario >= LIM_USER_H) return enviar(res, NO_HECHO('Alcanzaste el límite de recargas por hora. Intenta más tarde', 'ENDPOINT_DISABLED'));
 
@@ -286,6 +304,7 @@ module.exports = async function handler(req, res){
       const s = await co('/orders/' + o.id);
       if(s.status === 200 && s.json && s.json.order){ o = Object.assign({}, o, s.json.order); if(['completed', 'failed', 'cancelled'].indexOf(o.status) >= 0) break; }
     }
+    try{ await A.despuesDeCompra(); }catch(e){}
     return enviar(res, mapearOrden(o));
   }catch(e){
     const timeout = e && e.name === 'AbortError';
