@@ -34,8 +34,8 @@ module.exports = async function handler(req, res){
       case 'paquetes': {
         const c = await C.catalogo(); if(!c.ok) return enviar(res, 200, c);
         const det = C.detectar(c.items), lim = x => ({ product_id: x.product_id, nombre: x.name, sku: x.sku, region: x.region, precio: x.reseller_price, in_stock: x.in_stock });
-        const todos = C.PRODUCTOS.map(p => { const d = det[p.clave], costo = d.costoMxn, margen = costo ? Math.round((p.precio - costo) / costo * 1000) / 10 : null;
-          return { clave: p.clave, grupo: p.grupo, titulo: p.titulo, precio_mxn: p.precio, estado: d.estado, via: d.via, candidatos: d.candidatos, product_id: d.item ? d.item.product_id : null,
+        const todos = C.PRODUCTOS.map(p => { const d = det[p.clave], costo = d.costoMxn, cu = parseFloat(d.precioUsd), margen = cu > 0 ? Math.round((p.usd - cu) / cu * 1000) / 10 : null;
+          return { clave: p.clave, grupo: p.grupo, titulo: p.titulo, precio_mxn: p.precio, precio_usd_venta: p.usd, estado: d.estado, via: d.via, candidatos: d.candidatos, product_id: d.item ? d.item.product_id : null,
             nombre: d.item ? d.item.name : null, sku: d.item ? d.item.sku : null, precio_usd: d.precioUsd, costo_mxn_aprox: costo, margen_pct: margen }; });
         // formato anterior (solo diamantes) para lo que ya usa tu panel y catalogo-co.html
         const paquetes = C.PRODUCTOS.filter(p => p.grupo === 'diamantes').map(p => { const d = det[p.clave]; return { diamantes: p.num, estado: d.estado, via: d.via, ref: p.refUsd, product_id: d.item ? d.item.product_id : null, nombre: d.item ? d.item.name : null, sku: d.item ? d.item.sku : null, precio: d.precioUsd, in_stock: d.item ? d.item.in_stock : null }; });
