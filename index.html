@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta name="cs-build" content="547a32f604">
-<script>var CS_BUILD="547a32f604";</script>
+<meta name="cs-build" content="5bc782bfca">
+<script>var CS_BUILD="5bc782bfca";</script>
 <meta charset="UTF-8"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -4297,7 +4297,7 @@ body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill
       <div class="hm-w-alt" id="home-saldo-alt">&nbsp;</div>
       <div id="sv-aviso-home"></div>
       <div class="hm-w-act">
-        <button type="button" class="hm-btn p" onclick="goPage('diamantes')">Comprar diamantes</button>
+        <button type="button" class="hm-btn p" onclick="abrirRecargaSheet()">Recargar saldo</button>
         <button type="button" class="hm-btn g" onclick="goPage('transferir')">Transferir</button>
       </div>
     </div>
@@ -4321,7 +4321,7 @@ body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill
       <button type="button" class="hm-tile" onclick="goPage('niveles')"><span class="hm-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span><span class="hm-tt"><b>Subidas de nivel</b><small>Nivel 6 al 30</small></span></button>
       <button type="button" class="hm-tile" onclick="goPage('likes')"><span class="hm-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z"/></svg></span><span class="hm-tt"><b>Likes</b><small>Para tu perfil</small></span></button>
       <button type="button" class="hm-tile" onclick="goPage('giftcards')"><span class="hm-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></span><span class="hm-tt"><b>Gift Cards</b><small>Robux y Netflix</small></span></button>
-      <button type="button" class="hm-tile" onclick="goPage('saldo')"><span class="hm-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12V8H6a2 2 0 0 1 0-4h12v4"/><path d="M4 6v12a2 2 0 0 0 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg></span><span class="hm-tt"><b>Billetera</b><small>Cómo pagar</small></span></button>
+      <button type="button" class="hm-tile" onclick="goPage('saldo')"><span class="hm-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12V8H6a2 2 0 0 1 0-4h12v4"/><path d="M4 6v12a2 2 0 0 0 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg></span><span class="hm-tt"><b>Billetera</b><small>Depositar saldo</small></span></button>
       <button type="button" class="hm-tile" onclick="goPage('miscompras')"><span class="hm-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span><span class="hm-tt"><b>Mis compras</b><small>Tus pedidos</small></span></button>
       <button type="button" class="hm-tile" onclick="goPage('soporte')"><span class="hm-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 14v-2a9 9 0 0 1 18 0v2"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3z"/><path d="M3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg></span><span class="hm-tt"><b>Soporte</b><small>Te ayudamos</small></span></button>
     </div>
@@ -4693,13 +4693,6 @@ body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill
         <div class="dcat-head-txt">Free Fire <span class="dcat-count" id="diam-count">0</span></div>
       </div>
       <div class="dcat-grid" id="diam-grid"></div>
-
-      <!-- ═══ MEMBRESIAS Y PASE ELITE ═══ -->
-      <div class="dcat-head" style="margin-top:1.8rem">
-        <div class="dcat-head-ico">&#127915;</div>
-        <div class="dcat-head-txt">Membres&iacute;as y Pase</div>
-      </div>
-      <div class="diam-mem-grid" style="display:flex;flex-direction:column;gap:.65rem" id="diam-membresias"></div>
 
       <!-- Cotizar otros paquetes -->
       <div style="margin-top:1.6rem;max-width:640px;background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:1.2rem 1.1rem;text-align:center">
@@ -8352,9 +8345,9 @@ body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill
 <div class="mn-ov" id="ot-modal" role="dialog" aria-modal="true" aria-labelledby="ot-title" style="display:none" onclick="if(event.target===this)otCerrar()">
   <div class="mn-box"><button type="button" class="mn-x" onclick="otCerrar()" aria-label="Cerrar">&times;</button><div class="mn-body" id="ot-body"></div></div>
 </div>
-<script src="supabase.js?v=547a32f604"></script>
-<script src="supabase_integration.js?v=547a32f604"></script>
-<script src="script.js?v=547a32f604"></script>
+<script src="supabase.js?v=5bc782bfca"></script>
+<script src="supabase_integration.js?v=5bc782bfca"></script>
+<script src="script.js?v=5bc782bfca"></script>
 
 <!-- BARRA DE NAVEGACION INFERIOR -->
 
