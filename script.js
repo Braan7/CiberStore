@@ -12912,7 +12912,7 @@ function fetchRecargaAuto(url, opts){
   try{ var b = JSON.parse(opts.body), id = (b.package_id != null) ? b.package_id : b.product_id; if(CO_AUTO_ACTIVO && CO_AUTO_PKGS.indexOf(Number(id)) >= 0){ var o2 = Object.assign({}, opts); o2.headers = Object.assign({}, opts.headers || {}); if(typeof CS_BUILD !== 'undefined') o2.headers['X-CS-Build'] = CS_BUILD; return fetch(RECARGA_AUTO_URL, o2); } }catch(e){}
   return fetch(url, opts);
 }
-var RECARGA_MANUAL_DIAMANTES = false;
+var RECARGA_MANUAL_DIAMANTES = true;
 // Pines: true = pedido manual con comprobante, sin saldo ni API · false = automático con saldo
 var RECARGA_MANUAL_PINES = true;
 var RECARGA_MANUAL = RECARGA_MANUAL_DIAMANTES || RECARGA_MANUAL_PINES;
@@ -13225,7 +13225,8 @@ function saldoAbrir(){ manualAbrir({tipo:'saldo'}); }
         + (m.copiar ? '<div class="mn-pay-r" style="justify-content:flex-end"><button type="button" class="mn-copy" onclick="manualCopiar(\''+_manEsc(m.id)+'\',this)">&#128203; '+_manEsc(m.copiarLabel||'Copiar')+'</button></div>' : '')
         + '</div>';
     }).join('');
-    d.innerHTML = '<div class="sal-cta-t">Depositar saldo</div><div class="sal-cta-s">Transfiere a una de estas cuentas, sube tu comprobante y acreditamos tu saldo cuando lo revisemos.</div>' + bancos + '<button type="button" class="mn-send" onclick="saldoAbrir()">Ya pagu&eacute; &middot; subir comprobante</button>';
+    d.innerHTML = '<div id="sv-aviso-saldo"></div><div class="sal-cta-t" style="margin-top:.9rem">Ya no hace falta recargar saldo</div><div class="sal-cta-s">Ahora pagas directo en cada compra: eliges tu paquete, transfieres y subes tu comprobante. En cuanto confirmamos tu pago, se recarga en tu ID.</div>'
+      + '<div class="sv-btns"><button type="button" class="mn-send" onclick="goPage(&#39;diamantes&#39;)">Comprar diamantes</button><button type="button" class="mn-ghost" onclick="goPage(&#39;tarjetas&#39;)">Tarjetas</button><button type="button" class="mn-ghost" onclick="goPage(&#39;niveles&#39;)">Subidas de nivel</button><button type="button" class="mn-ghost" onclick="if(typeof crtAbrirHistorial===&#39;function&#39;)crtAbrirHistorial()">Ver mis pedidos</button></div>';
     av.parentNode.replaceChild(d, av);
   }
   setTimeout(cta, 500); window.addEventListener('load', function(){ setTimeout(cta, 700); });
@@ -13265,6 +13266,13 @@ function crtAddProducto(p, ffId){
   if(ffId) _crtIdUnico = ffId;
   if(crtAdd(i, 1)) crtAbrirCarrito();
 }
+// Tarjetas y subidas de nivel (productos que no son diamantes): o = {k, n, p, clave, tipo}
+function crtAddOtro(o){
+  if(crtUnidades() + 1 > CRT_MAX){ _manToast('Máximo ' + CRT_MAX + ' recargas por pedido'); return false; }
+  var ex = null; _crtCart.forEach(function(x){ if(x.k === o.k) ex = x; });
+  if(ex) ex.q += 1; else _crtCart.push({k:o.k, n:o.n, d:0, p:o.p, q:1, pk:null, ck:null, man:false, pase:false, clave:o.clave, tipo:o.tipo});
+  crtGuardar(); return true;
+}
 function crtAdd(i, q){
   var p = crtProductos()[i]; if(!p) return false; q = q || 1;
   if(crtUnidades() + q > CRT_MAX){ _manToast('Máximo ' + CRT_MAX + ' recargas por pedido'); return false; }
@@ -13283,6 +13291,7 @@ function crtCambiarQ(k, d){
 function crtQuitar(k){ _crtCart = _crtCart.filter(function(x){ return x.k !== k; }); crtGuardar(); crtRender(); }
 function crtSyncPrecios(){
   var l = crtProductos();
+  _crtCart.forEach(function(x){ if(x.clave && typeof OT_PRODUCTOS !== 'undefined'){ ['tarjetas', 'niveles'].forEach(function(t){ (OT_PRODUCTOS[t] || []).forEach(function(o){ if(o.clave === x.clave){ x.p = o.mxn; x.n = o.n; } }); }); } });
   _crtCart.forEach(function(x){ l.forEach(function(p){ if(p.key === x.k){ x.p = p.precio; x.n = p.nombre; x.d = p.diamantes; x.pk = p.package_id || null; x.ck = p.catalog_id || null; } }); });
   crtGuardar();
 }
@@ -13343,7 +13352,7 @@ function crtCopiarPrimero(){ var v = _crtIds[0] || ''; var n = crtUnidades(); fo
 
 function crtRender(){
   var b = document.getElementById('crt-body'); if(!b) return;
-  var cab = '<div class="mn-eye">RECARGA DE DIAMANTES · SIN SALDO</div><h2 class="mn-h" id="crt-title">Tu carrito</h2>';
+  var cab = '<div class="mn-eye">RECARGAS · PAGO DIRECTO, SIN SALDO</div><h2 class="mn-h" id="crt-title">Tu carrito</h2>';
   if(!_crtCart.length){
     b.innerHTML = cab + '<div class="mn-warn"><span style="font-size:1.4rem">&#128722;</span><div><b>Carrito vacío</b>Agrega recargas desde el catálogo de diamantes.</div></div><button type="button" class="mn-send" onclick="crtCerrar()">Ver catálogo</button>';
     return;
@@ -13387,7 +13396,7 @@ function crtRender(){
     + '<input type="file" id="crt-foto" accept="image/*" style="display:none" onchange="crtOnFoto(this)">'
     + '<div class="mn-up" id="crt-up" role="button" tabindex="0" style="' + (_crtFotoRaw ? 'display:none' : '') + '" onclick="document.getElementById(\'crt-foto\').click()" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}"><div style="font-size:1.5rem">&#128247;</div><b>Toca para elegir la foto</b>Captura de tu pago (JPG, PNG)</div>'
     + '<div class="mn-prev" id="crt-prev" style="' + (_crtFotoRaw ? 'display:block' : '') + '"><img id="crt-prev-img" alt="Vista previa del comprobante" src="' + (_crtFotoRaw || '') + '"><small id="crt-prev-nom">' + (_crtFotoNom ? '\u2713 ' + _manEsc(_crtFotoNom) : '') + '</small><button type="button" onclick="crtQuitarFoto()">Cambiar foto</button></div>'
-    + '<div class="mn-note">Transfiere el total exacto y sube tu comprobante. Cuando confirmemos tu pago hacemos las recargas y cuentan para el Top de compradores. No se usa tu saldo.</div>'
+    + '<div class="mn-note">Transfiere el total exacto y sube tu comprobante. Cuando confirmemos tu pago hacemos las recargas (los diamantes cuentan para el Top de compradores). No se usa tu saldo.</div>'
     + '<button type="button" class="mn-send" id="crt-send" onclick="crtEnviar()"' + (MANUAL_METODOS.length ? '' : ' disabled') + '>Enviar comprobante y pedir recargas</button>';
   b.innerHTML = h;
 }
@@ -13435,17 +13444,17 @@ function crtEnviar(){
 
   _crtEnviando = true;
   var btn = document.getElementById('crt-send'); if(btn){ btn.disabled = true; btn.textContent = 'Enviando...'; }
-  var items = uni.map(function(x, i){ return {i:i, k:x.k, nombre:x.n, diamantes:x.d, precio:x.p, package_id:x.pk, catalog_id:x.ck, manual:!!x.man, pase:!!x.pase, ff_id:ids[i], estado:'pendiente', idem:crtUUID()}; });
+  var items = uni.map(function(x, i){ return {i:i, k:x.k, nombre:x.n, diamantes:x.d, precio:x.p, package_id:x.pk, catalog_id:x.ck, manual:!!x.man, pase:!!x.pase, clave:x.clave || null, tipo:x.tipo || 'diamantes', ff_id:ids[i], estado:'pendiente', idem:crtUUID()}; });
   var total = crtTotal(), liberar = function(){ _crtEnviando = false; var b2 = document.getElementById('crt-send'); if(b2){ b2.disabled = false; b2.textContent = 'Enviar comprobante y pedir recargas'; } };
 
-  sb.post(CRT_TABLA, {user_id:authSession.id, username:authSession.username, items:items, total:total, metodo:met.nombre, modo_ids:_crtModo, estado:'pendiente'}).then(function(r){
+  sb.post(CRT_TABLA, {user_id:authSession.id, username:authSession.username, items:items, total:total, metodo:met.nombre, modo_ids:_crtModo, estado:'pendiente', nota:'v:' + (typeof CS_BUILD !== 'undefined' ? CS_BUILD : 'sinversion')}).then(function(r){
     var row = Array.isArray(r) ? r[0] : r;
     if(!row || row.id == null) throw new Error('sin id');
     var rid = row.id, user = authSession.username || 'Cliente';
     var resumen = (_crtModo === 'mismo')
       ? ('ID ' + ids[0] + ': ' + _crtCart.map(function(x){ return x.n + (x.q > 1 ? ' x' + x.q : ''); }).join(', '))
       : items.map(function(it, i){ return (i + 1) + ') ' + it.nombre + ' → ' + it.ff_id; }).join(' | ');
-    var payload = { usuario:user, username:user, metodo:'PEDIDO MANUAL (sin saldo): Diamantes - ' + met.nombre, monto:_manMXN(total) + ' - Pedido R' + rid, monto_acreditar:0,
+    var payload = { usuario:user, username:user, metodo:'PEDIDO (pago directo, sin saldo): Recargas - ' + met.nombre, monto:_manMXN(total) + ' - Pedido R' + rid, monto_acreditar:0,
       extra:'Pedido R' + rid + ' | ' + uni.length + ' recarga' + (uni.length === 1 ? '' : 's') + ' | ' + (_crtModo === 'mismo' ? 'MISMO ID' : 'IDs DIFERENTES') + ' | ' + resumen + ' | Total: ' + _manMXN(total) + ' | SIN SALDO · confirmar en panel admin → Recargas', foto_base64:_crtFoto };
     return fetch(NOTIF_RECARGA_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)}).then(function(r2){ return r2.json(); }).then(function(res){
       if(res && res.success){ crtMostrarOk(rid, uni.length, total); }
@@ -13506,9 +13515,9 @@ function admCrtRender(){
   el.innerHTML = filas.map(function(r){
     var busy = !!_crtaBusy[r.id], its = r.items || [], hayPend = its.some(function(x){ return x.estado === 'pendiente'; }), abierto = r.estado !== 'completada' && r.estado !== 'rechazada' && r.estado !== 'cancelada';
     var fecha = r.created_at ? new Date(r.created_at).toLocaleString('es-MX', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}) : '';
-    return '<div class="crta-card"><div class="crta-h"><b>R' + _manEsc(r.id) + '</b> · ' + _manEsc(r.username || '') + ' <span class="crta-f">' + _manEsc(fecha) + '</span>' + _crtaChip(r.estado) + '</div>'
+    return '<div class="crta-card"><div class="crta-h"><b>R' + _manEsc(r.id) + '</b> · ' + _manEsc(r.username || '') + ' <span class="crta-f">' + _manEsc(fecha) + '</span>' + _crtaChip(r.estado) + ((abierto && (!r.nota || (typeof CS_BUILD !== 'undefined' && r.nota !== 'v:' + CS_BUILD))) ? '<span class="crta-chip e-viejo" title="El cliente pidió con una versión anterior de la tienda: verifica el precio">Tienda vieja del cliente</span>' : '') + '</div>'
       + '<div class="crta-meta">' + _manEsc(r.modo_ids === 'mismo' ? 'Mismo ID' : 'IDs diferentes') + ' · ' + _manEsc(r.metodo || '') + ' · <b>' + _manEsc(_manMXN(r.total)) + '</b></div>'
-      + '<div class="crta-items">' + its.map(function(it, i){
+      + _crtaSaldoHTML(r, abierto) + '<div class="crta-items">' + its.map(function(it, i){
           var bt = '';
           if(!busy){
             if(it.estado === 'manual') bt = '<button type="button" onclick="admCrtReintentar(' + r.id + ',' + i + ')">Reintentar API</button><button type="button" onclick="admCrtHecha(' + r.id + ',' + i + ')">Ya la hice \u2713</button>';
@@ -13519,7 +13528,7 @@ function admCrtRender(){
             + (it.detalle ? '<small class="crta-det">' + _manEsc(it.detalle) + '</small>' : '') + (bt ? '<div class="crta-bt">' + bt + '</div>' : '') + '</div>';
         }).join('') + '</div>'
       + (abierto ? '<div class="crta-act">'
-          + (hayPend ? '<button type="button" class="crta-ok" ' + (busy ? 'disabled' : '') + ' onclick="admCrtAprobar(' + r.id + ')">' + (busy ? 'Procesando...' : '\u2705 Confirmar pago y recargar') + '</button>' : '')
+          + (hayPend ? '<button type="button" class="crta-ok" ' + (busy ? 'disabled' : '') + ' onclick="admCrtAprobar(' + r.id + ')">' + (busy ? 'Procesando...' : '\u2705 Aceptar y recargar') + '</button>' : '')
           + '<button type="button" class="crta-no" ' + (busy ? 'disabled' : '') + ' onclick="admCrtRechazar(' + r.id + ')">Rechazar</button></div>' : '')
       + '</div>';
   }).join('');
@@ -13531,13 +13540,13 @@ function admCrtGuardar(row){
   return sb.patch(CRT_TABLA, {items:row.items, estado:row.estado, updated_at:new Date().toISOString()}, 'id=eq.' + row.id);
 }
 // registrarPedido() original usa la sesión del cliente; aquí se manda con el usuario del pedido
-function _crtaRegistrarPedido(username, producto, cantidad, ffId, precio){
-  try{ fetch(NOTIF_PEDIDO_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:username, producto:producto, cantidad:String(cantidad), tipo:'diamantes', ff_id:ffId || '', precio:precio || 0, progreso_total:0})}).catch(function(e){ console.warn('[PEDIDO]', e); }); }catch(e){}
+function _crtaRegistrarPedido(username, producto, cantidad, ffId, precio, tipo){
+  try{ fetch(NOTIF_PEDIDO_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:username, producto:producto, cantidad:String(cantidad), tipo:tipo || 'diamantes', ff_id:ffId || '', precio:precio || 0, progreso_total:0})}).catch(function(e){ console.warn('[PEDIDO]', e); }); }catch(e){}
 }
 function _crtaCompletarItem(row, i, modo, darPuntos){
   var it = row.items[i];
-  if(!it.reg){ _crtaRegistrarPedido(row.username, it.nombre + ' (' + modo + ')', it.diamantes, it.ff_id, it.precio); it.reg = true; }
-  if(darPuntos && !it.pts && row.user_id && typeof sb !== 'undefined' && sb.rpc){
+  if(!it.reg){ _crtaRegistrarPedido(row.username, it.nombre + ' (' + modo + ')', it.clave ? 1 : it.diamantes, it.ff_id, it.precio, it.clave ? 'otro' : 'diamantes'); it.reg = true; }
+  if(darPuntos && !it.pts && !it.clave && row.user_id && typeof sb !== 'undefined' && sb.rpc){
     (csRegistrarVentaDiamantes(row.user_id, CRT_PID_BASE + Number(row.id) * 100 + i, Number(it.diamantes) || 0), sb.rpc('otorgar_puntos_pedido', {p_user_id:row.user_id, p_pedido_id:CRT_PID_BASE + Number(row.id) * 100 + i, p_diamantes:Number(it.diamantes) || 0})).catch(function(e){ console.error('[PUNTOS]', e); });
     it.pts = true;
   }
@@ -13552,7 +13561,7 @@ function _crtaClasificar(res){
 }
 function _crtaProcesarItem(row, i){
   var it = row.items[i];
-  if(typeof CO_ACTIVO !== 'undefined' && CO_ACTIVO && !it.pase && CO_PAQUETES.indexOf(Number(it.diamantes)) >= 0){
+  if(typeof CO_ACTIVO !== 'undefined' && CO_ACTIVO && !it.pase && (it.clave || CO_PAQUETES.indexOf(Number(it.diamantes)) >= 0)){
     return _crtaProcesarCO(row, i).then(function(){ return admCrtGuardar(row); });
   }
   if(it.manual || !it.package_id || !it.catalog_id){ it.estado = 'manual'; it.detalle = 'Producto sin API: hazla a mano'; return admCrtGuardar(row); }
@@ -13577,7 +13586,9 @@ function _crtaCorrer(row, idxs){
 function admCrtAprobar(id){
   var row = _crtaFila(id); if(!row || _crtaBusy[id]) return;
   var idxs = []; (row.items || []).forEach(function(x, i){ if(x.estado === 'pendiente') idxs.push(i); }); if(!idxs.length) return;
-  if(!confirm('¿Ya verificaste que el pago de este pedido llegó a tu cuenta?\n\nSe intentará hacer ' + idxs.length + ' recarga(s) con la API del proveedor. Las que no se puedan (sin saldo o no disponibles) quedarán marcadas para hacerlas a mano.')) return;
+  var _c = _crtaCostoRow(row), _txt = '¿Ya verificaste que el pago de este pedido llegó a tu cuenta?\n\nSe intentará hacer ' + idxs.length + ' recarga(s) con la API del proveedor. Las que no se puedan (sin saldo o no disponibles) quedarán marcadas para hacerlas a mano.';
+  if(typeof _coSaldo !== 'undefined' && _coSaldo != null && _c.usd > _coSaldo) _txt = '⛔ El saldo del proveedor (US$ ' + _coSaldo.toFixed(2) + ') NO alcanza para este pedido (US$ ' + _c.usd.toFixed(4) + ').\n\nSi aceptas, las recargas que no se puedan hacer quedarán para hacerlas a mano.\n\n' + _txt;
+  if(!confirm(_txt)) return;
   _crtaCorrer(row, idxs);
 }
 function admCrtReintentar(id, i){
@@ -13651,11 +13662,12 @@ function admCoPaquetes(){
   var o = document.getElementById('crta-prov-out'); if(!o) return; o.innerHTML = '<div class="crta-det">Leyendo el catálogo...</div>';
   coCall('paquetes').then(function(r){
     if(!r.ok){ o.innerHTML = '<div class="crta-bad">' + _manEsc(_coErrTxt(r)) + '</div>'; return; }
-    var ET = {ok:'OK', no_detectado:'No detectado', precio_fuera_de_rango:'Precio raro', sin_stock:'Sin stock'};
-    var h = '<div class="crta-det">Revisa que cada paquete apunte al producto correcto antes de usar dinero real.</div><div class="crta-tabw"><table class="crta-tab"><thead><tr><th>Diamantes</th><th>Producto en Central One</th><th>Precio US$</th><th>Estado</th></tr></thead><tbody>'
-      + r.paquetes.map(function(p){ return '<tr><td>' + _manEsc(p.diamantes) + '</td><td>' + (p.nombre ? _manEsc(p.nombre) + '<br><small>' + _manEsc(p.sku || '') + (p.via === 'CO_MAP' ? ' · fijado a mano' : '') + '</small>' : '—') + '</td><td>' + (p.precio ? _manEsc(p.precio) + '<br><small>ref. ' + _manEsc(p.ref) + '</small>' : '—') + '</td><td><span class="crta-chip e-' + (p.estado === 'ok' ? 'completada' : 'manual') + '">' + _manEsc(ET[p.estado] || p.estado) + '</span></td></tr>'; }).join('')
+    var ET = {ok:'OK', no_detectado:'No detectado', ambiguo:'Ambiguo', precio_fuera_de_rango:'Precio raro', sin_stock:'Sin stock', bajo_costo:'Bajo costo', precio_invalido:'Precio inválido'};
+    var lista = Array.isArray(r.productos) ? r.productos : r.paquetes.map(function(p){ return {titulo:p.diamantes + ' diamantes', clave:'d' + p.diamantes, nombre:p.nombre, sku:p.sku, via:p.via, precio_usd:p.precio, estado:p.estado}; });
+    var h = '<div class="crta-det">Revisa que cada producto apunte al correcto antes de usar dinero real.</div><div class="crta-tabw"><table class="crta-tab"><thead><tr><th>Producto</th><th>En Central One</th><th>Costo US$</th><th>Estado</th></tr></thead><tbody>'
+      + lista.map(function(p){ return '<tr><td><b>' + _manEsc(p.titulo) + '</b><br><small>' + _manEsc(p.clave) + '</small></td><td>' + (p.nombre ? _manEsc(p.nombre) + '<br><small>' + _manEsc(p.sku || '') + (p.via === 'CO_MAP' ? ' · fijado a mano' : '') + '</small>' : '—') + '</td><td>' + (p.precio_usd ? _manEsc(p.precio_usd) : '—') + '</td><td><span class="crta-chip e-' + (p.estado === 'ok' ? 'completada' : 'manual') + '">' + _manEsc(ET[p.estado] || p.estado) + '</span></td></tr>'; }).join('')
       + '</tbody></table></div>';
-    if(r.paquetes.some(function(p){ return p.estado !== 'ok'; })) h += '<div class="crta-bad" style="margin-top:.5rem">Lo que no salga OK no se comprará solo. Busca el producto correcto aquí abajo y fíjalo en Vercel con la variable <b>CO_MAP</b> (por ejemplo {"110":"el-product_id"}).</div>';
+    if(lista.some(function(p){ return p.estado !== 'ok'; })) h += '<div class="crta-bad" style="margin-top:.5rem">Lo que no salga OK no se recargará solo (quedará para hacerlo a mano). Busca el producto correcto aquí abajo y fíjalo en Vercel con la variable <b>CO_MAP</b> (por ejemplo {"tm":"el-product_id","110":"otro-product_id"}).</div>';
     h += '<details class="crta-det" style="margin-top:.5rem"><summary>Productos de Free Fire que ve tu cuenta (' + r.candidatos.length + ')</summary>'
       + r.candidatos.map(function(c){ return '<div class="crta-cand"><b>' + _manEsc(c.nombre) + '</b> · ' + _manEsc(c.region || '') + ' · ' + _manEsc(c.precio || '') + ' US$<br><small>' + _manEsc(c.product_id) + '</small></div>'; }).join('') + '</details>';
     o.innerHTML = h;
@@ -13682,11 +13694,12 @@ function _crtaClasificarCO(it, r){
 function _crtaProcesarCO(row, i){
   var it = row.items[i];
   var fin = function(v){ return CO_PAUSA_MS ? new Promise(function(res){ setTimeout(function(){ res(v); }, CO_PAUSA_MS); }) : v; };
-  return coCall('validate', {diamantes:it.diamantes, player_id:it.ff_id}).then(function(v){
+  var clave = it.clave || ('d' + it.diamantes);
+  return coCall('validate', {producto:clave, player_id:it.ff_id}).then(function(v){
     if(v && v.ok && v.status === 'invalid'){ it.estado = 'verificar'; it.detalle = 'Central One: el ID ' + it.ff_id + ' no existe para este producto. Confírmalo con el cliente antes de recargar.'; return 'invalido'; }
     // "unverified" NO significa que no exista: se sigue. Errores de configuración o de producto se tratan igual que al comprar.
-    if(v && !v.ok && ['no_autorizado','config','invalid_api_key','insufficient_scope','sin_servidor','no_detectado','precio_fuera_de_rango','campo_requerido','paquete_no_permitido','insufficient_stock','id_invalido'].indexOf(v.code) >= 0) return _crtaClasificarCO(it, v);
-    return coCall('order', {diamantes:it.diamantes, player_id:it.ff_id, idempotency_key:it.idem, note:'CS R' + row.id + '-' + (i + 1)}).then(function(r){ return _crtaClasificarCO(it, r); });
+    if(v && !v.ok && ['no_autorizado','config','invalid_api_key','insufficient_scope','sin_servidor','no_detectado','precio_fuera_de_rango','campo_requerido','paquete_no_permitido','insufficient_stock','id_invalido','ambiguo','bajo_costo','precio_invalido'].indexOf(v.code) >= 0) return _crtaClasificarCO(it, v);
+    return coCall('order', {producto:clave, player_id:it.ff_id, idempotency_key:it.idem, note:'CS R' + row.id + '-' + (i + 1)}).then(function(r){ return _crtaClasificarCO(it, r); });
   }).then(fin);
 }
 
@@ -14330,7 +14343,7 @@ var _ot = null, _otEnviando = false, _otFoco = null;
 function otRenderGrid(tipo){
   var g = document.getElementById('ot-grid-' + tipo); if(!g) return;
   g.innerHTML = (OT_PRODUCTOS[tipo] || []).map(function(p){
-    return '<div class="jg-pc"><div class="jg-pn">' + _manEsc(p.n) + '</div><div class="jg-pp">' + _manEsc(fmt(p.mxn)) + '</div><div class="jg-pu">Entrega autom&aacute;tica en tu ID</div>'
+    return '<div class="jg-pc"><div class="jg-pn">' + _manEsc(p.n) + '</div><div class="jg-pp">' + _manEsc(fmt(p.mxn)) + '</div><div class="jg-pu">Pago directo &middot; se recarga en tu ID</div>'
       + '<button type="button" class="jg-comprar" onclick="otAbrir(\'' + tipo + '\',\'' + p.clave + '\')">Comprar</button></div>';
   }).join('');
 }
@@ -14344,6 +14357,8 @@ function otApi(body){
 }
 function otAbrir(tipo, clave){
   var p = null; (OT_PRODUCTOS[tipo] || []).forEach(function(x){ if(x.clave === clave) p = x; }); if(!p) return;
+  // Con pago directo (sin saldo) tarjetas y niveles se piden desde el carrito, igual que los diamantes
+  if(typeof _crtOn === 'function' && _crtOn()){ if(crtAddOtro({k:'ot_' + clave, n:p.n, p:p.mxn, clave:clave, tipo:(tipo === 'tarjetas' ? 'tarjeta' : 'nivel')})) crtAbrirCarrito(); return; }
   if(typeof authSession === 'undefined' || !authSession){ _manToast('Inicia sesión para comprar'); setTimeout(function(){ if(typeof showAuthModal === 'function') showAuthModal(); }, 600); return; }
   _ot = {p:p, tipo:tipo, estado:'id', nombre:'', ok:false, id:''}; _otEnviando = false;
   otRender();
@@ -14460,6 +14475,81 @@ function otComprar(){
 function obraWA(){ if(typeof WA !== 'undefined' && WA) window.open('https://wa.me/' + WA + '?text=' + encodeURIComponent('Hola, quiero que me avisen cuando esté lista la API para revendedores'), '_blank', 'noopener'); }
 
 
+// ═══════════════════════ SISTEMA SEMIAUTOMÁTICO: pago directo + tú aceptas + se recarga sola ═══════════════════════
+// 1) El cliente pide (diamantes, tarjetas o niveles), paga por transferencia y sube su comprobante → te llega a Telegram y al panel Recargas.
+// 2) En el panel ves el saldo del proveedor y si alcanza para ese pedido. Aceptas → se recarga solo con Central One; si no hay saldo o no se puede, queda para hacerla a mano. O rechazas.
+// 3) El saldo de la tienda ya no se usa: se avisa a quien tenga saldo y se le da el contacto del administrador.
+
+// ── Panel admin: saldo del proveedor y costo de cada pedido ──
+var _coSaldo = null, _coCostos = {}, _coResumenT = 0;
+function _crtaCostoUsd(it){
+  var clave = it.clave || ('d' + it.diamantes);
+  if(_coCostos[clave] != null) return _coCostos[clave];
+  if(!it.clave && it.diamantes && typeof RECARGAS_AUTO !== 'undefined'){ var c = null; RECARGAS_AUTO.forEach(function(x){ if(Number(x.diamantes) === Number(it.diamantes) && x.costoUSD) c = Number(x.costoUSD); }); if(c != null) return c; }
+  return null;
+}
+function _crtaCostoRow(r){
+  var t = 0, ok = true;
+  (r.items || []).forEach(function(it){ if(it.estado === 'pendiente' || it.estado === 'manual' || it.estado === 'verificar'){ var c = _crtaCostoUsd(it); if(c == null) ok = false; else t += c; } });
+  return {usd: Math.round(t * 10000) / 10000, completo: ok};
+}
+function _crtaSaldoHTML(r, abierto){
+  if(!abierto) return '';
+  var c = _crtaCostoRow(r), s = _coSaldo, txt = 'US$ ' + c.usd.toFixed(4) + (c.completo ? '' : ' o más');
+  if(s == null) return '<div class="crta-saldo">Costo estimado en el proveedor: ' + txt + ' · <a href="#" onclick="admCoResumen(true);return false" style="color:#67e8f9">Ver saldo del proveedor</a></div>';
+  var alcanza = c.usd <= s;
+  return '<div class="crta-saldo ' + (alcanza ? 'si' : 'no') + '">' + (alcanza ? '\u2705 El saldo del proveedor alcanza' : '\u26D4 El saldo del proveedor NO alcanza') + ' · costo ' + txt + ' · saldo US$ ' + s.toFixed(2) + '</div>';
+}
+function admCoResumen(forzar){
+  var box = document.getElementById('crta-saldo-prov');
+  if(!forzar){ var tok = ''; try{ tok = sessionStorage.getItem('co_admin_token') || ''; }catch(e){} if(!tok) return; }   // sin token guardado no se molesta: se pide al pulsar el botón
+  if(Date.now() - _coResumenT < 8000 && !forzar) return; _coResumenT = Date.now();
+  if(box) box.textContent = 'Consultando al proveedor…';
+  Promise.all([coCall('balance'), coCall('paquetes')]).then(function(rs){
+    var b = rs[0], p = rs[1];
+    if(!b.ok){ if(box) box.innerHTML = '<span style="color:#ffb4c4">' + _manEsc(_coErrTxt(b)) + '</span>'; return; }
+    _coSaldo = parseFloat(b.available);
+    if(p && p.ok && Array.isArray(p.productos)) p.productos.forEach(function(x){ if(x.precio_usd != null && !isNaN(parseFloat(x.precio_usd))) _coCostos[x.clave] = parseFloat(x.precio_usd); });
+    if(box) box.innerHTML = 'Saldo del proveedor: <b style="color:#67e8f9;font-size:1.05rem">US$ ' + _manEsc(Number(_coSaldo).toFixed(2)) + '</b> <small style="color:#8E9AB8">(disponible; ' + _manEsc(b.held) + ' retenido)</small>';
+    admCrtRender();
+  });
+}
+// al abrir la pestaña Recargas se carga el saldo si el token ya está guardado
+(function(){ var f = window.admCrtCargar; if(typeof f === 'function') window.admCrtCargar = function(){ var r = f.apply(this, arguments); try{ admCoResumen(false); }catch(e){} return r; }; })();
+
+// ── Aviso de solicitudes nuevas (insignia en el menú del panel + sonido) ──
+var _crtaConteo = null;
+function crtaBeep(){ try{ var A = window.AudioContext || window.webkitAudioContext; if(!A) return; var c = new A(), o = c.createOscillator(), g = c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.value = 880; g.gain.value = .08; o.start(); setTimeout(function(){ o.frequency.value = 1175; }, 160); setTimeout(function(){ o.stop(); c.close(); }, 380); }catch(e){} }
+function crtaBadgeTick(){
+  if(typeof adminAuthed === 'undefined' || !adminAuthed || typeof sb === 'undefined') return;
+  sb.get(CRT_TABLA, 'select=id&estado=in.(pendiente,atencion)&limit=200').then(function(rows){
+    var n = Array.isArray(rows) ? rows.length : 0, b = document.getElementById('crta-badge');
+    if(b){ b.textContent = n; b.style.display = n ? 'inline-block' : 'none'; }
+    if(_crtaConteo !== null && n > _crtaConteo){ _manToast('\uD83D\uDD14 Nueva solicitud de recarga por revisar', 6000); crtaBeep(); var s = document.getElementById('adms-recargas'); if(s && s.offsetParent !== null) admCrtCargar(); }
+    _crtaConteo = n;
+  }).catch(function(){});
+}
+setInterval(crtaBadgeTick, 40000); setTimeout(crtaBadgeTick, 6000);
+
+// ── Saldo retirado de las compras: aviso para quien tiene saldo + contactos del administrador ──
+var SV_TEL = '+81 70-9432-2677', SV_WA = '817094322677';
+function saldoAvisoHTML(){
+  var s = (typeof authSession !== 'undefined' && authSession) ? (Number(authSession.saldo) || 0) : 0; if(!(s > 0)) return '';
+  var canal = (typeof WA_CHANNEL !== 'undefined' && WA_CHANNEL) ? WA_CHANNEL : '';
+  return '<div class="sv-aviso" role="note"><b>\u26A0\uFE0F Tienes ' + _manEsc(fmt(s)) + ' de saldo</b><br>El saldo ya no se usa en las compras de la tienda. Puedes seguir usándolo, pero tienes que <b>contactar al administrador</b>:'
+    + '<div class="sv-links"><a href="https://wa.me/' + SV_WA + '?text=' + encodeURIComponent('Hola, quiero usar mi saldo de CiberStore') + '" target="_blank" rel="noopener noreferrer">WhatsApp ' + _manEsc(SV_TEL) + '</a>'
+    + (canal ? '<a href="' + _manEsc(canal) + '" target="_blank" rel="noopener noreferrer">Canal de WhatsApp</a>' : '') + '</div></div>';
+}
+function saldoAvisoRefrescar(){
+  ['sv-aviso-home', 'sv-aviso-saldo'].forEach(function(id){ var e = document.getElementById(id); if(!e) return; var h = saldoAvisoHTML(); if(e.getAttribute('data-h') !== h){ e.innerHTML = h; e.setAttribute('data-h', h); } });
+}
+setInterval(saldoAvisoRefrescar, 1500);
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', saldoAvisoRefrescar); else saldoAvisoRefrescar();
+// "Recargar saldo" ya no abre el formulario de depósito: lleva a la Billetera, que explica cómo pagar ahora
+window.saldoAbrir = function(){ goPage('saldo'); };
+window.abrirRecargaSheet = window.saldoAbrir;
+
+
 // ═══════════════════════ CONTROL DE VERSIÓN: nada de comprar con una tienda vieja ═══════════════════════
 // Cada vez que subes la tienda, index.html trae una "huella" nueva (CS_BUILD). Esta pieza compara la huella de la página
 // que el cliente tiene abierta con la que hay publicada. Si son distintas: bloquea la pantalla con un aviso y la actualiza sola
@@ -14527,12 +14617,12 @@ function csMarcarViejo(nuevo){
 (function(){ try{ if(/[?&]cs_v=/.test(location.search)){ var q = location.search.replace(/([?&])cs_v=[^&]*&?/g, '$1').replace(/[?&]$/, ''); history.replaceState(null, '', location.pathname + q + location.hash); } }catch(e){} })();
 // Cuándo revisar: al abrir, cada minuto, al volver a la pestaña, al recuperar internet y al volver con el botón "atrás"
 setTimeout(function(){ csVerificarVersion(true); }, 4000);
-setInterval(function(){ if(document.visibilityState === 'visible') csVerificarVersion(); }, 60000);
+setInterval(function(){ if(document.visibilityState === 'visible') csVerificarVersion(); }, 30000);
 document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible') csVerificarVersion(); });
 window.addEventListener('pageshow', function(e){ if(e.persisted) csVerificarVersion(true); });
 window.addEventListener('online', function(){ csVerificarVersion(true); });
 // Antes de cualquier compra se vuelve a revisar (sin frenar la compra si no hay red)
-['confirmarDiamCompra', 'manualEnviar', 'crtEnviar', 'ofxEnviar', 'gcEnviar'].forEach(function(n){
+['confirmarDiamCompra', 'manualEnviar', 'crtEnviar', 'ofxEnviar', 'gcEnviar', 'crtAbrirCarrito', 'crtAdd', 'crtAddOtro', 'crtAddDesdeDetalle', 'otAbrir'].forEach(function(n){
   var f = window[n]; if(typeof f !== 'function') return;
   window[n] = function(){ if(_csViejo){ return; } csVerificarVersion(true); return f.apply(this, arguments); };
 });

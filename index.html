@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta name="cs-build" content="6ffba07a18">
-<script>var CS_BUILD="6ffba07a18";</script>
+<meta name="cs-build" content="547a32f604">
+<script>var CS_BUILD="547a32f604";</script>
 <meta charset="UTF-8"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -3851,6 +3851,14 @@ body:not(.light-mode) .hm-tt b{font-weight:600!important}
 .crta-tab small,.crta-cand small{color:#8E9AB8;word-break:break-all}
 .crta-cand{padding:.35rem 0;border-bottom:1px solid rgba(140,170,255,.08);font-size:.8rem}
 
+/* Panel admin: saldo del proveedor, ayuda para decidir y avisos de solicitudes */
+.crta-saldo{margin:.1rem 0 .6rem;padding:.5rem .7rem;border-radius:10px;font-size:.82rem;line-height:1.4;background:rgba(140,170,255,.08);border:1px solid rgba(140,170,255,.2);color:#cbd5e1}
+.crta-saldo.si{background:rgba(52,227,122,.08);border-color:rgba(52,227,122,.4);color:#8ff0b5}
+.crta-saldo.no{background:rgba(255,80,110,.1);border-color:rgba(255,80,110,.45);color:#ffb4c4}
+#crta-saldo-prov{margin:.6rem 0 0;color:#e5e7eb;font-size:.9rem}
+.crta-badge{display:none;margin-left:.4rem;padding:.05rem .45rem;border-radius:999px;background:#ef4444;color:#fff;font-size:.68rem;font-weight:700;vertical-align:middle}
+.crta-chip.e-viejo{background:rgba(255,210,74,.1);border-color:rgba(255,210,74,.45);color:#ffd24a}
+
 /* ═══════════ OFERTA EXCLUSIVA (Inicio) ═══════════ */
 .ofx{position:relative;overflow:hidden;margin:1rem 0 0;padding:1.05rem 1.05rem 1.1rem;border-radius:18px;isolation:isolate;
   background:linear-gradient(135deg,#1a1240 0%,#0f1b45 55%,#2a1659 100%);
@@ -4086,6 +4094,15 @@ body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill
 .vip-btn:focus-visible{outline:2px solid #fff;outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.vip,.vip::before,.vip-shine{animation:none}.vip-shine{display:none}}
 
+/* Aviso para quien tiene saldo y explicación de pago directo */
+.sv-aviso{margin:.7rem 0 0;padding:.75rem .9rem;border-radius:14px;background:rgba(255,210,74,.09);border:1px solid rgba(255,210,74,.45);color:#ffe9a8;font-size:.86rem;line-height:1.5}
+.sv-aviso b{color:#fff}
+.sv-links{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.55rem}
+.sv-links a{padding:.45rem .8rem;border-radius:10px;border:1px solid rgba(255,210,74,.5);color:#ffd24a;text-decoration:none;font-weight:600;font-size:.82rem;background:rgba(0,0,0,.25)}
+.sv-links a:hover{filter:brightness(1.15)}
+.sv-btns{display:grid;gap:.5rem;margin-top:.9rem}
+.sv-btns .mn-ghost{margin:0}
+
 #theme-btn,.theme-btn{display:none!important}
 </style>
 </head>
@@ -4278,8 +4295,9 @@ body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill
       <div class="hm-w-l">Saldo disponible</div>
       <div class="hm-w-v" id="home-saldo">$0</div>
       <div class="hm-w-alt" id="home-saldo-alt">&nbsp;</div>
+      <div id="sv-aviso-home"></div>
       <div class="hm-w-act">
-        <button type="button" class="hm-btn p" onclick="abrirRecargaSheet()">Recargar saldo</button>
+        <button type="button" class="hm-btn p" onclick="goPage('diamantes')">Comprar diamantes</button>
         <button type="button" class="hm-btn g" onclick="goPage('transferir')">Transferir</button>
       </div>
     </div>
@@ -4303,7 +4321,7 @@ body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill
       <button type="button" class="hm-tile" onclick="goPage('niveles')"><span class="hm-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span><span class="hm-tt"><b>Subidas de nivel</b><small>Nivel 6 al 30</small></span></button>
       <button type="button" class="hm-tile" onclick="goPage('likes')"><span class="hm-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z"/></svg></span><span class="hm-tt"><b>Likes</b><small>Para tu perfil</small></span></button>
       <button type="button" class="hm-tile" onclick="goPage('giftcards')"><span class="hm-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></span><span class="hm-tt"><b>Gift Cards</b><small>Robux y Netflix</small></span></button>
-      <button type="button" class="hm-tile" onclick="goPage('saldo')"><span class="hm-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12V8H6a2 2 0 0 1 0-4h12v4"/><path d="M4 6v12a2 2 0 0 0 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg></span><span class="hm-tt"><b>Billetera</b><small>Depositar saldo</small></span></button>
+      <button type="button" class="hm-tile" onclick="goPage('saldo')"><span class="hm-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12V8H6a2 2 0 0 1 0-4h12v4"/><path d="M4 6v12a2 2 0 0 0 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg></span><span class="hm-tt"><b>Billetera</b><small>Cómo pagar</small></span></button>
       <button type="button" class="hm-tile" onclick="goPage('miscompras')"><span class="hm-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span><span class="hm-tt"><b>Mis compras</b><small>Tus pedidos</small></span></button>
       <button type="button" class="hm-tile" onclick="goPage('soporte')"><span class="hm-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 14v-2a9 9 0 0 1 18 0v2"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3z"/><path d="M3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg></span><span class="hm-tt"><b>Soporte</b><small>Te ayudamos</small></span></button>
     </div>
@@ -6594,12 +6612,12 @@ body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill
 
 <div class="page" id="page-tarjetas">
   <div class="ph"><div class="stag">Otras cosas</div><h2 class="ptitle">Tarjetas <span>Free Fire</span></h2><p class="psub">Elige tu tarjeta y c&oacute;mprala con tu saldo.</p></div>
-  <div class="page-wrap"><div class="jg-pgrid" id="ot-grid-tarjetas"></div><p class="rk-nota">Pagas con tu saldo y se recarga directo en tu ID de Free Fire (LATAM). Si el proveedor no puede hacerla, tu saldo se devuelve solo.</p></div>
+  <div class="page-wrap"><div class="jg-pgrid" id="ot-grid-tarjetas"></div><p class="rk-nota">Agrega al carrito, paga por transferencia y sube tu comprobante. En cuanto lo confirmamos, se recarga directo en tu ID de Free Fire (LATAM). Si no se puede hacer, te devolvemos tu dinero.</p></div>
 </div>
 
 <div class="page" id="page-niveles">
   <div class="ph"><div class="stag">Otras cosas</div><h2 class="ptitle">Subidas de <span>nivel</span></h2><p class="psub">Paquetes del nivel 6 al 30, directo a tu ID.</p></div>
-  <div class="page-wrap"><div class="jg-pgrid" id="ot-grid-niveles"></div><p class="rk-nota">Pagas con tu saldo y se recarga directo en tu ID de Free Fire (LATAM). Si el proveedor no puede hacerla, tu saldo se devuelve solo.</p></div>
+  <div class="page-wrap"><div class="jg-pgrid" id="ot-grid-niveles"></div><p class="rk-nota">Agrega al carrito, paga por transferencia y sube tu comprobante. En cuanto lo confirmamos, se recarga directo en tu ID de Free Fire (LATAM). Si no se puede hacer, te devolvemos tu dinero.</p></div>
 </div>
 
 <div class="page" id="page-soporte">
@@ -7624,7 +7642,7 @@ body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill
       <button class="adm-nav-btn"        id="admn-soporte" onclick="admFullTab('soporte')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Soporte <span id="adm-soporte-badge" style="display:none;background:#ff6b6b;color:#fff;font-size:.6rem;font-weight:800;border-radius:99px;padding:.1rem .4rem;margin-left:.3rem"></span></button>
       <button class="adm-nav-btn"        id="admn-inactivos" onclick="admFullTab('inactivos')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m22 11-3 3-1.5-1.5"/></svg> Gesti&oacute;n de Usuarios</button>
       <button class="adm-nav-btn"        id="admn-seguridad" onclick="admFullTab('seguridad')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Seguridad</button>
-      <button class="adm-nav-btn" id="admn-recargas" onclick="admFullTab('recargas')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M2 9h20"/></svg> Recargas</button>
+      <button class="adm-nav-btn" id="admn-recargas" onclick="admFullTab('recargas')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M2 9h20"/></svg> Recargas <span class="crta-badge" id="crta-badge"></span></button>
     </div>
 
     <div class="adm-nav-foot">
@@ -8066,10 +8084,12 @@ body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill
     <div class="crta-prov">
       <div class="crta-prov-h"><b>Proveedor Central One</b></div>
       <div class="crta-prov-b">
+        <button type="button" class="p" onclick="admCoResumen(true)">Ver saldo y costos</button>
         <button type="button" onclick="admCoProbar()">Probar conexión y saldo</button>
         <button type="button" onclick="admCoPaquetes()">Ver paquetes detectados</button>
         <button type="button" onclick="admCoTokenReset()">Olvidar token</button>
       </div>
+      <div id="crta-saldo-prov"></div>
       <div id="crta-prov-out"></div>
     </div>
     <div id="crta-lista"><div class="crta-vacio">Presiona Actualizar</div></div>
@@ -8332,9 +8352,9 @@ body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill
 <div class="mn-ov" id="ot-modal" role="dialog" aria-modal="true" aria-labelledby="ot-title" style="display:none" onclick="if(event.target===this)otCerrar()">
   <div class="mn-box"><button type="button" class="mn-x" onclick="otCerrar()" aria-label="Cerrar">&times;</button><div class="mn-body" id="ot-body"></div></div>
 </div>
-<script src="supabase.js?v=6ffba07a18"></script>
-<script src="supabase_integration.js?v=6ffba07a18"></script>
-<script src="script.js?v=6ffba07a18"></script>
+<script src="supabase.js?v=547a32f604"></script>
+<script src="supabase_integration.js?v=547a32f604"></script>
+<script src="script.js?v=547a32f604"></script>
 
 <!-- BARRA DE NAVEGACION INFERIOR -->
 
