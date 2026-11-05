@@ -9,26 +9,27 @@ const TOL  = Number(process.env.CO_TOLERANCIA || 0.35);      // cuánto se puede
 const TC   = Number(process.env.CO_TC || 19.5);              // pesos por dólar para la protección contra venta bajo costo
 const PROTEGER_MARGEN = !/^(0|false|off|no)$/i.test(String(process.env.CO_PROTEGER_MARGEN || '1'));
 
-// ── PRECIOS DE REFERENCIA (MXN) ── Solo para calcular el margen en el panel. Los diamantes de CiberStore se calculan en USD con el tipo de cambio del día.
+// ── PRECIOS DE VENTA (los de tu lista): precio = MXN, usd = dólares. Sirven para proteger el margen: si el proveedor cobra más que "usd", ese producto se bloquea.
 // refUsd = costo de referencia del proveedor (solo diamantes), sirve para no comprar un producto equivocado.
 const PRODUCTOS = [
-  { clave:'d110',  grupo:'diamantes', titulo:'110 Diamantes',   precio:13.26, num:110,  base:100,  refUsd:0.6650 },
-  { clave:'d341',  grupo:'diamantes', titulo:'341 Diamantes',   precio:46.86, num:341,  base:310,  refUsd:1.9999 },
-  { clave:'d572',  grupo:'diamantes', titulo:'572 Diamantes',   precio:69.27, num:572,  base:520,  refUsd:3.3955 },
-  { clave:'d1166', grupo:'diamantes', titulo:'1,166 Diamantes', precio:130.15, num:1166, base:1060, refUsd:6.3089 },
-  { clave:'d2398', grupo:'diamantes', titulo:'2,398 Diamantes', precio:246.97, num:2398, base:2180, refUsd:12.5203 },
-  { clave:'d6160', grupo:'diamantes', titulo:'6,160 Diamantes', precio:630.37, num:6160, base:5600, refUsd:31.8640 },
+  { clave:'d110',  grupo:'diamantes', titulo:'110 Diamantes',   precio:12.57,  usd:0.6699,  num:110,  base:100,  refUsd:0.6650 },
+  { clave:'d341',  grupo:'diamantes', titulo:'341 Diamantes',   precio:37.70,  usd:2.0098,  num:341,  base:310,  refUsd:1.9999 },
+  { clave:'d572',  grupo:'diamantes', titulo:'572 Diamantes',   precio:63.74,  usd:3.3976,  num:572,  base:520,  refUsd:3.3955 },
+  { clave:'d1166', grupo:'diamantes', titulo:'1,166 Diamantes', precio:118.39, usd:6.3109,  num:1166, base:1060, refUsd:6.3089 },
+  { clave:'d2398', grupo:'diamantes', titulo:'2,398 Diamantes', precio:234.88, usd:12.5209, num:2398, base:2180, refUsd:12.5203 },
+  { clave:'d6160', grupo:'diamantes', titulo:'6,160 Diamantes', precio:597.75, usd:31.8646, num:6160, base:5600, refUsd:31.8640 },
 
-  { clave:'tsb', grupo:'tarjetas', titulo:'Tarjeta Semanal Básica', precio:8,   tipo:'semanal_basica' },
-  { clave:'ts',  grupo:'tarjetas', titulo:'Tarjeta Semanal',        precio:35,  tipo:'semanal' },
-  { clave:'tm',  grupo:'tarjetas', titulo:'Tarjeta Mensual',        precio:165, tipo:'mensual' },
+  { clave:'tsb', grupo:'tarjetas', titulo:'Tarjeta Semanal Básica', precio:6.76,   usd:0.3605, tipo:'semanal_basica' },
+  { clave:'ts',  grupo:'tarjetas', titulo:'Tarjeta Semanal',        precio:28.98,  usd:1.5450, tipo:'semanal' },
+  { clave:'pb',  grupo:'tarjetas', titulo:'Pase Booyah',            precio:20,     usd:1.1865, tipo:'booyah' },
+  { clave:'tm',  grupo:'tarjetas', titulo:'Tarjeta Mensual',        precio:135.25, usd:7.2100, tipo:'mensual' },
 
-  { clave:'n6',  grupo:'niveles', titulo:'Paquete Nivel 6',  precio:4.5, nivel:6 },
-  { clave:'n10', grupo:'niveles', titulo:'Paquete Nivel 10', precio:10,  nivel:10 },
-  { clave:'n15', grupo:'niveles', titulo:'Paquete Nivel 15', precio:10,  nivel:15 },
-  { clave:'n20', grupo:'niveles', titulo:'Paquete Nivel 20', precio:10,  nivel:20 },
-  { clave:'n25', grupo:'niveles', titulo:'Paquete Nivel 25', precio:10,  nivel:25 },
-  { clave:'n30', grupo:'niveles', titulo:'Paquete Nivel 30', precio:12,  nivel:30 }
+  { clave:'n6',  grupo:'niveles', titulo:'Paquete de mejora de nivel - Nivel 6',  precio:5.10,  usd:0.2719, nivel:6 },
+  { clave:'n10', grupo:'niveles', titulo:'Paquete de subida de nivel - Nivel 10', precio:8.10,  usd:0.4317, nivel:10 },
+  { clave:'n15', grupo:'niveles', titulo:'Paquete de subida de nivel - Nivel 15', precio:8.10,  usd:0.4317, nivel:15 },
+  { clave:'n20', grupo:'niveles', titulo:'Paquete de subida de nivel - Nivel 20', precio:8.10,  usd:0.4317, nivel:20 },
+  { clave:'n25', grupo:'niveles', titulo:'Paquete de subida de nivel - Nivel 25', precio:8.10,  usd:0.4317, nivel:25 },
+  { clave:'n30', grupo:'niveles', titulo:'Paquete de subida de nivel - Nivel 30', precio:11.00, usd:0.5864, nivel:30 }
 ];
 const POR_CLAVE = {}; PRODUCTOS.forEach(p => { POR_CLAVE[p.clave] = p; });
 
@@ -78,16 +79,18 @@ function esFFLatam(it){
   return rx.test((it.region || '') + ' ' + (it.market || '') + ' ' + (it.name || ''));
 }
 const EXCLUIR_DIAM = /pase|pass|tarjeta|card|semanal|mensual|weekly|monthly|membres|member|nivel|level|lvl|upgrade|subida/i;
+const BOOYAH = /b(?:oo|o)y(?:aa|a)h/;   // booyah, boyaah, boyah, booyaah
 function coincide(p, it){
-  const t = norm((it.name || '') + ' ' + (it.sku || ''));
+  const t = norm((it.name || '') + ' ' + (it.sku || '')), booyah = BOOYAH.test(t);
   if(p.grupo === 'diamantes') return !EXCLUIR_DIAM.test(t) && (tieneNum(t, p.num) || (tieneNum(t, p.base) && /bono|bonus|%/.test(t)));
   if(p.grupo === 'tarjetas'){
     const basica = /(basic|lite|light)/.test(t);
-    if(p.tipo === 'semanal_basica') return /(semanal|weekly)/.test(t) && basica;
-    if(p.tipo === 'semanal') return /(semanal|weekly)/.test(t) && !basica;
-    if(p.tipo === 'mensual') return /(mensual|monthly)/.test(t);
+    if(p.tipo === 'booyah') return booyah && /(pase|pass)/.test(t);
+    if(p.tipo === 'semanal_basica') return /(semanal|weekly)/.test(t) && basica && !booyah;
+    if(p.tipo === 'semanal') return /(semanal|weekly)/.test(t) && !basica && !booyah;
+    if(p.tipo === 'mensual') return /(mensual|monthly)/.test(t) && !booyah;
   }
-  if(p.grupo === 'niveles') return new RegExp('(nivel|level|lvl|lv)\\.?\\s*' + p.nivel + '(?![0-9])').test(t) && !/(semanal|weekly|mensual|monthly|diamante|diamond)/.test(t);
+  if(p.grupo === 'niveles') return new RegExp('(nivel|level|lvl|lv)\\.?\\s*' + p.nivel + '(?![0-9])').test(t) && !/(semanal|weekly|mensual|monthly|diamante|diamond)/.test(t) && !booyah;
   return false;
 }
 // Devuelve { estado, item, ... } por producto. Si hay más de un candidato (y no es diamante) NO se elige: se marca "ambiguo".
@@ -110,7 +113,7 @@ function detectar(items, opts){
       if(!item) estado = 'no_detectado';
       else if(!(precioUsd > 0)) estado = 'precio_invalido';
       else if(p.refUsd && Math.abs(precioUsd - p.refUsd) / p.refUsd > TOL) estado = 'precio_fuera_de_rango';
-      else if(margen && PROTEGER_MARGEN && p.precio < precioUsd * TC) estado = 'bajo_costo';
+      else if(margen && PROTEGER_MARGEN && p.usd < precioUsd) estado = 'bajo_costo';   // el proveedor cobra más de lo que vendes
       else if(item.in_stock === false) estado = 'sin_stock';
     }
     out[p.clave] = { clave: p.clave, estado, via, candidatos: n, producto: p, item, precioUsd: item ? item.reseller_price : null,
