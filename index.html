@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta name="cs-build" content="13d2770e13">
-<script>var CS_BUILD="13d2770e13";</script>
+<meta name="cs-build" content="cdcf3df074">
+<script>var CS_BUILD="cdcf3df074";</script>
 <meta charset="UTF-8"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -4033,6 +4033,29 @@ body:not(.light-mode) .wl-bal-amount{background:none!important;-webkit-text-fill
 .obra-btn{display:block;width:100%;margin:.5rem 0 0;padding:.8rem;border:0;border-radius:12px;cursor:pointer;font-family:inherit;font-weight:600;font-size:.98rem;color:#04101c;background:linear-gradient(135deg,#22d3ee,#5b8cff 60%,#8b5cf6)}
 .obra-btn.g{background:rgba(140,170,255,.1);color:#e6edff;border:1px solid rgba(140,170,255,.3)}
 
+/* Catálogo nuevo: tipo de entrega e imagen del producto */
+.jg-ent{margin:.15rem 0 .1rem;font-size:.66rem;font-weight:600;letter-spacing:.4px;color:#67e8f9}
+.jg-pimg{display:block;width:100%;max-height:92px;object-fit:contain;margin:0 0 .4rem;border-radius:10px}
+/* Panel admin: gestión de catálogo */
+.cat-res{display:flex;flex-wrap:wrap;gap:.4rem;margin:.2rem 0 .8rem}
+.cat-res span{padding:.3rem .6rem;border-radius:999px;background:rgba(140,170,255,.08);border:1px solid rgba(140,170,255,.2);font-size:.75rem;color:#cbd5e1}
+.cat-res b{color:#fff}
+.cat-nota{font-size:.8rem;color:#8E9AB8;line-height:1.5;margin:.3rem 0 .8rem}
+.cat-nota small{color:#64748b}
+.cat-alerta{padding:.6rem .8rem;border-radius:10px;font-size:.8rem;line-height:1.5;margin:0 0 .8rem}
+.cat-alerta.am{background:rgba(255,210,74,.08);border:1px solid rgba(255,210,74,.4);color:#ffe9a8}
+.cat-alerta.ro{background:rgba(255,80,110,.1);border:1px solid rgba(255,80,110,.45);color:#ffb4c4}
+.cat-gh{margin:1rem 0 .4rem;font-weight:700;color:#fff;font-size:.9rem}
+.cat-tw{overflow-x:auto;border:1px solid rgba(255,255,255,.07);border-radius:12px}
+.cat-t{width:100%;border-collapse:collapse;font-size:.76rem;min-width:640px}
+.cat-t th{text-align:left;color:#8fb4ff;padding:.45rem .5rem;border-bottom:1px solid rgba(255,255,255,.1);white-space:nowrap}
+.cat-t td{padding:.45rem .5rem;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:top;color:#e5e7eb}
+.cat-t small{color:#8E9AB8;word-break:break-all}
+.cat-neg{color:#ff8fa3;font-weight:700}
+.cat-chip{display:inline-block;padding:.15rem .5rem;border-radius:999px;font-size:.68rem;font-weight:700;white-space:nowrap}
+.cat-chip.ok{background:rgba(52,227,122,.12);color:#8ff0b5}.cat-chip.am{background:rgba(255,210,74,.12);color:#ffd24a}.cat-chip.ro{background:rgba(255,80,110,.12);color:#ff8fa3}.cat-chip.gr{background:rgba(255,255,255,.06);color:#cbd5e1}
+.cat-btn{margin-top:1rem;padding:.6rem 1rem;border-radius:10px;border:1px solid rgba(34,211,238,.35);background:rgba(34,211,238,.1);color:#67e8f9;font-weight:700;font-size:.82rem;cursor:pointer}
+
 /* Aviso de nueva versión */
 #cs-actualizar{position:fixed;inset:0;z-index:2147483000;display:none;align-items:center;justify-content:center;padding:1.2rem;background:rgba(4,8,20,.92);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .cs-act-box{width:min(420px,100%);text-align:center;padding:1.6rem 1.3rem;border-radius:20px;background:linear-gradient(180deg,#14214a,#0b1330);border:1px solid rgba(34,211,238,.4);box-shadow:0 30px 80px -20px rgba(0,0,0,.9)}
@@ -7646,6 +7669,7 @@ body.prov-pausa #page-tarjetas .jg-comprar,body.prov-pausa #page-niveles .jg-com
       <button class="adm-nav-btn"        id="admn-inactivos" onclick="admFullTab('inactivos')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m22 11-3 3-1.5-1.5"/></svg> Gesti&oacute;n de Usuarios</button>
       <button class="adm-nav-btn"        id="admn-seguridad" onclick="admFullTab('seguridad')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Seguridad</button>
       <button class="adm-nav-btn" id="admn-recargas" onclick="admFullTab('recargas')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M2 9h20"/></svg> Recargas <span class="crta-badge" id="crta-badge"></span></button>
+<button class="adm-nav-btn" id="admn-catalogo" onclick="admFullTab('catalogo')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg> Catálogo</button>
     </div>
 
     <div class="adm-nav-foot">
@@ -8100,6 +8124,12 @@ body.prov-pausa #page-tarjetas .jg-comprar,body.prov-pausa #page-niveles .jg-com
     <div id="crta-lista"><div class="crta-vacio">Presiona Actualizar</div></div>
     <div style="font-size:.72rem;color:var(--muted);margin-top:.8rem;line-height:1.5">Revisa en tu banco que el pago llegó y luego pulsa <b>Confirmar pago y recargar</b>. Si el proveedor no tiene saldo o el paquete no está disponible, la recarga queda marcada para que la hagas a mano.</div>
   </div>
+<div class="adm-section" id="adms-catalogo">
+  <div class="adm-card-title">&#128450;&#65039; Gestión de catálogo</div>
+  <p class="cat-nota">Blood Strike, PUBG Mobile, Fortnite, Discord, Minecraft, Call of Duty Mobile y Roblox. Los precios de venta son los tuyos y no cambian solos.</p>
+  <button type="button" class="cat-btn" style="margin:0 0 .8rem" onclick="catAdmRevisar()">Revisar contra Central One</button>
+  <div id="cat-adm-out"></div>
+</div>
 
   <!-- ══ CREAR USUARIO ══ -->
   <div class="adm-section" id="adms-nuevo">
@@ -8357,9 +8387,9 @@ body.prov-pausa #page-tarjetas .jg-comprar,body.prov-pausa #page-niveles .jg-com
 <div class="mn-ov" id="ot-modal" role="dialog" aria-modal="true" aria-labelledby="ot-title" style="display:none" onclick="if(event.target===this)otCerrar()">
   <div class="mn-box"><button type="button" class="mn-x" onclick="otCerrar()" aria-label="Cerrar">&times;</button><div class="mn-body" id="ot-body"></div></div>
 </div>
-<script src="supabase.js?v=13d2770e13"></script>
-<script src="supabase_integration.js?v=13d2770e13"></script>
-<script src="script.js?v=13d2770e13"></script>
+<script src="supabase.js?v=cdcf3df074"></script>
+<script src="supabase_integration.js?v=cdcf3df074"></script>
+<script src="script.js?v=cdcf3df074"></script>
 
 <!-- BARRA DE NAVEGACION INFERIOR -->
 

@@ -3473,7 +3473,7 @@ function admToggleNav(force){
 }
 
 function admFullTab(tab){
-  var tabs=['stats','users','pedidos','saldos','top','puntos','codigos','chat','resenas','soporte','inactivos','seguridad','recargas','config'];
+  var tabs=['stats','users','pedidos','saldos','top','puntos','codigos','chat','resenas','soporte','inactivos','seguridad','recargas','catalogo','config'];
   tabs.forEach(function(t){
     var btn=document.getElementById('admn-'+t);
     var sec=document.getElementById('adms-'+t);
@@ -3481,6 +3481,7 @@ function admFullTab(tab){
     if(sec) sec.className='adm-section'+(t===tab?' active':'');
   });
   if(tab==='stats')   admFullLoadStats();
+  if(tab==='catalogo') catAdmRender();
   if(tab==='users')   { admFullLoadUsers(); admCargarStatsClientes(); }
   if(tab==='pedidos') admLoadPedidos();
   if(tab==='saldos')  admFullLoadMovs();
@@ -13977,7 +13978,7 @@ function _jgUSD(p){ return p.usd != null ? Math.round(Number(p.usd) * (1 + (GC_M
 function _jgMXN(p){ return p.mxn != null ? Number(p.mxn) : (p.usd != null ? Math.round(_jgUSD(p) * USD_MXN * 100) / 100 : null); }
 function _jgTodosProd(g){ if(g.subcats){ var a = []; g.subcats.forEach(function(s){ a = a.concat(s.productos || []); }); return a; } return g.productos || []; }
 function _jgActivo(g){ return _jgTodosProd(g).length > 0; }
-function _jgDesde(g){ var v = _jgTodosProd(g).filter(function(p){ return !p.agotado; }).map(_jgMXN).filter(function(x){ return x != null && x > 0; }); return v.length ? Math.min.apply(null, v) : null; }
+function _jgDesde(g){ var v = _jgTodosProd(g).filter(function(p){ return !p.agotado && p.estado !== 'pendiente'; }).map(_jgMXN).filter(function(x){ return x != null && x > 0; }); return v.length ? Math.min.apply(null, v) : null; }
 function _jgSrcs(g){ return Array.isArray(g.img) ? g.img : (g.img ? [g.img] : []); }
 // Si la primera ruta no existe, prueba las siguientes; si ninguna existe, se queda la inicial.
 function jgImgFalla(im){
@@ -14075,6 +14076,7 @@ function jgRenderVista(){
   if(sc.nota) h += '<div class="jg-nota">' + _manEsc(sc.nota) + '</div>';
   var mostrarUSD = (typeof CURRENCY !== 'undefined') && CURRENCY !== 'USD', grupoAct = null, abierto = false;
   sc.productos.forEach(function(p, i){
+    if(p.estado === 'pendiente') return;   // pendiente de aprobación del administrador
     if(!abierto || p.grupo !== grupoAct){
       if(abierto) h += '</div>';
       grupoAct = p.grupo; abierto = true;
@@ -14082,9 +14084,12 @@ function jgRenderVista(){
       h += '<div class="jg-pgrid">';
     }
     var mxn = _jgMXN(p), usd = _jgUSD(p);
-    h += '<div class="jg-pc' + (p.agotado ? ' ag' : '') + '"><div class="jg-pn">' + _manEsc(p.n) + '</div>'
+    var ent = (typeof _jgEntrega === 'function') ? _jgEntregaTxt(_jgEntrega(p, sc)) : '';
+    h += '<div class="jg-pc' + (p.agotado ? ' ag' : '') + '">' + (p.img ? '<img class="jg-pimg" src="' + _manEsc(p.img) + '" alt="" loading="lazy" onerror="this.remove()">' : '') + '<div class="jg-pn">' + _manEsc(p.n) + '</div>'
       + (p.region ? '<div class="jg-rg">REGIÓN: ' + _manEsc(p.region) + '</div>' : '')
-      + '<div class="jg-pp">' + _manEsc(fmt(mxn)) + '</div>'
+      + (p.dur ? '<div class="jg-rg">DURACIÓN: ' + _manEsc(p.dur) + '</div>' : '')
+      + (ent ? '<div class="jg-ent">' + _manEsc(ent) + '</div>' : '')
+      + '<div class="jg-pp">' + _manEsc(typeof _jgPrecioTxt === 'function' ? _jgPrecioTxt(mxn, usd) : fmt(mxn)) + '</div>'
       + (mostrarUSD && usd != null ? '<div class="jg-pu">US$ ' + usd.toFixed(4) + '</div>' : '')
       + (p.agotado ? '<div class="jg-ss">SIN STOCK</div><button type="button" class="jg-comprar" disabled>Agotado</button>'
                    : '<button type="button" class="jg-comprar" onclick="gcPedir(\'' + tipo + '\',\'' + g.id + '\',\'' + sc.id + '\',' + i + ')">Comprar</button>')
@@ -14096,11 +14101,12 @@ function jgRenderVista(){
 
 // ── Pedido de una gift card: cantidad, WhatsApp, pago (Klar / Hey Banco) y comprobante → Telegram ──
 // Sin saldo ni API: tú envías el código a mano cuando confirmas el pago.
+var _gcPID = '';
 var _gc = null, _gcQ = 1, _gcWA = '', _gcMetodo = null, _gcFoto = '', _gcFotoRaw = '', _gcFotoNom = '', _gcEnviando = false, _gcFoco = null;
 function gcPedir(tipo, catId, subId, idx){
-  var g = _jgBuscar(tipo, catId), sc = g && g.subcats ? g.subcats.filter(function(s){ return s.id === subId; })[0] : null, p = sc ? sc.productos[idx] : null; if(!p || p.agotado) return;
-  _gc = {cat: g.n, sub: sc.n, p: p, mxn: _jgMXN(p), usd: _jgUSD(p), nota: sc.nota};
-  _gcQ = 1; _gcEnviando = false; if(!_gcMetodo && MANUAL_METODOS.length) _gcMetodo = MANUAL_METODOS[0].id;
+  var g = _jgBuscar(tipo, catId), sc = g && g.subcats ? g.subcats.filter(function(s){ return s.id === subId; })[0] : null, p = sc ? sc.productos[idx] : null; if(!p || p.agotado || p.estado === 'pendiente') return;
+  _gc = {cat: g.n, sub: sc.n, p: p, mxn: _jgMXN(p), usd: _jgUSD(p), nota: sc.nota, tipo: tipo, entrega: (typeof _jgEntrega === 'function' ? _jgEntrega(p, sc) : '') || 'pin'};
+  _gcQ = 1; _gcPID = ''; _gcEnviando = false; if(!_gcMetodo && MANUAL_METODOS.length) _gcMetodo = MANUAL_METODOS[0].id;
   gcRender();
   var ov = document.getElementById('gc-modal'); if(!ov) return; _gcFoco = document.activeElement; ov.style.display = 'flex'; document.documentElement.style.overflow = 'hidden';
   var x = ov.querySelector('.mn-x'); if(x) x.focus();
@@ -14112,12 +14118,13 @@ function gcMetodo(id){ _gcMetodo = id; gcRender(); }
 function _gcTotal(){ return Math.round(_gc.mxn * _gcQ * 100) / 100; }
 function gcRender(){
   var b = document.getElementById('gc-body'); if(!b || !_gc) return;
-  var total = _gcTotal(), h = '<div class="mn-eye">GIFT CARD · ' + _manEsc(String(_gc.cat).toUpperCase()) + ' · ' + _manEsc(String(_gc.sub).toUpperCase()) + '</div><h2 class="mn-h" id="gc-title">' + _manEsc(_gc.cat + ' ' + _gc.sub + ' · ' + _gc.p.n) + '</h2>';
+  var total = _gcTotal(), h = '<div class="mn-eye">' + (_gc.tipo === 'recargas' ? 'RECARGA · ' : 'GIFT CARD · ') + _manEsc(String(_gc.cat).toUpperCase()) + ' · ' + _manEsc(String(_gc.sub).toUpperCase()) + '</div><h2 class="mn-h" id="gc-title">' + _manEsc(_gc.cat + ' ' + _gc.sub + ' · ' + _gc.p.n) + '</h2>';
   h += '<div class="crt-it"><div class="crt-it-i"><b>' + _manEsc(_gc.p.n) + '</b><small>' + _manEsc(_manMXN(_gc.mxn)) + ' c/u · US$ ' + _gc.usd.toFixed(4) + '</small></div>'
     + '<div class="crt-q"><button type="button" aria-label="Quitar uno" onclick="gcQ(-1)">&minus;</button><span>' + _gcQ + '</span><button type="button" aria-label="Agregar uno" onclick="gcQ(1)">+</button></div>'
     + '<div class="crt-sub" style="grid-column:1/-1;grid-row:auto">' + _manEsc(_manMXN(total)) + '</div></div>';
   if(_gc.nota) h += '<div class="mn-note" style="margin-top:.6rem">' + _manEsc(_gc.nota) + '</div>';
-  h += '<label class="mn-lbl" for="gc-wa" style="margin-top:.9rem">Tu WhatsApp (para enviarte el código) *</label><input class="mn-inp" id="gc-wa" type="tel" inputmode="tel" maxlength="20" placeholder="Ej. 55 1234 5678" autocomplete="tel" value="' + _manEsc(_gcWA) + '" oninput="_gcWA=this.value">';
+  if(_gc.entrega === 'id' || _gc.entrega === 'id_opcional') h += '<label class="mn-lbl" for="gc-pid" style="margin-top:.9rem">ID de jugador' + (_gc.entrega === 'id' ? ' *' : ' (si tu paquete lo pide)') + '</label><input class="mn-inp" id="gc-pid" inputmode="text" maxlength="30" autocomplete="off" placeholder="Ej. 123456789" value="' + _manEsc(_gcPID) + '" oninput="_gcPID=this.value">';
+  h += '<label class="mn-lbl" for="gc-wa" style="margin-top:.9rem">Tu WhatsApp (' + (_gc.entrega === 'pin' ? 'para enviarte el código' : 'para avisarte') + ') *</label><input class="mn-inp" id="gc-wa" type="tel" inputmode="tel" maxlength="20" placeholder="Ej. 55 1234 5678" autocomplete="tel" value="' + _manEsc(_gcWA) + '" oninput="_gcWA=this.value">';
   h += '<div class="mn-sum" style="margin-top:1rem"><div class="mn-row"><span>Cantidad</span><b>' + _gcQ + '</b></div><div class="mn-row tot"><span>Total a pagar</span><b>' + _manEsc(_manMXN(total)) + '</b></div></div>';
   h += '<div class="mn-sec">Método de pago</div>';
   if(!MANUAL_METODOS.length){
@@ -14136,7 +14143,7 @@ function gcRender(){
     + '<input type="file" id="gc-foto" accept="image/*" style="display:none" onchange="gcOnFoto(this)">'
     + '<div class="mn-up" id="gc-up" role="button" tabindex="0" style="' + (_gcFotoRaw ? 'display:none' : '') + '" onclick="document.getElementById(\'gc-foto\').click()" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}"><div style="font-size:1.5rem">&#128247;</div><b>Toca para elegir la foto</b>Captura de tu pago (JPG, PNG)</div>'
     + '<div class="mn-prev" id="gc-prev" style="' + (_gcFotoRaw ? 'display:block' : '') + '"><img id="gc-prev-img" alt="Vista previa del comprobante" src="' + (_gcFotoRaw || '') + '"><small id="gc-prev-nom">' + (_gcFotoNom ? '\u2713 ' + _manEsc(_gcFotoNom) : '') + '</small><button type="button" onclick="gcQuitarFoto()">Cambiar foto</button></div>'
-    + '<div class="mn-note">Transfiere el total exacto y sube tu comprobante. Cuando confirmemos tu pago te enviamos tu código por WhatsApp. No se usa tu saldo.</div>'
+    + '<div class="mn-note">Transfiere el total exacto y sube tu comprobante. ' + (_gc.entrega === 'pin' ? 'Cuando confirmemos tu pago te enviamos tu código por WhatsApp.' : 'Cuando confirmemos tu pago hacemos la recarga y te avisamos por WhatsApp.') + ' No se usa tu saldo.</div>'
     + '<button type="button" class="mn-send" id="gc-send" onclick="gcEnviar()"' + (MANUAL_METODOS.length ? '' : ' disabled') + '>Enviar comprobante y pedir mi código</button>';
   b.innerHTML = h;
 }
@@ -14171,18 +14178,20 @@ function gcEnviar(){
   var met = null; MANUAL_METODOS.forEach(function(m){ if(m.id === _gcMetodo) met = m; }); if(!met) met = MANUAL_METODOS[0];
   var wa = String(_gcWA || '').replace(/[\s()+-]/g, '');
   if(!/^\d{8,15}$/.test(wa)){ _manToast('Escribe tu WhatsApp con lada (solo números)', 4500); var el = document.getElementById('gc-wa'); if(el){ el.scrollIntoView({behavior:'smooth', block:'center'}); el.focus(); } return; }
+  var pid = String(_gcPID || '').trim();
+  if((_gc.entrega === 'id' || pid) && !/^[A-Za-z0-9_.-]{4,30}$/.test(pid)){ _manToast(_gc.entrega === 'id' ? 'Escribe tu ID de jugador' : 'Revisa tu ID de jugador', 4500); var ep = document.getElementById('gc-pid'); if(ep){ ep.scrollIntoView({behavior:'smooth', block:'center'}); ep.focus(); } return; }
   if(!_gcFoto){ _manToast('\u26A0 Sube tu comprobante de pago'); var u = document.getElementById('gc-up'); if(u) u.scrollIntoView({behavior:'smooth', block:'center'}); return; }
   _gcEnviando = true;
   var btn = document.getElementById('gc-send'); if(btn){ btn.disabled = true; btn.textContent = 'Enviando...'; }
   var total = _gcTotal(), user = authSession.username || 'Cliente', cod = 'GC-' + Date.now().toString(36).toUpperCase().slice(-6);
-  var nombre = 'Gift Card ' + _gc.cat + ' ' + _gc.sub + ' - ' + _gc.p.n;
+  var nombre = (_gc.tipo === 'recargas' ? 'Recarga ' : 'Gift Card ') + _gc.cat + ' ' + _gc.sub + ' - ' + _gc.p.n;
   var payload = { usuario:user, username:user, metodo:'PEDIDO MANUAL (sin saldo): ' + nombre + ' - ' + met.nombre, monto:_manMXN(total) + ' - Pedido ' + cod, monto_acreditar:0,
-    extra:'Pedido ' + cod + ' | ' + nombre + ' x' + _gcQ + ' | ' + _manMXN(_gc.mxn) + ' c/u (US$ ' + _gc.usd.toFixed(4) + ') | Total: ' + _manMXN(total) + ' | WhatsApp: +' + wa + ' | SIN SALDO · enviar el código a mano', foto_base64:_gcFoto };
+    extra:'Pedido ' + cod + ' | ' + nombre + ' x' + _gcQ + ' | ' + _manMXN(_gc.mxn) + ' c/u (US$ ' + _gc.usd.toFixed(4) + ') | Total: ' + _manMXN(total) + (pid ? ' | ID jugador: ' + pid : '') + ' | WhatsApp: +' + wa + ' | SIN SALDO · ' + (_gc.entrega === 'pin' ? 'enviar el código a mano' : 'recargar a mano al ID'), foto_base64:_gcFoto };
   var liberar = function(){ _gcEnviando = false; var b2 = document.getElementById('gc-send'); if(b2){ b2.disabled = false; b2.textContent = 'Enviar comprobante y pedir mi código'; } };
   fetch(NOTIF_RECARGA_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)}).then(function(r){ return r.json(); }).then(function(res){
     if(res && res.success){
-      if(typeof NOTIF_PEDIDO_URL !== 'undefined'){ try{ fetch(NOTIF_PEDIDO_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:user, producto:nombre + ' (MANUAL)', cantidad:String(_gcQ), tipo:'otro', ff_id:'', precio:_gc.mxn, progreso_total:0})}).catch(function(){}); }catch(e){} }
-      gcOk(cod, _gcQ, total);
+      if(typeof NOTIF_PEDIDO_URL !== 'undefined'){ try{ fetch(NOTIF_PEDIDO_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:user, producto:nombre + ' (MANUAL)', cantidad:String(_gcQ), tipo:'otro', ff_id:pid, precio:_gc.mxn, progreso_total:0})}).catch(function(){}); }catch(e){} }
+      _gcPID = ''; gcOk(cod, _gcQ, total);
     } else { liberar(); _manToast('No se pudo enviar el comprobante. Intenta otra vez.', 4500); }
   }).catch(function(){ liberar(); _manToast('Error de conexión. Intenta otra vez.', 4500); });
 }
@@ -14190,7 +14199,1012 @@ function gcOk(cod, n, total){
   _gcFoto = ''; _gcFotoRaw = ''; _gcFotoNom = ''; _gcEnviando = false;
   var b = document.getElementById('gc-body'); if(!b) return;
   b.innerHTML = '<div class="mn-ok"><div class="ic">&#9989;</div><h3>¡Pedido enviado!</h3><p>Pedido <b style="color:#67e8f9">' + _manEsc(cod) + '</b> · ' + n + ' · ' + _manEsc(_manMXN(total)) + '</p>'
-    + '<p>Confirmaremos tu pago y te enviaremos tu código por WhatsApp.</p><button type="button" class="mn-send" onclick="gcCerrar()">Listo</button></div>';
+    + '<p>' + (_gc && _gc.entrega !== 'pin' ? 'Confirmaremos tu pago, haremos la recarga a tu ID y te avisaremos por WhatsApp.' : 'Confirmaremos tu pago y te enviaremos tu código por WhatsApp.') + '</p><button type="button" class="mn-send" onclick="gcCerrar()">Listo</button></div>';
+}
+
+
+// ═══════════════════════ CATÁLOGO NUEVO (Blood Strike, PUBG, Fortnite, Discord, Minecraft, COD Mobile, Roblox) ═══════════════════════
+// Precios de VENTA exactos (USD y MXN) que configuró el administrador. NO se cambian solos al sincronizar con el proveedor.
+// Cada producto: id interno, n (nombre), usd y mxn de venta, region, api_id (product_id de Central One, vacío hasta mapearlo),
+// img (imagen propia del producto, opcional), estado ('activo' | 'pendiente' = no se muestra ni se vende hasta aprobarlo).
+// entrega (en la subcategoría): 'pin' = código · 'id' = recarga directa a un ID de jugador · 'id_opcional' = se pide el ID por si aplica.
+// Imágenes de cada juego: sube el archivo a img/juegos/ con el nombre del id (ej. img/juegos/blood-strike.webp). Si no existe se muestran las iniciales.
+var CATALOGO_NUEVO = {
+ "recargas": [
+  {
+   "id": "blood-strike",
+   "n": "Blood Strike",
+   "fam": "blood strike",
+   "img": [
+    "img/juegos/blood-strike.webp",
+    "img/juegos/blood-strike.jpg",
+    "img/juegos/blood-strike.png"
+   ],
+   "subcats": [
+    {
+     "id": "ofertas",
+     "n": "Ofertas y productos",
+     "titulo": "BLOOD STRIKE · OFERTAS Y PRODUCTOS",
+     "entrega": "id",
+     "nota": "Región Global · Recarga directa a tu ID de jugador.",
+     "productos": [
+      {
+       "id": "bs-of-ultra-skin-lucky-chest",
+       "n": "Ultra Skin Lucky Chest",
+       "usd": 1.7226,
+       "mxn": 32.38,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-of-105-bc",
+       "n": "105 BC",
+       "usd": 2.0363,
+       "mxn": 38.28,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-of-0-99-deal",
+       "n": "0.99 DEAL",
+       "usd": 2.1053,
+       "mxn": 39.58,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-of-featured-lucha-strike-stash-voucher",
+       "n": "Featured Lucha Strike Stash Voucher",
+       "usd": 2.1053,
+       "mxn": 39.58,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-of-7ds-featured-valor-voucher",
+       "n": "7DS Featured Valor Voucher",
+       "usd": 2.1254,
+       "mxn": 39.96,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-of-one-punch-man-featured-valor-voucher",
+       "n": "One-Punch Man Featured Valor Voucher",
+       "usd": 2.1254,
+       "mxn": 39.96,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-of-tokyo-revengers-featured-valor-voucher",
+       "n": "Tokyo Revengers Featured Valor Voucher",
+       "usd": 2.1254,
+       "mxn": 39.96,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-of-attack-on-titan-featured-titan-stash-voucher",
+       "n": "Attack on Titan Featured Titan Stash Voucher",
+       "usd": 2.1456,
+       "mxn": 40.34,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-of-pre-order-for-eternal-valor-unplugged",
+       "n": "Pre-order for Eternal Valor Unplugged",
+       "usd": 2.8707,
+       "mxn": 53.97,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-of-1-99-deal",
+       "n": "1.99 DEAL",
+       "usd": 2.9009,
+       "mxn": 54.54,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-of-dark-matter-lucky-bag-pre-order",
+       "n": "Dark Matter Lucky Bag Pre-order",
+       "usd": 2.9009,
+       "mxn": 54.54,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-of-flourish-eternal-valor-pre-order",
+       "n": "Flourish Eternal Valor Pre-order",
+       "usd": 2.9009,
+       "mxn": 54.54,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-of-fright-eternal-valor-pre-order",
+       "n": "Fright Eternal Valor Pre-order",
+       "usd": 2.9009,
+       "mxn": 54.54,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-of-lucha-strike-upgrade-point-chest",
+       "n": "Lucha Strike Upgrade Point Chest",
+       "usd": 2.9009,
+       "mxn": 54.54,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-of-enzo-the-next-one-collab-upgrade-point-lucky-che",
+       "n": "Enzo: The Next One Collab Upgrade Point Lucky Chest",
+       "usd": 2.921,
+       "mxn": 54.91,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-of-golden-elegy-eternal-valor-pre-order",
+       "n": "Golden Elegy Eternal Valor Pre-order",
+       "usd": 2.921,
+       "mxn": 54.91,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-of-maestro-featured-stash-voucher",
+       "n": "Maestro Featured Stash Voucher",
+       "usd": 2.921,
+       "mxn": 54.91,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-of-seven-deadly-sins-upgrade-point-chest",
+       "n": "Seven Deadly Sins Upgrade Point Chest",
+       "usd": 2.921,
+       "mxn": 54.91,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-of-tokyo-revengers-upgrade-point-chest",
+       "n": "Tokyo Revengers Upgrade Point Chest",
+       "usd": 2.921,
+       "mxn": 54.91,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-of-one-punch-man-upgrade-point-lucky-chest",
+       "n": "One-Punch Man Upgrade Point Lucky Chest",
+       "usd": 2.9311,
+       "mxn": 55.1,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-of-attack-on-titan-featured-titan-trial-stash-vouch",
+       "n": "Attack on Titan Featured Titan Trial Stash Voucher",
+       "usd": 2.9613,
+       "mxn": 55.67,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-of-attack-on-titan-upgrade-point-lucky-chest",
+       "n": "Attack on Titan Upgrade Point Lucky Chest",
+       "usd": 2.9613,
+       "mxn": 55.67,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      }
+     ]
+    },
+    {
+     "id": "bc",
+     "n": "Recargas BC",
+     "titulo": "BLOOD STRIKE · RECARGAS BC",
+     "entrega": "id",
+     "nota": "Región Global · Recarga directa a tu ID de jugador.",
+     "productos": [
+      {
+       "id": "bs-bc-320-bc",
+       "n": "320 BC",
+       "usd": 3.4545,
+       "mxn": 64.94,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-bc-2-99-deal",
+       "n": "2.99 DEAL",
+       "usd": 3.6965,
+       "mxn": 69.49,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-bc-3-99-deal",
+       "n": "3.99 DEAL",
+       "usd": 4.4921,
+       "mxn": 84.45,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-bc-540-bc",
+       "n": "540 BC",
+       "usd": 4.87,
+       "mxn": 91.56,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-bc-4-99-deal",
+       "n": "4.99 DEAL",
+       "usd": 5.2776,
+       "mxn": 99.22,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-bc-5-99-deal",
+       "n": "5.99 DEAL",
+       "usd": 6.0027,
+       "mxn": 112.85,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-bc-6-99-deal",
+       "n": "6.99 DEAL",
+       "usd": 6.8084,
+       "mxn": 128.0,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-bc-7-99-deal",
+       "n": "7.99 DEAL",
+       "usd": 7.594,
+       "mxn": 142.77,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-bc-1-100-bc",
+       "n": "1,100 BC",
+       "usd": 8.4102,
+       "mxn": 158.11,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      }
+     ]
+    },
+    {
+     "id": "pases",
+     "n": "Pases",
+     "titulo": "BLOOD STRIKE · PASES",
+     "entrega": "id",
+     "nota": "Región Global · Recarga directa a tu ID de jugador.",
+     "productos": [
+      {
+       "id": "bs-pa-season-pass",
+       "n": "Season Pass",
+       "usd": 2.1315,
+       "mxn": 40.07,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-pa-level-up-pass",
+       "n": "Level Up Pass",
+       "usd": 2.9009,
+       "mxn": 54.54,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-pa-strike-pass-elite",
+       "n": "Strike Pass Elite",
+       "usd": 4.4779,
+       "mxn": 84.18,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "bs-pa-strike-pass-premium",
+       "n": "Strike Pass Premium",
+       "usd": 8.3928,
+       "mxn": 157.78,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      }
+     ]
+    },
+    {
+     "id": "membresias",
+     "n": "Membresías",
+     "titulo": "BLOOD STRIKE · MEMBRESÍAS",
+     "entrega": "id",
+     "nota": "Región Global · Recarga directa a tu ID de jugador.",
+     "productos": [
+      {
+       "id": "bs-me-lucky-bag-week",
+       "n": "Lucky Bag Week",
+       "usd": 2.1053,
+       "mxn": 39.58,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "call-of-duty-mobile",
+   "n": "Call of Duty Mobile",
+   "fam": "call of duty",
+   "img": [
+    "img/juegos/call-of-duty-mobile.webp",
+    "img/juegos/call-of-duty-mobile.jpg",
+    "img/juegos/call-of-duty-mobile.png"
+   ],
+   "subcats": [
+    {
+     "id": "cp",
+     "n": "CP",
+     "titulo": "CALL OF DUTY MOBILE · CP",
+     "entrega": "id_opcional",
+     "nota": "Te pedimos tu ID de jugador por si el paquete se recarga directo a tu cuenta. Si se entrega como código, te lo enviamos por WhatsApp.",
+     "productos": [
+      {
+       "id": "cod-31-cp",
+       "n": "31 CP",
+       "usd": 0.3723,
+       "mxn": 7.0,
+       "region": "",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "cod-63-cp",
+       "n": "63 CP",
+       "usd": 0.6383,
+       "mxn": 12.0,
+       "region": "",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "cod-128-cp",
+       "n": "128 CP",
+       "usd": 1.1702,
+       "mxn": 22.0,
+       "region": "",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "cod-321-cp",
+       "n": "321 CP",
+       "usd": 2.5,
+       "mxn": 47.0,
+       "region": "",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "cod-645-cp",
+       "n": "645 CP",
+       "usd": 4.8936,
+       "mxn": 92.0,
+       "region": "",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "cod-800-cp",
+       "n": "800 CP",
+       "usd": 5.8511,
+       "mxn": 110.0,
+       "region": "",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "cod-1-373-cp",
+       "n": "1,373 CP",
+       "usd": 9.5745,
+       "mxn": 180.0,
+       "region": "",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "cod-2-060-cp",
+       "n": "2,060 CP",
+       "usd": 14.8404,
+       "mxn": 279.0,
+       "region": "",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "cod-2-750-cp",
+       "n": "2,750 CP",
+       "usd": 18.1383,
+       "mxn": 341.0,
+       "region": "",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "cod-3-564-cp",
+       "n": "3,564 CP",
+       "usd": 23.7234,
+       "mxn": 446.0,
+       "region": "",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "cod-7-656-cp",
+       "n": "7,656 CP",
+       "usd": 46.7021,
+       "mxn": 878.0,
+       "region": "",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "cod-15-312-cp",
+       "n": "15,312 CP",
+       "usd": 93.4574,
+       "mxn": 1757.0,
+       "region": "",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "cod-38-280-cp",
+       "n": "38,280 CP",
+       "usd": 229.1766,
+       "mxn": 4308.52,
+       "region": "",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "cod-76-560-cp",
+       "n": "76,560 CP",
+       "usd": 466.8612,
+       "mxn": 8776.99,
+       "region": "",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "giftcards": [
+  {
+   "id": "pubg-mobile-gc",
+   "n": "PUBG Mobile",
+   "fam": "pubg",
+   "img": [
+    "img/juegos/pubg-mobile.webp",
+    "img/juegos/pubg-mobile.jpg",
+    "img/juegos/pubg-mobile.png"
+   ],
+   "subcats": [
+    {
+     "id": "pin",
+     "n": "UC (PIN)",
+     "titulo": "PUBG MOBILE · UC",
+     "entrega": "pin",
+     "nota": "ENTREGA PIN · Código para canjear en Midasbuy. Región Global.\n⚠️ No compatible con cuentas de China, Japón, Corea, Taiwán ni Vietnam.",
+     "productos": [
+      {
+       "id": "pubg-60-uc",
+       "n": "60 UC",
+       "usd": 2.2076,
+       "mxn": 41.5,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "pubg-325-uc",
+       "n": "325 UC",
+       "usd": 5.719,
+       "mxn": 107.52,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "pubg-660-uc",
+       "n": "660 UC",
+       "usd": 10.1081,
+       "mxn": 190.03,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "pubg-1-800-uc",
+       "n": "1,800 UC",
+       "usd": 23.4401,
+       "mxn": 440.67,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "pubg-3-850-uc",
+       "n": "3,850 UC",
+       "usd": 45.2213,
+       "mxn": 850.16,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "pubg-8-100-uc",
+       "n": "8,100 UC",
+       "usd": 89.1128,
+       "mxn": 1675.32,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "pubg-16-200-uc",
+       "n": "16,200 UC",
+       "usd": 182.9498,
+       "mxn": 3439.46,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "pubg-24-300-uc",
+       "n": "24,300 UC",
+       "usd": 264.6788,
+       "mxn": 4975.96,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "pubg-32-400-uc",
+       "n": "32,400 UC",
+       "usd": 352.4618,
+       "mxn": 6626.28,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "pubg-40-500-uc",
+       "n": "40,500 UC",
+       "usd": 455.3798,
+       "mxn": 8561.14,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fortnite",
+   "n": "Fortnite",
+   "fam": "fortnite",
+   "img": [
+    "img/juegos/fortnite.webp",
+    "img/juegos/fortnite.jpg",
+    "img/juegos/fortnite.png"
+   ],
+   "subcats": [
+    {
+     "id": "us",
+     "n": "Estados Unidos",
+     "titulo": "FORTNITE",
+     "entrega": "pin",
+     "nota": "ENTREGA PIN · Región Estados Unidos.",
+     "productos": [
+      {
+       "id": "fn-50-usd",
+       "n": "50 USD",
+       "usd": 51.2652,
+       "mxn": 963.79,
+       "region": "US",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "fn-75-usd",
+       "n": "75 USD",
+       "usd": 76.2329,
+       "mxn": 1433.18,
+       "region": "US",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "fn-100-usd",
+       "n": "100 USD",
+       "usd": 101.2006,
+       "mxn": 1902.57,
+       "region": "US",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "fn-150-usd",
+       "n": "150 USD",
+       "usd": 1643.5546,
+       "mxn": 30898.83,
+       "region": "US",
+       "api_id": "",
+       "img": "",
+       "estado": "pendiente",
+       "motivo": "Precio por confirmar: US$ 1,643.5546 (muy distinto a los demás paquetes)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "discord",
+   "n": "Discord",
+   "fam": "discord",
+   "img": [
+    "img/juegos/discord.webp",
+    "img/juegos/discord.jpg",
+    "img/juegos/discord.png"
+   ],
+   "subcats": [
+    {
+     "id": "global",
+     "n": "Global",
+     "titulo": "DISCORD",
+     "entrega": "pin",
+     "nota": "ENTREGA PIN · Región Global. Revisa la duración de cada suscripción.",
+     "productos": [
+      {
+       "id": "dc-basic-1-month-subscription",
+       "n": "Basic: 1 Month Subscription",
+       "usd": 5.7442,
+       "mxn": 107.99,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo",
+       "dur": "1 mes"
+      },
+      {
+       "id": "dc-nitro-1-month-subscription",
+       "n": "Nitro: 1 Month Subscription",
+       "usd": 10.0852,
+       "mxn": 189.6,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo",
+       "dur": "1 mes"
+      },
+      {
+       "id": "dc-nitro-12-months-subscription",
+       "n": "Nitro: 12 Months Subscription",
+       "usd": 89.6173,
+       "mxn": 1684.81,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo",
+       "dur": "12 meses"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "minecraft",
+   "n": "Minecraft",
+   "fam": "minecraft",
+   "img": [
+    "img/juegos/minecraft.webp",
+    "img/juegos/minecraft.jpg",
+    "img/juegos/minecraft.png"
+   ],
+   "subcats": [
+    {
+     "id": "pin",
+     "n": "Minecraft PIN",
+     "titulo": "MINECRAFT · JAVA & BEDROCK (PC)",
+     "entrega": "pin",
+     "nota": "ENTREGA PIN · El juego Minecraft: Java & Bedrock para PC. Región Global.",
+     "productos": [
+      {
+       "id": "mc-minecraft-java-bedrock-edition-pc",
+       "n": "Minecraft: Java & Bedrock Edition (PC)",
+       "usd": 18.6287,
+       "mxn": 350.22,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "mc-minecraft-java-bedrock-deluxe-collection-pc",
+       "n": "Minecraft: Java & Bedrock Deluxe Collection (PC)",
+       "usd": 22.2319,
+       "mxn": 417.96,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      }
+     ]
+    },
+    {
+     "id": "minecoins",
+     "n": "Minecoins",
+     "titulo": "MINECRAFT · MINECOINS",
+     "entrega": "pin",
+     "nota": "ENTREGA PIN · Minecoins: la moneda dentro de Minecraft. NO es el juego. Región Global.",
+     "productos": [
+      {
+       "id": "mcc-330-minecoins",
+       "n": "330 Minecoins",
+       "usd": 5.4867,
+       "mxn": 103.15,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "mcc-1-720-minecoins",
+       "n": "1,720 Minecoins",
+       "usd": 9.4745,
+       "mxn": 178.12,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "mcc-3-500-minecoins",
+       "n": "3,500 Minecoins",
+       "usd": 13.8755,
+       "mxn": 260.86,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      },
+      {
+       "id": "mcc-8-800-minecoins",
+       "n": "8,800 Minecoins",
+       "usd": 53.083,
+       "mxn": 997.98,
+       "region": "Global",
+       "api_id": "",
+       "img": "",
+       "estado": "activo"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "robux_pin": {
+  "id": "pin",
+  "n": "Robux PIN",
+  "titulo": "ROBLOX · ROBUX",
+  "entrega": "pin",
+  "nota": "ENTREGA PIN · Código para canjear Robux en tu cuenta de Roblox. Respeta las condiciones de canje y la región del código.",
+  "productos": [
+   {
+    "id": "rbx-800-robux",
+    "n": "800 Robux",
+    "usd": 9.833,
+    "mxn": 184.86,
+    "region": "",
+    "api_id": "",
+    "img": "",
+    "estado": "activo"
+   },
+   {
+    "id": "rbx-1-000-robux",
+    "n": "1,000 Robux",
+    "usd": 11.4324,
+    "mxn": 214.93,
+    "region": "",
+    "api_id": "",
+    "img": "",
+    "estado": "activo"
+   },
+   {
+    "id": "rbx-2-000-robux",
+    "n": "2,000 Robux",
+    "usd": 23.15,
+    "mxn": 435.22,
+    "region": "",
+    "api_id": "",
+    "img": "",
+    "estado": "activo"
+   },
+   {
+    "id": "rbx-2-500-robux",
+    "n": "2,500 Robux",
+    "usd": 26.1048,
+    "mxn": 490.77,
+    "region": "",
+    "api_id": "",
+    "img": "",
+    "estado": "activo"
+   },
+   {
+    "id": "rbx-4-500-robux",
+    "n": "4,500 Robux",
+    "usd": 48.6973,
+    "mxn": 915.51,
+    "region": "",
+    "api_id": "",
+    "img": "",
+    "estado": "activo"
+   },
+   {
+    "id": "rbx-10-000-robux",
+    "n": "10,000 Robux",
+    "usd": 99.7441,
+    "mxn": 1875.19,
+    "region": "",
+    "api_id": "",
+    "img": "",
+    "estado": "activo"
+   }
+  ]
+ }
+};
+(function(){
+  function poner(lista, cat){
+    for(var i = 0; i < lista.length; i++) if(lista[i].id === cat.id){ lista[i] = cat; return; }
+    lista.unshift(cat);
+  }
+  CATALOGO_NUEVO.recargas.forEach(function(c){ poner(JG_RECARGAS, c); });
+  // Minecraft: una sola categoría con dos subcategorías (PIN y Minecoins) en el lugar de los dos espacios vacíos que había
+  var iMc = -1; for(var i = 0; i < JG_GIFTCARDS.length; i++) if(JG_GIFTCARDS[i].id === 'minecraft-minecoins'){ iMc = i; break; }
+  for(var j = JG_GIFTCARDS.length - 1; j >= 0; j--) if(JG_GIFTCARDS[j].id === 'minecraft-minecoins' || JG_GIFTCARDS[j].id === 'minecraft-java-bedrock') JG_GIFTCARDS.splice(j, 1);
+  CATALOGO_NUEVO.giftcards.forEach(function(c){
+    if(c.id === 'minecraft' && iMc >= 0){ JG_GIFTCARDS.splice(Math.min(iMc, JG_GIFTCARDS.length), 0, c); return; }
+    poner(JG_GIFTCARDS, c);
+  });
+  // Roblox: "Robux PIN" como primera pestaña; las listas que ya tenías (México y LATAM) se conservan
+  JG_GIFTCARDS.forEach(function(g){ if(g.id === 'robux' && g.subcats){ g.n = 'Roblox'; g.fam = 'roblox'; if(!g.subcats.some(function(s){ return s.id === 'pin'; })) g.subcats.unshift(CATALOGO_NUEVO.robux_pin); } });
+})();
+// Entrega de un producto (texto para la tarjeta y el pedido)
+function _jgEntrega(p, sc){ var e = (p && p.entrega) || (sc && sc.entrega) || ''; return e; }
+function _jgEntregaTxt(e){ return e === 'pin' ? 'Entrega: código PIN' : (e === 'id' ? 'Recarga directa a tu ID' : (e === 'id_opcional' ? 'Entrega según el proveedor' : '')); }
+// Precio a mostrar: en MXN y USD el EXACTO de la lista; en las demás monedas se convierte desde el USD con el tipo de cambio del día.
+function _jgPrecioTxt(mxn, usd){
+  var cur = (typeof CURRENCY !== 'undefined') ? CURRENCY : 'MXN';
+  if(cur === 'USD' && usd != null) return '$' + Number(usd).toFixed(4) + ' USD';
+  if(cur !== 'MXN' && usd != null && USD_MXN > 0) return fmt(usd * USD_MXN);
+  return fmt(mxn);
 }
 
 
@@ -14661,6 +15675,89 @@ function admCoProbarAlerta(){
   coCall('probar_alerta').then(function(r){ _manToast(r.ok ? '\u2705 Aviso enviado por ' + (r.via === 'telegram' ? 'Telegram' : 'Supabase') + '. Rev\u00EDsalo en tu Telegram.' : '\u274C No se pudo enviar el aviso (' + _manEsc(_coErrTxt(r)) + '). Revisa TG_BOT_TOKEN y TG_CHAT_ID en Vercel.', 6500); });
 }
 (function(){ var f = window.admCoResumen; if(typeof f === 'function') window.admCoResumen = function(){ var r = f.apply(this, arguments); try{ admCoProteccion(); }catch(e){} return r; }; })();
+
+
+// ═══════════════════════ GESTIÓN DE CATÁLOGO (panel admin) ═══════════════════════
+// Compara los productos de la tienda con el catálogo REAL de Central One (no compra nada) y muestra alertas:
+// no encontrado, ambiguo, sin stock, margen negativo, entrega distinta, sin imagen y pendientes de aprobación.
+var _catAud = null, _catAudBusy = false;
+function catAdmProductos(){
+  var out = [];
+  [['recargas', JG_RECARGAS], ['giftcards', JG_GIFTCARDS]].forEach(function(par){
+    par[1].forEach(function(g){
+      if(!g.fam || !g.subcats) return;
+      g.subcats.forEach(function(s){ (s.productos || []).forEach(function(p){
+        if(!p.id) return;
+        out.push({id:p.id, fam:g.fam, n:p.n, usd:p.usd, mxn:p.mxn, cat:g.n, sub:s.n, estado:p.estado || 'activo', motivo:p.motivo || '', entrega:p.entrega || s.entrega || '', img:p.img || '', catImg:(typeof _jgSrcs === 'function' && _jgSrcs(g).length > 0)});
+      }); });
+    });
+  });
+  return out;
+}
+function catAdmRender(){
+  var o = document.getElementById('cat-adm-out'); if(!o) return;
+  var ps = catAdmProductos(), cats = {};
+  ps.forEach(function(p){ cats[p.cat] = (cats[p.cat] || 0) + 1; });
+  var pend = ps.filter(function(p){ return p.estado === 'pendiente'; });
+  var h = '<div class="cat-res">' + Object.keys(cats).map(function(c){ return '<span>' + _manEsc(c) + ' <b>' + cats[c] + '</b></span>'; }).join('') + '</div>';
+  if(pend.length) h += '<div class="cat-alerta am"><b>\u23F8\uFE0F Pendientes de tu aprobación (no se muestran ni se venden):</b>' + pend.map(function(p){ return '<div>' + _manEsc(p.cat + ' · ' + p.n) + ' — ' + _manEsc(p.motivo) + '</div>'; }).join('') + '</div>';
+  if(!_catAud) h += '<p class="cat-nota">Pulsa <b>Revisar contra Central One</b> para ver qué productos existen en tu proveedor, su costo, el margen y el tipo de entrega. No se compra nada.</p>';
+  else h += catAdmTabla(ps);
+  o.innerHTML = h;
+}
+function catAdmRevisar(){
+  if(_catAudBusy) return; _catAudBusy = true;
+  var o = document.getElementById('cat-adm-out'); if(o) o.insertAdjacentHTML('afterbegin', '<p class="cat-nota" id="cat-cargando">Leyendo el catálogo de Central One…</p>');
+  var ps = catAdmProductos().map(function(p){ return {id:p.id, fam:p.fam, n:p.n}; });
+  coCall('auditar', {productos:ps}).then(function(r){
+    _catAudBusy = false;
+    if(!r.ok){ var c = document.getElementById('cat-cargando'); if(c) c.outerHTML = '<div class="cat-alerta ro">' + _manEsc(_coErrTxt(r)) + '</div>'; return; }
+    _catAud = r; catAdmRender();
+  });
+}
+function _catAdmEstado(p, r){
+  if(p.estado === 'pendiente') return {k:'am', t:'Pendiente de aprobación'};
+  if(!r) return {k:'gr', t:'Sin revisar'};
+  if(r.estado === 'familia_no_encontrada') return {k:'ro', t:'El juego no está en tu catálogo'};
+  if(r.estado === 'no_encontrado') return {k:'ro', t:'No encontrado'};
+  if(r.estado === 'ambiguo') return {k:'am', t:'Ambiguo: revisar'};
+  var m = r.match;
+  if(m.in_stock === false) return {k:'am', t:'Sin stock'};
+  var costo = parseFloat(m.precio); if(costo > 0 && p.usd < costo) return {k:'ro', t:'Margen negativo'};
+  if((p.entrega === 'pin' && m.requiere_id) || (p.entrega === 'id' && !m.requiere_id)) return {k:'am', t:'Entrega distinta'};
+  return {k:'ok', t:'OK'};
+}
+function catAdmTabla(ps){
+  var map = {}; (_catAud.resultados || []).forEach(function(r){ map[r.id] = r; });
+  var cuenta = {}, alertas = [], sinImg = 0, h = '';
+  ps.forEach(function(p){ var e = _catAdmEstado(p, map[p.id]); cuenta[e.t] = (cuenta[e.t] || 0) + 1; var r = map[p.id]; if(!p.img && !(r && r.match && r.match.imagen)) sinImg++; if(e.k !== 'ok') alertas.push(p.cat + ' · ' + p.n + ': ' + e.t); });
+  h += '<div class="cat-res">' + Object.keys(cuenta).map(function(k){ return '<span>' + _manEsc(k) + ' <b>' + cuenta[k] + '</b></span>'; }).join('') + '<span>Sin imagen propia <b>' + sinImg + '</b></span></div>';
+  h += '<p class="cat-nota">Catálogo de Central One: ' + _manEsc(_catAud.total_catalogo) + ' productos · por juego: ' + Object.keys(_catAud.familias || {}).map(function(f){ return _manEsc(f) + ' ' + _catAud.familias[f]; }).join(', ') + '.<br>'
+    + (_catAud.con_imagen ? _manEsc(_catAud.con_imagen) + ' productos traen imagen del proveedor.' : 'El proveedor <b>no</b> manda imágenes en los productos encontrados: las imágenes se cargan a mano.')
+    + ' Campos que trae el catálogo: <small>' + _manEsc((_catAud.campos_catalogo || []).join(', ')) + '</small></p>';
+  var grupos = {}; ps.forEach(function(p){ (grupos[p.cat + ' · ' + p.sub] = grupos[p.cat + ' · ' + p.sub] || []).push(p); });
+  Object.keys(grupos).forEach(function(gk){
+    h += '<div class="cat-gh">' + _manEsc(gk) + '</div><div class="cat-tw"><table class="cat-t"><thead><tr><th>Producto</th><th>Venta</th><th>En Central One</th><th>Costo</th><th>Margen</th><th>Entrega</th><th>Estado</th></tr></thead><tbody>'
+      + grupos[gk].map(function(p){
+        var r = map[p.id], m = r && r.match, e = _catAdmEstado(p, r), costo = m ? parseFloat(m.precio) : NaN, mg = costo > 0 ? ((p.usd - costo) / costo * 100) : null;
+        return '<tr><td><b>' + _manEsc(p.n) + '</b><br><small>' + _manEsc(p.id) + '</small></td>'
+          + '<td>US$ ' + Number(p.usd).toFixed(4) + '<br><small>$' + Number(p.mxn).toFixed(2) + ' MXN</small></td>'
+          + '<td>' + (m ? _manEsc(m.nombre) + '<br><small>' + _manEsc(m.region || '') + ' · ' + _manEsc(m.product_id) + '</small>' + (r.alternativas && r.alternativas.length ? '<br><small>También: ' + r.alternativas.map(function(a){ return _manEsc(a.nombre); }).join(' / ') + '</small>' : '') : '—') + '</td>'
+          + '<td>' + (m ? 'US$ ' + _manEsc(m.precio) : '—') + '</td>'
+          + '<td class="' + (mg != null && mg < 0 ? 'cat-neg' : '') + '">' + (mg != null ? mg.toFixed(1) + ' %' : '—') + '</td>'
+          + '<td>' + _manEsc(p.entrega === 'pin' ? 'PIN' : (p.entrega === 'id' ? 'ID' : 'Por confirmar')) + (m ? '<br><small>Proveedor: ' + (m.requiere_id ? 'pide ' + _manEsc((m.campos || []).join(', ') || 'ID') : 'código') + '</small>' : '') + '</td>'
+          + '<td><span class="cat-chip ' + e.k + '">' + _manEsc(e.t) + '</span></td></tr>';
+      }).join('') + '</tbody></table></div>';
+  });
+  h += '<button type="button" class="cat-btn" onclick="catAdmCopiarMapeo()">Copiar mapeo de productos encontrados (JSON)</button>';
+  return h;
+}
+function catAdmCopiarMapeo(){
+  if(!_catAud) return; var m = {};
+  (_catAud.resultados || []).forEach(function(r){ if(r.estado === 'ok' && r.match) m[r.id] = r.match.product_id; });
+  var t = JSON.stringify(m);
+  if(navigator.clipboard) navigator.clipboard.writeText(t).then(function(){ _manToast('Mapeo copiado (' + Object.keys(m).length + ' productos)'); }, function(){ prompt('Copia:', t); }); else prompt('Copia:', t);
+}
 
 
 // ═══════════════════════ CONTROL DE VERSIÓN: nada de comprar con una tienda vieja ═══════════════════════
