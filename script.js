@@ -1,6 +1,6 @@
 /* CiberStore v1779504760 */
 /* \u2500\u2500 DATA \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-var WA = '573180051415';
+var WA = '573337291678';
 
 /* Fallback if supabase_integration.js not loaded yet */
 if(typeof getSpent === 'undefined'){
@@ -1319,7 +1319,7 @@ function renderProds(){
     +'<span style="font-size:1.1rem;flex-shrink:0">\u26A0\uFE0F</span>'
     +'<div style="font-size:.76rem;color:var(--text);line-height:1.6"><strong style="color:#ffa500">Manda tu ID para comprobar si tiene la oferta.</strong> Una vez comprobada, haz tu pedido con saldo.</div>'
     +'</div>'
-    +'<a href="https://wa.me/573180051415?text=Hola!%20Quiero%20verificar%20mi%20ID%20para%20Diamantes%201%20Vez%20x%20ID" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:.72rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:9px;font-family:Barlow,sans-serif;font-weight:800;font-size:.85rem;text-decoration:none;box-sizing:border-box;margin-bottom:1.1rem">\uD83D\uDCF1 Verificar mi ID por WhatsApp</a>'
+    +'<a href="https://wa.me/573337291678?text=Hola!%20Quiero%20verificar%20mi%20ID%20para%20Diamantes%201%20Vez%20x%20ID" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:.72rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:9px;font-family:Barlow,sans-serif;font-weight:800;font-size:.85rem;text-decoration:none;box-sizing:border-box;margin-bottom:1.1rem">\uD83D\uDCF1 Verificar mi ID por WhatsApp</a>'
     +'<div class="lkpln-grid" style="margin-bottom:1.1rem">';
   for(var j=0;j<PRODUCTS_1VEZ.length;j++){
     rows+=makeModernCard(PRODUCTS_1VEZ[j], '#00e676', PRODUCTS_1VEZ[j].badge==='MEJOR PRECIO');
@@ -5262,7 +5262,7 @@ function submitLk2k(){
     + 'Plan%3A%20'+likes+'%20likes%20-%20%24'+precio+'%20MX%0A'
     + 'ID%20FF%3A%20'+encodeURIComponent(ffId)+'%0A'
     + 'Nombre%3A%20'+encodeURIComponent(ffNom);
-  window.open('https://wa.me/573180051415?text='+msg,'_blank');
+  window.open('https://wa.me/573337291678?text='+msg,'_blank');
 }
 
 function submitLk200(){
@@ -5280,7 +5280,7 @@ function submitLk200(){
     + 'Plan%3A%20'+likes+'%20likes%20-%20%24'+precio+'%20MX%0A'
     + 'ID%20FF%3A%20'+encodeURIComponent(ffId)+'%0A'
     + 'Nombre%3A%20'+encodeURIComponent(ffNom);
-  window.open('https://wa.me/573180051415?text='+msg,'_blank');
+  window.open('https://wa.me/573337291678?text='+msg,'_blank');
 }
 
 /* ================================================================
@@ -5795,12 +5795,12 @@ function buyLikesInstant(){
 
 function quoteLikesBasico(){
   var msg = 'Hola, quiero cotizar un plan de likes básicos. ¿Cuál es el mejor para mí?';
-  window.open('https://wa.me/573180051415?text='+encodeURIComponent(msg), '_blank');
+  window.open('https://wa.me/573337291678?text='+encodeURIComponent(msg), '_blank');
 }
 
 function quoteLikesInstant(){
   var msg = 'Hola, me interesa un plan de likes instantáneos. ¿Cuál recomiendas?';
-  window.open('https://wa.me/573180051415?text='+encodeURIComponent(msg), '_blank');
+  window.open('https://wa.me/573337291678?text='+encodeURIComponent(msg), '_blank');
 }
 
 // Cargar saldo cuando se abre la página de likes
@@ -6241,7 +6241,7 @@ function cotizarDiamantes(){
   // Tambien avisar a Telegram (sin foto, ya que por WhatsApp va aparte)
   _notifTelegramTexto(metodo);
 
-  window.open('https://wa.me/573180051415?text=' + msg, '_blank');
+  window.open('https://wa.me/573337291678?text=' + msg, '_blank');
 }
 
 // Manda solo el aviso de texto a Telegram (para el flujo de WhatsApp)
@@ -6329,7 +6329,7 @@ function cotizarBonus(){
   var ffId = ((document.getElementById('bonus-id')||{}).value||'').trim();
   var txt = 'Hola! Quiero pedir '+(plan?plan.label:'diamantes x ID +20% bonus');
   if(ffId) txt += ' para mi ID: '+ffId;
-  window.open('https://wa.me/573180051415?text='+encodeURIComponent(txt), '_blank');
+  window.open('https://wa.me/573337291678?text='+encodeURIComponent(txt), '_blank');
 }
 
 function _updateBonusSaldo(){
@@ -6404,7 +6404,7 @@ function cotizarIlim(){
   var ffId=((document.getElementById('ilim-id')||{}).value||'').trim();
   var txt='Hola! Quiero pedir '+diamantes+' diamantes ilimitados';
   if(ffId) txt+=' para mi ID: '+ffId;
-  window.open('https://wa.me/573180051415?text='+encodeURIComponent(txt),'_blank');
+  window.open('https://wa.me/573337291678?text='+encodeURIComponent(txt),'_blank');
 }
 
 
@@ -6880,7 +6880,7 @@ function solicitarAccesoAPI(){
     + '📱 WhatsApp: ' + encodeURIComponent(tel) + '%0A%0A'
     + 'Quedo atento para recibir mi API Key y recargar saldo. Gracias!';
 
-  window.open('https://wa.me/573180051415?text=' + msg, '_blank');
+  window.open('https://wa.me/573337291678?text=' + msg, '_blank');
   showToast('Abriendo WhatsApp...', 2000);
 }
 
@@ -6955,7 +6955,7 @@ function confirmarBinance(){
     + (_bncSel.custom ? '' : ' (con bono)') + '%0A%0A'
     + 'Ya transferi a Binance ID 1106987175. Adjunto mi comprobante.';
   _notifTelegramTexto('binance');
-  window.open('https://wa.me/573180051415?text=' + msg, '_blank');
+  window.open('https://wa.me/573337291678?text=' + msg, '_blank');
 }
 
 
@@ -7021,7 +7021,7 @@ function enviarPagoWA(metodo){
       + '%0AAdjunto mi comprobante.';
   }
 
-  window.open('https://wa.me/573180051415?text=' + msg, '_blank');
+  window.open('https://wa.me/573337291678?text=' + msg, '_blank');
 }
 
 
@@ -7736,7 +7736,7 @@ function enviarCreadorWA(){
     + 'ID Free Fire: ' + encodeURIComponent(ffid) + '%0A%0A'
     + 'Aqui esta mi video para verificacion.';
 
-  window.open('https://wa.me/573180051415?text=' + msg, '_blank');
+  window.open('https://wa.me/573337291678?text=' + msg, '_blank');
   showToast('Abriendo WhatsApp...', 2000);
 }
 
@@ -7800,12 +7800,12 @@ var _diamSeleccionado = null;
 // ═══════════ RECARGAS AUTOMÁTICAS (Recargas América type=recharge) ═══════════
 // package_id = el ID de Recargas América | precio = costo USD × 20 (redondeado)
 var RECARGAS_AUTO = [
-  { package_id:351, catalog_id:5,  sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.6650, precioUSD:0.6699, precioMXN:12.57, precio:12.57,   img:'img/diam-100.png'  },
-  { package_id:348, catalog_id:6,  sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:1.9999, precioUSD:2.0098, precioMXN:37.70, precio:37.70,   img:'img/diam-310.png'  },
-  { package_id:350, catalog_id:7,  sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.3955, precioUSD:3.3976, precioMXN:63.74, precio:63.74,   img:'img/diam-520.png'  },
-  { package_id:347, catalog_id:8,  sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.3089, precioUSD:6.3109, precioMXN:118.39, precio:118.39,  img:'img/diam-1060.png' },
-  { package_id:346, catalog_id:9,  sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:12.5203, precioUSD:12.5209, precioMXN:234.88, precio:234.88,  img:'img/diam-2180.png' },
-  { package_id:349, catalog_id:10, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:31.8640, precioUSD:31.8646, precioMXN:597.75, precio:597.75,  img:'img/diam-5600.png' },
+  { package_id:351, catalog_id:5,  sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.6650, precioUSD:0.6799, precioMXN:null, precio:12.71,   img:'img/diam-100.png'  },
+  { package_id:348, catalog_id:6,  sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:1.9999, precioUSD:2.5098, precioMXN:null, precio:46.93,   img:'img/diam-310.png'  },
+  { package_id:350, catalog_id:7,  sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.3955, precioUSD:3.9576, precioMXN:null, precio:74.01,   img:'img/diam-520.png'  },
+  { package_id:347, catalog_id:8,  sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.3089, precioUSD:6.9909, precioMXN:null, precio:130.73,  img:'img/diam-1060.png' },
+  { package_id:346, catalog_id:9,  sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:12.5203, precioUSD:13.0209, precioMXN:null, precio:243.49,  img:'img/diam-2180.png' },
+  { package_id:349, catalog_id:10, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:31.8640, precioUSD:32.1046, precioMXN:null, precio:600.36,  img:'img/diam-5600.png' },
   { package_id:null, catalog_id:null, nombre:'11.200 Diamantes + 1.120 Bono', diamantes:12320, costoUSD:66.32, precio:1300, manual:true }
 ];
 // Precios de los diamantes: en USD (precioUSD) y en MXN (precioMXN) son FIJOS y salen de tu lista de precios.
@@ -11340,7 +11340,7 @@ function comprarLikes2k(i){
   // Paquetes de cotizacion → WhatsApp
   if(p.cotizar){
     var msg = encodeURIComponent('Hola! Quiero cotizar el paquete de ' + p.likes + ' LIKES para Free Fire.');
-    window.open('https://wa.me/573180051415?text=' + msg, '_blank');
+    window.open('https://wa.me/573337291678?text=' + msg, '_blank');
     return;
   }
 
@@ -12386,7 +12386,7 @@ function boyaahEnviar(){
     + '\n\uD83D\uDCCE Adjunto mi comprobante de pago en este chat.';
 
   // 1) Abrir WhatsApp de inmediato (dentro del clic, para que el navegador no lo bloquee)
-  _boyaahUltimoWA = 'https://wa.me/' + (typeof WA !== 'undefined' ? WA : '573180051415') + '?text=' + encodeURIComponent(msg);
+  _boyaahUltimoWA = 'https://wa.me/' + (typeof WA !== 'undefined' ? WA : '573337291678') + '?text=' + encodeURIComponent(msg);
   window.open(_boyaahUltimoWA, '_blank');
 
   // 2) Registrar la solicitud + comprobante en el Telegram del admin (sin saldo)
@@ -12878,7 +12878,7 @@ function hxMod(i){ hxIr('mod', {mod:i}); }
 function hxPedir(){
   var g = HX_JUEGOS_ANDROID.filter(function(x){return x.id===_hxCtx.juego;})[0], m = g && g.mods[_hxCtx.mod]; if(!m) return;
   var msg = 'Hola! Quiero pedir el mod *' + m.n + '* (' + g.n + ' · Android).\nPrecio de referencia: $' + m.p.toFixed(2) + ' USD.\nDuraciones disponibles: ' + m.d + '.\n¿Me confirman duración y forma de pago?';
-  window.open('https://wa.me/' + (typeof WA !== 'undefined' ? WA : '573180051415') + '?text=' + encodeURIComponent(msg), '_blank', 'noopener');
+  window.open('https://wa.me/' + (typeof WA !== 'undefined' ? WA : '573337291678') + '?text=' + encodeURIComponent(msg), '_blank', 'noopener');
 }
 function hxCuenta(tab){ hxCerrar(); if(typeof showAuthModal === 'function'){ showAuthModal(); if(typeof authTab === 'function') authTab(tab); } }
 function hxProductos(){ hxCerrar(); if(typeof goPage === 'function') goPage('home'); }
