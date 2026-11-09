@@ -261,8 +261,8 @@ var EXP_PACKAGES = [
 ];
 
 var HONOR_CUENTA_PRICE = 200;
-var ADMIN_EMAIL2 = 'ciberstore@admin.com';
-var ADMIN_PASS2  = 'ciberstore26';
+var ADMIN_EMAIL2 = '';
+var ADMIN_PASS2 = '';
 /* adminAuthed, authSession, isGuest declared in supabase_integration.js */
 /* selectedStars in supabase_integration.js */
 var selectedExpPkg = null;
@@ -800,8 +800,8 @@ function doAdminLogin(){
   var email=((document.getElementById('adm-auth-email')||{}).value||'').trim().toLowerCase();
   var pass=((document.getElementById('adm-auth-pass')||{}).value||'');
   var err=document.getElementById('adm-auth-err');
-  var emailOk=(email==='ciberstore@admin.com');
-  var passOk =(pass ==='ciberstore26');
+  var emailOk=false;
+  var passOk=false;
   if(!emailOk||!passOk){
     if(err){err.textContent='Credenciales incorrectas';err.style.display='block';}
     return;
@@ -8327,7 +8327,7 @@ function _ejecutarRecargaVerificada(p, ffId, nombre, verificationStatus, btn, ms
       if(typeof tgNotifyPurchase==='function'){
         var infoJugador = esVerificado ? ('\uD83D\uDC64 Nombre IG: '+nombre) : '\u26A0\uFE0F ID SIN VERIFICAR - cliente confirmo bajo su responsabilidad';
         var infoVia = res.via ? ('\n\uD83D\uDD17 Via: '+(res.via==='catalog'?'Catalogo Unificado':(res.via&&String(res.via).indexOf('Central One')===0?res.via:'API pines'))) : '';
-        tgNotifyPurchase(authSession.username, '\u26A1 Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n'+infoJugador+infoVia, p.precio, ord);
+        tgNotifyPurchase(authSession.username, '\u26A1 Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n'+infoJugador+infoVia+(typeof csGananciaTxt==='function'?csGananciaTxt(p.precio,p.precioUSD,res.costo_usd,res.status):''), p.precio, ord);
       }
       // Puntos de ranking: SOLO cuando el proveedor confirma COMPLETED de verdad.
       // PENDING no otorga puntos (regla explicita) — si mas tarde se marca
@@ -15461,7 +15461,7 @@ function otComprar(){
     otApi({action:'comprar', producto:p.clave, player_id:ffId, client_name:authSession.username, idempotency_key:key}).then(function(res){
       if(res.success && (res.status === 'COMPLETED' || res.status === 'PENDING')){
         registrarPedido(p.n + ' (AUTO' + (verificado ? '' : ' - ID NO VERIFICADO') + ')', 1, 'otro', ffId, p.mxn, 0);
-        tg('\u26A1 Recarga AUTO\n\uD83C\uDF81 Producto: ' + p.n + '\n\uD83C\uDFAE ID: ' + ffId + '\n' + (verificado ? ('\uD83D\uDC64 Nombre IG: ' + nombre) : '\u26A0\uFE0F ID SIN VERIFICAR - cliente confirmó bajo su responsabilidad') + (res.via ? ('\n\uD83D\uDD17 Via: ' + res.via) : ''));
+        tg('\u26A1 Recarga AUTO\n\uD83C\uDF81 Producto: ' + p.n + '\n\uD83C\uDFAE ID: ' + ffId + '\n' + (verificado ? ('\uD83D\uDC64 Nombre IG: ' + nombre) : '\u26A0\uFE0F ID SIN VERIFICAR - cliente confirmó bajo su responsabilidad') + (res.via ? ('\n\uD83D\uDD17 Via: ' + res.via) : '') + (typeof csGananciaTxt === 'function' ? csGananciaTxt(p.mxn, p.usd, res.costo_usd, res.status) : ''));
         fin(res.status === 'COMPLETED' ? 'ok' : 'warn', res.status === 'COMPLETED'
           ? '<div class="ic">\u2705</div><h3>¡Recarga completada!</h3><p>' + _manEsc(p.n) + ' ya está en el ID <b>' + _manEsc(ffId) + '</b>.</p>'
           : '<b>\u23F3 Recarga en proceso</b><br>' + _manEsc(p.n) + ' llegará al ID ' + _manEsc(ffId) + ' en unos minutos.');
@@ -15529,7 +15529,7 @@ function _crtaSaldoHTML(r, abierto){
 }
 function admCoResumen(forzar){
   var box = document.getElementById('crta-saldo-prov');
-  if(!forzar){ var tok = ''; try{ tok = sessionStorage.getItem('co_admin_token') || ''; }catch(e){} if(!tok) return; }   // sin token guardado no se molesta: se pide al pulsar el botón
+  if(!forzar){ var tok = (typeof csAdminSesionToken === 'function' && csAdminSesionToken()) || ''; try{ tok = tok || sessionStorage.getItem('co_admin_token') || ''; }catch(e){} if(!tok) return; }   // sin token guardado no se molesta: se pide al pulsar el botón
   if(Date.now() - _coResumenT < 8000 && !forzar) return; _coResumenT = Date.now();
   if(box) box.textContent = 'Consultando al proveedor…';
   Promise.all([coCall('balance'), coCall('paquetes')]).then(function(rs){
@@ -15758,6 +15758,90 @@ function catAdmCopiarMapeo(){
   var t = JSON.stringify(m);
   if(navigator.clipboard) navigator.clipboard.writeText(t).then(function(){ _manToast('Mapeo copiado (' + Object.keys(m).length + ' productos)'); }, function(){ prompt('Copia:', t); }); else prompt('Copia:', t);
 }
+
+
+// ═══════════════════════ SESIÓN DE ADMINISTRADOR (verificada en el servidor) ═══════════════════════
+// Entras UNA vez con tu correo y contraseña (ADMIN_EMAIL / ADMIN_PASSWORD en Vercel) y la sesión dura 30 días en ese dispositivo,
+// aunque recargues la página o la tienda se actualice. La misma sesión sirve para Central One: ya no se pide el token aparte.
+// "Cerrar sesión" la borra de este dispositivo. Cambiar ADMIN_PASSWORD en Vercel cierra todas las sesiones abiertas.
+var ADMIN_URL = '/api/admin', ADMIN_SESION_KEY = 'cs_admin_sesion';
+function csAdminSesion(){ try{ var j = JSON.parse(localStorage.getItem(ADMIN_SESION_KEY) || 'null'); if(j && j.t && j.exp > Date.now()) return j; }catch(e){} return null; }
+function csAdminSesionToken(){ var s = csAdminSesion(); return s ? s.t : ''; }
+function csAdminBorrar(){ try{ localStorage.removeItem(ADMIN_SESION_KEY); }catch(e){} }
+function _admLoginErr(t){ var err = document.getElementById('adm-auth-err'); if(err){ err.textContent = t; err.style.display = t ? 'block' : 'none'; } }
+var _admLoginBusy = false;
+window.doAdminLogin = function(){
+  if(_admLoginBusy) return;
+  var email = ((document.getElementById('adm-auth-email') || {}).value || '').trim().toLowerCase();
+  var pass = ((document.getElementById('adm-auth-pass') || {}).value || '');
+  if(!email || !pass){ _admLoginErr('Escribe tu correo y contraseña'); return; }
+  _admLoginBusy = true; _admLoginErr('');
+  fetch(ADMIN_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'login', email:email, password:pass})})
+    .then(function(r){ return r.json().catch(function(){ return {ok:false, code:(r.status === 404 ? 'sin_servidor' : 'error')}; }); })
+    .then(function(j){
+      _admLoginBusy = false;
+      if(j && j.ok && j.token){
+        try{ localStorage.setItem(ADMIN_SESION_KEY, JSON.stringify({t:j.token, exp:j.exp})); }catch(e){}
+        adminAuthed = true; var p = document.getElementById('adm-auth-pass'); if(p) p.value = '';
+        if(typeof hideAuthModal === 'function') hideAuthModal();
+        setTimeout(function(){ openFullAdmin(); }, 100); return;
+      }
+      var M = {credenciales:'Correo o contraseña incorrectos', demasiados_intentos:'Demasiados intentos. Espera 10 minutos.', sin_configurar:'Falta configurar ADMIN_EMAIL y ADMIN_PASSWORD en Vercel (y redesplegar).',
+        contrasena_corta:'ADMIN_PASSWORD en Vercel debe tener al menos 10 caracteres.', sin_servidor:'No encuentro /api/admin: sube la carpeta api/ y espera a que Vercel termine.'};
+      _admLoginErr(M[j && j.code] || 'No se pudo iniciar sesión. Intenta otra vez.');
+    })
+    .catch(function(){ _admLoginBusy = false; _admLoginErr('Sin conexión. Intenta otra vez.'); });
+};
+window.adminLogin = window.doAdminLogin;
+function csAdminCerrarSesion(){
+  csAdminBorrar(); try{ sessionStorage.removeItem('co_admin_token'); }catch(e){}
+  adminAuthed = false; if(typeof closeFullAdmin === 'function') closeFullAdmin();
+  if(typeof _manToast === 'function') _manToast('Sesión de administrador cerrada en este dispositivo', 3500);
+}
+window.doAdminLogout = csAdminCerrarSesion; window.adminLogout = csAdminCerrarSesion;
+// Al cargar: si hay sesión guardada se entra directo (así ?admin=1 abre el panel sin pedir nada) y luego se confirma con el servidor
+(function(){
+  var s = csAdminSesion(); if(!s){ csAdminBorrar(); return; }
+  adminAuthed = true;
+  fetch(ADMIN_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'verificar', token:s.t})})
+    .then(function(r){ return r.json(); })
+    .then(function(j){ if(j && j.ok === false && (j.code === 'sesion_invalida' || j.code === 'sin_configurar')){ csAdminBorrar(); adminAuthed = false; if(typeof closeFullAdmin === 'function') closeFullAdmin(); } })
+    .catch(function(){});   // sin conexión: se conserva; el servidor revisa la sesión en cada acción de todas formas
+})();
+// El panel del proveedor usa la misma sesión (ya no pide el token de Central One)
+(function(){
+  var orig = window.coToken;
+  window.coToken = function(){ return csAdminSesionToken() || (typeof orig === 'function' ? orig() : ''); };
+})();
+
+// ═══════════════════════ PANEL: reloj, cerrar sesión ═══════════════════════
+var _admClockOn = false;
+(function(){
+  var f = window.openFullAdmin;
+  if(typeof f === 'function') window.openFullAdmin = function(){ var r = f.apply(this, arguments); if(adminAuthed && !_admClockOn && typeof startAdmClock === 'function'){ _admClockOn = true; startAdmClock(); } return r; };
+})();
+
+// ═══════════════════════ TELEGRAM: venta, costo del proveedor y ganancia de cada compra ═══════════════════════
+function _csMXN(n){ n = Number(n); return (n < 0 ? '-$' : '$') + Math.abs(n).toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' MXN'; }
+function csGananciaTxt(ventaMxn, ventaUsd, costoUsd, status){
+  var c = parseFloat(costoUsd); if(!(c > 0) || !(Number(ventaMxn) > 0)) return '';
+  var tc = (typeof USD_MXN !== 'undefined' && USD_MXN > 0) ? USD_MXN : null;
+  var vu = (ventaUsd != null && Number(ventaUsd) > 0) ? Number(ventaUsd) : (tc ? Number(ventaMxn) / tc : null);
+  var gMxn = tc ? (Number(ventaMxn) - c * tc) : null, gUsd = vu != null ? (vu - c) : null, pct = gUsd != null ? (gUsd / c * 100) : null;
+  var perdida = (gUsd != null ? gUsd : gMxn) < 0;
+  return '\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500'
+    + '\n\uD83D\uDCB0 Venta: ' + _csMXN(ventaMxn) + (vu != null ? ' (US$ ' + vu.toFixed(4) + ')' : '')
+    + '\n\uD83C\uDFED Proveedor: US$ ' + c.toFixed(4) + (tc ? ' (\u2248 ' + _csMXN(c * tc) + ')' : '')
+    + '\n' + (perdida ? '\uD83D\uDD3B P\u00C9RDIDA: ' : '\u2705 Ganancia: ') + (gMxn != null ? _csMXN(gMxn) : '') + (gUsd != null ? ' \u00B7 ' + (gUsd < 0 ? '-US$ ' : 'US$ ') + Math.abs(gUsd).toFixed(4) : '') + (pct != null ? ' (' + pct.toFixed(1) + ' %)' : '')
+    + (status === 'PENDING' ? '\n\u23F3 (si el proveedor la completa)' : '');
+}
+// Si el servidor dice que la sesión ya no vale (venció o cambiaste la contraseña), se cierra y se pide entrar de nuevo
+(function(){
+  var f = window.coCall; if(typeof f !== 'function') return;
+  window.coCall = function(){ var usaSesion = !!csAdminSesionToken(); return f.apply(this, arguments).then(function(r){
+    if(usaSesion && r && r.code === 'no_autorizado'){ csAdminBorrar(); adminAuthed = false; if(typeof _manToast === 'function') _manToast('Tu sesión de administrador venció. Entra de nuevo.', 5000); if(typeof closeFullAdmin === 'function') closeFullAdmin(); }
+    return r; }); };
+})();
 
 
 // ═══════════════════════ CONTROL DE VERSIÓN: nada de comprar con una tienda vieja ═══════════════════════
