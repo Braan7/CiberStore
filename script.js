@@ -15842,6 +15842,24 @@ function csGananciaTxt(ventaMxn, ventaUsd, costoUsd, status){
     if(usaSesion && r && r.code === 'no_autorizado'){ csAdminBorrar(); adminAuthed = false; if(typeof _manToast === 'function') _manToast('Tu sesión de administrador venció. Entra de nuevo.', 5000); if(typeof closeFullAdmin === 'function') closeFullAdmin(); }
     return r; }); };
 })();
+// ── Menú del panel: en el celular es un cajón; en PC la hamburguesa lo muestra u oculta (y se recuerda) ──
+function _admEsPC(){ return window.matchMedia && window.matchMedia('(min-width:901px)').matches; }
+(function(){
+  var orig = window.admToggleNav;
+  window.admToggleNav = function(force){
+    if(_admEsPC()){
+      var fp = document.getElementById('full-admin-panel'); if(!fp) return;
+      var abrir = (force !== undefined) ? !!force : fp.classList.contains('adm-nav-oculto');
+      fp.classList.toggle('adm-nav-oculto', !abrir);
+      try{ localStorage.setItem('cs_adm_nav_oculto', abrir ? '0' : '1'); }catch(e){}
+      var hb = document.querySelector('.adm-ham'); if(hb) hb.setAttribute('aria-expanded', String(abrir));
+      return;
+    }
+    return orig ? orig.apply(this, arguments) : undefined;
+  };
+  try{ if(localStorage.getItem('cs_adm_nav_oculto') === '1'){ var fp = document.getElementById('full-admin-panel'); if(fp) fp.classList.add('adm-nav-oculto'); } }catch(e){}
+  document.addEventListener('DOMContentLoaded', function(){ try{ if(localStorage.getItem('cs_adm_nav_oculto') === '1'){ var fp = document.getElementById('full-admin-panel'); if(fp) fp.classList.add('adm-nav-oculto'); } }catch(e){} });
+})();
 
 
 // ═══════════════════════ CONTROL DE VERSIÓN: nada de comprar con una tienda vieja ═══════════════════════
