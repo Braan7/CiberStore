@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta name="cs-build" content="98cb4703bf">
-<script>var CS_BUILD="98cb4703bf";</script>
+<meta name="cs-build" content="448a747ab2">
+<script>var CS_BUILD="448a747ab2";</script>
 <meta charset="UTF-8"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -4139,6 +4139,14 @@ body.prov-pausa #page-tarjetas .jg-comprar,body.prov-pausa #page-niveles .jg-com
 /* Panel admin en celular: el menú abierto va por encima del encabezado (antes el encabezado le tapaba la parte de arriba) */
 .admin-panel .adm-nav.open{z-index:40}
 .admin-panel .adm-nav-overlay.show{z-index:39}
+/* PC: la hamburguesa abre y cierra el menú lateral; cerrado, el contenido usa todo el ancho */
+@media(min-width:901px){
+  .admin-panel .adm-ham{display:flex;cursor:pointer;margin-right:.7rem;flex-shrink:0}
+  .admin-panel .adm-nav{transition:transform .25s ease}
+  .admin-panel .adm-section,.admin-panel .adm-topbar{transition:margin-left .25s ease}
+  .admin-panel.adm-nav-oculto .adm-nav{transform:translateX(-100%)}
+  .admin-panel.adm-nav-oculto .adm-section,.admin-panel.adm-nav-oculto .adm-topbar{margin-left:0}
+}
 
 #theme-btn,.theme-btn{display:none!important}
 </style>
@@ -7622,7 +7630,7 @@ body.prov-pausa #page-tarjetas .jg-comprar,body.prov-pausa #page-niveles .jg-com
   <!-- Topbar -->
   <div class="adm-topbar">
     <div style="display:flex;align-items:center;gap:.85rem">
-      <button class="adm-ham" onclick="admToggleNav()" aria-label="Abrir menu">
+      <button class="adm-ham" onclick="admToggleNav()" aria-label="Abrir o cerrar el men&uacute;" title="Men&uacute;">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
       <div style="width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#04151a" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
@@ -7835,8 +7843,6 @@ body.prov-pausa #page-tarjetas .jg-comprar,body.prov-pausa #page-niveles .jg-com
         <tbody id="adm-pedidos-body"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem">Presiona Filtrar</td></tr></tbody>
       </table>
     </div>
-  </div>
-
   <!-- GESTION DE ENTREGAS (cambiar estado de pedidos) -->
   <div class="admin-card" style="margin-top:1.25rem">
     <div style="font-family:Saira;font-size:.72rem;color:#67e8f9;letter-spacing:1px;margin-bottom:.85rem">&#128666; GESTION DE ENTREGAS</div>
@@ -7848,6 +7854,9 @@ body.prov-pausa #page-tarjetas .jg-comprar,body.prov-pausa #page-niveles .jg-com
       <div style="text-align:center;color:var(--muted);padding:1.5rem;font-size:.82rem">Presiona "Cargar pedidos"</div>
     </div>
   </div>
+</div>
+
+  
 
   <!-- ══ SALDOS ══ -->
   <div class="adm-section" id="adms-saldos">
@@ -8389,9 +8398,9 @@ body.prov-pausa #page-tarjetas .jg-comprar,body.prov-pausa #page-niveles .jg-com
 <div class="mn-ov" id="ot-modal" role="dialog" aria-modal="true" aria-labelledby="ot-title" style="display:none" onclick="if(event.target===this)otCerrar()">
   <div class="mn-box"><button type="button" class="mn-x" onclick="otCerrar()" aria-label="Cerrar">&times;</button><div class="mn-body" id="ot-body"></div></div>
 </div>
-<script src="supabase.js?v=98cb4703bf"></script>
-<script src="supabase_integration.js?v=98cb4703bf"></script>
-<script src="script.js?v=98cb4703bf"></script>
+<script src="supabase.js?v=448a747ab2"></script>
+<script src="supabase_integration.js?v=448a747ab2"></script>
+<script src="script.js?v=448a747ab2"></script>
 
 <!-- BARRA DE NAVEGACION INFERIOR -->
 
