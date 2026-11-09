@@ -9,15 +9,15 @@ const TOL  = Number(process.env.CO_TOLERANCIA || 0.35);      // cuánto se puede
 const TC   = Number(process.env.CO_TC || 19.5);              // pesos por dólar para la protección contra venta bajo costo
 const PROTEGER_MARGEN = !/^(0|false|off|no)$/i.test(String(process.env.CO_PROTEGER_MARGEN || '1'));
 
-// ── PRECIOS DE VENTA (los de tu lista): precio = MXN, usd = dólares. Sirven para proteger el margen: si el proveedor cobra más que "usd", ese producto se bloquea.
+// ── PRECIOS DE VENTA (los de tu lista): usd = dólares; precio = MXN de referencia (en la tienda los diamantes se calculan con el tipo de cambio del día). Sirven para proteger el margen: si el proveedor cobra más que "usd", ese producto se bloquea.
 // refUsd = costo de referencia del proveedor (solo diamantes), sirve para no comprar un producto equivocado.
 const PRODUCTOS = [
-  { clave:'d110',  grupo:'diamantes', titulo:'110 Diamantes',   precio:12.57,  usd:0.6699,  num:110,  base:100,  refUsd:0.6650 },
-  { clave:'d341',  grupo:'diamantes', titulo:'341 Diamantes',   precio:37.70,  usd:2.0098,  num:341,  base:310,  refUsd:1.9999 },
-  { clave:'d572',  grupo:'diamantes', titulo:'572 Diamantes',   precio:63.74,  usd:3.3976,  num:572,  base:520,  refUsd:3.3955 },
-  { clave:'d1166', grupo:'diamantes', titulo:'1,166 Diamantes', precio:118.39, usd:6.3109,  num:1166, base:1060, refUsd:6.3089 },
-  { clave:'d2398', grupo:'diamantes', titulo:'2,398 Diamantes', precio:234.88, usd:12.5209, num:2398, base:2180, refUsd:12.5203 },
-  { clave:'d6160', grupo:'diamantes', titulo:'6,160 Diamantes', precio:597.75, usd:31.8646, num:6160, base:5600, refUsd:31.8640 },
+  { clave:'d110',  grupo:'diamantes', titulo:'110 Diamantes',   precio:12.71,  usd:0.6799,  num:110,  base:100,  refUsd:0.6650 },
+  { clave:'d341',  grupo:'diamantes', titulo:'341 Diamantes',   precio:46.93,  usd:2.5098,  num:341,  base:310,  refUsd:1.9999 },
+  { clave:'d572',  grupo:'diamantes', titulo:'572 Diamantes',   precio:74.01,  usd:3.9576,  num:572,  base:520,  refUsd:3.3955 },
+  { clave:'d1166', grupo:'diamantes', titulo:'1,166 Diamantes', precio:130.73, usd:6.9909,  num:1166, base:1060, refUsd:6.3089 },
+  { clave:'d2398', grupo:'diamantes', titulo:'2,398 Diamantes', precio:243.49, usd:13.0209, num:2398, base:2180, refUsd:12.5203 },
+  { clave:'d6160', grupo:'diamantes', titulo:'6,160 Diamantes', precio:600.36, usd:32.1046, num:6160, base:5600, refUsd:31.8640 },
 
   { clave:'tsb', grupo:'tarjetas', titulo:'Tarjeta Semanal Básica', precio:6.76,   usd:0.3605, tipo:'semanal_basica' },
   { clave:'ts',  grupo:'tarjetas', titulo:'Tarjeta Semanal',        precio:28.98,  usd:1.5450, tipo:'semanal' },
