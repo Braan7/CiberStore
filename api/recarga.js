@@ -278,7 +278,7 @@ module.exports = async function handler(req, res){
     // ¿Ya existe este mismo pedido? (reintento tras un corte): se devuelve su estado sin gastar de nuevo ni aplicar fusibles
     const rev = await revisarPedidos(cliente, key);
     if(!rev.ok) return enviar(res, NO_HECHO('No se pudo verificar el límite de gasto', 'ENDPOINT_DISABLED'));
-    if(rev.existente) return enviar(res, mapearOrden(rev.existente));
+    if(rev.existente) return enviar(res, Object.assign(mapearOrden(rev.existente), { costo_usd: d.precio }));
     // Protección de saldo con el proveedor: si queda poco (o no alcanza para este pedido) se pausa y se te avisa por Telegram
     const sp = await A.estado(d.precio);
     if(sp.pausa){ await A.avisarSaldoBajo(sp.saldo, sp.motivo); return enviar(res, NO_HECHO('Recargas en pausa por unos minutos: estamos reponiendo saldo del sistema. Intenta de nuevo en un rato.', 'ENDPOINT_DISABLED')); }
@@ -305,7 +305,9 @@ module.exports = async function handler(req, res){
       if(s.status === 200 && s.json && s.json.order){ o = Object.assign({}, o, s.json.order); if(['completed', 'failed', 'cancelled'].indexOf(o.status) >= 0) break; }
     }
     try{ await A.despuesDeCompra(); }catch(e){}
-    return enviar(res, mapearOrden(o));
+    // costo_usd: lo que cobró el proveedor (para el aviso de Telegram con la ganancia)
+    const final = mapearOrden(o); if(final.success) final.costo_usd = d.precio;
+    return enviar(res, final);
   }catch(e){
     const timeout = e && e.name === 'AbortError';
     return enviar(res, DUDOSO(timeout ? 'El proveedor tardó demasiado: se está verificando' : 'Error al contactar al proveedor'));

@@ -3,12 +3,14 @@
 // Acciones: ping · balance · paquetes · catalogo · validate · order · status
 //   validate/order aceptan  {producto:'d110'|'tsb'|'n6'…}  o, como antes,  {diamantes:110}
 // Variables de entorno en Vercel: CO_API_KEY, CO_ADMIN_TOKEN  (opcionales: CO_MAP, CO_TOLERANCIA, CO_REGION_REGEX, CO_TC)
+// Acepta tu sesión del panel (api/admin.js) en lugar del CO_ADMIN_TOKEN: así solo inicias sesión una vez.
 // Requiere api/_comun.js (productos y detección). La llave del proveedor vive SOLO aquí.
 // ═══════════════════════════════════════════════════════════════════════════
 'use strict';
 const crypto = require('crypto');
 const C = require('./_comun.js');
 const A = require('./_alerta.js');
+const S = require('./_sesion.js');
 
 function enviar(res, status, body){ res.statusCode = status; res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.setHeader('Cache-Control', 'no-store'); res.end(JSON.stringify(body)); }
 const iguales = (a, b) => { const x = Buffer.from(String(a)), y = Buffer.from(String(b)); return x.length === y.length && crypto.timingSafeEqual(x, y); };
@@ -50,7 +52,9 @@ module.exports = async function handler(req, res){
     if(!process.env.CO_API_KEY || !process.env.CO_ADMIN_TOKEN) return enviar(res, 500, { ok: false, code: 'config', message: 'Falta configurar CO_API_KEY y CO_ADMIN_TOKEN en Vercel' });
     const ip = C.ipDe(req);
     if(bloqueada(ip)) return enviar(res, 429, { ok: false, code: 'demasiados_intentos', message: 'Demasiados intentos. Espera un minuto.' });
-    if(!iguales(req.headers['x-admin-token'] || '', process.env.CO_ADMIN_TOKEN)){ anotarFallo(ip); return enviar(res, 401, { ok: false, code: 'no_autorizado', message: 'Token incorrecto' }); }
+    // Sirve tu sesión del panel (iniciada con ADMIN_EMAIL / ADMIN_PASSWORD) o, como antes, el CO_ADMIN_TOKEN
+    const tk = String(req.headers['x-admin-token'] || '');
+    if(!(S.verificar(tk) || iguales(tk, process.env.CO_ADMIN_TOKEN))){ anotarFallo(ip); return enviar(res, 401, { ok: false, code: 'no_autorizado', message: 'Sesión vencida o token incorrecto' }); }
     const b = (req.body && typeof req.body === 'object') ? req.body : {};
 
     switch(b.action){
