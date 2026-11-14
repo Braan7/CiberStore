@@ -1,6 +1,8 @@
 /* CiberStore v1779504760 */
 /* \u2500\u2500 DATA \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-var WA = '573337291678';
+/* ══ CONTACTO OFICIAL DE SOPORTE ══ Para cambiar el WhatsApp de toda la web, edita SOLO estas 3 líneas. */
+var CS_SOPORTE = { wa:'573503173878', visible:'+57 350 3173878', mensaje:'Hola, necesito ayuda con CIBERSTORE. Mi usuario es:' };
+var WA = CS_SOPORTE.wa;
 
 /* Fallback if supabase_integration.js not loaded yet */
 if(typeof getSpent === 'undefined'){
@@ -1319,7 +1321,7 @@ function renderProds(){
     +'<span style="font-size:1.1rem;flex-shrink:0">\u26A0\uFE0F</span>'
     +'<div style="font-size:.76rem;color:var(--text);line-height:1.6"><strong style="color:#ffa500">Manda tu ID para comprobar si tiene la oferta.</strong> Una vez comprobada, haz tu pedido con saldo.</div>'
     +'</div>'
-    +'<a href="https://wa.me/573337291678?text=Hola!%20Quiero%20verificar%20mi%20ID%20para%20Diamantes%201%20Vez%20x%20ID" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:.72rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:9px;font-family:Barlow,sans-serif;font-weight:800;font-size:.85rem;text-decoration:none;box-sizing:border-box;margin-bottom:1.1rem">\uD83D\uDCF1 Verificar mi ID por WhatsApp</a>'
+    +'<a href="https://wa.me/'+WA+'?text=Hola!%20Quiero%20verificar%20mi%20ID%20para%20Diamantes%201%20Vez%20x%20ID" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:.72rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border-radius:9px;font-family:Barlow,sans-serif;font-weight:800;font-size:.85rem;text-decoration:none;box-sizing:border-box;margin-bottom:1.1rem">\uD83D\uDCF1 Verificar mi ID por WhatsApp</a>'
     +'<div class="lkpln-grid" style="margin-bottom:1.1rem">';
   for(var j=0;j<PRODUCTS_1VEZ.length;j++){
     rows+=makeModernCard(PRODUCTS_1VEZ[j], '#00e676', PRODUCTS_1VEZ[j].badge==='MEJOR PRECIO');
@@ -1508,13 +1510,13 @@ function renderPerfil(){
       var h='';
       rows.forEach(function(m){
         var f2=m.created_at?new Date(m.created_at).toLocaleDateString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'';  
-        var isC=m.tipo==='credito'||m.tipo==='ajuste';
+        var isC=m.tipo==='credito'||m.tipo==='ajuste'||m.tipo==='compra_cancelada';
         var color=isC?'#00e676':'#ff6b6b';
         var signo=isC?'+':'-';
         h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:.42rem .55rem;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px">'
           +'<div style="min-width:0;flex:1"><div style="font-size:.75rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis">'+(m.descripcion||m.tipo)+'</div>'
           +'<div style="font-size:.62rem;color:var(--muted)">'+f2+'</div></div>'
-          +'<div style="font-family:Saira;font-size:.75rem;font-weight:700;color:'+color+';flex-shrink:0;margin-left:.5rem">'+signo+'$'+(m.monto||0).toLocaleString('es-MX')+'</div>'
+          +'<div style="font-family:Saira;font-size:.75rem;font-weight:700;color:'+color+';flex-shrink:0;margin-left:.5rem">'+signo+'$'+Math.abs(Number(m.monto)||0).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})+'</div>'
           +'</div>';
       });
       movs.innerHTML=h;
@@ -3473,7 +3475,7 @@ function admToggleNav(force){
 }
 
 function admFullTab(tab){
-  var tabs=['stats','users','pedidos','saldos','top','puntos','codigos','chat','resenas','soporte','inactivos','seguridad','recargas','catalogo','config'];
+  var tabs=['stats','users','pedidos','saldos','top','puntos','codigos','chat','resenas','soporte','inactivos','seguridad','recargas','catalogo','premios','config'];
   tabs.forEach(function(t){
     var btn=document.getElementById('admn-'+t);
     var sec=document.getElementById('adms-'+t);
@@ -3482,6 +3484,7 @@ function admFullTab(tab){
   });
   if(tab==='stats')   admFullLoadStats();
   if(tab==='catalogo') catAdmRender();
+  if(tab==='premios') admPremiosRender();
   if(tab==='users')   { admFullLoadUsers(); admCargarStatsClientes(); }
   if(tab==='pedidos') admLoadPedidos();
   if(tab==='saldos')  admFullLoadMovs();
@@ -3575,7 +3578,7 @@ function admFullLoadStats(){
           h+='<tr>'
             +'<td style="font-weight:700;color:#fff">'+(umap[m.user_id]||'-')+'</td>'
             +'<td style="color:var(--muted)">'+(m.descripcion||'-')+'</td>'
-            +'<td style="font-family:Saira;color:#00e676;font-weight:700">$'+(m.monto||0).toLocaleString('es-MX')+'</td>'
+            +'<td style="font-family:Saira;color:#00e676;font-weight:700">$'+Math.abs(Number(m.monto)||0).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})+'</td>'
             +'<td style="color:var(--muted)">'+fecha+'</td>'
             +'</tr>';
         });
@@ -3911,14 +3914,14 @@ function admLoadPedidos(){
       var h='';
       filtered.forEach(function(m,i){
         var fecha=m.created_at?new Date(m.created_at).toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'';
-        var isC=m.tipo==='credito'||m.tipo==='ajuste';
+        var isC=m.tipo==='credito'||m.tipo==='ajuste'||m.tipo==='compra_cancelada';
         var tipoBadge='<span class="adm-badge" style="background:rgba('+(isC?'0,230,118':'255,80,80')+',.1);color:'+(isC?'#00e676':m.tipo==='compra'?'var(--c1)':'#ff6b6b')+'">'+m.tipo+'</span>';
         h+='<tr>'
           +'<td style="color:var(--muted);font-family:Saira;font-size:.7rem">'+(i+1)+'</td>'
           +'<td style="font-weight:700;color:#fff">'+(umap[m.user_id]||'-')+'</td>'
           +'<td>'+tipoBadge+'</td>'
           +'<td style="color:var(--muted)">'+(m.descripcion||'-')+'</td>'
-          +'<td style="font-family:Saira;font-weight:700;color:'+(isC?'#00e676':'#ff6b6b')+'">'+(isC?'+':'-')+'$'+(m.monto||0).toLocaleString('es-MX')+'</td>'
+          +'<td style="font-family:Saira;font-weight:700;color:'+(isC?'#00e676':'#ff6b6b')+'">'+(isC?'+':'-')+'$'+Math.abs(Number(m.monto)||0).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})+'</td>'
           +'<td style="color:var(--muted)">'+fecha+'</td>'
           +'</tr>';
       });
@@ -3940,11 +3943,11 @@ function admFullLoadMovs(){
       var h='';
       movs.forEach(function(m){
         var fecha=m.created_at?new Date(m.created_at).toLocaleDateString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'';
-        var isC=m.tipo==='credito'||m.tipo==='ajuste';
+        var isC=m.tipo==='credito'||m.tipo==='ajuste'||m.tipo==='compra_cancelada';
         h+='<tr>'
           +'<td style="color:#fff;font-weight:600">'+(umap[m.user_id]||'-')+'</td>'
           +'<td><span class="adm-badge" style="background:rgba('+(isC?'0,230,118':'255,80,80')+',.1);color:'+(isC?'#00e676':'#ff6b6b')+'">'+m.tipo+'</span></td>'
-          +'<td style="font-family:Saira;font-weight:700;color:'+(isC?'#00e676':'#ff6b6b')+'">'+(isC?'+':'-')+'$'+(m.monto||0).toLocaleString('es-MX')+'</td>'
+          +'<td style="font-family:Saira;font-weight:700;color:'+(isC?'#00e676':'#ff6b6b')+'">'+(isC?'+':'-')+'$'+Math.abs(Number(m.monto)||0).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})+'</td>'
           +'<td style="color:var(--muted)">'+(m.descripcion||'-')+'</td>'
           +'<td style="color:var(--muted)">'+fecha+'</td>'
           +'</tr>';
@@ -5262,7 +5265,7 @@ function submitLk2k(){
     + 'Plan%3A%20'+likes+'%20likes%20-%20%24'+precio+'%20MX%0A'
     + 'ID%20FF%3A%20'+encodeURIComponent(ffId)+'%0A'
     + 'Nombre%3A%20'+encodeURIComponent(ffNom);
-  window.open('https://wa.me/573337291678?text='+msg,'_blank');
+  window.open('https://wa.me/'+WA+'?text='+msg,'_blank');
 }
 
 function submitLk200(){
@@ -5280,7 +5283,7 @@ function submitLk200(){
     + 'Plan%3A%20'+likes+'%20likes%20-%20%24'+precio+'%20MX%0A'
     + 'ID%20FF%3A%20'+encodeURIComponent(ffId)+'%0A'
     + 'Nombre%3A%20'+encodeURIComponent(ffNom);
-  window.open('https://wa.me/573337291678?text='+msg,'_blank');
+  window.open('https://wa.me/'+WA+'?text='+msg,'_blank');
 }
 
 /* ================================================================
@@ -5795,12 +5798,12 @@ function buyLikesInstant(){
 
 function quoteLikesBasico(){
   var msg = 'Hola, quiero cotizar un plan de likes básicos. ¿Cuál es el mejor para mí?';
-  window.open('https://wa.me/573337291678?text='+encodeURIComponent(msg), '_blank');
+  window.open('https://wa.me/'+WA+'?text='+encodeURIComponent(msg), '_blank');
 }
 
 function quoteLikesInstant(){
   var msg = 'Hola, me interesa un plan de likes instantáneos. ¿Cuál recomiendas?';
-  window.open('https://wa.me/573337291678?text='+encodeURIComponent(msg), '_blank');
+  window.open('https://wa.me/'+WA+'?text='+encodeURIComponent(msg), '_blank');
 }
 
 // Cargar saldo cuando se abre la página de likes
@@ -6241,7 +6244,7 @@ function cotizarDiamantes(){
   // Tambien avisar a Telegram (sin foto, ya que por WhatsApp va aparte)
   _notifTelegramTexto(metodo);
 
-  window.open('https://wa.me/573337291678?text=' + msg, '_blank');
+  window.open('https://wa.me/'+WA+'?text=' + msg, '_blank');
 }
 
 // Manda solo el aviso de texto a Telegram (para el flujo de WhatsApp)
@@ -6329,7 +6332,7 @@ function cotizarBonus(){
   var ffId = ((document.getElementById('bonus-id')||{}).value||'').trim();
   var txt = 'Hola! Quiero pedir '+(plan?plan.label:'diamantes x ID +20% bonus');
   if(ffId) txt += ' para mi ID: '+ffId;
-  window.open('https://wa.me/573337291678?text='+encodeURIComponent(txt), '_blank');
+  window.open('https://wa.me/'+WA+'?text='+encodeURIComponent(txt), '_blank');
 }
 
 function _updateBonusSaldo(){
@@ -6404,7 +6407,7 @@ function cotizarIlim(){
   var ffId=((document.getElementById('ilim-id')||{}).value||'').trim();
   var txt='Hola! Quiero pedir '+diamantes+' diamantes ilimitados';
   if(ffId) txt+=' para mi ID: '+ffId;
-  window.open('https://wa.me/573337291678?text='+encodeURIComponent(txt),'_blank');
+  window.open('https://wa.me/'+WA+'?text='+encodeURIComponent(txt),'_blank');
 }
 
 
@@ -6880,7 +6883,7 @@ function solicitarAccesoAPI(){
     + '📱 WhatsApp: ' + encodeURIComponent(tel) + '%0A%0A'
     + 'Quedo atento para recibir mi API Key y recargar saldo. Gracias!';
 
-  window.open('https://wa.me/573337291678?text=' + msg, '_blank');
+  window.open('https://wa.me/'+WA+'?text=' + msg, '_blank');
   showToast('Abriendo WhatsApp...', 2000);
 }
 
@@ -6955,7 +6958,7 @@ function confirmarBinance(){
     + (_bncSel.custom ? '' : ' (con bono)') + '%0A%0A'
     + 'Ya transferi a Binance ID 1106987175. Adjunto mi comprobante.';
   _notifTelegramTexto('binance');
-  window.open('https://wa.me/573337291678?text=' + msg, '_blank');
+  window.open('https://wa.me/'+WA+'?text=' + msg, '_blank');
 }
 
 
@@ -7021,7 +7024,7 @@ function enviarPagoWA(metodo){
       + '%0AAdjunto mi comprobante.';
   }
 
-  window.open('https://wa.me/573337291678?text=' + msg, '_blank');
+  window.open('https://wa.me/'+WA+'?text=' + msg, '_blank');
 }
 
 
@@ -7637,13 +7640,13 @@ function _cargarSaldoYMovimientos(){
       var h='';
       rows.forEach(function(m){
         var f2=m.created_at?new Date(m.created_at).toLocaleDateString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'';
-        var isC=m.tipo==='credito'||m.tipo==='ajuste'||m.tipo==='recarga';
+        var isC=m.tipo==='credito'||m.tipo==='ajuste'||m.tipo==='recarga'||m.tipo==='compra_cancelada';
         var color=isC?'#00e676':'#ff6b6b';
         var signo=isC?'+':'-';
         h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:.42rem .55rem;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px">'
           +'<div style="min-width:0;flex:1"><div style="font-size:.75rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis">'+(m.descripcion||m.tipo)+'</div>'
           +'<div style="font-size:.62rem;color:var(--muted)">'+f2+'</div></div>'
-          +'<div style="font-family:Saira;font-size:.75rem;font-weight:700;color:'+color+';flex-shrink:0;margin-left:.5rem">'+signo+'$'+(m.monto||0).toLocaleString('es-MX')+'</div>'
+          +'<div style="font-family:Saira;font-size:.75rem;font-weight:700;color:'+color+';flex-shrink:0;margin-left:.5rem">'+signo+'$'+Math.abs(Number(m.monto)||0).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})+'</div>'
           +'</div>';
       });
       movs.innerHTML=h;
@@ -7736,7 +7739,7 @@ function enviarCreadorWA(){
     + 'ID Free Fire: ' + encodeURIComponent(ffid) + '%0A%0A'
     + 'Aqui esta mi video para verificacion.';
 
-  window.open('https://wa.me/573337291678?text=' + msg, '_blank');
+  window.open('https://wa.me/'+WA+'?text=' + msg, '_blank');
   showToast('Abriendo WhatsApp...', 2000);
 }
 
@@ -8323,7 +8326,7 @@ function _ejecutarRecargaVerificada(p, ffId, nombre, verificationStatus, btn, ms
     body: JSON.stringify({ action:'comprar', package_id:p.package_id, catalog_id:p.catalog_id, sku:p.sku, player_id:ffId, client_name:authSession.username, idempotency_key:idempotencyKey })
   }).then(function(r){ return r.json(); }).then(function(res){
     if(res.success && (res.status==='COMPLETED' || res.status==='PENDING')){
-      registrarPedido(p.nombre+' (AUTO'+(esVerificado?'':' - ID NO VERIFICADO')+')', p.diamantes, 'diamantes', ffId, p.precio, 0);
+      registrarPedido(p.nombre+' (AUTO'+(esVerificado?'':' - ID NO VERIFICADO')+')', p.diamantes, 'diamantes', ffId, p.precio, 0, {res:res, ord:ord, diamantes:p.diamantes});
       if(typeof tgNotifyPurchase==='function'){
         var infoJugador = esVerificado ? ('\uD83D\uDC64 Nombre IG: '+nombre) : '\u26A0\uFE0F ID SIN VERIFICAR - cliente confirmo bajo su responsabilidad';
         var infoVia = res.via ? ('\n\uD83D\uDD17 Via: '+(res.via==='catalog'?'Catalogo Unificado':(res.via&&String(res.via).indexOf('Central One')===0?res.via:'API pines'))) : '';
@@ -8334,7 +8337,7 @@ function _ejecutarRecargaVerificada(p, ffId, nombre, verificationStatus, btn, ms
       // COMPLETED por otro medio, otorgar_puntos_pedido() puede llamarse de nuevo
       // con el mismo pedido_id sin duplicar (UNIQUE lo protege).
       if(res.status==='COMPLETED' && typeof sb!=='undefined' && sb.rpc && authSession && authSession.id){
-        (csRegistrarVentaDiamantes(authSession.id, ord, p.diamantes), sb.rpc('otorgar_puntos_pedido', { p_user_id: authSession.id, p_pedido_id: ord, p_diamantes: p.diamantes }))
+        (csRegistrarVentaDiamantes(authSession.id, ord, p.diamantes, p.precio), sb.rpc('otorgar_puntos_pedido', { p_user_id: authSession.id, p_pedido_id: ord, p_diamantes: p.diamantes }))
           .then(function(pts){ if(pts) console.log('[PUNTOS] +'+pts+' puntos otorgados, pedido #'+ord); })
           .catch(function(e){ console.error('[PUNTOS] Error otorgando:', e); });
       }
@@ -8363,7 +8366,7 @@ function _ejecutarRecargaVerificada(p, ffId, nombre, verificationStatus, btn, ms
       if(esDuplicado){
         // Esta misma idempotency_key ya se habia usado — no asumir nada, dejar
         // en revision manual para que el admin consulte el estado real primero.
-        registrarPedido(p.nombre+' (AUTO - DUPLICADA, VERIFICAR)', p.diamantes, 'diamantes', ffId, p.precio, 0);
+        registrarPedido(p.nombre+' (AUTO - DUPLICADA, VERIFICAR)', p.diamantes, 'diamantes', ffId, p.precio, 0, {ord:ord});
         if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F PEDIDO DUPLICADO (idempotencia) - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\uD83D\uDD11 Key: '+idempotencyKey, p.precio, ord);
         if(btn){ btn.disabled=false; btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
         if(msg){ msg.className='ddet-msg'; msg.innerHTML = _rcEstadoHTML('pending', '\u23F3 EN VERIFICACION', 'Este pedido parece repetido. Estamos verificando el estado real antes de continuar.'); }
@@ -8376,7 +8379,7 @@ function _ejecutarRecargaVerificada(p, ffId, nombre, verificationStatus, btn, ms
         // El proveedor fue contactado (con exito o no) - la wallet mayorista ya se
         // movio. Nunca reembolsar solo: dejar para revision manual, igual que el
         // bloque de "error ambiguo" que ya existia.
-        registrarPedido(p.nombre+' (AUTO - VERIFICAR)', p.diamantes, 'diamantes', ffId, p.precio, 0);
+        registrarPedido(p.nombre+' (AUTO - VERIFICAR)', p.diamantes, 'diamantes', ffId, p.precio, 0, {ord:ord});
         if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F PROVEEDOR CONTACTADO, VERIFICAR - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\uD83D\uDD11 Key: '+idempotencyKey, p.precio, ord);
         if(btn){ btn.disabled=false; btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
         if(msg){ msg.className='ddet-msg'; msg.innerHTML = _rcEstadoHTML('pending', '\u23F3 EN VERIFICACION', 'Tu recarga se esta verificando. Si no llega en unos minutos, contacta al admin con tu ID.'); }
@@ -8399,7 +8402,7 @@ function _ejecutarRecargaVerificada(p, ffId, nombre, verificationStatus, btn, ms
           if(typeof sbAddMovimiento==='function') sbAddMovimiento(authSession.id, 'credito', p.precio, 'Reembolso Pedido #'+ord+' - recarga rechazada');
           if(_movCompraId) _cancelarMovPorId(_movCompraId); else { _cancelarPendiente = true; _cancelarMovimientoCompra(authSession.id, ord); }
 
-          registrarPedido(p.nombre+' (RECHAZADA - reembolsado)', p.diamantes, 'diamantes', ffId, 0, 0);
+          registrarPedido(p.nombre+' (RECHAZADA - reembolsado)', p.diamantes, 'diamantes', ffId, 0, 0, {estado:'rechazado', ord:ord});
           // Reversion de seguridad: si por algun motivo este pedido ya habia
           // otorgado puntos antes, los revierte. Si nunca otorgo puntos (caso
           // normal aqui), el RPC simplemente devuelve 0 sin hacer nada.
@@ -8412,7 +8415,7 @@ function _ejecutarRecargaVerificada(p, ffId, nombre, verificationStatus, btn, ms
           // No decir "reembolsado" en Telegram: avisar con urgencia real para
           // que el admin lo reembolse manualmente.
           console.error('[RECARGA] reembolso fallo:', e);
-          registrarPedido(p.nombre+' (RECHAZADA - REEMBOLSO FALLIDO, REVISAR)', p.diamantes, 'diamantes', ffId, p.precio, 0);
+          registrarPedido(p.nombre+' (RECHAZADA - REEMBOLSO FALLIDO, REVISAR)', p.diamantes, 'diamantes', ffId, p.precio, 0, {ord:ord});
           if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\uD83D\uDD25 <b>URGENTE: REEMBOLSO FALLIDO</b>\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 Recarga rechazada: '+errTxt+'\n\u274C El reembolso automatico de '+fmt(p.precio)+' AL CLIENTE FALLO ('+String((e&&e.message)||e)+')\n\n\uD83D\uDEA8 <b>REEMBOLSA MANUALMENTE AL CLIENTE Y RECARGA TU CUENTA DEL PROVEEDOR</b>', p.precio, ord);
         });
 
@@ -8437,14 +8440,14 @@ function _ejecutarRecargaVerificada(p, ffId, nombre, verificationStatus, btn, ms
           if(typeof sbAddMovimiento==='function') sbAddMovimiento(authSession.id, 'credito', p.precio, 'Devolucion Pedido #'+ord+' - producto no disponible');
           if(_movCompraId) _cancelarMovPorId(_movCompraId); else { _cancelarPendiente = true; _cancelarMovimientoCompra(authSession.id, ord); }
 
-          registrarPedido(p.nombre+' (AUTO - NO DISPONIBLE, devuelto)', p.diamantes, 'diamantes', ffId, 0, 0);
+          registrarPedido(p.nombre+' (AUTO - NO DISPONIBLE, devuelto)', p.diamantes, 'diamantes', ffId, 0, 0, {estado:'rechazado', ord:ord});
           if(typeof sb!=='undefined' && sb.rpc && authSession && authSession.id){
             csAnularVentaDiamantes(authSession.id, ord); sb.rpc('revertir_puntos_pedido', { p_user_id: authSession.id, p_pedido_id: ord, p_motivo: 'Producto no disponible - devuelto' }).catch(function(){});
           }
           if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F NO DISPONIBLE - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt+'\n\u2705 SALDO DEVUELTO automaticamente ('+fmt(p.precio)+')', p.precio, ord);
         }).catch(function(e){
           console.error('[RECARGA] devolucion fallo:', e);
-          registrarPedido(p.nombre+' (NO DISPONIBLE - DEVOLUCION FALLIDA, REVISAR)', p.diamantes, 'diamantes', ffId, p.precio, 0);
+          registrarPedido(p.nombre+' (NO DISPONIBLE - DEVOLUCION FALLIDA, REVISAR)', p.diamantes, 'diamantes', ffId, p.precio, 0, {ord:ord});
           if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\uD83D\uDD25 <b>URGENTE: DEVOLUCION FALLIDA</b>\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 Producto no disponible: '+errTxt+'\n\u274C La devolucion automatica de '+fmt(p.precio)+' AL CLIENTE FALLO ('+String((e&&e.message)||e)+')\n\n\uD83D\uDEA8 <b>DEVUELVE MANUALMENTE AL CLIENTE</b>', p.precio, ord);
         });
         if(btn){ btn.disabled=false; btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
@@ -8453,7 +8456,7 @@ function _ejecutarRecargaVerificada(p, ffId, nombre, verificationStatus, btn, ms
         _comprandoDiam = false;
       } else {
         // Error ambiguo: la recarga pudo haberse hecho igual. NO reembolsar, verificar manual.
-        registrarPedido(p.nombre+' (AUTO - VERIFICAR)', p.diamantes, 'diamantes', ffId, p.precio, 0);
+        registrarPedido(p.nombre+' (AUTO - VERIFICAR)', p.diamantes, 'diamantes', ffId, p.precio, 0, {ord:ord});
         if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F VERIFICAR - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId+'\n\u2757 '+errTxt, p.precio, ord);
         if(btn){ btn.disabled=false; btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
         if(msg){ msg.className='ddet-msg'; msg.innerHTML = _rcEstadoHTML('pending', '\u23F3 EN VERIFICACION', 'Tu recarga se esta verificando. Si no llega en unos minutos, contacta al admin con tu ID.'); }
@@ -8464,7 +8467,7 @@ function _ejecutarRecargaVerificada(p, ffId, nombre, verificationStatus, btn, ms
     }
   }).catch(function(err){
     // NO reembolsar: la recarga pudo haberse completado aunque la respuesta fallo
-    registrarPedido(p.nombre+' (AUTO - VERIFICAR)', p.diamantes, 'diamantes', ffId, p.precio, 0);
+    registrarPedido(p.nombre+' (AUTO - VERIFICAR)', p.diamantes, 'diamantes', ffId, p.precio, 0, {ord:ord});
     if(typeof tgNotifyPurchase==='function') tgNotifyPurchase(authSession.username, '\u26A0\uFE0F VERIFICAR (sin respuesta) - Recarga AUTO\n\uD83D\uDCA0 Paquete: '+p.nombre+'\n\uD83C\uDFAE ID: '+ffId, p.precio, ord);
     if(btn){ btn.disabled=false; btn.className='ddet-btn on'; btn.innerHTML='Recargar con saldo &#8594;'; }
     if(msg){ msg.className='ddet-msg'; msg.innerHTML = _rcEstadoHTML('pending', '\u23F3 EN VERIFICACION', 'Tu recarga se esta verificando. Si no llega, contacta al admin.'); }
@@ -8639,7 +8642,7 @@ function cargarWalletPerfil(){
       if(!rows || !rows.length){ movs.innerHTML='<div style="text-align:center;padding:1rem;color:var(--muted);font-size:.78rem">Sin movimientos aun</div>'; return; }
       var h='';
       rows.slice(0,4).forEach(function(m){
-        var isC = m.tipo==='credito'||m.tipo==='ajuste'||m.tipo==='recarga';
+        var isC = m.tipo==='credito'||m.tipo==='ajuste'||m.tipo==='recarga'||m.tipo==='compra_cancelada';
         var color = isC?'#00e676':'#ff6b6b';
         var signo = isC?'+':'-';
         var hora = m.created_at ? new Date(m.created_at).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}) : '';
@@ -11340,7 +11343,7 @@ function comprarLikes2k(i){
   // Paquetes de cotizacion → WhatsApp
   if(p.cotizar){
     var msg = encodeURIComponent('Hola! Quiero cotizar el paquete de ' + p.likes + ' LIKES para Free Fire.');
-    window.open('https://wa.me/573337291678?text=' + msg, '_blank');
+    window.open('https://wa.me/'+WA+'?text=' + msg, '_blank');
     return;
   }
 
@@ -12386,7 +12389,7 @@ function boyaahEnviar(){
     + '\n\uD83D\uDCCE Adjunto mi comprobante de pago en este chat.';
 
   // 1) Abrir WhatsApp de inmediato (dentro del clic, para que el navegador no lo bloquee)
-  _boyaahUltimoWA = 'https://wa.me/' + (typeof WA !== 'undefined' ? WA : '573337291678') + '?text=' + encodeURIComponent(msg);
+  _boyaahUltimoWA = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(msg);
   window.open(_boyaahUltimoWA, '_blank');
 
   // 2) Registrar la solicitud + comprobante en el Telegram del admin (sin saldo)
@@ -12878,7 +12881,7 @@ function hxMod(i){ hxIr('mod', {mod:i}); }
 function hxPedir(){
   var g = HX_JUEGOS_ANDROID.filter(function(x){return x.id===_hxCtx.juego;})[0], m = g && g.mods[_hxCtx.mod]; if(!m) return;
   var msg = 'Hola! Quiero pedir el mod *' + m.n + '* (' + g.n + ' · Android).\nPrecio de referencia: $' + m.p.toFixed(2) + ' USD.\nDuraciones disponibles: ' + m.d + '.\n¿Me confirman duración y forma de pago?';
-  window.open('https://wa.me/' + (typeof WA !== 'undefined' ? WA : '573337291678') + '?text=' + encodeURIComponent(msg), '_blank', 'noopener');
+  window.open('https://wa.me/' + WA + '?text=' + encodeURIComponent(msg), '_blank', 'noopener');
 }
 function hxCuenta(tab){ hxCerrar(); if(typeof showAuthModal === 'function'){ showAuthModal(); if(typeof authTab === 'function') authTab(tab); } }
 function hxProductos(){ hxCerrar(); if(typeof goPage === 'function') goPage('home'); }
@@ -13552,7 +13555,7 @@ function _crtaCompletarItem(row, i, modo, darPuntos){
   var it = row.items[i];
   if(!it.reg){ _crtaRegistrarPedido(row.username, it.nombre + ' (' + modo + ')', it.clave ? 1 : it.diamantes, it.ff_id, it.precio, it.clave ? 'otro' : 'diamantes'); it.reg = true; }
   if(darPuntos && !it.pts && !it.clave && row.user_id && typeof sb !== 'undefined' && sb.rpc){
-    (csRegistrarVentaDiamantes(row.user_id, CRT_PID_BASE + Number(row.id) * 100 + i, Number(it.diamantes) || 0), sb.rpc('otorgar_puntos_pedido', {p_user_id:row.user_id, p_pedido_id:CRT_PID_BASE + Number(row.id) * 100 + i, p_diamantes:Number(it.diamantes) || 0})).catch(function(e){ console.error('[PUNTOS]', e); });
+    (csRegistrarVentaDiamantes(row.user_id, CRT_PID_BASE + Number(row.id) * 100 + i, Number(it.diamantes) || 0, Number(it.precio) || 0), sb.rpc('otorgar_puntos_pedido', {p_user_id:row.user_id, p_pedido_id:CRT_PID_BASE + Number(row.id) * 100 + i, p_diamantes:Number(it.diamantes) || 0})).catch(function(e){ console.error('[PUNTOS]', e); });
     it.pts = true;
   }
 }
@@ -15229,8 +15232,8 @@ var RK_MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto
 var _rkPer = 'historico', _rkCache = {}, _rkTotal = null, _rkSeq = 0;
 
 // ── Registro de ventas (se llama junto a los puntos) ──
-function csRegistrarVentaDiamantes(uid, pedido, diamantes){
-  try{ if(typeof sb !== 'undefined' && sb.rpc && uid && pedido != null) sb.rpc('registrar_venta_diamantes', {p_user_id:String(uid), p_pedido_id:Number(pedido), p_diamantes:Number(diamantes)}).catch(function(e){ console.warn('[RANKING] no se pudo registrar la venta:', e); }); }catch(e){}
+function csRegistrarVentaDiamantes(uid, pedido, diamantes, monto){
+  try{ if(typeof sb !== 'undefined' && sb.rpc && uid && pedido != null) sb.rpc('registrar_venta_diamantes', Object.assign({p_user_id:String(uid), p_pedido_id:Number(pedido), p_diamantes:Number(diamantes)}, (Number(monto) > 0 ? {p_monto:Math.round(Number(monto) * 100) / 100} : {}))).catch(function(e){ console.warn('[RANKING] no se pudo registrar la venta:', e); }); }catch(e){}
 }
 function csAnularVentaDiamantes(uid, pedido){
   try{ if(typeof sb !== 'undefined' && sb.rpc && uid && pedido != null) sb.rpc('anular_venta_diamantes', {p_user_id:String(uid), p_pedido_id:Number(pedido)}).catch(function(){}); }catch(e){}
@@ -15454,13 +15457,13 @@ function otComprar(){
     var tg = function(txt){ if(typeof tgNotifyPurchase === 'function') tgNotifyPurchase(authSession.username, txt, p.mxn, ord); };
     var fin = function(tono, html){ _otEnviando = false; _ot.estado = 'fin'; _ot.tono = tono; _ot.html = html; otRender(); };
     var verificar = function(titulo, errTxt, tipoPedido){
-      registrarPedido(p.n + ' (AUTO - ' + tipoPedido + ')', 1, 'otro', ffId, p.mxn, 0);
+      registrarPedido(p.n + ' (AUTO - ' + tipoPedido + ')', 1, 'otro', ffId, p.mxn, 0, {ord:ord});
       tg('\u26A0\uFE0F ' + titulo + ' - Recarga AUTO\n\uD83C\uDF81 Producto: ' + p.n + '\n\uD83C\uDFAE ID: ' + ffId + '\n\u2757 ' + errTxt + '\n\uD83D\uDD11 Key: ' + key);
       fin('warn', '<b>\u23F3 En verificación</b><br>Tu recarga se está verificando. Si no llega en unos minutos, contacta al administrador con tu ID.');
     };
     otApi({action:'comprar', producto:p.clave, player_id:ffId, client_name:authSession.username, idempotency_key:key}).then(function(res){
       if(res.success && (res.status === 'COMPLETED' || res.status === 'PENDING')){
-        registrarPedido(p.n + ' (AUTO' + (verificado ? '' : ' - ID NO VERIFICADO') + ')', 1, 'otro', ffId, p.mxn, 0);
+        registrarPedido(p.n + ' (AUTO' + (verificado ? '' : ' - ID NO VERIFICADO') + ')', 1, 'otro', ffId, p.mxn, 0, {res:res, ord:ord});
         tg('\u26A1 Recarga AUTO\n\uD83C\uDF81 Producto: ' + p.n + '\n\uD83C\uDFAE ID: ' + ffId + '\n' + (verificado ? ('\uD83D\uDC64 Nombre IG: ' + nombre) : '\u26A0\uFE0F ID SIN VERIFICAR - cliente confirmó bajo su responsabilidad') + (res.via ? ('\n\uD83D\uDD17 Via: ' + res.via) : '') + (typeof csGananciaTxt === 'function' ? csGananciaTxt(p.mxn, p.usd, res.costo_usd, res.status) : ''));
         fin(res.status === 'COMPLETED' ? 'ok' : 'warn', res.status === 'COMPLETED'
           ? '<div class="ic">\u2705</div><h3>¡Recarga completada!</h3><p>' + _manEsc(p.n) + ' ya está en el ID <b>' + _manEsc(ffId) + '</b>.</p>'
@@ -15477,7 +15480,7 @@ function otComprar(){
           var sn = Number(saldoNuevo) || 0; authSession.saldo = sn; _refreshSaldoUI(sn); if(typeof saveSession === 'function') saveSession(authSession);
           if(typeof sbAddMovimiento === 'function') sbAddMovimiento(authSession.id, 'credito', p.mxn, 'Reembolso Pedido #' + ord + ' - recarga rechazada');
           if(movId) _cancelarMovPorId(movId); else { cancelarPend = true; _cancelarMovimientoCompra(authSession.id, ord); }
-          registrarPedido(p.n + ' (RECHAZADA - reembolsado)', 1, 'otro', ffId, 0, 0);
+          registrarPedido(p.n + ' (RECHAZADA - reembolsado)', 1, 'otro', ffId, 0, 0, {estado:'rechazado', ord:ord});
           var viejo = /desactualizada/i.test(errTxt), tope = /pausa|l[i\u00ED]mite|por hora/i.test(errTxt);
           tg('\uD83D\uDEA8 <b>RECARGA RECHAZADA - ' + (viejo ? 'CLIENTE CON VERSION ANTIGUA' : (tope ? 'LIMITE DE GASTO ALCANZADO' : 'NO SE PUDO HACER')) + '</b>\n\uD83C\uDF81 Producto: ' + p.n + '\n\uD83C\uDFAE ID: ' + ffId + '\n\u2757 ' + errTxt + '\n\u2705 Saldo reembolsado al cliente (' + fmt(p.mxn) + ')');
           fin('warn', '<b>No se pudo completar tu recarga</b><br>' + _manEsc(errTxt) + '<div style="margin-top:.8rem;padding:.7rem .9rem;border-radius:12px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);color:#25d366;font-weight:600">\u2705 Tu saldo fue reembolsado automáticamente</div>');
@@ -15485,7 +15488,7 @@ function otComprar(){
         }).catch(function(e){
           // El reembolso falló: el cliente SIGUE sin su dinero. Se avisa con urgencia para reembolsarlo a mano.
           console.error('[OTRAS] reembolso falló:', e);
-          registrarPedido(p.n + ' (RECHAZADA - REEMBOLSO FALLIDO, REVISAR)', 1, 'otro', ffId, p.mxn, 0);
+          registrarPedido(p.n + ' (RECHAZADA - REEMBOLSO FALLIDO, REVISAR)', 1, 'otro', ffId, p.mxn, 0, {ord:ord});
           tg('\uD83D\uDD25 <b>URGENTE: REEMBOLSO FALLIDO</b>\n\uD83C\uDF81 Producto: ' + p.n + '\n\uD83C\uDFAE ID: ' + ffId + '\n\u2757 Recarga rechazada: ' + errTxt + '\n\u274C El reembolso automático de ' + fmt(p.mxn) + ' AL CLIENTE FALLÓ\n\n\uD83D\uDEA8 <b>REEMBOLSA MANUALMENTE AL CLIENTE</b>');
           fin('warn', '<b>No se pudo completar tu recarga</b><br>Estamos devolviendo tu saldo. Si no lo ves en unos minutos, contacta al administrador.');
         });
@@ -15938,3 +15941,993 @@ window.addEventListener('online', function(){ csVerificarVersion(true); });
   var f = window[n]; if(typeof f !== 'function') return;
   window[n] = function(){ if(_csViejo){ return; } csVerificarVersion(true); return f.apply(this, arguments); };
 });
+
+
+
+// ═══════════════════════ PEDIDOS AUTOMÁTICOS: REGISTRO CONFIABLE + SEGUIMIENTO ═══════════════════════
+// Antes: el pedido se mandaba una sola vez "a ciegas", sin estado. Si fallaba la red o se cerraba la página, no salía;
+// y una recarga entregada o reembolsada se quedaba como "Recibido" para siempre.
+// Ahora, para las recargas AUTOMÁTICAS (diamantes, tarjetas y niveles):
+//   1. El pedido lleva su número (#123) y se comprueba en Supabase que de verdad se guardó. Si no, se reintenta
+//      (también al volver a abrir la página) y, como último recurso, se guarda directo en la tabla, sin duplicar.
+//   2. Queda con su estado real: Entregado (completado), Rechazado (reembolsado) o Preparando (en proceso).
+//   3. Las que quedan "en proceso" se le vuelven a preguntar al proveedor cada minuto: al completarse pasan a Entregado
+//      y reciben sus puntos y su lugar en el ranking; si el proveedor la cancela, pasa a Rechazado y te llega un aviso
+//      para reembolsar a mano.
+// Los pedidos manuales (gift cards, ofertas, etc.) siguen igual que antes.
+var PED_COLA_KEY = 'cs_ped_cola', _pedBusy = {}, _pedSegBusy = false;
+function _pedCola(){ try{ var a = JSON.parse(localStorage.getItem(PED_COLA_KEY) || '[]'); return Array.isArray(a) ? a : []; }catch(e){ return []; } }
+function _pedGuardarCola(a){ try{ localStorage.setItem(PED_COLA_KEY, JSON.stringify(a.slice(-60))); }catch(e){} }
+function _pedPoner(it){ var a = _pedCola(), i = -1; a.forEach(function(x, j){ if(x.k === it.k) i = j; }); if(i >= 0) a[i] = it; else a.push(it); _pedGuardarCola(a); }
+function _pedQuitar(k){ _pedGuardarCola(_pedCola().filter(function(x){ return x.k !== k; })); }
+function _pedEspera(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+// Busca la fila del pedido. Devuelve la fila, null si no existe, o undefined si no se pudo consultar.
+function _pedBuscar(it){
+  return sb.get('pedidos', 'username=eq.' + encodeURIComponent(it.u) + '&producto=eq.' + encodeURIComponent(it.producto) + '&select=id,estado&order=created_at.desc&limit=1')
+    .then(function(r){ return (Array.isArray(r) && r[0]) ? r[0] : null; }).catch(function(){ return undefined; });
+}
+function _pedEnviarFuncion(it){
+  var body = {username:it.u, producto:it.producto, cantidad:it.cantidad, tipo:it.tipo, ff_id:it.ff_id, precio:it.precio, progreso_total:it.prog};
+  if(it.estado) body.estado = it.estado;
+  return fetch(NOTIF_PEDIDO_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)})
+    .then(function(r){ return r.ok; }).catch(function(){ return false; });
+}
+function _pedInsertarDirecto(it){
+  var fila = {username:it.u, producto:it.producto, cantidad:it.cantidad, tipo:it.tipo, ff_id:it.ff_id, precio:it.precio, progreso_total:it.prog};
+  if(it.estado) fila.estado = it.estado;
+  var guardo = function(r){ return (Array.isArray(r) && r.length) ? true : Promise.reject(new Error('sin fila')); };
+  return sb.post('pedidos', fila).then(guardo).catch(function(){
+    // por si la columna de precio no acepta centavos
+    fila.precio = Math.round(Number(fila.precio) || 0);
+    return sb.post('pedidos', fila).then(guardo).catch(function(){ return false; });
+  });
+}
+function _pedProcesar(it){
+  if(_pedBusy[it.k] || typeof sb === 'undefined' || !sb.get) return Promise.resolve();
+  _pedBusy[it.k] = true;
+  var listo = function(){ delete _pedBusy[it.k]; };
+  return Promise.resolve().then(function(){
+    if(it.ok) return {id:it.id, estado:it.estadoGuardado};
+    return _pedBuscar(it).then(function(f){
+      if(f || f === undefined) return f;                       // ya está, o no se pudo consultar (se reintenta luego)
+      if(!it.funcOk && (it.env || 0) < 2){                     // 1) se manda como siempre (la función también avisa por Telegram)
+        it.env = (it.env || 0) + 1; _pedPoner(it);
+        return _pedEnviarFuncion(it).then(function(ok){ if(ok){ it.funcOk = true; _pedPoner(it); } return _pedEspera(2000).then(function(){ return _pedBuscar(it); }); });
+      }
+      if(it.funcOk && (it.busq || 0) < 3){ it.busq = (it.busq || 0) + 1; _pedPoner(it); return _pedEspera(2500 * it.busq).then(function(){ return _pedBuscar(it); }); }
+      if(!it.directo){ it.directo = true; _pedPoner(it); return _pedInsertarDirecto(it).then(function(){ return _pedBuscar(it); }); }  // 2) último recurso
+      return null;
+    });
+  }).then(function(f){
+    if(!f){ if(f === null && it.directo && !it.alertado){ it.alertado = true; _pedPoner(it); _pedAvisarAdmin('⚠️ PEDIDO QUE NO SE PUDO GUARDAR EN SUPABASE', it, 'Revisa la tabla pedidos: la tienda intentó guardarlo varias veces.'); } return; }
+    it.ok = true; it.id = f.id; it.estadoGuardado = f.estado; _pedPoner(it);
+    if(it.estado && f.estado !== it.estado){
+      return sb.patch('pedidos', {estado:it.estado}, 'id=eq.' + encodeURIComponent(f.id)).then(function(){ it.estadoGuardado = it.estado; _pedPoner(it); }).catch(function(){});
+    }
+  }).then(function(){
+    if(it.ok && it.estadoGuardado === (it.estado || it.estadoGuardado) && !it.seg) _pedQuitar(it.k);
+  }).then(listo, listo);
+}
+function _pedAvisarAdmin(titulo, it, detalle){
+  try{ fetch(NOTIF_RECARGA_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({usuario:it.u, metodo:titulo, monto:'$' + Number(it.precio || 0).toFixed(2) + ' MXN', extra:it.producto + (it.ff_id ? ' | ID: ' + it.ff_id : '') + (detalle ? ' | ' + detalle : ''), foto_base64:''})}).catch(function(){}); }catch(e){}
+}
+// Recargas que quedaron "en proceso": se le pregunta al proveedor si ya terminaron
+function _pedSeguimiento(){
+  if(_pedSegBusy) return; var pend = _pedCola().filter(function(x){ return x.seg && x.ok; }); if(!pend.length) return;
+  _pedSegBusy = true;
+  var h = {'Content-Type':'application/json'}; if(typeof CS_BUILD !== 'undefined') h['X-CS-Build'] = CS_BUILD;
+  Promise.all(pend.map(function(it){
+    return fetch(RECARGA_AUTO_URL, {method:'POST', headers:h, body:JSON.stringify({action:'estado', order_id:it.seg.order_id})}).then(function(r){ return r.json(); }).then(function(j){
+      if(!j || !j.success) return;
+      if(j.status === 'COMPLETED'){
+        return sb.patch('pedidos', {estado:'completado'}, 'id=eq.' + encodeURIComponent(it.id)).then(function(){
+          if(it.seg.diamantes > 0 && sb.rpc){
+            if(typeof csRegistrarVentaDiamantes === 'function') csRegistrarVentaDiamantes(it.uid, it.seg.ord, it.seg.diamantes, it.precio);
+            sb.rpc('otorgar_puntos_pedido', {p_user_id:it.uid, p_pedido_id:it.seg.ord, p_diamantes:it.seg.diamantes}).catch(function(){});
+          }
+          _pedQuitar(it.k);
+        });
+      }
+      if(j.status === 'FAILED' || j.status === 'REFUNDED'){
+        return sb.patch('pedidos', {estado:'rechazado'}, 'id=eq.' + encodeURIComponent(it.id)).then(function(){
+          _pedAvisarAdmin('🚨 RECARGA EN PROCESO FALLÓ EN EL PROVEEDOR · REEMBOLSAR A MANO', it, 'El proveedor la marcó ' + j.status + (j.error ? ' (' + j.error + ')' : '') + '. El saldo NO se devolvió solo.');
+          _pedQuitar(it.k);
+        });
+      }
+      if(Date.now() - it.t > 7 * 86400000){ _pedAvisarAdmin('⏳ RECARGA LLEVA 7 DÍAS EN PROCESO', it, 'Revísala en Central One.'); _pedQuitar(it.k); }
+    }).catch(function(){});
+  })).then(function(){ _pedSegBusy = false; }, function(){ _pedSegBusy = false; });
+}
+// Nueva forma de registrar: con un 7.º dato {res, estado, ord, diamantes}. Sin ese dato funciona exactamente como antes.
+(function(){
+  var base = window.registrarPedido;
+  window.registrarPedido = function(producto, cantidad, tipo, ffId, precio, progresoTotal, extra){
+    if(!extra || typeof authSession === 'undefined' || !authSession || typeof sb === 'undefined') return base.apply(this, arguments);
+    var st = extra.res && extra.res.status;
+    var it = {k:((window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('p' + Date.now() + Math.random().toString(36).slice(2))),
+      u:authSession.username, uid:authSession.id, producto:String(producto || 'Pedido') + (extra.ord != null ? ' #' + extra.ord : ''),
+      cantidad:(cantidad != null ? String(cantidad) : ''), tipo:tipo || 'otro', ff_id:ffId || '', precio:precio || 0, prog:progresoTotal || 0,
+      estado:extra.estado || (st === 'COMPLETED' ? 'completado' : (st === 'PENDING' ? 'procesando' : '')), t:Date.now(),
+      seg:(st === 'PENDING' && extra.res.order_id) ? {order_id:extra.res.order_id, ord:extra.ord, diamantes:Number(extra.diamantes) || 0} : null};
+    _pedPoner(it); _pedProcesar(it);
+  };
+})();
+// Al abrir la página: termina lo que haya quedado pendiente; y cada minuto revisa las recargas en proceso
+setTimeout(function(){
+  _pedCola().filter(function(x){ return Date.now() - x.t > 3 * 86400000 && !x.seg; }).forEach(function(x){ _pedQuitar(x.k); });
+  _pedCola().forEach(function(it){ if(!it.ok) _pedProcesar(it); });
+  _pedSeguimiento();
+}, 4000);
+setInterval(function(){ if(document.visibilityState === 'visible'){ _pedCola().forEach(function(it){ if(!it.ok) _pedProcesar(it); }); _pedSeguimiento(); } }, 60000);
+
+
+
+// ═══════════════════════ RANKING: PREMIOS DEL TOP 3 MENSUAL + ESTADÍSTICAS DE COMPRAS Y GASTOS ═══════════════════════
+// Requiere ranking_premios_gastos.sql. Sin ese SQL, estas dos secciones dicen "se está preparando" y el ranking sigue igual.
+// Premios: los 3 primeros del ranking del MES en curso. El equivalente en pesos sale del precio actual de la tienda
+// (o del monto fijo que pongas en el panel). Gastos: suma lo que de verdad pagó cada cliente en recargas completadas.
+var RK2_PREMIOS_DEF = [ {posicion:1, premio:'Tarjeta Mensual de Free Fire', producto:'tm'}, {posicion:2, premio:'Tarjeta Semanal de Free Fire', producto:'ts'}, {posicion:3, premio:'110 diamantes de Free Fire', producto:'d110'} ];
+var RK2_PERIODOS = [ {id:'dia', n:'Hoy'}, {id:'semana', n:'Esta semana'}, {id:'mes', n:'Este mes'}, {id:'historico', n:'Histórico'} ];
+var _rk2Premios = null, _rk2Lider = [], _rk2T = 0, _rgPer = 'mes', _rgFilas = [], _rgAbierto = null, _rgSeq = 0;
+function _rk2MXN(n){ n = Number(n) || 0; return '$' + n.toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' MXN'; }
+function _rk2Fecha(t){ try{ return new Date(t).toLocaleString('es-MX', {timeZone:'America/Mexico_City', day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'}); }catch(e){ return ''; } }
+// Precio actual en la tienda de un producto (clave del panel): tm, ts, tsb, pb, n10… o d110, d341…
+function rk2PrecioProducto(clave){
+  clave = String(clave || '');
+  var m = clave.match(/^d(\d+)$/);
+  if(m && typeof RECARGAS_AUTO !== 'undefined'){ var r = null; RECARGAS_AUTO.forEach(function(x){ if(x.package_id && Number(x.diamantes) === Number(m[1])) r = x; }); return r ? Number(r.precio) : null; }
+  if(typeof OT_PRODUCTOS !== 'undefined'){ var p = null; ['tarjetas', 'niveles'].forEach(function(t){ (OT_PRODUCTOS[t] || []).forEach(function(x){ if(x.clave === clave) p = x; }); }); return p ? Number(p.mxn) : null; }
+  return null;
+}
+function rk2Equivalente(p){ return (Number(p.equivalente_mxn) > 0) ? Number(p.equivalente_mxn) : rk2PrecioProducto(p.producto); }
+function _rk2MesNombre(){ var d = _rkAhoraMX(); var n = RK_MESES[d.getUTCMonth()]; return n.charAt(0).toUpperCase() + n.slice(1) + ' ' + d.getUTCFullYear(); }
+
+function rk2Montar(){
+  var w = document.getElementById('rk-nuevo'); if(!w || document.getElementById('rk-premios')) return;
+  w.insertAdjacentHTML('beforeend',
+    '<section class="rk2-sec" id="rk-premios" aria-labelledby="rk-premios-h"><h3 class="rk-h" id="rk-premios-h">🎁 Premios del mes</h3>'
+    + '<p class="rk-info" id="rk-premios-info"></p><div class="rk2-premios" id="rk-premios-lista"><div class="rk-vacio">Cargando…</div></div></section>'
+    + '<section class="rk2-sec" id="rk-gastos" aria-labelledby="rk-gastos-h"><h3 class="rk-h" id="rk-gastos-h">💰 Estadísticas de compras y gastos</h3>'
+    + '<p class="rk-info">Clientes que más han gastado en recargas de diamantes completadas. Toca una fila para ver su última recarga.</p>'
+    + '<div class="rk-tabs" id="rg-tabs" role="tablist" aria-label="Periodo de las estadísticas"></div>'
+    + '<div class="rg-head" aria-hidden="true"><span>#</span><span>Usuario</span><span>Recargas</span><span>Total gastado</span><span>Diamantes</span><span>Última recarga</span></div>'
+    + '<div class="rg-lista" id="rg-lista" aria-live="polite"><div class="rk-vacio">Cargando…</div></div>'
+    + '<p class="rk-nota">Montos en pesos mexicanos. Solo suman recargas de diamantes completadas; las rechazadas, reembolsadas o anuladas no cuentan. Algunas recargas anteriores a este registro no guardaron su monto y aparecen como «sin monto».</p></section>');
+}
+function rk2RenderPremios(){
+  var c = document.getElementById('rk-premios-lista'), info = document.getElementById('rk-premios-info'); if(!c) return;
+  if(info) info.textContent = _rk2MesNombre() + ' · para los 3 primeros del ranking mensual · se reinicia el día 1 de cada mes';
+  var ps = (_rk2Premios && _rk2Premios.length) ? _rk2Premios : RK2_PREMIOS_DEF, med = ['🥇', '🥈', '🥉'];
+  c.innerHTML = [1, 2, 3].map(function(pos){
+    var p = null; ps.forEach(function(x){ if(Number(x.posicion) === pos) p = x; }); if(!p) return '';
+    var eq = rk2Equivalente(p), l = _rk2Lider[pos - 1];
+    return '<div class="rk2-premio top' + pos + '"><div class="rk2-med" aria-hidden="true">' + med[pos - 1] + '</div><div class="rk2-pt">TOP ' + pos + '</div>'
+      + '<div class="rk2-pn">' + _manEsc(p.premio) + '</div>'
+      + (eq ? '<div class="rk2-pe">o ' + _rk2MXN(eq) + ' en efectivo</div>' : '')
+      + '<div class="rk2-pl">' + (l ? 'Va ganando: <b>' + _manEsc(l.username) + '</b> · ' + _rkNum(l.diamantes) + ' 💎' : 'Lugar libre: ¡puede ser tuyo!') + '</div></div>';
+  }).join('');
+}
+function rk2CargarPremios(){
+  Promise.all([
+    sb.get('premios_mensuales', 'select=posicion,premio,producto,equivalente_mxn&order=posicion.asc').catch(function(){ return null; }),
+    sb.rpc('ranking_diamantes', {p_periodo:'mes', p_limite:3}).catch(function(){ return []; })
+  ]).then(function(rs){ if(Array.isArray(rs[0]) && rs[0].length) _rk2Premios = rs[0]; _rk2Lider = Array.isArray(rs[1]) ? rs[1] : []; rk2RenderPremios(); });
+}
+function rk2RenderTabsGastos(){
+  var t = document.getElementById('rg-tabs'); if(!t) return;
+  t.innerHTML = RK2_PERIODOS.map(function(p){ var s = p.id === _rgPer; return '<button type="button" role="tab" class="rk-tab' + (s ? ' sel' : '') + '" aria-selected="' + s + '" onclick="rgTab(\'' + p.id + '\')">' + p.n + '</button>'; }).join('');
+}
+function rgTab(id){ _rgPer = id; _rgAbierto = null; rk2RenderTabsGastos(); rk2CargarGastos(); }
+function _rgTotal(r){
+  var t = Number(r.total_mxn) || 0, s = Number(r.sin_monto) || 0;
+  if(t <= 0 && s > 0) return '<span class="rg-sin">sin monto</span>';
+  return _rk2MXN(t) + (s > 0 ? '<small class="rg-sin">+' + s + ' sin monto</small>' : '');
+}
+function rk2RenderGastos(){
+  var l = document.getElementById('rg-lista'); if(!l) return;
+  if(!_rgFilas.length){ l.innerHTML = '<div class="rk-vacio">Aún no hay recargas en este periodo.</div>'; return; }
+  var yo = (typeof authSession !== 'undefined' && authSession && authSession.username) ? String(authSession.username).toLowerCase() : '';
+  l.innerHTML = _rgFilas.map(function(r, i){
+    var abierto = _rgAbierto === i, esYo = yo && String(r.username).toLowerCase() === yo, pos = Number(r.posicion);
+    return '<div class="rg-item' + (pos <= 3 ? ' top' + pos : '') + (esYo ? ' yo' : '') + '">'
+      + '<button type="button" class="rg-row" aria-expanded="' + abierto + '" onclick="rgAbrir(' + i + ')">'
+      + '<span class="rg-pos">' + (pos <= 3 ? ['🥇', '🥈', '🥉'][pos - 1] : '#' + pos) + '</span>'
+      + '<span class="rg-us">' + _manEsc(r.username) + (esYo ? ' <em>(tú)</em>' : '') + '</span>'
+      + '<span class="rg-rc"><i>Recargas</i>' + _rkNum(r.recargas) + '</span>'
+      + '<span class="rg-tot"><i>Total</i>' + _rgTotal(r) + '</span>'
+      + '<span class="rg-di"><i>Diamantes</i>' + _rkNum(r.diamantes) + ' 💎</span>'
+      + '<span class="rg-ul"><i>Última</i>' + (r.ultimo_mxn != null ? _rk2MXN(r.ultimo_mxn) : '<span class="rg-sin">sin monto</span>') + '</span></button>'
+      + (abierto ? '<div class="rg-det"><div><b>Última recarga:</b> ' + _manEsc(_rk2Fecha(r.ultima_fecha)) + ' · ' + _rkNum(r.ultimos_diamantes) + ' 💎 · ' + (r.ultimo_mxn != null ? _rk2MXN(r.ultimo_mxn) : 'sin monto') + '</div>'
+        + '<div id="rg-hist-' + i + '" class="rg-hist"><button type="button" class="rg-btn" onclick="rgHistorial(' + i + ')">Ver historial de compras</button></div></div>' : '')
+      + '</div>';
+  }).join('');
+}
+function rgAbrir(i){ _rgAbierto = (_rgAbierto === i) ? null : i; rk2RenderGastos(); }
+function rgHistorial(i){
+  var r = _rgFilas[i], c = document.getElementById('rg-hist-' + i); if(!r || !c) return;
+  c.innerHTML = '<div class="rk-vacio">Cargando…</div>';
+  sb.rpc('historial_ventas_usuario', {p_username:r.username, p_limite:15}).then(function(h){
+    if(!Array.isArray(h) || !h.length){ c.innerHTML = '<div class="rk-vacio">Sin recargas.</div>'; return; }
+    c.innerHTML = '<ul class="rg-hl">' + h.map(function(x){
+      return '<li class="' + (x.estado !== 'valida' ? 'anul' : '') + '"><span>' + _manEsc(_rk2Fecha(x.created_at)) + '</span><span>' + _rkNum(x.diamantes) + ' 💎</span><span>' + (x.monto_mxn != null ? _rk2MXN(x.monto_mxn) : 'sin monto') + (x.estado !== 'valida' ? ' · anulada' : '') + '</span></li>';
+    }).join('') + '</ul>';
+  }).catch(function(){ c.innerHTML = '<div class="rk-vacio">No se pudo cargar el historial.</div>'; });
+}
+function rk2CargarGastos(){
+  var l = document.getElementById('rg-lista'), seq = ++_rgSeq; if(!l) return;
+  if(!_rgFilas.length) l.innerHTML = '<div class="rk-vacio">Cargando…</div>';
+  sb.rpc('estadisticas_gastos', {p_periodo:_rgPer, p_limite:20}).then(function(rows){
+    if(seq !== _rgSeq) return;
+    if(!Array.isArray(rows)){ l.innerHTML = '<div class="rk-vacio">Esta sección se está preparando. Vuelve en un momento.</div>'; return; }
+    _rgFilas = rows; rk2RenderGastos();
+  }).catch(function(){ if(seq === _rgSeq) l.innerHTML = '<div class="rk-vacio">Esta sección se está preparando. Vuelve en un momento.</div>'; });
+}
+function rk2Cargar(forzar){
+  if(typeof RANKING_SOLO_DIAMANTES !== 'undefined' && !RANKING_SOLO_DIAMANTES) return;
+  if(typeof sb === 'undefined' || !sb.rpc) return;
+  rk2Montar(); rk2RenderTabsGastos();
+  if(!forzar && Date.now() - _rk2T < 25000){ rk2RenderPremios(); return; }
+  _rk2T = Date.now(); rk2CargarPremios(); rk2CargarGastos();
+}
+(function(){
+  var f = window.rkCargar;
+  if(typeof f === 'function') window.rkCargar = function(forzar){ var r = f.apply(this, arguments); try{ rk2Cargar(forzar); }catch(e){} return r; };
+  var g = window.initRankingPage;
+  if(typeof g === 'function') window.initRankingPage = function(){ var r = g.apply(this, arguments); try{ rk2Cargar(true); }catch(e){} return r; };
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', rk2Montar); else rk2Montar();
+})();
+
+// ═══════════════════════ PANEL ADMIN: RANKING Y PREMIOS ═══════════════════════
+// Configurar premios, ganadores de cada mes (entregado / pendiente), gastos por cliente, correcciones auditadas.
+// Todo lo que cambia datos pasa por /api/admin con tu sesión (nunca directo desde el navegador).
+var RK2_PRODUCTOS = [['', 'Ninguno (pon el monto a mano)'], ['tm', 'Tarjeta Mensual'], ['ts', 'Tarjeta Semanal'], ['tsb', 'Tarjeta Semanal Básica'], ['pb', 'Pase Booyah'],
+  ['d110', '110 diamantes'], ['d341', '341 diamantes'], ['d572', '572 diamantes'], ['d1166', '1,166 diamantes'], ['d2398', '2,398 diamantes'], ['d6160', '6,160 diamantes']];
+var _apMes = null;
+function admDb(fn, args){
+  var tok = (typeof csAdminSesionToken === 'function') ? csAdminSesionToken() : '';
+  if(!tok) return Promise.resolve({ok:false, code:'sesion_invalida', message:'Entra de nuevo al panel.'});
+  return fetch('/api/admin', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'db', token:tok, fn:fn, args:args || {}})})
+    .then(function(r){ return r.json().catch(function(){ return {ok:false, code:'error', message:'Respuesta inválida (' + r.status + ')'}; }); })
+    .catch(function(){ return {ok:false, code:'red', message:'Sin conexión'}; });
+}
+function _apMsg(r){ return r && r.ok ? '' : ((r && r.message) || 'No se pudo completar'); }
+function _apMeses(){
+  var out = [], d = _rkAhoraMX(), y = d.getUTCFullYear(), m = d.getUTCMonth();
+  while(y > 2026 || (y === 2026 && m >= 10)){ out.push(y + '-' + String(m + 1).padStart(2, '0') + '-01'); m--; if(m < 0){ m = 11; y--; } if(out.length >= 12) break; }
+  return out;
+}
+function _apMesNombre(s){ var p = s.split('-'); var n = RK_MESES[Number(p[1]) - 1]; return n.charAt(0).toUpperCase() + n.slice(1) + ' ' + p[0]; }
+function admPremiosRender(){
+  var sec = document.getElementById('adms-premios'); if(!sec) return;
+  if(!document.getElementById('ap-config')){
+    var meses = _apMeses(); if(!_apMes) _apMes = meses[0];
+    sec.innerHTML = '<div class="adm-card-title">🏆 Ranking y premios</div>'
+      + '<div class="ap-card"><div class="ap-h">🎁 Premios del TOP 3 mensual</div><p class="cat-nota">El equivalente en efectivo sale del precio actual de la tienda. Si escribes un monto fijo, se usa ese.</p><div id="ap-config"></div></div>'
+      + '<div class="ap-card"><div class="ap-h">🥇 Ganadores por mes</div><select id="ap-mes" class="ap-inp" onchange="_apMes=this.value;admPremiosGanadores()">' + meses.map(function(m){ return '<option value="' + m + '">' + _apMesNombre(m) + '</option>'; }).join('') + '</select><div id="ap-ganadores"></div></div>'
+      + '<div class="ap-card"><div class="ap-h">💰 Gastos por cliente</div><select id="ap-per" class="ap-inp" onchange="admPremiosGastos()">' + RK2_PERIODOS.map(function(p){ return '<option value="' + p.id + '"' + (p.id === 'historico' ? ' selected' : '') + '>' + p.n + '</option>'; }).join('') + '</select><div id="ap-gastos"></div>'
+      + '<div class="ap-fila"><input id="ap-user" class="ap-inp" placeholder="Usuario para ver su historial" onkeydown="if(event.key===\'Enter\')admPremiosHistorial()"><button type="button" class="cat-btn" onclick="admPremiosHistorial()">Ver historial</button></div><div id="ap-hist"></div></div>'
+      + '<div class="ap-card"><div class="ap-h">✍️ Agregar venta manual</div><p class="cat-nota">Para ventas por privado. Queda registrada en la auditoría.</p><div class="ap-fila"><input id="ap-mu" class="ap-inp" placeholder="Usuario"><input id="ap-md" class="ap-inp" type="number" min="1" placeholder="Diamantes"><input id="ap-mm" class="ap-inp" type="number" min="0" step="0.01" placeholder="Monto MXN (opcional)"><input id="ap-mn" class="ap-inp" placeholder="Nota"><button type="button" class="cat-btn" onclick="admPremiosVentaManual()">Agregar</button></div></div>'
+      + '<div class="ap-card"><div class="ap-h">📜 Auditoría</div><button type="button" class="cat-btn" onclick="admPremiosAuditoria()">Ver últimas acciones</button><div id="ap-audit"></div></div>';
+  }
+  admPremiosConfig(); admPremiosGanadores(); admPremiosGastos();
+}
+function admPremiosConfig(){
+  var c = document.getElementById('ap-config'); if(!c) return;
+  sb.get('premios_mensuales', 'select=*&order=posicion.asc').then(function(ps){
+    if(!Array.isArray(ps) || !ps.length) ps = RK2_PREMIOS_DEF;
+    c.innerHTML = ps.map(function(p){
+      var auto = rk2PrecioProducto(p.producto);
+      return '<div class="ap-fila"><b class="ap-pos">TOP ' + p.posicion + '</b><input id="ap-pr-' + p.posicion + '" class="ap-inp" value="' + _manEsc(p.premio) + '">'
+        + '<select id="ap-pp-' + p.posicion + '" class="ap-inp">' + RK2_PRODUCTOS.map(function(o){ return '<option value="' + o[0] + '"' + (o[0] === (p.producto || '') ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>'
+        + '<input id="ap-pe-' + p.posicion + '" class="ap-inp" type="number" min="0" step="0.01" placeholder="Automático' + (auto ? ': ' + auto.toFixed(2) : '') + '" value="' + (Number(p.equivalente_mxn) > 0 ? Number(p.equivalente_mxn) : '') + '">'
+        + '<button type="button" class="cat-btn" onclick="admPremiosGuardar(' + p.posicion + ')">Guardar</button></div>';
+    }).join('');
+  }).catch(function(){ c.innerHTML = '<div class="cat-alerta ro">Falta correr ranking_premios_gastos.sql en Supabase.</div>'; });
+}
+function admPremiosGuardar(pos){
+  var v = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
+  admDb('admin_premio_guardar', {p_posicion:pos, p_premio:v('ap-pr-' + pos), p_producto:v('ap-pp-' + pos), p_equivalente:Number(v('ap-pe-' + pos)) || null}).then(function(r){
+    if(r.ok && r.data === true){ _manToast('✅ Premio TOP ' + pos + ' guardado'); _rk2T = 0; admPremiosConfig(); } else _manToast('❌ ' + (_apMsg(r) || 'Revisa el nombre del premio'), 5000);
+  });
+}
+function admPremiosGanadores(){
+  var c = document.getElementById('ap-ganadores'); if(!c || !_apMes) return;
+  var enCurso = _apMes === _apMeses()[0];
+  c.innerHTML = '<div class="rk-vacio">Cargando…</div>';
+  Promise.all([ sb.rpc('ranking_diamantes_mes', {p_mes:_apMes, p_limite:3}), sb.get('premios_entregas', 'mes=eq.' + _apMes + '&select=*').catch(function(){ return []; }),
+    sb.get('premios_mensuales', 'select=*&order=posicion.asc').catch(function(){ return RK2_PREMIOS_DEF; }) ]).then(function(rs){
+    var top = Array.isArray(rs[0]) ? rs[0] : [], ent = {}, prem = {};
+    (Array.isArray(rs[1]) ? rs[1] : []).forEach(function(e){ ent[e.posicion] = e; });
+    ((Array.isArray(rs[2]) && rs[2].length) ? rs[2] : RK2_PREMIOS_DEF).forEach(function(p){ prem[p.posicion] = p; });
+    if(!top.length){ c.innerHTML = '<div class="rk-vacio">Sin recargas en ' + _apMesNombre(_apMes) + '.</div>'; return; }
+    c.innerHTML = (enCurso ? '<p class="cat-nota">El mes está en curso: los ganadores se confirman cuando termine.</p>' : '') + top.map(function(t){
+      var e = ent[t.posicion] || {}, p = prem[t.posicion] || {}, entregado = e.estado === 'entregado', eq = e.equivalente_mxn || rk2Equivalente(p);
+      return '<div class="ap-gan"><b>TOP ' + t.posicion + '</b> · ' + _manEsc(e.username || t.username) + ' · ' + _rkNum(e.diamantes || t.diamantes) + ' 💎'
+        + '<div class="cat-nota" style="margin:.2rem 0">' + _manEsc(e.premio || p.premio || '') + (eq ? ' · o ' + _rk2MXN(eq) : '') + (e.nota ? ' · Nota: ' + _manEsc(e.nota) : '') + '</div>'
+        + '<span class="cat-chip ' + (entregado ? 'ok' : 'am') + '">' + (entregado ? 'Entregado' + (e.entregado_at ? ' · ' + _manEsc(_rk2Fecha(e.entregado_at)) : '') : 'Pendiente') + '</span> '
+        + (enCurso ? '' : '<button type="button" class="cat-btn ap-mini" onclick="admPremiosEstado(' + t.posicion + ',\'' + (entregado ? 'pendiente' : 'entregado') + '\',' + (eq || 0) + ')">Marcar ' + (entregado ? 'pendiente' : 'entregado') + '</button>') + '</div>';
+    }).join('');
+  }).catch(function(){ c.innerHTML = '<div class="cat-alerta ro">Falta correr ranking_premios_gastos.sql en Supabase.</div>'; });
+}
+function admPremiosEstado(pos, estado, eq){
+  var nota = estado === 'entregado' ? (prompt('Nota opcional (ej. "Se le dio la tarjeta" o "Se pagó en efectivo"):', '') || '') : '';
+  admDb('admin_premio_estado', {p_mes:_apMes, p_posicion:pos, p_estado:estado, p_nota:nota, p_equivalente:eq || null}).then(function(r){
+    if(r.ok && r.data === true){ _manToast('✅ Premio marcado como ' + estado); admPremiosGanadores(); } else _manToast('❌ ' + (_apMsg(r) || 'No se pudo: ¿el mes ya terminó?'), 5000);
+  });
+}
+function admPremiosGastos(){
+  var c = document.getElementById('ap-gastos'), per = (document.getElementById('ap-per') || {}).value || 'historico'; if(!c) return;
+  sb.rpc('estadisticas_gastos', {p_periodo:per, p_limite:100}).then(function(rows){
+    if(!Array.isArray(rows) || !rows.length){ c.innerHTML = '<div class="rk-vacio">Sin recargas en este periodo.</div>'; return; }
+    c.innerHTML = '<div class="cat-tw"><table class="cat-t"><thead><tr><th>#</th><th>Usuario</th><th>Recargas</th><th>Total</th><th>Diamantes</th><th>Última recarga</th></tr></thead><tbody>'
+      + rows.map(function(r){ return '<tr><td>' + r.posicion + '</td><td><a href="#" class="ap-link" onclick="document.getElementById(\'ap-user\').value=\'' + _manEsc(r.username).replace(/'/g, '') + '\';admPremiosHistorial();return false">' + _manEsc(r.username) + '</a></td><td>' + _rkNum(r.recargas) + '</td><td>' + _rgTotal(r) + '</td><td>' + _rkNum(r.diamantes) + '</td><td>' + _manEsc(_rk2Fecha(r.ultima_fecha)) + '<br><small>' + _rkNum(r.ultimos_diamantes) + ' 💎 · ' + (r.ultimo_mxn != null ? _rk2MXN(r.ultimo_mxn) : 'sin monto') + '</small></td></tr>'; }).join('')
+      + '</tbody></table></div>';
+  }).catch(function(){ c.innerHTML = '<div class="cat-alerta ro">Falta correr ranking_premios_gastos.sql en Supabase.</div>'; });
+}
+function admPremiosHistorial(){
+  var u = ((document.getElementById('ap-user') || {}).value || '').trim(), c = document.getElementById('ap-hist'); if(!c) return;
+  if(!u){ c.innerHTML = ''; return; }
+  sb.rpc('historial_ventas_usuario', {p_username:u, p_limite:50}).then(function(h){
+    if(!Array.isArray(h) || !h.length){ c.innerHTML = '<div class="rk-vacio">Sin recargas de ' + _manEsc(u) + '.</div>'; return; }
+    c.innerHTML = '<div class="cat-tw"><table class="cat-t"><thead><tr><th>Fecha</th><th>Diamantes</th><th>Monto</th><th>Pedido</th><th>Estado</th><th></th></tr></thead><tbody>' + h.map(function(x){
+      var val = x.estado === 'valida';
+      return '<tr><td>' + _manEsc(_rk2Fecha(x.created_at)) + '</td><td>' + _rkNum(x.diamantes) + '</td><td>' + (x.monto_mxn != null ? _rk2MXN(x.monto_mxn) : '—') + '</td><td><small>' + _manEsc(x.pedido_id) + '</small></td>'
+        + '<td><span class="cat-chip ' + (val ? 'ok' : 'ro') + '">' + (val ? 'Válida' : 'Anulada') + '</span></td><td><button type="button" class="cat-btn ap-mini" onclick="admPremiosVenta(' + x.id + ',\'' + (val ? 'anular' : 'restaurar') + '\')">' + (val ? 'Anular' : 'Restaurar') + '</button></td></tr>';
+    }).join('') + '</tbody></table></div>';
+  }).catch(function(){ c.innerHTML = '<div class="cat-alerta ro">No se pudo cargar.</div>'; });
+}
+function admPremiosVenta(id, accion){
+  var motivo = prompt(accion === 'anular' ? 'Motivo para anular esta venta (obligatorio). Dejará de contar en el ranking y en los gastos:' : 'Motivo para restaurar esta venta (obligatorio):', '');
+  if(!motivo || !motivo.trim()) return;
+  admDb(accion === 'anular' ? 'admin_venta_anular' : 'admin_venta_restaurar', {p_id:id, p_motivo:motivo.trim()}).then(function(r){
+    if(r.ok && r.data === true){ _manToast('✅ Venta ' + (accion === 'anular' ? 'anulada' : 'restaurada')); _rk2T = 0; if(typeof _rkCache !== 'undefined') _rkCache = {}; admPremiosHistorial(); admPremiosGastos(); }
+    else _manToast('❌ ' + (_apMsg(r) || 'No se pudo'), 5000);
+  });
+}
+function admPremiosVentaManual(){
+  var v = function(id){ return ((document.getElementById(id) || {}).value || '').trim(); };
+  var u = v('ap-mu'), d = parseInt(v('ap-md'), 10), m = Number(v('ap-mm')) || null, n = v('ap-mn');
+  if(!u || !(d > 0)){ _manToast('Escribe el usuario y los diamantes'); return; }
+  if(!confirm('¿Agregar ' + d.toLocaleString('es-MX') + ' diamantes a ' + u + (m ? ' por ' + _rk2MXN(m) : '') + '? Contará en el ranking de hoy.')) return;
+  admDb('admin_venta_manual', {p_username:u, p_diamantes:d, p_monto:m, p_nota:n}).then(function(r){
+    if(r.ok && r.data){ _manToast('✅ Venta manual agregada'); ['ap-mu', 'ap-md', 'ap-mm', 'ap-mn'].forEach(function(id){ var e = document.getElementById(id); if(e) e.value = ''; }); _rk2T = 0; if(typeof _rkCache !== 'undefined') _rkCache = {}; admPremiosGastos(); }
+    else _manToast('❌ ' + (_apMsg(r) || 'Revisa los datos'), 5000);
+  });
+}
+function admPremiosAuditoria(){
+  var c = document.getElementById('ap-audit'); if(!c) return;
+  admDb('admin_auditoria', {p_limite:30}).then(function(r){
+    if(!r.ok){ c.innerHTML = '<div class="cat-alerta ro">' + _manEsc(_apMsg(r)) + '</div>'; return; }
+    var a = Array.isArray(r.data) ? r.data : [];
+    c.innerHTML = a.length ? '<ul class="rg-hl">' + a.map(function(x){ var d = x.detalle || {}; return '<li><span>' + _manEsc(_rk2Fecha(x.created_at)) + '</span><span>' + _manEsc(String(x.accion).replace(/_/g, ' ')) + (d.username ? ' · ' + _manEsc(d.username) : '') + (d.motivo ? ' · ' + _manEsc(d.motivo) : '') + '</span><span>' + _manEsc(x.admin || '') + '</span></li>'; }).join('') + '</ul>' : '<div class="rk-vacio">Sin acciones registradas.</div>';
+  });
+}
+
+
+
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+//  CIBERSTORE v3 · Soporte renovado, WhatsApp oficial centralizado, dashboard y mejoras de uso
+//  Solo agrega o reemplaza funciones de presentación. Las tablas, rutas y datos son los mismos.
+// ═════════════════════════════════════════════════════════════════════════════════════════════
+
+// ── WhatsApp oficial: el número vive SOLO en CS_SOPORTE (arriba del todo en este archivo) ──
+function csSoporteTexto(extra){
+  var u = (typeof authSession !== 'undefined' && authSession && authSession.username) ? authSession.username : '';
+  return CS_SOPORTE.mensaje + (u ? ' ' + u : ' ') + (extra ? '\n' + extra : '');
+}
+function csWaUrl(texto){ return 'https://wa.me/' + CS_SOPORTE.wa + (texto ? '?text=' + encodeURIComponent(texto) : ''); }
+function csWaSoporte(extra){ window.open(csWaUrl(csSoporteTexto(extra)), '_blank', 'noopener'); }
+var CS_WA_ICO = '<svg class="cs-wa-ico" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91A9.85 9.85 0 0 0 12.04 2zm0 18.15h-.01a8.23 8.23 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24a8.2 8.2 0 0 1 8.24 8.25c0 4.54-3.7 8.23-8.24 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.24-.64.8-.78.97-.15.16-.29.18-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.43.13-.15.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.43h-.48a.92.92 0 0 0-.66.31c-.23.25-.87.85-.87 2.07s.89 2.4 1.01 2.56c.12.17 1.75 2.67 4.24 3.74.59.26 1.05.41 1.41.52.6.19 1.14.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.15-1.18-.06-.1-.22-.16-.47-.28z"/></svg>';
+
+// Los enlaces escritos en el HTML (data-cs-wa) toman el número y el mensaje de la configuración al tocarlos.
+function csWaActualizarEnlaces(){
+  document.querySelectorAll('a[data-cs-wa]').forEach(function(a){
+    var t = a.getAttribute('data-cs-wa-text');
+    a.href = csWaUrl(t ? t + (authSession && authSession.username ? '\nMi usuario es: ' + authSession.username : '') : csSoporteTexto());
+    a.target = '_blank'; a.rel = 'noopener';
+  });
+  document.querySelectorAll('.cs-wa-num').forEach(function(e){ e.textContent = CS_SOPORTE.visible; });
+}
+document.addEventListener('click', function(e){
+  var a = e.target && e.target.closest ? e.target.closest('a[data-cs-wa]') : null;
+  if(a) csWaActualizarEnlaces();
+}, true);
+
+// Botón flotante: mismo mensaje por página que antes, ahora con el usuario incluido.
+function openSmartWA(){
+  var activePage = document.querySelector('.page.active');
+  var pageId = activePage ? activePage.id.replace('page-', '') : 'home';
+  var msgs = { diamantes:'Quiero comprar diamantes de Free Fire.', likes:'Quiero saber más sobre los likes para perfil.', saldo:'Quiero información sobre los métodos de pago.',
+    referidos:'Quiero información sobre el programa de referidos.', tarjetas:'Quiero comprar una tarjeta de Free Fire.', niveles:'Quiero una subida de nivel.' };
+  csWaSoporte(msgs[pageId] || '');
+}
+
+function _csWaTarjeta(titulo, sub, extraBtn){
+  return '<div class="cs-wa-card"><div class="cs-wa-card-ico">' + CS_WA_ICO + '</div><div class="cs-wa-card-tx"><b>' + titulo + '</b><span>' + sub + '</span>'
+    + '<span class="cs-wa-card-num">WhatsApp oficial: <b class="cs-wa-num">' + CS_SOPORTE.visible + '</b></span></div>'
+    + '<div class="cs-wa-card-acc"><a class="cs-wa-btn" data-cs-wa href="' + csWaUrl(CS_SOPORTE.mensaje) + '" target="_blank" rel="noopener">' + CS_WA_ICO + ' Escribir por WhatsApp</a>' + (extraBtn || '') + '</div></div>';
+}
+function csWaMontar(){
+  var lista = document.getElementById('sop-vista-lista'), hero = lista && lista.querySelector('.sop-hero');
+  if(hero && !document.getElementById('cs-wa-sop')){
+    var d = document.createElement('div'); d.id = 'cs-wa-sop';
+    d.innerHTML = _csWaTarjeta('¿Prefieres WhatsApp?', 'Escríbenos directo. Tus tickets siguen guardados aquí en tu cuenta.');
+    hero.parentNode.insertBefore(d, hero.nextSibling);
+  }
+  var pf = document.querySelector('#page-perfil .pf-wrap');
+  if(pf && !document.getElementById('cs-wa-perfil')){
+    var p = document.createElement('div'); p.id = 'cs-wa-perfil';
+    p.innerHTML = _csWaTarjeta('¿Necesitas ayuda con tu cuenta?', 'Contacta a soporte por WhatsApp o abre un ticket.', '<button type="button" class="cs-wa-btn2" onclick="goPage(\'soporte\')">Abrir un ticket</button>');
+    pf.appendChild(p);
+  }
+  var faq = document.querySelector('#page-faq > div:last-child');
+  if(faq && !document.getElementById('cs-wa-faq')){
+    var f = document.createElement('div'); f.id = 'cs-wa-faq';
+    f.innerHTML = _csWaTarjeta('¿No encontraste tu respuesta?', 'Nuestro equipo te atiende por WhatsApp o desde el Centro de soporte.', '<button type="button" class="cs-wa-btn2" onclick="goPage(\'soporte\')">Centro de soporte</button>');
+    faq.appendChild(f);
+  }
+  csWaActualizarEnlaces();
+}
+
+// ── Avisos (toast) más claros: tipo por contenido, no se cortan y se ven también dentro del panel ──
+var _toastT = null;
+function showToast(msg, dur){
+  var el = document.getElementById('toast'); if(!el) return;
+  var s = String(msg == null ? '' : msg), tipo = /^(❌|⚠|Error|No se pudo|Sin conex)/i.test(s) || /error/i.test(s) ? 'err' : (/^(✅|✔|✓)/.test(s) || /(guardad|enviad|actualizad|listo|copiad)/i.test(s) ? 'ok' : 'info');
+  el.textContent = s; el.className = 'toast show cs-t-' + tipo; el.setAttribute('role', tipo === 'err' ? 'alert' : 'status');
+  clearTimeout(_toastT); _toastT = setTimeout(function(){ el.classList.remove('show'); }, dur || (tipo === 'err' ? 4200 : 2800));
+}
+// Sin internet: un aviso fijo y entendible en lugar de errores sueltos.
+(function(){
+  function red(){
+    var b = document.getElementById('cs-offline');
+    if(navigator.onLine){ if(b) b.remove(); return; }
+    if(!b){ b = document.createElement('div'); b.id = 'cs-offline'; b.setAttribute('role', 'alert'); b.textContent = 'Sin conexión a internet. Tus datos están a salvo; reintentaremos cuando vuelva la señal.'; document.body.appendChild(b); }
+  }
+  window.addEventListener('online', function(){ red(); showToast('✅ Conexión restablecida'); });
+  window.addEventListener('offline', red);
+})();
+
+// ═════════════════════════════ SOPORTE · PANEL ADMIN ═════════════════════════════
+var SOP_PRIO_RANK = { urgente:0, alta:1, normal:2, baja:3 };
+var SOP_PRIO_LABEL = { urgente:'Urgente', alta:'Alta', normal:'Normal', baja:'Baja' };
+var SOP_ESTADO2 = { nuevo:'Nuevo', pendiente:'Pendiente', en_atencion:'En atención', resuelto:'Resuelto', cerrado:'Cerrado' };
+var SOP_RAPIDAS = [
+  'Hola, gracias por escribir. Ya estoy revisando tu caso.',
+  '¿Me compartes una captura del comprobante de pago, por favor?',
+  '¿Me confirmas tu ID de Free Fire y el número de pedido?',
+  'Listo, tu recarga ya fue entregada. ¿Puedes confirmar que te llegó?',
+  'Tu reembolso ya se aplicó a tu saldo de CiberStore.'
+];
+var S2 = { rows:[], meta:{}, f:{q:'', estado:'', prio:'', cat:'', sinResp:false}, actual:null, ticket:null, nMsgs:0, adj:null, enviando:false, timer:null, conocidos:null, pendientes:0 };
+
+function _s2Esc(s){ return String(s == null ? '' : s).replace(/[<>&"']/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function _s2Rel(iso){
+  if(!iso) return '—'; var s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
+  if(s < 60) return 'hace un momento'; if(s < 3600) return 'hace ' + Math.floor(s / 60) + ' min'; if(s < 86400) return 'hace ' + Math.floor(s / 3600) + ' h';
+  var d = Math.floor(s / 86400); return d === 1 ? 'ayer' : 'hace ' + d + ' días';
+}
+function _s2Fecha(iso, conAnio){ try{ return new Date(iso).toLocaleString('es-MX', {day:'2-digit', month:'short', year:conAnio ? 'numeric' : undefined, hour:'2-digit', minute:'2-digit'}); }catch(e){ return ''; } }
+function _s2Hora(iso){ try{ return new Date(iso).toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'}); }catch(e){ return ''; } }
+function _s2Dia(iso){
+  var d = new Date(iso), h = new Date(), ay = new Date(Date.now() - 864e5);
+  if(d.toDateString() === h.toDateString()) return 'Hoy'; if(d.toDateString() === ay.toDateString()) return 'Ayer';
+  return d.toLocaleDateString('es-MX', {weekday:'long', day:'numeric', month:'long'});
+}
+function _s2Abierto(t){ return t.status !== 'cerrado' && t.status !== 'resuelto'; }
+function _s2Estado(t){ var m = S2.meta[t.id] || {}; return (t.status === 'pendiente' && !m.agente) ? 'nuevo' : t.status; }
+function _s2SinResp(t){ var m = S2.meta[t.id] || {}; return _s2Abierto(t) && (!!t.unread_admin || m.ultimo === 'user'); }
+function _s2Orden(a, b){
+  var sa = _s2SinResp(a) ? 0 : 1, sb2 = _s2SinResp(b) ? 0 : 1; if(sa !== sb2) return sa - sb2;
+  var oa = _s2Abierto(a) ? 0 : 1, ob = _s2Abierto(b) ? 0 : 1; if(oa !== ob) return oa - ob;
+  var pa = SOP_PRIO_RANK[a.priority] == null ? 2 : SOP_PRIO_RANK[a.priority], pb = SOP_PRIO_RANK[b.priority] == null ? 2 : SOP_PRIO_RANK[b.priority];
+  if(a.needs_human && _s2Abierto(a)) pa = Math.min(pa, 1); if(b.needs_human && _s2Abierto(b)) pb = Math.min(pb, 1);
+  if(pa !== pb) return pa - pb;
+  return new Date(b.updated_at || 0) - new Date(a.updated_at || 0);
+}
+
+function _s2Montar(){
+  var sec = document.getElementById('adms-soporte'); if(!sec || document.getElementById('s2-root')) return;
+  sec.innerHTML = '<div id="s2-root">'
+    + '<div id="adm-sop-vista-lista">'
+    +   '<div class="s2-chips" id="s2-chips"></div>'
+    +   '<div class="s2-filtros">'
+    +     '<div class="s2-buscar"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="s2-q" type="search" placeholder="Buscar por usuario o código (CS-…)" aria-label="Buscar ticket" oninput="_s2Buscar()"></div>'
+    +     '<select id="s2-estado" aria-label="Estado" onchange="S2.f.estado=this.value;_s2Render()"><option value="">Todos los estados</option><option value="nuevo">Nuevos</option><option value="pendiente">Pendientes</option><option value="en_atencion">En atención</option><option value="resuelto">Resueltos</option><option value="cerrado">Cerrados</option></select>'
+    +     '<select id="s2-prio" aria-label="Prioridad" onchange="S2.f.prio=this.value;_s2Render()"><option value="">Toda prioridad</option><option value="urgente">Urgente</option><option value="alta">Alta</option><option value="normal">Normal</option><option value="baja">Baja</option></select>'
+    +     '<select id="s2-cat" aria-label="Categoría" onchange="S2.f.cat=this.value;_s2Render()"><option value="">Toda categoría</option>' + Object.keys(SOP_CATEGORIA_LABEL).map(function(k){ return '<option value="' + k + '">' + SOP_CATEGORIA_LABEL[k] + '</option>'; }).join('') + '</select>'
+    +     '<label class="s2-tog"><input type="checkbox" id="s2-sr" onchange="S2.f.sinResp=this.checked;_s2Render()"> Solo sin responder</label>'
+    +     '<button type="button" class="s2-btn" onclick="admSopCargarLista()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/></svg> Actualizar</button>'
+    +   '</div>'
+    +   '<div class="s2-lista" id="s2-lista" aria-live="polite"><div class="s2-vacio">Cargando tickets…</div></div>'
+    + '</div>'
+    + '<div id="adm-sop-vista-detalle" style="display:none"></div>'
+    + '</div>';
+}
+
+var _s2BuscarT = null;
+function _s2Buscar(){ clearTimeout(_s2BuscarT); _s2BuscarT = setTimeout(function(){ S2.f.q = (document.getElementById('s2-q') || {}).value || ''; admSopCargarLista(); }, 350); }
+
+function admSopCargarLista(silencioso){
+  _s2Montar();
+  var lista = document.getElementById('s2-lista'); if(!lista) return Promise.resolve();
+  if(!silencioso && !S2.rows.length) lista.innerHTML = '<div class="s2-vacio">Cargando tickets…</div>';
+  var q = S2.f.q.trim().replace(/[*,()]/g, ''), qs = 'order=updated_at.desc&limit=300';
+  if(q) qs = 'or=(username.ilike.*' + encodeURIComponent(q) + '*,codigo.ilike.*' + encodeURIComponent(q.toUpperCase()) + '*)&' + qs;
+  return sb.get('tickets', qs).then(function(rows){
+    rows = Array.isArray(rows) ? rows : [];
+    if(!rows.length){ S2.rows = []; S2.meta = {}; _s2Render(); return; }
+    var ids = rows.map(function(t){ return t.id; });
+    return sb.get('ticket_messages', 'select=ticket_id,sender_type,created_at&ticket_id=in.(' + ids.join(',') + ')&order=created_at.desc&limit=5000').catch(function(){ return []; }).then(function(msgs){
+      var meta = {};
+      (Array.isArray(msgs) ? msgs : []).forEach(function(m){
+        var x = meta[m.ticket_id] || (meta[m.ticket_id] = {});
+        if(m.sender_type === 'user' && !x.cliente) x.cliente = m.created_at;
+        if(m.sender_type === 'agent' && !x.agente) x.agente = m.created_at;
+        if(m.sender_type !== 'bot' && !x.ultimo) x.ultimo = m.sender_type;
+      });
+      S2.rows = rows; S2.meta = meta; _s2Render(); _s2Badge();
+    });
+  }).catch(function(){ if(!silencioso) lista.innerHTML = '<div class="s2-vacio err">No se pudieron cargar los tickets. Revisa tu conexión y toca «Actualizar».</div>'; });
+}
+
+function _s2Badge(){
+  var n = S2.rows.filter(_s2SinResp).length; S2.pendientes = n; _s2BadgePintar(n);
+}
+function _s2BadgePintar(n){
+  var b = document.getElementById('adm-soporte-badge');
+  if(b){ b.style.display = n > 0 ? 'inline-block' : 'none'; b.textContent = n; }
+  var c = document.getElementById('adm-bell-n'); if(c){ c.textContent = n; c.style.display = n > 0 ? 'flex' : 'none'; }
+  var bell = document.getElementById('adm-bell'); if(bell) bell.setAttribute('aria-label', n + ' tickets sin responder');
+}
+
+function _s2Chip(id, n, txt, cls){
+  var on = (id === 'sinResp' && S2.f.sinResp) || (id !== 'sinResp' && id !== 'todos' && (S2.f.estado === id || S2.f.prio === id)) || (id === 'todos' && !S2.f.estado && !S2.f.prio && !S2.f.sinResp);
+  return '<button type="button" class="s2-chip ' + cls + (on ? ' on' : '') + '" onclick="_s2Rapido(\'' + id + '\')"><b>' + n + '</b><span>' + txt + '</span></button>';
+}
+function _s2Rapido(id){
+  S2.f.estado = ''; S2.f.prio = ''; S2.f.sinResp = false;
+  if(id === 'sinResp') S2.f.sinResp = true; else if(id === 'urgente') S2.f.prio = 'urgente'; else if(id !== 'todos') S2.f.estado = id;
+  var e = document.getElementById('s2-estado'); if(e) e.value = S2.f.estado;
+  var p = document.getElementById('s2-prio'); if(p) p.value = S2.f.prio;
+  var s = document.getElementById('s2-sr'); if(s) s.checked = S2.f.sinResp;
+  _s2Render();
+}
+function _s2Render(){
+  var lista = document.getElementById('s2-lista'), chips = document.getElementById('s2-chips'); if(!lista) return;
+  var r = S2.rows, abiertos = r.filter(_s2Abierto);
+  if(chips) chips.innerHTML = _s2Chip('todos', r.length, 'Todos', '')
+    + _s2Chip('sinResp', r.filter(_s2SinResp).length, 'Sin responder', 'rojo')
+    + _s2Chip('nuevo', r.filter(function(t){ return _s2Estado(t) === 'nuevo'; }).length, 'Nuevos', 'cian')
+    + _s2Chip('urgente', abiertos.filter(function(t){ return t.priority === 'urgente'; }).length, 'Urgentes', 'rojo')
+    + _s2Chip('pendiente', r.filter(function(t){ return _s2Estado(t) === 'pendiente'; }).length, 'Pendientes', 'ambar')
+    + _s2Chip('en_atencion', r.filter(function(t){ return t.status === 'en_atencion'; }).length, 'En atención', 'azul')
+    + _s2Chip('cerrado', r.filter(function(t){ return t.status === 'cerrado'; }).length, 'Cerrados', 'gris');
+  var f = S2.f, vis = r.filter(function(t){
+    if(f.estado && _s2Estado(t) !== f.estado) return false;
+    if(f.prio && t.priority !== f.prio) return false;
+    if(f.cat && t.category !== f.cat) return false;
+    if(f.sinResp && !_s2SinResp(t)) return false;
+    return true;
+  }).sort(_s2Orden);
+  if(!vis.length){ lista.innerHTML = '<div class="s2-vacio">' + (r.length ? 'Ningún ticket coincide con estos filtros.' : (f.q ? 'No hay tickets con «' + _s2Esc(f.q) + '».' : 'Todavía no hay tickets.')) + '</div>'; return; }
+  lista.innerHTML = '<div class="s2-head" aria-hidden="true"><span>Ticket</span><span>Cliente</span><span>Categoría</span><span>Estado</span><span>Prioridad</span><span>Actividad</span></div>' + vis.map(function(t){
+    var est = _s2Estado(t), sr = _s2SinResp(t), m = S2.meta[t.id] || {}, prio = t.priority || 'normal';
+    return '<button type="button" class="s2-item e-' + est + (sr ? ' sr' : '') + ' p-' + prio + '" onclick="admSopAbrirTicket(' + t.id + ')">'
+      + '<span class="s2-c1"><b class="s2-cod">' + (sr ? '<i class="s2-dot" aria-label="sin responder"></i>' : '') + _s2Esc(t.codigo) + '</b><span class="s2-asunto">' + _s2Esc(t.subject) + '</span></span>'
+      + '<span class="s2-c2"><span class="s2-av">' + _s2Esc(String(t.username || '?').charAt(0).toUpperCase()) + '</span>' + _s2Esc(t.username) + '</span>'
+      + '<span class="s2-c3">' + _s2Esc(SOP_CATEGORIA_LABEL[t.category] || t.category || '—') + '</span>'
+      + '<span class="s2-c4"><span class="s2-est e-' + est + '">' + (SOP_ESTADO2[est] || est) + '</span></span>'
+      + '<span class="s2-c5"><span class="s2-pr p-' + prio + '">' + (prio === 'urgente' ? '⚡ ' : '') + (SOP_PRIO_LABEL[prio] || prio) + '</span>' + (t.needs_human && _s2Abierto(t) ? '<span class="s2-hum" title="Pidió hablar con una persona">🙋</span>' : '') + '</span>'
+      + '<span class="s2-c6">' + (sr ? '<b class="s2-sr">Sin responder · ' + _s2Rel(m.cliente || t.updated_at) + '</b>' : _s2Rel(t.updated_at)) + '</span>'
+      + '</button>';
+  }).join('');
+}
+
+function admSopVolver(){
+  S2.actual = null; S2.ticket = null; S2.adj = null;
+  var l = document.getElementById('adm-sop-vista-lista'), d = document.getElementById('adm-sop-vista-detalle');
+  if(l) l.style.display = 'block'; if(d){ d.style.display = 'none'; d.innerHTML = ''; }
+  admSopCargarLista();
+}
+
+function admSopAbrirTicket(ticketId){
+  _s2Montar(); S2.actual = ticketId; S2.nMsgs = -1; S2.adj = null; _admSopTicketActual = ticketId;
+  var l = document.getElementById('adm-sop-vista-lista'), d = document.getElementById('adm-sop-vista-detalle');
+  if(l) l.style.display = 'none'; if(!d) return; d.style.display = 'block';
+  d.innerHTML = '<div class="s2-vacio">Abriendo ticket…</div>';
+  var sc = document.getElementById('full-admin-panel'); if(sc) sc.scrollTop = 0;
+  sb.get('tickets', 'id=eq.' + ticketId + '&limit=1').then(function(rows){
+    var t = rows && rows[0];
+    if(!t){ showToast('❌ Ticket no encontrado'); admSopVolver(); return; }
+    S2.ticket = t; _s2PintarDetalle();
+    if(t.unread_admin) sb.patch('tickets', {unread_admin:false}, 'id=eq.' + ticketId).then(function(){ S2.rows.forEach(function(x){ if(x.id === t.id) x.unread_admin = false; }); _s2Badge(); }).catch(function(){});
+    admSopCargarMensajes(ticketId); _s2Cliente(t);
+  }).catch(function(){ d.innerHTML = '<div class="s2-vacio err">No se pudo abrir el ticket. <button class="s2-btn" onclick="admSopAbrirTicket(' + ticketId + ')">Reintentar</button></div>'; });
+}
+
+function _s2PintarDetalle(){
+  var t = S2.ticket, d = document.getElementById('adm-sop-vista-detalle'); if(!t || !d) return;
+  var cerrado = t.status === 'cerrado', est = _s2Estado(t), prio = t.priority || 'normal';
+  d.innerHTML = '<div class="s2-dtop">'
+    + '<button type="button" class="s2-back" onclick="admSopVolver()" aria-label="Volver a la lista"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg> Tickets</button>'
+    + '<div class="s2-dtit"><div class="s2-dcod">' + _s2Esc(t.codigo) + ' <span class="s2-est e-' + est + '">' + (SOP_ESTADO2[est] || est) + '</span> <span class="s2-pr p-' + prio + '">' + (SOP_PRIO_LABEL[prio] || prio) + '</span></div>'
+    + '<div class="s2-dasu">' + _s2Esc(t.subject) + ((SOP_CATEGORIA_LABEL[t.category] || t.category) && (SOP_CATEGORIA_LABEL[t.category] || t.category) !== t.subject ? ' · ' + _s2Esc(SOP_CATEGORIA_LABEL[t.category] || t.category) : '') + '</div></div>'
+    + '<div class="s2-dacc">' + (cerrado ? '<button type="button" class="s2-btn" onclick="admSopReabrir()">Reabrir ticket</button>'
+        : '<button type="button" class="s2-btn ok" onclick="admSopCambiarEstado(\'resuelto\')">Marcar resuelto</button><button type="button" class="s2-btn danger" onclick="admSopCerrar()">Cerrar ticket</button>') + '</div>'
+    + '</div>'
+    + '<div class="s2-dgrid">'
+    +   '<section class="s2-chat" aria-label="Conversación">'
+    +     '<div class="s2-feed" id="adm-sop-d-feed"><div class="s2-vacio">Cargando conversación…</div></div>'
+    +     (cerrado ? '<div class="s2-cerrado">Este ticket está cerrado. Reábrelo para responder.</div>'
+         : '<div class="s2-comp">'
+         +   '<div class="s2-rap" aria-label="Respuestas rápidas">' + SOP_RAPIDAS.map(function(x, i){ return '<button type="button" onclick="_s2Rapida(' + i + ')">' + _s2Esc(x.length > 38 ? x.slice(0, 36) + '…' : x) + '</button>'; }).join('') + '</div>'
+         +   '<div id="s2-adj-prev" class="s2-adjprev" style="display:none"></div>'
+         +   '<div class="s2-row"><label class="s2-clip" title="Adjuntar imagen o comprobante"><input type="file" accept="image/*" onchange="_s2Adjuntar(this)" hidden><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21.4 11.1l-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg><span class="sr-only">Adjuntar</span></label>'
+         +   '<textarea id="adm-sop-d-input" rows="2" placeholder="Escribe tu respuesta… (Ctrl + Enter para enviar)" onkeydown="if(event.key===\'Enter\'&&(event.ctrlKey||event.metaKey)){event.preventDefault();admSopResponder();}"></textarea>'
+         +   '<button type="button" class="s2-send" id="s2-send" onclick="admSopResponder()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg> Enviar</button></div>'
+         + '</div>')
+    +   '</section>'
+    +   '<aside class="s2-side">'
+    +     '<div class="s2-card"><h4>Gestión</h4>'
+    +       '<label>Estado<select id="adm-sop-d-estado" onchange="admSopCambiarEstado(this.value)">' + ['pendiente', 'en_atencion', 'resuelto', 'cerrado'].map(function(s){ return '<option value="' + s + '"' + (t.status === s ? ' selected' : '') + '>' + SOP_ESTADO2[s] + '</option>'; }).join('') + '</select></label>'
+    +       '<label>Prioridad<select id="adm-sop-d-prioridad" onchange="admSopCambiarPrioridad(this.value)">' + ['urgente', 'alta', 'normal', 'baja'].map(function(s){ return '<option value="' + s + '"' + (prio === s ? ' selected' : '') + '>' + SOP_PRIO_LABEL[s] + '</option>'; }).join('') + '</select></label>'
+    +     '</div>'
+    +     '<div class="s2-card"><h4>Actividad</h4><dl class="s2-dl" id="s2-act"><dt>Creado</dt><dd>' + _s2Fecha(t.created_at, true) + '</dd></dl></div>'
+    +     '<div class="s2-card"><h4>Cliente</h4><div id="s2-cli"><div class="s2-vacio sm">Cargando…</div></div></div>'
+    +     '<div class="s2-card" id="adm-sop-d-pedido" style="display:none"></div>'
+    +     '<div class="s2-card"><h4>Pedidos recientes</h4><div id="s2-peds"><div class="s2-vacio sm">Cargando…</div></div></div>'
+    +     '<div class="s2-card"><h4>Otros tickets del cliente</h4><div id="s2-otros"><div class="s2-vacio sm">Cargando…</div></div></div>'
+    +   '</aside>'
+    + '</div>';
+  if(t.pedido_id){
+    sb.get('pedidos', 'id=eq.' + t.pedido_id + '&limit=1').then(function(p){
+      p = p && p[0]; var box = document.getElementById('adm-sop-d-pedido'); if(!p || !box) return;
+      box.style.display = 'block';
+      box.innerHTML = '<h4>Pedido relacionado #' + p.id + '</h4><div class="s2-ped"><b>' + _s2Esc(p.producto) + '</b><span>' + _s2Esc(ESTADO_LABEL[p.estado] ? ESTADO_LABEL[p.estado].t : p.estado) + ' · ' + _s2Fecha(p.created_at) + '</span></div>';
+    }).catch(function(){});
+  }
+}
+
+function _s2Cliente(t){
+  var cli = function(h){ var e = document.getElementById('s2-cli'); if(e) e.innerHTML = h; };
+  var q = t.user_id ? 'id=eq.' + encodeURIComponent(t.user_id) : 'username=eq.' + encodeURIComponent(t.username);
+  sb.get('profiles', q + '&select=id,username,nombre,whatsapp,saldo,role,banned,created_at,last_seen&limit=1').then(function(p){
+    p = p && p[0];
+    if(!p){ cli('<div class="s2-vacio sm">No se encontró el perfil de ' + _s2Esc(t.username) + '.</div>'); return; }
+    var wa = String(p.whatsapp || '').replace(/\D/g, '');
+    cli('<div class="s2-cli"><span class="s2-av lg">' + _s2Esc(String(p.username || '?').charAt(0).toUpperCase()) + '</span><div><b>' + _s2Esc(p.username) + '</b>' + (p.nombre ? '<small>' + _s2Esc(p.nombre) + '</small>' : '') + '</div></div>'
+      + '<dl class="s2-dl"><dt>Saldo</dt><dd>' + _d2MXN(p.saldo) + '</dd><dt>Registrado</dt><dd>' + _s2Fecha(p.created_at, true) + '</dd>'
+      + (p.last_seen ? '<dt>Última conexión</dt><dd>' + _s2Rel(p.last_seen) + '</dd>' : '') + '<dt>Rol</dt><dd>' + _s2Esc(p.role || 'user') + (p.banned ? ' · <b class="s2-ban">Bloqueado</b>' : '') + '</dd></dl>'
+      + (wa ? '<a class="s2-btn wa" href="https://wa.me/' + wa + '" target="_blank" rel="noopener">' + CS_WA_ICO + ' Escribir al cliente</a>' : ''));
+  }).catch(function(){ cli('<div class="s2-vacio sm err">No se pudieron cargar los datos.</div>'); });
+  sb.get('pedidos', 'username=eq.' + encodeURIComponent(t.username) + '&order=created_at.desc&limit=5').then(function(ps){
+    var e = document.getElementById('s2-peds'); if(!e) return;
+    e.innerHTML = (Array.isArray(ps) && ps.length) ? ps.map(function(p){ return '<div class="s2-ped"><b>' + _s2Esc(p.producto) + '</b><span>' + _s2Esc(ESTADO_LABEL[p.estado] ? ESTADO_LABEL[p.estado].t : p.estado) + ' · ' + _s2Fecha(p.created_at) + '</span></div>'; }).join('') : '<div class="s2-vacio sm">Sin pedidos registrados.</div>';
+  }).catch(function(){ var e = document.getElementById('s2-peds'); if(e) e.innerHTML = '<div class="s2-vacio sm">No disponible.</div>'; });
+  sb.get('tickets', 'username=eq.' + encodeURIComponent(t.username) + '&id=neq.' + t.id + '&order=updated_at.desc&limit=5').then(function(ts){
+    var e = document.getElementById('s2-otros'); if(!e) return;
+    ts = (Array.isArray(ts) ? ts : []).filter(function(x){ return x.id !== t.id; });
+    e.innerHTML = ts.length ? ts.map(function(x){ return '<button type="button" class="s2-otro" onclick="admSopAbrirTicket(' + x.id + ')"><b>' + _s2Esc(x.codigo) + '</b><span>' + _s2Esc(x.subject) + ' · ' + (SOP_ESTADO2[x.status] || x.status) + '</span></button>'; }).join('') : '<div class="s2-vacio sm">Es su único ticket.</div>';
+  }).catch(function(){});
+}
+
+function admSopCargarMensajes(ticketId, silencioso){
+  return sb.get('ticket_messages', 'ticket_id=eq.' + ticketId + '&order=created_at.asc').then(function(rows){
+    if(S2.actual !== ticketId) return;
+    var feed = document.getElementById('adm-sop-d-feed'); if(!feed) return;
+    rows = Array.isArray(rows) ? rows : [];
+    if(silencioso && rows.length === S2.nMsgs) return;
+    var nuevos = silencioso && S2.nMsgs >= 0 && rows.length > S2.nMsgs;
+    S2.nMsgs = rows.length;
+    var cerca = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 120;
+    if(!rows.length){ feed.innerHTML = '<div class="s2-vacio">Sin mensajes todavía.</div>'; return; }
+    var dia = '', uCli = null, uAg = null;
+    feed.innerHTML = rows.map(function(m){
+      var h = '', d = _s2Dia(m.created_at);
+      if(d !== dia){ dia = d; h += '<div class="s2-dia"><span>' + d + '</span></div>'; }
+      if(m.sender_type === 'user') uCli = m.created_at; if(m.sender_type === 'agent') uAg = m.created_at;
+      var nuestro = m.sender_type !== 'user', quien = m.sender_type === 'bot' ? '🤖 Asistente IA' : (m.sender_type === 'agent' ? _s2Esc(m.sender_name || 'Soporte') : _s2Esc(m.sender_name || 'Cliente'));
+      var img = m.attachment_url ? '<button type="button" class="s2-img" onclick="_s2Ver(this)"><img src="' + _s2Esc(m.attachment_url) + '" alt="Imagen adjunta" loading="lazy"></button>' : '';
+      return h + '<div class="s2-msg ' + (nuestro ? 'yo ' : 'cli ') + m.sender_type + '"><div class="s2-bub"><div class="s2-who">' + quien + '</div>' + (m.message ? '<div class="s2-txt">' + _s2Esc(m.message).replace(/\n/g, '<br>') + '</div>' : '') + img + '</div><div class="s2-time">' + _s2Hora(m.created_at) + '</div></div>';
+    }).join('');
+    var act = document.getElementById('s2-act');
+    if(act && S2.ticket) act.innerHTML = '<dt>Creado</dt><dd>' + _s2Fecha(S2.ticket.created_at, true) + '</dd>'
+      + '<dt>Último mensaje del cliente</dt><dd>' + (uCli ? _s2Rel(uCli) + '<small>' + _s2Fecha(uCli) + '</small>' : '—') + '</dd>'
+      + '<dt>Última respuesta de soporte</dt><dd>' + (uAg ? _s2Rel(uAg) + '<small>' + _s2Fecha(uAg) + '</small>' : '<b class="s2-sr">Aún sin respuesta</b>') + '</dd>'
+      + (S2.ticket.assigned_agent ? '<dt>Atendido por</dt><dd>' + _s2Esc(S2.ticket.assigned_agent) + '</dd>' : '')
+      + '<dt>Mensajes</dt><dd>' + rows.length + '</dd>';
+    if(!silencioso || cerca || nuevos) feed.scrollTop = feed.scrollHeight;
+    if(nuevos) showToast('💬 Nuevo mensaje en ' + (S2.ticket ? S2.ticket.codigo : 'el ticket'));
+  }).catch(function(){ if(!silencioso){ var f = document.getElementById('adm-sop-d-feed'); if(f) f.innerHTML = '<div class="s2-vacio err">No se pudo cargar la conversación.</div>'; } });
+}
+function _s2Ver(btn){
+  var src = btn.querySelector('img').src, ov = document.createElement('div');
+  ov.className = 's2-lb'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-label', 'Imagen adjunta');
+  ov.innerHTML = '<img src="' + src + '" alt="Imagen adjunta"><button type="button" aria-label="Cerrar">✕</button>';
+  ov.onclick = function(){ ov.remove(); }; document.body.appendChild(ov);
+}
+function _s2Rapida(i){ var t = document.getElementById('adm-sop-d-input'); if(!t) return; t.value = (t.value ? t.value.trim() + '\n' : '') + SOP_RAPIDAS[i]; t.focus(); }
+// Las imágenes se reducen (máx. 1280 px, JPG) antes de guardarse, igual que se guardan los adjuntos del cliente.
+function _s2Adjuntar(input){
+  var f = input.files && input.files[0]; if(!f) return;
+  if(!/^image\//.test(f.type)){ showToast('❌ Solo se pueden adjuntar imágenes'); input.value = ''; return; }
+  if(f.size > 8 * 1024 * 1024){ showToast('❌ La imagen pesa más de 8 MB'); input.value = ''; return; }
+  var r = new FileReader();
+  r.onload = function(e){
+    var img = new Image();
+    img.onload = function(){
+      var k = Math.min(1, 1280 / Math.max(img.width, img.height)), c = document.createElement('canvas');
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      S2.adj = c.toDataURL('image/jpeg', .82);
+      var p = document.getElementById('s2-adj-prev');
+      if(p){ p.style.display = 'flex'; p.innerHTML = '<img src="' + S2.adj + '" alt=""><span>Imagen lista para enviar</span><button type="button" onclick="S2.adj=null;this.parentNode.style.display=\'none\'">Quitar</button>'; }
+    };
+    img.onerror = function(){ showToast('❌ No se pudo leer la imagen'); };
+    img.src = e.target.result;
+  };
+  r.readAsDataURL(f); input.value = '';
+}
+function admSopResponder(){
+  if(!S2.actual || S2.enviando) return;
+  var input = document.getElementById('adm-sop-d-input'), texto = ((input || {}).value || '').trim();
+  if(!texto && !S2.adj){ showToast('Escribe una respuesta o adjunta una imagen'); return; }
+  if(texto.length > 2000){ showToast('❌ La respuesta es muy larga (máximo 2000 caracteres)'); return; }
+  var id = S2.actual, agente = (typeof authSession !== 'undefined' && authSession && authSession.username) || 'Admin';
+  var btn = document.getElementById('s2-send'); S2.enviando = true; if(btn){ btn.disabled = true; btn.classList.add('cargando'); }
+  sb.post('ticket_messages', {ticket_id:id, sender_type:'agent', sender_name:agente, message:texto, attachment_url:S2.adj || null}).then(function(){
+    if(input) input.value = ''; S2.adj = null; var p = document.getElementById('s2-adj-prev'); if(p) p.style.display = 'none';
+    var cambio = {unread_user:true, assigned_agent:agente}; if(S2.ticket && S2.ticket.status !== 'resuelto') cambio.status = 'en_atencion';
+    return sb.patch('tickets', cambio, 'id=eq.' + id).then(function(){ if(S2.ticket){ Object.assign(S2.ticket, cambio); var s = document.getElementById('adm-sop-d-estado'); if(s) s.value = S2.ticket.status; } });
+  }).then(function(){ showToast('✅ Respuesta enviada'); return admSopCargarMensajes(id); })
+    .catch(function(){ showToast('❌ No se pudo enviar la respuesta. Tu texto sigue en la caja.'); })
+    .then(function(){ S2.enviando = false; if(btn){ btn.disabled = false; btn.classList.remove('cargando'); } });
+}
+function admSopCambiarEstado(nuevo){
+  if(!S2.actual) return Promise.resolve();
+  var data = {status:nuevo}; if(nuevo === 'cerrado') data.closed_at = new Date().toISOString();
+  return sb.patch('tickets', data, 'id=eq.' + S2.actual).then(function(){
+    if(S2.ticket) Object.assign(S2.ticket, data); showToast('✅ Estado: ' + SOP_ESTADO2[nuevo]); _s2PintarDetalle(); admSopCargarMensajes(S2.actual); _s2Cliente(S2.ticket);
+  }).catch(function(){ showToast('❌ No se pudo cambiar el estado'); });
+}
+function admSopCerrar(){ if(confirm('¿Cerrar este ticket? El cliente ya no podrá escribir en él hasta que lo reabras.')) admSopCambiarEstado('cerrado'); }
+function admSopReabrir(){
+  if(!S2.actual) return;
+  sb.patch('tickets', {status:'en_atencion', closed_at:null}, 'id=eq.' + S2.actual).then(function(){
+    if(S2.ticket){ S2.ticket.status = 'en_atencion'; S2.ticket.closed_at = null; } showToast('✅ Ticket reabierto'); _s2PintarDetalle(); admSopCargarMensajes(S2.actual); _s2Cliente(S2.ticket);
+  }).catch(function(){ showToast('❌ No se pudo reabrir'); });
+}
+function admSopCambiarPrioridad(p){
+  if(!S2.actual) return;
+  sb.patch('tickets', {priority:p}, 'id=eq.' + S2.actual).then(function(){ if(S2.ticket) S2.ticket.priority = p; showToast('✅ Prioridad: ' + SOP_PRIO_LABEL[p]); _s2PintarDetalle(); admSopCargarMensajes(S2.actual); _s2Cliente(S2.ticket); })
+    .catch(function(){ showToast('❌ No se pudo cambiar la prioridad'); });
+}
+
+// Revisión periódica con el panel abierto: contador de pendientes, aviso de tickets nuevos y mensajes nuevos.
+function _s2Vigilar(){
+  var panel = document.getElementById('full-admin-panel');
+  if(!panel || !panel.classList.contains('open') || document.hidden || typeof sb === 'undefined') return;
+  var enSoporte = (document.getElementById('adms-soporte') || {}).className === 'adm-section active';
+  if(enSoporte && S2.actual) admSopCargarMensajes(S2.actual, true);
+  sb.get('tickets', 'select=id,codigo,username,subject,status,unread_admin,created_at&order=created_at.desc&limit=60').then(function(rows){
+    rows = Array.isArray(rows) ? rows : [];
+    if(S2.conocidos){
+      var nuevos = rows.filter(function(t){ return !S2.conocidos[t.id]; });
+      if(nuevos.length){
+        showToast('🎫 ' + (nuevos.length === 1 ? 'Nuevo ticket ' + nuevos[0].codigo + ' de ' + nuevos[0].username : nuevos.length + ' tickets nuevos'), 5000);
+        _s2Sonido();
+      }
+    }
+    var huella = rows.map(function(t){ return t.id + ':' + t.status + ':' + (t.unread_admin ? 1 : 0); }).join(',');
+    var cambio = huella !== S2.huella; S2.huella = huella;
+    S2.conocidos = {}; rows.forEach(function(t){ S2.conocidos[t.id] = 1; });
+    // La lista completa solo se recalcula si algo cambió (o si estás viéndola), para no gastar consultas.
+    if((enSoporte && !S2.actual) || cambio || !S2.rows.length) admSopCargarLista(true);
+  }).catch(function(){});
+}
+function _s2Sonido(){ try{ var C = window.AudioContext || window.webkitAudioContext, c = new C(), o = c.createOscillator(), g = c.createGain(); o.frequency.value = 880; g.gain.setValueAtTime(.08, c.currentTime); g.gain.exponentialRampToValueAtTime(.0001, c.currentTime + .35); o.connect(g); g.connect(c.destination); o.start(); o.stop(c.currentTime + .36); }catch(e){} }
+setInterval(_s2Vigilar, 20000);
+
+// ═════════════════════════════ SOPORTE · CLIENTE ═════════════════════════════
+// Mientras el cliente tiene un ticket abierto, las respuestas de soporte aparecen solas.
+var _sopNMsgs = -1;
+setInterval(function(){
+  if(typeof _sopTicketActual === 'undefined' || !_sopTicketActual || document.hidden || _sopEnviando) return;
+  var pg = document.getElementById('page-soporte'); if(!pg || !pg.classList.contains('active')) return;
+  var id = _sopTicketActual;
+  sb.get('ticket_messages', 'select=id&ticket_id=eq.' + id).then(function(r){
+    if(!Array.isArray(r) || id !== _sopTicketActual) return;
+    if(_sopNMsgs >= 0 && r.length > _sopNMsgs){ sopCargarMensajes(id); showToast('💬 Soporte te respondió'); }
+    _sopNMsgs = r.length;
+  }).catch(function(){});
+}, 15000);
+(function(){ var f = window.sopAbrirTicket; if(typeof f === 'function') window.sopAbrirTicket = function(id){ _sopNMsgs = -1; return f.apply(this, arguments); }; })();
+
+// ═════════════════════════════ DASHBOARD ═════════════════════════════
+function _d2MXN(n, dec){ n = Number(n) || 0; var d = dec == null ? 2 : dec; return '$' + n.toLocaleString('es-MX', {minimumFractionDigits:d, maximumFractionDigits:d}) + ' MXN'; }
+function _d2Corto(n){ n = Number(n) || 0; if(n >= 1e6) return '$' + (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M'; if(n >= 1e4) return '$' + (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'k'; return '$' + Math.round(n).toLocaleString('es-MX'); }
+function _d2Num(n){ return (Number(n) || 0).toLocaleString('es-MX'); }
+function _d2Set(id, v){ var e = document.getElementById(id); if(e) e.textContent = v; }
+function _d2Dia(t){ return new Date(new Date(t).getTime() - 6 * 3600e3).toISOString().slice(0, 10); }   // día en hora de México
+function _d2Delta(a, b){
+  if(!(b > 0)) return '<span class="d2-dl n">sin datos para comparar</span>';
+  var p = (a - b) / b * 100, s = p >= 0 ? 'up' : 'down';
+  return '<span class="d2-dl ' + s + '">' + (p >= 0 ? '▲ ' : '▼ ') + Math.abs(p).toFixed(1) + '%</span>';
+}
+
+function admFullLoadStats(){
+  _d2Set('adm-last-update', 'Actualizado ' + new Date().toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'}));
+  _d2Montar();
+  ['adm-s-users', 'adm-s-saldo', 'adm-s-movs', 'adm-s-diamonds', 'adm-s-likes', 'adm-s-admins'].forEach(function(id){ var e = document.getElementById(id); if(e) e.classList.add('d2-cargando'); });
+  var listo = function(id, v){ var e = document.getElementById(id); if(e){ e.textContent = v; e.classList.remove('d2-cargando'); } };
+  sb.count('profiles').then(function(n){ listo('adm-s-users', _d2Num(n)); }).catch(function(){ listo('adm-s-users', 'Error'); });
+  sbGetAll('profiles', 'saldo,role,banned').then(function(users){
+    if(!Array.isArray(users)) return;
+    var total = users.reduce(function(s, u){ return s + (Number(u.saldo) || 0); }, 0);
+    listo('adm-s-saldo', _d2MXN(total)); listo('adm-s-admins', _d2Num(users.filter(function(u){ return u.role === 'admin'; }).length));
+    var conSaldo = users.filter(function(u){ return (Number(u.saldo) || 0) > 0; }).length;
+    _d2Sub('adm-s-saldo', _d2Num(conSaldo) + ' clientes con saldo');
+    if(typeof renderAdminStats2 === 'function') renderAdminStats2(users);
+  }).catch(function(){ listo('adm-s-saldo', 'Error'); });
+  sbGetAll('movimientos_saldo', 'id,tipo,descripcion,monto').then(function(movs){
+    if(!Array.isArray(movs)) return;
+    var dia = 0, lik = 0;
+    movs.forEach(function(m){ var d = String(m.descripcion || '').toLowerCase(); if(d.indexOf('diamante') >= 0) dia++; if(d.indexOf('like') >= 0) lik++; });
+    listo('adm-s-movs', _d2Num(movs.length)); listo('adm-s-diamonds', _d2Num(dia)); listo('adm-s-likes', _d2Num(lik));
+    _d2Sub('adm-s-diamonds', 'pedidos con diamantes'); _d2Sub('adm-s-likes', 'pedidos con likes');
+  }).catch(function(){ listo('adm-s-movs', 'Error'); });
+  if(sb.rpc) sb.rpc('total_diamantes_vendidos', {p_periodo:'historico'}).then(function(r){
+    var t = Array.isArray(r) && r[0]; if(t && Number(t.diamantes) > 0) _d2Sub('adm-s-diamonds', _d2Num(t.diamantes) + ' 💎 vendidos desde el 3 nov');
+  }).catch(function(){});
+  var tbody = document.getElementById('adm-recent-body');
+  if(tbody) sb.get('movimientos_saldo', 'tipo=eq.compra&order=created_at.desc&limit=8').then(function(rows){
+    if(!rows || !rows.length){ tbody.innerHTML = '<tr><td colspan="4" class="d2-vacio">Sin compras aún</td></tr>'; return; }
+    var ids = rows.map(function(m){ return m.user_id; }).filter(Boolean).filter(function(v, i, a){ return a.indexOf(v) === i && /^[0-9a-f-]{36}$/i.test(v); });
+    sb.get('profiles', 'select=id,username&id=in.(' + ids.map(encodeURIComponent).join(',') + ')').catch(function(){ return []; }).then(function(profs){
+      var u = {}; (profs || []).forEach(function(p){ u[p.id] = p.username; });
+      tbody.innerHTML = rows.map(function(m){
+        return '<tr><td class="d2-u">' + _s2Esc(u[m.user_id] || '—') + '</td><td class="d2-m">' + _s2Esc(m.descripcion || '—') + '</td><td class="d2-mon">' + _d2MXN(Math.abs(Number(m.monto) || 0)) + '</td><td class="d2-m">' + _s2Fecha(m.created_at) + '</td></tr>';
+      }).join('');
+    });
+  }).catch(function(){ tbody.innerHTML = '<tr><td colspan="4" class="d2-vacio">No se pudieron cargar las compras.</td></tr>'; });
+  var canvas = document.getElementById('adm-sales-chart'); if(canvas) admRenderChart(canvas);
+  _d2Soporte();
+}
+function _d2Sub(id, txt){
+  var v = document.getElementById(id); if(!v) return; var card = v.closest('.adm-stat-card'); if(!card) return;
+  var s = card.querySelector('.d2-sub'); if(!s){ s = document.createElement('span'); s.className = 'd2-sub'; card.appendChild(s); } s.textContent = txt;
+}
+function _d2Montar(){
+  var grid = document.getElementById('adm-stats-grid'); if(!grid || document.getElementById('d2-kpis')) return;
+  grid.insertAdjacentHTML('afterend', '<div class="d2-kpis" id="d2-kpis"></div>');
+  var lbl = { 'adm-s-likes':'Likes vendidos', 'adm-s-admins':'Administradores', 'adm-s-users':'Usuarios registrados', 'adm-s-saldo':'Saldo total de usuarios' };
+  Object.keys(lbl).forEach(function(id){ var v = document.getElementById(id), l = v && v.parentNode.querySelector('.adm-stat-lbl'); if(l) l.textContent = lbl[id]; });
+  var sop = document.createElement('button'); sop.type = 'button'; sop.className = 'adm-stat-card d2-sop'; sop.id = 'd2-sop-card'; sop.onclick = function(){ admFullTab('soporte'); };
+  sop.innerHTML = '<div class="adm-stat-ico-wrap"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><span class="adm-stat-val" id="d2-sop-n">-</span><span class="adm-stat-lbl">Tickets sin responder</span><span class="d2-sub" id="d2-sop-sub">Soporte</span>';
+  grid.appendChild(sop);
+}
+// Usa el mismo cálculo que la lista de Soporte, así el número coincide en todos lados.
+function _d2Soporte(){
+  admSopCargarLista(true).then(function(){
+    var r = S2.rows, ab = r.filter(_s2Abierto);
+    var sr = r.filter(_s2SinResp).length, urg = ab.filter(function(t){ return t.priority === 'urgente'; }).length;
+    _d2Set('d2-sop-n', _d2Num(sr)); _d2Set('d2-sop-sub', _d2Num(ab.length) + ' abiertos' + (urg ? ' · ' + urg + ' urgentes' : ''));
+    var c = document.getElementById('d2-sop-card'); if(c) c.classList.toggle('alerta', sr > 0);
+  }).catch(function(){ _d2Set('d2-sop-n', '—'); });
+}
+
+var _d2Datos = null;
+function admRenderChart(canvas){
+  var hoy = _d2Dia(Date.now()), desde = new Date(Date.parse(hoy + 'T06:00:00Z') - 13 * 864e5).toISOString();
+  var extra = document.getElementById('adm-chart-extra');
+  sbGetAll('movimientos_saldo', 'tipo,monto,created_at', 'tipo=in.(compra,compra_cancelada)&created_at=gte.' + desde + '&order=created_at.asc').then(function(rows){
+    rows = Array.isArray(rows) ? rows : [];
+    var dias = []; for(var i = 13; i >= 0; i--){ var k = new Date(Date.parse(hoy + 'T12:00:00Z') - i * 864e5).toISOString().slice(0, 10); dias.push({k:k, v:0, n:0, r:0, rn:0}); }
+    var idx = {}; dias.forEach(function(d, i){ idx[d.k] = i; });
+    rows.forEach(function(m){ var i = idx[_d2Dia(m.created_at)]; if(i == null) return; var v = Math.abs(Number(m.monto) || 0); if(m.tipo === 'compra'){ dias[i].v += v; dias[i].n++; } else { dias[i].r += v; dias[i].rn++; } });
+    var ant = dias.slice(0, 7), act = dias.slice(7);
+    var sum = function(a, f){ return a.reduce(function(s, d){ return s + d[f]; }, 0); };
+    var tAct = sum(act, 'v'), tAnt = sum(ant, 'v'), nAct = sum(act, 'n'), rAct = sum(act, 'r'), rnAct = sum(act, 'rn');
+    _d2Datos = {act:act, ant:ant};
+    var ct = document.getElementById('adm-chart-total');
+    if(ct) ct.innerHTML = 'Total semana: ' + _d2MXN(tAct) + ' ' + _d2Delta(tAct, tAnt);
+    var mejor = act.reduce(function(a, d){ return d.v > a.v ? d : a; }, act[0]), conVenta = act.filter(function(d){ return d.v > 0; }).length;
+    if(extra) extra.innerHTML = [
+      ['Hoy', _d2MXN(act[6].v), _d2Delta(act[6].v, act[5].v) + '<small>vs ayer ' + _d2MXN(act[5].v) + '</small>'],
+      ['Semana anterior', _d2MXN(tAnt), '<small>' + _d2Num(sum(ant, 'n')) + ' compras</small>'],
+      ['Promedio por día', _d2MXN(conVenta ? tAct / conVenta : 0), '<small>' + conVenta + ' de 7 días con ventas</small>'],
+      ['Mejor día', _d2MXN(mejor.v), '<small>' + _d2Etiqueta(mejor.k, true) + '</small>'],
+      ['Compras', _d2Num(nAct), '<small>ticket promedio ' + _d2MXN(nAct ? tAct / nAct : 0) + '</small>'],
+      ['Reembolsos', _d2MXN(rAct), '<small>' + _d2Num(rnAct) + ' cancelaciones · neto ' + _d2MXN(tAct - rAct) + '</small>']
+    ].map(function(x){ return '<div class="d2-kpi"><span class="d2-kl">' + x[0] + '</span><b class="d2-kv">' + x[1] + '</b><span class="d2-ks">' + x[2] + '</span></div>'; }).join('');
+    _d2Dibujar(canvas);
+    var kp = document.getElementById('d2-kpis');
+    if(kp) kp.innerHTML = '<div class="d2-kpi big"><span class="d2-kl">Ventas de hoy</span><b class="d2-kv">' + _d2MXN(act[6].v) + '</b><span class="d2-ks">' + _d2Delta(act[6].v, act[5].v) + ' vs ayer</span></div>'
+      + '<div class="d2-kpi big"><span class="d2-kl">Ventas últimos 7 días</span><b class="d2-kv">' + _d2MXN(tAct) + '</b><span class="d2-ks">' + _d2Delta(tAct, tAnt) + ' vs 7 días anteriores</span></div>'
+      + '<div class="d2-kpi big"><span class="d2-kl">Compras últimos 7 días</span><b class="d2-kv">' + _d2Num(nAct) + '</b><span class="d2-ks">' + _d2Delta(nAct, sum(ant, 'n')) + ' en cantidad</span></div>';
+  }).catch(function(){ if(extra) extra.innerHTML = '<div class="d2-vacio">No se pudieron cargar las ventas.</div>'; });
+}
+function _d2Etiqueta(k, largo){ var d = new Date(k + 'T12:00:00Z'); return d.toLocaleDateString('es-MX', largo ? {weekday:'long', day:'numeric', month:'short', timeZone:'UTC'} : {weekday:'short', day:'2-digit', timeZone:'UTC'}); }
+function _d2Dibujar(canvas, hover){
+  if(!_d2Datos) return;
+  var act = _d2Datos.act, ant = _d2Datos.ant, dpr = window.devicePixelRatio || 1;
+  var W = canvas.clientWidth || canvas.parentNode.clientWidth || 300, H = W < 520 ? 210 : 240;
+  canvas.style.height = H + 'px'; canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+  var c = canvas.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, W, H);
+  var izq = W < 520 ? 44 : 64, top = 26, abajo = 30, aw = W - izq - 10, ah = H - top - abajo;
+  var mx = Math.max.apply(null, act.map(function(d){ return d.v; }).concat(ant.map(function(d){ return d.v; }), [1]));
+  var paso = Math.pow(10, Math.floor(Math.log10(mx))), tope = Math.ceil(mx / paso) * paso; if(tope / paso > 6) paso *= 2; tope = Math.ceil(mx / paso) * paso;
+  c.font = '11px Barlow, system-ui, sans-serif'; c.textBaseline = 'middle';
+  for(var y = 0; y <= tope + 1e-9; y += paso){
+    var py = top + ah - (y / tope) * ah;
+    c.strokeStyle = 'rgba(140,170,255,.10)'; c.lineWidth = 1; c.beginPath(); c.moveTo(izq, py); c.lineTo(W - 10, py); c.stroke();
+    c.fillStyle = '#7f8db0'; c.textAlign = 'right'; c.fillText(_d2Corto(y), izq - 8, py);
+  }
+  var col = aw / 7, bw = Math.min(46, col * .52);
+  act.forEach(function(d, i){
+    var cx = izq + col * i + col / 2, hA = (ant[i].v / tope) * ah, hB = (d.v / tope) * ah;
+    c.strokeStyle = 'rgba(139,92,246,.55)'; c.setLineDash([3, 3]); c.strokeRect(cx - bw / 2 - 3, top + ah - hA, bw + 6, hA); c.setLineDash([]);
+    var g = c.createLinearGradient(0, top + ah - hB, 0, top + ah); g.addColorStop(0, hover === i ? '#7ee7fb' : '#22d3ee'); g.addColorStop(1, 'rgba(91,140,255,.35)');
+    c.fillStyle = g; c.beginPath(); if(c.roundRect) c.roundRect(cx - bw / 2, top + ah - hB, bw, Math.max(hB, d.v > 0 ? 2 : 0), [6, 6, 2, 2]); else c.rect(cx - bw / 2, top + ah - hB, bw, hB); c.fill();
+    c.fillStyle = i === 6 ? '#fff' : '#8E9AB8'; c.textAlign = 'center'; c.font = (i === 6 ? '600 ' : '') + '11px Barlow, system-ui, sans-serif';
+    c.fillText(i === 6 ? 'Hoy' : _d2Etiqueta(d.k), cx, H - abajo / 2);
+    if(d.v > 0 && W >= 420){ c.fillStyle = '#EAF0FF'; c.font = '600 11px Barlow, system-ui, sans-serif'; c.fillText(_d2Corto(d.v), cx, top + ah - hB - 10); }
+  });
+  c.textAlign = 'left'; c.font = '11px Barlow, system-ui, sans-serif';
+  c.fillStyle = '#22d3ee'; c.fillRect(izq, 8, 10, 10); c.fillStyle = '#c9d1e0'; c.fillText('Últimos 7 días', izq + 15, 13);
+  c.strokeStyle = 'rgba(139,92,246,.8)'; c.setLineDash([3, 3]); c.strokeRect(izq + 110, 8, 10, 10); c.setLineDash([]); c.fillText('7 días anteriores', izq + 125, 13);
+  canvas._d2 = {izq:izq, col:col};
+}
+(function(){
+  function tip(e){
+    var cv = document.getElementById('adm-sales-chart'); if(!cv || !cv._d2 || !_d2Datos) return;
+    var r = cv.getBoundingClientRect(), x = ((e.touches ? e.touches[0].clientX : e.clientX) - r.left), i = Math.floor((x - cv._d2.izq) / cv._d2.col);
+    var t = document.getElementById('d2-tip');
+    if(i < 0 || i > 6){ if(t) t.style.display = 'none'; _d2Dibujar(cv); return; }
+    if(!t){ t = document.createElement('div'); t.id = 'd2-tip'; t.className = 'd2-tip'; cv.parentNode.style.position = 'relative'; cv.parentNode.appendChild(t); }
+    var d = _d2Datos.act[i], a = _d2Datos.ant[i];
+    t.innerHTML = '<b>' + _d2Etiqueta(d.k, true) + '</b><span>' + _d2MXN(d.v) + ' · ' + d.n + ' compras</span>' + (d.r ? '<span>Reembolsos: ' + _d2MXN(d.r) + '</span>' : '') + '<span class="d2-ta">Semana anterior (' + _d2Etiqueta(a.k) + '): ' + _d2MXN(a.v) + ' ' + _d2Delta(d.v, a.v) + '</span>';
+    t.style.display = 'flex'; var left = Math.min(Math.max(cv.offsetLeft + cv._d2.izq + cv._d2.col * i + cv._d2.col / 2 - t.offsetWidth / 2, 4), cv.parentNode.clientWidth - t.offsetWidth - 4);
+    t.style.left = left + 'px'; t.style.top = (cv.offsetTop + 4) + 'px'; _d2Dibujar(cv, i);
+  }
+  document.addEventListener('mousemove', function(e){ if(e.target && e.target.id === 'adm-sales-chart') tip(e); else { var t = document.getElementById('d2-tip'); if(t && t.style.display !== 'none' && !(e.target && e.target.closest && e.target.closest('#d2-tip'))){ t.style.display = 'none'; var cv = document.getElementById('adm-sales-chart'); if(cv) _d2Dibujar(cv); } } });
+  document.addEventListener('touchstart', function(e){ if(e.target && e.target.id === 'adm-sales-chart') tip(e); }, {passive:true});
+  var rt = null; window.addEventListener('resize', function(){ clearTimeout(rt); rt = setTimeout(function(){ var cv = document.getElementById('adm-sales-chart'); if(cv && cv.offsetParent) _d2Dibujar(cv); }, 150); });
+})();
+
+// ═════════════════════════════ PANEL ADMIN · ESTRUCTURA ═════════════════════════════
+// Encabezado de cada sección (grupo + título), campana de tickets y refresco al cambiar de pestaña.
+function _admMontarExtras(){
+  var panel = document.getElementById('full-admin-panel'); if(!panel) return;
+  var bar = panel.querySelector('.adm-topbar > div:last-child');
+  if(bar && !document.getElementById('adm-bell')){
+    bar.insertAdjacentHTML('afterbegin', '<button type="button" class="adm-bell" id="adm-bell" onclick="admFullTab(\'soporte\')" title="Tickets sin responder" aria-label="Tickets sin responder"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="adm-bell-n" id="adm-bell-n" style="display:none">0</span></button>');
+    bar.classList.add('adm-top-acc');
+  }
+  var first = panel.querySelector('.adm-section');
+  if(first && !document.getElementById('adm-ph')) first.insertAdjacentHTML('beforebegin', '<header class="adm-ph" id="adm-ph"><div class="adm-ph-k" id="adm-ph-k">Resumen</div><h1 class="adm-ph-t" id="adm-ph-t">Dashboard</h1></header>');
+  var cfg = panel.querySelector('#adms-config');
+  if(cfg) Array.prototype.forEach.call(cfg.querySelectorAll('div'), function(dv){ if(dv.children.length === 0 && /\+52 55 4846 1200/.test(dv.textContent)){ dv.textContent = CS_SOPORTE.visible; dv.classList.add('cs-wa-num'); } });
+}
+(function(){
+  var f = window.admFullTab;
+  if(typeof f !== 'function') return;
+  window.admFullTab = function(tab){
+    _admMontarExtras();
+    if(tab !== 'soporte'){ S2.actual = null; }
+    else { _s2Montar(); if(S2.actual === null){ var l = document.getElementById('adm-sop-vista-lista'), d = document.getElementById('adm-sop-vista-detalle'); if(l) l.style.display = 'block'; if(d){ d.style.display = 'none'; } } }
+    var r = f.apply(this, arguments);
+    var btn = document.getElementById('admn-' + tab);
+    if(btn){
+      var sec = btn.previousElementSibling; while(sec && !sec.classList.contains('adm-nav-sec')) sec = sec.previousElementSibling;
+      _d2Set('adm-ph-t', btn.textContent.replace(/\s+\d+\s*$/, '').trim()); _d2Set('adm-ph-k', sec ? sec.textContent.trim() : 'Cuenta');
+    }
+    if(window.innerWidth <= 900 && typeof admToggleNav === 'function') admToggleNav(false);
+    var sc = document.getElementById('full-admin-panel'); if(sc) sc.scrollTop = 0;
+    return r;
+  };
+  var o = window.openFullAdmin;
+  if(typeof o === 'function') window.openFullAdmin = function(){ var r = o.apply(this, arguments); _admMontarExtras(); S2.conocidos = null; setTimeout(_s2Vigilar, 1200); return r; };
+})();
+
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', csWaMontar); else csWaMontar();
