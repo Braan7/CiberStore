@@ -22,7 +22,8 @@ const FUNCIONES = {
   admin_venta_anular:    ['p_id', 'p_motivo', 'p_admin'],
   admin_venta_restaurar: ['p_id', 'p_motivo', 'p_admin'],
   admin_venta_manual:    ['p_username', 'p_diamantes', 'p_monto', 'p_nota', 'p_admin'],
-  admin_auditoria:       ['p_limite']
+  admin_auditoria:       ['p_limite'],
+  admin_tickets_borrar:  ['p_ids', 'p_admin']      // tickets_admin.sql
 };
 const fallos = new Map();
 function bloqueada(ip){ const t = Date.now(), l = (fallos.get(ip) || []).filter(x => t - x < 600000); fallos.set(ip, l); return l.length >= 6; }   // 6 intentos fallidos cada 10 minutos
