@@ -16399,7 +16399,7 @@ var SOP_RAPIDAS = [
   'Listo, tu recarga ya fue entregada. ¿Puedes confirmar que te llegó?',
   'Tu reembolso ya se aplicó a tu saldo de CiberStore.'
 ];
-var S2 = { rows:[], meta:{}, f:{q:'', estado:'', prio:'', cat:'', sinResp:false}, actual:null, ticket:null, nMsgs:0, adj:null, enviando:false, timer:null, conocidos:null, pendientes:0 };
+var S2 = { sel:{}, modoSel:false, visibles:[], rows:[], meta:{}, f:{q:'', estado:'', prio:'', cat:'', sinResp:false}, actual:null, ticket:null, nMsgs:0, adj:null, enviando:false, timer:null, conocidos:null, pendientes:0 };
 
 function _s2Esc(s){ return String(s == null ? '' : s).replace(/[<>&"']/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]; }); }
 function _s2Rel(iso){
@@ -16431,6 +16431,7 @@ function _s2Montar(){
   sec.innerHTML = '<div id="s2-root">'
     + '<div id="adm-sop-vista-lista">'
     +   '<div class="s2-chips" id="s2-chips"></div>'
+    +   '<div class="s2-masivo" id="s2-masivo"></div>'
     +   '<div class="s2-filtros">'
     +     '<div class="s2-buscar"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="s2-q" type="search" placeholder="Buscar por usuario o código (CS-…)" aria-label="Buscar ticket" oninput="_s2Buscar()"></div>'
     +     '<select id="s2-estado" aria-label="Estado" onchange="S2.f.estado=this.value;_s2Render()"><option value="">Todos los estados</option><option value="nuevo">Nuevos</option><option value="pendiente">Pendientes</option><option value="en_atencion">En atención</option><option value="resuelto">Resueltos</option><option value="cerrado">Cerrados</option></select>'
@@ -16510,11 +16511,13 @@ function _s2Render(){
     if(f.sinResp && !_s2SinResp(t)) return false;
     return true;
   }).sort(_s2Orden);
+  S2.visibles = vis; _s2Masivo();
   if(!vis.length){ lista.innerHTML = '<div class="s2-vacio">' + (r.length ? 'Ningún ticket coincide con estos filtros.' : (f.q ? 'No hay tickets con «' + _s2Esc(f.q) + '».' : 'Todavía no hay tickets.')) + '</div>'; return; }
   lista.innerHTML = '<div class="s2-head" aria-hidden="true"><span>Ticket</span><span>Cliente</span><span>Categoría</span><span>Estado</span><span>Prioridad</span><span>Actividad</span></div>' + vis.map(function(t){
     var est = _s2Estado(t), sr = _s2SinResp(t), m = S2.meta[t.id] || {}, prio = t.priority || 'normal';
-    return '<button type="button" class="s2-item e-' + est + (sr ? ' sr' : '') + ' p-' + prio + '" onclick="admSopAbrirTicket(' + t.id + ')">'
-      + '<span class="s2-c1"><b class="s2-cod">' + (sr ? '<i class="s2-dot" aria-label="sin responder"></i>' : '') + _s2Esc(t.codigo) + '</b><span class="s2-asunto">' + _s2Esc(t.subject) + '</span></span>'
+    var sel = !!S2.sel[t.id];
+    return '<button type="button" class="s2-item e-' + est + (sr ? ' sr' : '') + ' p-' + prio + (S2.modoSel ? ' modo-sel' : '') + (sel ? ' sel' : '') + '"' + (S2.modoSel ? ' aria-pressed="' + sel + '"' : '') + ' onclick="' + (S2.modoSel ? '_s2Toggle(' + t.id + ')' : 'admSopAbrirTicket(' + t.id + ')') + '">'
+      + '<span class="s2-c1"><b class="s2-cod">' + (S2.modoSel ? '<i class="s2-chk" aria-hidden="true">' + (sel ? '\u2713' : '') + '</i>' : '') + (sr ? '<i class="s2-dot" aria-label="sin responder"></i>' : '') + _s2Esc(t.codigo) + '</b><span class="s2-asunto">' + _s2Esc(t.subject) + '</span></span>'
       + '<span class="s2-c2"><span class="s2-av">' + _s2Esc(String(t.username || '?').charAt(0).toUpperCase()) + '</span>' + _s2Esc(t.username) + '</span>'
       + '<span class="s2-c3">' + _s2Esc(SOP_CATEGORIA_LABEL[t.category] || t.category || '—') + '</span>'
       + '<span class="s2-c4"><span class="s2-est e-' + est + '">' + (SOP_ESTADO2[est] || est) + '</span></span>'
@@ -16554,7 +16557,7 @@ function _s2PintarDetalle(){
     + '<div class="s2-dtit"><div class="s2-dcod">' + _s2Esc(t.codigo) + ' <span class="s2-est e-' + est + '">' + (SOP_ESTADO2[est] || est) + '</span> <span class="s2-pr p-' + prio + '">' + (SOP_PRIO_LABEL[prio] || prio) + '</span></div>'
     + '<div class="s2-dasu">' + _s2Esc(t.subject) + ((SOP_CATEGORIA_LABEL[t.category] || t.category) && (SOP_CATEGORIA_LABEL[t.category] || t.category) !== t.subject ? ' · ' + _s2Esc(SOP_CATEGORIA_LABEL[t.category] || t.category) : '') + '</div></div>'
     + '<div class="s2-dacc">' + (cerrado ? '<button type="button" class="s2-btn" onclick="admSopReabrir()">Reabrir ticket</button>'
-        : '<button type="button" class="s2-btn ok" onclick="admSopCambiarEstado(\'resuelto\')">Marcar resuelto</button><button type="button" class="s2-btn danger" onclick="admSopCerrar()">Cerrar ticket</button>') + '</div>'
+        : '<button type="button" class="s2-btn ok" onclick="admSopCambiarEstado(\'resuelto\')">Marcar resuelto</button><button type="button" class="s2-btn danger" onclick="admSopCerrar()">Cerrar ticket</button>') + '<button type="button" class="s2-btn danger" onclick="_s2Borrar([S2.actual])" title="Borrar este ticket para siempre"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg> Borrar</button></div>'
     + '</div>'
     + '<div class="s2-dgrid">'
     +   '<section class="s2-chat" aria-label="Conversación">'
@@ -16931,3 +16934,58 @@ function _admMontarExtras(){
 })();
 
 if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', csWaMontar); else csWaMontar();
+
+// ── Acciones masivas: cerrar o borrar varios tickets ──
+// Cerrar usa el mismo permiso que ya cerraba tickets uno por uno. Borrar pasa por el servidor (/api/admin)
+// con tu sesión de administrador y queda en la auditoría; desde el navegador nadie puede borrar.
+function _s2Ids(){ return Object.keys(S2.sel).filter(function(k){ return S2.sel[k]; }).map(Number); }
+function _s2Masivo(){
+  var b = document.getElementById('s2-masivo'); if(!b) return;
+  var n = _s2Ids().length, vis = S2.visibles || [], abiertosVis = vis.filter(function(t){ return t.status !== 'cerrado'; }).length, cerradosVis = vis.filter(function(t){ return t.status === 'cerrado'; }).length;
+  if(!S2.modoSel){
+    b.innerHTML = '<button type="button" class="s2-btn" onclick="_s2ModoSel(true)"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="m8 12 3 3 5-6"/></svg> Seleccionar</button>'
+      + '<button type="button" class="s2-btn" ' + (abiertosVis ? '' : 'disabled ') + 'onclick="_s2CerrarVisibles()">Cerrar todos' + (abiertosVis ? ' (' + abiertosVis + ')' : '') + '</button>'
+      + '<button type="button" class="s2-btn danger" ' + (cerradosVis ? '' : 'disabled ') + 'onclick="_s2BorrarCerrados()">Borrar los cerrados' + (cerradosVis ? ' (' + cerradosVis + ')' : '') + '</button>';
+    return;
+  }
+  b.innerHTML = '<span class="s2-nsel"><b>' + n + '</b> seleccionado' + (n === 1 ? '' : 's') + '</span>'
+    + '<button type="button" class="s2-btn" onclick="_s2SelTodos()">' + (n && n === vis.length ? 'Quitar todos' : 'Seleccionar los ' + vis.length + ' de la lista') + '</button>'
+    + '<button type="button" class="s2-btn ok" ' + (n ? '' : 'disabled ') + 'onclick="_s2Cerrar(_s2Ids())">Cerrar</button>'
+    + '<button type="button" class="s2-btn danger" ' + (n ? '' : 'disabled ') + 'onclick="_s2Borrar(_s2Ids())">Borrar</button>'
+    + '<button type="button" class="s2-btn gris" onclick="_s2ModoSel(false)">Listo</button>';
+}
+function _s2ModoSel(on){ S2.modoSel = on; S2.sel = {}; _s2Render(); }
+function _s2Toggle(id){ S2.sel[id] = !S2.sel[id]; _s2Render(); }
+function _s2SelTodos(){ var vis = S2.visibles || [], todos = _s2Ids().length === vis.length && vis.length; S2.sel = {}; if(!todos) vis.forEach(function(t){ S2.sel[t.id] = true; }); _s2Render(); }
+function _s2CerrarVisibles(){ _s2Cerrar((S2.visibles || []).filter(function(t){ return t.status !== 'cerrado'; }).map(function(t){ return t.id; })); }
+function _s2BorrarCerrados(){ _s2Borrar((S2.visibles || []).filter(function(t){ return t.status === 'cerrado'; }).map(function(t){ return t.id; })); }
+function _s2Cerrar(ids){
+  ids = (ids || []).filter(function(id){ var t = S2.rows.filter(function(x){ return x.id === id; })[0]; return !t || t.status !== 'cerrado'; });
+  if(!ids.length){ showToast('No hay tickets abiertos en la selección'); return; }
+  if(!confirm('¿Cerrar ' + ids.length + ' ticket' + (ids.length === 1 ? '' : 's') + '? Los clientes ya no podrán escribir en ellos hasta que los reabras.')) return;
+  var data = {status:'cerrado', closed_at:new Date().toISOString()}, grupos = [];
+  for(var i = 0; i < ids.length; i += 80) grupos.push(ids.slice(i, i + 80));
+  showToast('Cerrando ' + ids.length + ' tickets…');
+  Promise.all(grupos.map(function(g){ return sb.patch('tickets', data, 'id=in.(' + g.join(',') + ')'); })).then(function(){
+    showToast('✅ ' + ids.length + ' ticket' + (ids.length === 1 ? ' cerrado' : 's cerrados')); S2.modoSel = false; S2.sel = {}; admSopCargarLista();
+  }).catch(function(){ showToast('❌ No se pudieron cerrar. Intenta de nuevo.'); admSopCargarLista(); });
+}
+function _s2Borrar(ids){
+  ids = (ids || []).filter(function(x){ return x != null; }).map(Number);
+  if(!ids.length) return;
+  var cods = ids.map(function(id){ var t = S2.rows.filter(function(x){ return x.id === id; })[0] || (S2.ticket && S2.ticket.id === id ? S2.ticket : null); return t ? t.codigo : '#' + id; });
+  var txt = prompt('Vas a BORRAR para siempre ' + ids.length + ' ticket' + (ids.length === 1 ? '' : 's') + ' con todos sus mensajes e imágenes (' + cods.slice(0, 5).join(', ') + (cods.length > 5 ? '…' : '') + ').\nNo se puede deshacer. Si solo quieres archivarlos, mejor ciérralos.\n\nEscribe BORRAR para confirmar:', '');
+  if(txt == null) return;
+  if(txt.trim().toUpperCase() !== 'BORRAR'){ showToast('No se borró nada: hay que escribir BORRAR'); return; }
+  showToast('Borrando…');
+  admDb('admin_tickets_borrar', {p_ids:ids}).then(function(r){
+    if(r && r.ok){
+      var n = Number(r.data) || 0; showToast('✅ ' + n + ' ticket' + (n === 1 ? ' borrado' : 's borrados'));
+      S2.modoSel = false; S2.sel = {}; if(S2.actual && ids.indexOf(Number(S2.actual)) >= 0) admSopVolver(); else admSopCargarLista();
+    } else if(r && r.code === 'sin_service_key'){
+      showToast('❌ Para borrar falta configurar SUPABASE_SERVICE_ROLE_KEY en Vercel', 6000);
+    } else if(r && /admin_tickets_borrar|function|funci/i.test(r.message || '')){
+      showToast('❌ Falta correr tickets_admin.sql en Supabase', 6000);
+    } else showToast('❌ ' + ((r && r.message) || 'No se pudo borrar'), 5000);
+  });
+}
