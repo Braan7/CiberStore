@@ -17714,10 +17714,26 @@ function rgPintar(){
   var e;
   rgKeys().forEach(function(k){
     if((e = document.getElementById('rg-' + k + '-sub'))) e.textContent = rgFmt(rgSub(k));
-    if((e = document.getElementById('rg-' + k + '-pu'))) e.textContent = rgFmt(k === 'pase' ? rgPrecioPase(RG.cant.pase || 0) : RG.PAQ[k].p);
+    if((e = document.getElementById('rg-' + k + '-pu'))) e.textContent = RG.agotado[k] ? 'Sin stock' : rgFmt(k === 'pase' ? rgPrecioPase(RG.cant.pase || 0) : RG.PAQ[k].p);
   });
   if((e = document.getElementById('rg-total'))) e.textContent = rgFmt(rgTotal());
   if((e = document.getElementById('rg-saldo'))) e.textContent = (typeof authSession !== 'undefined' && authSession) ? rgFmt(authSession.saldo || 0) : rgFmt(0);
+}
+// Stock del proveedor: los productos sin stock se marcan y no se pueden comprar
+RG.agotado = {};
+function rgCargarStock(){
+  fetch((typeof RECARGA_AUTO_URL !== 'undefined' ? RECARGA_AUTO_URL : '/api/recarga'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'stock_regalos' }) })
+    .then(function(r){ return r.json(); }).then(function(j){
+      if(!j || !j.ok || !j.stock) return;
+      Object.keys(RG.PAQ).forEach(function(k){
+        var ag = j.stock[k.replace(/^c/, 'cj').replace(/^f/, 'fa')] === 'sin_stock'; RG.agotado[k] = ag;
+        var card = document.querySelector('#page-regalos [data-p="' + k + '"]'); if(!card) return;
+        card.style.opacity = ag ? '.5' : ''; card.querySelectorAll('button,input').forEach(function(x){ x.disabled = ag; });
+        var pu = document.getElementById('rg-' + k + '-pu'); if(pu && ag) pu.textContent = 'Sin stock';
+        if(ag && RG.cant[k]){ RG.cant[k] = 0; var i = document.getElementById('rg-' + k + '-cant'); if(i) i.value = 0; }
+      });
+      rgPintar();
+    }).catch(function(){});
 }
 function rgError(m){ var e = document.getElementById('rg-err'); if(!e) return; if(m){ e.textContent = m; e.style.display = 'block'; } else e.style.display = 'none'; }
 function rgIdVal(){ return ((document.getElementById('rg-id') || {}).value || '').replace(/\D/g, ''); }
@@ -17748,6 +17764,7 @@ function rgComprar(){
   rgError('');
   var id = rgIdVal();
   if(id.length < 5){ rgError('Escribe tu ID de Free Fire (mínimo 5 dígitos).'); return; }
+  if(rgKeys().some(function(k){ return RG.agotado[k] && RG.cant[k] > 0; })){ rgError('Quita los productos sin stock.'); return; }
   var total = rgTotal();
   if(!rgKeys().some(function(k){ return RG.cant[k] > 0; })){ rgError('Elige al menos un producto.'); return; }
   if(!(total > 0)){ rgError('Total inválido.'); return; }
@@ -17783,5 +17800,5 @@ function rgComprar(){
 }
 (function(){
   var _gp = goPage;
-  goPage = function(id){ var r = _gp.apply(this, arguments); if(id === 'regalos'){ setTimeout(function(){ rgComprar._conf = false; rgError(''); rgPintar(); }, 80); } return r; };
+  goPage = function(id){ var r = _gp.apply(this, arguments); if(id === 'regalos'){ setTimeout(function(){ rgComprar._conf = false; rgError(''); rgPintar(); rgCargarStock(); }, 80); } return r; };
 })();
