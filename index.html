@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta name="cs-build" content="798f3d1581">
-<script>var CS_BUILD="798f3d1581";</script>
+<meta name="cs-build" content="9f04f460ef">
+<script>var CS_BUILD="9f04f460ef";</script>
 <meta charset="UTF-8"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -9388,6 +9388,24 @@ html body:not(.light-mode) .hm-chat .hm-ico svg{width:30px;height:30px;stroke-wi
 .rg2-card.ag{opacity:.5}.rg2-card.ag .rg2-buy{background:#2a3444;color:#8a97ab;cursor:not-allowed}
 html.ck-abierto{overflow:hidden}
 .rg2-cat{width:100%;text-align:left;cursor:pointer;font:inherit;color:inherit}.rg2-cat .ck-img svg{display:block}
+/* Regalos vía correo: menú VÍA REGALO + adaptación a celular / iOS / tablet / PC */
+.rg2-menu{display:flex;align-items:center;gap:.85rem;width:100%;text-align:left;cursor:pointer;font:inherit;color:#fff;background:linear-gradient(135deg,#0d2c57,#124a93);border:1px solid rgba(109,179,255,.45);border-radius:18px;padding:.95rem;margin-bottom:.6rem;-webkit-tap-highlight-color:transparent;min-height:68px}
+.rg2-menu .rg2-mi{width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,.12);display:grid;place-items:center;flex:none}.rg2-menu .rg2-mi svg{width:28px;height:28px}
+.rg2-menu .i{flex:1;min-width:0}.rg2-menu b{display:block;font-family:Saira,sans-serif;font-weight:900;letter-spacing:.06em;font-size:1.08rem}.rg2-menu small{display:block;color:#b9d4f5;font-size:.82rem;margin-top:.1rem}
+.rg2-chv,.rg2-arr{color:#8fb4e6;font-size:1.6rem;transition:transform .2s;flex:none}.rg2-menu.on .rg2-chv{transform:rotate(90deg)}.rg2-arr{color:#6b7280}
+.rg2-sub{margin:-.1rem 0 .7rem .9rem;padding-left:.7rem;border-left:2px solid rgba(109,179,255,.35)}
+.rg2-sub .rg2-card{margin-bottom:.5rem}
+.rg2-cat{width:100%;text-align:left;cursor:pointer;font:inherit;color:inherit;-webkit-tap-highlight-color:transparent;min-height:68px}
+.rg2-cat .ck-img svg{display:block}
+#page-regalos .rg-wrap{max-width:640px}
+.ck-in,.mn-inp{font-size:16px!important}  /* iOS no hace zoom al enfocar */
+.ck-ov{padding-top:env(safe-area-inset-top);padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+@media (min-width:900px){#page-regalos .rg-wrap{max-width:720px}.rg2-card{padding:.95rem}.rg2-card .ck-img{width:72px;height:72px}}
+@media (max-width:360px){.rg2-card .ck-img{width:52px;height:52px}.rg2-buy{padding:.65rem .75rem}}
+@media (hover:hover){.rg2-cat:hover,.rg2-menu:hover{border-color:#1b87f5}}
+.ot-stk{display:flex;justify-content:center;margin:.1rem 0 .45rem}.ot-stk svg{filter:drop-shadow(0 4px 8px rgba(0,0,0,.45));display:block}
+#ot-grid-tarjetas .jg-pc,#ot-grid-niveles .jg-pc{text-align:center}
+@media (min-width:700px){#ot-grid-tarjetas.jg-pgrid,#ot-grid-niveles.jg-pgrid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}}
 
 /* ═══ MIS COMPRAS (v5) ═══ */
 #page-miscompras .mc2-wrap{max-width:720px;margin:0 auto;padding:.6rem .9rem 3rem;font-family:"Barlow","Segoe UI",system-ui,sans-serif;color:#eaf0ff}
@@ -9490,9 +9508,9 @@ html.ck-abierto{overflow:hidden}
 #adms-osaldo .dp-au b{display:block;color:#fff;font-size:.88rem}#adms-osaldo .dp-au small{color:#8b93a3;font-size:.76rem;word-break:break-word}
 
 </style>
-<script src="supabase.js?v=798f3d1581"></script>
-<script src="supabase_integration.js?v=798f3d1581"></script>
-<script src="script.js?v=798f3d1581"></script>
+<script src="supabase.js?v=9f04f460ef"></script>
+<script src="supabase_integration.js?v=9f04f460ef"></script>
+<script src="script.js?v=9f04f460ef"></script>
 
 <!-- BARRA DE NAVEGACION INFERIOR -->
 
