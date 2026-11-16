@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta name="cs-build" content="e33cbddad7">
-<script>var CS_BUILD="e33cbddad7";</script>
+<meta name="cs-build" content="798f3d1581">
+<script>var CS_BUILD="798f3d1581";</script>
 <meta charset="UTF-8"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -4534,12 +4534,8 @@ select.ap-inp{flex:0 1 auto}
             </div>
           </div>
         </div>
-            <div class="ff-acc-card" onclick="goPage('tarjetas')"><div class="ff-acc-img" style="background:linear-gradient(135deg,#0a4fa8,#2e77d9);aspect-ratio:21/9"><span class="ff-acc-badge" style="background:rgba(0,0,0,.45)">TARJETAS</span></div><div class="ff-acc-body" style="padding:.9rem 1rem"><div style="display:flex;align-items:center;justify-content:space-between;gap:.75rem"><div><div class="ff-acc-title" style="font-size:.95rem;margin-bottom:.2rem">Tarjetas</div><div style="font-size:.75rem;color:#9aa3b0">Semanal y mensual</div></div><span style="color:#6b7280;font-size:1.3rem;flex-shrink:0">&#8250;</span></div></div></div>
-            <div class="ff-acc-card" onclick="goPage('niveles')"><div class="ff-acc-img" style="background:linear-gradient(135deg,#b45309,#295eaf);aspect-ratio:21/9"><span class="ff-acc-badge" style="background:rgba(0,0,0,.45)">NIVELES</span></div><div class="ff-acc-body" style="padding:.9rem 1rem"><div style="display:flex;align-items:center;justify-content:space-between;gap:.75rem"><div><div class="ff-acc-title" style="font-size:.95rem;margin-bottom:.2rem">Subidas de nivel</div><div style="font-size:.75rem;color:#9aa3b0">Paquetes del nivel 6 al 30</div></div><span style="color:#6b7280;font-size:1.3rem;flex-shrink:0">&#8250;</span></div></div></div>
 
         
-
-        <div class="ff-acc-card" onclick="goPage('regalos')"><div class="ff-acc-img" style="background:linear-gradient(135deg,#0a4fa8,#1b87f5);aspect-ratio:21/9"><span class="ff-acc-badge" style="background:rgba(0,0,0,.45)">REGALOS</span></div><div class="ff-acc-body" style="padding:.9rem 1rem"><div style="display:flex;align-items:center;justify-content:space-between;gap:.75rem"><div><div class="ff-acc-title" style="font-size:.95rem;margin-bottom:.2rem">Regalos v&iacute;a correo</div><div style="font-size:.75rem;color:#9aa3b0">Pase Booyah, cajas y fragmentos</div></div><span style="color:#6b7280;font-size:1.3rem;flex-shrink:0">&#8250;</span></div></div></div>
 
         <div class="ff-acc-card" onclick="goPage('clanes')">
           <div class="ff-acc-img" style="background-image:url('img/clanes-nvl7.png');aspect-ratio:21/9">
@@ -4555,6 +4551,9 @@ select.ap-inp{flex:0 1 auto}
             </div>
           </div>
         </div>
+
+        <div class="ff-acc-card" onclick="goPage('regalos')"><div class="ff-acc-img" style="background:linear-gradient(135deg,#0a4fa8,#1b87f5);aspect-ratio:21/9"><span class="ff-acc-badge" style="background:rgba(0,0,0,.45)">REGALOS</span></div><div class="ff-acc-body" style="padding:.9rem 1rem"><div style="display:flex;align-items:center;justify-content:space-between;gap:.75rem"><div><div class="ff-acc-title" style="font-size:.95rem;margin-bottom:.2rem">Regalos v&iacute;a correo</div><div style="font-size:.75rem;color:#9aa3b0">Pase, cajas, fragmentos, tarjetas y niveles</div></div><span style="color:#6b7280;font-size:1.3rem;flex-shrink:0">&#8250;</span></div></div></div>
+
 
         
 
@@ -6886,10 +6885,11 @@ select.ap-inp{flex:0 1 auto}
 <div class="page" id="page-regalos">
   <div class="rg-wrap">
     <div class="rg-head">
-      <button class="rg-back" onclick="goPage('freefire');setTimeout(ffIrTienda,150)" aria-label="Volver">&#8592;</button>
+      <button class="rg-back" onclick="rg2Atras()" aria-label="Volver">&#8592;</button>
       <div><div class="rg-title">Regalos v&iacute;a correo</div><div class="rg-sub">Free Fire &middot; Se pagan con tu saldo</div></div>
     </div>
-    <div id="rg2-lista"><div class="ck-note">Cargando productos&hellip;</div></div>
+    <div id="rg2-cats"></div>
+    <div id="rg2-lista" style="display:none"><div class="ck-note">Cargando productos&hellip;</div></div>
     <div class="rg-note" style="margin-top:1rem">Pase Booyah: entrega por regalo en el juego (hasta 1 d&iacute;a). Cajas y fragmentos: entrega autom&aacute;tica. Sigue tu pedido en Mis Compras.</div>
   </div>
 </div>
@@ -9387,6 +9387,7 @@ html body:not(.light-mode) .hm-chat .hm-ico svg{width:30px;height:30px;stroke-wi
 .rg2-buy{background:#1b87f5;border:none;color:#fff;border-radius:12px;padding:.7rem 1rem;font:800 .92rem "Barlow",sans-serif;cursor:pointer;white-space:nowrap}
 .rg2-card.ag{opacity:.5}.rg2-card.ag .rg2-buy{background:#2a3444;color:#8a97ab;cursor:not-allowed}
 html.ck-abierto{overflow:hidden}
+.rg2-cat{width:100%;text-align:left;cursor:pointer;font:inherit;color:inherit}.rg2-cat .ck-img svg{display:block}
 
 /* ═══ MIS COMPRAS (v5) ═══ */
 #page-miscompras .mc2-wrap{max-width:720px;margin:0 auto;padding:.6rem .9rem 3rem;font-family:"Barlow","Segoe UI",system-ui,sans-serif;color:#eaf0ff}
@@ -9489,9 +9490,9 @@ html.ck-abierto{overflow:hidden}
 #adms-osaldo .dp-au b{display:block;color:#fff;font-size:.88rem}#adms-osaldo .dp-au small{color:#8b93a3;font-size:.76rem;word-break:break-word}
 
 </style>
-<script src="supabase.js?v=e33cbddad7"></script>
-<script src="supabase_integration.js?v=e33cbddad7"></script>
-<script src="script.js?v=e33cbddad7"></script>
+<script src="supabase.js?v=798f3d1581"></script>
+<script src="supabase_integration.js?v=798f3d1581"></script>
+<script src="script.js?v=798f3d1581"></script>
 
 <!-- BARRA DE NAVEGACION INFERIOR -->
 
