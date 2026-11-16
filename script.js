@@ -3475,7 +3475,7 @@ function admToggleNav(force){
 }
 
 function admFullTab(tab){
-  var tabs=['stats','users','pedidos','saldos','top','puntos','codigos','chat','resenas','soporte','inactivos','seguridad','recargas','catalogo','premios','chatadm','config'];
+  var tabs=['stats','users','pedidos','saldos','top','puntos','codigos','chat','resenas','soporte','inactivos','seguridad','recargas','depositos','osaldo','catalogo','premios','chatadm','config'];
   tabs.forEach(function(t){
     var btn=document.getElementById('admn-'+t);
     var sec=document.getElementById('adms-'+t);
@@ -3498,6 +3498,8 @@ function admFullTab(tab){
   if(tab==='inactivos') admInactCargar();
   if(tab==='seguridad') admSegCargar();
   if(tab==='recargas') admCrtCargar();
+  if(tab==='depositos') depAdmCargar();
+  if(tab==='osaldo') osaCargar();
   // Cerrar el drawer al elegir una opción en móvil
   if(window.innerWidth < 901) admToggleNav(false);
 }
@@ -13673,8 +13675,13 @@ function admCoPaquetes(){
     if(!r.ok){ o.innerHTML = '<div class="crta-bad">' + _manEsc(_coErrTxt(r)) + '</div>'; return; }
     var ET = {ok:'OK', no_detectado:'No detectado', ambiguo:'Ambiguo', precio_fuera_de_rango:'Precio raro', sin_stock:'Sin stock', bajo_costo:'Bajo costo', precio_invalido:'Precio inválido'};
     var lista = Array.isArray(r.productos) ? r.productos : r.paquetes.map(function(p){ return {titulo:p.diamantes + ' diamantes', clave:'d' + p.diamantes, nombre:p.nombre, sku:p.sku, via:p.via, precio_usd:p.precio, estado:p.estado}; });
-    var h = '<div class="crta-det">Revisa que cada producto apunte al correcto antes de usar dinero real.</div><div class="crta-tabw"><table class="crta-tab"><thead><tr><th>Producto</th><th>En Central One</th><th>Costo US$</th><th>Estado</th></tr></thead><tbody>'
-      + lista.map(function(p){ return '<tr><td><b>' + _manEsc(p.titulo) + '</b><br><small>' + _manEsc(p.clave) + '</small></td><td>' + (p.nombre ? _manEsc(p.nombre) + '<br><small>' + _manEsc(p.sku || '') + (p.via === 'CO_MAP' ? ' · fijado a mano' : '') + '</small>' : '—') + '</td><td>' + (p.precio_usd ? _manEsc(p.precio_usd) : '—') + '</td><td><span class="crta-chip e-' + (p.estado === 'ok' ? 'completada' : 'manual') + '">' + _manEsc(ET[p.estado] || p.estado) + '</span></td></tr>'; }).join('')
+    var h = '<div class="crta-det">Revisa que cada producto apunte al correcto antes de usar dinero real. <b>Ganancia</b> = mi precio − costo del proveedor (US$ × ' + (Number(r.tc) || 19.5) + ' MXN por dólar).</div><div class="crta-tabw"><table class="crta-tab"><thead><tr><th>Producto</th><th>En Central One</th><th>Costo US$</th><th>Costo MXN</th><th>Mi precio</th><th>Ganancia</th><th>Estado</th></tr></thead><tbody>'
+      + lista.map(function(p){ return '<tr><td><b>' + _manEsc(p.titulo) + '</b><br><small>' + _manEsc(p.clave) + '</small></td><td>' + (p.nombre ? _manEsc(p.nombre) + '<br><small>' + _manEsc(p.sku || '') + (p.via === 'CO_MAP' ? ' · fijado a mano' : '') + '</small>' : '—') + '</td><td>' + (p.precio_usd ? _manEsc(p.precio_usd) : '—') + '</td>' + (function(){
+          var cu = parseFloat(p.precio_usd), mi = Number(p.precio_mxn), tc = Number(r.tc) || 19.5;
+          if(!(cu > 0) || !(mi > 0)) return '<td>—</td><td>' + (mi > 0 ? '$' + mi.toFixed(2) : '—') + '</td><td>—</td>';
+          var cm = cu * tc, g = mi - cm, pc = g / cm * 100;
+          return '<td>$' + cm.toFixed(2) + '</td><td>$' + mi.toFixed(2) + '</td><td style="font-weight:800;color:' + (g < 0 ? '#ff6b81' : '#25d366') + '">' + (g < 0 ? '-' : '+') + '$' + Math.abs(g).toFixed(2) + '<br><small>' + pc.toFixed(1) + ' %</small></td>';
+        })() + '<td><span class="crta-chip e-' + (p.estado === 'ok' ? 'completada' : 'manual') + '">' + _manEsc(ET[p.estado] || p.estado) + '</span></td></tr>'; }).join('')
       + '</tbody></table></div>';
     if(lista.some(function(p){ return p.estado !== 'ok'; })) h += '<div class="crta-bad" style="margin-top:.5rem">Lo que no salga OK no se recargará solo (quedará para hacerlo a mano). Busca el producto correcto aquí abajo y fíjalo en Vercel con la variable <b>CO_MAP</b> (por ejemplo {"tm":"el-product_id","110":"otro-product_id"}).</div>';
     h += '<details class="crta-det" style="margin-top:.5rem"><summary>Productos de Free Fire que ve tu cuenta (' + r.candidatos.length + ')</summary>'
@@ -17785,7 +17792,7 @@ function rgUnidad(u, id, nom, cb){
     otApi({ action: 'comprar', producto: u.srv, player_id: id, client_name: authSession.username, idempotency_key: key }).then(function(res){
       if(res.success && (res.status === 'COMPLETED' || res.status === 'PENDING')){
         registrarPedido(u.t + ' (AUTO)', 1, 'otro', id, u.p, 0, { res: res, ord: ord });
-        rgTg('⚡ Regalo AUTO\n🎁 ' + u.t + '\n🎮 ID: ' + id + (res.via ? ('\n📡 ' + res.via) : '') + '\n' + (res.status === 'COMPLETED' ? '✅ Completado' : '⏳ En proceso'), u.p, ord);
+        rgTg('⚡ Regalo AUTO\n🎁 ' + u.t + '\n🎮 ID: ' + id + (res.via ? ('\n📡 ' + res.via) : '') + '\n' + (res.status === 'COMPLETED' ? '✅ Completado' : '⏳ En proceso') + (typeof csGananciaTxt === 'function' ? csGananciaTxt(u.p, null, res.costo_usd, res.status) : ''), u.p, ord);
         cb('ok'); return;
       }
       var errTxt = String(res.error || res.status || 'sin confirmar'), code = String(res.code || '');
@@ -17880,3 +17887,1448 @@ function rgComprar(){
   var _gp = goPage;
   goPage = function(id){ var r = _gp.apply(this, arguments); if(id === 'regalos'){ setTimeout(function(){ rgComprar._conf = false; rgError(''); rgPintar(); rgCargarStock(); }, 80); } return r; };
 })();
+/* ═══════════════ MI PERFIL (v5) ═══════════════
+   Reutiliza: authSession, saveSession, hashPass, fmt, sbGetMovimientos, goPage, sop*, doLogout.
+   Backend: /api/perfil (foto, edición, contraseña, sesiones, avisos). Nada inventado: lo que no existe no se muestra. */
+var PF = { tab:'perfil', filtro:'todas', movs:null, sid:null, ult:null, tk:0, avisos:[], cierre:false, pingT:null };
+var PF_API = '/api/perfil';
+var PF_ICONS = {
+  arrow:'<path d="M9 6l6 6-6 6"/>', bell:'<path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/>',
+  cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/>',
+  camera:'<path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13" r="3.5"/>',
+  cart:'<circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.6 12.4a1 1 0 001 .8h8.8a1 1 0 001-.8L20 7H6"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  copy:'<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 012-2h8"/>',
+  device:'<rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/>',
+  doc:'<path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>',
+  eye:'<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 01-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 010-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 014 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 010 4h-.1a1.7 1.7 0 00-1.5 1z"/>',
+  globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/>',
+  grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  headset:'<path d="M4 14v-2a8 8 0 0116 0v2"/><rect x="2.5" y="14" width="4" height="6" rx="1.5"/><rect x="17.5" y="14" width="4" height="6" rx="1.5"/><path d="M20 20c0 1.5-2 2-5 2"/>',
+  hist:'<path d="M3 12a9 9 0 109-9 9 9 0 00-6.4 2.6L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/>',
+  id:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.6-1.6 5.4-1.6 6 0M15 10h3M15 14h3"/>',
+  image:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="1.8"/><path d="M21 16l-5-5-9 9"/>',
+  key:'<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3"/>',
+  list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+  out:'<path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>',
+  pencil:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/>',
+  phone:'<path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8 9.9a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>', refresh:'<path d="M21 12a9 9 0 11-3-6.7L21 8"/><path d="M21 3v5h-5"/>',
+  refund:'<path d="M3 12a9 9 0 109-9 9 9 0 00-6.4 2.6L3 8"/><path d="M3 3v5h5"/>',
+  share:'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>',
+  shield:'<path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z"/><path d="M9 12l2 2 4-4"/>',
+  star:'<path d="M12 2l3 6.5 7 .9-5.2 4.8 1.4 7L12 17.8 5.8 21.2l1.4-7L2 9.4l7-.9z"/>',
+  swap:'<path d="M7 4L3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/>',
+  ticket:'<path d="M3 9a2 2 0 002-2h14a2 2 0 002 2v0a2 2 0 000 6v0a2 2 0 00-2 2H5a2 2 0 00-2-2v0a2 2 0 000-6z" transform="translate(0 -1)"/><path d="M13 7v10" stroke-dasharray="2 2.4"/>',
+  up:'<path d="M12 19V5M5 12l7-7 7 7"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
+  users:'<circle cx="9" cy="8" r="3.5"/><path d="M2 21c0-3.6 3.1-6 7-6s7 2.4 7 6"/><path d="M16 4.5a3.5 3.5 0 010 7M18 15c2.4.7 4 2.4 4 5"/>',
+  wallet:'<path d="M3 7a2 2 0 012-2h13v4"/><path d="M3 7v11a2 2 0 002 2h15a1 1 0 001-1v-3"/><path d="M21 9H16a3 3 0 000 6h5z"/>'
+};
+function pfIco(n){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+(PF_ICONS[n]||'')+'</svg>'; }
+function pfIconos(root){
+  var els = (root||pfEl('page-perfil')||document).querySelectorAll('i[data-i]');
+  for(var i=0;i<els.length;i++){ var e=els[i]; if(!e.getAttribute('data-ok')){ e.innerHTML=pfIco(e.getAttribute('data-i')); e.setAttribute('data-ok','1'); } }
+}
+function pfEsc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function pfEl(id){ return document.getElementById(id); }
+function pfSet(id,t){ var e=pfEl(id); if(e) e.textContent=t; }
+function pfToast(m,d){ if(typeof showToast==='function') showToast(m,d||2500); }
+function pfFechaHora(iso){
+  if(!iso) return '';
+  try{ var d=new Date(iso); return d.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric',timeZone:'America/Mexico_City'})+' · '+d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'America/Mexico_City'}); }catch(e){ return ''; }
+}
+function pfRelativo(iso){
+  if(!iso) return '';
+  var s=Math.max(0,(Date.now()-new Date(iso).getTime())/1000);
+  if(s<90) return 'Hace un momento';
+  if(s<3600) return 'Hace '+Math.round(s/60)+' min';
+  if(s<86400) return 'Hace '+Math.round(s/3600)+' h';
+  return pfFechaHora(iso);
+}
+
+/* ── API + identidad ── */
+function pfHash(){
+  if(!authSession) return Promise.resolve(null);
+  if(authSession.password_hash) return Promise.resolve(authSession.password_hash);
+  return sbGetById(authSession.id).then(function(u){ if(u&&u.password_hash){ authSession.password_hash=u.password_hash; return u.password_hash; } return null; }).catch(function(){ return null; });
+}
+function pfSidKey(){ return 'cs_sid_'+(authSession?authSession.username:''); }
+function pfSidGet(){ try{ return localStorage.getItem(pfSidKey())||''; }catch(e){ return ''; } }
+function pfSidSet(v){ try{ if(v) localStorage.setItem(pfSidKey(),v); else localStorage.removeItem(pfSidKey()); }catch(e){} }
+function pfApi(action,extra){
+  if(!authSession) return Promise.resolve({ok:false,message:'Inicia sesión'});
+  var usr=authSession.username, sid0=pfSidGet();
+  return pfHash().then(function(h){
+    if(!h) return {ok:false,message:'Vuelve a iniciar sesión'};
+    var body={action:action,username:usr,hash:h,sid:sid0};
+    for(var k in (extra||{})) body[k]=extra[k];
+    return fetch(PF_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+      .then(function(r){ return r.json().catch(function(){ return {ok:false,message:'Respuesta no válida del servidor'}; }); })
+      .catch(function(){ return {ok:false,message:'Sin conexión con el servidor'}; });
+  });
+}
+
+/* ── Avatar (todas las vistas) ── */
+function pfAvatarHtml(){
+  var u=authSession; if(!u) return '?';
+  if(u.avatar_url) return '<img src="'+pfEsc(u.avatar_url)+'" alt="" onerror="this.remove()">';
+  return pfEsc(u.username.charAt(0).toUpperCase());
+}
+function pfAvatares(){
+  if(!authSession) return;
+  var u=authSession, url=u.avatar_url||'';
+  var ids=['user-pill-av','sb-av'];
+  ids.forEach(function(id){
+    var e=pfEl(id); if(!e) return;
+    if(url){ e.style.backgroundImage='url("'+url.replace(/"/g,'')+'")'; e.style.backgroundSize='cover'; e.style.backgroundPosition='center'; e.textContent=''; }
+    else { e.style.backgroundImage=''; e.textContent=u.username.charAt(0).toUpperCase(); }
+  });
+  var a=pfEl('pf2-av'); if(a) a.innerHTML=pfAvatarHtml();
+}
+
+/* ── Render principal ── */
+var _renderPerfilOriginal = (typeof renderPerfil==='function') ? renderPerfil : null;
+function renderPerfil(){
+  pfIconos();
+  var u=authSession;
+  if(!u){
+    pfSet('pf2-name','Sin sesión'); pfSet('pf2-rol','Invitado');
+    var m=pfEl('pf2-movs'); if(m) m.innerHTML='<div class="pf2-vacio">Inicia sesión para ver tu cuenta</div>';
+    pfAvatares(); return;
+  }
+  pfSet('pf2-name',u.nombre||u.username);
+  pfSet('pf2-rol',u.role==='admin'?'Administrador':'Usuario');
+  pfSet('pf2-id',String(u.id||'').slice(0,8).toUpperCase()||'-');
+  pfSet('pf2-desde',u.created_at?new Date(u.created_at).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'}):'-');
+  pfSet('pf2-nombre',u.nombre||'-');
+  pfSet('pf2-wa',u.whatsapp?'+'+u.whatsapp:'-');
+  pfSet('pf2-refc',u.ref_code||'-');
+  pfAvatares(); pfConexion(); pfHora(); pfUltima();
+  if(typeof cargarWalletPerfil==='function') cargarWalletPerfil();
+  pfMonedas(); pfCargarMovs(); pfCargarTickets(); pfAvisosCargar();
+  if(PF.tab==='seg') pfSesiones();
+}
+function pfConexion(){
+  var on=navigator.onLine!==false, c=pfEl('pf2-conn'), d=pfEl('pf2-dot');
+  if(c) c.className='pf2-conn'+(on?'':' off'); if(d) d.className='pf2-dot'+(on?'':' off');
+  pfSet('pf2-conn-t',on?'En línea':'Sin conexión');
+}
+window.addEventListener('online',pfConexion); window.addEventListener('offline',pfConexion);
+function pfHora(){
+  try{ pfSet('pf2-hora',new Date().toLocaleTimeString('es-MX',{timeZone:'America/Mexico_City',hour:'2-digit',minute:'2-digit',hour12:true})); }catch(e){}
+}
+function pfUltima(){ pfSet('pf2-ult',PF.ult?pfRelativo(PF.ult):'Ahora'); }
+setInterval(function(){ var p=pfEl('page-perfil'); if(p&&p.classList.contains('active')){ pfHora(); pfUltima(); } },30000);
+
+function pfTab(t,scroll,target){
+  PF.tab=t;
+  var bs=document.querySelectorAll('#page-perfil .pf2-tabs button');
+  for(var i=0;i<bs.length;i++) bs[i].classList.toggle('on',bs[i].getAttribute('data-t')===t);
+  ['perfil','seg','pref','ref'].forEach(function(k){ var p=pfEl('pf2-p-'+k); if(p) p.classList.toggle('on',k===t); });
+  if(t==='seg') pfSesiones();
+  if(t==='pref'){ pfMonedas(); pfAvisosCargar(); }
+  if(scroll){ var el=pfEl(target||('pf2-p-'+t)); if(el&&el.scrollIntoView) setTimeout(function(){ el.scrollIntoView({behavior:'smooth',block:'start'}); },60); }
+}
+function pfRefrescar(){
+  if(!authSession) return;
+  var b=document.querySelector('#page-perfil .pf2-ph');
+  (typeof refreshProfile==='function'?refreshProfile():Promise.resolve()).then(function(){ pfPing(); renderPerfil(); pfToast('Perfil actualizado',1500); });
+}
+
+/* ── Movimientos ── */
+function pfClasificar(m){
+  var t=String(m.tipo||'').toLowerCase(), d=String(m.descripcion||'').toLowerCase();
+  if(t==='compra_cancelada'||t==='reembolso'||/reembols/.test(d)) return 'reembolso';
+  if(/transfer/.test(t)||/transfer/.test(d)) return 'transferencia';
+  if(t==='credito'||t==='recarga'||t==='ajuste'||t==='bonus') return 'recarga';
+  return 'compra';
+}
+var PF_TIPO={compra:'Compra',recarga:'Recarga',transferencia:'Transferencia',reembolso:'Reembolso'};
+function pfCargarMovs(){
+  var box=pfEl('pf2-movs'); if(!box||!authSession||!authSession.id||typeof sbGetMovimientos!=='function') return;
+  sbGetMovimientos(authSession.id).then(function(rows){ PF.movs=Array.isArray(rows)?rows:[]; pfPintarMovs(); pfAvisosDerivados(); })
+    .catch(function(){ if(!PF.movs) box.innerHTML='<div class="pf2-vacio">No se pudieron cargar tus movimientos</div>'; });
+}
+function pfFiltro(f){
+  PF.filtro=f;
+  var bs=document.querySelectorAll('#pf2-filtros button');
+  for(var i=0;i<bs.length;i++){ var m=/pfFiltro\('([a-z]+)'\)/.exec(bs[i].getAttribute('onclick')||''); bs[i].classList.toggle('on',!!m&&m[1]===f); }
+  pfPintarMovs();
+}
+function pfPintarMovs(){
+  var box=pfEl('pf2-movs'); if(!box) return;
+  if(PF.movs===null){ box.innerHTML='<div class="pf2-vacio">Cargando…</div>'; return; }
+  var l=PF.movs.filter(function(m){ return PF.filtro==='todas'||pfClasificar(m)===PF.filtro; }).slice(0,6);
+  if(!l.length){ box.innerHTML='<div class="pf2-vacio">'+(PF.movs.length?'No hay movimientos de este tipo':'Aún no tienes movimientos')+'</div>'; return; }
+  box.innerHTML=l.map(function(m){
+    var c=pfClasificar(m), pos=(c==='recarga'||c==='reembolso'), ico=c==='compra'?'cart':c==='recarga'?'wallet':c==='transferencia'?'swap':'refund';
+    var monto=Math.abs(Number(m.monto)||0), est=c==='reembolso'?'<span class="pf2-st can">Reembolsado</span>':'<span class="pf2-st">Completado</span>';
+    return '<div class="pf2-mv"><div class="pf2-mi '+(pos?'pos':'neg')+'"><i data-i="'+ico+'"></i></div>'
+      +'<div class="pf2-mt"><b>'+pfEsc(m.descripcion||PF_TIPO[c])+'</b><small><span>'+pfFechaHora(m.created_at)+'</span><span>'+PF_TIPO[c]+'</span>'+est+'</small></div>'
+      +'<div class="pf2-mm '+(pos?'pos':'neg')+'">'+(pos?'+':'-')+fmt(monto)+'</div></div>';
+  }).join('');
+  pfIconos(box);
+}
+
+/* ── Tickets ── */
+function pfCargarTickets(){
+  if(!authSession||!authSession.id||typeof sb==='undefined') return;
+  sb.get('tickets','user_id=eq.'+encodeURIComponent(authSession.id)+'&unread_user=eq.true&select=id,codigo,updated_at&limit=20').then(function(r){
+    var n=Array.isArray(r)?r.length:0; PF.tk=n; PF.tkList=Array.isArray(r)?r:[];
+    var b=pfEl('pf2-tk-n'); if(b){ b.textContent=n; b.style.display=n?'flex':'none'; }
+    pfAvisosDerivados();
+  }).catch(function(){});
+}
+function pfTickets(){ goPage('soporte'); setTimeout(function(){ if(typeof sopVolverLista==='function') sopVolverLista(); },50); }
+function pfTicketNuevo(){ goPage('soporte'); setTimeout(function(){ if(typeof sopAbrirNuevo==='function') sopAbrirNuevo(); },50); }
+
+/* ── Copiar / compartir / salir ── */
+function pfCopiar(w){
+  var u=authSession; if(!u){ pfToast('Inicia sesión'); return; }
+  var txt=w==='id'?String(u.id||''):(u.ref_code||'');
+  if(!txt){ pfToast('Sin código disponible'); return; }
+  var ok=function(){ pfToast(w==='id'?'ID copiado':'Código copiado: '+txt,2000); };
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok).catch(function(){ pfToast(txt,4000); });
+  else pfToast(txt,4000);
+}
+function pfCompartir(){
+  var u=authSession; if(!u||!u.ref_code){ pfToast('Sin código asignado'); return; }
+  var msg='Regístrate en CiberStore y usa mi código '+u.ref_code+' al registrarte. https://ciberstore.lat';
+  if(navigator.share){ navigator.share({title:'CiberStore',text:msg}).catch(function(){}); return; }
+  var url='https://wa.me/?text='+encodeURIComponent(msg); var w=window.open(url,'_blank'); if(!w) location.href=url;
+}
+function pfSalir(){
+  if(!authSession) return;
+  var sid=pfSidGet(); PF.cierre=true;
+  var fin=function(){ pfSidSet(''); doLogout(); };
+  if(!sid){ fin(); return; }
+  Promise.race([pfApi('sesion_salir',{sid:sid}),new Promise(function(r){ setTimeout(r,1500); })]).then(fin,fin);
+}
+/* doLogout: revoca la sesión del servidor si se cerró por otra vía (menú, etc.) */
+(function(){
+  if(typeof doLogout!=='function') return;
+  var orig=doLogout;
+  doLogout=function(){
+    if(!PF.cierre && authSession){ var sid=pfSidGet(); if(sid){ pfApi('sesion_salir',{sid:sid}); } pfSidSet(''); }
+    PF.cierre=false; PF.movs=null; PF.avisos=[];
+    return orig.apply(this,arguments);
+  };
+})();
+
+/* ── Códigos / cupones ── */
+function pfHoja(html){ var o=pfEl('pf2-ov'); if(!o) return; if(o.parentNode!==document.body) document.body.appendChild(o); o.innerHTML='<div class="pf2-sheet">'+html+'</div>'; o.classList.add('on'); pfIconos(o); }
+function pfCerrarHoja(){ var o=pfEl('pf2-ov'); if(o){ o.classList.remove('on'); o.innerHTML=''; } PF.crop=null; }
+function pfCodigosAbrir(){
+  if(!authSession){ pfToast('Inicia sesión'); return; }
+  var log=[]; try{ log=JSON.parse(localStorage.getItem('cs_promo_log')||'[]'); }catch(e){}
+  var h='<h3>Mis códigos y cupones <button type="button" onclick="pfCerrarHoja()">✕</button></h3><p class="s">Tu código de referido y los códigos que has canjeado en este dispositivo.</p>'
+    +'<div class="pf2-refbox"><span>'+pfEsc(authSession.ref_code||'—')+'</span><button type="button" onclick="pfCopiar(\'ref\')"><i data-i="copy"></i></button></div>';
+  if(Array.isArray(log)&&log.length){
+    h+=log.slice(-8).reverse().map(function(c){ var n=typeof c==='string'?c:(c.code||c.codigo||''); var x=(c&&typeof c==='object')?(c.disc?c.disc+'% de descuento':''):''; return n?'<div class="pf2-cup"><span>'+pfEsc(n)+'</span><small>'+pfEsc(x)+'</small></div>':''; }).join('');
+  } else h+='<div class="pf2-vacio">Aún no has canjeado códigos</div>';
+  h+='<button type="button" class="pf2-btn pf2-btn-p pf2-wide" onclick="pfCerrarHoja();goPage(\'referidos\')">Ir a referidos y códigos</button>';
+  pfHoja(h);
+}
+
+/* ── Editar datos ── */
+function pfEditarAbrir(){
+  var u=authSession; if(!u) return;
+  pfHoja('<h3>Editar perfil <button type="button" onclick="pfCerrarHoja()">✕</button></h3><p class="s">Tu usuario y tu saldo no se pueden modificar desde aquí.</p>'
+    +'<label>Usuario</label><div class="pf2-ro">'+pfEsc(u.username)+'</div>'
+    +'<label for="pf2-e-n">Nombre</label><input class="pf2-in" id="pf2-e-n" maxlength="60" value="'+pfEsc(u.nombre||'')+'" autocomplete="name">'
+    +'<label for="pf2-e-w">WhatsApp (con lada, solo números)</label><input class="pf2-in" id="pf2-e-w" inputmode="numeric" maxlength="15" value="'+pfEsc(u.whatsapp||'')+'" autocomplete="tel">'
+    +'<div class="pf2-err" id="pf2-e-err" style="display:none;margin-top:.7rem"></div>'
+    +'<button type="button" class="pf2-btn pf2-btn-p pf2-wide" id="pf2-e-btn" onclick="pfEditarGuardar()">Guardar cambios</button>');
+}
+function pfEditarGuardar(){
+  var n=(pfEl('pf2-e-n').value||'').trim(), w=(pfEl('pf2-e-w').value||'').replace(/\D/g,''), er=pfEl('pf2-e-err'), b=pfEl('pf2-e-btn');
+  var ch={}; if(n!==(authSession.nombre||'')) ch.nombre=n; if(w!==(authSession.whatsapp||'')) ch.whatsapp=w;
+  function mal(t){ er.textContent=t; er.style.display='block'; }
+  if(!Object.keys(ch).length){ mal('No hay cambios que guardar'); return; }
+  if(ch.nombre!==undefined&&(n.length<2||n.length>60)){ mal('El nombre debe tener entre 2 y 60 caracteres'); return; }
+  if(ch.whatsapp!==undefined&&(w.length<10||w.length>15)){ mal('El WhatsApp debe tener entre 10 y 15 dígitos (con lada)'); return; }
+  b.disabled=true; b.textContent='Guardando…'; er.style.display='none';
+  var extra={}; if(ch.nombre!==undefined) extra.nombre=n; if(ch.whatsapp!==undefined) extra.whatsapp=w;
+  pfApi('perfil_editar',extra).then(function(r){
+    if(!r||!r.ok){ b.disabled=false; b.textContent='Guardar cambios'; mal((r&&r.message)||'No se pudo guardar'); return; }
+    authSession.nombre=r.nombre; authSession.whatsapp=r.whatsapp; saveSession(authSession);
+    if(typeof updateAuthUI==='function') updateAuthUI(); pfCerrarHoja(); renderPerfil(); pfToast('Perfil actualizado');
+  });
+}
+
+/* ── Foto: galería/cámara → recorte → vista previa → guardar ── */
+function pfFotoAbrir(){
+  if(!authSession){ pfToast('Inicia sesión'); return; }
+  var h='<h3>Foto de perfil <button type="button" onclick="pfCerrarHoja()">✕</button></h3><p class="s">JPG, PNG o WEBP. Se ajusta a un círculo.</p>'
+    +'<div class="pf2-opc">'
+    +'<button type="button" class="pf2-btn" onclick="pfElegir(false)"><i data-i="image"></i> Elegir de la galería</button>'
+    +'<button type="button" class="pf2-btn" onclick="pfElegir(true)"><i data-i="camera"></i> Tomar foto</button>'
+    +(authSession.avatar_url?'<button type="button" class="pf2-btn" style="color:#ff7b86;border-color:rgba(255,90,100,.35)" onclick="pfFotoBorrar()">Eliminar foto actual</button>':'')
+    +'</div><input type="file" id="pf2-file" accept="image/jpeg,image/png,image/webp" style="display:none">'
+    +'<input type="file" id="pf2-cam" accept="image/*" capture="user" style="display:none">'
+    +'<div class="pf2-err" id="pf2-f-err" style="display:none;margin-top:.8rem"></div>';
+  pfHoja(h);
+  ['pf2-file','pf2-cam'].forEach(function(id){ var f=pfEl(id); if(f) f.onchange=function(){ if(f.files&&f.files[0]) pfFotoCargar(f.files[0]); f.value=''; }; });
+}
+function pfElegir(cam){ var f=pfEl(cam?'pf2-cam':'pf2-file'); if(f) f.click(); }
+function pfFotoErr(t){ var e=pfEl('pf2-f-err'); if(e){ e.textContent=t; e.style.display='block'; } else pfToast(t,3500); }
+function pfFotoCargar(file){
+  if(!/^image\/(jpeg|png|webp)$/.test(file.type)){ pfFotoErr('Formato no permitido. Usa JPG, PNG o WEBP.'); return; }
+  if(file.size>12*1024*1024){ pfFotoErr('La imagen es demasiado grande (máximo 12 MB).'); return; }
+  var url=URL.createObjectURL(file), img=new Image();
+  img.onload=function(){
+    if(img.width<64||img.height<64){ URL.revokeObjectURL(url); pfFotoErr('La imagen es muy pequeña.'); return; }
+    PF.crop={img:img,url:url,z:1,x:0,y:0};
+    pfHoja('<h3>Ajusta tu foto <button type="button" onclick="pfCerrarHoja()">✕</button></h3><p class="s">Arrastra para encuadrar y usa el control para acercar.</p>'
+      +'<div class="pf2-crop" id="pf2-crop"><canvas id="pf2-cv" width="280" height="280"></canvas></div>'
+      +'<div class="pf2-zoom"><span>−</span><input type="range" id="pf2-z" min="1" max="3" step="0.02" value="1" aria-label="Zoom"><span>+</span></div>'
+      +'<div class="pf2-err" id="pf2-f-err" style="display:none;margin-bottom:.7rem"></div>'
+      +'<button type="button" class="pf2-btn pf2-btn-p pf2-wide" id="pf2-f-ok" onclick="pfFotoGuardar()">Guardar foto</button>'
+      +'<button type="button" class="pf2-btn pf2-wide" onclick="pfFotoAbrir()">Elegir otra</button>');
+    pfCropIniciar();
+  };
+  img.onerror=function(){ URL.revokeObjectURL(url); pfFotoErr('No se pudo leer la imagen.'); };
+  img.src=url;
+}
+function pfCropBase(){ var c=PF.crop; return Math.max(280/c.img.width,280/c.img.height); }
+function pfCropClamp(){
+  var c=PF.crop, s=pfCropBase()*c.z, w=c.img.width*s, h=c.img.height*s;
+  var mx=(w-280)/2, my=(h-280)/2; c.x=Math.max(-mx,Math.min(mx,c.x)); c.y=Math.max(-my,Math.min(my,c.y));
+}
+function pfCropPintar(cv,tam){
+  var c=PF.crop; if(!c) return; var k=tam/280, s=pfCropBase()*c.z*k, g=cv.getContext('2d');
+  g.fillStyle='#000'; g.fillRect(0,0,tam,tam);
+  var w=c.img.width*s, h=c.img.height*s; g.drawImage(c.img,tam/2-w/2+c.x*k,tam/2-h/2+c.y*k,w,h);
+}
+function pfCropIniciar(){
+  var box=pfEl('pf2-crop'), cv=pfEl('pf2-cv'), z=pfEl('pf2-z'); if(!box||!cv) return;
+  var drag=null;
+  function draw(){ pfCropClamp(); pfCropPintar(cv,280); }
+  draw();
+  z.oninput=function(){ PF.crop.z=parseFloat(z.value); draw(); };
+  box.onpointerdown=function(e){ drag={x:e.clientX,y:e.clientY,cx:PF.crop.x,cy:PF.crop.y}; try{ box.setPointerCapture(e.pointerId); }catch(_){} box.style.cursor='grabbing'; };
+  box.onpointermove=function(e){ if(!drag) return; var r=box.getBoundingClientRect(), f=280/r.width; PF.crop.x=drag.cx+(e.clientX-drag.x)*f; PF.crop.y=drag.cy+(e.clientY-drag.y)*f; draw(); };
+  box.onpointerup=box.onpointercancel=function(){ drag=null; box.style.cursor='grab'; };
+}
+function pfFotoGuardar(){
+  var c=PF.crop; if(!c) return;
+  var cv=document.createElement('canvas'); cv.width=cv.height=400; pfCropPintar(cv,400);
+  var q=0.88, data=cv.toDataURL('image/jpeg',q);
+  while(data.length*0.75>560*1024&&q>0.4){ q-=0.08; data=cv.toDataURL('image/jpeg',q); }
+  if(data.length*0.75>600*1024){ pfFotoErr('La imagen sigue siendo demasiado pesada. Prueba con otra.'); return; }
+  var b=pfEl('pf2-f-ok'); b.disabled=true; b.textContent='Subiendo…';
+  pfApi('foto_subir',{imagen:data}).then(function(r){
+    if(!r||!r.ok){ b.disabled=false; b.textContent='Guardar foto'; pfFotoErr((r&&r.message)||'No se pudo subir la foto'); return; }
+    try{ URL.revokeObjectURL(c.url); }catch(e){}
+    authSession.avatar_url=r.avatar_url; pfCerrarHoja(); pfAvatares(); pfToast('Foto actualizada');
+  });
+}
+function pfFotoBorrar(){
+  pfApi('foto_borrar').then(function(r){
+    if(!r||!r.ok){ pfFotoErr((r&&r.message)||'No se pudo eliminar'); return; }
+    authSession.avatar_url=null; pfCerrarHoja(); pfAvatares(); pfToast('Foto eliminada');
+  });
+}
+
+/* ── Seguridad: contraseña ── */
+function pfVer(id,btn){ var i=pfEl(id); if(!i) return; var v=i.type==='password'; i.type=v?'text':'password'; if(btn){ btn.setAttribute('aria-pressed',v?'true':'false'); btn.style.color=v?'#4da3ff':''; } }
+function pfMsg(t,ok){ var m=pfEl('pf2-pmsg'); if(!m) return; if(!t){ m.style.display='none'; return; } m.className='pf2-msg '+(ok?'ok':'err'); m.textContent=t; m.style.display='block'; }
+function pfPassGuardar(){
+  if(!authSession) return;
+  var a=pfEl('pf2-pa').value, n=pfEl('pf2-pn').value, c=pfEl('pf2-pc').value, b=pfEl('pf2-pbtn');
+  if(!a||!n||!c){ pfMsg('Completa los tres campos',false); return; }
+  if(n.length<6){ pfMsg('La nueva contraseña debe tener al menos 6 caracteres',false); return; }
+  if(n!==c){ pfMsg('La confirmación no coincide',false); return; }
+  if(n===a){ pfMsg('La nueva contraseña debe ser distinta a la actual',false); return; }
+  var ha=hashPass(a), hn=hashPass(n);
+  b.disabled=true; var t0=b.textContent; b.textContent='Guardando…'; pfMsg('');
+  /* se valida la actual contra el hash que el servidor ya conoce */
+  pfHash().then(function(h){
+    if(h&&h!==ha){ b.disabled=false; b.textContent=t0; pfMsg('La contraseña actual es incorrecta',false); return; }
+    pfApi('pass_cambiar',{actual:ha,nuevo:hn}).then(function(r){
+      b.disabled=false; b.textContent=t0;
+      if(!r||!r.ok){ pfMsg((r&&r.message)||'No se pudo cambiar la contraseña',false); return; }
+      authSession.password_hash=hn; try{ saveSession(authSession); }catch(e){}
+      ['pf2-pa','pf2-pn','pf2-pc'].forEach(function(i){ pfEl(i).value=''; });
+      pfMsg('Contraseña actualizada. Las demás sesiones se cerraron.',true); pfToast('Contraseña actualizada'); pfSesiones(); pfAvisosCargar();
+    });
+  });
+}
+function openCambiarPass(){ goPage('perfil'); setTimeout(function(){ pfTab('seg',true); },80); }
+
+/* ── Seguridad: sesiones ── */
+function pfDispIcono(d){ return /iphone|android|móvil|movil|ipad|tablet/i.test(d||'')?'device':'globe'; }
+function pfSesiones(){
+  var box=pfEl('pf2-ses'); if(!box||!authSession) return;
+  box.innerHTML='<div class="pf2-vacio">Cargando sesiones…</div>';
+  pfApi('sesiones').then(function(r){
+    if(!r||!r.ok){ box.innerHTML='<div class="pf2-vacio">'+pfEsc((r&&r.message)||'No se pudo cargar el historial')+'</div>'; return; }
+    var l=r.sesiones||[]; if(!l.length){ box.innerHTML='<div class="pf2-vacio">Sin sesiones registradas</div>'; return; }
+    box.innerHTML=l.map(function(s){
+      return '<div class="pf2-s"><i data-i="'+pfDispIcono(s.dispositivo)+'" class="pf2-ib"></i><div><b>'+pfEsc(s.dispositivo||'Dispositivo')+(s.actual?' <em>ESTA SESIÓN</em>':'')+'</b>'
+        +'<small>'+(s.ip?'IP '+pfEsc(s.ip)+' · ':'')+(s.actual?'Activa ahora':'Último uso '+pfRelativo(s.ultima))+'</small><small>Inició '+pfFechaHora(s.creada)+'</small></div>'
+        +(s.actual?'':'<button type="button" onclick="pfCerrarSesion(\''+pfEsc(s.id)+'\')">Cerrar</button>')+'</div>';
+    }).join('');
+    pfIconos(box);
+  });
+}
+function pfCerrarSesion(id){ pfApi('sesion_cerrar',{objetivo:id}).then(function(r){ pfToast(r&&r.ok?'Sesión cerrada':((r&&r.message)||'No se pudo cerrar')); pfSesiones(); }); }
+function pfCerrarOtras(){
+  if(!pfSidGet()){ pfToast('Aún no hay una sesión registrada, intenta de nuevo'); pfPing(); return; }
+  pfApi('sesion_cerrar_otras').then(function(r){
+    if(!r||!r.ok){ pfToast((r&&r.message)||'No se pudo cerrar'); return; }
+    pfToast(r.cerradas?('Se cerraron '+r.cerradas+' sesión(es)'):'No había otras sesiones activas'); pfSesiones(); pfAvisosCargar();
+  });
+}
+/* Ping: registra la sesión, detecta cierre remoto y refresca foto/datos */
+function pfPing(){
+  if(!authSession) return;
+  var user=authSession.username;
+  pfApi('sesion_ping').then(function(r){
+    if(!authSession||authSession.username!==user||!r||!r.ok) return;
+    if(r.revocada){ pfSidSet(''); PF.cierre=true; pfToast('Tu sesión se cerró desde otro dispositivo',4000); doLogout(); return; }
+    if(r.sid) pfSidSet(r.sid);
+    if(r.ultima) PF.ult=r.ultima;
+    var ch=false;
+    if((r.avatar_url||null)!==(authSession.avatar_url||null)){ authSession.avatar_url=r.avatar_url||null; ch=true; }
+    if(r.nombre&&r.nombre!==authSession.nombre){ authSession.nombre=r.nombre; ch=true; }
+    if(r.whatsapp&&r.whatsapp!==authSession.whatsapp){ authSession.whatsapp=r.whatsapp; ch=true; }
+    pfAvatares(); if(ch){ pfSet('pf2-name',authSession.nombre||authSession.username); pfSet('pf2-nombre',authSession.nombre||'-'); pfSet('pf2-wa',authSession.whatsapp?'+'+authSession.whatsapp:'-'); }
+    pfUltima();
+  });
+}
+(function(){
+  if(typeof updateAuthUI==='function'){
+    var orig=updateAuthUI, ultimo='';
+    updateAuthUI=function(){
+      var r=orig.apply(this,arguments);
+      try{ if(authSession){ pfAvatares(); if(ultimo!==authSession.username){ ultimo=authSession.username; setTimeout(pfPing,400); } } else ultimo=''; }catch(e){}
+      return r;
+    };
+  }
+  if(PF.pingT) clearInterval(PF.pingT);
+  PF.pingT=setInterval(function(){ if(authSession&&!document.hidden) pfPing(); },120000);
+  document.addEventListener('visibilitychange',function(){ if(!document.hidden&&authSession) pfPing(); });
+})();
+
+/* ── Preferencias: moneda ── */
+function pfMonedas(){
+  var box=pfEl('pf2-mon'); if(!box||typeof CURRENCY_LIST==='undefined') return;
+  box.innerHTML=CURRENCY_LIST.map(function(c){
+    return '<button type="button" class="'+(c.code===CURRENCY?'on':'')+'" onclick="pfMoneda(\''+c.code+'\')"><span>'+c.flag+'</span><span>'+c.code+' · '+pfEsc(c.name)+'</span></button>';
+  }).join('');
+}
+function pfMoneda(c){ if(typeof changeCurrency==='function') changeCurrency(c); pfMonedas(); if(authSession){ cargarWalletPerfil(); pfPintarMovs(); } }
+
+/* ── Avisos (leído / no leído) ── */
+function pfLeidosKey(){ return 'cs_nread_'+(authSession?authSession.username:''); }
+function pfLeidos(){ try{ return JSON.parse(localStorage.getItem(pfLeidosKey())||'[]'); }catch(e){ return []; } }
+function pfAvisosCargar(){
+  if(!authSession) return;
+  pfApi('notif_lista').then(function(r){
+    PF.srv=(r&&r.ok&&Array.isArray(r.items))?r.items:[]; pfAvisosDerivados();
+  });
+}
+function pfAvisosDerivados(){
+  var l=[], leidos=pfLeidos();
+  (PF.srv||[]).forEach(function(n){ l.push({k:'s'+n.id,id:n.id,srv:true,t:n.titulo,d:n.cuerpo,f:n.created_at,e:n.tipo==='seguridad'?'🔒':'🔔',leida:!!n.leida}); });
+  (PF.movs||[]).slice(0,8).forEach(function(m){
+    var c=pfClasificar(m); if(c==='transferencia') return;
+    var k='m'+(m.id||m.created_at), tit=c==='compra'?'Compra realizada':c==='recarga'?'Saldo acreditado':'Reembolso aplicado';
+    l.push({k:k,t:tit,d:(m.descripcion||'')+' · '+fmt(Math.abs(Number(m.monto)||0)),f:m.created_at,e:c==='compra'?'🛒':c==='recarga'?'💰':'↩️',leida:leidos.indexOf(k)>=0});
+  });
+  (PF.tkList||[]).forEach(function(t){ var k='t'+t.id+'|'+t.updated_at; l.push({k:k,t:'Respuesta en tu ticket'+(t.codigo?' '+t.codigo:''),d:'Soporte respondió a tu solicitud.',f:t.updated_at,e:'🎧',leida:leidos.indexOf(k)>=0,tk:true}); });
+  l.sort(function(a,b){ return new Date(b.f||0)-new Date(a.f||0); });
+  PF.avisos=l.slice(0,20); pfAvisosPintar();
+}
+function pfAvisosPintar(){
+  var box=pfEl('pf2-av-l'); if(!box) return;
+  var n=PF.avisos.filter(function(a){ return !a.leida; }).length;
+  pfSet('pf2-av-sub',n?(n+' sin leer'):'Todo al día');
+  var b=pfEl('pf2-nt-n'); if(b){ b.textContent=n; b.style.display=n?'flex':'none'; }
+  if(!PF.avisos.length){ box.innerHTML='<div class="pf2-vacio">No tienes notificaciones</div>'; return; }
+  box.innerHTML=PF.avisos.map(function(a,i){
+    return '<button type="button" class="pf2-n '+(a.leida?'':'nu')+'" onclick="pfAvisoAbrir('+i+')"><span class="e">'+a.e+'</span><span style="min-width:0;flex:1"><b>'+pfEsc(a.t)+'</b><small>'+pfEsc(a.d)+'</small><time>'+pfRelativo(a.f)+'</time></span><span class="pf2-nw">'+(a.leida?'Leída':'Nueva')+'</span></button>';
+  }).join('');
+}
+function pfMarcar(a){
+  if(a.leida) return; a.leida=true;
+  if(a.srv){ pfApi('notif_leer',{ids:[a.id]}); }
+  else { var l=pfLeidos(); if(l.indexOf(a.k)<0) l.push(a.k); try{ localStorage.setItem(pfLeidosKey(),JSON.stringify(l.slice(-200))); }catch(e){} }
+}
+function pfAvisoAbrir(i){ var a=PF.avisos[i]; if(!a) return; pfMarcar(a); pfAvisosPintar(); if(a.tk) pfTickets(); }
+function pfAvisosLeer(){
+  PF.avisos.forEach(function(a){ if(!a.srv&&!a.leida) pfMarcar(a); a.leida=true; });
+  pfApi('notif_leer',{}); pfAvisosPintar(); pfToast('Marcadas como leídas',1500);
+}
+
+/* ── goPage: al entrar al perfil refresca ── */
+(function(){
+  if(typeof goPage!=='function') return;
+  var orig=goPage;
+  goPage=function(id){
+    var r=orig.apply(this,arguments);
+    if(id==='perfil'){ try{ pfIconos(); if(!arguments[1]) pfTab(PF.tab||'perfil'); }catch(e){} }
+    return r;
+  };
+})();
+document.addEventListener('DOMContentLoaded',function(){ try{ pfIconos(); if(authSession) pfAvatares(); }catch(e){} });
+pfIconos();
+/* ═══════════════ BILLETERA / RECARGA DE SALDO (v5) ═══════════════
+   Backend: /api/recargas (solicitudes, comprobantes privados, aprobación atómica en la base).
+   El navegador NUNCA acredita saldo: solo manda la solicitud; el saldo lo mueve el servidor cuando el administrador aprueba. */
+var BW = { cuentas:[], min:200, max:50000, mis:null, comp:null, idem:'', env:false, vistos:null, t:null, cargoCuentas:false };
+var BW_API = '/api/recargas';
+(function(){ if(typeof PF_ICONS==='undefined') return; var x={
+  bank:'<path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/>',
+  card:'<rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19M6 15h4"/>',
+  send:'<path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/>', down:'<path d="M6 9l6 6 6-6"/>',
+  check:'<path d="M5 12l5 5 9-10"/>', x:'<path d="M6 6l12 12M18 6L6 18"/>', file:'<path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5"/>'};
+  for(var k in x) if(!PF_ICONS[k]) PF_ICONS[k]=x[k]; })();
+function bwEl(i){ return document.getElementById(i); }
+function bwEsc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function bwMXN(n){ return '$'+Number(n||0).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})+' MXN'; }
+function bwFH(iso){ if(!iso) return '—'; try{ var d=new Date(iso); return d.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric',timeZone:'America/Mexico_City'})+' · '+d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'America/Mexico_City'}); }catch(e){ return '—'; } }
+function bwIcons(root){ if(typeof pfIconos==='function') pfIconos(root||bwEl('page-saldo')); }
+function bwToast(m,d){ if(typeof showToast==='function') showToast(m,d||2500); }
+var BW_EST={pendiente:'Pendiente de revisión',aprobada:'Aprobada',rechazada:'Rechazada'};
+function bwApi(action,extra){
+  if(!authSession) return Promise.resolve({ok:false,message:'Inicia sesión'});
+  var usr=authSession.username, hp=(typeof pfHash==='function')?pfHash():Promise.resolve(authSession.password_hash);
+  return hp.then(function(h){
+    if(!h) return {ok:false,message:'Vuelve a iniciar sesión'};
+    var body={action:action,username:usr,hash:h}; for(var k in (extra||{})) body[k]=extra[k];
+    return fetch(BW_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+      .then(function(r){ return r.json().catch(function(){ return {ok:false,message:'Respuesta no válida del servidor'}; }); })
+      .catch(function(){ return {ok:false,message:'Sin conexión con el servidor'}; });
+  });
+}
+function bwNuevoIdem(){ var a=new Uint8Array(16); try{ crypto.getRandomValues(a); }catch(e){ for(var i=0;i<16;i++) a[i]=Math.floor(Math.random()*256); } BW.idem=Array.prototype.map.call(a,function(b){ return ('0'+b.toString(16)).slice(-2); }).join(''); }
+
+/* ── Entrada a la página ── */
+function bwInit(){
+  bwIcons(); bwMover();
+  var ok=!!authSession; bwEl('bw-login').style.display=ok?'none':'block';
+  ['bw-metodos','bw-form','bw-mis','bw-hist'].forEach(function(i){ bwEl(i).style.display=ok?'block':'none'; });
+  bwPintarSaldo();
+  if(!ok) return;
+  if(!BW.idem) bwNuevoIdem();
+  bwFechaAhora(false); if(!bwEl('bw-titular').value && authSession.nombre) { /* el titular lo escribe el cliente: puede ser otra persona */ }
+  bwCargarCuentas(); bwCargarMis(); bwCargarMovs();
+  if(BW.t) clearInterval(BW.t);
+  BW.t=setInterval(function(){ var p=bwEl('page-saldo'); if(p&&p.classList.contains('active')&&authSession&&!document.hidden) bwCargarMis(false,true); },30000);
+}
+function bwMover(){ var o=bwEl('bw-ov'); if(o&&o.parentNode!==document.body) document.body.appendChild(o); }
+function bwPintarSaldo(){
+  var s=authSession?Number(authSession.saldo)||0:0, el=bwEl('saldo-page-balance'); if(el) el.textContent=fmt(s);
+  var c=bwEl('bw-cur'); if(c) c.textContent=(typeof CURRENCY!=='undefined'?CURRENCY:'MXN');
+  var u=bwEl('bw-usd'); if(u){ var r=(typeof RATES!=='undefined'&&RATES.USD)?RATES.USD:0; u.textContent=(r>0&&r!==1&&(typeof CURRENCY==='undefined'||CURRENCY!=='USD'))?'≈ $'+(s*r).toFixed(2)+' USD':''; }
+}
+function bwRefrescar(){
+  var b=bwEl('bw-ref'); if(b){ b.classList.add('gira'); b.disabled=true; }
+  var p=(typeof refreshProfile==='function')?refreshProfile():Promise.resolve();
+  p.then(function(){ bwPintarSaldo(); bwCargarMis(false,true); bwCargarMovs(); }).then(function(){ setTimeout(function(){ if(b){ b.classList.remove('gira'); b.disabled=false; } },500); },function(){ if(b){ b.classList.remove('gira'); b.disabled=false; } });
+}
+function bwIr(id,btn){
+  var e=bwEl(id); if(e&&e.scrollIntoView) e.scrollIntoView({behavior:'smooth',block:'start'});
+  var bs=document.querySelectorAll('#page-saldo .bw-nav button'); for(var i=0;i<bs.length;i++) bs[i].classList.toggle('on',bs[i]===btn);
+}
+
+/* ── Cuentas bancarias (vienen de la base; las administra el panel) ── */
+function bwCargarCuentas(){
+  var box=bwEl('bw-cuentas');
+  bwApi('cuentas').then(function(r){
+    if(!r||!r.ok){ box.innerHTML='<div class="bw-vacio">'+bwEsc((r&&r.message)||'No se pudieron cargar las cuentas')+'</div>'; return; }
+    BW.cuentas=r.cuentas||[]; BW.min=r.min||200; BW.max=r.max||50000; BW.cargoCuentas=true;
+    var h=bwEl('bw-min'); if(h) h.textContent='Monto mínimo '+bwMXN(BW.min)+'.';
+    if(!BW.cuentas.length){ box.innerHTML='<div class="bw-vacio">Buscamos banca, ya que la nuestra está llena. Vuelve a intentar más tarde.</div>'; }
+    else box.innerHTML=BW.cuentas.map(function(c,i){
+      return '<div class="bw-ac"><div class="bw-ac-t"><span class="bw-logo">'+bwEsc(String(c.nombre).charAt(0).toUpperCase())+'</span><b>'+bwEsc(c.nombre)+'</b>'
+        +'<button type="button" class="bw-cp" onclick="bwCopiar('+i+',this)"><i data-i="copy"></i><span>Copiar</span></button></div>'
+        +'<div class="bw-ac-d"><span>Titular</span><b>'+bwEsc(c.titular)+'</b><span>CLABE</span><b>'+bwEsc(c.clabe)+'</b></div></div>';
+    }).join('');
+    var sel=bwEl('bw-cuenta'), cur=sel.value;
+    sel.innerHTML='<option value="">'+(BW.cuentas.length?'Selecciona un método':'Sin métodos disponibles')+'</option>'+BW.cuentas.map(function(c){ return '<option value="'+bwEsc(c.id)+'">'+bwEsc(c.nombre)+'</option>'; }).join('');
+    if(cur&&BW.cuentas.some(function(c){ return c.id===cur; })) sel.value=cur;
+    var btn=bwEl('bw-send'); if(btn) btn.disabled=!BW.cuentas.length;
+    bwIcons();
+  });
+}
+function bwCopiar(i,btn){
+  var c=BW.cuentas[i]; if(!c) return;
+  var fin=function(){ btn.classList.add('ok'); btn.querySelector('span').textContent='¡Copiada!'; bwToast('CLABE de '+c.nombre+' copiada',2000); setTimeout(function(){ btn.classList.remove('ok'); btn.querySelector('span').textContent='Copiar'; },2200); };
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(c.clabe).then(fin).catch(function(){ bwToast('CLABE: '+c.clabe,5000); });
+  else { try{ var t=document.createElement('textarea'); t.value=c.clabe; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); fin(); }catch(e){ bwToast('CLABE: '+c.clabe,5000); } }
+}
+
+/* ── Formulario ── */
+function bwFechaAhora(force){
+  var f=bwEl('bw-fecha'); if(!f) return; var d=new Date(), p=function(n){ return ('0'+n).slice(-2); };
+  var s=d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes());
+  f.max=s; if(force||!f.value) f.value=s;
+}
+function bwErr(t){ var e=bwEl('bw-err'); if(!e) return; if(!t){ e.style.display='none'; return; } e.textContent=t; e.style.display='block'; try{ e.scrollIntoView({behavior:'smooth',block:'center'}); }catch(x){} }
+function bwQuitarComp(){ BW.comp=null; var f=bwEl('bw-file'); if(f) f.value=''; bwEl('bw-prev').style.display='none'; bwEl('bw-prev').innerHTML=''; bwEl('bw-drop').style.display='flex'; }
+function bwPrevComp(){
+  var c=BW.comp, p=bwEl('bw-prev'); if(!c){ return; }
+  p.innerHTML=(c.tipo==='application/pdf'?'<span class="bw-pdf">PDF</span>':'<img alt="Vista previa del comprobante" src="'+c.data+'">')
+    +'<div><b>'+bwEsc(c.nombre)+'</b><small>'+(c.tipo==='application/pdf'?'PDF':'Imagen optimizada')+' · '+Math.max(1,Math.round(c.size/1024))+' KB</small></div>'
+    +'<button type="button" onclick="bwQuitarComp()" aria-label="Quitar comprobante"><i data-i="x"></i></button>';
+  p.style.display='flex'; bwEl('bw-drop').style.display='none'; bwIcons(p);
+}
+function bwArchivo(file){
+  bwErr('');
+  if(!file) return;
+  var t=file.type;
+  if(!/^(image\/(jpeg|png|webp)|application\/pdf)$/.test(t)){ bwErr('Formato no permitido. Sube JPG, JPEG, PNG, WEBP o PDF.'); return; }
+  if(t==='application/pdf'){
+    if(file.size>3*1024*1024){ bwErr('El PDF pesa más de 3 MB. Súbelo como foto o comprímelo.'); return; }
+    var r=new FileReader(); r.onload=function(){ BW.comp={data:r.result,tipo:t,nombre:file.name,size:file.size}; bwPrevComp(); }; r.onerror=function(){ bwErr('No se pudo leer el archivo.'); }; r.readAsDataURL(file); return;
+  }
+  if(file.size>25*1024*1024){ bwErr('La imagen es demasiado grande (máximo 25 MB).'); return; }
+  var url=URL.createObjectURL(file), img=new Image();
+  img.onload=function(){
+    var m=1600, k=Math.min(1,m/Math.max(img.width,img.height)), cv=document.createElement('canvas'); cv.width=Math.round(img.width*k); cv.height=Math.round(img.height*k);
+    var g=cv.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,cv.width,cv.height); g.drawImage(img,0,0,cv.width,cv.height);
+    var q=0.85, d=cv.toDataURL('image/jpeg',q); while(d.length*0.75>2.6*1024*1024&&q>0.4){ q-=0.1; d=cv.toDataURL('image/jpeg',q); }
+    URL.revokeObjectURL(url);
+    if(d.length*0.75>3*1024*1024){ bwErr('No se pudo reducir la imagen lo suficiente. Prueba con otra captura.'); return; }
+    BW.comp={data:d,tipo:'image/jpeg',nombre:file.name.replace(/\.[^.]+$/,'')+'.jpg',size:Math.round(d.length*0.75)}; bwPrevComp();
+  };
+  img.onerror=function(){ URL.revokeObjectURL(url); bwErr('No se pudo leer la imagen.'); };
+  img.src=url;
+}
+(function(){
+  function ligar(){
+    var f=bwEl('bw-file'), d=bwEl('bw-drop'); if(!f||f.getAttribute('data-ok')) return; f.setAttribute('data-ok','1');
+    f.onchange=function(){ if(f.files&&f.files[0]) bwArchivo(f.files[0]); };
+    d.onkeydown=function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); f.click(); } };
+    ['dragover','dragenter'].forEach(function(n){ d.addEventListener(n,function(e){ e.preventDefault(); d.classList.add('over'); }); });
+    ['dragleave','drop'].forEach(function(n){ d.addEventListener(n,function(e){ e.preventDefault(); d.classList.remove('over'); }); });
+    d.addEventListener('drop',function(e){ if(e.dataTransfer&&e.dataTransfer.files[0]) bwArchivo(e.dataTransfer.files[0]); });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',ligar); else ligar();
+})();
+function bwDatos(){
+  var cid=bwEl('bw-cuenta').value, c=null; BW.cuentas.forEach(function(x){ if(x.id===cid) c=x; });
+  var monto=parseFloat(bwEl('bw-monto').value), tit=bwEl('bw-titular').value.replace(/\s+/g,' ').trim(), ref=bwEl('bw-refe').value.replace(/\s+/g,' ').trim(), fv=bwEl('bw-fecha').value, fecha=fv?new Date(fv):null;
+  if(!c){ return {e:'Elige un método de depósito'}; }
+  if(!isFinite(monto)||monto<=0){ return {e:'Escribe una cantidad válida'}; }
+  if(monto<BW.min){ return {e:'El monto mínimo es '+bwMXN(BW.min)}; }
+  if(monto>BW.max){ return {e:'El monto máximo por solicitud es '+bwMXN(BW.max)}; }
+  if(tit.length<3){ return {e:'Escribe el nombre del titular que hizo la transferencia'}; }
+  if(ref.replace(/[^A-Za-z0-9]/g,'').length<4){ return {e:'Escribe la referencia o clave de rastreo (mínimo 4 caracteres)'}; }
+  if(!fecha||isNaN(fecha.getTime())){ return {e:'Indica la fecha y hora de la transferencia'}; }
+  if(fecha.getTime()>Date.now()+5*60000){ return {e:'La fecha de la transferencia no puede ser futura'}; }
+  if(fecha.getTime()<Date.now()-30*86400000){ return {e:'La transferencia es demasiado antigua (máximo 30 días)'}; }
+  if(!BW.comp){ return {e:'Sube tu comprobante de pago'}; }
+  return {c:c,monto:Math.round(monto*100)/100,tit:tit,ref:ref,fecha:fecha};
+}
+function bwHoja(html){ var o=bwEl('bw-ov'); if(!o) return; bwMover(); o.innerHTML='<div class="bw-sheet">'+html+'</div>'; o.classList.add('on'); bwIcons(o); }
+function bwCerrar(){ var o=bwEl('bw-ov'); if(o){ o.classList.remove('on'); o.innerHTML=''; } }
+function bwResumen(){
+  if(!authSession){ if(typeof showAuthModal==='function') showAuthModal(); return; }
+  var d=bwDatos(); if(d.e){ bwErr(d.e); return; } bwErr('');
+  bwHoja('<h3>Resumen de tu solicitud <button type="button" onclick="bwCerrar()">✕</button></h3><p class="s">Revisa que todo coincida con tu transferencia.</p>'
+    +kv('Método de depósito',d.c.nombre)+kv('Cuenta destino',d.c.clabe)+kv('Cantidad',bwMXN(d.monto))+kv('Titular de la transferencia',d.tit)+kv('Referencia',d.ref)+kv('Fecha y hora',bwFH(d.fecha.toISOString()))+kv('Comprobante',d.c&&BW.comp.nombre)
+    +'<div class="bw-err" id="bw-e2" style="display:none"></div>'
+    +'<button type="button" class="bw-btn bw-p bw-big" id="bw-conf" onclick="bwEnviar()"><i data-i="send"></i> Confirmar y enviar</button>'
+    +'<button type="button" class="bw-btn" onclick="bwCerrar()">Volver a editar</button>'
+    +'<p class="bw-note">Tu saldo se acredita cuando el administrador apruebe la solicitud.</p>');
+  function kv(a,b){ return '<div class="bw-kv"><span>'+bwEsc(a)+'</span><b>'+bwEsc(b)+'</b></div>'; }
+}
+function bwEnviar(){
+  if(BW.env) return; var d=bwDatos(); if(d.e){ bwCerrar(); bwErr(d.e); return; }
+  BW.env=true; var b=bwEl('bw-conf'); if(b){ b.disabled=true; b.textContent='Enviando…'; }
+  bwApi('solicitar',{cuenta_id:d.c.id,monto:d.monto,titular:d.tit,referencia:d.ref,fecha:d.fecha.toISOString(),comprobante:BW.comp.data,idem:BW.idem}).then(function(r){
+    BW.env=false;
+    if(!r||!r.ok){ var e=bwEl('bw-e2'); if(b){ b.disabled=false; b.innerHTML='<i data-i="send"></i> Confirmar y enviar'; bwIcons(bwEl('bw-ov')); } if(e){ e.textContent=(r&&r.message)||'No se pudo enviar la solicitud'; e.style.display='block'; } return; }
+    bwNuevoIdem(); bwQuitarComp(); ['bw-monto','bw-titular','bw-refe'].forEach(function(i){ bwEl(i).value=''; }); bwEl('bw-cuenta').value=''; bwFechaAhora(true);
+    bwHoja('<div style="text-align:center;padding:.6rem 0 .2rem"><span class="bw-ib" style="margin:0 auto .7rem;width:56px;height:56px;font-size:1.7rem;background:rgba(37,211,102,.14);color:#25d366"><i data-i="check"></i></span>'
+      +'<h3 style="justify-content:center">Solicitud recibida</h3><p class="s">Tu recarga de '+bwMXN(r.item?r.item.monto:d.monto)+' está <b style="color:#ffb84d">pendiente de revisión</b>. Te avisaremos aquí cuando se resuelva.</p></div>'
+      +'<button type="button" class="bw-btn bw-p" onclick="bwCerrar();bwIr(\'bw-mis\')">Ver mis recargas</button><button type="button" class="bw-btn" onclick="bwCerrar()">Cerrar</button>');
+    bwCargarMis(true);
+  });
+}
+
+/* ── Mis recargas ── */
+function bwCargarMis(forzar,silencioso){
+  if(!authSession) return Promise.resolve();
+  return bwApi('mis').then(function(r){
+    var box=bwEl('bw-mis-l');
+    if(!r||!r.ok){ if(!silencioso&&box) box.innerHTML='<div class="bw-vacio">'+bwEsc((r&&r.message)||'No se pudo cargar')+'</div>'; return; }
+    var prev=BW.mis; BW.mis=r.items||[];
+    if(prev){ BW.mis.forEach(function(n){ var o=prev.filter(function(x){ return x.id===n.id; })[0]; if(o&&o.estado==='pendiente'&&n.estado!=='pendiente') bwCambio(n); }); }
+    bwPintarMis();
+  });
+}
+function bwCambio(n){
+  if(n.estado==='aprobada'){ bwToast('✅ Recarga aprobada: '+bwMXN(n.monto)+' acreditados',5000); if(typeof refreshProfile==='function') refreshProfile().then(function(){ bwPintarSaldo(); bwCargarMovs(); }); }
+  else if(n.estado==='rechazada'){ bwToast('❌ Recarga rechazada: '+(n.motivo_rechazo||'revisa el detalle'),6000); }
+}
+function bwPintarMis(){
+  var box=bwEl('bw-mis-l'), l=BW.mis||[], pn=l.filter(function(x){ return x.estado==='pendiente'; }).length, b=bwEl('bw-pend-n'); if(b){ b.textContent=pn; b.style.display=pn?'inline-flex':'none'; }
+  if(!box) return;
+  if(!l.length){ box.innerHTML='<div class="bw-vacio">Aún no has solicitado recargas.<br>Cuando lo hagas, verás aquí su estado.</div>'; return; }
+  box.innerHTML=l.map(function(x,i){
+    var ic=x.estado==='aprobada'?'check':x.estado==='rechazada'?'x':'clock', cl=x.estado==='aprobada'?'pos':x.estado==='rechazada'?'neg':'pen';
+    return '<button type="button" class="bw-it" onclick="bwDetalle('+i+')"><span class="bw-mi '+cl+'"><i data-i="'+ic+'"></i></span><div><b>'+bwEsc(x.banco)+' · Ref '+bwEsc(x.referencia)+'</b><small>'+bwFH(x.creada)+'</small><span class="bw-st '+x.estado+'">'+BW_EST[x.estado]+'</span></div><span class="bw-am '+(x.estado==='aprobada'?'pos':'')+'">$'+Number(x.monto).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})+'</span></button>';
+  }).join(''); bwIcons(box);
+}
+function bwDetalle(i){
+  var x=(BW.mis||[])[i]; if(!x) return;
+  function kv(a,b){ return '<div class="bw-kv"><span>'+bwEsc(a)+'</span><b>'+b+'</b></div>'; }
+  bwHoja('<h3>Detalle de la recarga <button type="button" onclick="bwCerrar()">✕</button></h3><div style="margin:.2rem 0 .5rem"><span class="bw-st '+x.estado+'">'+BW_EST[x.estado]+'</span></div>'
+    +kv('Cantidad depositada',bwEsc(bwMXN(x.monto)))+kv('Banco utilizado',bwEsc(x.banco))+kv('Referencia',bwEsc(x.referencia))+kv('Titular de la transferencia',bwEsc(x.titular))
+    +kv('Fecha de la transferencia',bwFH(x.fecha_transferencia))+kv('Fecha de solicitud',bwFH(x.creada))+kv('Fecha de resolución',x.resuelta?bwFH(x.resuelta):'En revisión')
+    +(x.estado==='rechazada'?'<div class="bw-rej"><b>Motivo del rechazo</b>'+bwEsc(x.motivo_rechazo||'Sin motivo indicado')+'</div>':'')
+    +(x.estado==='aprobada'?'<p class="bw-note" style="color:#25d366">El saldo ya fue acreditado a tu billetera.</p>':'')
+    +'<div id="bw-cv"></div>'
+    +'<button type="button" class="bw-btn" id="bw-vc" onclick="bwVerComp('+i+')"><i data-i="file"></i> Ver comprobante</button>'
+    +(x.estado==='rechazada'?'<button type="button" class="bw-btn bw-p" onclick="bwNueva('+i+')"><i data-i="plus"></i> Hacer una nueva solicitud</button>':''));
+}
+function bwVerComp(i){
+  var x=BW.mis[i], b=bwEl('bw-vc'); if(b){ b.disabled=true; }
+  bwApi('comprobante_url',{id:x.id}).then(function(r){
+    if(b) b.disabled=false; var c=bwEl('bw-cv'); if(!c) return;
+    if(!r||!r.ok){ c.innerHTML='<div class="bw-err">'+bwEsc((r&&r.message)||'No se pudo abrir el comprobante')+'</div>'; return; }
+    c.innerHTML=r.tipo==='application/pdf'?'<a class="bw-btn bw-g" href="'+bwEsc(r.url)+'" target="_blank" rel="noopener">Abrir PDF del comprobante</a>':'<img class="bw-imgv" alt="Comprobante" src="'+bwEsc(r.url)+'">';
+  });
+}
+function bwNueva(i){
+  var x=BW.mis[i]; bwCerrar(); var s=bwEl('bw-cuenta'); (BW.cuentas||[]).forEach(function(c){ if(c.nombre===x.banco) s.value=c.id; }); bwEl('bw-monto').value=x.monto; bwIr('bw-form'); }
+
+/* ── Historial de la billetera ── */
+function bwCargarMovs(){
+  var box=bwEl('bw-mov'); if(!box||!authSession||!authSession.id||typeof sbGetMovimientos!=='function') return;
+  sbGetMovimientos(authSession.id).then(function(rows){
+    rows=Array.isArray(rows)?rows:[]; if(!rows.length){ box.innerHTML='<div class="bw-vacio">Aún no tienes movimientos.</div>'; return; }
+    box.innerHTML=rows.slice(0,15).map(function(m){
+      var c=typeof pfClasificar==='function'?pfClasificar(m):'compra', pos=(c==='recarga'||c==='reembolso'), ic=c==='compra'?'cart':c==='recarga'?'wallet':c==='transferencia'?'swap':'refund';
+      return '<div class="bw-it" style="cursor:default"><span class="bw-mi '+(pos?'pos':'neg')+'"><i data-i="'+ic+'"></i></span><div><b>'+bwEsc(m.descripcion||c)+'</b><small>'+bwFH(m.created_at)+'</small></div><span class="bw-am '+(pos?'pos':'neg')+'">'+(pos?'+':'-')+bwEsc(fmt(Math.abs(Number(m.monto)||0)))+'</span></div>';
+    }).join(''); bwIcons(box);
+  }).catch(function(){ box.innerHTML='<div class="bw-vacio">No se pudieron cargar los movimientos.</div>'; });
+}
+
+/* ── Integración con el resto de la tienda ── */
+(function(){
+  if(typeof goPage==='function'){ var og=goPage; goPage=function(id){ var r=og.apply(this,arguments); if(id==='saldo'){ try{ bwInit(); }catch(e){} } return r; }; }
+  // Un solo sistema de recarga: todos los botones "Recargar / Depositar" llevan a la Billetera
+  window.abrirRecargaSheet=window.saldoAbrir=window.abrirMetodoSheet=function(){ goPage('saldo'); };
+  // Campana de notificaciones: estado de las solicitudes de recarga
+  if(typeof ntCargar==='function'){
+    var on=ntCargar;
+    ntCargar=function(){
+      var p=on.apply(this,arguments);
+      if(!authSession||typeof NT==='undefined') return p;
+      return Promise.resolve(p).then(function(){ return bwApi('mis'); }).then(function(r){
+        if(!r||!r.ok||!Array.isArray(r.items)) return;
+        var lim=Date.now()-14*86400000; NT.items=NT.items.filter(function(i){ return !i.bw; });
+        r.items.forEach(function(x){
+          var t=new Date(x.resuelta||x.creada).getTime(); if(t<lim) return;
+          var a=x.estado==='aprobada'?'Recarga aprobada':x.estado==='rechazada'?'Recarga rechazada':'Recarga en revisión';
+          NT.items.push({t:t,e:x.estado==='aprobada'?'✅':x.estado==='rechazada'?'❌':'⏳',a:a,b:bwMXN(x.monto)+' · '+x.banco+(x.estado==='rechazada'&&x.motivo_rechazo?' · '+x.motivo_rechazo:''),go:'saldo',bw:1,fijo:x.estado==='pendiente'?0:0});
+        });
+        NT.items.sort(function(a,b){ return b.t-a.t; }); NT.items=NT.items.slice(0,10); if(typeof ntPintarDot==='function') ntPintarDot();
+      });
+    };
+  }
+  document.addEventListener('DOMContentLoaded',function(){ try{ bwMover(); bwIcons(); }catch(e){} });
+  bwIcons();
+})();
+
+/* ═══════════ PANEL ADMIN · DEPÓSITOS (recargas de saldo) ═══════════
+   Todo pasa por /api/recargas con tu sesión del panel (token firmado). El saldo lo acredita la base en una sola transacción. */
+var DEP = { tab:'sol', filtro:'pendiente', items:[], cuentas:[], aud:[], busy:false, ed:null };
+function depEsc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function depMXN(n){ return '$'+Number(n||0).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})+' MXN'; }
+function depFH(iso){ if(!iso) return '—'; try{ var d=new Date(iso); return d.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric',timeZone:'America/Mexico_City'})+' '+d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'America/Mexico_City'}); }catch(e){ return '—'; } }
+function depApi(action,extra){
+  var tok=(typeof csAdminSesionToken==='function')?csAdminSesionToken():'';
+  if(!tok) return Promise.resolve({ok:false,code:'sesion_invalida',message:'Entra de nuevo al panel.'});
+  var body={action:action,token:tok}; for(var k in (extra||{})) body[k]=extra[k];
+  return fetch('/api/recargas',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+    .then(function(r){ return r.json().catch(function(){ return {ok:false,message:'Respuesta inválida ('+r.status+')'}; }); })
+    .catch(function(){ return {ok:false,message:'Sin conexión'}; });
+}
+function depToast(m){ if(typeof showToast==='function') showToast(m,3500); else alert(m); }
+function depAdmCargar(){
+  var s=document.getElementById('adms-depositos'); if(!s) return;
+  s.innerHTML='<div class="adm-card-title">💳 Depósitos · recargas de saldo</div>'
+    +'<div class="dp-tabs"><button type="button" data-t="sol" onclick="depTab(\'sol\')">Solicitudes</button><button type="button" data-t="cue" onclick="depTab(\'cue\')">Cuentas bancarias</button><button type="button" data-t="aud" onclick="depTab(\'aud\')">Historial de operaciones</button></div>'
+    +'<div id="dp-body"></div>';
+  depTab(DEP.tab||'sol');
+}
+function depTab(t){
+  DEP.tab=t; var bs=document.querySelectorAll('#adms-depositos .dp-tabs button'); for(var i=0;i<bs.length;i++) bs[i].classList.toggle('on',bs[i].getAttribute('data-t')===t);
+  if(t==='sol') depSolCargar(); else if(t==='cue') depCueCargar(); else depAudCargar();
+}
+function depBody(h){ var b=document.getElementById('dp-body'); if(b) b.innerHTML=h; }
+/* — Solicitudes — */
+function depFiltro(f){ DEP.filtro=f; depSolCargar(); }
+function depSolCargar(){
+  depBody('<div class="dp-v">Cargando…</div>');
+  depApi('admin_lista',{estado:DEP.filtro==='todas'?'':DEP.filtro}).then(function(r){
+    if(!r||!r.ok){ depBody('<div class="dp-err">'+depEsc((r&&r.message)||'No se pudo cargar')+'</div>'); return; }
+    DEP.items=r.items||[]; depSolPintar(); depBadge();
+  });
+}
+function depSolPintar(){
+  var fl=[['pendiente','Pendientes'],['aprobada','Aprobadas'],['rechazada','Rechazadas'],['todas','Todas']];
+  var h='<div class="dp-fl">'+fl.map(function(f){ return '<button type="button" class="'+(DEP.filtro===f[0]?'on':'')+'" onclick="depFiltro(\''+f[0]+'\')">'+f[1]+'</button>'; }).join('')+'<button type="button" class="dp-rf" onclick="depSolCargar()">↻ Actualizar</button></div>';
+  if(!DEP.items.length) h+='<div class="dp-v">No hay solicitudes en esta vista.</div>';
+  h+=DEP.items.map(function(x,i){
+    var u=x.usuario||{}, pen=x.estado==='pendiente';
+    return '<div class="dp-c"><div class="dp-top"><div><b>'+depEsc(x.username)+'</b><small>'+depEsc(u.nombre||'')+(u.whatsapp?' · +'+depEsc(u.whatsapp):'')+'</small></div><div class="dp-mo">'+depMXN(x.monto)+'</div></div>'
+      +'<span class="dp-st '+x.estado+'">'+({pendiente:'Pendiente de revisión',aprobada:'Aprobada',rechazada:'Rechazada'}[x.estado])+'</span>'
+      +'<div class="dp-g"><span>Banco</span><b>'+depEsc(x.banco)+'</b><span>Titular</span><b>'+depEsc(x.titular)+'</b><span>Referencia</span><b>'+depEsc(x.referencia)+'</b><span>Transferencia</span><b>'+depFH(x.fecha_transferencia)+'</b><span>Solicitud</span><b>'+depFH(x.creada)+'</b>'
+      +(u.saldo!=null?'<span>Saldo actual</span><b>'+depMXN(u.saldo)+'</b>':'')+(u.desde?'<span>Cliente desde</span><b>'+depFH(u.desde)+'</b>':'')
+      +(x.resuelta?'<span>Resuelta</span><b>'+depFH(x.resuelta)+' · '+depEsc(x.resuelta_por||'')+'</b>':'')+(x.motivo_rechazo?'<span>Motivo</span><b>'+depEsc(x.motivo_rechazo)+'</b>':'')+'</div>'
+      +'<div class="dp-ac"><button type="button" onclick="depVerComp('+i+')">🧾 Ver comprobante</button>'
+      +(pen?'<button type="button" class="ok" onclick="depAprobar('+i+')">✔ Aprobar</button><button type="button" class="no" onclick="depRechazoAbrir('+i+')">✖ Rechazar</button>':'')+'</div>'
+      +'<div id="dp-rj-'+i+'"></div></div>';
+  }).join('');
+  depBody(h);
+}
+function depVerComp(i){
+  var x=DEP.items[i]; if(!x) return;
+  depApi('admin_comprobante',{id:x.id}).then(function(r){
+    if(!r||!r.ok){ depToast((r&&r.message)||'No se pudo abrir el comprobante'); return; }
+    var c=r.tipo==='application/pdf'?'<a class="dp-pdf" href="'+depEsc(r.url)+'" target="_blank" rel="noopener">Abrir PDF del comprobante</a>':'<img class="dp-img" alt="Comprobante" src="'+depEsc(r.url)+'">';
+    var o=document.getElementById('bw-ov'); if(!o){ window.open(r.url,'_blank'); return; }
+    if(typeof bwHoja==='function') bwHoja('<h3>Comprobante · '+depEsc(x.username)+' <button type="button" onclick="bwCerrar()">✕</button></h3><p class="s">'+depMXN(x.monto)+' · '+depEsc(x.banco)+' · Ref '+depEsc(x.referencia)+'</p>'+c+'<a class="bw-btn" style="text-decoration:none;margin-top:.8rem" href="'+depEsc(r.url)+'" target="_blank" rel="noopener">Abrir en pestaña nueva</a>');
+  });
+}
+function depAprobar(i){
+  var x=DEP.items[i]; if(!x||DEP.busy) return;
+  if(!confirm('¿Aprobar la recarga de '+depMXN(x.monto)+' para '+x.username+'?\nSe acreditará a su saldo ahora mismo.')) return;
+  DEP.busy=true;
+  depApi('admin_resolver',{id:x.id,accion:'aprobar'}).then(function(r){
+    DEP.busy=false;
+    if(!r||!r.ok){ depToast((r&&r.message)||'No se pudo aprobar'); depSolCargar(); return; }
+    depToast('✅ Aprobada: '+depMXN(x.monto)+' acreditados a '+x.username); depSolCargar();
+  });
+}
+function depRechazoAbrir(i){
+  var b=document.getElementById('dp-rj-'+i); if(!b) return;
+  b.innerHTML='<div class="dp-rj"><label>Motivo del rechazo (lo verá el cliente)</label><textarea id="dp-mt-'+i+'" maxlength="300" rows="2" placeholder="Ej. No encontramos el depósito con esa referencia"></textarea><div class="dp-ac"><button type="button" class="no" onclick="depRechazar('+i+')">Confirmar rechazo</button><button type="button" onclick="document.getElementById(\'dp-rj-'+i+'\').innerHTML=\'\'">Cancelar</button></div></div>';
+}
+function depRechazar(i){
+  var x=DEP.items[i], m=(document.getElementById('dp-mt-'+i)||{}).value||''; if(!x||DEP.busy) return;
+  if(m.trim().length<3){ depToast('Escribe el motivo del rechazo'); return; }
+  DEP.busy=true;
+  depApi('admin_resolver',{id:x.id,accion:'rechazar',motivo:m.trim()}).then(function(r){
+    DEP.busy=false;
+    if(!r||!r.ok){ depToast((r&&r.message)||'No se pudo rechazar'); depSolCargar(); return; }
+    depToast('Rechazada. El cliente verá el motivo.'); depSolCargar();
+  });
+}
+/* — Cuentas bancarias — */
+function depCueCargar(){
+  depBody('<div class="dp-v">Cargando…</div>');
+  depApi('admin_cuentas').then(function(r){
+    if(!r||!r.ok){ depBody('<div class="dp-err">'+depEsc((r&&r.message)||'No se pudo cargar')+'</div>'); return; }
+    DEP.cuentas=r.items||[]; depCuePintar();
+  });
+}
+function depCuePintar(){
+  var e=DEP.ed, h='<div class="dp-c"><div class="dp-top"><b>'+(e?'Editar cuenta':'Agregar cuenta')+'</b></div>'
+   +'<div class="dp-fm"><label>Banco</label><input id="dc-n" maxlength="40" value="'+depEsc(e?e.nombre:'')+'" placeholder="Ej. Klar">'
+   +'<label>Titular</label><input id="dc-t" maxlength="80" value="'+depEsc(e?e.titular:'')+'" placeholder="Nombre del titular">'
+   +'<label>CLABE (18 dígitos)</label><input id="dc-c" inputmode="numeric" maxlength="22" value="'+depEsc(e?e.clabe:'')+'" placeholder="000000000000000000">'
+   +'<label>Orden</label><input id="dc-o" type="number" min="0" max="999" value="'+depEsc(e?e.orden:(DEP.cuentas.length+1))+'">'
+   +'<label class="dp-ck"><input id="dc-a" type="checkbox" '+(!e||e.activa?'checked':'')+'> Activa (visible para los clientes)</label>'
+   +'<div class="dp-ac"><button type="button" class="ok" onclick="depCueGuardar()">'+(e?'Guardar cambios':'Agregar cuenta')+'</button>'+(e?'<button type="button" onclick="DEP.ed=null;depCuePintar()">Cancelar</button>':'')+'</div></div></div>';
+  h+=DEP.cuentas.map(function(c,i){
+    return '<div class="dp-c"><div class="dp-top"><div><b>'+depEsc(c.nombre)+'</b><small>'+depEsc(c.titular)+'</small></div><span class="dp-st '+(c.activa?'aprobada':'rechazada')+'">'+(c.activa?'Activa':'Desactivada')+'</span></div>'
+     +'<div class="dp-g"><span>CLABE</span><b>'+depEsc(c.clabe)+'</b><span>Orden</span><b>'+depEsc(c.orden)+'</b></div>'
+     +'<div class="dp-ac"><button type="button" onclick="depCueEditar('+i+')">✎ Editar</button><button type="button" onclick="depCueToggle('+i+')">'+(c.activa?'Desactivar':'Activar')+'</button><button type="button" class="no" onclick="depCueBorrar('+i+')">🗑 Eliminar</button></div></div>';
+  }).join('');
+  if(!DEP.cuentas.length) h+='<div class="dp-v">No hay cuentas. Los clientes verán "Buscamos banca" hasta que agregues una activa.</div>';
+  depBody(h);
+}
+function depCueEditar(i){ DEP.ed=DEP.cuentas[i]; depCuePintar(); try{ document.getElementById('dc-n').scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){} }
+function depCueGuardar(){
+  var d={nombre:document.getElementById('dc-n').value,titular:document.getElementById('dc-t').value,clabe:document.getElementById('dc-c').value,orden:document.getElementById('dc-o').value,activa:document.getElementById('dc-a').checked};
+  if(DEP.ed) d.id=DEP.ed.id;
+  depApi('admin_cuenta_guardar',d).then(function(r){ if(!r||!r.ok){ depToast((r&&r.message)||'No se pudo guardar'); return; } depToast('Cuenta guardada. Ya se ve en la Billetera.'); DEP.ed=null; depCueCargar(); });
+}
+function depCueToggle(i){ var c=DEP.cuentas[i]; depApi('admin_cuenta_guardar',{id:c.id,nombre:c.nombre,titular:c.titular,clabe:c.clabe,orden:c.orden,activa:!c.activa}).then(function(r){ if(!r||!r.ok){ depToast((r&&r.message)||'No se pudo cambiar'); return; } depCueCargar(); }); }
+function depCueBorrar(i){ var c=DEP.cuentas[i]; if(!confirm('¿Eliminar la cuenta '+c.nombre+'?\nLas solicitudes ya hechas conservan su banco.')) return; depApi('admin_cuenta_borrar',{id:c.id}).then(function(r){ if(!r||!r.ok){ depToast((r&&r.message)||'No se pudo eliminar'); return; } depToast('Cuenta eliminada'); depCueCargar(); }); }
+/* — Historial de operaciones — */
+function depAudCargar(){
+  depBody('<div class="dp-v">Cargando…</div>');
+  depApi('admin_auditoria').then(function(r){
+    if(!r||!r.ok){ depBody('<div class="dp-err">'+depEsc((r&&r.message)||'No se pudo cargar')+'</div>'); return; }
+    var N={solicitar:'Solicitud creada',aprobar:'Recarga aprobada',rechazar:'Recarga rechazada',ver_comprobante:'Comprobante consultado',cuenta_crear:'Cuenta agregada',cuenta_editar:'Cuenta editada',cuenta_borrar:'Cuenta eliminada'};
+    var l=r.items||[]; depBody(l.length?'<div class="dp-c">'+l.map(function(a){ var d=a.detalle||{}; var det=[d.usuario,d.monto!=null?depMXN(d.monto):'',d.banco,d.nombre,d.motivo].filter(Boolean).join(' · ');
+      return '<div class="dp-au"><b>'+depEsc(N[a.accion]||a.accion)+'</b><small>'+depFH(a.created_at)+' · '+depEsc(a.actor)+(det?' · '+depEsc(det):'')+'</small></div>'; }).join('')+'</div>':'<div class="dp-v">Sin operaciones registradas.</div>');
+  });
+}
+/* — Contador de pendientes en el menú — */
+function depBadge(){
+  var b=document.getElementById('dep-badge'); if(!b) return;
+  depApi('admin_pendientes').then(function(r){ if(r&&r.ok){ b.textContent=r.pendientes; b.style.display=r.pendientes>0?'inline-block':'none'; } });
+}
+setInterval(function(){ var a=document.getElementById('adms-depositos'); if(a&&document.getElementById('dep-badge')&&!document.hidden&&typeof csAdminSesionToken==='function'&&csAdminSesionToken()) depBadge(); },60000);
+setTimeout(function(){ try{ if(typeof csAdminSesionToken==='function'&&csAdminSesionToken()) depBadge(); }catch(e){} },4000);
+/* ═══════════════ CHECKOUT CON SALDO (v5) ═══════════════
+   Pase Booyah, Cajas y Fragmentos se pagan SOLO con el saldo de la cuenta. El navegador manda únicamente
+   {clave, ID de Free Fire}: el precio, el total y el saldo los calcula y valida el servidor (/api/comprar + checkout_pagar).
+   Reutiliza: authSession, fmt, pfHash, saveSession, _refreshSaldoUI, goPage, showToast, COMPRAR_RECARGA_URL. */
+var CK_API = '/api/comprar';
+var CK = { cat:null, catT:0, clave:null, q:1, modo:'mismo', idU:'', ids:[], busy:false, base:null, err:'', errSaldo:false, nick:'', nickId:'', fase:'form', orden:null, saldo:null, ag:{}, stockT:0 };
+var CK_IC = {
+  wallet:'<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14a4 4 0 014-4h26v8"/><path d="M6 14v24a4 4 0 004 4h30a2 2 0 002-2v-8"/><path d="M42 20H33a6 6 0 000 12h9z"/><circle cx="34" cy="26" r="1.2" fill="currentColor"/></svg>',
+  cart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.6 12.4a1 1 0 001 .8h8.8a1 1 0 001-.8L20 7H6"/></svg>',
+  ok:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>',
+  warn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>'
+};
+function ckEsc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function ckFmt(n){ return (typeof fmt === 'function') ? fmt(n) : ('$' + n + ' MXN'); }
+function ckR2(n){ return Math.round(n * 100) / 100; }
+function ckEl(id){ return document.getElementById(id); }
+function ckToast(m, d){ if(typeof showToast === 'function') showToast(m, d || 3000); }
+function ckUUID(){ return (window.crypto && crypto.randomUUID) ? crypto.randomUUID().replace(/-/g, '') : ('cs' + Date.now().toString(36) + Math.random().toString(36).slice(2, 12)); }
+function ckHash32(s){ var h = 5381; for(var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
+
+function ckApi(action, extra, auth){
+  var go = function(h){
+    var body = Object.assign({ action: action }, extra || {});
+    if(auth && authSession){ body.username = authSession.username; body.hash = h; }
+    return fetch(CK_API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) }).then(function(r){ return r.json(); });
+  };
+  if(!auth || typeof authSession === 'undefined' || !authSession) return go(null);
+  return pfHash().then(go);
+}
+function ckCargarCatalogo(force){
+  if(!force && CK.cat && Date.now() - CK.catT < 60000) return Promise.resolve(CK.cat);
+  return ckApi('catalogo', {}, true).then(function(j){
+    if(!j || !j.ok) throw new Error((j && j.message) || 'catalogo');
+    CK.cat = j.productos; CK.catT = Date.now();
+    if(j.saldo != null){ CK.saldo = Number(j.saldo) || 0; ckSyncSaldo(CK.saldo); }
+    return CK.cat;
+  });
+}
+function ckSyncSaldo(n){
+  if(typeof authSession !== 'undefined' && authSession){ authSession.saldo = n; if(typeof _refreshSaldoUI === 'function') _refreshSaldoUI(n); if(typeof saveSession === 'function') saveSession(authSession); }
+}
+function ckProd(clave){ var r = null; (CK.cat || []).forEach(function(p){ if(p.clave === clave) r = p; }); return r; }
+function ckPU(p, q){ return (p.mayoreo_min && p.mayoreo_precio && q >= p.mayoreo_min) ? p.mayoreo_precio : p.precio; }
+function ckTotal(){ var p = ckProd(CK.clave); return p ? ckR2(ckPU(p, CK.q) * CK.q) : 0; }
+function ckSaldoAct(){ return CK.saldo != null ? CK.saldo : ((typeof authSession !== 'undefined' && authSession) ? Number(authSession.saldo) || 0 : 0); }
+
+/* imagen ORIGINAL del producto (ruta real del repositorio); si no carga, un bloque neutro con la inicial (nunca un emoji) */
+function ckImg(src, nombre){
+  var ini = ckEsc(String(nombre || '?').trim().charAt(0).toUpperCase());
+  return '<span class="ck-img">' + (src ? '<img src="' + ckEsc(src) + '" alt="' + ckEsc(nombre) + '" loading="lazy" onerror="this.parentNode.innerHTML=\'<b>' + ini + '</b>\'">' : '<b>' + ini + '</b>') + '</span>';
+}
+
+/* ── apertura / cierre ── */
+function ckOverlay(){
+  var ov = ckEl('ck-ov'); if(ov) return ov;
+  ov = document.createElement('div'); ov.id = 'ck-ov'; ov.className = 'ck-ov'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-labelledby', 'ck-title');
+  document.body.appendChild(ov); return ov;
+}
+function ckPosicion(){
+  var ov = ckEl('ck-ov'); if(!ov) return; var tb = document.querySelector('.topbar'), t = 0;
+  if(tb){ var r = tb.getBoundingClientRect(); t = Math.max(0, Math.round(r.bottom)); }
+  ov.style.top = t + 'px';
+}
+window.addEventListener('resize', ckPosicion);
+function ckAbrir(clave){
+  if(typeof authSession === 'undefined' || !authSession){ ckToast('Inicia sesión para comprar'); if(typeof showAuthModal === 'function') setTimeout(showAuthModal, 500); return; }
+  try{ window.scrollTo(0, 0); }catch(e){}
+  CK.clave = clave; CK.q = 1; CK.modo = 'mismo'; CK.idU = ''; CK.ids = []; CK.err = ''; CK.errSaldo = false; CK.nick = ''; CK.nickId = ''; CK.fase = 'form'; CK.orden = null; CK.busy = false; CK.base = ckUUID();
+  var ov = ckOverlay(); ov.innerHTML = '<div class="ck-wrap"><div class="ck-card"><div class="ck-note">Cargando…</div></div></div>';
+  ov.classList.add('on'); ckPosicion();
+  document.documentElement.classList.add('cs-sin-nav', 'ck-abierto');
+  ckCargarCatalogo(true).then(function(){
+    if(!ckProd(clave)){ ckCerrar(); ckToast('Ese producto no está disponible por ahora'); return; }
+    ckRender();
+  }).catch(function(){ ckCerrar(); ckToast('No se pudo cargar el producto. Revisa tu conexión.', 4000); });
+}
+function ckCerrar(){
+  var ov = ckEl('ck-ov'); if(ov){ ov.classList.remove('on'); ov.innerHTML = ''; }
+  document.documentElement.classList.remove('cs-sin-nav', 'ck-abierto');
+  CK.busy = false;
+}
+document.addEventListener('keydown', function(e){ if(e.key === 'Escape'){ var ov = ckEl('ck-ov'); if(ov && ov.classList.contains('on') && !CK.busy) ckCerrar(); } });
+
+/* ── formulario ── */
+function ckCant(d){
+  var p = ckProd(CK.clave); if(!p || CK.busy) return;
+  var q = CK.q + d; if(q < 1) q = 1;
+  if(q > p.max_cant){ q = p.max_cant; ckToast('Máximo ' + p.max_cant + ' por pedido'); }
+  CK.q = q; CK.err = ''; CK.errSaldo = false; ckRender();
+}
+function ckModo(m){ if(CK.busy) return; CK.modo = m; CK.err = ''; ckRender(); }
+function ckCopiar1(){ var v = CK.ids[0] || ''; for(var i = 1; i < CK.q; i++) CK.ids[i] = v; ckRender(); }
+function ckIdInput(el, i){ var v = el.value.replace(/\D/g, '').slice(0, 15); if(el.value !== v) el.value = v; if(i < 0){ CK.idU = v; if(CK.nickId !== v){ CK.nick = ''; CK.nickId = ''; var n = ckEl('ck-nick'); if(n) n.style.display = 'none'; } } else CK.ids[i] = v; el.classList.remove('bad'); }
+function ckVerificar(){
+  var id = CK.idU; if(!/^\d{5,15}$/.test(id)){ CK.err = 'Escribe un ID de Free Fire válido (5 a 15 dígitos).'; ckRender(); return; }
+  if(typeof COMPRAR_RECARGA_URL === 'undefined') return;
+  var b = ckEl('ck-ver'); if(b){ b.disabled = true; b.textContent = 'Verificando…'; }
+  fetch(COMPRAR_RECARGA_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'validar', product_id:340, service_user_id:id }) }).then(function(r){ return r.json(); }).then(function(res){
+    if(res && res.success && res.valido){ CK.nick = res.nombre || 'Jugador'; CK.nickId = id; CK.err = ''; }
+    else if(res && res.success && !res.valido){ CK.err = 'No se encontró esa cuenta. Revisa el ID.'; }
+    else { CK.nick = 'No se pudo verificar ahora; puedes continuar con tu ID.'; CK.nickId = id; }
+    ckRender();
+  }).catch(function(){ CK.nick = 'No se pudo verificar ahora; puedes continuar con tu ID.'; CK.nickId = id; ckRender(); });
+}
+function ckRender(){
+  var ov = ckEl('ck-ov'); if(!ov) return;
+  if(CK.fase === 'ok'){ ckRenderOk(); return; }
+  var p = ckProd(CK.clave); if(!p) return;
+  var pu = ckPU(p, CK.q), total = ckTotal(), saldo = ckSaldoAct(), resta = ckR2(saldo - total), falta = resta < 0;
+  var unidad = p.grupo === 'pase' ? 'pase' : 'paquete', unidades = p.grupo === 'pase' ? 'pases' : 'paquetes';
+  var h = '<div class="ck-wrap"><div class="ck-card"><button type="button" class="ck-x" onclick="ckCerrar()" aria-label="Cerrar">&times;</button>';
+  h += (CK.clave === 'pase_oferta' ? '<div class="ck-eye">Oferta exclusiva</div>' : '<div class="ck-eye" style="color:#6db3ff">' + (p.grupo === 'pase' ? 'Free Fire · Regalo' : 'Free Fire · Entrega automática') + '</div>');
+  h += '<h2 class="ck-h" id="ck-title">' + ckEsc(p.nombre) + '</h2>';
+  h += '<div class="ck-item">' + ckImg(p.img, p.nombre) + '<div class="ck-info"><b>' + ckEsc(p.nombre) + '</b><small>' + ckFmt(pu) + ' c/u</small>' + (pu < p.precio ? '<em>Precio de mayoreo</em>' : '') + '</div>'
+    + '<div class="ck-qty"><button type="button" aria-label="Quitar uno" onclick="ckCant(-1)"' + (CK.q <= 1 || CK.busy ? ' disabled' : '') + '>&minus;</button><span>' + CK.q + '</span><button type="button" aria-label="Agregar uno" onclick="ckCant(1)"' + (CK.busy ? ' disabled' : '') + '>+</button></div>'
+    + '<div class="ck-sub">' + ckFmt(total) + '</div></div>';
+  if(p.mayoreo_min && p.mayoreo_precio) h += '<div class="ck-note" style="text-align:left;margin-top:.5rem">Mayoreo: desde ' + p.mayoreo_min + ' pases a ' + ckFmt(p.mayoreo_precio) + ' c/u.</div>';
+  h += '<div class="ck-sec">¿A qué ID(s) lo mandamos?</div>';
+  h += '<button type="button" class="ck-opt' + (CK.modo === 'mismo' ? ' sel' : '') + '" role="radio" aria-checked="' + (CK.modo === 'mismo') + '" onclick="ckModo(\'mismo\')"><span class="ck-dot"></span><span><b>Todos al mismo ID</b><small>Todos los ' + unidades + ' van a una sola cuenta.</small></span></button>';
+  h += '<button type="button" class="ck-opt' + (CK.modo === 'diferentes' ? ' sel' : '') + '" role="radio" aria-checked="' + (CK.modo === 'diferentes') + '" onclick="ckModo(\'diferentes\')"><span class="ck-dot"></span><span><b>A diferentes IDs</b><small>Pon un ID distinto para cada ' + unidad + '.</small></span></button>';
+  if(CK.modo === 'mismo'){
+    h += '<label class="ck-lbl" for="ck-id">ID de Free Fire *</label><input class="ck-in" id="ck-id" inputmode="numeric" maxlength="15" autocomplete="off" placeholder="Ej: 123456789" value="' + ckEsc(CK.idU) + '" oninput="ckIdInput(this,-1)">';
+    h += '<button type="button" class="ck-ver" id="ck-ver" onclick="ckVerificar()">Verificar cuenta</button><div class="ck-nick" id="ck-nick" style="' + (CK.nick ? '' : 'display:none') + '">' + (CK.nick ? ((CK.nick.indexOf('No se pudo') === 0 ? '' : '✅ ') + ckEsc(CK.nick)) : '') + '</div>';
+  } else {
+    for(var i = 0; i < CK.q; i++) h += '<label class="ck-lbl" for="ck-id' + i + '">' + (p.grupo === 'pase' ? 'Pase ' : 'Paquete ') + (i + 1) + ' · ID de Free Fire *</label><input class="ck-in" id="ck-id' + i + '" inputmode="numeric" maxlength="15" autocomplete="off" placeholder="Ej: 123456789" value="' + ckEsc(CK.ids[i] || '') + '" oninput="ckIdInput(this,' + i + ')">';
+    if(CK.q > 1) h += '<button type="button" class="ck-ver" onclick="ckCopiar1()">Copiar el primero a todos</button>';
+  }
+  h += '<div class="ck-sum"><div class="ck-row"><span>' + (p.grupo === 'pase' ? 'Pases' : 'Paquetes') + '</span><b>' + CK.q + '</b></div><div class="ck-row tot"><span>Total a pagar</span><b>' + ckFmt(total) + '</b></div></div>';
+  h += '<div class="ck-sec">Método de pago</div>';
+  h += '<div class="ck-pay">' + CK_IC.wallet + '<div><b>Saldo de mi cuenta</b><small>Paga tu compra utilizando el saldo disponible en CiberStore.</small></div><span class="ck-dot"></span></div>';
+  h += '<div class="ck-bal">' + CK_IC.wallet + '<div><small>Saldo disponible:</small><b class="' + (saldo <= 0 ? 'cero' : '') + '">' + ckFmt(saldo) + '</b></div><button type="button" class="ck-rec" onclick="ckRecargar()">+ Recargar</button></div>';
+  h += '<div class="ck-sum" style="margin-top:.7rem"><div class="ck-row"><span>Total de la compra</span><b>' + ckFmt(total) + '</b></div><div class="ck-row rest' + (falta ? ' neg' : '') + '"><span>' + (falta ? 'Te faltan' : 'Saldo restante después de comprar') + '</span><b>' + ckFmt(falta ? -resta : resta) + '</b></div></div>';
+  if(CK.err || falta){
+    var sinSaldo = CK.errSaldo || falta;
+    h += '<div class="ck-err" id="ck-err" role="alert">' + (sinSaldo && !CK.err ? 'Necesitas saldo suficiente para esta compra. Te faltan ' + ckFmt(-resta) + '.' : ckEsc(CK.err)) + (sinSaldo ? '<br><button type="button" class="ck-rec" onclick="ckRecargar()">Recargar saldo</button>' : '') + '</div>';
+  }
+  h += '<button type="button" class="ck-buy" id="ck-buy" onclick="ckComprar()"' + (CK.busy ? ' disabled' : '') + '>' + CK_IC.cart + '<span>' + (CK.busy ? 'Procesando tu compra…' : 'Comprar ahora') + '</span></button>';
+  h += '<div class="ck-note">' + (p.entrega === 'auto' ? 'Entrega automática: llega en minutos. ' : 'Entrega por regalo en el juego: hasta 1 día. ') + 'El cobro se valida en el servidor y no se cobra dos veces.</div>';
+  h += '</div></div>';
+  var ov = ckEl('ck-ov'), sc = ov.scrollTop; ov.innerHTML = h; ov.scrollTop = sc;
+}
+function ckRecargar(){ ckCerrar(); if(typeof goPage === 'function') goPage('saldo'); }
+
+/* ── comprar ── */
+function ckItems(){
+  var items = [], n = CK.q;
+  for(var i = 0; i < n; i++) items.push({ clave: CK.clave, ff_id: (CK.modo === 'mismo' ? CK.idU : (CK.ids[i] || '')).replace(/\D/g, '') });
+  return items;
+}
+function ckComprar(){
+  if(CK.busy) return;
+  if(typeof authSession === 'undefined' || !authSession){ ckToast('Inicia sesión para comprar'); return; }
+  var items = ckItems(), bad = -1;
+  for(var i = 0; i < items.length; i++){ if(!/^\d{5,15}$/.test(items[i].ff_id)){ bad = i; break; } }
+  if(bad >= 0){
+    CK.err = CK.modo === 'mismo' ? 'Escribe tu ID de Free Fire (solo números, de 5 a 15 dígitos).' : 'Revisa el ID del ' + (ckProd(CK.clave).grupo === 'pase' ? 'pase ' : 'paquete ') + (bad + 1) + ' (solo números, de 5 a 15 dígitos).';
+    ckRender(); var el = ckEl(CK.modo === 'mismo' ? 'ck-id' : 'ck-id' + bad); if(el){ el.classList.add('bad'); try{ el.scrollIntoView({ behavior:'smooth', block:'center' }); el.focus(); }catch(e){} } return;
+  }
+  var total = ckTotal(); CK.err = ''; CK.errSaldo = false;
+  /* la idempotencia depende del contenido: reintentar el MISMO pedido nunca cobra dos veces; otro pedido, otra clave */
+  var idem = 'ck' + CK.base + ckHash32(JSON.stringify(items));
+  CK.busy = true; ckRender();
+  ckApi('pagar', { items: items, idem: idem }, true).then(function(j){
+    CK.busy = false;
+    if(!j || !j.ok){
+      if(j && j.code === 'credenciales'){ CK.err = 'Tu sesión venció. Inicia sesión de nuevo.'; }
+      else if(j && j.code === 'saldo_insuficiente'){ CK.saldo = Number(j.saldo) || 0; ckSyncSaldo(CK.saldo); CK.errSaldo = true; CK.err = j.message || 'Saldo insuficiente.'; }
+      else CK.err = (j && j.message) || 'No se pudo completar la compra. No se te cobró.';
+      ckRender(); return;
+    }
+    CK.saldo = Number(j.saldo); ckSyncSaldo(CK.saldo); CK.orden = j.orden; CK.fase = 'ok'; CK.base = ckUUID();
+    if(typeof refreshUserBalance === 'function'){ try{ refreshUserBalance(); }catch(e){} }
+    ckRender();
+    if(j.orden && j.orden.por_entregar > 0) ckEntregar(j.orden.id);
+    if(typeof mc2Refrescar === 'function'){ try{ mc2Refrescar(); }catch(e){} }
+  }).catch(function(){
+    CK.busy = false;
+    CK.err = 'Sin conexión con el servidor. Si se descontó saldo, aparecerá en Mis Compras. Puedes volver a pulsar "Comprar ahora": no se cobra dos veces el mismo pedido.';
+    ckRender();
+  });
+}
+/* entrega automática: el servidor entrega UNA unidad por llamada; aquí se repite hasta terminar */
+function ckEntregar(oid, n){
+  n = n || 0; if(n > 12) return;
+  ckApi('entregar', { orden_id: oid }, true).then(function(j){
+    if(j && j.ok && j.orden){ CK.orden = j.orden; if(CK.fase === 'ok') ckRender(); if(typeof ckSaldoRefrescar === 'function') ckSaldoRefrescar(); if(j.siguiente) return ckEntregar(oid, n + 1); if(typeof mc2Refrescar === 'function') mc2Refrescar(); }
+  }).catch(function(){ setTimeout(function(){ ckEntregar(oid, n + 1); }, 2500); });
+}
+function ckSaldoRefrescar(){ ckApi('catalogo', {}, true).then(function(j){ if(j && j.ok && j.saldo != null){ CK.saldo = Number(j.saldo); ckSyncSaldo(CK.saldo); if(CK.fase === 'ok') ckRender(); } }).catch(function(){}); }
+var CK_FASE = { recibido:['Recibido',''], preparando:['Preparando',''], en_proceso:['En proceso',''], entregado:['Entregado','ok'], reembolsado:['Reembolsado','wa'], verificar:['En verificación','wa'], error:['Error','ko'] };
+function ckRenderOk(){
+  var o = CK.orden; if(!o) return; var ov = ckEl('ck-ov'); if(!ov) return;
+  var alerta = o.items.some(function(i){ return i.fase === 'reembolsado' || i.fase === 'verificar' || i.fase === 'error'; });
+  var h = '<div class="ck-wrap"><div class="ck-card"><button type="button" class="ck-x" onclick="ckCerrar()" aria-label="Cerrar">&times;</button><div class="ck-ok"><div class="ic' + (alerta ? ' w' : '') + '">' + (alerta ? CK_IC.warn : CK_IC.ok) + '</div>';
+  h += '<h3 id="ck-title">' + (alerta ? 'Compra procesada con avisos' : '¡Compra realizada!') + '</h3>';
+  h += '<p>Pedido <b style="color:#6db3ff">' + ckEsc(o.codigo) + '</b> · ' + ckFmt(o.total) + ' pagados con tu saldo</p>';
+  h += '<p>Saldo restante: <b style="color:#22c55e">' + ckFmt(ckSaldoAct()) + '</b></p>';
+  h += '<div class="ck-uni">' + o.items.map(function(i){ var f = CK_FASE[i.fase] || CK_FASE.recibido;
+    return '<div class="ck-u">' + ckImg(i.img, i.nombre) + '<div><b>' + ckEsc(i.nombre) + '</b><small>ID ' + ckEsc(i.ff_id) + '</small></div><span class="ck-chip ' + f[1] + '">' + f[0] + '</span></div>'; }).join('') + '</div>';
+  var rem = o.items.filter(function(i){ return i.fase === 'reembolsado'; }).length, ver = o.items.filter(function(i){ return i.fase === 'verificar'; }).length;
+  if(rem) h += '<div class="ck-note" style="margin-top:.8rem;color:#f5b43a">↩ ' + rem + ' unidad(es) no se pudieron hacer y se devolvió su importe a tu saldo.</div>';
+  if(ver) h += '<div class="ck-note" style="margin-top:.5rem;color:#f5b43a">⏳ ' + ver + ' unidad(es) están en verificación con el equipo. No se cobra doble: si no llegan, se te reembolsan.</div>';
+  if(o.por_entregar > 0) h += '<div class="ck-note" style="margin-top:.8rem">Entregando tu pedido automáticamente… puedes cerrar esta ventana; sigue en Mis Compras.</div>';
+  h += '<button type="button" class="ck-buy" onclick="ckCerrar();goPage(\'miscompras\')">Ver en Mis Compras</button><button type="button" class="ck-btn2" onclick="ckCerrar()">Seguir comprando</button></div></div></div>';
+  ov.innerHTML = h;
+}
+
+/* ── Punto de entrada: "Oferta exclusiva" del Inicio (antes pedía Klar/Hey Banco + comprobante) ── */
+(function(){ if(typeof ofxAbrir === 'function'){ window.ofxAbrir = function(){ ckAbrir('pase_oferta'); }; ofxAbrir = window.ofxAbrir; } })();
+
+/* ── Página "Regalos vía correo": lista de productos con su imagen original y su precio real; cada uno abre el checkout ── */
+function ckStockCargar(cb){
+  if(Date.now() - CK.stockT < 60000){ cb && cb(); return; }
+  fetch((typeof RECARGA_AUTO_URL !== 'undefined' ? RECARGA_AUTO_URL : '/api/recarga'), { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'stock_regalos' }) }).then(function(r){ return r.json(); }).then(function(j){
+    if(j && j.ok && j.stock){ CK.stockT = Date.now(); (CK.cat || []).forEach(function(p){ if(p.entrega === 'auto') CK.ag[p.clave] = j.stock[p.clave.replace(/^c/, 'cj').replace(/^f/, 'fa')] === 'sin_stock'; }); }
+    cb && cb();
+  }).catch(function(){ cb && cb(); });
+}
+function ckPintarLista(){
+  var c = ckEl('rg2-lista'); if(!c) return;
+  var sec = { pase:'Pase Booyah', caja:'Cajas de Fragmentos Evo', fragmento:'Fragmentos de arma Evo' }, vistos = {}, h = '';
+  (CK.cat || []).forEach(function(p){
+    if(p.clave === 'pase_oferta') return; /* la oferta exclusiva vive en el Inicio */
+    if(!vistos[p.grupo]){ vistos[p.grupo] = 1; h += '<div class="rg2-sec">' + sec[p.grupo] + '</div>'; }
+    var ag = !!CK.ag[p.clave];
+    h += '<div class="rg2-card' + (ag ? ' ag' : '') + '">' + ckImg(p.img, p.nombre) + '<div class="i"><b>' + ckEsc(p.nombre) + '</b><small>' + ckEsc(p.detalle || '') + '</small><div class="p">' + (ag ? 'Sin stock' : ckFmt(p.precio)) + '</div>' + (p.mayoreo_min && !ag ? '<small style="color:#22c55e">Desde ' + p.mayoreo_min + ' pases: ' + ckFmt(p.mayoreo_precio) + ' c/u</small>' : '') + '</div>'
+      + '<button type="button" class="rg2-buy" ' + (ag ? 'disabled' : 'onclick="ckAbrir(\'' + ckEsc(p.clave) + '\')"') + '>Comprar</button></div>';
+  });
+  c.innerHTML = h || '<div class="ck-note">No hay productos disponibles por ahora.</div>';
+}
+function ckListaCargar(){
+  var c = ckEl('rg2-lista'); if(!c) return;
+  c.innerHTML = '<div class="ck-note">Cargando productos…</div>';
+  ckCargarCatalogo(true).then(function(){ ckPintarLista(); ckStockCargar(ckPintarLista); }).catch(function(){ c.innerHTML = '<div class="ck-note">No se pudieron cargar los productos. <button type="button" class="ck-ver" onclick="ckListaCargar()">Reintentar</button></div>'; });
+}
+(function(){
+  var _gp = goPage;
+  goPage = function(id){
+    if(id === 'pase'){ id = 'regalos'; }   /* el asistente viejo de pago por transferencia ya no se usa: los pases se compran con saldo */
+    var r = _gp.apply(this, arguments);
+    if(id !== 'regalos' && ckEl('ck-ov') && ckEl('ck-ov').classList.contains('on') && id !== 'saldo'){ ckCerrar(); }
+    if(id === 'regalos'){ setTimeout(ckListaCargar, 60); }
+    return r;
+  };
+})();
+/* ═══════════════ MIS COMPRAS (v5) ═══════════════
+   Una sola sección: resumen, Compras / Recargas / En seguimiento, movimientos e historial de pedidos.
+   Todo viene de la base de datos (pedidos, movimientos_saldo, recargas_saldo y las órdenes con saldo); no hay cifras de ejemplo.
+   Reutiliza: authSession, sb, fmt, _paqueteDeDescripcion, bwApi/BW (recargas), ckApi/ckEntregar (entrega automática). */
+var MC = { tab:'compras', movs:null, compras:null, peds:null, ordenes:[], recs:null, q:'', fFecha:'todo', fProd:'todos', fEst:'todos', verLista:false, pag:20, movN:5, hq:'', hest:'todos', hpag:20, tk:0, cargando:false };
+var MC_IC = {
+  cart:'<circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.6 12.4a1 1 0 001 .8h8.8a1 1 0 001-.8L20 7H6"/>',
+  wallet:'<path d="M3 7a2 2 0 012-2h13v4"/><path d="M3 7v11a2 2 0 002 2h15a1 1 0 001-1v-3"/><path d="M21 9H16a3 3 0 000 6h5z"/>',
+  layers:'<path d="M12 2l9 5-9 5-9-5z"/><path d="M3 12l9 5 9-5M3 17l9 5 9-5"/>',
+  card:'<rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M2 10h20M6 15h4"/>',
+  truck:'<path d="M1 6h13v10H1zM14 9h4l3 3v4h-7z"/><circle cx="6" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>', filter:'<path d="M3 5h18l-7 8v6l-4-2v-4z"/>', down:'<path d="M6 9l6 6 6-6"/>',
+  bolt:'<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>', list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>', box:'<path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>',
+  refresh:'<path d="M21 12a9 9 0 11-3-6.7L21 8"/><path d="M21 3v5h-5"/>', clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', doc:'<path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>',
+  up:'<path d="M12 19V5M5 12l7-7 7 7"/>', dn:'<path d="M12 5v14M19 12l-7 7-7-7"/>', info:'<circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/>',
+  diamond:'<path d="M6 3h12l4 6-10 13L2 9z"/><path d="M2 9h20M9 3l3 6 3-6M12 22L9 9m6 0l-3 13"/>', ticket:'<path d="M3 9a2 2 0 002-2h14a2 2 0 002 2v0a2 2 0 000 6v0a2 2 0 00-2 2H5a2 2 0 00-2-2v0a2 2 0 000-6z" transform="translate(0 -1)"/><path d="M13 7v10" stroke-dasharray="2 2.4"/>',
+  like:'<path d="M7 11v9H3v-9zM7 11l4-8a2 2 0 012 2v4h6a2 2 0 012 2.3l-1.3 7a2 2 0 01-2 1.7H7"/>', shield:'<path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z"/>', up2:'<path d="M12 19V8M6 13l6-6 6 6M5 4h14"/>', bag:'<path d="M6 7h12l1 13H5z"/><path d="M9 7a3 3 0 016 0"/>'
+};
+function mcIco(n){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + (MC_IC[n] || '') + '</svg>'; }
+function mcIconos(root){ var els = (root || document).querySelectorAll('.mc2-ic[data-ic]'); for(var i = 0; i < els.length; i++){ var e = els[i]; if(!e.getAttribute('data-ok')){ e.innerHTML = mcIco(e.getAttribute('data-ic')); e.setAttribute('data-ok', '1'); } } }
+function mcEsc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function mcEl(id){ return document.getElementById(id); }
+function mcFmt(n){ return (typeof fmt === 'function') ? fmt(n) : ('$' + n); }
+function mcFecha(iso, corto){
+  if(!iso) return ''; try{ var d = new Date(iso);
+    var f = d.toLocaleDateString('es-MX', { day:'2-digit', month:'short', year: corto ? undefined : 'numeric', timeZone:'America/Mexico_City' });
+    return f + ', ' + d.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit', hour12:true, timeZone:'America/Mexico_City' }); }catch(e){ return ''; }
+}
+function mcHace(iso){
+  if(!iso) return ''; var s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
+  if(s < 90) return 'hace un momento'; if(s < 3600) return 'hace ' + Math.round(s / 60) + ' min'; if(s < 86400) return 'hace ' + Math.round(s / 3600) + ' h'; return 'hace ' + Math.round(s / 86400) + ' d';
+}
+function mcMonto(n){ return mcFmt(Math.abs(Number(n) || 0)); }
+
+/* ── clasificación y IMAGEN ORIGINAL de cada producto (rutas reales del repositorio; sin imagen conocida = icono neutro, nunca emoji) ── */
+var MC_DIAM_IMG = { 100:'img/diam-100.png', 310:'img/diam-310.png', 520:'img/diam-520.png', 1060:'img/diam-1060.png', 2180:'img/diam-2180.png', 5600:'img/diam-5600.png' };
+function mcClase(texto){
+  var n = String(texto || ''), l = n.toLowerCase();
+  if(/pase\s*bo+yah|boyaah/.test(l)) return { t:'pase', n:'Pase Booyah', img:'img/pase-booyah.png', ic:'ticket' };
+  if(/caja/.test(l) && /fragment/.test(l)) return { t:'caja', n:'Cajas de Fragmentos Evo', img:'img/caja-fragmentos.png', ic:'box' };
+  if(/fragment/.test(l)) return { t:'fragmento', n:'Fragmentos de arma Evo', img:'img/fragmento-universal.png', ic:'diamond' };
+  if(/diamante|recarga auto/.test(l) || (typeof _paqueteDeDescripcion === 'function' && _paqueteDeDescripcion(n))){
+    var p = (typeof _paqueteDeDescripcion === 'function') ? _paqueteDeDescripcion(n) : null;
+    return { t:'diamantes', n: p ? p.nombre : 'Diamantes', img: p ? (MC_DIAM_IMG[p.base] || null) : null, ic:'diamond', k:p ? String(p.base) : 'x' };
+  }
+  if(/like/.test(l)) return { t:'likes', n:'Likes', img:null, ic:'like' };
+  if(/honor|clan|gloria/.test(l)) return { t:'honor', n:'Honor de clan', img:null, ic:'shield' };
+  if(/tarjeta|semanal|mensual/.test(l)) return { t:'tarjeta', n:'Tarjetas', img:null, ic:'card' };
+  if(/nivel/.test(l)) return { t:'nivel', n:'Subidas de nivel', img:null, ic:'up2' };
+  return { t:'otro', n:'Otros', img:null, ic:'bag' };
+}
+function mcThumb(c){
+  var fb = mcIco(c.ic || 'bag');
+  if(!c.img) return '<span class="mc2-img">' + fb + '</span>';
+  return '<span class="mc2-img"><img src="' + mcEsc(c.img) + '" alt="' + mcEsc(c.n) + '" loading="lazy" onerror="this.parentNode.innerHTML=this.getAttribute(\'data-fb\')" data-fb="' + mcEsc(fb) + '"></span>';
+}
+function mcLimpio(p){ return String(p || 'Pedido').replace(/\s*\((?:AUTO(?: - VERIFICAR)?|MANUAL|SALDO|RECHAZADO[^)]*|AUTO ·[^)]*|SALDO ·[^)]*)\)/gi, '').replace(/\s*\(regalo\)/i, '').replace(/\s*\[mayoreo\]/i, '').trim() || 'Pedido'; }
+function mcOrdDe(producto){ var m = /\bOS(\d+)\)/.exec(String(producto || '')); return m ? Number(m[1]) : null; }
+var MC_EST = { pendiente:['Recibido',''], procesando:['Preparando',''], enviado:['En proceso',''], completado:['Completado','ok'], rechazado:['Rechazado','ko'] };
+function mcEstadoPed(p){ var e = MC_EST[p.estado] || MC_EST.pendiente; if(p.estado === 'rechazado' && /reembols/i.test(p.nota || '')) return ['Reembolsado', 'wa']; return e; }
+var MC_FASE = { recibido:['Recibido',''], preparando:['Preparando',''], en_proceso:['En proceso',''], parcial:['Parcialmente entregado','wa'], completado:['Completado','ok'], entregado:['Entregado','ok'], error:['Error','ko'], verificar:['En verificación','wa'], reembolsado:['Reembolsado','wa'] };
+
+/* ── carga de datos ── */
+function mc2Cargar(forzar){
+  if(typeof authSession === 'undefined' || !authSession){ ['mc2-n','mc2-gasto','mc2-saldo'].forEach(function(i){ var e = mcEl(i); if(e) e.textContent = '–'; }); ['mc2-grupos','mc2-movs','mc2-hist','mc2-seg','mc2-recs'].forEach(function(i){ var e = mcEl(i); if(e) e.innerHTML = '<div class="mc2-vacio">Inicia sesión para ver tus compras.</div>'; }); return Promise.resolve(); }
+  var tk = ++MC.tk, uid = encodeURIComponent(authSession.id), un = encodeURIComponent(authSession.username);
+  mcIconos(mcEl('page-miscompras'));
+  var q = function(p){ return p.catch(function(){ return null; }); };
+  return Promise.all([
+    q(sb.get('movimientos_saldo', 'user_id=eq.' + uid + '&select=id,tipo,monto,descripcion,created_at&order=created_at.desc&limit=2000')),
+    q(sb.get('pedidos', 'username=eq.' + un + '&order=created_at.desc&limit=1000')),
+    q(sb.get('profiles', 'id=eq.' + uid + '&select=saldo')),
+    q(ckApi('mis_ordenes', { limit: 50 }, true)),
+    q(bwApi('mis'))
+  ]).then(function(r){
+    if(tk !== MC.tk) return;
+    MC.movs = Array.isArray(r[0]) ? r[0] : []; MC.peds = Array.isArray(r[1]) ? r[1] : [];
+    if(Array.isArray(r[2]) && r[2][0] && r[2][0].saldo != null){ authSession.saldo = Number(r[2][0].saldo) || 0; if(typeof _refreshSaldoUI === 'function') _refreshSaldoUI(authSession.saldo); if(typeof saveSession === 'function') saveSession(authSession); }
+    MC.ordenes = (r[3] && r[3].ok && r[3].ordenes) ? r[3].ordenes : [];
+    MC.recs = (r[4] && r[4].ok) ? (r[4].items || []) : null; if(MC.recs && typeof BW !== 'undefined') BW.mis = MC.recs;
+    mc2Pintar(); mc2Reanudar();
+  });
+}
+function mc2Refrescar(){ if(mcEl('page-miscompras') && mcEl('page-miscompras').classList.contains('active')) mc2Cargar(); }
+/* entregas automáticas que quedaron a medias (se cerró la ventana, se cortó la red…): se continúan solas, sin cobrar de nuevo */
+function mc2Reanudar(){
+  (MC.ordenes || []).forEach(function(o){ if(o.por_entregar > 0 && !mc2Reanudar['o' + o.id] && Date.now() - new Date(o.creada).getTime() > 20000){ mc2Reanudar['o' + o.id] = 1; if(typeof ckEntregar === 'function') ckEntregar(o.id); } });
+}
+
+/* ── pintar todo ── */
+function mc2Pintar(){
+  var gasto = 0, compras = (MC.movs || []).filter(function(m){ return m.tipo === 'compra'; });
+  compras.forEach(function(m){ gasto += Number(m.monto) || 0; });
+  MC.compras = compras;
+  var n = (MC.peds || []).filter(function(p){ return p.estado !== 'rechazado'; }).length;
+  var e;
+  if((e = mcEl('mc2-n'))) e.textContent = n.toLocaleString('es-MX');
+  if((e = mcEl('mc2-gasto'))) e.textContent = mcFmt(gasto);
+  if((e = mcEl('mc2-saldo'))) e.textContent = mcFmt(Number(authSession.saldo) || 0);
+  mc2PintarGrupos(); mc2PintarLista(); mc2PintarRecs(); mc2PintarSeg(); mc2PintarMovs(); mc2PintarHist(); mcIconos(mcEl('page-miscompras'));
+}
+function mc2PintarGrupos(){
+  var box = mcEl('mc2-grupos'); if(!box) return; var g = {}, tot = 0, nt = 0;
+  (MC.compras || []).forEach(function(m){
+    var c = mcClase(m.descripcion), k = c.t + (c.k ? ':' + c.k : ''); if(!g[k]) g[k] = { c:c, n:0, monto:0, base: Number(c.k) || 0 };
+    g[k].n++; g[k].monto += Number(m.monto) || 0; tot += Number(m.monto) || 0; nt++;
+  });
+  var arr = Object.keys(g).map(function(k){ return g[k]; }).sort(function(a, b){ return b.monto - a.monto; });
+  if(!arr.length){ box.innerHTML = '<div class="mc2-vacio">Aún no tienes compras.<br>Cuando compres con tu saldo aparecerán aquí.</div>'; return; }
+  box.innerHTML = arr.map(function(x){
+    return '<button type="button" class="mc2-row" onclick="mc2FiltrarProd(\'' + x.c.t + '\')">' + mcThumb(x.c) + '<span class="mc2-mid"><b>' + mcEsc(x.c.n) + '</b><small>' + x.n + (x.n === 1 ? ' compra' : (x.c.t === 'diamantes' ? ' recargas' : ' compras')) + '</small></span><span class="mc2-amt">' + mcFmt(x.monto) + '</span><span class="mc2-chev">›</span></button>';
+  }).join('') + '<div class="mc2-tot"><span class="mc2-ic" data-ic="cart"></span><b>Total</b><span>' + nt + ' compras · <strong>' + mcFmt(tot) + '</strong></span></div>';
+}
+function mc2FiltrarProd(t){ var s = mcEl('mc2-f-prod'); if(s){ s.value = t; } MC.fProd = t; MC.verLista = true; MC.pag = 20; mc2PintarLista(); var f = mcEl('mc2-fbtn'); if(f) f.classList.toggle('on', mc2HayFiltros()); var l = mcEl('mc2-lista-c'); if(l && l.scrollIntoView) l.scrollIntoView({ behavior:'smooth', block:'start' }); }
+function mc2HayFiltros(){ return MC.fFecha !== 'todo' || MC.fProd !== 'todos' || MC.fEst !== 'todos'; }
+function mc2VerTodas(ocultar){ MC.verLista = !ocultar; MC.pag = 20; mc2PintarLista(); if(!ocultar){ var l = mcEl('mc2-lista-c'); if(l && l.scrollIntoView) l.scrollIntoView({ behavior:'smooth', block:'start' }); } }
+function mc2Buscar(v){ MC.q = String(v || '').toLowerCase().trim(); MC.pag = 20; if(MC.q) MC.verLista = true; mc2PintarLista(); }
+function mc2Filtros(){ var f = mcEl('mc2-filtros'); if(f) f.style.display = f.style.display === 'none' ? 'grid' : 'none'; }
+function mc2Filtro(){ MC.fFecha = mcEl('mc2-f-fecha').value; MC.fProd = mcEl('mc2-f-prod').value; MC.fEst = mcEl('mc2-f-est').value; MC.pag = 20; MC.verLista = true; var f = mcEl('mc2-fbtn'); if(f) f.classList.toggle('on', mc2HayFiltros()); mc2PintarLista(); }
+function mc2Limpiar(){ ['mc2-f-fecha','mc2-f-prod','mc2-f-est'].forEach(function(i, k){ mcEl(i).value = k === 0 ? 'todo' : 'todos'; }); var q = mcEl('mc2-q'); if(q) q.value = ''; MC.q = ''; mc2Filtro(); }
+function mcFiltrar(lista, o){
+  var ahora = Date.now(), lim = 0;
+  if(o.fecha === 'hoy'){ var d = new Date(); d.setHours(0, 0, 0, 0); lim = d.getTime(); } else if(o.fecha !== 'todo') lim = ahora - Number(o.fecha) * 86400000;
+  return lista.filter(function(p){
+    if(lim && new Date(p.created_at).getTime() < lim) return false;
+    if(o.prod && o.prod !== 'todos' && mcClase(p.producto).t !== o.prod) return false;
+    if(o.est && o.est !== 'todos' && p.estado !== o.est) return false;
+    if(o.q){ var h = (String(p.producto || '') + ' ' + (p.ff_id || '') + ' ' + (p.id || '') + ' ' + mcFecha(p.created_at)).toLowerCase(); if(h.indexOf(o.q) < 0) return false; }
+    return true;
+  });
+}
+function mcFilaPedido(p, idx, lista){
+  var c = mcClase(p.producto), e = mcEstadoPed(p), cant = /^\d+$/.test(String(p.cantidad || '')) && Number(p.cantidad) > 1 ? ' · x' + p.cantidad : '';
+  return '<button type="button" class="mc2-row" onclick="mc2Detalle(\'' + lista + '\',' + idx + ')">' + mcThumb(c) + '<span class="mc2-mid"><b>' + mcEsc(mcLimpio(p.producto)) + '</b><small>' + (p.ff_id ? 'ID ' + mcEsc(p.ff_id) + ' · ' : '') + mcEsc(mcFecha(p.created_at, true)) + cant + '</small></span><span class="mc2-amt">' + (Number(p.precio) > 0 ? mcFmt(p.precio) : '') + '<span class="mc2-chip ' + e[1] + '">' + e[0] + '</span></span></button>';
+}
+function mc2PintarLista(){
+  var card = mcEl('mc2-lista-c'); if(!card) return;
+  var hay = MC.verLista || MC.q || mc2HayFiltros(); card.style.display = hay ? '' : 'none'; if(!hay) return;
+  var f = mcFiltrar(MC.peds || [], { fecha: MC.fFecha, prod: MC.fProd, est: MC.fEst, q: MC.q }); MC._lista = f;
+  var box = mcEl('mc2-lista'), mas = mcEl('mc2-mas'), t = mcEl('mc2-lista-t'); if(t) t.textContent = 'Mis compras (' + f.length + ')';
+  if(!f.length){ box.innerHTML = '<div class="mc2-vacio">No hay compras con esos filtros.</div>'; if(mas) mas.style.display = 'none'; return; }
+  box.innerHTML = f.slice(0, MC.pag).map(function(p, i){ return mcFilaPedido(p, i, 'l'); }).join('');
+  if(mas) mas.style.display = f.length > MC.pag ? 'block' : 'none';
+}
+function mc2Mas(){ MC.pag += 20; mc2PintarLista(); }
+
+/* ── movimientos ── */
+function mcTipoMov(m){
+  var d = String(m.descripcion || ''), t = m.tipo;
+  if(t === 'recarga') return { l:'Recarga', k:'in', i:'up' };
+  if(t === 'compra') return { l:'Compra', k:'out', i:'dn' };
+  if(t === 'credito') return /reembols/i.test(d) ? { l:'Reembolso', k:'in', i:'refresh' } : { l:'Crédito', k:'in', i:'up' };
+  if(t === 'ajuste') return { l:'Ajuste administrativo', k:'in', i:'up' };
+  if(/transfer/i.test(t)) return /recib|entrada|de /i.test(t + d) && !/envi/i.test(t) ? { l:'Transferencia recibida', k:'in', i:'up' } : { l:'Transferencia enviada', k:'out', i:'dn' };
+  if(/retir|descuento|debito|cargo/i.test(t)) return { l:'Descuento', k:'out', i:'dn' };
+  return { l:'Movimiento', k:'info', i:'info' };
+}
+function mc2PintarMovs(){
+  var box = mcEl('mc2-movs'); if(!box) return;
+  var l = (MC.movs || []).filter(function(m){ return m.tipo !== 'compra_cancelada'; }); var v = mcEl('mc2-mov-v');
+  if(!l.length){ box.innerHTML = '<div class="mc2-vacio">Aún no tienes movimientos.</div>'; if(v) v.style.display = 'none'; return; }
+  var vis = l.slice(0, MC.movN); if(v){ v.style.display = l.length > 5 ? '' : 'none'; v.textContent = l.length > MC.movN ? 'Ver todo →' : 'Ver menos'; }
+  box.innerHTML = vis.map(function(m){
+    var t = mcTipoMov(m), sg = t.k === 'in' ? '+' : (t.k === 'out' ? '−' : '');
+    return '<div class="mc2-mv"><span class="mc2-mvi ' + t.k + '">' + mcIco(t.i) + '</span><span class="mc2-mid"><b>' + mcEsc(m.descripcion || t.l) + '</b><small>' + mcEsc(t.l) + ' · ' + mcEsc(mcFecha(m.created_at, true)) + '</small></span><span class="mc2-amt ' + (t.k === 'out' ? 'neg' : '') + '" style="' + (t.k === 'info' ? 'color:#6db3ff' : '') + '">' + sg + mcMonto(m.monto) + '</span></div>';
+  }).join('');
+}
+function mc2MovTodo(){ MC.movN = MC.movN > 5 ? 5 : 5 + 25; if(MC.movN > 5){ MC.movN = 40; } mc2PintarMovs(); }
+
+/* ── historial de pedidos (paginado + filtros + búsqueda) ── */
+function mc2HBuscar(v){ MC.hq = String(v || '').toLowerCase().trim(); MC.hpag = 20; mc2PintarHist(); }
+function mc2HFiltro(){ MC.hest = mcEl('mc2-hest').value; MC.hpag = 20; mc2PintarHist(); }
+function mc2HMas(){ MC.hpag += 20; mc2PintarHist(); }
+function mc2PintarHist(){
+  var box = mcEl('mc2-hist'), mas = mcEl('mc2-hmas'); if(!box) return;
+  var base = (MC.peds || []).filter(function(p){ return p.estado === 'completado' || p.estado === 'rechazado'; });
+  var f = mcFiltrar(base, { fecha:'todo', prod:'todos', est: MC.hest, q: MC.hq }); MC._hist = f;
+  if(!f.length){ box.innerHTML = '<div class="mc2-vacio">' + (base.length ? 'No hay pedidos con ese filtro.' : 'Sin pedidos anteriores.<br>Aquí se mostrarán tus pedidos completados.') + '</div>'; if(mas) mas.style.display = 'none'; return; }
+  box.innerHTML = f.slice(0, MC.hpag).map(function(p, i){ return mcFilaPedido(p, i, 'h'); }).join('');
+  if(mas) mas.style.display = f.length > MC.hpag ? 'block' : 'none';
+}
+
+/* ── recargas de saldo ── */
+var MC_REC = { pendiente:['Pendiente',''], aprobada:['Aprobada','ok'], rechazada:['Rechazada','ko'] };
+function mc2PintarRecs(){
+  var box = mcEl('mc2-recs'); if(!box) return;
+  if(MC.recs == null){ box.innerHTML = '<div class="mc2-vacio">No se pudieron cargar tus recargas. <button type="button" class="mc2-lnk" onclick="mc2Cargar()">Reintentar</button></div>'; return; }
+  if(!MC.recs.length){ box.innerHTML = '<div class="mc2-vacio">Aún no has solicitado recargas.<br><button type="button" class="mc2-lnk" onclick="goPage(\'saldo\')">Recargar saldo →</button></div>'; return; }
+  box.innerHTML = MC.recs.map(function(x, i){ var e = MC_REC[x.estado] || MC_REC.pendiente;
+    return '<button type="button" class="mc2-row" onclick="mc2RecDetalle(' + i + ')"><span class="mc2-mvi ' + (x.estado === 'aprobada' ? 'in' : (x.estado === 'rechazada' ? 'out' : '')) + '">' + mcIco('card') + '</span><span class="mc2-mid"><b>' + mcEsc(x.banco) + ' · Ref ' + mcEsc(x.referencia) + '</b><small>' + mcEsc(mcFecha(x.creada, true)) + (x.comprobante_tipo ? ' · con comprobante' : '') + '</small></span><span class="mc2-amt ' + (x.estado === 'rechazada' ? 'neg' : '') + '">' + mcFmt(x.monto) + '<span class="mc2-chip ' + e[1] + '">' + e[0] + '</span></span></button>';
+  }).join('');
+}
+function mc2RecDetalle(i){ if(typeof bwDetalle === 'function'){ if(typeof BW !== 'undefined') BW.mis = MC.recs; bwDetalle(i); } }
+
+/* ── pedidos en seguimiento (progreso REAL: unidades entregadas, días reales o etapa del pedido; nunca un porcentaje inventado) ── */
+function mcEtapas(estado){
+  var paso = { pendiente:0, procesando:1, enviado:2, completado:3 }[estado]; if(paso == null) paso = 0;
+  return ['Recibido', 'Preparando', 'En proceso'].map(function(t, i){ return '<i class="' + (i < paso ? 'on' : (i === paso ? 'pr' : '')) + '" title="' + t + '"></i>'; }).join('');
+}
+function mc2Seg(){
+  var out = [], ordenIds = {};
+  (MC.ordenes || []).forEach(function(o){ ordenIds[o.id] = 1; if(o.fase !== 'completado' && o.fase !== 'reembolsado') out.push({ o:o, t:o.creada }); });
+  (MC.peds || []).forEach(function(p){ if(mcOrdDe(p.producto) && ordenIds[mcOrdDe(p.producto)]) return; if(p.estado === 'pendiente' || p.estado === 'procesando' || p.estado === 'enviado') out.push({ p:p, t:p.created_at }); });
+  out.sort(function(a, b){ return new Date(b.t) - new Date(a.t); }); return out;
+}
+function mc2PintarSeg(){
+  var box = mcEl('mc2-seg'), n = mcEl('mc2-seg-n'); if(!box) return; var l = mc2Seg(); MC._seg = l;
+  if(n){ n.textContent = l.length; n.style.display = l.length ? '' : 'none'; }
+  if(!l.length){ box.innerHTML = '<div class="mc2-vacio">No tienes pedidos en seguimiento por ahora.<br>Cuando compres, aquí verás el avance de la entrega.</div>'; return; }
+  box.innerHTML = l.map(function(x, i){
+    if(x.o){
+      var o = x.o, f = o.items[0] || {}, c = mcClase(f.nombre), fs = MC_FASE[o.fase] || MC_FASE.recibido, act = o.unidades - o.reembolsadas, ids = Array.from(new Set(o.items.map(function(i){ return i.ff_id; })));
+      var nom = f.nombre ? (act > 1 && o.items.every(function(i){ return i.clave === f.clave; }) ? f.nombre + ' x' + act : (o.items.every(function(i){ return i.clave === f.clave; }) ? f.nombre : f.nombre + ' + ' + (o.items.length - 1) + ' más')) : 'Pedido ' + o.codigo;
+      var bars = o.items.filter(function(i){ return i.fase !== 'reembolsado'; }).map(function(i){ return '<i class="' + (i.fase === 'entregado' ? 'on' : ((i.fase === 'en_proceso' || i.fase === 'preparando') ? 'pr' : '')) + '"></i>'; }).join('');
+      return '<div class="mc2-sc"><button type="button" class="mc2-row" style="margin:0;background:none;border:none;padding:0" onclick="mc2Detalle(\'s\',' + i + ')"><span class="top" style="display:contents">' + mcThumb({ img:f.img, n:f.nombre, ic:c.ic }) + '<span class="mc2-mid"><b>' + mcEsc(nom) + '</b><small>ID ' + mcEsc(ids[0]) + (ids.length > 1 ? ' +' + (ids.length - 1) : '') + ' · ' + mcEsc(mcFecha(o.creada, true)) + '</small></span><span class="mc2-chip ' + fs[1] + '">' + fs[0] + '</span></span></button>'
+        + '<div class="mc2-prog"><div class="l"><span>Cantidad enviada</span><b>' + o.entregadas + ' / ' + act + '</b></div>' + (o.pendientes > 0 ? '<div class="l"><span>Pendiente</span><b class="az">' + o.pendientes + '</b></div>' : '') + '<div class="l"><span>Tiempo transcurrido</span><span>' + mcHace(o.creada).replace('hace ', '') + '</span></div><div class="mc2-bars">' + bars + '</div></div></div>';
+    }
+    var p = x.p, c2 = mcClase(p.producto), e = mcEstadoPed(p), tot = Number(p.progreso_total) || 0, act2 = Number(p.progreso_actual) || 0;
+    var prog = tot > 0 ? '<div class="l"><span>Progreso de entrega</span><b class="az">' + act2 + ' / ' + tot + ' días</b></div><div class="mc2-bars">' + Array.apply(null, Array(tot)).map(function(_, k){ return '<i class="' + (k < act2 ? 'on' : (k === act2 ? 'pr' : '')) + '"></i>'; }).join('') + '</div>' : '<div class="l"><span>Etapa</span><span>' + e[0] + '</span></div><div class="mc2-bars">' + mcEtapas(p.estado) + '</div>';
+    return '<div class="mc2-sc"><button type="button" class="mc2-row" style="margin:0;background:none;border:none;padding:0" onclick="mc2Detalle(\'s\',' + i + ')"><span class="top" style="display:contents">' + mcThumb(c2) + '<span class="mc2-mid"><b>' + mcEsc(mcLimpio(p.producto)) + '</b><small>' + (p.ff_id ? 'ID ' + mcEsc(p.ff_id) + ' · ' : '') + mcEsc(mcFecha(p.created_at, true)) + '</small></span><span class="mc2-chip ' + e[1] + '">' + e[0] + '</span></span></button><div class="mc2-prog">' + prog + '<div class="l"><span>Tiempo transcurrido</span><span>' + mcHace(p.created_at).replace('hace ', '') + '</span></div></div></div>';
+  }).join('');
+}
+function mc2Actualizar(){
+  var b = mcEl('mc2-act'); if(b){ b.disabled = true; }
+  var rec = (MC.ordenes || []).filter(function(o){ return o.items.some(function(i){ return i.estado === 'enviada'; }); }).slice(0, 5);
+  var pend = (MC.ordenes || []).filter(function(o){ return o.por_entregar > 0; }).slice(0, 5);
+  Promise.all(rec.map(function(o){ return ckApi('refrescar', { orden_id: o.id }, true).catch(function(){}); }).concat(pend.map(function(o){ return ckApi('entregar', { orden_id: o.id }, true).catch(function(){}); }))).then(function(){ return mc2Cargar(); }).then(function(){ if(b) b.disabled = false; if(typeof showToast === 'function') showToast('Estado actualizado', 1800); }).catch(function(){ if(b) b.disabled = false; });
+}
+
+/* ── detalle ── */
+function mc2Hoja(h){ var o = mcEl('mc2-ov'); if(!o) return; if(o.parentNode !== document.body) document.body.appendChild(o); o.innerHTML = '<div class="mc2-sheet">' + h + '</div>'; o.classList.add('on'); mcIconos(o); }
+function mc2Cerrar(){ var o = mcEl('mc2-ov'); if(o){ o.classList.remove('on'); o.innerHTML = ''; } }
+function mcDl(a){ return '<dl class="mc2-dl">' + a.filter(function(x){ return x[1] != null && x[1] !== ''; }).map(function(x){ return '<dt>' + x[0] + '</dt><dd>' + x[1] + '</dd>'; }).join('') + '</dl>'; }
+function mcUnidades(o){
+  return '<div class="mc2-sc" style="padding:.5rem">' + o.items.map(function(i){ var f = MC_FASE[i.fase] || MC_FASE.recibido; return '<div class="mc2-mv" style="padding:.4rem .1rem">' + mcThumb({ img:i.img, n:i.nombre, ic:'box' }) + '<span class="mc2-mid"><b style="-webkit-line-clamp:1">' + mcEsc(i.nombre) + '</b><small>ID ' + mcEsc(i.ff_id) + ' · ' + mcFmt(i.precio) + '</small></span><span class="mc2-chip ' + f[1] + '">' + f[0] + '</span></div>'; }).join('') + '</div>';
+}
+function mc2Detalle(lista, i){
+  var o = null, p = null;
+  if(lista === 's'){ var x = (MC._seg || [])[i]; if(!x) return; o = x.o || null; p = x.p || null; }
+  else { p = ((lista === 'h' ? MC._hist : MC._lista) || [])[i]; if(!p) return; var oid = mcOrdDe(p.producto); (MC.ordenes || []).forEach(function(q){ if(q.id === oid) o = q; }); }
+  var h;
+  if(o && !p){
+    var fs = MC_FASE[o.fase] || MC_FASE.recibido;
+    h = '<h3>Pedido ' + mcEsc(o.codigo) + '<button type="button" onclick="mc2Cerrar()" aria-label="Cerrar">✕</button></h3><span class="mc2-chip ' + fs[1] + '">' + fs[0] + '</span>'
+      + mcDl([['Fecha de compra', mcEsc(mcFecha(o.creada))], ['Método de pago', 'Saldo CiberStore'], ['Total pagado', mcFmt(o.total)], ['ID de transacción', mcEsc(o.codigo)], ['Enviado', o.entregadas + ' de ' + (o.unidades - o.reembolsadas)], ['Pendiente', o.pendientes > 0 ? String(o.pendientes) : ''], ['Reembolsado', o.reembolsadas > 0 ? o.reembolsadas + ' unidad(es)' : '']]) + mcUnidades(o);
+  } else {
+    var e = mcEstadoPed(p), c = mcClase(p.producto);
+    h = '<h3>Detalle del pedido<button type="button" onclick="mc2Cerrar()" aria-label="Cerrar">✕</button></h3><div style="display:flex;gap:.7rem;align-items:center;margin-bottom:.3rem">' + mcThumb(c) + '<div class="mc2-mid"><b style="-webkit-line-clamp:3">' + mcEsc(mcLimpio(p.producto)) + '</b><span class="mc2-chip ' + e[1] + '" style="margin-top:.3rem">' + e[0] + '</span></div></div>'
+      + mcDl([['Pedido', p.id != null ? '#' + mcEsc(p.id) : ''], ['Cantidad', /^\d+$/.test(String(p.cantidad || '')) ? mcEsc(p.cantidad) : mcEsc(p.cantidad || '')], ['ID de Free Fire', mcEsc(p.ff_id)], ['Fecha de compra', mcEsc(mcFecha(p.created_at))], ['Importe pagado', Number(p.precio) > 0 ? mcFmt(p.precio) : ''], ['Método de pago', o ? 'Saldo CiberStore' : ''], ['ID de transacción', o ? mcEsc(o.codigo) : ''], ['Progreso', Number(p.progreso_total) > 0 ? (Number(p.progreso_actual) || 0) + ' de ' + p.progreso_total + ' días' : '']])
+      + (p.nota ? '<div class="mc2-sc"><small style="color:#93a1b5">Nota del equipo</small>' + mcEsc(p.nota) + '</div>' : '') + (o ? mcUnidades(o) : '');
+  }
+  mc2Hoja(h);
+}
+
+/* ── pestañas ── */
+function mc2Tab(t){
+  MC.tab = t; ['compras', 'recargas', 'seg'].forEach(function(k){ var p = mcEl('mc2-p-' + k), b = mcEl('mc2-t-' + k); if(p) p.style.display = k === t ? '' : 'none'; if(b) b.classList.toggle('on', k === t); });
+}
+
+/* ── integración con la app ── */
+(function(){
+  window.renderMisCompras = function(){ mcIconos(mcEl('page-miscompras')); mc2Tab(MC.tab || 'compras'); mc2Cargar(); };
+  renderMisCompras = window.renderMisCompras;
+  window.cargarPedidosSeguimiento = function(){ };      /* el seguimiento ahora vive en la pestaña "En seguimiento" */
+  cargarPedidosSeguimiento = window.cargarPedidosSeguimiento;
+  window.loadMisCompras = function(){ mc2Cargar(); };
+  window.renderResumenRecargas = function(){ };
+})();
+/* ═══════════ PANEL ADMIN · ÓRDENES CON SALDO ═══════════
+   Compras pagadas con saldo CiberStore: usuario, producto, cantidad, IDs, total, método, ID de transacción, estado de entrega.
+   Las unidades "en verificación" se resuelven aquí (Reembolsar / Marcar entregada) vía /api/comprar con tu token del panel. */
+var OSA = { filtro:'todas', items:[], busy:false };
+function osaApi(action, extra){
+  var tok = (typeof csAdminSesionToken === 'function') ? csAdminSesionToken() : '';
+  if(!tok) return Promise.resolve({ ok:false, message:'Entra de nuevo al panel.' });
+  var body = { action:action, token:tok }; for(var k in (extra || {})) body[k] = extra[k];
+  return fetch('/api/comprar', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) })
+    .then(function(r){ return r.json().catch(function(){ return { ok:false, message:'Respuesta inválida (' + r.status + ')' }; }); })
+    .catch(function(){ return { ok:false, message:'Sin conexión' }; });
+}
+function osaE(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function osaFH(iso){ if(!iso) return '—'; try{ var d = new Date(iso); return d.toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric', timeZone:'America/Mexico_City' }) + ' ' + d.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit', hour12:true, timeZone:'America/Mexico_City' }); }catch(e){ return '—'; } }
+function osaMXN(n){ return '$' + Number(n || 0).toLocaleString('es-MX', { minimumFractionDigits:2, maximumFractionDigits:2 }) + ' MXN'; }
+var OSA_FASE = { recibido:'Recibido', preparando:'Preparando', en_proceso:'En proceso', entregado:'Entregado', reembolsado:'Reembolsado', verificar:'En verificación', error:'Error', completado:'Completado', parcial:'Parcial' };
+function osaCargar(){
+  var s = document.getElementById('adms-osaldo'); if(!s) return;
+  var fl = [['todas','Todas'],['verificar','En verificación'],['entregando','Entregando'],['parcial','Parciales'],['pagada','Pagadas'],['reembolsada','Reembolsadas']];
+  s.innerHTML = '<div class="adm-card-title">Órdenes con saldo</div><div class="dp-fl">' + fl.map(function(f){ return '<button type="button" class="' + (OSA.filtro === f[0] ? 'on' : '') + '" onclick="osaFiltro(\'' + f[0] + '\')">' + f[1] + '</button>'; }).join('') + '<button type="button" class="dp-rf" onclick="osaCargar()">↻ Actualizar</button></div><div id="osa-body"><div class="dp-v">Cargando…</div></div>';
+  osaApi('admin_ordenes', { estado: OSA.filtro === 'todas' ? '' : OSA.filtro, limit:100 }).then(function(r){
+    var b = document.getElementById('osa-body'); if(!b) return;
+    if(!r || !r.ok){ b.innerHTML = '<div class="dp-err">' + osaE((r && r.message) || 'No se pudo cargar') + '</div>'; return; }
+    OSA.items = r.ordenes || []; var bd = document.getElementById('osa-badge'), nv = OSA.items.filter(function(o){ return o.items.some(function(i){ return i.estado === 'verificar'; }); }).length;
+    if(bd && OSA.filtro === 'todas') bd.textContent = nv ? nv : '';
+    if(!OSA.items.length){ b.innerHTML = '<div class="dp-v">No hay órdenes en esta vista.</div>'; return; }
+    b.innerHTML = OSA.items.map(function(o){
+      var ids = Array.from(new Set(o.items.map(function(i){ return i.ff_id; })));
+      var prod = Object.keys(o.items.reduce(function(a, i){ a[i.nombre] = (a[i.nombre] || 0) + 1; return a; }, {})).map(function(n){ return n + ' x' + o.items.filter(function(i){ return i.nombre === n; }).length; }).join(', ');
+      return '<div class="dp-c"><div class="dp-top"><div><b>' + osaE(o.codigo) + ' · ' + osaE(o.usuario) + '</b><small>' + osaE(osaFH(o.creada)) + '</small></div><div class="dp-mo">' + osaMXN(o.total) + '</div></div>'
+        + '<span class="dp-st ' + (o.fase === 'completado' ? 'aprobada' : (o.fase === 'error' || o.fase === 'reembolsado' ? 'rechazada' : 'pendiente')) + '">' + osaE(OSA_FASE[o.fase] || o.fase) + '</span>'
+        + '<div class="dp-g"><span>Producto</span><b>' + osaE(prod) + '</b><span>IDs destino</span><b>' + ids.map(osaE).join(', ') + '</b><span>Método de pago</span><b>Saldo CiberStore</b><span>ID transacción</span><b>' + osaE(o.codigo) + ' · ' + osaE(String(o.idem || '').slice(0, 14)) + '</b><span>Entrega</span><b>' + o.entregadas + ' entregadas · ' + o.pendientes + ' pendientes · ' + o.reembolsadas + ' reembolsadas</b></div>'
+        + o.items.map(function(i){ var ver = i.estado === 'verificar';
+          return '<div class="dp-g" style="margin:0 0 .35rem;border-top:1px solid rgba(255,255,255,.06);padding-top:.35rem"><span>' + osaE(i.nombre) + ' · ' + osaE(i.ff_id) + '</span><b>' + osaE(OSA_FASE[i.fase] || i.fase) + (i.error ? ' · ' + osaE(i.error) : '') + '</b></div>'
+            + (ver ? '<div class="dp-fl"><button type="button" onclick="osaAccion(' + i.id + ',\'entregada\')">Marcar entregada</button><button type="button" onclick="osaAccion(' + i.id + ',\'reembolsar\')">Reembolsar al saldo</button></div>' : ''); }).join('') + '</div>';
+    }).join('');
+  });
+}
+function osaFiltro(f){ OSA.filtro = f; osaCargar(); }
+function osaAccion(id, accion){
+  if(OSA.busy) return;
+  if(!confirm(accion === 'reembolsar' ? '¿Reembolsar esta unidad al saldo del usuario? Solo se hace una vez.' : '¿Confirmas que esta unidad SÍ fue entregada?')) return;
+  OSA.busy = true;
+  osaApi('admin_item', { item_id:id, accion:accion }).then(function(r){ OSA.busy = false; if(typeof showToast === 'function') showToast(r && r.ok ? 'Listo' : ((r && r.message) || 'Error'), 3000); osaCargar(); });
+}
