@@ -17578,7 +17578,7 @@ function cs4Servicios(){
   if(document.getElementById('page-servicios')) return;
   var secs = [
     ['Juegos', [['Free Fire','Diamantes, pases y cuentas','freefire'],['PUBG Mobile','Catálogo','pubg'],['Delta Force','Monedas y más','deltaforce']]],
-    ['Free Fire', [['Diamantes','Recarga a tu ID','diamantes'],['Tarjetas','Semanal y mensual','tarjetas'],['Subidas de nivel','Nivel 6 al 30','niveles'],['Pase Booyah','Para uno o varios IDs','boyaah'],['Likes','Para tu perfil','likes2k'],['Clanes','Honor y gloria','clanes']]],
+    ['Free Fire', [['Diamantes','Recarga a tu ID','diamantes'],['Tarjetas','Semanal y mensual','tarjetas'],['Subidas de nivel','Nivel 6 al 30','niveles'],['Likes','Para tu perfil','likes2k'],['Clanes','Honor y gloria','clanes']]],
     ['Recargas y gift cards', [['Recargas','Servicios digitales','recargas'],['Gift Cards','Robux y Netflix','giftcards']]],
     ['Tu cuenta', [['Billetera','Depositar saldo','saldo'],['Transferir','Enviar saldo','transferir'],['Mis compras','Historial y seguimiento','miscompras'],['Ranking y premios','TOP mensual','ranking']]],
     ['Ayuda', [['Soporte','Tickets y WhatsApp','soporte'],['Preguntas frecuentes','Respuestas al instante','faq']]]
@@ -18992,12 +18992,38 @@ function ckStockCargar(cb){
     cb && cb();
   }).catch(function(){ cb && cb(); });
 }
+var RG2 = { sel: null };
+var RG2_CATS = [
+  { k:'pase', n:'Pase Booyah', d:'Entrega por regalo en el juego', img:'img/pase-booyah.png' },
+  { k:'caja', n:'Cajas de Fragmentos', d:'Entrega automática', img:'img/caja-fragmentos.png' },
+  { k:'fragmento', n:'Fragmentos de arma Evo', d:'Entrega automática', img:'img/fragmento-universal.png' },
+  { k:'tarjetas', n:'Tarjetas', d:'Semanal y mensual', go:'tarjetas', ic:'<rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M2 10h20M6 15h4"/>' },
+  { k:'niveles', n:'Subidas de nivel', d:'Nivel 6 al 30', go:'niveles', ic:'<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>' }
+];
+function rg2Cats(){
+  var c = ckEl('rg2-cats'), l = ckEl('rg2-lista'); if(!c) return;
+  c.style.display = RG2.sel ? 'none' : ''; if(l) l.style.display = RG2.sel ? '' : 'none';
+  c.innerHTML = RG2_CATS.map(function(x){
+    var ico = x.img ? ckImg(x.img, x.n) : '<span class="ck-img"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#6db3ff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + x.ic + '</svg></span>';
+    return '<button type="button" class="rg2-card rg2-cat" onclick="rg2Abrir(\'' + x.k + '\')">' + ico + '<span class="i"><b>' + ckEsc(x.n) + '</b><small>' + ckEsc(x.d) + '</small></span><span style="color:#6b7280;font-size:1.5rem">&#8250;</span></button>';
+  }).join('');
+}
+function rg2Abrir(k){
+  var x = RG2_CATS.filter(function(c){ return c.k === k; })[0]; if(!x) return;
+  if(x.go){ goPage(x.go); return; }
+  RG2.sel = k; rg2Cats(); ckListaCargar(); try{ window.scrollTo(0, 0); }catch(e){}
+}
+function rg2Atras(){
+  if(RG2.sel){ RG2.sel = null; rg2Cats(); return; }
+  goPage('freefire'); setTimeout(function(){ if(typeof ffIrTienda === 'function') ffIrTienda(); }, 150);
+}
 function ckPintarLista(){
   var c = ckEl('rg2-lista'); if(!c) return;
   var sec = { pase:'Pase Booyah', caja:'Cajas de Fragmentos Evo', fragmento:'Fragmentos de arma Evo' }, vistos = {}, h = '';
   (CK.cat || []).forEach(function(p){
     if(p.clave === 'pase_oferta') return; /* la oferta exclusiva vive en el Inicio */
-    if(!vistos[p.grupo]){ vistos[p.grupo] = 1; h += '<div class="rg2-sec">' + sec[p.grupo] + '</div>'; }
+    if(RG2.sel && p.grupo !== RG2.sel) return;
+    if(!vistos[p.grupo] && !RG2.sel){ vistos[p.grupo] = 1; h += '<div class="rg2-sec">' + sec[p.grupo] + '</div>'; }
     var ag = !!CK.ag[p.clave];
     h += '<div class="rg2-card' + (ag ? ' ag' : '') + '">' + ckImg(p.img, p.nombre) + '<div class="i"><b>' + ckEsc(p.nombre) + '</b><small>' + ckEsc(p.detalle || '') + '</small><div class="p">' + (ag ? 'Sin stock' : ckFmt(p.precio)) + '</div>' + (p.mayoreo_min && !ag ? '<small style="color:#22c55e">Desde ' + p.mayoreo_min + ' pases: ' + ckFmt(p.mayoreo_precio) + ' c/u</small>' : '') + '</div>'
       + '<button type="button" class="rg2-buy" ' + (ag ? 'disabled' : 'onclick="ckAbrir(\'' + ckEsc(p.clave) + '\')"') + '>Comprar</button></div>';
@@ -19015,7 +19041,7 @@ function ckListaCargar(){
     if(id === 'pase'){ id = 'regalos'; }   /* el asistente viejo de pago por transferencia ya no se usa: los pases se compran con saldo */
     var r = _gp.apply(this, arguments);
     if(id !== 'regalos' && ckEl('ck-ov') && ckEl('ck-ov').classList.contains('on') && id !== 'saldo'){ ckCerrar(); }
-    if(id === 'regalos'){ setTimeout(ckListaCargar, 60); }
+    if(id === 'regalos'){ RG2.sel = null; rg2Cats(); setTimeout(ckListaCargar, 60); }
     return r;
   };
 })();
