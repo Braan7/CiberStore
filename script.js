@@ -163,10 +163,10 @@ var PRODUCTS_1VEZ = [
 
 var LIKES = [
   {id:1,  label:'1 dia',   emoji:'\uD83D\uDC4D', priceMX:10,  total:200,  perDay:200, days:1,   color:'#00e676'},
-  {id:2,  label:'7 dias',  emoji:'\uD83D\uDC4D', priceMX:25,  total:1400, perDay:200, days:7,   color:'#22d3ee', popular:true},
-  {id:3,  label:'14 dias', emoji:'\uD83D\uDC4D', priceMX:35,  total:2800, perDay:200, days:14,  color:'#22d3ee'},
+  {id:2,  label:'7 dias',  emoji:'\uD83D\uDC4D', priceMX:25,  total:1400, perDay:200, days:7,   color:'#1b87f5', popular:true},
+  {id:3,  label:'14 dias', emoji:'\uD83D\uDC4D', priceMX:35,  total:2800, perDay:200, days:14,  color:'#1b87f5'},
   {id:4,  label:'21 dias', emoji:'\uD83D\uDC4D', priceMX:60,  total:4200, perDay:200, days:21,  color:'#ffd700'},
-  {id:5,  label:'30 dias', emoji:'\uD83D\uDC4D', priceMX:70,  total:6600, perDay:220, days:30,  color:'#22d3ee', best:true},
+  {id:5,  label:'30 dias', emoji:'\uD83D\uDC4D', priceMX:70,  total:6600, perDay:220, days:30,  color:'#1b87f5', best:true},
   {id:11, label:'Instant 2K',  emoji:'\u26A1', priceMX:120,  total:2000,  perDay:2000, days:1,  color:'#ff4da6', isInstant:true},
   {id:12, label:'Instant 4K',  emoji:'\u26A1', priceMX:230,  total:4000,  perDay:2000, days:2,  color:'#ff4da6', isInstant:true},
   {id:13, label:'Instant 10K', emoji:'\u26A1', priceMX:590,  total:10000, perDay:2000, days:5,  color:'#ff4da6', isInstant:true},
@@ -212,16 +212,16 @@ var SERVICES = [
 var SVC_ESTADO_LABEL = {
   disponible: { txt:'DISPONIBLE', color:'#25d366', ico:'\uD83D\uDFE2' },
   construccion: { txt:'EN CONSTRUCCION', color:'#ffb84d', ico:'\uD83D\uDEA7' },
-  proximamente: { txt:'PROXIMAMENTE', color:'#a78bfa', ico:'\u2728' },
-  buscando_proveedor: { txt:'BUSCANDO PROVEEDOR', color:'#67e8f9', ico:'\uD83D\uDD0E' }
+  proximamente: { txt:'PROXIMAMENTE', color:'#7cc0ff', ico:'\u2728' },
+  buscando_proveedor: { txt:'BUSCANDO PROVEEDOR', color:'#7cc0ff', ico:'\uD83D\uDD0E' }
 };
 
 // Click en un servicio sin proveedor: aviso moderno, sin permitir compra
 function clickServicioNoDisponible(nombre){
   if(typeof _mostrarAvisoModal === 'function'){
     _mostrarAvisoModal('SERVICIO EN CONSTRUCCION',
-      '<b style="color:#fff">'+nombre+'</b> todavia no esta disponible en CiberStore.<br/><br/>Actualmente estamos buscando un proveedor confiable para ofrecer este servicio.<br/><br/><b style="color:#22d3ee">Proximamente disponible en CiberStore!</b>',
-      '#67e8f9');
+      '<b style="color:#fff">'+nombre+'</b> todavia no esta disponible en CiberStore.<br/><br/>Actualmente estamos buscando un proveedor confiable para ofrecer este servicio.<br/><br/><b style="color:#1b87f5">Proximamente disponible en CiberStore!</b>',
+      '#7cc0ff');
   } else {
     showToast(nombre+': proximamente disponible', 3000);
   }
@@ -238,9 +238,9 @@ var HONOR = [
   {region:'Indonesia',      flag:'\uD83C\uDDEE\uD83C\uDDE9', color:'#e74c3c', precio:260},
   {region:'Oriente Medio',  flag:'\uD83C\uDDE6\uD83C\uDDEA', color:'#f0b90b', precio:260},
   {region:'Pakistan',       flag:'\uD83C\uDDF5\uD83C\uDDF0', color:'#01a049', precio:260},
-  {region:'Rusia',          flag:'\uD83C\uDDF7\uD83C\uDDFA', color:'#67e8f9', precio:260},
+  {region:'Rusia',          flag:'\uD83C\uDDF7\uD83C\uDDFA', color:'#7cc0ff', precio:260},
   {region:'Singapur',       flag:'\uD83C\uDDF8\uD83C\uDDEC', color:'#ff6b6b', precio:260},
-  {region:'Tailandia',      flag:'\uD83C\uDDF9\uD83C\uDDED', color:'#a78bfa', precio:260},
+  {region:'Tailandia',      flag:'\uD83C\uDDF9\uD83C\uDDED', color:'#7cc0ff', precio:260},
   {region:'Vietnam',        flag:'\uD83C\uDDFB\uD83C\uDDF3', color:'#ffb84d', precio:260}
 ];
 // Devuelve el precio en MXN de un honor (precio fijo, ya no depende del tipo de cambio)
@@ -250,7 +250,7 @@ function honorPrecioMXN(i){
 }
 
 var TIERS = [
-  {id:'free', name:'Cliente', color:'#22d3ee', colorBg:'rgba(34,211,238,.1)', threshold:0, perks:['Precio fijo'], disc:0, icon:'\uD83D\uDC64'}
+  {id:'free', name:'Cliente', color:'#1b87f5', colorBg:'rgba(27,135,245,.1)', threshold:0, perks:['Precio fijo'], disc:0, icon:'\uD83D\uDC64'}
 ];
 
 var EXP_PACKAGES = [
@@ -769,8 +769,8 @@ function authTab(tab){
   /* Highlight selected tab */
   var tabBtn=document.getElementById('atab-'+tab);
   if(tabBtn){
-    tabBtn.style.color='#22d3ee';
-    tabBtn.style.borderBottom='2px solid #22d3ee';
+    tabBtn.style.color='#1b87f5';
+    tabBtn.style.borderBottom='2px solid #1b87f5';
   }
 }
 function updateAuthUI(){
@@ -831,8 +831,8 @@ function admSubTab(tab){
     var btn=document.getElementById('adm-stab-'+tabs[i]);
     if(panel) panel.style.display=tabs[i]===tab?'block':'none';
     if(btn){
-      var colors={dash:['rgba(34,211,238,.2)','rgba(34,211,238,.45)','#67e8f9'],
-                  users:['rgba(34,211,238,.12)','rgba(34,211,238,.35)','var(--c1)'],
+      var colors={dash:['rgba(27,135,245,.2)','rgba(27,135,245,.45)','#7cc0ff'],
+                  users:['rgba(27,135,245,.12)','rgba(27,135,245,.35)','var(--c1)'],
                   codes:['rgba(0,230,118,.1)','rgba(0,230,118,.3)','#00e676'],
                   chat:['rgba(255,165,0,.1)','rgba(255,165,0,.3)','#ffa500']};
       var cc=tabs[i]===tab?(colors[tabs[i]]||colors.dash):null;
@@ -947,8 +947,8 @@ var RANGOS_INFO = {
   bronce:   { nombre:'BRONCE',   icono:'\uD83E\uDD49', min:0,    max:50,   color:'#cd7f32' },
   plata:    { nombre:'PLATA',    icono:'\uD83E\uDD48', min:50,   max:150,  color:'#c0c0c0' },
   oro:      { nombre:'ORO',      icono:'\uD83E\uDD47', min:150,  max:300,  color:'#ffd700' },
-  diamante: { nombre:'DIAMANTE', icono:'\uD83D\uDC8E', min:300,  max:600,  color:'#67e8f9' },
-  elite:    { nombre:'\u00c9LITE',    icono:'\uD83D\uDC51', min:600,  max:1000, color:'#a78bfa' },
+  diamante: { nombre:'DIAMANTE', icono:'\uD83D\uDC8E', min:300,  max:600,  color:'#7cc0ff' },
+  elite:    { nombre:'\u00c9LITE',    icono:'\uD83D\uDC51', min:600,  max:1000, color:'#7cc0ff' },
   leyenda:  { nombre:'LEYENDA',  icono:'\uD83D\uDD25', min:1000, max:null, color:'#ff6b35' }
 };
 var RANGOS_ORDEN = ['bronce','plata','oro','diamante','elite','leyenda'];
@@ -1023,7 +1023,7 @@ function cargarTopPuntos(){
         + '<span style="font-size:1rem;width:28px;text-align:center;flex-shrink:0">'+medalla+'</span>'
         + '<span style="font-size:1.1rem;flex-shrink:0">'+info.icono+'</span>'
         + '<div style="flex:1;min-width:0"><div style="font-family:Barlow;font-weight:700;font-size:.85rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+_esc(u.username)+'</div><div style="font-size:.66rem;color:#6b7280">'+info.nombre+'</div></div>'
-        + '<span style="font-family:Saira;font-weight:900;font-size:.95rem;color:#67e8f9;flex-shrink:0">'+(Number(u.puntos)||0).toLocaleString('es-MX')+' pts</span>'
+        + '<span style="font-family:Saira;font-weight:900;font-size:.95rem;color:#7cc0ff;flex-shrink:0">'+(Number(u.puntos)||0).toLocaleString('es-MX')+' pts</span>'
         + '</div>';
     }).join('');
   }).catch(function(e){
@@ -1043,10 +1043,10 @@ function cargarPremios(){
       return;
     }
     cont.innerHTML = premios.map(function(p){
-      return '<div style="display:flex;align-items:center;gap:.7rem;background:rgba(255,255,255,.03);border:1px solid rgba(167,139,250,.18);border-radius:12px;padding:.75rem .9rem">'
+      return '<div style="display:flex;align-items:center;gap:.7rem;background:rgba(255,255,255,.03);border:1px solid rgba(124,192,255,.18);border-radius:12px;padding:.75rem .9rem">'
         + '<span style="font-size:1.4rem;flex-shrink:0">'+(p.icono||'\uD83C\uDF81')+'</span>'
         + '<div style="flex:1;min-width:0"><div style="font-family:Barlow;font-weight:700;font-size:.85rem;color:#fff">'+_esc(p.nombre)+'</div>'+(p.descripcion?('<div style="font-size:.7rem;color:#9aa3b0;margin-top:.1rem">'+_esc(p.descripcion)+'</div>'):'')+'</div>'
-        + '<button onclick="canjearPremioUI('+p.id+',\''+_esc(p.nombre).replace(/'/g,"")+'\','+p.costo_puntos+')" style="flex-shrink:0;padding:.5rem .9rem;background:linear-gradient(135deg,#5b21b6,#a78bfa);color:#fff;border:none;border-radius:9px;font-family:Saira;font-weight:800;font-size:.78rem;cursor:pointer">'+p.costo_puntos+' pts</button>'
+        + '<button onclick="canjearPremioUI('+p.id+',\''+_esc(p.nombre).replace(/'/g,"")+'\','+p.costo_puntos+')" style="flex-shrink:0;padding:.5rem .9rem;background:linear-gradient(135deg,#2664b6,#7cc0ff);color:#fff;border:none;border-radius:9px;font-family:Saira;font-weight:800;font-size:.78rem;cursor:pointer">'+p.costo_puntos+' pts</button>'
         + '</div>';
     }).join('');
   }).catch(function(e){
@@ -1099,7 +1099,7 @@ function admBuscarHistorialPuntos(){
           + '<div style="flex:1;min-width:0"><div style="font-size:.78rem;color:#fff">Pedido #'+h.pedido_id+' &middot; '+(h.diamantes||0)+' &#128142;</div><div style="font-size:.68rem;color:#6b7280">'+(h.motivo||'')+' &middot; '+fecha+'</div></div>'
           + '</div>';
       }).join('');
-      cont.innerHTML = '<div style="text-align:right;font-family:Saira;font-weight:800;color:#67e8f9;font-size:.85rem;margin-bottom:.5rem">Total actual: '+total+' puntos</div>' + rowsHtml;
+      cont.innerHTML = '<div style="text-align:right;font-family:Saira;font-weight:800;color:#7cc0ff;font-size:.85rem;margin-bottom:.5rem">Total actual: '+total+' puntos</div>' + rowsHtml;
     }).catch(function(){ cont.innerHTML = '<div style="text-align:center;padding:1rem;color:#ff6b6b;font-size:.8rem">Error al cargar historial</div>'; });
   }).catch(function(){ cont.innerHTML = '<div style="text-align:center;padding:1rem;color:#ff6b6b;font-size:.8rem">Error de conexion</div>'; });
 }
@@ -1278,34 +1278,34 @@ function renderProds(){
   var rows='';
 
   /* ═══ DIAMANTES ILIMITADOS ═══ */
-  rows+='<div style="grid-column:1/-1;background:linear-gradient(135deg,#0a0a0a,#0a0a0a);border:1px solid rgba(34,211,238,.28);border-radius:16px;padding:1.3rem 1.15rem;margin-bottom:1.25rem">'
+  rows+='<div style="grid-column:1/-1;background:linear-gradient(135deg,#0a0a0a,#0a0a0a);border:1px solid rgba(27,135,245,.28);border-radius:16px;padding:1.3rem 1.15rem;margin-bottom:1.25rem">'
     +'<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:1rem">'
     +'<span style="font-size:1.5rem">\u26A1</span>'
-    +'<div><div style="font-family:Saira;font-size:1rem;font-weight:900;color:#22d3ee;letter-spacing:.5px">DIAMANTES ILIMITADOS</div>'
+    +'<div><div style="font-family:Saira;font-size:1rem;font-weight:900;color:#1b87f5;letter-spacing:.5px">DIAMANTES ILIMITADOS</div>'
     +'<div style="font-size:.72rem;color:var(--muted)">Recarga las veces que quieras</div></div>'
     +'</div>'
     +'<div class="lkpln-grid" style="margin-bottom:1.1rem">';
   for(var i=0;i<PRODUCTS.length;i++){
-    rows+=makeModernCard(PRODUCTS[i], '#22d3ee', PRODUCTS[i].badge==='GRAN VALOR'||PRODUCTS[i].badge==='MEGA PACK');
+    rows+=makeModernCard(PRODUCTS[i], '#1b87f5', PRODUCTS[i].badge==='GRAN VALOR'||PRODUCTS[i].badge==='MEGA PACK');
   }
   rows+='</div>'
     // Formulario ilimitados
-    +'<div style="border-top:1px solid rgba(34,211,238,.15);padding-top:1rem">'
+    +'<div style="border-top:1px solid rgba(27,135,245,.15);padding-top:1rem">'
     +'<div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem">Pedir con saldo</div>'
     +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Elige tu paquete</label>'
-    +'<select id="ilim-plan" style="width:100%;background:#0a0a0a;border:1px solid rgba(34,211,238,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Barlow,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box">';
+    +'<select id="ilim-plan" style="width:100%;background:#0a0a0a;border:1px solid rgba(27,135,245,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Barlow,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box">';
   for(var a=0;a<PRODUCTS.length;a++){
     rows+='<option value="'+PRODUCTS[a].total+'|'+PRODUCTS[a].prices[0]+'">'+PRODUCTS[a].name+' diamantes \u2014 '+fmt(PRODUCTS[a].prices[0])+' MXN</option>';
   }
   rows+='</select>'
     +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Tu ID de Free Fire</label>'
-    +'<input id="ilim-id" type="text" placeholder="Ej: 123456789" style="width:100%;background:#0a0a0a;border:1px solid rgba(34,211,238,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Barlow,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box"/>'
+    +'<input id="ilim-id" type="text" placeholder="Ej: 123456789" style="width:100%;background:#0a0a0a;border:1px solid rgba(27,135,245,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Barlow,sans-serif;font-size:.88rem;margin-bottom:.55rem;box-sizing:border-box"/>'
     +'<label style="font-size:.72rem;color:var(--muted);display:block;margin-bottom:.25rem">Nombre en el juego</label>'
-    +'<input id="ilim-nombre" type="text" placeholder="Tu nickname" style="width:100%;background:#0a0a0a;border:1px solid rgba(34,211,238,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Barlow,sans-serif;font-size:.88rem;margin-bottom:.65rem;box-sizing:border-box"/>'
-    +'<div style="display:flex;justify-content:space-between;background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.18);border-radius:8px;padding:.45rem .85rem;margin-bottom:.5rem"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span id="ilim-saldo-val" style="font-family:Saira;font-weight:700;color:#22d3ee;font-size:.82rem">$0 MXN</span></div>'
+    +'<input id="ilim-nombre" type="text" placeholder="Tu nickname" style="width:100%;background:#0a0a0a;border:1px solid rgba(27,135,245,.25);color:#fff;border-radius:9px;padding:.6rem .8rem;font-family:Barlow,sans-serif;font-size:.88rem;margin-bottom:.65rem;box-sizing:border-box"/>'
+    +'<div style="display:flex;justify-content:space-between;background:rgba(27,135,245,.06);border:1px solid rgba(27,135,245,.18);border-radius:8px;padding:.45rem .85rem;margin-bottom:.5rem"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span id="ilim-saldo-val" style="font-family:Saira;font-weight:700;color:#1b87f5;font-size:.82rem">$0 MXN</span></div>'
     +'<div id="ilim-err" style="display:none;color:#ff6b6b;font-size:.75rem;margin-bottom:.5rem"></div>'
     +'<button onclick="submitIlimSaldo()" style="width:100%;padding:.78rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:10px;font-family:Barlow,sans-serif;font-weight:900;font-size:.9rem;cursor:pointer">\uD83D\uDD12 Confirmar con saldo</button>'
-    +'<button onclick="cotizarIlim()" style="width:100%;padding:.62rem;margin-top:.5rem;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.3);color:#22d3ee;border-radius:10px;font-family:Barlow;font-weight:900;font-size:.82rem;cursor:pointer">\uD83D\uDCAC O cotizar por WhatsApp</button>'
+    +'<button onclick="cotizarIlim()" style="width:100%;padding:.62rem;margin-top:.5rem;background:rgba(27,135,245,.08);border:1px solid rgba(27,135,245,.3);color:#1b87f5;border-radius:10px;font-family:Barlow;font-weight:900;font-size:.82rem;cursor:pointer">\uD83D\uDCAC O cotizar por WhatsApp</button>'
     +'</div>'
     +'</div>';
 
@@ -1362,7 +1362,7 @@ function renderLikes(){
     var cls='lk-card'+(p.popular?' lk-popular':'')+(p.best?' lk-best':'')+(isVip?' lk-vip':'');
     var card='<div class="'+cls+'" onclick="openLikeModal('+p.id+')" style="--lk-clr:'+p.color+';border-color:'+p.color+'22">';
     if(p.popular) card+='<div class="lk-ribbon">POPULAR</div>';
-    if(p.best) card+='<div class="lk-ribbon" style="background:linear-gradient(90deg,#00a87a,#00f5d4);color:#002a22">MEJOR VALOR</div>';
+    if(p.best) card+='<div class="lk-ribbon" style="background:linear-gradient(90deg,#00a87a,#00f5d4);color:#191a1d">MEJOR VALOR</div>';
     if(isVip) card+='<div class="lk-ribbon" style="background:linear-gradient(90deg,#c97b00,#f0b90b);color:#1a0a00">VIP</div>';
     card+='<div class="lk-top"><div class="lk-ico">'+p.emoji+'</div>';
     card+='<div style="flex:1"><div class="lk-label">'+p.label+'</div>';
@@ -1377,11 +1377,11 @@ function renderLikes(){
     card+='</div>';
     card+='<div class="lk-stats">';
     if(p.isInstant){
-      card+='<div class="lk-stat"><span class="lk-stat-n" style="color:#00f5ff">'+p.total.toLocaleString()+'</span><span class="lk-stat-l">likes</span></div>';
+      card+='<div class="lk-stat"><span class="lk-stat-n" style="color:#4aa8ff">'+p.total.toLocaleString()+'</span><span class="lk-stat-l">likes</span></div>';
       card+='<div class="lk-stat-div"></div>';
-      card+='<div class="lk-stat"><span class="lk-stat-n" style="color:#00f5ff">24H</span><span class="lk-stat-l">entrega</span></div>';
+      card+='<div class="lk-stat"><span class="lk-stat-n" style="color:#4aa8ff">24H</span><span class="lk-stat-l">entrega</span></div>';
       card+='<div class="lk-stat-div"></div>';
-      card+='<div class="lk-stat"><span class="lk-stat-n" style="color:#00f5ff">\u26A1</span><span class="lk-stat-l">instant</span></div>';
+      card+='<div class="lk-stat"><span class="lk-stat-n" style="color:#4aa8ff">\u26A1</span><span class="lk-stat-l">instant</span></div>';
     } else {
       card+='<div class="lk-stat"><span class="lk-stat-n">'+p.perDay+'</span><span class="lk-stat-l">likes/dia</span></div>';
       card+='<div class="lk-stat-div"></div>';
@@ -1911,7 +1911,7 @@ function lanzarGrupoHonor(){
     ov.id = 'honor-confirm-overlay';
     ov.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px)';
     ov.innerHTML =
-      '<div style="background:#0e1118;border:1.5px solid rgba(255,208,0,.4);border-radius:18px;padding:1.5rem;max-width:340px;width:100%;text-align:center">'
+      '<div style="background:#0d1117;border:1.5px solid rgba(255,208,0,.4);border-radius:18px;padding:1.5rem;max-width:340px;width:100%;text-align:center">'
       + '<div style="font-size:2rem;margin-bottom:.5rem">'+h.flag+'</div>'
       + '<div style="font-family:Saira;font-weight:900;font-size:1rem;color:#fff;margin-bottom:.35rem">Confirmar grupo</div>'
       + '<div style="font-size:.8rem;color:#8b93a3;margin-bottom:1.1rem;line-height:1.6">'
@@ -1971,7 +1971,7 @@ function _mostrarInstruccionesHonor(ord){
   ov.id = 'honor-instrucciones-overlay';
   ov.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px)';
   ov.innerHTML =
-    '<div style="background:#0e1118;border:1.5px solid rgba(255,208,0,.35);border-radius:18px;padding:1.4rem;max-width:400px;width:100%;max-height:90vh;overflow-y:auto">'
+    '<div style="background:#0d1117;border:1.5px solid rgba(255,208,0,.35);border-radius:18px;padding:1.4rem;max-width:400px;width:100%;max-height:90vh;overflow-y:auto">'
     + '<div style="text-align:center;margin-bottom:1rem">'
     +   '<div style="font-size:1.8rem;margin-bottom:.4rem">\u2705</div>'
     +   '<div style="font-family:Saira;font-weight:900;font-size:1rem;color:#fff">Pedido #'+ord+' confirmado</div>'
@@ -2074,7 +2074,7 @@ function renderMembresiasCatalogo(){
     return '<div class="ds-cat-card" style="flex-direction:row;align-items:center;text-align:left;padding:1.1rem 1.2rem;gap:1rem" onclick="abrirMembresia('+i+')">'
       + '<span class="ds-cat-ico" style="font-size:1.5rem">'+u.icon+'</span>'
       + '<div style="flex:1"><div class="ds-cat-name" style="font-size:.92rem">'+u.nombre+'</div><div class="ds-cat-sub" style="font-size:.72rem">Entrega autom&aacute;tica</div></div>'
-      + '<span style="font-family:Saira;font-weight:800;font-size:1rem;color:#a78bfa;flex-shrink:0" id="mem-precio-'+i+'">'+fmt(u.precio)+'</span>'
+      + '<span style="font-family:Saira;font-weight:800;font-size:1rem;color:#7cc0ff;flex-shrink:0" id="mem-precio-'+i+'">'+fmt(u.precio)+'</span>'
       + '</div>';
   }).join('');
 }
@@ -2267,7 +2267,7 @@ function renderPubgPcCatalogo(){
   cont.innerHTML = PUBGPC_MONEDAS.map(function(u, i){
     return '<div class="ds-cat-card" style="flex-direction:row;align-items:center;text-align:left;padding:1.1rem 1.2rem;gap:1rem" onclick="abrirPubgPcModal('+i+')">'
       + '<span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffb84d" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10v4M5 12h4M15 11h.01M17.5 13h.01"/></svg></span>'
-      + '<div style="flex:1"><div class="ds-cat-name" style="font-size:.92rem">'+u.nombre+'</div><div class="ds-cat-sub" style="font-size:.72rem;color:#67e8f9">&#127917; Se entrega c&oacute;digo</div></div>'
+      + '<div style="flex:1"><div class="ds-cat-name" style="font-size:.92rem">'+u.nombre+'</div><div class="ds-cat-sub" style="font-size:.72rem;color:#7cc0ff">&#127917; Se entrega c&oacute;digo</div></div>'
       + '<span style="font-family:Saira;font-weight:800;font-size:1rem;color:#ffb84d;flex-shrink:0">'+fmt(u.precio)+'</span>'
       + '</div>';
   }).join('');
@@ -2391,9 +2391,9 @@ function renderDeltaCatalogo(){
   if(contP){
     contP.innerHTML = DELTA_PAQUETES.map(function(u, i){
       return '<div class="ds-cat-card" style="flex-direction:row;align-items:center;text-align:left;padding:1.1rem 1.2rem;gap:1rem" onclick="abrirDeltaModal(\'paquetes\','+i+')">'
-        + '<span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#67e8f9" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg></span>'
+        + '<span class="ds-cat-ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#7cc0ff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg></span>'
         + '<div style="flex:1"><div class="ds-cat-name" style="font-size:.92rem">'+u.nombre+'</div><div class="ds-cat-sub" style="font-size:.72rem">Entrega manual</div></div>'
-        + '<span style="font-family:Saira;font-weight:800;font-size:1rem;color:#67e8f9;flex-shrink:0">'+fmt(u.precio)+'</span>'
+        + '<span style="font-family:Saira;font-weight:800;font-size:1rem;color:#7cc0ff;flex-shrink:0">'+fmt(u.precio)+'</span>'
         + '</div>';
     }).join('');
   }
@@ -2507,13 +2507,13 @@ function submitPaseFF(){
     ov.id = 'paseff-confirm-overlay';
     ov.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px)';
     ov.innerHTML =
-      '<div style="background:#0e1118;border:1.5px solid rgba(255,180,60,.4);border-radius:18px;padding:1.5rem;max-width:340px;width:100%;text-align:center">'
+      '<div style="background:#0d1117;border:1.5px solid rgba(255,180,60,.4);border-radius:18px;padding:1.5rem;max-width:340px;width:100%;text-align:center">'
       + '<div style="font-size:2rem;margin-bottom:.5rem">\u26A0\uFE0F</div>'
       + '<div style="font-family:Saira;font-weight:900;font-size:1rem;color:#fff;margin-bottom:.35rem">Confirmar pedido</div>'
       + '<div style="font-size:.8rem;color:#8b93a3;margin-bottom:1.1rem;line-height:1.6">'
       + 'Pases FF x' + _paseffCantidad + '<br/>'
-      + 'ID: <b style="color:#22d3ee">' + id + '</b><br/>'
-      + 'Usuario: <b style="color:#22d3ee">' + nombre + '</b><br/>'
+      + 'ID: <b style="color:#1b87f5">' + id + '</b><br/>'
+      + 'Usuario: <b style="color:#1b87f5">' + nombre + '</b><br/>'
       + 'Total: <b style="color:#25d366">' + fmt(totalPaseFF) + '</b>'
       + '<br/><br/><b style="color:#ffb84d">Recuerda: tendras 3 minutos para aceptar la solicitud del bot. Sin reembolso si no aceptas a tiempo.</b>'
       + '</div>'
@@ -2604,7 +2604,7 @@ function _mostrarReciboHonor(h, nombreClan, idClan, ord){
     + '<div style="font-size:2.8rem;margin-bottom:.5rem">\u2705</div>'
     + '<div style="font-family:Saira;font-weight:900;font-size:1.25rem;color:#25d366;margin-bottom:.35rem;letter-spacing:.5px">PEDIDO CONFIRMADO</div>'
     + '<div style="font-size:.8rem;color:var(--muted);margin-bottom:1.35rem">Tu honor de clan esta en proceso</div>'
-    + '<div style="background:rgba(0,0,0,.25);border-radius:99px;height:10px;overflow:hidden;margin-bottom:1.4rem"><div style="height:100%;width:20%;border-radius:99px;background:linear-gradient(90deg,#22d3ee,#ff9900);box-shadow:0 0 12px rgba(255,180,60,.5)"></div></div>'
+    + '<div style="background:rgba(0,0,0,.25);border-radius:99px;height:10px;overflow:hidden;margin-bottom:1.4rem"><div style="height:100%;width:20%;border-radius:99px;background:linear-gradient(90deg,#1b87f5,#ff9900);box-shadow:0 0 12px rgba(255,180,60,.5)"></div></div>'
     + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
     +   _filaRecibo('\uD83D\uDCCB Pedido', '#'+ord)
     +   _filaRecibo('\uD83C\uDFC6 Servicio', 'Honor '+h.region)
@@ -2613,8 +2613,8 @@ function _mostrarReciboHonor(h, nombreClan, idClan, ord){
     +   _filaRecibo('\uD83D\uDCB5 Precio', fmt(h.price))
     +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' \u00B7 ' + hora, true)
     + '</div>'
-    + '<div style="background:rgba(255,180,60,.08);border:1px solid rgba(255,180,60,.25);border-radius:10px;padding:.75rem .9rem;margin-top:1rem;font-size:.73rem;color:#22d3ee;line-height:1.55">&#128197; Los pedidos se procesan <b>sabados y domingos</b>.<br/>&#129302; Los bots se uniran entre las <b>3:00 y 7:00 AM</b>.</div>'
-    + '<button onclick="var o=document.getElementById(\'recibo-honor-ov\'); if(o) o.remove();" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Barlow;font-weight:700;font-size:.9rem;cursor:pointer">Entendido</button>'
+    + '<div style="background:rgba(255,180,60,.08);border:1px solid rgba(255,180,60,.25);border-radius:10px;padding:.75rem .9rem;margin-top:1rem;font-size:.73rem;color:#1b87f5;line-height:1.55">&#128197; Los pedidos se procesan <b>sabados y domingos</b>.<br/>&#129302; Los bots se uniran entre las <b>3:00 y 7:00 AM</b>.</div>'
+    + '<button onclick="var o=document.getElementById(\'recibo-honor-ov\'); if(o) o.remove();" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0a4fa8,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Barlow;font-weight:700;font-size:.9rem;cursor:pointer">Entendido</button>'
     + '</div>';
 }
 function clanWA(){
@@ -2638,7 +2638,7 @@ function renderExpPackages(){
       +'</div>';
   }
   rows+='<div style="grid-column:1/-1;text-align:center;margin-top:.5rem">'
-    +'<button onclick="openHonorCuentaModalWithPkg()" style="padding:.75rem 2rem;background:linear-gradient(90deg,#007799,#00f5ff);color:#020a0a;border:none;border-radius:8px;font-family:\'Barlow\';font-weight:800;font-size:.85rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;box-shadow:0 0 20px rgba(0,245,255,.3)">\u26A1 Contratar plan</button>'
+    +'<button onclick="openHonorCuentaModalWithPkg()" style="padding:.75rem 2rem;background:linear-gradient(90deg,#007799,#4aa8ff);color:#020a0a;border:none;border-radius:8px;font-family:\'Barlow\';font-weight:800;font-size:.85rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;box-shadow:0 0 20px rgba(74,168,255,.3)">\u26A1 Contratar plan</button>'
     +'</div>';
   g.innerHTML=rows;
 }
@@ -2648,8 +2648,8 @@ function selectExpPkg(id){
   for(var i=0;i<EXP_PACKAGES.length;i++){if(EXP_PACKAGES[i].id===id){selectedExpPkgData=EXP_PACKAGES[i];break;}}
   var cards=document.querySelectorAll('.exp-pkg-card');
   for(var j=0;j<cards.length;j++){
-    cards[j].style.borderColor=cards[j].id==='expc-'+id?'rgba(0,245,255,.7)':'rgba(255,255,255,.07)';
-    cards[j].style.background=cards[j].id==='expc-'+id?'rgba(0,245,255,.08)':'';
+    cards[j].style.borderColor=cards[j].id==='expc-'+id?'rgba(74,168,255,.7)':'rgba(255,255,255,.07)';
+    cards[j].style.background=cards[j].id==='expc-'+id?'rgba(74,168,255,.08)':'';
   }
 }
 function openHonorCuentaModalWithPkg(){
@@ -2736,7 +2736,7 @@ function submitHonorCuenta(){
   if(typeof _mostrarAvisoModal==='function'){
     _mostrarAvisoModal('PEDIDO #'+ord+' CONFIRMADO',
       'Tu <b style="color:#fff">Experiencia FF</b> ('+planTxt+') fue pedida.<br/>Te contactaremos por WhatsApp para coordinar.',
-      '#22d3ee');
+      '#1b87f5');
   }
   showToast('\u2705 Pedido #'+ord+' confirmado!', 3000);
   setTimeout(function(){ _comprandoHC = false; }, 3000);
@@ -2969,7 +2969,7 @@ function launchConfetti(){
   canvas.width=window.innerWidth; canvas.height=window.innerHeight;
   var ctx=canvas.getContext('2d');
   var pieces=[];
-  var colors=['#22d3ee','#ffd000','#ff4422','#00f5ff','#25d366','#0e7490'];
+  var colors=['#1b87f5','#ffd000','#ff4422','#4aa8ff','#25d366','#0a4fa8'];
   for(var i=0;i<120;i++) pieces.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height-canvas.height,w:Math.random()*10+4,h:Math.random()*6+3,color:colors[Math.floor(Math.random()*colors.length)],rot:Math.random()*360,vx:(Math.random()-.5)*3,vy:Math.random()*4+2,vr:(Math.random()-.5)*5});
   var frame=0;
   function draw(){
@@ -3034,9 +3034,9 @@ function copyExitCode(){
 
 /* \u2500\u2500 RULETA \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 var RULETA_PRIZES=[
-  {label:'2%',disc:2,color:'#0055cc'},{label:'5%',disc:5,color:'#22d3ee'},
-  {label:'3%',disc:3,color:'#0e7490'},{label:'10%',disc:10,color:'#ffd000'},
-  {label:'1%',disc:1,color:'#333855'},{label:'7%',disc:7,color:'#00f5ff'},
+  {label:'2%',disc:2,color:'#0055cc'},{label:'5%',disc:5,color:'#1b87f5'},
+  {label:'3%',disc:3,color:'#0a4fa8'},{label:'10%',disc:10,color:'#ffd000'},
+  {label:'1%',disc:1,color:'#3e4146'},{label:'7%',disc:7,color:'#4aa8ff'},
   {label:'15%',disc:15,color:'#ff4422'},{label:'4%',disc:4,color:'#25d366'}
 ];
 function drawRuleta(angle){
@@ -3058,7 +3058,7 @@ function drawRuleta(angle){
   }
   ctx.beginPath(); ctx.arc(cx,cy,16,0,Math.PI*2);
   ctx.fillStyle='#0b0b0b'; ctx.fill();
-  ctx.strokeStyle='rgba(34,211,238,.5)'; ctx.lineWidth=2; ctx.stroke();
+  ctx.strokeStyle='rgba(27,135,245,.5)'; ctx.lineWidth=2; ctx.stroke();
 }
 function openRuleta(){
   if(!authSession){showToast('Inicia sesion para girar');setTimeout(showAuthModal,600);return;}
@@ -3386,9 +3386,9 @@ function loadLeaderboard(){
             /* Name + stats */
             + '<div style="flex:1;min-width:0">'
             + '<div style="font-size:.85rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'
-            + u.username + (isMe?' <span style="font-size:.62rem;background:rgba(34,211,238,.15);color:var(--c1);padding:.1rem .35rem;border-radius:4px;font-family:sans-serif">Tu</span>':'')+'</div>'
+            + u.username + (isMe?' <span style="font-size:.62rem;background:rgba(27,135,245,.15);color:var(--c1);padding:.1rem .35rem;border-radius:4px;font-family:sans-serif">Tu</span>':'')+'</div>'
             + '<div style="display:flex;align-items:center;gap:.6rem;margin-top:.2rem;flex-wrap:wrap">'
-            + (diamonds>0?'<span style="font-size:.68rem;color:#67e8f9;font-weight:600">&#128142; '+diamonds.toLocaleString('es-MX')+'</span>':'')
+            + (diamonds>0?'<span style="font-size:.68rem;color:#7cc0ff;font-weight:600">&#128142; '+diamonds.toLocaleString('es-MX')+'</span>':'')
             + (likes>0?'<span style="font-size:.68rem;color:#ff6b9d;font-weight:600">&#128077; '+likes.toLocaleString('es-MX')+'</span>':'')
             + '</div></div>'
             /* Amount */
@@ -3475,7 +3475,7 @@ function admToggleNav(force){
 }
 
 function admFullTab(tab){
-  var tabs=['stats','users','pedidos','saldos','top','puntos','codigos','chat','resenas','soporte','inactivos','seguridad','recargas','catalogo','premios','config'];
+  var tabs=['stats','users','pedidos','saldos','top','puntos','codigos','chat','resenas','soporte','inactivos','seguridad','recargas','catalogo','premios','chatadm','config'];
   tabs.forEach(function(t){
     var btn=document.getElementById('admn-'+t);
     var sec=document.getElementById('adms-'+t);
@@ -3485,6 +3485,7 @@ function admFullTab(tab){
   if(tab==='stats')   admFullLoadStats();
   if(tab==='catalogo') catAdmRender();
   if(tab==='premios') admPremiosRender();
+  if(tab==='chatadm') ccaRender();
   if(tab==='users')   { admFullLoadUsers(); admCargarStatsClientes(); }
   if(tab==='pedidos') admLoadPedidos();
   if(tab==='saldos')  admFullLoadMovs();
@@ -3623,7 +3624,7 @@ function admRenderChart(canvas){
         var bh=Math.round((sales[k]/mx)*(H-36));
         /* Bar */
         var g=ctx.createLinearGradient(0,H-bh,0,H);
-        g.addColorStop(0,'#22d3ee');
+        g.addColorStop(0,'#1b87f5');
         g.addColorStop(1,'rgba(0,85,204,.3)');
         ctx.fillStyle=g;
         if(ctx.roundRect) ctx.roundRect(x,H-bh-16,bw,bh,4);
@@ -3647,7 +3648,7 @@ function admRenderChart(canvas){
         var avg=totalVentas>0?Math.round(totalVentas/sales.filter(function(s){return s>0;}).length):0;
         var maxDay=Math.max.apply(null,sales);
         extra.innerHTML=
-          '<div style="background:rgba(34,211,238,.07);border:1px solid rgba(34,211,238,.15);border-radius:8px;padding:.65rem;text-align:center">'
+          '<div style="background:rgba(27,135,245,.07);border:1px solid rgba(27,135,245,.15);border-radius:8px;padding:.65rem;text-align:center">'
           +'<div style="font-family:Saira;font-size:.9rem;font-weight:700;color:var(--c1)">$'+avg.toLocaleString('es-MX')+'</div>'
           +'<div style="font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:.1rem">Promedio/dia</div></div>'
           +'<div style="background:rgba(255,208,0,.07);border:1px solid rgba(255,208,0,.15);border-radius:8px;padding:.65rem;text-align:center">'
@@ -3879,8 +3880,8 @@ function admFullLoadUsers(){
         +'<td><div style="display:flex;gap:.3rem;flex-wrap:wrap">'
         +'<button data-u="'+u.id+'" data-n="'+u.username+'" onclick="admAddSaldo(this.dataset.u,this.dataset.n)" class="adm-action-btn" style="border-color:rgba(0,230,118,.3);color:#00e676">+$</button>'
         +'<button data-u="'+u.id+'" data-n="'+u.username+'" onclick="admQuitarSaldo(this.dataset.u,this.dataset.n)" class="adm-action-btn" style="border-color:rgba(255,80,80,.3);color:#ff6b6b">-$</button>'
-        +'<button data-u="'+u.id+'" data-n="'+u.username+'" onclick="admVerHistorial(this.dataset.u,this.dataset.n)" class="adm-action-btn" style="border-color:rgba(34,211,238,.3);color:var(--c1)">Hist</button>'
-        +'<button data-u="'+u.id+'" data-n="'+u.username+'" data-r="'+u.role+'" onclick="admCambiarRol(this.dataset.u,this.dataset.n,this.dataset.r)" class="adm-action-btn" style="border-color:rgba(34,211,238,.3);color:#67e8f9">Rol</button>'
+        +'<button data-u="'+u.id+'" data-n="'+u.username+'" onclick="admVerHistorial(this.dataset.u,this.dataset.n)" class="adm-action-btn" style="border-color:rgba(27,135,245,.3);color:var(--c1)">Hist</button>'
+        +'<button data-u="'+u.id+'" data-n="'+u.username+'" data-r="'+u.role+'" onclick="admCambiarRol(this.dataset.u,this.dataset.n,this.dataset.r)" class="adm-action-btn" style="border-color:rgba(27,135,245,.3);color:#7cc0ff">Rol</button>'
         +'<button data-u="'+u.id+'" data-n="'+u.username+'" data-b="'+u.banned+'" onclick="admBanear(this.dataset.u,this.dataset.n,this.dataset.b)" class="adm-action-btn" style="border-color:rgba(255,165,0,.3);color:#ffa500">'+(u.banned?'Des':'Ban')+'</button>'
         +'<button data-u="'+u.id+'" data-n="'+u.username+'" onclick="admResetPass(this.dataset.u,this.dataset.n)" class="adm-action-btn" style="border-color:rgba(255,255,255,.15);color:var(--muted)">Reset</button>'
         +'</div></td></tr>';
@@ -4342,7 +4343,7 @@ function sopAbrirTicket(ticketId){
         var p = peds && peds[0];
         if(p && pedidoBox){
           pedidoBox.style.display = 'block';
-          pedidoBox.innerHTML = '<b style="color:#22d3ee">Pedido relacionado</b><br/>'+_esc(p.producto)+' &middot; '+(ESTADO_LABEL[p.estado]?ESTADO_LABEL[p.estado].t:p.estado);
+          pedidoBox.innerHTML = '<b style="color:#1b87f5">Pedido relacionado</b><br/>'+_esc(p.producto)+' &middot; '+(ESTADO_LABEL[p.estado]?ESTADO_LABEL[p.estado].t:p.estado);
         }
       });
     } else if(pedidoBox){ pedidoBox.style.display = 'none'; }
@@ -4388,7 +4389,7 @@ function sopArchivoElegido(input){
     _sopArchivoB64 = e.target.result;
     var prev = document.getElementById('sop-preview-adjunto');
     prev.style.display = 'block';
-    prev.innerHTML = '<div style="display:flex;align-items:center;gap:.6rem;background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:10px;padding:.5rem .7rem">'
+    prev.innerHTML = '<div style="display:flex;align-items:center;gap:.6rem;background:rgba(27,135,245,.06);border:1px solid rgba(27,135,245,.2);border-radius:10px;padding:.5rem .7rem">'
       + '<img src="'+_sopArchivoB64+'" style="width:36px;height:36px;border-radius:8px;object-fit:cover"/>'
       + '<span style="flex:1;font-size:.72rem;color:#c8d0e0">Imagen lista para enviar</span>'
       + '<button onclick="sopQuitarAdjunto()" style="background:none;border:none;color:#ff6b6b;cursor:pointer;font-size:.8rem">Quitar</button>'
@@ -4542,7 +4543,7 @@ function admSopCargarLista(){
         + '<td><span class="sop-badge sop-badge--'+t.status+'">'+(SOP_ESTADO_LABEL[t.status]||t.status)+'</span></td>'
         + '<td>'+t.priority+(t.needs_human?' \uD83D\uDEA8':'')+'</td>'
         + '<td>'+fecha+'</td>'
-        + '<td><button onclick="event.stopPropagation();admSopAbrirTicket('+t.id+')" class="adm-action-btn" style="border-color:rgba(34,211,238,.3);color:#22d3ee">Abrir</button></td>'
+        + '<td><button onclick="event.stopPropagation();admSopAbrirTicket('+t.id+')" class="adm-action-btn" style="border-color:rgba(27,135,245,.3);color:#1b87f5">Abrir</button></td>'
         + '</tr>';
     }).join('');
   }).catch(function(){ body.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:1.5rem">Error al cargar</td></tr>'; });
@@ -4568,7 +4569,7 @@ function admSopAbrirTicket(ticketId){
         var p = peds && peds[0];
         if(p){
           pedidoBox.style.display = 'block';
-          pedidoBox.innerHTML = '<b style="color:#22d3ee">Pedido relacionado #'+p.id+'</b><br/>'+_esc(p.producto)+' \u00b7 '+(ESTADO_LABEL[p.estado]?ESTADO_LABEL[p.estado].t:p.estado)+' \u00b7 '+_fechaPed(p.created_at);
+          pedidoBox.innerHTML = '<b style="color:#1b87f5">Pedido relacionado #'+p.id+'</b><br/>'+_esc(p.producto)+' \u00b7 '+(ESTADO_LABEL[p.estado]?ESTADO_LABEL[p.estado].t:p.estado)+' \u00b7 '+_fechaPed(p.created_at);
         }
       });
     } else { pedidoBox.style.display = 'none'; }
@@ -4589,7 +4590,7 @@ function admSopCargarMensajes(ticketId){
       // En la vista admin: "user" = ellos (izquierda), "bot"/"agent" = nosotros (derecha)
       var esNuestro = m.sender_type !== 'user';
       var clase = m.sender_type === 'bot' ? 'sop-msg bot' : (m.sender_type === 'agent' ? 'sop-msg me' : 'sop-msg agent');
-      var label = m.sender_type === 'bot' ? '<div class="sop-msg-label bot">\uD83E\uDD16 IA</div>' : (m.sender_type === 'agent' ? '<div class="sop-msg-label" style="color:#04151a">\uD83D\uDC64 '+_esc(m.sender_name)+'</div>' : '');
+      var label = m.sender_type === 'bot' ? '<div class="sop-msg-label bot">\uD83E\uDD16 IA</div>' : (m.sender_type === 'agent' ? '<div class="sop-msg-label" style="color:#111215">\uD83D\uDC64 '+_esc(m.sender_name)+'</div>' : '');
       var img = m.attachment_url ? '<img src="'+m.attachment_url+'" alt="adjunto"/>' : '';
       var fecha = m.created_at ? new Date(m.created_at).toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
       return '<div class="sop-msg-row '+(esNuestro?'me':'them')+'">'
@@ -4678,7 +4679,7 @@ function admInactCargar(){
       var fechaReg = u.created_at ? new Date(u.created_at).toLocaleDateString('es-MX') : '-';
       var fechaVisto = u.last_seen ? new Date(u.last_seen).toLocaleDateString('es-MX') : '-';
       return '<tr>'
-        + '<td><input type="checkbox" class="inact-check-row" data-id="'+u.id+'" onchange="admInactToggleUno(\''+u.id+'\',this.checked)" style="width:16px;height:16px;accent-color:#22d3ee"/></td>'
+        + '<td><input type="checkbox" class="inact-check-row" data-id="'+u.id+'" onchange="admInactToggleUno(\''+u.id+'\',this.checked)" style="width:16px;height:16px;accent-color:#1b87f5"/></td>'
         + '<td>'+_esc(u.username)+(u.nombre?'<br/><span style="font-size:.68rem;color:var(--muted)">'+_esc(u.nombre)+'</span>':'')+'</td>'
         + '<td>'+fechaReg+'</td>'
         + '<td>'+fechaVisto+'</td>'
@@ -4739,7 +4740,7 @@ function admInactConfirmarUno(userId){
     ? '<div style="margin-top:.9rem"><label style="font-size:.72rem;color:#8b93a3;display:block;margin-bottom:.4rem">Escribe <b style="color:#ff6b6b">ELIMINAR</b> para confirmar</label><input id="inact-confirm-txt" type="text" class="finput" style="margin-bottom:0" placeholder="ELIMINAR"/></div>'
     : '';
 
-  overlay.innerHTML = '<div style="background:#0e1118;border:1.5px solid rgba(255,80,80,.4);border-radius:18px;padding:1.5rem;max-width:380px;width:100%">'
+  overlay.innerHTML = '<div style="background:#0d1117;border:1.5px solid rgba(255,80,80,.4);border-radius:18px;padding:1.5rem;max-width:380px;width:100%">'
     + '<div style="font-size:1.8rem;text-align:center;margin-bottom:.5rem">&#128465;&#65039;</div>'
     + '<div style="font-family:Saira;font-weight:900;font-size:1rem;color:#fff;text-align:center;margin-bottom:.5rem">Eliminar a '+_esc(u.username)+'</div>'
     + '<div style="font-size:.8rem;color:#8b93a3;text-align:center;line-height:1.6">Se borraran su perfil, pedidos, movimientos de saldo, likes enviados, tickets de soporte y resenas.</div>'
@@ -4771,7 +4772,7 @@ function admInactConfirmarMasivo(){
 
   var overlay = document.createElement('div');
   overlay.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px)';
-  overlay.innerHTML = '<div style="background:#0e1118;border:1.5px solid rgba(255,80,80,.4);border-radius:18px;padding:1.5rem;max-width:380px;width:100%">'
+  overlay.innerHTML = '<div style="background:#0d1117;border:1.5px solid rgba(255,80,80,.4);border-radius:18px;padding:1.5rem;max-width:380px;width:100%">'
     + '<div style="font-size:1.8rem;text-align:center;margin-bottom:.5rem">&#128465;&#65039;</div>'
     + '<div style="font-family:Saira;font-weight:900;font-size:1rem;color:#fff;text-align:center;margin-bottom:.7rem">Eliminacion masiva</div>'
     + '<div style="font-size:.82rem;color:#c8d0e0;text-align:center;line-height:1.7">Vas a eliminar <b style="color:#fff">'+ids.length+' usuarios</b>.<br/>Saldo total de las cuentas: <b style="color:#ff6b6b">'+fmt(saldoTotal)+' MXN</b>.<br/><br/>Esta accion eliminara permanentemente sus cuentas y datos.</div>'
@@ -5071,7 +5072,7 @@ function submitFrag(){
   if(typeof _mostrarAvisoModal==='function'){
     _mostrarAvisoModal('PEDIDO #'+ord+' CONFIRMADO',
       'Tus <b style="color:#fff">'+fragCurrent.frags+' Fragmentos Evo</b> fueron pedidos.<br/>Te avisaremos cuando esten entregados.',
-      '#22d3ee');
+      '#1b87f5');
   }
   showToast('\u2705 Pedido #'+ord+' confirmado!', 3000);
   setTimeout(function(){ _comprandoFrag = false; }, 3000);
@@ -5097,11 +5098,11 @@ function renderCart(){
     h+='</div>';
     // Formulario por item (solo si hay sesion)
     if(authSession){
-      h+='<div style="background:rgba(0,150,255,.04);border:1px solid rgba(0,150,255,.12);border-radius:7px;padding:.5rem .6rem">';
+      h+='<div style="background:rgba(27,135,245,.04);border:1px solid rgba(27,135,245,.12);border-radius:7px;padding:.5rem .6rem">';
       h+='<label style="display:block;font-size:.58rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#5a6580;margin-bottom:.15rem">ID de Free Fire</label>';
-      h+='<input id="cart-id-'+item.id+'" type="text" value="'+(item.ffId||'')+'" oninput="updateCartItemField('+item.id+',\'ffId\',this.value)" placeholder="Ej: 123456789" style="width:100%;background:#10131f;border:1px solid rgba(0,150,255,.2);color:#fff;border-radius:5px;padding:.42rem .6rem;font-size:.8rem;margin-bottom:.35rem;box-sizing:border-box"/>';
+      h+='<input id="cart-id-'+item.id+'" type="text" value="'+(item.ffId||'')+'" oninput="updateCartItemField('+item.id+',\'ffId\',this.value)" placeholder="Ej: 123456789" style="width:100%;background:#17181b;border:1px solid rgba(27,135,245,.2);color:#fff;border-radius:5px;padding:.42rem .6rem;font-size:.8rem;margin-bottom:.35rem;box-sizing:border-box"/>';
       h+='<label style="display:block;font-size:.58rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#5a6580;margin-bottom:.15rem">Nombre en el juego</label>';
-      h+='<input id="cart-nom-'+item.id+'" type="text" value="'+(item.ffNom||'')+'" oninput="updateCartItemField('+item.id+',\'ffNom\',this.value)" placeholder="Tu nickname" style="width:100%;background:#10131f;border:1px solid rgba(0,150,255,.2);color:#fff;border-radius:5px;padding:.42rem .6rem;font-size:.8rem;box-sizing:border-box"/>';
+      h+='<input id="cart-nom-'+item.id+'" type="text" value="'+(item.ffNom||'')+'" oninput="updateCartItemField('+item.id+',\'ffNom\',this.value)" placeholder="Tu nickname" style="width:100%;background:#17181b;border:1px solid rgba(27,135,245,.2);color:#fff;border-radius:5px;padding:.42rem .6rem;font-size:.8rem;box-sizing:border-box"/>';
       h+='</div>';
     }
     h+='</div>';
@@ -5111,7 +5112,7 @@ function renderCart(){
   rows+='<div class="cart-total"><span>Total</span><span style="color:'+(enough?'#00e676':'#ff6b6b')+'">'+fmt(total)+'</span></div>';
   rows+='<div style="display:flex;justify-content:space-between;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.18);border-radius:8px;padding:.5rem .85rem;margin:.5rem 0"><span style="font-size:.72rem;color:var(--muted)">Tu saldo</span><span style="font-family:Saira;font-weight:700;color:'+(enough?'#00e676':'#ff6b6b')+'">'+fmt(saldo)+'</span></div>';
   if(!authSession){
-    rows+='<button onclick="closeCart();showAuthModal();" style="width:100%;padding:.72rem;background:linear-gradient(90deg,#0055cc,#22d3ee);color:#fff;border:none;border-radius:7px;font-weight:700;font-size:.9rem;cursor:pointer">Inicia sesion</button>';
+    rows+='<button onclick="closeCart();showAuthModal();" style="width:100%;padding:.72rem;background:linear-gradient(90deg,#0055cc,#1b87f5);color:#fff;border:none;border-radius:7px;font-weight:700;font-size:.9rem;cursor:pointer">Inicia sesion</button>';
   } else if(!enough){
     var falta=total-saldo;
     rows+='<div style="font-size:.78rem;color:#ff6b6b;margin-bottom:.5rem">Saldo insuficiente. Te faltan $'+falta.toLocaleString('es-MX')+' MXN.</div>';
@@ -5413,7 +5414,7 @@ function renderTopList(elId, data, colorFn, maxItems){
       + '<div style="width:30px;text-align:center;font-size:'+(i<3?'1.2rem':'.82rem')+';color:'+medalColor+';font-weight:700;flex-shrink:0">'+medal+'</div>'
       + '<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Saira;font-size:.72rem;font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+medalColor+'44">'+initial+'</div>'
       + '<div style="flex:1;min-width:0">'
-      + '<div style="font-size:.85rem;font-weight:700;color:#fff">'+item.username+(isMe?' <span style="font-size:.62rem;background:rgba(34,211,238,.15);color:var(--c1);padding:.1rem .35rem;border-radius:4px">Tu</span>':'')+' </div>'
+      + '<div style="font-size:.85rem;font-weight:700;color:#fff">'+item.username+(isMe?' <span style="font-size:.62rem;background:rgba(27,135,245,.15);color:var(--c1);padding:.1rem .35rem;border-radius:4px">Tu</span>':'')+' </div>'
       + '</div>'
       + '<div style="text-align:right;flex-shrink:0;font-family:Saira;font-size:.82rem;font-weight:900;color:'+valueColor+'">$'+Math.round(value).toLocaleString('es-MX')+'</div>'
       + '</div>';
@@ -5834,7 +5835,7 @@ function setDiamondPeriod(period){
     var tab = document.getElementById('dtab-'+p);
     if(tab){
       if(p === period){
-        tab.style.background = 'linear-gradient(90deg,#67e8f9,#0e7490)';
+        tab.style.background = 'linear-gradient(90deg,#7cc0ff,#0a4fa8)';
         tab.style.color = '#fff';
       } else {
         tab.style.background = 'transparent';
@@ -5902,18 +5903,18 @@ function loadDiamondTop(){
         var rankColor = i < 3 ? medalColors[i] : 'var(--muted)';
         var initial = item.username.charAt(0).toUpperCase();
         var isTop1 = i === 0;
-        var bg = isTop1 ? 'linear-gradient(90deg,rgba(255,215,0,.1),rgba(167,139,250,.05))' : 'rgba(255,255,255,.03)';
+        var bg = isTop1 ? 'linear-gradient(90deg,rgba(255,215,0,.1),rgba(124,192,255,.05))' : 'rgba(255,255,255,.03)';
         var border = isTop1 ? 'rgba(255,215,0,.3)' : 'rgba(255,255,255,.06)';
         var avSize = isTop1 ? '44px' : '38px';
 
         html += '<div style="background:'+bg+';border:1px solid '+border+';border-radius:11px;padding:'+(isTop1?'.85rem .9rem':'.65rem .9rem')+';display:flex;align-items:center;gap:.75rem;'+(isTop1?'box-shadow:0 0 18px rgba(255,215,0,.1);':'')+'">'
           + '<div style="width:26px;text-align:center;font-size:'+(i<3?'1.2rem':'.85rem')+';font-weight:900;color:'+rankColor+';flex-shrink:0">'+rank+'</div>'
-          + '<div style="width:'+avSize+';height:'+avSize+';border-radius:11px;background:linear-gradient(135deg,#67e8f9,#0e7490);display:flex;align-items:center;justify-content:center;font-family:Saira;font-size:'+(isTop1?'.9rem':'.78rem')+';font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+rankColor+'44">'+initial+'</div>'
+          + '<div style="width:'+avSize+';height:'+avSize+';border-radius:11px;background:linear-gradient(135deg,#7cc0ff,#0a4fa8);display:flex;align-items:center;justify-content:center;font-family:Saira;font-size:'+(isTop1?'.9rem':'.78rem')+';font-weight:900;color:#fff;flex-shrink:0;border:2px solid '+rankColor+'44">'+initial+'</div>'
           + '<div style="flex:1;min-width:0">'
           + '<div style="font-size:'+(isTop1?'1rem':'.85rem')+';font-weight:'+(isTop1?'900':'700')+';color:#fff">'+item.username+'</div>'
           + '<div style="font-size:.62rem;color:var(--muted)">diamantes comprados</div>'
           + '</div>'
-          + '<div style="text-align:right;flex-shrink:0;font-family:Saira;font-size:'+(isTop1?'1.05rem':'.88rem')+';font-weight:900;color:'+(isTop1?'#ffd700':'#67e8f9')+'">'+item.diamonds.toLocaleString('es-MX')+' 💎</div>'
+          + '<div style="text-align:right;flex-shrink:0;font-family:Saira;font-size:'+(isTop1?'1.05rem':'.88rem')+';font-weight:900;color:'+(isTop1?'#ffd700':'#7cc0ff')+'">'+item.diamonds.toLocaleString('es-MX')+' 💎</div>'
           + '</div>';
       });
 
@@ -7223,8 +7224,8 @@ function _mostrarRetiroEnviado(monto, montoMxn, recibeMxn, metodo, destino){
     +   _filaRecibo('\uD83D\uDCE7 Destino', destino)
     +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha+' \u00B7 '+hora, true)
     + '</div>'
-    + '<div style="background:rgba(255,180,60,.08);border:1px solid rgba(255,180,60,.25);border-radius:10px;padding:.75rem .9rem;margin-top:1rem;font-size:.73rem;color:#22d3ee;line-height:1.55">\u23F3 Procesamos los retiros en <b>24-48 hrs habiles</b>. El saldo se descuenta cuando aprobamos la solicitud.</div>'
-    + '<button onclick="var o=document.getElementById(\'recibo-retiro-ov\'); if(o) o.remove();" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Barlow;font-weight:700;font-size:.9rem;cursor:pointer">Entendido</button>'
+    + '<div style="background:rgba(255,180,60,.08);border:1px solid rgba(255,180,60,.25);border-radius:10px;padding:.75rem .9rem;margin-top:1rem;font-size:.73rem;color:#1b87f5;line-height:1.55">\u23F3 Procesamos los retiros en <b>24-48 hrs habiles</b>. El saldo se descuenta cuando aprobamos la solicitud.</div>'
+    + '<button onclick="var o=document.getElementById(\'recibo-retiro-ov\'); if(o) o.remove();" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0a4fa8,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Barlow;font-weight:700;font-size:.9rem;cursor:pointer">Entendido</button>'
     + '</div>';
 }
 
@@ -7504,12 +7505,12 @@ function cargarPedidosSeguimiento(){
           var yaEnviado = Math.round((actual/total) * cantNum);
           enviado = '<div style="display:flex;justify-content:space-between;font-size:.72rem;margin-bottom:.5rem"><span style="color:var(--muted)">Likes enviados</span><span style="color:#25d366;font-weight:700">'+yaEnviado.toLocaleString('es-MX')+' / '+cantNum.toLocaleString('es-MX')+'</span></div>';
         } else if(p.tipo === 'honor'){
-          enviado = '<div style="display:flex;justify-content:space-between;font-size:.72rem;margin-bottom:.5rem"><span style="color:var(--muted)">Honor de clan</span><span style="color:#67e8f9;font-weight:700">Dia '+actual+' de '+total+'</span></div>';
+          enviado = '<div style="display:flex;justify-content:space-between;font-size:.72rem;margin-bottom:.5rem"><span style="color:var(--muted)">Honor de clan</span><span style="color:#7cc0ff;font-weight:700">Dia '+actual+' de '+total+'</span></div>';
         }
 
         html += '<div class="ped-prog-wrap">';
         html += enviado;
-        html += '<div class="ped-prog-head"><span>Progreso de entrega</span><span style="color:#a5f3fc;font-weight:700">'+actual+'/'+total+' dias</span></div>';
+        html += '<div class="ped-prog-head"><span>Progreso de entrega</span><span style="color:#b9dcff;font-weight:700">'+actual+'/'+total+' dias</span></div>';
         html += '<div class="ped-prog-bar"><div class="ped-prog-fill" style="width:'+pct+'%"></div></div>';
         // Puntitos por día
         html += '<div class="ped-prog-dots">';
@@ -7685,8 +7686,8 @@ function renderCreadoresTabla(){
     var bg = (i % 2 === 0) ? 'rgba(255,255,255,.015)' : 'transparent';
     var esUltimo = (i === CREADORES_PREMIOS.length - 1);
     html += '<div style="display:grid;grid-template-columns:1.3fr 1fr;padding:.85rem 1rem;background:'+bg+';'+(esUltimo?'background:rgba(255,207,64,.06);':'')+'border-bottom:'+(esUltimo?'none':'1px solid rgba(255,255,255,.05)')+'">';
-    html += '<div style="font-family:Saira;font-weight:700;font-size:.85rem;color:'+(esUltimo?'#67e8f9':'#fff')+';display:flex;align-items:center">'+p.label+'</div>';
-    html += '<div style="font-family:Saira;font-weight:800;font-size:.92rem;color:'+(esUltimo?'#67e8f9':'#22d3ee')+';display:flex;align-items:center;gap:.35rem">'+p.diamantes.toLocaleString('es-MX')+' \u{1F48E}</div>';
+    html += '<div style="font-family:Saira;font-weight:700;font-size:.85rem;color:'+(esUltimo?'#7cc0ff':'#fff')+';display:flex;align-items:center">'+p.label+'</div>';
+    html += '<div style="font-family:Saira;font-weight:800;font-size:.92rem;color:'+(esUltimo?'#7cc0ff':'#1b87f5')+';display:flex;align-items:center;gap:.35rem">'+p.diamantes.toLocaleString('es-MX')+' \u{1F48E}</div>';
     html += '</div>';
   });
   cont.innerHTML = html;
@@ -7938,7 +7939,7 @@ function _avisoEntrega(p){
       + '</div>';
   }
   if(p && p.tipo==='auto'){
-    return '<div style="background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.25);border-radius:11px;padding:.7rem .9rem;margin-bottom:1.25rem;font-size:.8rem;color:#25d366">\u26A1 Recarga instantanea directa a tu ID<br/><span style="color:#67e8f9;font-size:.74rem">\uD83C\uDF0E Solo cuentas de region LATAM</span></div>';
+    return '<div style="background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.25);border-radius:11px;padding:.7rem .9rem;margin-bottom:1.25rem;font-size:.8rem;color:#25d366">\u26A1 Recarga instantanea directa a tu ID<br/><span style="color:#7cc0ff;font-size:.74rem">\uD83C\uDF0E Solo cuentas de region LATAM</span></div>';
   }
   return '<div style="background:rgba(255,180,60,.08);border:1px solid rgba(255,180,60,.25);border-radius:11px;padding:.7rem .9rem;margin-bottom:1.25rem;font-size:.8rem;color:#ffb84d">\u23F3 Se procesa manualmente (te contactamos)</div>';
 }
@@ -7982,7 +7983,7 @@ function _mostrarAvisoModal(titulo, texto, color){
 
   var c = document.createElement('div');
   c.className = 'av-card';
-  c.style.cssText = 'position:relative;max-width:400px;width:100%;background:linear-gradient(165deg,#12141f,#0a0b12);border:1px solid '+color+'44;border-radius:24px;padding:2rem 1.5rem 1.6rem;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.6),0 0 50px '+color+'22,inset 0 1px 0 rgba(255,255,255,.05);animation:avCardIn .4s cubic-bezier(.2,.8,.3,1.1) both';
+  c.style.cssText = 'position:relative;max-width:400px;width:100%;background:linear-gradient(165deg,#17181b,#0a0b12);border:1px solid '+color+'44;border-radius:24px;padding:2rem 1.5rem 1.6rem;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.6),0 0 50px '+color+'22,inset 0 1px 0 rgba(255,255,255,.05);animation:avCardIn .4s cubic-bezier(.2,.8,.3,1.1) both';
   c.innerHTML =
     // Icono con anillos animados
     '<div style="position:relative;width:78px;height:78px;margin:0 auto 1.1rem">'
@@ -8109,10 +8110,10 @@ function abrirDiamDetalle(idx){
     + _avisoEntrega(p)
     + '<label class="flabel">Tu ID de Free Fire *</label>'
     + '<input class="finput" id="diam-ffid" type="text" inputmode="numeric" placeholder="Ej: 123456789"/>'
-    + '<div style="display:flex;justify-content:space-between;background:rgba(34,211,238,.05);border:1px solid rgba(34,211,238,.15);border-radius:11px;padding:.65rem 1rem;margin:.3rem 0 .8rem"><span style="font-size:.76rem;color:#6b7280">Tu saldo</span><span style="font-weight:600;color:'+(alcanza?'#22d3ee':'#ff6b6b')+';font-size:.85rem">'+fmt(saldo)+'</span></div>'
+    + '<div style="display:flex;justify-content:space-between;background:rgba(27,135,245,.05);border:1px solid rgba(27,135,245,.15);border-radius:11px;padding:.65rem 1rem;margin:.3rem 0 .8rem"><span style="font-size:.76rem;color:#6b7280">Tu saldo</span><span style="font-weight:600;color:'+(alcanza?'#1b87f5':'#ff6b6b')+';font-size:.85rem">'+fmt(saldo)+'</span></div>'
     + (alcanza ? '' : '<div style="background:rgba(255,60,60,.08);border:1px solid rgba(255,60,60,.25);border-radius:10px;padding:.65rem .85rem;font-size:.77rem;color:#ff6b6b;margin-bottom:.75rem">Saldo insuficiente. <span onclick="goPage(\'saldo\')" style="text-decoration:underline;cursor:pointer">Recarga aqui</span></div>')
     + '<div class="ddet-msg" id="diam-msg"></div>'
-    + '<button id="diam-btn" onclick="confirmarDiamCompra()" style="width:100%;padding:.9rem;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.42);color:#22d3ee;border-radius:13px;font-family:Barlow;font-weight:600;font-size:.92rem;cursor:pointer">Comprar con saldo</button>'
+    + '<button id="diam-btn" onclick="confirmarDiamCompra()" style="width:100%;padding:.9rem;background:rgba(27,135,245,.12);border:1px solid rgba(27,135,245,.42);color:#1b87f5;border-radius:13px;font-family:Barlow;font-weight:600;font-size:.92rem;cursor:pointer">Comprar con saldo</button>'
     + '</div>';
 
   document.getElementById('diam-catalogo').style.display='none';
@@ -8206,12 +8207,12 @@ function _mostrarReciboProceso(p, ffId, ord){
   det.innerHTML =
     '<div style="background:linear-gradient(160deg,rgba(255,180,60,.08),rgba(255,255,255,.02));border:2px solid rgba(255,180,60,.35);border-radius:18px;padding:1.75rem 1.35rem;text-align:center;max-width:420px;margin:0 auto">'
     + '<div style="font-size:2.8rem;margin-bottom:.5rem">\u23F3</div>'
-    + '<div style="font-family:Saira;font-weight:900;font-size:1.25rem;color:#22d3ee;margin-bottom:.35rem;letter-spacing:.5px">RECARGA EN PROCESO</div>'
+    + '<div style="font-family:Saira;font-weight:900;font-size:1.25rem;color:#1b87f5;margin-bottom:.35rem;letter-spacing:.5px">RECARGA EN PROCESO</div>'
     + '<div style="font-size:.8rem;color:var(--muted);margin-bottom:1.35rem">Tu pedido se esta procesando, te lo acreditamos pronto</div>'
 
     // Barra de progreso animada
     + '<div style="background:rgba(0,0,0,.25);border-radius:99px;height:10px;overflow:hidden;margin-bottom:1.5rem">'
-    +   '<div id="recibo-barra" style="height:100%;width:15%;border-radius:99px;background:linear-gradient(90deg,#22d3ee,#ff9900,#22d3ee);background-size:200% 100%;box-shadow:0 0 12px rgba(255,180,60,.5);transition:width .8s ease"></div>'
+    +   '<div id="recibo-barra" style="height:100%;width:15%;border-radius:99px;background:linear-gradient(90deg,#1b87f5,#ff9900,#1b87f5);background-size:200% 100%;box-shadow:0 0 12px rgba(255,180,60,.5);transition:width .8s ease"></div>'
     + '</div>'
 
     + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
@@ -8222,7 +8223,7 @@ function _mostrarReciboProceso(p, ffId, ord){
     +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' \u00B7 \uD83D\uDD52 ' + hora, true)
     + '</div>'
 
-    + '<button onclick="cerrarDiamDetalle()" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Barlow;font-weight:700;font-size:.9rem;cursor:pointer">Volver al catalogo</button>'
+    + '<button onclick="cerrarDiamDetalle()" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0a4fa8,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Barlow;font-weight:700;font-size:.9rem;cursor:pointer">Volver al catalogo</button>'
     + '</div>';
 
   det.style.display = '';
@@ -8491,7 +8492,7 @@ function _mostrarConfirmacionIdNoVerificado(p, ffId, btnOriginal, msgOriginal){
   ov.id = 'id-noverif-overlay';
   ov.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px)';
   ov.innerHTML =
-    '<div style="background:#0e1118;border:1.5px solid rgba(255,180,60,.45);border-radius:18px;padding:1.4rem;max-width:380px;width:100%;max-height:90vh;overflow-y:auto">'
+    '<div style="background:#0d1117;border:1.5px solid rgba(255,180,60,.45);border-radius:18px;padding:1.4rem;max-width:380px;width:100%;max-height:90vh;overflow-y:auto">'
     + '<div style="text-align:center;margin-bottom:1rem">'
     +   '<div style="font-size:2rem;margin-bottom:.4rem">\u26A0\uFE0F</div>'
     +   '<div style="font-family:Saira;font-weight:900;font-size:1.05rem;color:#ffb84d">ID NO VERIFICADO</div>'
@@ -8510,7 +8511,7 @@ function _mostrarConfirmacionIdNoVerificado(p, ffId, btnOriginal, msgOriginal){
     + '</label>'
     + '<div style="display:flex;gap:.65rem">'
     +   '<button id="id-noverif-cancel" style="flex:1;padding:.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#8b93a3;border-radius:11px;font-family:Barlow;font-weight:700;font-size:.82rem;cursor:pointer">Cancelar</button>'
-    +   '<button id="btn-continuar-noverif" disabled style="flex:1.4;padding:.75rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#4b5563;border-radius:11px;font-family:Saira;font-weight:900;font-size:.8rem;cursor:not-allowed">CONTINUAR CON LA RECARGA</button>'
+    +   '<button id="btn-continuar-noverif" disabled style="flex:1.4;padding:.75rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#54575d;border-radius:11px;font-family:Saira;font-weight:900;font-size:.8rem;cursor:not-allowed">CONTINUAR CON LA RECARGA</button>'
     + '</div></div>';
   document.body.appendChild(ov);
 
@@ -8532,7 +8533,7 @@ function _toggleBtnIdNoVerif(){
     btn.style.cssText = 'flex:1.4;padding:.75rem;background:linear-gradient(135deg,#a3690a,#ffb84d);border:none;color:#1a0f00;border-radius:11px;font-family:Saira;font-weight:900;font-size:.8rem;cursor:pointer';
   } else {
     btn.disabled = true;
-    btn.style.cssText = 'flex:1.4;padding:.75rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#4b5563;border-radius:11px;font-family:Saira;font-weight:900;font-size:.8rem;cursor:not-allowed';
+    btn.style.cssText = 'flex:1.4;padding:.75rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#54575d;border-radius:11px;font-family:Saira;font-weight:900;font-size:.8rem;cursor:not-allowed';
   }
 }
 
@@ -8546,7 +8547,7 @@ function _mostrarConfirmacionFinalNoVerificado(p, ffId){
   ov.id = 'id-noverif-final-overlay';
   ov.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px)';
   ov.innerHTML =
-    '<div style="background:#0e1118;border:1.5px solid rgba(255,180,60,.45);border-radius:18px;padding:1.4rem;max-width:360px;width:100%">'
+    '<div style="background:#0d1117;border:1.5px solid rgba(255,180,60,.45);border-radius:18px;padding:1.4rem;max-width:360px;width:100%">'
     + '<div style="text-align:center;margin-bottom:1rem">'
     +   '<div style="font-size:1.8rem;margin-bottom:.4rem">\u26A0\uFE0F</div>'
     +   '<div style="font-family:Saira;font-weight:900;font-size:1rem;color:#ffb84d">ID NO VERIFICADO</div>'
@@ -8562,7 +8563,7 @@ function _mostrarConfirmacionFinalNoVerificado(p, ffId){
     + '</label>'
     + '<div style="display:flex;gap:.65rem">'
     +   '<button id="id-final-cancel" style="flex:1;padding:.75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#8b93a3;border-radius:11px;font-family:Barlow;font-weight:700;font-size:.82rem;cursor:pointer">Cancelar</button>'
-    +   '<button id="btn-confirmar-final" disabled style="flex:1.4;padding:.75rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#4b5563;border-radius:11px;font-family:Saira;font-weight:900;font-size:.8rem;cursor:not-allowed">CONFIRMAR RECARGA</button>'
+    +   '<button id="btn-confirmar-final" disabled style="flex:1.4;padding:.75rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#54575d;border-radius:11px;font-family:Saira;font-weight:900;font-size:.8rem;cursor:not-allowed">CONFIRMAR RECARGA</button>'
     + '</div></div>';
   document.body.appendChild(ov);
 
@@ -8594,7 +8595,7 @@ function _toggleBtnFinalNoVerif(){
     btn.style.cssText = 'flex:1.4;padding:.75rem;background:linear-gradient(135deg,#a3690a,#ffb84d);border:none;color:#1a0f00;border-radius:11px;font-family:Saira;font-weight:900;font-size:.8rem;cursor:pointer';
   } else {
     btn.disabled = true;
-    btn.style.cssText = 'flex:1.4;padding:.75rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#4b5563;border-radius:11px;font-family:Saira;font-weight:900;font-size:.8rem;cursor:not-allowed';
+    btn.style.cssText = 'flex:1.4;padding:.75rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#54575d;border-radius:11px;font-family:Saira;font-weight:900;font-size:.8rem;cursor:not-allowed';
   }
 }
 
@@ -8667,7 +8668,7 @@ function verProductosRA(){
   var cont = document.getElementById('ra-productos-lista');
   if(!cont) return;
   cont.style.display = 'block';
-  cont.innerHTML = '<div style="text-align:center;padding:1rem;color:#22d3ee">Cargando productos...</div>';
+  cont.innerHTML = '<div style="text-align:center;padding:1rem;color:#1b87f5">Cargando productos...</div>';
 
   fetch(COMPRAR_RECARGA_URL, {
     method: 'POST',
@@ -8682,7 +8683,7 @@ function verProductosRA(){
     if(!prods || !prods.length){
       var dbg = '';
       if(res._debug_respuesta_cruda !== undefined){
-        dbg = '<div style="margin-top:.75rem;padding:.6rem;background:rgba(255,255,255,.03);border-radius:8px;font-size:.65rem;color:#a5f3fc;word-break:break-all">HTTP: '+(res._debug_http_status||'?')+'<br>Respuesta cruda:<br>'+JSON.stringify(res._debug_respuesta_cruda)+'</div>';
+        dbg = '<div style="margin-top:.75rem;padding:.6rem;background:rgba(255,255,255,.03);border-radius:8px;font-size:.65rem;color:#b9dcff;word-break:break-all">HTTP: '+(res._debug_http_status||'?')+'<br>Respuesta cruda:<br>'+JSON.stringify(res._debug_respuesta_cruda)+'</div>';
       }
       cont.innerHTML = '<div style="color:#ff6b6b">No se recibieron productos (lista vacia).</div>'+dbg;
       return;
@@ -8693,7 +8694,7 @@ function verProductosRA(){
     var pins = prods.filter(function(p){ return (p.type||p.tipo)==='pin'; });
     var otros = prods.filter(function(p){ return (p.type||p.tipo)!=='recharge' && (p.type||p.tipo)!=='pin'; });
 
-    var html = '<div style="font-family:Saira;font-weight:800;color:#22d3ee;margin-bottom:.75rem">'+prods.length+' PRODUCTOS ('+recargas.length+' recargas, '+pins.length+' pins)</div>';
+    var html = '<div style="font-family:Saira;font-weight:800;color:#1b87f5;margin-bottom:.75rem">'+prods.length+' PRODUCTOS ('+recargas.length+' recargas, '+pins.length+' pins)</div>';
 
     function pintar(lista, titulo, color){
       if(!lista.length) return '';
@@ -8702,7 +8703,7 @@ function verProductosRA(){
         var tipo = p.type || p.tipo || '?';
         h += '<div style="padding:.6rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:8px;margin-bottom:.5rem">'
           + '<div style="color:#fff;font-weight:700">ID: '+p.id+' &mdash; '+(p.name||p.sku||p.package||'?')+'</div>'
-          + '<div style="color:#22d3ee;font-size:.68rem">Tipo: '+tipo+' &middot; SKU: '+(p.sku||'?')+'</div>'
+          + '<div style="color:#1b87f5;font-size:.68rem">Tipo: '+tipo+' &middot; SKU: '+(p.sku||'?')+'</div>'
           + '<div style="color:#25d366;font-size:.72rem">Precio (tu costo): $'+(p.price||'?')+'</div>'
           + '</div>';
       });
@@ -8710,9 +8711,9 @@ function verProductosRA(){
     }
 
     html += pintar(recargas, '\u{1F3AE} RECARGAS DIRECTAS (type=recharge):', '#25d366');
-    html += pintar(pins, '\u{1F39F}\uFE0F PINS (type=pin):', '#22d3ee');
-    html += pintar(otros, '\u{2753} OTROS:', '#67e8f9');
-    html += '<div style="margin-top:.75rem;padding:.6rem;background:rgba(34,211,238,.08);border-radius:8px;color:#a5f3fc;font-size:.72rem">&#128203; Copia esta lista y pasala para conectar los productos.</div>';
+    html += pintar(pins, '\u{1F39F}\uFE0F PINS (type=pin):', '#1b87f5');
+    html += pintar(otros, '\u{2753} OTROS:', '#7cc0ff');
+    html += '<div style="margin-top:.75rem;padding:.6rem;background:rgba(27,135,245,.08);border-radius:8px;color:#b9dcff;font-size:.72rem">&#128203; Copia esta lista y pasala para conectar los productos.</div>';
     cont.innerHTML = html;
   }).catch(function(err){
     cont.innerHTML = '<div style="color:#ff6b6b">Error de conexion: '+err+'<br>Revisa que la funcion comprar-recarga este montada.</div>';
@@ -8947,11 +8948,11 @@ function _mostrarReciboRecarga(p, ffId, nombreJugador, status){
     ? '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
     : '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
 
-  var icDiam = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/></svg>';
+  var icDiam = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5aa9ff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/></svg>';
   var icId = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8b93a3" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>';
   var icPrice = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>';
-  var icCal = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
-  var icClock = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>';
+  var icCal = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5aa9ff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
+  var icClock = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5aa9ff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>';
 
   function bg(ic, tint){ return '<div class="cy-row-ic" style="background:'+tint+'">'+ic+'</div>'; }
   function cyRow(icHtml, k, v, cls){
@@ -8981,11 +8982,11 @@ function _mostrarReciboRecarga(p, ffId, nombreJugador, status){
     +   '</div>'
     +   (base && bonus ? '<div style="text-align:center;margin-top:-.5rem;margin-bottom:1.1rem"><span class="cy-desglose">'+base+' + '+bonus+' \uD83C\uDF81 BONUS</span></div>' : '')
     +   '<div class="cy-panel">'
-    +     cyRow(bg(icDiam,'rgba(56,189,248,.1)'), 'Cantidad', p.nombre)
-    +     cyRow(bg(icId,'rgba(255,255,255,.05)'), 'Free Fire ID', ffId + (nombreJugador ? '<br/><span style="color:#38bdf8">@'+nombreJugador+'</span>' : '<br/><span style="color:#ffb84d;font-size:.72em">&#9888; ID sin verificar</span>'), 'cyan')
+    +     cyRow(bg(icDiam,'rgba(90,169,255,.1)'), 'Cantidad', p.nombre)
+    +     cyRow(bg(icId,'rgba(255,255,255,.05)'), 'Free Fire ID', ffId + (nombreJugador ? '<br/><span style="color:#5aa9ff">@'+nombreJugador+'</span>' : '<br/><span style="color:#ffb84d;font-size:.72em">&#9888; ID sin verificar</span>'), 'cyan')
     +     cyRow(bg(icPrice,'rgba(74,222,128,.1)'), 'Precio', fmtDiam(p), 'green')
-    +     cyRow(bg(icCal,'rgba(56,189,248,.1)'), 'Fecha', fecha + ' \u00B7 ' + dia)
-    +     cyRow(bg(icClock,'rgba(56,189,248,.1)'), 'Hora', hora)
+    +     cyRow(bg(icCal,'rgba(90,169,255,.1)'), 'Fecha', fecha + ' \u00B7 ' + dia)
+    +     cyRow(bg(icClock,'rgba(90,169,255,.1)'), 'Hora', hora)
     +   '</div>'
     +   '<div class="cy-actions">'
     +     '<div class="cy-act" onclick="descargarComprobante()"><div class="cy-act-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div><div><div class="cy-act-t">Descargar comprobante</div><div class="cy-act-s">Guardar como imagen</div></div></div>'
@@ -9034,8 +9035,8 @@ function _generarComprobanteCanvas(){
   var W = 720, H = 1000;
   var cv = document.createElement('canvas'); cv.width=W; cv.height=H;
   var ctx = cv.getContext('2d');
-  ctx.fillStyle = '#0e1118'; ctx.fillRect(0,0,W,H);
-  _rr(ctx, 40, 50, W-80, H-100, 28); ctx.fillStyle='#12161f'; ctx.fill();
+  ctx.fillStyle = '#0d1117'; ctx.fillRect(0,0,W,H);
+  _rr(ctx, 40, 50, W-80, H-100, 28); ctx.fillStyle='#18191c'; ctx.fill();
   ctx.beginPath(); ctx.arc(W/2, 175, 52, 0, Math.PI*2); ctx.fillStyle='#16a34a'; ctx.fill();
   ctx.strokeStyle='#fff'; ctx.lineWidth=8; ctx.lineCap='round'; ctx.lineJoin='round';
   ctx.beginPath(); ctx.moveTo(W/2-24, 175); ctx.lineTo(W/2-6, 193); ctx.lineTo(W/2+26, 158); ctx.stroke();
@@ -9043,7 +9044,7 @@ function _generarComprobanteCanvas(){
   ctx.fillText(c.titulo, W/2, 285);
   ctx.fillStyle='#8b93a3'; ctx.font='24px Barlow, sans-serif';
   ctx.fillText('Los diamantes ya estan en tu cuenta', W/2, 325);
-  _rr(ctx, 80, 370, W-160, 130, 20); ctx.fillStyle='rgba(56,189,248,.06)'; ctx.fill();
+  _rr(ctx, 80, 370, W-160, 130, 20); ctx.fillStyle='rgba(90,169,255,.06)'; ctx.fill();
   ctx.strokeStyle='rgba(255,255,255,.08)'; ctx.lineWidth=1.5; ctx.stroke();
   ctx.textAlign='left'; ctx.fillStyle='#fff'; ctx.font='bold 68px Barlow, sans-serif';
   ctx.fillText(c.total, 230, 455);
@@ -9067,7 +9068,7 @@ function _generarComprobanteCanvas(){
     ctx.beginPath(); ctx.moveTo(90, y+22); ctx.lineTo(W-90, y+22); ctx.stroke();
     y += 62;
   });
-  ctx.textAlign='center'; ctx.fillStyle='#5a6478'; ctx.font='20px Barlow, sans-serif';
+  ctx.textAlign='center'; ctx.fillStyle='#64686e'; ctx.font='20px Barlow, sans-serif';
   ctx.fillText('ciberstore.lat \u00B7 ' + c.txId, W/2, H-80);
   return cv;
 }
@@ -9191,7 +9192,7 @@ function _mostrarReciboScar(ffId, user, ord){
     + '<div style="font-size:3rem;margin-bottom:.5rem">\u2705</div>'
     + '<div style="font-family:Saira;font-weight:900;font-size:1.3rem;color:#25d366;margin-bottom:.35rem;letter-spacing:.5px">PEDIDO CONFIRMADO</div>'
     + '<div style="font-size:.82rem;color:var(--muted);margin-bottom:1.5rem">Tu SCAR Evolutiva esta en proceso</div>'
-    + '<div style="background:rgba(0,0,0,.25);border-radius:99px;height:10px;overflow:hidden;margin-bottom:1.5rem"><div style="height:100%;width:25%;border-radius:99px;background:linear-gradient(90deg,#22d3ee,#ff9900);box-shadow:0 0 12px rgba(255,180,60,.5)"></div></div>'
+    + '<div style="background:rgba(0,0,0,.25);border-radius:99px;height:10px;overflow:hidden;margin-bottom:1.5rem"><div style="height:100%;width:25%;border-radius:99px;background:linear-gradient(90deg,#1b87f5,#ff9900);box-shadow:0 0 12px rgba(255,180,60,.5)"></div></div>'
     + '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;text-align:left">'
     +   _filaRecibo('\uD83D\uDCCB Pedido', '#'+ord)
     +   _filaRecibo('\uD83D\uDD2B Producto', 'SCAR Evolutiva Nivel 7')
@@ -9201,8 +9202,8 @@ function _mostrarReciboScar(ffId, user, ord){
     +   _filaRecibo('\u23F3 Entrega', '2 a 3 semanas')
     +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' \u00B7 ' + hora, true)
     + '</div>'
-    + '<div style="font-size:.75rem;color:#22d3ee;margin-top:1rem;line-height:1.5">Te contactaremos por WhatsApp. La skin llega en 2-3 semanas al correo de tu cuenta.</div>'
-    + '<button onclick="goPage(\'home\')" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Barlow;font-weight:700;font-size:.9rem;cursor:pointer">Volver al inicio</button>'
+    + '<div style="font-size:.75rem;color:#1b87f5;margin-top:1rem;line-height:1.5">Te contactaremos por WhatsApp. La skin llega en 2-3 semanas al correo de tu cuenta.</div>'
+    + '<button onclick="goPage(\'home\')" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0a4fa8,#f0b90b);color:#fff;border:none;border-radius:12px;font-family:Barlow;font-weight:700;font-size:.9rem;cursor:pointer">Volver al inicio</button>'
     + '</div>';
   wrap.scrollIntoView({ behavior:'smooth', block:'start' });
 }
@@ -9619,7 +9620,7 @@ function _tarjetaEntrega(p, estActual, rechazado){
     _ESTADOS_FLUJO.forEach(function(est){
       var activo = (est === estActual);
       botones += '<button onclick="admSetEstado(\''+p.id+'\',\''+est+'\')" style="flex:1;min-width:70px;padding:.45rem .3rem;border-radius:8px;font-family:Saira;font-weight:700;font-size:.65rem;cursor:pointer;border:1px solid '
-        + (activo?'#67e8f9;background:linear-gradient(90deg,#67e8f9,#0e7490);color:#fff':'rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:var(--muted)')+'">'
+        + (activo?'#7cc0ff;background:linear-gradient(90deg,#7cc0ff,#0a4fa8);color:#fff':'rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:var(--muted)')+'">'
         + _ESTADOS_NOMBRE[est].replace(/[^\x00-\x7F ]/g,'').trim() + '</button>';
     });
   }
@@ -9627,7 +9628,7 @@ function _tarjetaEntrega(p, estActual, rechazado){
     + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;margin-bottom:.7rem">'
     +   '<div><div style="font-weight:700;color:#fff;font-size:.85rem">'+_esc(p.producto||'Pedido')+'</div>'
     +   '<div style="font-size:.7rem;color:var(--muted);margin-top:.2rem">'+_esc(p.username||'')+(p.ff_id?(' \u00b7 ID: '+_esc(p.ff_id)):'')+' \u00b7 '+fecha+'</div></div>'
-    +   '<span style="font-size:.68rem;font-weight:700;color:#a5f3fc;white-space:nowrap">'+(_ESTADOS_NOMBRE[estActual]||estActual)+'</span>'
+    +   '<span style="font-size:.68rem;font-weight:700;color:#b9dcff;white-space:nowrap">'+(_ESTADOS_NOMBRE[estActual]||estActual)+'</span>'
     + '</div>'
     + (rechazado ? '<div style="font-size:.72rem;color:#ff6b6b">Pedido rechazado</div>'
        : '<div style="display:flex;gap:.35rem;flex-wrap:wrap">'+botones+'</div>'
@@ -10049,7 +10050,7 @@ function comprarPase(){
     if(typeof _mostrarAvisoModal==='function'){
       _mostrarAvisoModal('PEDIDO #'+ord+' CONFIRMADO',
         'Tu <b style="color:#fff">'+txtCant+'</b> fue pedido para <b style="color:#fff">'+nom+'</b>.<br/><br/>Se envia mediante <b style="color:#fff">REGALO</b> y puede tardar <b style="color:#fff">1 dia</b>.',
-        '#22d3ee');
+        '#1b87f5');
     }
     showToast('\u2705 Pedido #'+ord+' confirmado!', 3000);
 
@@ -10207,7 +10208,7 @@ function recSetMoneda(m){
   var lbl = document.getElementById('rec-cur-label');
   if(lbl) lbl.textContent = m;
   var av = document.getElementById('rec-min-aviso');
-  if(av) av.innerHTML = '<span style="color:#22d3ee">&#9432;</span> Minimo ' + (m==='MXN'?'$200 MXN':'$11.80 USD');
+  if(av) av.innerHTML = '<span style="color:#1b87f5">&#9432;</span> Minimo ' + (m==='MXN'?'$200 MXN':'$11.80 USD');
   var inp = document.getElementById('rec-monto');
   if(inp) inp.value = (m==='MXN') ? 200 : 11.80;
   _recPintarMontos();
@@ -10458,9 +10459,9 @@ var LIKES_PLANES = [
   { id:'estandar', nombre:'ESTANDAR',    ids:'5 IDs / dia',   precio:100, color:'#c9d1e0', icono:'\u2b50' },
   { id:'estandar2',nombre:'ESTANDAR II', ids:'7 IDs / dia',   precio:150, color:'#ffb84d', icono:'\ud83c\udf96\ufe0f' },
   { id:'pro',      nombre:'PRO',         ids:'10 IDs / dia',  precio:200, color:'#ff5050', icono:'\ud83d\udd25' },
-  { id:'master',   nombre:'MASTER',      ids:'20 IDs / dia',  precio:280, color:'#a78bfa', icono:'\ud83d\udc51' },
+  { id:'master',   nombre:'MASTER',      ids:'20 IDs / dia',  precio:280, color:'#7cc0ff', icono:'\ud83d\udc51' },
   { id:'elite',    nombre:'ELITE',       ids:'30 IDs / dia',  precio:350, color:'#ffb84d', icono:'\ud83d\udc8e' },
-  { id:'ilimitado',nombre:'ILIMITADO',   ids:'Ilimitado',     precio:500, color:'#22d3ee', icono:'\u267e\ufe0f' }
+  { id:'ilimitado',nombre:'ILIMITADO',   ids:'Ilimitado',     precio:500, color:'#1b87f5', icono:'\u267e\ufe0f' }
 ];
 
 function renderLikesPlanes(){
@@ -10506,7 +10507,7 @@ function canjearCodigoLikes(){
     msg.style.display = 'block';
     if(tipo==='ok'){ msg.style.background='rgba(37,211,102,.1)'; msg.style.border='1px solid rgba(37,211,102,.3)'; msg.style.color='#25d366'; }
     else if(tipo==='err'){ msg.style.background='rgba(255,60,60,.1)'; msg.style.border='1px solid rgba(255,60,60,.3)'; msg.style.color='#ff6b6b'; }
-    else { msg.style.background='rgba(34,211,238,.08)'; msg.style.border='1px solid rgba(34,211,238,.3)'; msg.style.color='#22d3ee'; }
+    else { msg.style.background='rgba(27,135,245,.08)'; msg.style.border='1px solid rgba(27,135,245,.3)'; msg.style.color='#1b87f5'; }
     msg.innerHTML = texto;
   }
 
@@ -10778,7 +10779,7 @@ function enviarLikesManual(){
     msg.style.display = 'block';
     if(tipo==='ok'){ msg.style.background='rgba(37,211,102,.1)'; msg.style.border='1px solid rgba(37,211,102,.3)'; msg.style.color='#25d366'; }
     else if(tipo==='err'){ msg.style.background='rgba(255,60,60,.1)'; msg.style.border='1px solid rgba(255,60,60,.3)'; msg.style.color='#ff6b6b'; }
-    else { msg.style.background='rgba(34,211,238,.08)'; msg.style.border='1px solid rgba(34,211,238,.3)'; msg.style.color='#22d3ee'; }
+    else { msg.style.background='rgba(27,135,245,.08)'; msg.style.border='1px solid rgba(27,135,245,.3)'; msg.style.color='#1b87f5'; }
     msg.innerHTML = texto;
   }
 
@@ -10827,7 +10828,7 @@ function enviarLikesManual(){
           + '<div style="text-align:center;margin-top:.85rem;font-size:.78rem;color:#25d366;font-weight:600">\u2764\uFE0F '+res.enviadas+' likes enviados con exito</div>'
           + '<div style="display:flex;gap:.6rem;margin-top:1rem">'
           +   '<button onclick="descargarImagenLikes()" style="flex:1;padding:.7rem;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.35);color:#25d366;border-radius:11px;font-family:Barlow,sans-serif;font-weight:700;font-size:.78rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.4rem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Descargar</button>'
-          +   '<button onclick="compartirImagenLikes()" style="flex:1;padding:.7rem;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.35);color:#22d3ee;border-radius:11px;font-family:Barlow,sans-serif;font-weight:700;font-size:.78rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.4rem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Compartir</button>'
+          +   '<button onclick="compartirImagenLikes()" style="flex:1;padding:.7rem;background:rgba(27,135,245,.12);border:1px solid rgba(27,135,245,.35);color:#1b87f5;border-radius:11px;font-family:Barlow,sans-serif;font-weight:700;font-size:.78rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.4rem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Compartir</button>'
           + '</div>'
           + '</div>';
         // Guardar datos para generar la imagen
@@ -10872,7 +10873,7 @@ function _lkVerificarPerfil(uid){
   var perfil = document.getElementById('lk-manual-perfil');
   if(!perfil) return;
   perfil.style.display = 'block';
-  perfil.innerHTML = '<div style="display:flex;align-items:center;gap:.5rem;font-size:.78rem;color:#67e8f9;background:rgba(34,211,238,.05);border:1px solid rgba(34,211,238,.2);border-radius:12px;padding:.7rem .9rem"><span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(103,232,249,.3);border-top-color:#67e8f9;border-radius:50%;animation:lkspin .7s linear infinite"></span>Buscando jugador...</div>';
+  perfil.innerHTML = '<div style="display:flex;align-items:center;gap:.5rem;font-size:.78rem;color:#7cc0ff;background:rgba(27,135,245,.05);border:1px solid rgba(27,135,245,.2);border-radius:12px;padding:.7rem .9rem"><span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(124,192,255,.3);border-top-color:#7cc0ff;border-radius:50%;animation:lkspin .7s linear infinite"></span>Buscando jugador...</div>';
 
   fetch(LIKES_ENVIAR_URL, {
     method:'POST',
@@ -10886,8 +10887,8 @@ function _lkVerificarPerfil(uid){
       if(regEl) regEl.value = res.region || 'AUTO';
       var ini = ((res.nombre||'?').charAt(0)||'?').toUpperCase();
       perfil.innerHTML =
-        '<div style="display:flex;align-items:center;gap:.8rem;background:linear-gradient(135deg,rgba(37,211,102,.1),rgba(34,211,238,.04));border:1px solid rgba(37,211,102,.3);border-radius:14px;padding:.85rem .95rem">'
-        + '<div style="width:44px;height:44px;flex-shrink:0;border-radius:12px;background:linear-gradient(135deg,#0e7490,#22d3ee);display:flex;align-items:center;justify-content:center;font-family:Saira;font-weight:800;font-size:1.3rem;color:#fff;box-shadow:0 3px 12px rgba(34,211,238,.3)">'+ini+'</div>'
+        '<div style="display:flex;align-items:center;gap:.8rem;background:linear-gradient(135deg,rgba(37,211,102,.1),rgba(27,135,245,.04));border:1px solid rgba(37,211,102,.3);border-radius:14px;padding:.85rem .95rem">'
+        + '<div style="width:44px;height:44px;flex-shrink:0;border-radius:12px;background:linear-gradient(135deg,#0a4fa8,#1b87f5);display:flex;align-items:center;justify-content:center;font-family:Saira;font-weight:800;font-size:1.3rem;color:#fff;box-shadow:0 3px 12px rgba(27,135,245,.3)">'+ini+'</div>'
         + '<div style="flex:1;min-width:0">'
         +   '<div style="font-family:Barlow,sans-serif;font-weight:700;font-size:1rem;color:#fff;word-break:break-word">'+(res.nombre||'Jugador')+'</div>'
         +   '<div style="display:flex;align-items:center;gap:.4rem;margin-top:.15rem"><span style="font-size:.65rem;color:#9aa3b0;border:1px solid rgba(255,255,255,.14);border-radius:6px;padding:.1rem .45rem;font-weight:600">'+(res.region||'?')+'</span>'+(res.nivel?('<span style="font-size:.7rem;color:#6b7280">Nivel '+res.nivel+'</span>'):'')+'</div>'
@@ -11005,7 +11006,7 @@ function _lkGenerarCanvas(callback){
     // ── Marco con brillo verde ──
     var marco = ctx.createLinearGradient(0, 0, W, H);
     marco.addColorStop(0, '#25d366');
-    marco.addColorStop(1, '#22a7f0');
+    marco.addColorStop(1, '#1b87f5');
     ctx.strokeStyle = marco; ctx.lineWidth = 6;
     glow('#25d366', 22);
     _roundRect(ctx, 28, 28, W-56, H-56, 40); ctx.stroke();
@@ -11020,9 +11021,9 @@ function _lkGenerarCanvas(callback){
       ctx.drawImage(logoImg, (W-lw)/2, y - lh/2, lw, lh);
       y += lh/2 + 45;
     } else {
-      glow('#22a7f0', 15);
+      glow('#1b87f5', 15);
       texto('CIBER', W/2 - 100, y, '900 88px Arial', '#fff', 'center');
-      texto('STORE', W/2 + 145, y, '900 88px Arial', '#22a7f0', 'center');
+      texto('STORE', W/2 + 145, y, '900 88px Arial', '#1b87f5', 'center');
       noGlow();
       y += 90;
     }
@@ -11097,7 +11098,7 @@ function _lkGenerarCanvas(callback){
     texto('+1 (289) 427-3983', W*3/4 - 35, y + 100, '800 38px Arial', '#fff', 'center');
 
     // ═══ 7) Slogan final (bien abajo, sin encimar) ═══
-    texto('\ud83d\udee1\ufe0f  TU EXITO, NUESTRA MISION', W/2, H - 55, '800 30px Arial', '#22a7f0', 'center');
+    texto('\ud83d\udee1\ufe0f  TU EXITO, NUESTRA MISION', W/2, H - 55, '800 30px Arial', '#1b87f5', 'center');
 
     callback(canvas);
   }
@@ -11267,7 +11268,7 @@ function _mostrarBioLargaLink(ord){
   }
   ov.innerHTML = '<div class="modal" style="max-width:420px">'
     + '<div style="padding:1.8rem 1.5rem;text-align:center">'
-    +   '<div style="width:64px;height:64px;margin:0 auto 1rem;border-radius:18px;background:linear-gradient(160deg,#25d366,#0d7a35);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(37,211,102,.4)"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>'
+    +   '<div style="width:64px;height:64px;margin:0 auto 1rem;border-radius:18px;background:linear-gradient(160deg,#25d366,#3d4044);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(37,211,102,.4)"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>'
     +   '<div style="font-family:Barlow,sans-serif;font-weight:700;font-size:1.2rem;color:#fff;margin-bottom:.4rem">Compra exitosa!</div>'
     +   '<div style="font-size:.82rem;color:#9aa3b0;line-height:1.5;margin-bottom:1.3rem">Aqui esta tu enlace para BIO LARGA. Uselo hasta 5 veces al dia.</div>'
     +   '<div style="background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.3);border-radius:12px;padding:1rem;margin-bottom:1rem">'
@@ -11278,7 +11279,7 @@ function _mostrarBioLargaLink(ord){
     +     '<button onclick="window.open(BIOLARGA_LINK,\'_blank\')" style="flex:1;padding:.85rem;background:linear-gradient(135deg,#128c3e,#25d366);color:#fff;border:none;border-radius:11px;font-family:Barlow;font-weight:700;font-size:.85rem;cursor:pointer">Abrir enlace</button>'
     +   '</div>'
     +   '<button onclick="document.getElementById(\'biolarga-modal\').classList.remove(\'show\')" style="width:100%;margin-top:.7rem;padding:.7rem;background:none;border:none;color:#6b7280;font-family:Barlow;font-size:.8rem;cursor:pointer">Cerrar</button>'
-    +   '<div style="font-size:.68rem;color:#4a5568;margin-top:.8rem">Pedido #' + ord + '</div>'
+    +   '<div style="font-size:.68rem;color:#55595e;margin-top:.8rem">Pedido #' + ord + '</div>'
     + '</div></div>';
   ov.classList.add('show');
 }
@@ -11319,13 +11320,13 @@ function renderLikes2k(){
   if(!cont) return;
   cont.innerHTML = LIKES2K_PAQUETES.map(function(p, i){
     var derecha = p.cotizar
-      ? '<div style="text-align:right;flex-shrink:0"><div style="font-family:Saira,sans-serif;font-weight:800;font-size:.82rem;color:#22d3ee;line-height:1.1">COTIZAR</div><div style="font-size:.55rem;color:#6b7280;letter-spacing:.5px">WhatsApp</div></div>'
+      ? '<div style="text-align:right;flex-shrink:0"><div style="font-family:Saira,sans-serif;font-weight:800;font-size:.82rem;color:#1b87f5;line-height:1.1">COTIZAR</div><div style="font-size:.55rem;color:#6b7280;letter-spacing:.5px">WhatsApp</div></div>'
       : '<div style="text-align:right;flex-shrink:0"><div style="font-family:Barlow,sans-serif;font-weight:700;font-size:1.2rem;color:#25d366;line-height:1">'+fmt(p.mxn)+'</div></div>';
     var subtitulo = p.cotizar
-      ? '<div style="font-size:.62rem;color:#22d3ee;margin-top:.15rem">Precio y tiempo segun disponibilidad</div>'
+      ? '<div style="font-size:.62rem;color:#1b87f5;margin-top:.15rem">Precio y tiempo segun disponibilidad</div>'
       : '<div style="font-size:.62rem;color:#6b7280;margin-top:.15rem">Entrega: <span style="color:#ffb84d">'+p.dias+'</span></div>';
-    var borde = p.cotizar ? 'rgba(34,211,238,.25)' : 'rgba(255,255,255,.08)';
-    var hover = p.cotizar ? 'rgba(34,211,238,.5)' : 'rgba(255,180,60,.4)';
+    var borde = p.cotizar ? 'rgba(27,135,245,.25)' : 'rgba(255,255,255,.08)';
+    var hover = p.cotizar ? 'rgba(27,135,245,.5)' : 'rgba(255,180,60,.4)';
     return '<div onclick="comprarLikes2k('+i+')" style="display:flex;align-items:center;justify-content:space-between;gap:.7rem;background:rgba(255,255,255,.022);border:1px solid '+borde+';border-radius:14px;padding:.95rem 1.1rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor=\''+hover+'\'" onmouseout="this.style.borderColor=\''+borde+'\'">'
       + '<div style="display:flex;align-items:center;gap:.8rem">'
       +   '<div style="width:44px;height:44px;flex-shrink:0;border-radius:12px;background:rgba(255,180,60,.12);border:1px solid rgba(255,180,60,.3);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="#ffb84d"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 5.5 6 5.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.5 0 5 3.5 3.5 6.5C19 16.5 12 21 12 21z"/></svg></div>'
@@ -11387,9 +11388,9 @@ function _regSetSexo(val, btn){
   if(el) el.value = val;
   document.querySelectorAll('.reg-sexo-btn').forEach(function(b){
     if(b.getAttribute('data-sexo')===val){
-      b.style.background='rgba(34,211,238,.15)'; b.style.borderColor='rgba(34,211,238,.5)'; b.style.color='#22d3ee';
+      b.style.background='rgba(27,135,245,.15)'; b.style.borderColor='rgba(27,135,245,.5)'; b.style.color='#1b87f5';
     } else {
-      b.style.background='#10131f'; b.style.borderColor='rgba(0,150,255,.2)'; b.style.color='#9aa3b0';
+      b.style.background='#17181b'; b.style.borderColor='rgba(27,135,245,.2)'; b.style.color='#9aa3b0';
     }
   });
 }
@@ -11617,7 +11618,7 @@ function _pintarTopCompras(cont, arr, nombres, colorHex, unidad){
 function renderTopPases(){
   _renderTopCompras('top-pases-lista', function(desc){
     return /pase booyah/i.test(desc) ? 1 : 0;
-  }, '#22d3ee', 'pases');
+  }, '#1b87f5', 'pases');
 }
 function renderTopFragmentos(){
   _renderTopCompras('top-frag-lista', function(desc){
@@ -11720,7 +11721,7 @@ function admListarPromo(){
       cont.innerHTML = rows.map(function(r){
         var fecha=''; try{ fecha=new Date(r.created_at).toLocaleDateString('es-MX'); }catch(e){}
         return '<div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:.6rem .8rem">'
-          + '<div style="min-width:0"><div style="font-family:Saira;font-weight:700;color:#fff;font-size:.9rem">' + r.ff_id + '</div>' + (r.nota?'<div style="font-size:.68rem;color:#6b7280">'+r.nota+'</div>':'') + (fecha?'<div style="font-size:.6rem;color:#4a5568">'+fecha+'</div>':'') + '</div>'
+          + '<div style="min-width:0"><div style="font-family:Saira;font-weight:700;color:#fff;font-size:.9rem">' + r.ff_id + '</div>' + (r.nota?'<div style="font-size:.68rem;color:#6b7280">'+r.nota+'</div>':'') + (fecha?'<div style="font-size:.6rem;color:#55595e">'+fecha+'</div>':'') + '</div>'
           + '<button onclick="admQuitarPromo(\'' + r.ff_id + '\')" style="flex-shrink:0;width:30px;height:30px;border-radius:8px;background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.3);color:#ff6b6b;cursor:pointer">&times;</button>'
           + '</div>';
       }).join('');
@@ -12034,9 +12035,9 @@ function renderActasGrid(){
   if(!grid) return;
   grid.innerHTML = ACTAS_TIPOS.map(function(a){
     return '<div onclick="actaSeleccionar(\''+a.id+'\')" id="acta-op-'+a.id+'" style="display:flex;align-items:center;gap:.85rem;background:rgba(255,255,255,.025);border:1.5px solid rgba(255,255,255,.08);border-radius:14px;padding:1rem;cursor:pointer;transition:all .2s">'
-      + '<div style="width:44px;height:44px;flex-shrink:0;border-radius:12px;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.25);display:flex;align-items:center;justify-content:center;font-size:1.35rem">'+a.ico+'</div>'
+      + '<div style="width:44px;height:44px;flex-shrink:0;border-radius:12px;background:rgba(27,135,245,.1);border:1px solid rgba(27,135,245,.25);display:flex;align-items:center;justify-content:center;font-size:1.35rem">'+a.ico+'</div>'
       + '<div style="flex:1;min-width:0"><div style="font-family:Saira,sans-serif;font-weight:800;font-size:.95rem;color:#fff">Acta de '+a.nombre+'</div><div style="font-size:.7rem;color:#8b93a3;margin-top:.15rem">Certificada y oficial</div></div>'
-      + '<div style="font-family:Saira,sans-serif;font-weight:900;font-size:1.05rem;color:#22d3ee;flex-shrink:0">$'+a.precio+' MXN</div>'
+      + '<div style="font-family:Saira,sans-serif;font-weight:900;font-size:1.05rem;color:#1b87f5;flex-shrink:0">$'+a.precio+' MXN</div>'
       + '</div>';
   }).join('');
 }
@@ -12049,8 +12050,8 @@ function actaSeleccionar(id){
     var el = document.getElementById('acta-op-'+a.id);
     if(!el) return;
     var on = (a.id===id);
-    el.style.borderColor = on ? 'rgba(34,211,238,.5)' : 'rgba(255,255,255,.08)';
-    el.style.background = on ? 'linear-gradient(135deg,rgba(34,211,238,.1),rgba(139,92,246,.06))' : 'rgba(255,255,255,.025)';
+    el.style.borderColor = on ? 'rgba(27,135,245,.5)' : 'rgba(255,255,255,.08)';
+    el.style.background = on ? 'linear-gradient(135deg,rgba(27,135,245,.1),rgba(10,99,209,.06))' : 'rgba(255,255,255,.025)';
   });
   var form = document.getElementById('actas-form');
   if(form) form.style.display = 'block';
@@ -12129,8 +12130,8 @@ function _mostrarReciboActa(nombre, estado, ord){
     +   _filaRecibo('\uD83D\uDCB5 Precio', fmt(_actaSel ? _actaSel.precio : 0))
     +   _filaRecibo('\uD83D\uDCC5 Fecha', fecha + ' \u00B7 ' + hora, true)
     + '</div>'
-    + '<div style="font-size:.75rem;color:#22d3ee;margin-top:1rem;line-height:1.5">Te contactaremos por WhatsApp para completar la entrega de tu acta.</div>'
-    + '<button onclick="goPage(\'home\')" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0e7490,#22d3ee);color:#fff;border:none;border-radius:12px;font-family:Barlow;font-weight:700;font-size:.9rem;cursor:pointer">Volver al inicio</button>'
+    + '<div style="font-size:.75rem;color:#1b87f5;margin-top:1rem;line-height:1.5">Te contactaremos por WhatsApp para completar la entrega de tu acta.</div>'
+    + '<button onclick="goPage(\'home\')" style="width:100%;margin-top:1.25rem;padding:.9rem;background:linear-gradient(135deg,#0a4fa8,#1b87f5);color:#fff;border:none;border-radius:12px;font-family:Barlow;font-weight:700;font-size:.9rem;cursor:pointer">Volver al inicio</button>'
     + '</div>';
   ok.scrollIntoView({ behavior:'smooth', block:'center' });
 }
@@ -12265,7 +12266,7 @@ function boyaahMedToggle(){
 function boyaahRenderResumen(){
   var el = document.getElementById('boyaah-resumen'); if(!el) return;
   var items = _boyaahItems(), med = _boyaahMed();
-  if(!items.length && !med){ el.innerHTML = '<div class="boyaah-empty">Aún no eliges productos. Usa <b style="color:#67e8f9">+</b> en los pases o agrega medallas.</div>'; return; }
+  if(!items.length && !med){ el.innerHTML = '<div class="boyaah-empty">Aún no eliges productos. Usa <b style="color:#7cc0ff">+</b> en los pases o agrega medallas.</div>'; return; }
   var h = '';
   if(items.length){
     h += '<div class="boyaah-rsec">\uD83C\uDF9F\uFE0F Pases seleccionados</div>';
@@ -13204,12 +13205,12 @@ function manualEnviar(){
 function manualMostrarOk(ord, o, monto){
   var b = document.getElementById('man-body'); if(!b) return;
   if(o.tipo === 'saldo'){
-    b.innerHTML = '<div class="mn-ok"><div class="ic">&#9989;</div><h3>¡Comprobante enviado!</h3><p>Recibimos tu comprobante por <b style="color:#67e8f9">'+_manEsc(_manMXN(monto))+'</b>.</p>'
+    b.innerHTML = '<div class="mn-ok"><div class="ic">&#9989;</div><h3>¡Comprobante enviado!</h3><p>Recibimos tu comprobante por <b style="color:#7cc0ff">'+_manEsc(_manMXN(monto))+'</b>.</p>'
       + '<p>Acreditaremos tu saldo <b style="color:#fff">manualmente</b> cuando lo revisemos.</p>'
       + '<button type="button" class="mn-send" onclick="manualCerrar();if(typeof goPage===\'function\')goPage(\'saldo\')">Ir a Billetera</button>'
       + '<button type="button" class="mn-ghost" onclick="manualCerrar()">Cerrar</button></div>';
   } else {
-    b.innerHTML = '<div class="mn-ok"><div class="ic">&#9989;</div><h3>¡Pedido enviado!</h3><p>Pedido <b style="color:#67e8f9">#'+_manEsc(ord)+'</b> · '+_manEsc(o.nombre)+'</p>'
+    b.innerHTML = '<div class="mn-ok"><div class="ic">&#9989;</div><h3>¡Pedido enviado!</h3><p>Pedido <b style="color:#7cc0ff">#'+_manEsc(ord)+'</b> · '+_manEsc(o.nombre)+'</p>'
       + '<p>Revisaremos tu comprobante y haremos la '+(o.tipo==='diamantes'?'recarga':'entrega')+' <b style="color:#fff">manualmente</b>. Puedes ver el estado en <b style="color:#fff">Mis compras</b>.</p>'
       + '<button type="button" class="mn-send" onclick="manualCerrar();if(typeof goPage===\'function\')goPage(\'miscompras\')">Ver mis compras</button>'
       + '<button type="button" class="mn-ghost" onclick="manualCerrar();if(typeof cerrarDiamDetalle===\'function\')try{cerrarDiamDetalle()}catch(e){}">Cerrar</button></div>';
@@ -13480,7 +13481,7 @@ function crtEnviar(){
 function crtMostrarOk(rid, n, total){
   _crtCart = []; _crtIds = {}; _crtIdUnico = ''; _crtFoto = ''; _crtFotoRaw = ''; _crtFotoNom = ''; _crtEnviando = false; crtGuardar();
   var b = document.getElementById('crt-body'); if(!b) return;
-  b.innerHTML = '<div class="mn-ok"><div class="ic">&#9989;</div><h3>¡Pedido enviado!</h3><p>Pedido <b style="color:#67e8f9">R' + _manEsc(rid) + '</b> · ' + n + ' recarga' + (n === 1 ? '' : 's') + ' · ' + _manEsc(_manMXN(total)) + '</p>'
+  b.innerHTML = '<div class="mn-ok"><div class="ic">&#9989;</div><h3>¡Pedido enviado!</h3><p>Pedido <b style="color:#7cc0ff">R' + _manEsc(rid) + '</b> · ' + n + ' recarga' + (n === 1 ? '' : 's') + ' · ' + _manEsc(_manMXN(total)) + '</p>'
     + '<p>Confirmaremos tu pago y haremos tus recargas. Puedes ver el estado en <b style="color:#fff">Mis recargas</b>.</p>'
     + '<button type="button" class="mn-send" onclick="crtAbrirHistorial()">Ver mis recargas</button><button type="button" class="mn-ghost" onclick="crtCerrar()">Cerrar</button></div>';
 }
@@ -13877,7 +13878,7 @@ function ofxEnviar(){
 function ofxMostrarOk(cod, n, total){
   _ofxIds = {}; _ofxIdUnico = ''; _ofxFoto = ''; _ofxFotoRaw = ''; _ofxFotoNom = ''; _ofxEnviando = false;
   var b = document.getElementById('ofx-body'); if(!b) return;
-  b.innerHTML = '<div class="mn-ok"><div class="ic">&#9989;</div><h3>¡Pedido enviado!</h3><p>Pedido <b style="color:#67e8f9">' + _manEsc(cod) + '</b> · ' + n + ' pase' + (n === 1 ? '' : 's') + ' · ' + _manEsc(_manMXN(total)) + '</p>'
+  b.innerHTML = '<div class="mn-ok"><div class="ic">&#9989;</div><h3>¡Pedido enviado!</h3><p>Pedido <b style="color:#7cc0ff">' + _manEsc(cod) + '</b> · ' + n + ' pase' + (n === 1 ? '' : 's') + ' · ' + _manEsc(_manMXN(total)) + '</p>'
     + '<p>Confirmaremos tu pago y te mandaremos tus pases.</p><button type="button" class="mn-send" onclick="ofxCerrar()">Listo</button></div>';
 }
 
@@ -14201,7 +14202,7 @@ function gcEnviar(){
 function gcOk(cod, n, total){
   _gcFoto = ''; _gcFotoRaw = ''; _gcFotoNom = ''; _gcEnviando = false;
   var b = document.getElementById('gc-body'); if(!b) return;
-  b.innerHTML = '<div class="mn-ok"><div class="ic">&#9989;</div><h3>¡Pedido enviado!</h3><p>Pedido <b style="color:#67e8f9">' + _manEsc(cod) + '</b> · ' + n + ' · ' + _manEsc(_manMXN(total)) + '</p>'
+  b.innerHTML = '<div class="mn-ok"><div class="ic">&#9989;</div><h3>¡Pedido enviado!</h3><p>Pedido <b style="color:#7cc0ff">' + _manEsc(cod) + '</b> · ' + n + ' · ' + _manEsc(_manMXN(total)) + '</p>'
     + '<p>' + (_gc && _gc.entrega !== 'pin' ? 'Confirmaremos tu pago, haremos la recarga a tu ID y te avisaremos por WhatsApp.' : 'Confirmaremos tu pago y te enviaremos tu código por WhatsApp.') + '</p><button type="button" class="mn-send" onclick="gcCerrar()">Listo</button></div>';
 }
 
@@ -15447,7 +15448,7 @@ function otComprar(){
   verificarSaldoFresco(p.mxn, function(alcanza, saldoReal){
     if(!alcanza){
       _otEnviando = false; _ot.estado = 'fin'; _ot.tono = 'err';
-      _ot.html = '<b>Saldo insuficiente</b><br>Tu saldo real es ' + _manEsc(fmt(saldoReal)) + '. <a href="#" onclick="otCerrar();goPage(\'saldo\');return false" style="color:#67e8f9">Recarga aquí</a>'; otRender(); return;
+      _ot.html = '<b>Saldo insuficiente</b><br>Tu saldo real es ' + _manEsc(fmt(saldoReal)) + '. <a href="#" onclick="otCerrar();goPage(\'saldo\');return false" style="color:#7cc0ff">Recarga aquí</a>'; otRender(); return;
     }
     _ot.msg = 'Procesando tu recarga...'; otRender();
     var ord = getNextOrder(), movId = null, cancelarPend = false, etiqueta = verificado ? (' (' + nombre + ')') : ' (SIN VERIFICAR)';
@@ -15526,7 +15527,7 @@ function _crtaCostoRow(r){
 function _crtaSaldoHTML(r, abierto){
   if(!abierto) return '';
   var c = _crtaCostoRow(r), s = _coSaldo, txt = 'US$ ' + c.usd.toFixed(4) + (c.completo ? '' : ' o más');
-  if(s == null) return '<div class="crta-saldo">Costo estimado en el proveedor: ' + txt + ' · <a href="#" onclick="admCoResumen(true);return false" style="color:#67e8f9">Ver saldo del proveedor</a></div>';
+  if(s == null) return '<div class="crta-saldo">Costo estimado en el proveedor: ' + txt + ' · <a href="#" onclick="admCoResumen(true);return false" style="color:#7cc0ff">Ver saldo del proveedor</a></div>';
   var alcanza = c.usd <= s;
   return '<div class="crta-saldo ' + (alcanza ? 'si' : 'no') + '">' + (alcanza ? '\u2705 El saldo del proveedor alcanza' : '\u26D4 El saldo del proveedor NO alcanza') + ' · costo ' + txt + ' · saldo US$ ' + s.toFixed(2) + '</div>';
 }
@@ -15540,7 +15541,7 @@ function admCoResumen(forzar){
     if(!b.ok){ if(box) box.innerHTML = '<span style="color:#ffb4c4">' + _manEsc(_coErrTxt(b)) + '</span>'; return; }
     _coSaldo = parseFloat(b.available);
     if(p && p.ok && Array.isArray(p.productos)) p.productos.forEach(function(x){ if(x.precio_usd != null && !isNaN(parseFloat(x.precio_usd))) _coCostos[x.clave] = parseFloat(x.precio_usd); });
-    if(box) box.innerHTML = 'Saldo del proveedor: <b style="color:#67e8f9;font-size:1.05rem">US$ ' + _manEsc(Number(_coSaldo).toFixed(2)) + '</b> <small style="color:#8E9AB8">(disponible; ' + _manEsc(b.held) + ' retenido)</small>';
+    if(box) box.innerHTML = 'Saldo del proveedor: <b style="color:#7cc0ff;font-size:1.05rem">US$ ' + _manEsc(Number(_coSaldo).toFixed(2)) + '</b> <small style="color:#8E9AB8">(disponible; ' + _manEsc(b.held) + ' retenido)</small>';
     admCrtRender();
   });
 }
@@ -16863,22 +16864,22 @@ function _d2Dibujar(canvas, hover){
   c.font = '11px Barlow, system-ui, sans-serif'; c.textBaseline = 'middle';
   for(var y = 0; y <= tope + 1e-9; y += paso){
     var py = top + ah - (y / tope) * ah;
-    c.strokeStyle = 'rgba(140,170,255,.10)'; c.lineWidth = 1; c.beginPath(); c.moveTo(izq, py); c.lineTo(W - 10, py); c.stroke();
+    c.strokeStyle = 'rgba(255,255,255,.10)'; c.lineWidth = 1; c.beginPath(); c.moveTo(izq, py); c.lineTo(W - 10, py); c.stroke();
     c.fillStyle = '#7f8db0'; c.textAlign = 'right'; c.fillText(_d2Corto(y), izq - 8, py);
   }
   var col = aw / 7, bw = Math.min(46, col * .52);
   act.forEach(function(d, i){
     var cx = izq + col * i + col / 2, hA = (ant[i].v / tope) * ah, hB = (d.v / tope) * ah;
-    c.strokeStyle = 'rgba(139,92,246,.55)'; c.setLineDash([3, 3]); c.strokeRect(cx - bw / 2 - 3, top + ah - hA, bw + 6, hA); c.setLineDash([]);
-    var g = c.createLinearGradient(0, top + ah - hB, 0, top + ah); g.addColorStop(0, hover === i ? '#7ee7fb' : '#22d3ee'); g.addColorStop(1, 'rgba(91,140,255,.35)');
+    c.strokeStyle = 'rgba(10,99,209,.55)'; c.setLineDash([3, 3]); c.strokeRect(cx - bw / 2 - 3, top + ah - hA, bw + 6, hA); c.setLineDash([]);
+    var g = c.createLinearGradient(0, top + ah - hB, 0, top + ah); g.addColorStop(0, hover === i ? '#8cc7ff' : '#1b87f5'); g.addColorStop(1, 'rgba(45,131,240,.35)');
     c.fillStyle = g; c.beginPath(); if(c.roundRect) c.roundRect(cx - bw / 2, top + ah - hB, bw, Math.max(hB, d.v > 0 ? 2 : 0), [6, 6, 2, 2]); else c.rect(cx - bw / 2, top + ah - hB, bw, hB); c.fill();
     c.fillStyle = i === 6 ? '#fff' : '#8E9AB8'; c.textAlign = 'center'; c.font = (i === 6 ? '600 ' : '') + '11px Barlow, system-ui, sans-serif';
     c.fillText(i === 6 ? 'Hoy' : _d2Etiqueta(d.k), cx, H - abajo / 2);
     if(d.v > 0 && W >= 420){ c.fillStyle = '#EAF0FF'; c.font = '600 11px Barlow, system-ui, sans-serif'; c.fillText(_d2Corto(d.v), cx, top + ah - hB - 10); }
   });
   c.textAlign = 'left'; c.font = '11px Barlow, system-ui, sans-serif';
-  c.fillStyle = '#22d3ee'; c.fillRect(izq, 8, 10, 10); c.fillStyle = '#c9d1e0'; c.fillText('Últimos 7 días', izq + 15, 13);
-  c.strokeStyle = 'rgba(139,92,246,.8)'; c.setLineDash([3, 3]); c.strokeRect(izq + 110, 8, 10, 10); c.setLineDash([]); c.fillText('7 días anteriores', izq + 125, 13);
+  c.fillStyle = '#1b87f5'; c.fillRect(izq, 8, 10, 10); c.fillStyle = '#c9d1e0'; c.fillText('Últimos 7 días', izq + 15, 13);
+  c.strokeStyle = 'rgba(10,99,209,.8)'; c.setLineDash([3, 3]); c.strokeRect(izq + 110, 8, 10, 10); c.setLineDash([]); c.fillText('7 días anteriores', izq + 125, 13);
   canvas._d2 = {izq:izq, col:col};
 }
 (function(){
@@ -16989,3 +16990,798 @@ function _s2Borrar(ids){
     } else showToast('❌ ' + ((r && r.message) || 'No se pudo borrar'), 5000);
   });
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CHAT GLOBAL EN TIEMPO REAL (v4)
+   · Lee mensajes con Supabase Realtime (WebSocket) y, si se cae, por consulta cada pocos segundos.
+   · Escribir / borrar / sancionar pasa SIEMPRE por /api/chat (el servidor valida permisos, silencios y spam).
+   · Todo texto de usuarios se pinta con textContent: no hay HTML de usuarios en ningún lado (sin XSS).
+   ═══════════════════════════════════════════════════════════════════════ */
+
+// showToast acepta un tercer parámetro opcional: 'ok' | 'err' | 'info'
+(function(){ var f = window.showToast; if(typeof f !== 'function' || f.__tipo) return;
+  window.showToast = function(m, d, t){ f(m, d); if(t){ var el = document.getElementById('toast'); if(el){ el.className = 'toast show cs-t-' + t; el.setAttribute('role', t === 'err' ? 'alert' : 'status'); } } };
+  window.showToast.__tipo = true; })();
+var CC = { open:false, msgs:new Map(), orden:[], ultimo:0, primero:0, hayMas:true, cargando:false, ws:null, wsOk:false, intentos:0, hb:null, pollT:null, pingT:null,
+  token:null, tokenExp:0, conectados:[], sancion:null, nuevos:0, noLeidos:0, sonido:true, anuncio:false, listo:false, errTabla:false, recT:null, desde:0 };
+try{ CC.sonido = localStorage.getItem('cs_cc_sonido') !== '0'; CC.visto = Number(localStorage.getItem('cs_cc_visto') || 0); }catch(e){ CC.visto = 0; }
+
+function ccEl(tag, cls, txt){ var e = document.createElement(tag); if(cls) e.className = cls; if(txt != null) e.textContent = txt; return e; }
+function ccIni(n){ return String(n || '?').trim().charAt(0).toUpperCase() || '?'; }
+function ccAvatar(nombre, url, cls){
+  var a = ccEl('span', 'cc-av' + (cls ? ' ' + cls : ''), ccIni(nombre));
+  if(typeof url === 'string' && /^https?:\/\//i.test(url) && url.length < 500){
+    var im = document.createElement('img'); im.alt = ''; im.loading = 'lazy'; im.referrerPolicy = 'no-referrer'; im.src = url;
+    im.onerror = function(){ if(im.parentNode) im.parentNode.removeChild(im); }; a.appendChild(im);
+  }
+  return a;
+}
+function ccHora(iso){ try{ return new Date(iso).toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit'}); }catch(e){ return ''; } }
+function ccDia(iso){
+  try{
+    var d = new Date(iso), h = new Date(), ay = new Date(Date.now() - 86400000);
+    if(d.toDateString() === h.toDateString()) return 'Hoy';
+    if(d.toDateString() === ay.toDateString()) return 'Ayer';
+    return d.toLocaleDateString('es-MX', {day:'numeric', month:'long'});
+  }catch(e){ return ''; }
+}
+// texto → nodos seguros (los enlaces http/https se vuelven clicables, lo demás es texto plano)
+function ccTexto(parent, txt){
+  var re = /(https?:\/\/[^\s<>"']+)/gi, last = 0, m;
+  while((m = re.exec(txt))){
+    if(m.index > last) parent.appendChild(document.createTextNode(txt.slice(last, m.index)));
+    var u = m[1].replace(/[.,;:!?)]+$/, ''), a = document.createElement('a');
+    a.textContent = u; a.href = u; a.target = '_blank'; a.rel = 'noopener noreferrer nofollow'; parent.appendChild(a);
+    last = m.index + u.length; re.lastIndex = last;
+  }
+  if(last < txt.length) parent.appendChild(document.createTextNode(txt.slice(last)));
+}
+function ccYo(){ return (typeof authSession !== 'undefined' && authSession && authSession.username) ? authSession : null; }
+function ccAdminTok(){ try{ return (typeof csAdminSesionToken === 'function') ? (csAdminSesionToken() || '') : ''; }catch(e){ return ''; } }
+function ccEsMod(){ var y = ccYo(); return !!(y && y.role === 'admin' && ccAdminTok()); }
+
+/* ── llamadas al servidor ── */
+function ccApi(body){
+  return fetch('/api/chat', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)})
+    .then(function(r){ return r.json().catch(function(){ return {ok:false, code:'error', message:'Respuesta inválida (' + r.status + ')'}; }); })
+    .catch(function(){ return {ok:false, code:'red', message:'Sin conexión'}; });
+}
+function ccObtenerToken(forzar){
+  var y = ccYo(); if(!y) return Promise.resolve(null);
+  if(!forzar && CC.token && CC.tokenExp - Date.now() > 120000 && CC.tokenUser === y.username) return Promise.resolve(CC.token);
+  var pHash = (y.password_hash ? Promise.resolve(y.password_hash)
+    : sb.get('profiles', 'id=eq.' + encodeURIComponent(y.id) + '&select=password_hash&limit=1').then(function(r){ return r && r[0] ? r[0].password_hash : ''; }));
+  return pHash.then(function(h){
+    return ccApi({action:'token', username:y.username, hash:h}).then(function(r){
+      if(r && r.ok){ CC.token = r.token; CC.tokenExp = r.exp; CC.tokenUser = y.username; return CC.token; }
+      CC.token = null; CC.tokenErr = r; return null;
+    });
+  }).catch(function(){ return null; });
+}
+function ccLlamar(body){
+  return ccObtenerToken(false).then(function(t){
+    if(!t) return CC.tokenErr || {ok:false, code:'token', message:'Inicia sesión para usar el chat'};
+    body.token = t; if(ccAdminTok()) body.admin_token = ccAdminTok();
+    return ccApi(body).then(function(r){
+      if(r && r.code === 'token'){ return ccObtenerToken(true).then(function(t2){ if(!t2) return r; body.token = t2; return ccApi(body); }); }
+      return r;
+    });
+  });
+}
+function ccAdminLlamar(body){
+  var t = ccAdminTok(); if(!t) return Promise.resolve({ok:false, code:'sesion_invalida', message:'Entra de nuevo al panel de administrador.'});
+  body.admin_token = t; return ccApi(body);
+}
+
+/* ── lectura (solo lectura con la llave pública) ── */
+var CC_SEL = 'select=id,username,avatar_url,texto,tipo,es_admin,created_at&eliminado=eq.false';
+function ccTraer(qs){ return sb.get('chat_mensajes', CC_SEL + '&' + qs); }
+function ccAgregar(m, alFinal){
+  if(!m || m.eliminado) return false;
+  if(CC.msgs.has(m.id)) return false;
+  CC.msgs.set(m.id, m);
+  if(m.id > CC.ultimo) CC.ultimo = m.id;
+  if(!CC.primero || m.id < CC.primero) CC.primero = m.id;
+  return true;
+}
+function ccQuitar(id){
+  if(!CC.msgs.has(id)) return false;
+  CC.msgs.delete(id);
+  var n = document.querySelector('#cc-lista [data-id="' + id + '"]'); if(n && n.parentNode) n.parentNode.removeChild(n);
+  ccLimpiarSeparadores(); return true;
+}
+function ccCargarInicial(){
+  if(CC.cargando) return Promise.resolve();
+  CC.cargando = true;
+  return ccTraer('order=id.desc&limit=40').then(function(rows){
+    CC.cargando = false;
+    if(!Array.isArray(rows)){ CC.errTabla = true; ccPintarTodo(); return; }
+    CC.errTabla = false; CC.listo = true;
+    rows.slice().reverse().forEach(function(m){ ccAgregar(m); });
+    CC.hayMas = rows.length >= 40;
+    if(!CC.visto && CC.ultimo){ CC.visto = CC.ultimo; }
+    ccPintarTodo();
+  }).catch(function(){ CC.cargando = false; CC.errTabla = true; ccPintarTodo(); });
+}
+function ccCargarAnteriores(){
+  if(CC.cargando || !CC.hayMas || !CC.primero) return;
+  CC.cargando = true;
+  var lista = document.getElementById('cc-lista'), alto = lista ? lista.scrollHeight : 0, top = lista ? lista.scrollTop : 0;
+  ccTraer('id=lt.' + CC.primero + '&order=id.desc&limit=30').then(function(rows){
+    CC.cargando = false;
+    if(!Array.isArray(rows)) return;
+    CC.hayMas = rows.length >= 30;
+    rows.forEach(function(m){ ccAgregar(m); });
+    ccPintarTodo();
+    if(lista) lista.scrollTop = top + (lista.scrollHeight - alto);
+  }).catch(function(){ CC.cargando = false; });
+}
+function ccPollear(){
+  if(!CC.listo) return;
+  ccTraer('id=gt.' + CC.ultimo + '&order=id.asc&limit=60').then(function(rows){
+    if(Array.isArray(rows) && rows.length) rows.forEach(function(m){ ccNuevoMensaje(m); });
+  }).catch(function(){});
+}
+// reconciliación: quita los mensajes que un admin borró aunque el WebSocket no haya avisado
+function ccReconciliar(){
+  if(!CC.listo || !CC.primero) return;
+  sb.get('chat_mensajes', 'select=id&eliminado=eq.true&id=gte.' + CC.primero + '&order=id.desc&limit=200').then(function(rows){
+    if(Array.isArray(rows)) rows.forEach(function(r){ ccQuitar(r.id); });
+  }).catch(function(){});
+}
+
+/* ── tiempo real: cliente mínimo del protocolo de Supabase Realtime ── */
+function ccWsUrl(){ return String(SB_URL).replace(/^http/, 'ws') + '/realtime/v1/websocket?apikey=' + encodeURIComponent(SB_KEY) + '&vsn=1.0.0'; }
+function ccConectar(){
+  if(CC.ws && (CC.ws.readyState === 0 || CC.ws.readyState === 1)) return;
+  var ws; try{ ws = new WebSocket(ccWsUrl()); }catch(e){ ccReintentar(); return; }
+  CC.ws = ws; var ref = 0;
+  ws.onopen = function(){
+    ws.send(JSON.stringify({topic:'realtime:chat-global', event:'phx_join', ref:String(++ref), join_ref:'1',
+      payload:{config:{broadcast:{self:false}, presence:{key:''}, postgres_changes:[{event:'*', schema:'public', table:'chat_mensajes'}]}, access_token:SB_KEY}}));
+    clearInterval(CC.hb);
+    CC.hb = setInterval(function(){ try{ if(ws.readyState === 1) ws.send(JSON.stringify({topic:'phoenix', event:'heartbeat', payload:{}, ref:String(++ref)})); }catch(e){} }, 25000);
+  };
+  ws.onmessage = function(ev){
+    var d; try{ d = JSON.parse(ev.data); }catch(e){ return; }
+    if(d.event === 'phx_reply' && d.topic === 'realtime:chat-global'){
+      if(d.payload && d.payload.status === 'ok'){ var re = !CC.wsOk; CC.wsOk = true; CC.intentos = 0; ccEstado(); if(re) { ccPollear(); ccReconciliar(); } }
+      else { try{ ws.close(); }catch(e){} }
+    } else if(d.event === 'postgres_changes' && d.payload && d.payload.data){
+      var x = d.payload.data, r = x.record || {};
+      if(x.type === 'INSERT') ccNuevoMensaje(r);
+      else if(x.type === 'UPDATE'){ if(r.eliminado) ccQuitar(r.id); }
+      else if(x.type === 'DELETE'){ var o = x.old_record || {}; if(o.id) ccQuitar(o.id); }
+    } else if(d.event === 'phx_close' || d.event === 'phx_error'){ try{ ws.close(); }catch(e){} }
+  };
+  ws.onclose = function(){ clearInterval(CC.hb); if(CC.ws === ws){ CC.wsOk = false; ccEstado(); ccReintentar(); } };
+  ws.onerror = function(){ try{ ws.close(); }catch(e){} };
+}
+function ccReintentar(){
+  if(!ccYo() && !CC.open) return;
+  var t = Math.min(15000, 1000 * Math.pow(2, Math.min(CC.intentos++, 4)));
+  clearTimeout(CC.recT); CC.recT = setTimeout(function(){ if(ccYo() || CC.open) ccConectar(); }, t);
+}
+function ccDesconectar(){
+  clearTimeout(CC.recT); clearInterval(CC.hb); clearInterval(CC.pollT); clearInterval(CC.pingT); clearInterval(CC.pingF); clearInterval(CC.recT2); CC.pollT = CC.pingT = CC.pingF = null;
+  var w = CC.ws; CC.ws = null; CC.wsOk = false; if(w){ try{ w.onclose = null; w.close(); }catch(e){} }
+}
+function ccIniciar(){
+  if(CC.pollT) return;
+  ccConectar();
+  CC.pollT = setInterval(function(){ if(!CC.wsOk) ccPollear(); }, 6000);
+  CC.recT2 = setInterval(function(){ ccReconciliar(); }, 45000);
+  if(ccYo()){ ccPing(); CC.pingT = setInterval(ccPing, 25000); CC.pingF = setInterval(function(){ if(CC.sancion) ccPing(); }, 8000); }
+}
+
+/* ── estado: conectados y sanción ── */
+function ccPing(){
+  if(!ccYo()) return;
+  ccLlamar({action:'ping'}).then(function(r){
+    if(!r || !r.ok) return;
+    CC.conectados = Array.isArray(r.conectados) ? r.conectados : [];
+    CC.sancion = r.sancion || null; ccPintarEstado(); ccPintarConectados(); ccPintarCompositor();
+  });
+}
+
+/* ── mensajes nuevos ── */
+function ccNuevoMensaje(m){
+  if(!ccAgregar(m)) return;
+  var yo = ccYo(), mio = yo && m.username === yo.username;
+  if(CC.open){
+    ccPintarUno(m);
+    var l = document.getElementById('cc-lista');
+    if(l){ var cerca = l.scrollHeight - l.scrollTop - l.clientHeight < 140; if(cerca || mio) ccIrAbajo(); else { CC.nuevos++; ccPintarIndicador(); } }
+    CC.visto = CC.ultimo; try{ localStorage.setItem('cs_cc_visto', String(CC.visto)); }catch(e){}
+  } else if(!mio){
+    CC.noLeidos++; ccBadge();
+    if(typeof showToast === 'function' && m.tipo === 'anuncio') showToast('📢 Anuncio: ' + String(m.texto).slice(0, 80), 4000);
+    ccSonar();
+  }
+}
+function ccSonar(){
+  if(!CC.sonido) return;
+  try{
+    var A = window.AudioContext || window.webkitAudioContext; if(!A) return; var c = CC.ac || (CC.ac = new A());
+    var o = c.createOscillator(), g = c.createGain(); o.type = 'sine'; o.frequency.value = 880; g.gain.value = .04; o.connect(g); g.connect(c.destination); o.start(); o.stop(c.currentTime + .09);
+    if(navigator.vibrate) navigator.vibrate(30);
+  }catch(e){}
+}
+function ccBadge(){
+  var n = CC.noLeidos > 99 ? '99+' : String(CC.noLeidos);
+  [].forEach.call(document.querySelectorAll('.cc-badge'), function(b){ b.textContent = n; b.style.display = CC.noLeidos > 0 ? '' : 'none'; });
+}
+
+/* ── interfaz ── */
+function ccMontar(){
+  if(document.getElementById('cc-panel')) return;
+  var p = ccEl('section', 'cc-panel'); p.id = 'cc-panel'; p.setAttribute('role', 'dialog'); p.setAttribute('aria-label', 'Chat global'); p.setAttribute('aria-hidden', 'true');
+  var h = ccEl('header', 'cc-head');
+  var tit = ccEl('div', 'cc-tit'); tit.appendChild(ccEl('b', '', 'Chat global'));
+  var st = ccEl('button', 'cc-on'); st.type = 'button'; st.id = 'cc-on'; st.setAttribute('aria-label', 'Ver conectados'); st.onclick = function(){ ccToggleLista(); };
+  st.appendChild(ccEl('i', 'cc-dot')); st.appendChild(ccEl('span', '', '0 conectados')); tit.appendChild(st); h.appendChild(tit);
+  var snd = ccEl('button', 'cc-ib'); snd.type = 'button'; snd.id = 'cc-snd'; snd.setAttribute('aria-label', 'Sonido de mensajes'); snd.onclick = function(){ CC.sonido = !CC.sonido; try{ localStorage.setItem('cs_cc_sonido', CC.sonido ? '1' : '0'); }catch(e){} ccPintarSonido(); };
+  h.appendChild(snd);
+  var cl = ccEl('button', 'cc-ib', '✕'); cl.type = 'button'; cl.setAttribute('aria-label', 'Cerrar chat'); cl.onclick = function(){ ccCerrar(); }; h.appendChild(cl);
+  p.appendChild(h);
+  var est = ccEl('div', 'cc-estado'); est.id = 'cc-estado'; est.style.display = 'none'; p.appendChild(est);
+  var cuerpo = ccEl('div', 'cc-cuerpo');
+  var lista = ccEl('div', 'cc-lista'); lista.id = 'cc-lista'; lista.setAttribute('aria-live', 'polite'); lista.onscroll = function(){
+    if(lista.scrollTop < 60) ccCargarAnteriores();
+    if(lista.scrollHeight - lista.scrollTop - lista.clientHeight < 80){ CC.nuevos = 0; ccPintarIndicador(); }
+  };
+  cuerpo.appendChild(lista);
+  var ind = ccEl('button', 'cc-nuevos'); ind.type = 'button'; ind.id = 'cc-nuevos'; ind.style.display = 'none'; ind.onclick = function(){ ccIrAbajo(); }; cuerpo.appendChild(ind);
+  var conn = ccEl('aside', 'cc-conn'); conn.id = 'cc-conn'; conn.style.display = 'none'; cuerpo.appendChild(conn);
+  p.appendChild(cuerpo);
+  var foot = ccEl('footer', 'cc-foot'); foot.id = 'cc-foot'; p.appendChild(foot);
+  document.body.appendChild(p);
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && CC.open) ccCerrar(); });
+  ccPintarSonido(); ccBadge();
+}
+function ccPintarSonido(){ var b = document.getElementById('cc-snd'); if(b){ b.textContent = CC.sonido ? '🔔' : '🔕'; b.title = CC.sonido ? 'Sonido activado' : 'Sonido desactivado'; } }
+function ccAbrir(){
+  ccMontar();
+  if(typeof closeSB === 'function'){ try{ closeSB(); }catch(e){} }
+  CC.open = true; CC.noLeidos = 0; CC.nuevos = 0; ccBadge();
+  var p = document.getElementById('cc-panel'); p.classList.add('open'); p.setAttribute('aria-hidden', 'false');
+  document.documentElement.classList.add('cc-abierto');
+  ccPintarCompositor(); ccPintarEstado();
+  if(!CC.listo) ccCargarInicial().then(function(){ ccIrAbajo(); }); else { ccPintarTodo(); ccIrAbajo(); }
+  ccIniciar();
+  if(ccYo()) ccPing();
+  CC.visto = CC.ultimo; try{ localStorage.setItem('cs_cc_visto', String(CC.visto)); }catch(e){}
+  setTimeout(function(){ var t = document.getElementById('cc-txt'); if(t && window.innerWidth > 700) t.focus(); }, 250);
+}
+function ccCerrar(){
+  CC.open = false; var p = document.getElementById('cc-panel'); if(p){ p.classList.remove('open'); p.setAttribute('aria-hidden', 'true'); }
+  document.documentElement.classList.remove('cc-abierto'); ccCerrarMenu();
+  if(!ccYo()) ccDesconectar();
+}
+function ccToggleLista(){ var c = document.getElementById('cc-conn'); if(c) c.style.display = (c.style.display === 'none') ? '' : 'none'; ccPintarConectados(); }
+function ccEstado(){ ccPintarEstado(); }
+function ccPintarEstado(){
+  var e = document.getElementById('cc-estado'); if(!e) return;
+  var y = ccYo(), txt = '';
+  if(CC.errTabla) txt = 'El chat se está activando. Intenta de nuevo en un momento.';
+  else if(!CC.wsOk && CC.open && CC.ws) txt = 'Reconectando…';
+  else if(y && y.role === 'admin' && !ccAdminTok()) txt = 'Eres administrador: entra al Panel admin para poder moderar el chat.';
+  e.textContent = txt; e.style.display = txt ? '' : 'none';
+  e.className = 'cc-estado' + (CC.errTabla ? ' err' : '');
+}
+function ccPintarConectados(){
+  var n = CC.conectados.length, on = document.getElementById('cc-on');
+  if(on){ var s = on.querySelector('span'); if(s) s.textContent = n + (n === 1 ? ' conectado' : ' conectados'); }
+  var c = document.getElementById('cc-conn'); if(!c || c.style.display === 'none') return;
+  c.textContent = ''; c.appendChild(ccEl('div', 'cc-conn-t', 'Conectados ahora'));
+  if(!n) c.appendChild(ccEl('div', 'cc-vacio', 'Nadie más por ahora'));
+  CC.conectados.forEach(function(u){
+    var f = ccEl('div', 'cc-conn-u'); f.appendChild(ccAvatar(u.username, u.avatar_url, 'sm')); f.appendChild(ccEl('span', 'cc-conn-n', u.username));
+    if(u.es_admin) f.appendChild(ccEl('em', 'cc-admin', 'ADMIN'));
+    c.appendChild(f);
+  });
+}
+function ccPintarTodo(){
+  var l = document.getElementById('cc-lista'); if(!l) return;
+  l.textContent = '';
+  if(CC.errTabla){ l.appendChild(ccEl('div', 'cc-vacio', 'No se pudo cargar el chat. Revisa tu conexión.')); return; }
+  var ids = Array.from(CC.msgs.keys()).sort(function(a, b){ return a - b; });
+  if(!ids.length){ l.appendChild(ccEl('div', 'cc-vacio', CC.listo ? 'Aún no hay mensajes. ¡Escribe el primero!' : 'Cargando…')); return; }
+  if(CC.hayMas){ var mas = ccEl('button', 'cc-mas', 'Cargar mensajes anteriores'); mas.type = 'button'; mas.onclick = ccCargarAnteriores; l.appendChild(mas); }
+  var antes = null; ids.forEach(function(id){ antes = ccPintarUno(CC.msgs.get(id), antes, true); });
+}
+function ccLimpiarSeparadores(){
+  var l = document.getElementById('cc-lista'); if(!l) return;
+  var hijos = Array.from(l.children);
+  hijos.forEach(function(n, i){ if(n.classList.contains('cc-sep')){ var sig = hijos[i + 1]; if(!sig || sig.classList.contains('cc-sep')) l.removeChild(n); } });
+  if(!l.querySelector('.cc-msg, .cc-anuncio') && !l.querySelector('.cc-vacio')) l.appendChild(ccEl('div', 'cc-vacio', 'Aún no hay mensajes. ¡Escribe el primero!'));
+}
+function ccPintarUno(m, prev, lote){
+  var l = document.getElementById('cc-lista'); if(!l) return null;
+  var vacio = l.querySelector('.cc-vacio'); if(vacio) l.removeChild(vacio);
+  if(l.querySelector('[data-id="' + m.id + '"]')) return m;
+  var previo = prev || null;
+  if(!lote){ var ult = l.lastElementChild; previo = (ult && ult.dataset && ult.dataset.id) ? (CC.msgs.get(Number(ult.dataset.id)) || null) : null; }
+  if(!previo || ccDia(previo.created_at) !== ccDia(m.created_at)){ var s = ccEl('div', 'cc-sep'); s.appendChild(ccEl('span', '', ccDia(m.created_at))); l.appendChild(s); }
+  var yo = ccYo(), mio = !!(yo && m.username === yo.username), mod = ccEsMod();
+  var f;
+  if(m.tipo === 'anuncio'){
+    f = ccEl('div', 'cc-anuncio'); f.dataset.id = m.id;
+    var t = ccEl('div', 'cc-an-t'); t.appendChild(ccEl('span', '', '📢 ANUNCIO OFICIAL')); t.appendChild(ccEl('small', '', ccHora(m.created_at))); f.appendChild(t);
+    var c = ccEl('div', 'cc-an-c'); ccTexto(c, m.texto); f.appendChild(c);
+    f.appendChild(ccEl('div', 'cc-an-p', 'Publicado por ' + m.username));
+    if(mod){ var x = ccEl('button', 'cc-mod', '⋯'); x.type = 'button'; x.setAttribute('aria-label', 'Moderar'); x.onclick = function(e){ e.stopPropagation(); ccMenu(m, x); }; f.appendChild(x); }
+  } else {
+    f = ccEl('div', 'cc-msg' + (mio ? ' mio' : '') + (m.es_admin ? ' es-admin' : '')); f.dataset.id = m.id;
+    if(!mio) f.appendChild(ccAvatar(m.username, m.avatar_url));
+    var b = ccEl('div', 'cc-burbuja');
+    var cab = ccEl('div', 'cc-cab');
+    if(!mio) cab.appendChild(ccEl('b', 'cc-nom', m.username));
+    if(m.es_admin) cab.appendChild(ccEl('em', 'cc-admin', 'ADMIN'));
+    cab.appendChild(ccEl('small', '', ccHora(m.created_at)));
+    b.appendChild(cab);
+    var tx = ccEl('div', 'cc-tx'); ccTexto(tx, m.texto); b.appendChild(tx);
+    if(mod && !mio){ var x2 = ccEl('button', 'cc-mod', '⋯'); x2.type = 'button'; x2.setAttribute('aria-label', 'Moderar mensaje'); x2.onclick = function(e){ e.stopPropagation(); ccMenu(m, x2); }; b.appendChild(x2); }
+    else if(mod && mio){ var x3 = ccEl('button', 'cc-mod', '🗑'); x3.type = 'button'; x3.setAttribute('aria-label', 'Borrar mensaje'); x3.onclick = function(e){ e.stopPropagation(); ccBorrar(m.id); }; b.appendChild(x3); }
+    f.appendChild(b);
+  }
+  l.appendChild(f); return m;
+}
+function ccIrAbajo(){ var l = document.getElementById('cc-lista'); if(l) l.scrollTop = l.scrollHeight; CC.nuevos = 0; ccPintarIndicador(); }
+function ccPintarIndicador(){ var i = document.getElementById('cc-nuevos'); if(!i) return; i.style.display = CC.nuevos > 0 ? '' : 'none'; i.textContent = '↓ ' + CC.nuevos + (CC.nuevos === 1 ? ' mensaje nuevo' : ' mensajes nuevos'); }
+
+/* ── compositor ── */
+function ccPintarCompositor(){
+  var f = document.getElementById('cc-foot'); if(!f) return;
+  var y = ccYo(), s = CC.sancion, clave = y ? (y.username + '|' + (s ? s.tipo + (s.hasta || '') : '') + '|' + ccEsMod()) : 'guest';
+  if(f.dataset.k === clave && f.firstChild) return; f.dataset.k = clave; f.textContent = '';
+  if(!y){
+    var b = ccEl('button', 'cc-login', 'Inicia sesión para escribir'); b.type = 'button'; b.onclick = function(){ ccCerrar(); if(typeof showAuthModal === 'function') showAuthModal(); }; f.appendChild(b); return;
+  }
+  if(s){
+    var txt = s.tipo === 'suspension' ? 'Estás suspendido del chat' + (s.motivo ? ': ' + s.motivo : '') + '.' : 'Estás silenciado' + (s.hasta ? ' hasta las ' + ccHora(s.hasta) : '') + (s.motivo ? ' · ' + s.motivo : '') + '.';
+    f.appendChild(ccEl('div', 'cc-bloq', txt)); return;
+  }
+  if(ccEsMod()){
+    var an = ccEl('label', 'cc-an-sw'); var ck = document.createElement('input'); ck.type = 'checkbox'; ck.id = 'cc-anun'; ck.checked = CC.anuncio; ck.onchange = function(){ CC.anuncio = ck.checked; var t = document.getElementById('cc-txt'); if(t) t.placeholder = CC.anuncio ? 'Escribe el anuncio oficial…' : 'Escribe un mensaje…'; };
+    an.appendChild(ck); an.appendChild(document.createTextNode(' 📢 Enviar como anuncio oficial')); f.appendChild(an);
+  }
+  var fila = ccEl('div', 'cc-fila');
+  var t = document.createElement('textarea'); t.id = 'cc-txt'; t.rows = 1; t.maxLength = 300; t.placeholder = CC.anuncio ? 'Escribe el anuncio oficial…' : 'Escribe un mensaje…'; t.setAttribute('aria-label', 'Mensaje');
+  t.oninput = function(){ t.style.height = 'auto'; t.style.height = Math.min(110, t.scrollHeight) + 'px'; ccContador(); };
+  t.onkeydown = function(e){ if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); ccEnviar(); } };
+  var go = ccEl('button', 'cc-go'); go.type = 'button'; go.id = 'cc-go'; go.setAttribute('aria-label', 'Enviar'); go.onclick = ccEnviar;
+  go.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg>';
+  fila.appendChild(t); fila.appendChild(go); f.appendChild(fila);
+  f.appendChild(ccEl('div', 'cc-cnt', '0/300')); f.lastChild.id = 'cc-cnt';
+}
+function ccContador(){ var t = document.getElementById('cc-txt'), c = document.getElementById('cc-cnt'); if(t && c) c.textContent = t.value.length + '/300'; }
+function ccEnviar(){
+  var t = document.getElementById('cc-txt'), go = document.getElementById('cc-go'); if(!t || CC.enviando) return;
+  var txt = t.value.trim(); if(!txt) return;
+  CC.enviando = true; if(go) go.disabled = true;
+  var anun = CC.anuncio && ccEsMod();
+  ccLlamar({action: anun ? 'anuncio' : 'enviar', texto: txt}).then(function(r){
+    CC.enviando = false; if(go) go.disabled = false;
+    if(r && r.ok){
+      t.value = ''; t.style.height = 'auto'; ccContador();
+      if(r.id){ ccTraer('id=eq.' + r.id).then(function(rows){ if(Array.isArray(rows) && rows[0]) ccNuevoMensaje(rows[0]); }).catch(function(){}); }
+      return;
+    }
+    var msg = (r && r.message) || 'No se pudo enviar';
+    if(r && (r.code === 'silenciado' || r.code === 'suspendido')) ccPing();
+    if(typeof showToast === 'function') showToast(msg, 3200, 'err'); else alert(msg);
+  });
+}
+
+/* ── moderación dentro del chat (solo con sesión admin; el servidor la vuelve a validar) ── */
+function ccBorrar(id){
+  ccAdminLlamar({action:'admin_borrar', id:id}).then(function(r){
+    if(r && r.ok){ ccQuitar(id); if(typeof showToast === 'function') showToast('Mensaje eliminado para todos', 2200, 'ok'); }
+    else if(typeof showToast === 'function') showToast((r && r.message) || 'No se pudo borrar', 3000, 'err');
+  });
+}
+function ccCerrarMenu(){ var m = document.getElementById('cc-menu'); if(m && m.parentNode) m.parentNode.removeChild(m); }
+function ccMenu(m, ancla){
+  ccCerrarMenu();
+  var menu = ccEl('div', 'cc-menu'); menu.id = 'cc-menu';
+  function op(t, fn, cls){ var b = ccEl('button', cls || '', t); b.type = 'button'; b.onclick = function(e){ e.stopPropagation(); ccCerrarMenu(); fn(); }; menu.appendChild(b); }
+  menu.appendChild(ccEl('div', 'cc-menu-t', m.username));
+  op('🗑 Borrar mensaje', function(){ ccBorrar(m.id); }, 'pel');
+  if(m.tipo !== 'anuncio' && !m.es_admin){
+    op('🔇 Silenciar 10 min', function(){ ccSancionar(m.username, 'silencio', 10); });
+    op('🔇 Silenciar 1 hora', function(){ ccSancionar(m.username, 'silencio', 60); });
+    op('🔇 Silenciar 24 horas', function(){ ccSancionar(m.username, 'silencio', 1440); });
+    op('⛔ Suspender del chat', function(){ if(confirm('¿Suspender a ' + m.username + ' del chat? No podrá escribir hasta que lo levantes.')) ccSancionar(m.username, 'suspension', 0); }, 'pel');
+    op('🧹 Borrar sus mensajes (24 h)', function(){ if(confirm('¿Borrar todos los mensajes de ' + m.username + ' de las últimas 24 horas?')) ccBorrarUsuario(m.username); }, 'pel');
+  }
+  document.getElementById('cc-panel').appendChild(menu);
+  var r = ancla.getBoundingClientRect(), pr = document.getElementById('cc-panel').getBoundingClientRect();
+  var top = Math.min(r.bottom - pr.top + 4, pr.height - menu.offsetHeight - 8); menu.style.top = Math.max(8, top) + 'px';
+  setTimeout(function(){ document.addEventListener('click', ccCerrarMenu, {once:true}); }, 0);
+}
+function ccSancionar(user, tipo, min, motivo){
+  return ccAdminLlamar({action:'admin_sancionar', username:user, tipo:tipo, minutos:min, motivo:motivo || ''}).then(function(r){
+    if(typeof showToast === 'function') showToast(r && r.ok ? (tipo === 'silencio' ? user + ' silenciado' : user + ' suspendido del chat') : ((r && r.message) || 'No se pudo aplicar'), 3000, r && r.ok ? 'ok' : 'err');
+    return r;
+  });
+}
+function ccBorrarUsuario(user){
+  return ccAdminLlamar({action:'admin_borrar_usuario', username:user, horas:24}).then(function(r){
+    if(r && r.ok){ Array.from(CC.msgs.values()).forEach(function(m){ if(m.username === user) ccQuitar(m.id); }); }
+    if(typeof showToast === 'function') showToast(r && r.ok ? (r.borrados || 0) + ' mensajes borrados' : ((r && r.message) || 'No se pudo borrar'), 3000, r && r.ok ? 'ok' : 'err');
+    return r;
+  });
+}
+
+/* ═════════════ PANEL ADMIN: ADMINISTRACIÓN DEL CHAT ═════════════ */
+var _ccaMsgs = [];
+function ccaHtmlBase(){
+  return '<div class="adm-card-title">💬 Administración del chat</div>'
+    + '<div class="cca-card"><div class="cca-h">🛡️ Moderar un usuario</div><p class="cat-nota">Silenciar = no puede escribir por un tiempo. Suspender = no puede escribir hasta que lo levantes. Todo queda en el registro.</p>'
+    + '<div class="cca-fila"><input id="cca-user" class="cca-inp" placeholder="Usuario" autocapitalize="none" autocomplete="off"><input id="cca-motivo" class="cca-inp" placeholder="Motivo (opcional)" maxlength="200"></div>'
+    + '<div class="cca-fila"><select id="cca-min" class="cca-inp"><option value="10">10 minutos</option><option value="60">1 hora</option><option value="360">6 horas</option><option value="1440">24 horas</option><option value="10080">7 días</option></select>'
+    + '<button type="button" class="cat-btn" onclick="ccaSancion(\'silencio\')">🔇 Silenciar</button></div>'
+    + '<div class="cca-fila"><button type="button" class="cat-btn cca-rj" onclick="ccaSancion(\'suspension\')">⛔ Suspender</button><button type="button" class="cat-btn" onclick="ccaLevantar()">✅ Levantar sanción</button><button type="button" class="cat-btn cca-rj" onclick="ccaBorrarUser()">🧹 Borrar sus mensajes</button></div></div>'
+    + '<div class="cca-card"><div class="cca-h">📢 Anuncio oficial</div><p class="cat-nota">Se muestra destacado a todos los usuarios del chat. Se publica con tu usuario de administrador.</p>'
+    + '<textarea id="cca-anun" class="cca-inp" rows="3" maxlength="500" placeholder="Escribe el comunicado…"></textarea><div class="cca-fila"><button type="button" class="cat-btn" onclick="ccaAnuncio()">📢 Publicar anuncio</button></div></div>'
+    + '<div class="cca-card"><div class="cca-h">🔒 Usuarios sancionados</div><div id="cca-sanc"><div class="rk-vacio">Cargando…</div></div></div>'
+    + '<div class="cca-card"><div class="cca-h">💬 Conversaciones <button type="button" class="cat-btn cca-mini" onclick="ccaCargarMsgs()">Actualizar</button></div><div id="cca-msgs"><div class="rk-vacio">Cargando…</div></div></div>'
+    + '<div class="cca-card"><div class="cca-h">📜 Registro de moderación</div><button type="button" class="cat-btn" onclick="ccaAuditoria()">Ver últimas acciones</button><div id="cca-audit"></div></div>';
+}
+function ccaRender(){
+  var sec = document.getElementById('adms-chatadm'); if(!sec) return;
+  if(!document.getElementById('cca-user')) sec.innerHTML = ccaHtmlBase();
+  ccaCargarSanc(); ccaCargarMsgs();
+}
+function ccaMsg(t, ok){ if(typeof showToast === 'function') showToast(t, 3200, ok ? 'ok' : 'err'); }
+function ccaUser(){ return ((document.getElementById('cca-user') || {}).value || '').trim(); }
+function ccaSancion(tipo){
+  var u = ccaUser(); if(!u){ ccaMsg('Escribe el usuario'); return; }
+  var min = tipo === 'silencio' ? Number(document.getElementById('cca-min').value) : 0, mot = (document.getElementById('cca-motivo') || {}).value || '';
+  if(tipo === 'suspension' && !confirm('¿Suspender a ' + u + ' del chat?')) return;
+  ccSancionar(u, tipo, min, mot).then(function(){ ccaCargarSanc(); });
+}
+function ccaLevantar(){
+  var u = ccaUser(); if(!u){ ccaMsg('Escribe el usuario'); return; }
+  ccAdminLlamar({action:'admin_levantar', username:u}).then(function(r){ ccaMsg(r && r.ok ? (r.retiradas ? 'Sanción retirada' : 'Ese usuario no tenía sanciones activas') : ((r && r.message) || 'Error'), r && r.ok); ccaCargarSanc(); });
+}
+function ccaBorrarUser(){
+  var u = ccaUser(); if(!u){ ccaMsg('Escribe el usuario'); return; }
+  if(!confirm('¿Borrar todos los mensajes de ' + u + ' de las últimas 24 horas?')) return;
+  ccBorrarUsuario(u).then(function(){ ccaCargarMsgs(); });
+}
+function ccaAnuncio(){
+  var t = document.getElementById('cca-anun'), txt = t ? t.value.trim() : ''; if(!txt){ ccaMsg('Escribe el anuncio'); return; }
+  if(!confirm('¿Publicar este anuncio para todos los usuarios del chat?')) return;
+  ccLlamar({action:'anuncio', texto:txt}).then(function(r){
+    if(r && r.ok){ t.value = ''; ccaMsg('Anuncio publicado', true); ccaCargarMsgs(); }
+    else ccaMsg((r && r.message) || 'No se pudo publicar (¿entraste con tu usuario administrador?)');
+  });
+}
+function ccaCargarSanc(){
+  var box = document.getElementById('cca-sanc'); if(!box) return;
+  ccAdminLlamar({action:'admin_sanciones'}).then(function(r){
+    box.textContent = '';
+    if(!r || !r.ok){ box.appendChild(ccEl('div', 'rk-vacio', (r && r.message) || 'No se pudo cargar')); return; }
+    if(!r.data.length){ box.appendChild(ccEl('div', 'rk-vacio', 'No hay usuarios sancionados ahora')); return; }
+    r.data.forEach(function(s){
+      var f = ccEl('div', 'cca-item'), i = ccEl('div', 'cca-it');
+      i.appendChild(ccEl('b', '', s.username)); i.appendChild(ccEl('span', 'cca-tag ' + s.tipo, s.tipo === 'silencio' ? 'Silenciado' : 'Suspendido'));
+      i.appendChild(ccEl('small', '', (s.hasta ? 'hasta ' + new Date(s.hasta).toLocaleString('es-MX') : 'sin fecha de fin') + (s.motivo ? ' · ' + s.motivo : '') + ' · por ' + (s.creado_por || '—')));
+      f.appendChild(i); var b = ccEl('button', 'cat-btn cca-mini', 'Retirar'); b.type = 'button';
+      b.onclick = function(){ ccAdminLlamar({action:'admin_levantar', username:s.username}).then(function(){ ccaMsg('Sanción retirada', true); ccaCargarSanc(); }); };
+      f.appendChild(b); box.appendChild(f);
+    });
+  });
+}
+function ccaCargarMsgs(){
+  var box = document.getElementById('cca-msgs'); if(!box) return;
+  sb.get('chat_mensajes', 'select=id,username,texto,tipo,es_admin,created_at&eliminado=eq.false&order=id.desc&limit=100').then(function(rows){
+    box.textContent = '';
+    if(!Array.isArray(rows)){ box.appendChild(ccEl('div', 'rk-vacio', 'Aún no se activa el chat: corre chat_global.sql en Supabase.')); return; }
+    if(!rows.length){ box.appendChild(ccEl('div', 'rk-vacio', 'Todavía no hay mensajes')); return; }
+    rows.forEach(function(m){
+      var f = ccEl('div', 'cca-item'), i = ccEl('div', 'cca-it');
+      i.appendChild(ccEl('b', '', m.username)); if(m.es_admin) i.appendChild(ccEl('em', 'cc-admin', 'ADMIN')); if(m.tipo === 'anuncio') i.appendChild(ccEl('span', 'cca-tag silencio', 'Anuncio'));
+      i.appendChild(ccEl('small', '', new Date(m.created_at).toLocaleString('es-MX')));
+      i.appendChild(ccEl('div', 'cca-tx', m.texto)); f.appendChild(i);
+      var acc = ccEl('div', 'cca-acc'); var d = ccEl('button', 'cat-btn cca-mini cca-rj', 'Borrar'); d.type = 'button';
+      d.onclick = function(){ ccAdminLlamar({action:'admin_borrar', id:m.id}).then(function(r){ if(r && r.ok){ ccQuitar(m.id); ccaCargarMsgs(); } else ccaMsg((r && r.message) || 'Error'); }); };
+      acc.appendChild(d);
+      if(!m.es_admin){ var s = ccEl('button', 'cat-btn cca-mini', 'Moderar'); s.type = 'button'; s.onclick = function(){ var u = document.getElementById('cca-user'); if(u){ u.value = m.username; u.scrollIntoView({behavior:'smooth', block:'center'}); } }; acc.appendChild(s); }
+      f.appendChild(acc); box.appendChild(f);
+    });
+  }).catch(function(){ box.textContent = ''; box.appendChild(ccEl('div', 'rk-vacio', 'No se pudo cargar')); });
+}
+function ccaAuditoria(){
+  var box = document.getElementById('cca-audit'); if(!box) return; box.textContent = 'Cargando…';
+  ccAdminLlamar({action:'admin_auditoria', limite:100}).then(function(r){
+    box.textContent = '';
+    if(!r || !r.ok){ box.appendChild(ccEl('div', 'rk-vacio', (r && r.message) || 'No se pudo cargar')); return; }
+    if(!r.data.length){ box.appendChild(ccEl('div', 'rk-vacio', 'Sin acciones registradas todavía')); return; }
+    var N = {mensaje_borrado:'Mensaje borrado', mensajes_borrados_usuario:'Mensajes de un usuario borrados', silencio:'Usuario silenciado', suspension:'Usuario suspendido', sancion_retirada:'Sanción retirada', anuncio:'Anuncio oficial'};
+    r.data.forEach(function(a){
+      var f = ccEl('div', 'cca-item'), i = ccEl('div', 'cca-it');
+      i.appendChild(ccEl('b', '', N[a.accion] || a.accion)); i.appendChild(ccEl('span', 'cca-tag', a.objetivo ? '→ ' + a.objetivo : ''));
+      var d = a.detalle || {}, extra = [];
+      if(d.texto) extra.push('“' + String(d.texto).slice(0, 120) + '”'); if(d.motivo) extra.push('motivo: ' + d.motivo); if(d.minutos) extra.push(d.minutos + ' min'); if(d.cantidad != null) extra.push(d.cantidad + ' mensajes');
+      i.appendChild(ccEl('small', '', new Date(a.created_at).toLocaleString('es-MX') + ' · por ' + (a.admin || '—') + (extra.length ? ' · ' + extra.join(' · ') : '')));
+      f.appendChild(i); box.appendChild(f);
+    });
+  });
+}
+
+/* ── arranque ── */
+(function(){
+  function listo(){
+    ccMontar();
+    // con sesión iniciada nos conectamos en segundo plano para avisar de mensajes nuevos
+    var intentos = 0, t = setInterval(function(){
+      intentos++;
+      if(ccYo() && !CC.pollT){ clearInterval(t); setTimeout(function(){ ccCargarInicial().then(function(){ ccIniciar(); }); }, 1200); }
+      else if(intentos > 40) clearInterval(t);
+    }, 1500);
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', listo); else listo();
+  var lo = window.doLogout;
+  if(typeof lo === 'function') window.doLogout = function(){ try{ ccDesconectar(); CC.token = null; CC.listo = false; CC.msgs = new Map(); CC.ultimo = CC.primero = 0; CC.sancion = null; var f = document.getElementById('cc-foot'); if(f) f.dataset.k = ''; ccCerrar(); }catch(e){} return lo.apply(this, arguments); };
+})();
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   v4 · Navegación (barra inferior, Servicios), campana de avisos y detalles del Inicio
+   ═══════════════════════════════════════════════════════════════════════ */
+(function(){ try{ document.body.classList.remove('light-mode'); localStorage.setItem('cs_theme', 'dark'); }catch(e){} })();
+
+var CS4_TABS = {
+  home:['home'],
+  servicios:['servicios','freefire','diamantes','tarjetas','niveles','likes','likes2k','giftcards','recargas','pase','boyaah','pines','pubg','deltaforce','honor','honorcuenta','membresia','clanes','api','cajas','codigos','biolarga','archivos','actas','creadores'],
+  pedidos:['miscompras'],
+  cuenta:['menu','perfil','saldo','transferir','retirar','referidos','ranking','faq','soporte','sobre','terminos']
+};
+function _syncBottomNav(id){
+  var tab = null; Object.keys(CS4_TABS).forEach(function(k){ if(CS4_TABS[k].indexOf(id) >= 0) tab = k; });
+  [].forEach.call(document.querySelectorAll('.cs-nav button'), function(b){ b.classList.toggle('on', b.dataset.tab === tab); });
+}
+function cs4Montar(){
+  if(document.getElementById('cs-nav')) return;
+  var ic = {
+    home:'<path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
+    servicios:'<path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
+    pedidos:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
+    cuenta:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+    chat:'<path d="M21 12a8 8 0 0 1-11.6 7.1L3 20l1-4.6A8 8 0 1 1 21 12z"/>'
+  };
+  var nav = document.createElement('nav'); nav.className = 'cs-nav'; nav.id = 'cs-nav'; nav.setAttribute('aria-label', 'Navegación principal');
+  [['home','Inicio','home'],['servicios','Servicios','servicios'],['chat','Chat','chat'],['pedidos','Pedidos','miscompras'],['cuenta','Cuenta','menu']].forEach(function(t){
+    var b = document.createElement('button'); b.type = 'button'; b.dataset.tab = t[0];
+    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ic[t[0]] + '</svg><span>' + t[1] + '</span>';
+    b.onclick = function(){ if(t[0] === 'chat'){ ccAbrir(); } else goPage(t[2]); };
+    if(t[0] === 'chat'){ var bd = document.createElement('span'); bd.className = 'cc-badge'; bd.style.display = 'none'; b.appendChild(bd); }
+    nav.appendChild(b);
+  });
+  document.body.appendChild(nav);
+  var act = document.querySelector('.page.active'); _syncBottomNav(act ? act.id.replace('page-', '') : 'home');
+}
+
+/* Pantalla "Servicios": reúne los accesos que ya existían en el menú lateral */
+function cs4Servicios(){
+  if(document.getElementById('page-servicios')) return;
+  var secs = [
+    ['Juegos', [['Free Fire','Diamantes, pases y cuentas','freefire'],['PUBG Mobile','Catálogo','pubg'],['Delta Force','Monedas y más','deltaforce']]],
+    ['Free Fire', [['Diamantes','Recarga a tu ID','diamantes'],['Tarjetas','Semanal y mensual','tarjetas'],['Subidas de nivel','Nivel 6 al 30','niveles'],['Pase Booyah','Para uno o varios IDs','boyaah'],['Likes','Para tu perfil','likes2k'],['Clanes','Honor y gloria','clanes']]],
+    ['Recargas y gift cards', [['Recargas','Servicios digitales','recargas'],['Gift Cards','Robux y Netflix','giftcards']]],
+    ['Tu cuenta', [['Billetera','Depositar saldo','saldo'],['Transferir','Enviar saldo','transferir'],['Mis compras','Historial y seguimiento','miscompras'],['Ranking y premios','TOP mensual','ranking']]],
+    ['Ayuda', [['Soporte','Tickets y WhatsApp','soporte'],['Preguntas frecuentes','Respuestas al instante','faq']]]
+  ];
+  var arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>';
+  var h = '<div class="sv-wrap"><h1>Servicios</h1><p>Todo lo que puedes pedir en CiberStore.</p>';
+  secs.forEach(function(s){
+    h += '<div class="sv-sec">' + s[0] + '</div><div class="sv-grid">';
+    s[1].forEach(function(i){ h += '<button type="button" class="sv-it" data-go="' + i[2] + '"><span style="flex:1;min-width:0">' + i[0] + '<small>' + i[1] + '</small></span>' + arrow + '</button>'; });
+    h += '</div>';
+  });
+  h += '<div class="sv-sec">Comunidad</div><div class="sv-grid"><button type="button" class="sv-it" data-chat="1"><span style="flex:1;min-width:0">Chat global<small>Conversa con otros usuarios</small></span>' + arrow + '</button></div></div>';
+  var pg = document.createElement('div'); pg.className = 'page'; pg.id = 'page-servicios'; pg.innerHTML = h;
+  pg.addEventListener('click', function(e){ var b = e.target.closest && e.target.closest('.sv-it'); if(!b) return; if(b.dataset.chat) ccAbrir(); else goPage(b.dataset.go); });
+  var home = document.getElementById('page-home'); home.parentNode.insertBefore(pg, home.nextSibling);
+}
+
+/* Detalles del Inicio: icono de billetera y tarjeta del chat con conectados reales */
+function cs4Home(){
+  var w = document.querySelector('.hm-wallet');
+  if(w && !w.querySelector('.hm-w-ico')){
+    var s = document.createElement('div'); s.className = 'hm-w-ico';
+    s.innerHTML = '<svg viewBox="0 0 64 56" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 14a6 6 0 0 1 6-6h30v8"/><rect x="4" y="14" width="52" height="36" rx="8"/><path d="M56 26H44a6 6 0 0 0 0 12h12"/><circle cx="46" cy="32" r="1.6" fill="currentColor"/></svg>';
+    w.insertBefore(s, w.firstChild);
+  }
+  var g = document.querySelector('#page-home .hm-grid');
+  if(g && !document.getElementById('hm-chat')){
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'hm-chat'; b.id = 'hm-chat'; b.onclick = function(){ ccAbrir(); };
+    b.innerHTML = '<span class="hm-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 20l1-4.6A8 8 0 1 1 21 12z"/></svg></span><span><b>Chat global</b><small><i></i><span id="hm-chat-n">Conversa con la comunidad</span></small></span><span class="hm-chat-go">Entrar →</span>';
+    g.parentNode.insertBefore(b, g.nextSibling);
+  }
+}
+function cs4ChatContador(){
+  var n = (typeof CC !== 'undefined' && CC.conectados) ? CC.conectados.length : 0, e = document.getElementById('hm-chat-n');
+  if(e && n) e.textContent = n + (n === 1 ? ' conectado ahora' : ' conectados ahora');
+}
+setInterval(cs4ChatContador, 4000);
+
+/* Menú lateral: accesos nuevos */
+function cs4Sidebar(){
+  var rk = document.getElementById('ni-ranking'); if(!rk || document.getElementById('ni-chat')) return;
+  var d = document.createElement('div'); d.className = 'nav-item'; d.id = 'ni-chat'; d.onclick = function(){ ccAbrir(); };
+  d.innerHTML = '<div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 20l1-4.6A8 8 0 1 1 21 12z"/></svg></div>Chat global';
+  rk.parentNode.insertBefore(d, rk.nextSibling);
+  var s = document.createElement('div'); s.className = 'nav-item'; s.id = 'ni-servicios'; s.onclick = function(){ goPage('servicios'); };
+  s.innerHTML = '<div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></div>Todos los servicios';
+  var h = document.getElementById('ni-home'); if(h) h.parentNode.insertBefore(s, h.nextSibling);
+}
+
+/* ── Campana: avisos reales (respuestas de soporte, saldo acreditado, anuncios del chat) ── */
+var NT = { items:[], visto:0, abierto:false };
+try{ NT.visto = Number(localStorage.getItem('cs_nt_visto') || 0); }catch(e){}
+function ntMontar(){
+  var bell = document.querySelector('.topbar-ico-btn'); if(!bell || bell.dataset.nt) return;
+  bell.dataset.nt = '1'; bell.setAttribute('aria-label', 'Notificaciones'); bell.title = 'Notificaciones'; bell.removeAttribute('onclick');
+  var dot = document.createElement('span'); dot.className = 'nt-dot'; dot.id = 'nt-dot'; bell.appendChild(dot);
+  bell.onclick = function(e){ e.stopPropagation(); ntAbrir(); };
+  var sh = document.createElement('div'); sh.className = 'nt-sheet'; sh.id = 'nt-sheet'; sh.setAttribute('role', 'dialog'); sh.setAttribute('aria-label', 'Notificaciones'); document.body.appendChild(sh);
+  document.addEventListener('click', function(e){ if(NT.abierto && !sh.contains(e.target)) ntCerrar(); });
+}
+function ntCargar(){
+  var y = (typeof authSession !== 'undefined') ? authSession : null; if(!y || !y.id) { NT.items = []; ntPintarDot(); return Promise.resolve(); }
+  var ps = [
+    sb.get('tickets', 'user_id=eq.' + encodeURIComponent(y.id) + '&unread_user=eq.true&select=id,codigo,updated_at&order=updated_at.desc&limit=5').catch(function(){ return []; }),
+    sb.get('movimientos_saldo', 'user_id=eq.' + encodeURIComponent(y.id) + '&tipo=in.(recarga,credito,compra_cancelada)&select=id,tipo,monto,created_at&order=created_at.desc&limit=4').catch(function(){ return []; }),
+    sb.get('chat_mensajes', 'tipo=eq.anuncio&eliminado=eq.false&select=id,texto,created_at&order=id.desc&limit=1').catch(function(){ return []; })
+  ];
+  return Promise.all(ps).then(function(r){
+    var out = [];
+    (Array.isArray(r[0]) ? r[0] : []).forEach(function(t){ out.push({t:new Date(t.updated_at).getTime() || Date.now(), e:'💬', a:'Soporte te respondió', b:'Ticket ' + (t.codigo || ('#' + t.id)), go:'soporte', fijo:true}); });
+    (Array.isArray(r[1]) ? r[1] : []).forEach(function(m){
+      var n = Math.abs(Number(m.monto) || 0).toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2});
+      out.push({t:new Date(m.created_at).getTime(), e:'💰', a: m.tipo === 'compra_cancelada' ? 'Reembolso a tu saldo' : 'Saldo acreditado', b:'+$' + n + ' MXN · ' + new Date(m.created_at).toLocaleDateString('es-MX', {day:'numeric', month:'short'}), go:'saldo'});
+    });
+    (Array.isArray(r[2]) ? r[2] : []).forEach(function(m){ out.push({t:new Date(m.created_at).getTime(), e:'📢', a:'Anuncio oficial', b:String(m.texto).slice(0, 90), chat:true}); });
+    out.sort(function(a, b){ return b.t - a.t; }); NT.items = out.slice(0, 8); ntPintarDot();
+  });
+}
+function ntNuevo(i){ return i.fijo || i.t > NT.visto; }
+function ntPintarDot(){ var d = document.getElementById('nt-dot'); if(d) d.classList.toggle('on', NT.items.some(ntNuevo)); }
+function ntAbrir(){
+  var sh = document.getElementById('nt-sheet'); if(!sh) return;
+  if(NT.abierto){ ntCerrar(); return; }
+  NT.abierto = true; sh.classList.add('on'); sh.textContent = 'Cargando…'; sh.className = 'nt-sheet on';
+  ntCargar().then(function(){
+    sh.textContent = '';
+    var h = document.createElement('div'); h.className = 'nt-h'; var t = document.createElement('span'); t.textContent = 'Notificaciones'; h.appendChild(t);
+    var x = document.createElement('button'); x.type = 'button'; x.textContent = '✕'; x.setAttribute('aria-label', 'Cerrar'); x.onclick = ntCerrar; h.appendChild(x); sh.appendChild(h);
+    if(typeof authSession === 'undefined' || !authSession){ var v0 = document.createElement('div'); v0.className = 'nt-vacio'; v0.textContent = 'Inicia sesión para ver tus avisos.'; sh.appendChild(v0); return; }
+    if(!NT.items.length){ var v = document.createElement('div'); v.className = 'nt-vacio'; v.textContent = 'No tienes avisos nuevos.'; sh.appendChild(v); }
+    NT.items.forEach(function(i){
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'nt-it' + (ntNuevo(i) ? ' nuevo' : '');
+      var e = document.createElement('span'); e.className = 'e'; e.textContent = i.e; var c = document.createElement('span'), s1 = document.createElement('b'), s2 = document.createElement('small');
+      s1.textContent = i.a; s2.textContent = i.b; c.appendChild(s1); c.appendChild(s2); b.appendChild(e); b.appendChild(c);
+      b.onclick = function(){ ntCerrar(); if(i.chat) ccAbrir(); else goPage(i.go); };
+      sh.appendChild(b);
+    });
+    NT.visto = Date.now(); try{ localStorage.setItem('cs_nt_visto', String(NT.visto)); }catch(e){}
+    setTimeout(function(){ var d = document.getElementById('nt-dot'); if(d && !NT.items.some(function(i){ return i.fijo; })) d.classList.remove('on'); }, 50);
+  });
+}
+function ntCerrar(){ NT.abierto = false; var sh = document.getElementById('nt-sheet'); if(sh) sh.classList.remove('on'); }
+
+(function(){
+  function listo(){
+    cs4Servicios(); cs4Montar(); cs4Sidebar(); cs4Home(); ntMontar();
+    setTimeout(ntCargar, 3500); setInterval(function(){ if(!document.hidden) ntCargar(); }, 60000);
+    var f = window.renderHomeDashboard; if(typeof f === 'function') window.renderHomeDashboard = function(){ var r = f.apply(this, arguments); try{ cs4Home(); }catch(e){} return r; };
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', listo); else listo();
+})();
+
+// ═══════════ REGALOS VÍA CORREO (Free Fire): Pase Booyah, Caja de Fragmentos, Caja de 10 Tokens Evolutivos, Fragmentos ═══════════
+// Se paga con saldo (mismo flujo que el Pase actual: saldo fresco -> descuento atómico -> pedido -> aviso al admin). Entrega manual por regalo.
+var RG = {
+  PASE: 23, PASE_MAY: 20, PASE_MAY_MIN: 10,
+  // paquetes del proveedor (precio de venta en MXN por paquete)
+  PAQ: { c1:{t:'Caja de Fragmentos Evo',p:2.90}, c5:{t:'5 Cajas de Fragmentos Evo',p:14.40}, c10:{t:'10 Cajas de Fragmentos Evo',p:27.90}, c50:{t:'50 Cajas de Fragmentos Evo',p:140.03},
+         f10:{t:'10 Fragmentos de arma Evo',p:5.70}, f50:{t:'50 Fragmentos de arma Evo',p:27.91}, f100:{t:'100 Fragmentos de arma Evo',p:55.10}, f500:{t:'500 Fragmentos de arma Evo',p:277.08} },
+  cant: { pase:0, c1:0, c5:0, c10:0, c50:0, f10:0, f50:0, f100:0, f500:0 }, busy: false, idOk: null, nick: ''
+};
+function rgR2(n){ return Math.round(n * 100) / 100; }
+function rgKeys(){ return Object.keys(RG.cant); }
+function rgPrecioPase(q){ return q >= RG.PASE_MAY_MIN ? RG.PASE_MAY : RG.PASE; }
+function rgSub(k){
+  var q = RG.cant[k] || 0;
+  if(k === 'pase') return rgR2(q * rgPrecioPase(q));
+  return rgR2(q * RG.PAQ[k].p);
+}
+function rgTotal(){ var t = 0; rgKeys().forEach(function(k){ t += rgSub(k); }); return rgR2(t); }
+function rgFmt(n){ return (typeof fmt === 'function') ? fmt(n) : ('$' + n); }
+function rgCant(k, d){ rgSet(k, (RG.cant[k] || 0) + d, true); }
+function rgSet(k, v, escribirInput){
+  var n = parseInt(String(v).replace(/[^0-9]/g, ''), 10) || 0;
+  RG.cant[k] = Math.max(0, Math.min(999, n));
+  if(escribirInput){ var i = document.getElementById('rg-' + k + '-cant'); if(i) i.value = RG.cant[k]; }
+  rgPintar();
+}
+function rgPintar(){
+  var e;
+  rgKeys().forEach(function(k){
+    if((e = document.getElementById('rg-' + k + '-sub'))) e.textContent = rgFmt(rgSub(k));
+    if((e = document.getElementById('rg-' + k + '-pu'))) e.textContent = rgFmt(k === 'pase' ? rgPrecioPase(RG.cant.pase || 0) : RG.PAQ[k].p);
+  });
+  if((e = document.getElementById('rg-total'))) e.textContent = rgFmt(rgTotal());
+  if((e = document.getElementById('rg-saldo'))) e.textContent = (typeof authSession !== 'undefined' && authSession) ? rgFmt(authSession.saldo || 0) : rgFmt(0);
+}
+function rgError(m){ var e = document.getElementById('rg-err'); if(!e) return; if(m){ e.textContent = m; e.style.display = 'block'; } else e.style.display = 'none'; }
+function rgIdVal(){ return ((document.getElementById('rg-id') || {}).value || '').replace(/\D/g, ''); }
+function rgIdCambio(){ RG.idOk = null; RG.nick = ''; var n = document.getElementById('rg-nick'); if(n) n.style.display = 'none'; }
+function rgVerificar(){
+  var id = rgIdVal(), btn = document.getElementById('rg-vbtn'), n = document.getElementById('rg-nick');
+  if(id.length < 5){ rgError('Escribe un ID de Free Fire válido.'); return; }
+  rgError('');
+  if(typeof COMPRAR_RECARGA_URL === 'undefined'){ return; }
+  if(btn){ btn.disabled = true; btn.textContent = '...'; }
+  fetch(COMPRAR_RECARGA_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'validar', product_id: 340, service_user_id: id }) })
+    .then(function(r){ return r.json(); }).then(function(res){
+      if(btn){ btn.disabled = false; btn.textContent = 'Verificar'; }
+      if(res && res.success && res.valido){ RG.idOk = id; RG.nick = res.nombre || 'Jugador'; if(n){ n.textContent = '✅ ' + RG.nick; n.style.display = 'block'; } }
+      else if(res && res.success && !res.valido){ rgError('❌ No se encontró la cuenta. Revisa el ID.'); }
+      else { if(n){ n.textContent = 'No se pudo verificar ahora; puedes continuar con tu ID.'; n.style.display = 'block'; } }
+    }).catch(function(){ if(btn){ btn.disabled = false; btn.textContent = 'Verificar'; } if(n){ n.textContent = 'No se pudo verificar ahora; puedes continuar con tu ID.'; n.style.display = 'block'; } });
+}
+function rgDetalle(){
+  var d = [];
+  rgKeys().forEach(function(k){ var q = RG.cant[k] || 0; if(!q) return;
+    d.push(k === 'pase' ? q + 'x Pase Booyah (regalo)' + (q >= RG.PASE_MAY_MIN ? ' [mayoreo]' : '') : q + 'x ' + RG.PAQ[k].t); });
+  return d.join(' + ');
+}
+function rgComprar(){
+  if(typeof authSession === 'undefined' || !authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal, 600); return; }
+  if(RG.busy) return;
+  rgError('');
+  var id = rgIdVal();
+  if(id.length < 5){ rgError('Escribe tu ID de Free Fire (mínimo 5 dígitos).'); return; }
+  var total = rgTotal();
+  if(!rgKeys().some(function(k){ return RG.cant[k] > 0; })){ rgError('Elige al menos un producto.'); return; }
+  if(!(total > 0)){ rgError('Total inválido.'); return; }
+  var btn = document.getElementById('rg-btn');
+  // Segundo toque: confirmación
+  if(!rgComprar._conf){
+    rgComprar._conf = true;
+    if(btn) btn.textContent = 'Confirmar: ' + rgFmt(total) + ' → ID ' + id;
+    setTimeout(function(){ if(rgComprar._conf){ rgComprar._conf = false; if(btn && !RG.busy) btn.textContent = 'Comprar con saldo'; } }, 6000);
+    return;
+  }
+  rgComprar._conf = false;
+  RG.busy = true;
+  if(btn){ btn.disabled = true; btn.textContent = 'Verificando saldo...'; }
+  var libera = function(){ RG.busy = false; if(btn){ btn.disabled = false; btn.textContent = 'Comprar con saldo'; } };
+  verificarSaldoFresco(total, function(alcanza, saldoReal){
+    if(!alcanza){ rgError('Saldo insuficiente (' + rgFmt(saldoReal) + '). Necesitas ' + rgFmt(total) + '.'); rgPintar(); libera(); return; }
+    var ord = getNextOrder(), det = rgDetalle(), nom = RG.idOk === id ? RG.nick : '-';
+    addSpend(total, det + ' - ID:' + id + ' (' + nom + ') - Pedido #' + ord);
+    registrarPedido(det, 0, 'otro', id, total, 0);
+    if(typeof tgNotifyPurchase === 'function'){
+      tgNotifyPurchase(authSession.username, '🎁 REGALOS VÍA CORREO\n' + det + '\n🎮 ID: ' + id + (RG.nick && RG.idOk === id ? '\n👤 Cuenta: ' + RG.nick : '') + '\n⚠️ Entrega por REGALO', total, ord);
+    }
+    if(typeof _mostrarAvisoModal === 'function'){
+      _mostrarAvisoModal('PEDIDO #' + ord + ' CONFIRMADO', 'Tu pedido <b style="color:#fff">' + det + '</b> fue registrado para el ID <b style="color:#fff">' + id + '</b>.<br/><br/>Se envía mediante <b style="color:#fff">REGALO</b> y puede tardar <b style="color:#fff">1 día</b>.', '#1b87f5');
+    }
+    showToast('✅ Pedido #' + ord + ' confirmado!', 3000);
+    rgKeys().forEach(function(k){ RG.cant[k] = 0; });
+    rgKeys().forEach(function(k){ var i = document.getElementById('rg-' + k + '-cant'); if(i) i.value = 0; });
+    var ii = document.getElementById('rg-id'); if(ii) ii.value = ''; rgIdCambio();
+    setTimeout(function(){ rgPintar(); libera(); }, 1500);
+  });
+}
+(function(){
+  var _gp = goPage;
+  goPage = function(id){ var r = _gp.apply(this, arguments); if(id === 'regalos'){ setTimeout(function(){ rgComprar._conf = false; rgError(''); rgPintar(); }, 80); } return r; };
+})();
