@@ -120,17 +120,29 @@ async function pedidoEstado(pedidoId, estado, nota){
 // Catálogo integrado (mismos productos y precios que la semilla de checkout_saldo.sql). Se usa SOLO para MOSTRAR los productos
 // cuando la tabla catalogo_checkout aún no existe; el cobro siempre exige y usa la tabla real (checkout_pagar).
 const CATALOGO_BASE = [
-  { clave: 'pase_oferta', nombre: 'Pase Booyah', grupo: 'pase', precio: 22, mayoreo_min: null, mayoreo_precio: null, max_cant: 30, img: 'img/pase-booyah.png', detalle: 'Oferta exclusiva · entrega por regalo (hasta 1 día)', entrega: 'manual' },
-  { clave: 'pase', nombre: 'Pase Booyah', grupo: 'pase', precio: 23, mayoreo_min: 10, mayoreo_precio: 20, max_cant: 99, img: 'img/pase-booyah.png', detalle: 'Mayoreo: desde 10 pases a $20 c/u · entrega por regalo', entrega: 'manual' },
-  { clave: 'c1', nombre: 'Caja de Fragmentos Evo', grupo: 'caja', precio: 2.90, mayoreo_min: null, mayoreo_precio: null, max_cant: 5, img: 'img/caja-fragmentos.png', detalle: 'LATAM · entrega automática', entrega: 'auto' },
-  { clave: 'c5', nombre: '5 Cajas de Fragmentos Evo', grupo: 'caja', precio: 14.40, mayoreo_min: null, mayoreo_precio: null, max_cant: 5, img: 'img/caja-fragmentos.png', detalle: 'LATAM · entrega automática', entrega: 'auto' },
-  { clave: 'c10', nombre: '10 Cajas de Fragmentos Evo', grupo: 'caja', precio: 27.90, mayoreo_min: null, mayoreo_precio: null, max_cant: 5, img: 'img/caja-fragmentos.png', detalle: 'LATAM · entrega automática', entrega: 'auto' },
-  { clave: 'c50', nombre: '50 Cajas de Fragmentos Evo', grupo: 'caja', precio: 140.03, mayoreo_min: null, mayoreo_precio: null, max_cant: 5, img: 'img/caja-fragmentos.png', detalle: 'LATAM · entrega automática', entrega: 'auto' },
-  { clave: 'f10', nombre: '10 Fragmentos de arma Evo', grupo: 'fragmento', precio: 5.70, mayoreo_min: null, mayoreo_precio: null, max_cant: 5, img: 'img/fragmento-universal.png', detalle: 'LATAM · entrega automática', entrega: 'auto' },
-  { clave: 'f50', nombre: '50 Fragmentos de arma Evo', grupo: 'fragmento', precio: 27.91, mayoreo_min: null, mayoreo_precio: null, max_cant: 5, img: 'img/fragmento-universal.png', detalle: 'LATAM · entrega automática', entrega: 'auto' },
-  { clave: 'f100', nombre: '100 Fragmentos de arma Evo', grupo: 'fragmento', precio: 55.10, mayoreo_min: null, mayoreo_precio: null, max_cant: 5, img: 'img/fragmento-universal.png', detalle: 'LATAM · entrega automática', entrega: 'auto' },
-  { clave: 'f500', nombre: '500 Fragmentos de arma Evo', grupo: 'fragmento', precio: 277.08, mayoreo_min: null, mayoreo_precio: null, max_cant: 5, img: 'img/fragmento-universal.png', detalle: 'LATAM · entrega automática', entrega: 'auto' }
+  { clave: 'pase_oferta', nombre: 'Pase Booyah', grupo: 'pase', precio: 22, mayoreo_min: null, mayoreo_precio: null, max_cant: 30, img: 'img/pase-booyah.png', detalle: 'Oferta exclusiva · entrega por regalo (hasta 1 día)', entrega: 'manual', srv: null, orden: 1 },
+  { clave: 'pase', nombre: 'Pase Booyah', grupo: 'pase', precio: 23, mayoreo_min: 10, mayoreo_precio: 20, max_cant: 99, img: 'img/pase-booyah.png', detalle: 'Mayoreo: desde 10 pases a $20 c/u · entrega por regalo', entrega: 'manual', srv: null, orden: 2 },
+  { clave: 'c1', nombre: 'Caja de Fragmentos Evo', grupo: 'caja', precio: 2.90, mayoreo_min: null, mayoreo_precio: null, max_cant: 5, img: 'img/caja-fragmentos.png', detalle: 'LATAM · entrega automática', entrega: 'auto', srv: 'cj1', orden: 10 },
+  { clave: 'c5', nombre: '5 Cajas de Fragmentos Evo', grupo: 'caja', precio: 14.40, mayoreo_min: null, mayoreo_precio: null, max_cant: 5, img: 'img/caja-fragmentos.png', detalle: 'LATAM · entrega automática', entrega: 'auto', srv: 'cj5', orden: 11 },
+  { clave: 'c10', nombre: '10 Cajas de Fragmentos Evo', grupo: 'caja', precio: 27.90, mayoreo_min: null, mayoreo_precio: null, max_cant: 5, img: 'img/caja-fragmentos.png', detalle: 'LATAM · entrega automática', entrega: 'auto', srv: 'cj10', orden: 12 },
+  { clave: 'c50', nombre: '50 Cajas de Fragmentos Evo', grupo: 'caja', precio: 140.03, mayoreo_min: null, mayoreo_precio: null, max_cant: 5, img: 'img/caja-fragmentos.png', detalle: 'LATAM · entrega automática', entrega: 'auto', srv: 'cj50', orden: 13 },
+  { clave: 'f10', nombre: '10 Fragmentos de arma Evo', grupo: 'fragmento', precio: 5.70, mayoreo_min: null, mayoreo_precio: null, max_cant: 5, img: 'img/fragmento-universal.png', detalle: 'LATAM · entrega automática', entrega: 'auto', srv: 'fa10', orden: 20 },
+  { clave: 'f50', nombre: '50 Fragmentos de arma Evo', grupo: 'fragmento', precio: 27.91, mayoreo_min: null, mayoreo_precio: null, max_cant: 5, img: 'img/fragmento-universal.png', detalle: 'LATAM · entrega automática', entrega: 'auto', srv: 'fa50', orden: 21 },
+  { clave: 'f100', nombre: '100 Fragmentos de arma Evo', grupo: 'fragmento', precio: 55.10, mayoreo_min: null, mayoreo_precio: null, max_cant: 5, img: 'img/fragmento-universal.png', detalle: 'LATAM · entrega automática', entrega: 'auto', srv: 'fa100', orden: 22 },
+  { clave: 'f500', nombre: '500 Fragmentos de arma Evo', grupo: 'fragmento', precio: 277.08, mayoreo_min: null, mayoreo_precio: null, max_cant: 5, img: 'img/fragmento-universal.png', detalle: 'LATAM · entrega automática', entrega: 'auto', srv: 'fa500', orden: 23 }
 ];
+
+const COLS_CAT = 'clave,nombre,grupo,precio,mayoreo_min,mayoreo_precio,max_cant,img,detalle,entrega';
+// Lee el catálogo real. Si la tabla existe pero está vacía, la llena con los productos integrados (una sola vez, sin pisar nada).
+async function leerCatalogo(){
+  let r = await rest('catalogo_checkout?activo=eq.true&order=orden.asc&select=' + COLS_CAT);
+  if(r.status < 400 && Array.isArray(r.json) && !r.json.length){
+    await rest('catalogo_checkout', { method: 'POST', headers: { Prefer: 'resolution=ignore-duplicates,return=minimal' }, body: J(CATALOGO_BASE) });
+    r = await rest('catalogo_checkout?activo=eq.true&order=orden.asc&select=' + COLS_CAT);
+  }
+  if(r.status >= 400 || !Array.isArray(r.json) || !r.json.length) return { sin_bd: true, productos: CATALOGO_BASE.map(x => { const y = Object.assign({}, x); delete y.srv; delete y.orden; return y; }) };
+  return { sin_bd: false, productos: r.json.map(x => Object.assign({}, x, { precio: Number(x.precio), mayoreo_precio: x.mayoreo_precio == null ? null : Number(x.mayoreo_precio) })) };
+}
 
 module.exports = async function handler(req, res){
   try{
@@ -182,9 +194,8 @@ module.exports = async function handler(req, res){
     const u = String(b.username || '').trim().slice(0, 60), h = String(b.hash || '').slice(0, 200);
     // El catálogo (precios) es público: se puede ver antes de iniciar sesión. El saldo solo si la sesión es válida.
     if(a === 'catalogo' && (!u || !h)){
-      const rc = await rest('catalogo_checkout?activo=eq.true&order=orden.asc&select=clave,nombre,grupo,precio,mayoreo_min,mayoreo_precio,max_cant,img,detalle,entrega');
-      if(rc.status >= 400 || !Array.isArray(rc.json)) return enviar(res, { ok: true, sin_bd: true, productos: CATALOGO_BASE, saldo: null });
-      return enviar(res, { ok: true, productos: rc.json.map(x => Object.assign({}, x, { precio: Number(x.precio), mayoreo_precio: x.mayoreo_precio == null ? null : Number(x.mayoreo_precio) })), saldo: null });
+      const k = await leerCatalogo();
+      return enviar(res, { ok: true, sin_bd: k.sin_bd, productos: k.productos, saldo: null });
     }
     if(!u || !h) return enviar(res, { ok: false, code: 'credenciales', message: 'Inicia sesión para comprar' }, 401);
     if(limite('a|' + ip, 80, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Demasiados intentos, espera un momento' }, 429);
@@ -194,9 +205,8 @@ module.exports = async function handler(req, res){
     const uid = String(p.id);
 
     if(a === 'catalogo'){
-      const r = await rest('catalogo_checkout?activo=eq.true&order=orden.asc&select=clave,nombre,grupo,precio,mayoreo_min,mayoreo_precio,max_cant,img,detalle,entrega');
-      if(r.status >= 400 || !Array.isArray(r.json)) return enviar(res, { ok: true, sin_bd: true, productos: CATALOGO_BASE, saldo: Number(p.saldo) || 0 });
-      return enviar(res, { ok: true, productos: r.json.map(x => Object.assign({}, x, { precio: Number(x.precio), mayoreo_precio: x.mayoreo_precio == null ? null : Number(x.mayoreo_precio) })), saldo: Number(p.saldo) || 0 });
+      const k = await leerCatalogo();
+      return enviar(res, { ok: true, sin_bd: k.sin_bd, productos: k.productos, saldo: Number(p.saldo) || 0 });
     }
 
     // ───────── pagar ─────────
