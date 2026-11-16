@@ -637,7 +637,7 @@ function submitResena(){
     .catch(function(){ showToast('Error al publicar. Intenta de nuevo.'); });
 }
 // Colores para los avatares (segun inicial del nombre)
-var _RESENA_COLORS = ['#7c3aed','#2563eb','#0891b2','#059669','#d97706','#dc2626','#db2777','#9333ea','#4f46e5','#0d9488'];
+var _RESENA_COLORS = ['#408aed','#2563eb','#0a63d1','#059669','#d97706','#dc2626','#db2777','#3c85ea','#4f46e5','#0d9488'];
 
 function _avatarColor(nombre){
   var n = (nombre || 'U').toUpperCase().charCodeAt(0) || 85;
@@ -650,7 +650,7 @@ function _estrellasHTML(stars){
   var half = (stars - full) >= 0.5;
   var h = '<span style="display:inline-flex;gap:1px;letter-spacing:0">';
   for(var s = 1; s <= 5; s++){
-    var color = (s <= full) ? '#ffb800' : ((s === full+1 && half) ? '#ffb800' : '#39394d');
+    var color = (s <= full) ? '#ffb800' : ((s === full+1 && half) ? '#ffb800' : '#3e4145');
     h += '<span style="color:'+color+';font-size:.85rem">\u2605</span>';
   }
   h += '</span>';
@@ -698,7 +698,7 @@ function renderResenas(){
       var claseExtra = (idx >= 3) ? ' resena-extra' : '';
       var estiloExtra = (idx >= 3) ? 'display:none;' : '';
 
-      h += '<div class="resena-card'+claseExtra+'" style="'+estiloExtra+'background:linear-gradient(160deg,rgba(255,255,255,.025),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:1.1rem;flex-direction:column;gap:.7rem;transition:border-color .2s" onmouseover="this.style.borderColor=\'rgba(124,58,237,.25)\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.08)\'">'
+      h += '<div class="resena-card'+claseExtra+'" style="'+estiloExtra+'background:linear-gradient(160deg,rgba(255,255,255,.025),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:1.1rem;flex-direction:column;gap:.7rem;transition:border-color .2s" onmouseover="this.style.borderColor=\'rgba(64,138,237,.25)\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.08)\'">'
         // Header: avatar + nombre + verificado
         + '<div style="display:flex;align-items:center;gap:.65rem">'
         +   '<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,'+color+','+color+'aa);display:flex;align-items:center;justify-content:center;font-family:Oxanium;font-weight:800;font-size:1.05rem;color:#fff;flex-shrink:0;box-shadow:0 3px 10px '+color+'55">'+inicial+'</div>'
@@ -710,7 +710,7 @@ function renderResenas(){
         // Estrellas
         + '<div style="display:flex;align-items:center;gap:.5rem">'+_estrellasHTML(r.stars)+'<span style="font-size:.65rem;color:#25d366;font-weight:700;background:rgba(37,211,102,.1);padding:.1rem .45rem;border-radius:99px">Compra verificada</span></div>'
         // Servicio
-        + '<div style="font-size:.68rem;color:#a78bfa;font-weight:600;display:flex;align-items:center;gap:.3rem">\uD83D\uDCE6 '+r.servicio+'</div>'
+        + '<div style="font-size:.68rem;color:#7cc0ff;font-weight:600;display:flex;align-items:center;gap:.3rem">\uD83D\uDCE6 '+r.servicio+'</div>'
         // Texto
         + '<div style="font-size:.8rem;color:#c5cad6;line-height:1.6">\u201c'+r.texto+'\u201d</div>'
         + '</div>';
@@ -796,8 +796,8 @@ function renderAdminUsers(){
     var rows = '';
     users.forEach(function(u){
       var fecha = u.created_at ? new Date(u.created_at).toLocaleDateString('es-MX') : '';
-      var roleColor = u.role === 'admin' ? '#a78bfa' : u.banned ? '#ff6b6b' : '#00e676';
-      rows += '<div style="background:#141828;border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:.7rem .8rem;margin-bottom:.4rem">'
+      var roleColor = u.role === 'admin' ? '#7cc0ff' : u.banned ? '#ff6b6b' : '#00e676';
+      rows += '<div style="background:#1c1d20;border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:.7rem .8rem;margin-bottom:.4rem">'
         + '<div style="display:flex;align-items:center;gap:.55rem;margin-bottom:.5rem">'
         + '<div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--c2),var(--c1));display:flex;align-items:center;justify-content:center;font-family:Orbitron;font-size:.65rem;font-weight:700;color:#fff;flex-shrink:0">' + u.username.charAt(0).toUpperCase() + '</div>'
         + '<div style="flex:1;min-width:0">'
@@ -812,7 +812,7 @@ function renderAdminUsers(){
         + '<button data-u="' + u.id + '" data-name="' + u.username + '" onclick="admAddSaldo(this.dataset.u, this.dataset.name)" style="padding:.22rem .5rem;background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.25);color:#00e676;border-radius:5px;font-family:\'Exo 2\';font-size:.6rem;cursor:pointer;font-weight:700">+ Saldo</button>'
         + '<button data-u="' + u.id + '" data-name="' + u.username + '" onclick="admQuitarSaldo(this.dataset.u, this.dataset.name)" style="padding:.22rem .5rem;background:rgba(255,80,80,.08);border:1px solid rgba(255,80,80,.2);color:#ff6b6b;border-radius:5px;font-family:\'Exo 2\';font-size:.6rem;cursor:pointer;font-weight:700">- Saldo</button>'
         + '<button data-u="' + u.id + '" data-name="' + u.username + '" onclick="admVerHistorial(this.dataset.u, this.dataset.name)" style="padding:.22rem .5rem;background:rgba(0,170,255,.08);border:1px solid rgba(0,170,255,.2);color:var(--c1);border-radius:5px;font-family:\'Exo 2\';font-size:.6rem;cursor:pointer;font-weight:700">Historial</button>'
-        + '<button data-u="' + u.id + '" data-name="' + u.username + '" data-role="' + u.role + '" onclick="admCambiarRol(this.dataset.u, this.dataset.name, this.dataset.role)" style="padding:.22rem .5rem;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);color:#a78bfa;border-radius:5px;font-family:\'Exo 2\';font-size:.6rem;cursor:pointer;font-weight:700">Rol</button>'
+        + '<button data-u="' + u.id + '" data-name="' + u.username + '" data-role="' + u.role + '" onclick="admCambiarRol(this.dataset.u, this.dataset.name, this.dataset.role)" style="padding:.22rem .5rem;background:rgba(64,138,237,.08);border:1px solid rgba(64,138,237,.2);color:#7cc0ff;border-radius:5px;font-family:\'Exo 2\';font-size:.6rem;cursor:pointer;font-weight:700">Rol</button>'
         + '<button data-u="' + u.id + '" data-name="' + u.username + '" data-banned="' + u.banned + '" onclick="admBanear(this.dataset.u, this.dataset.name, this.dataset.banned)" style="padding:.22rem .5rem;background:rgba(255,165,0,.08);border:1px solid rgba(255,165,0,.2);color:#ffa500;border-radius:5px;font-family:\'Exo 2\';font-size:.6rem;cursor:pointer;font-weight:700">' + (u.banned ? 'Desbanear' : 'Banear') + '</button>'
         + '<button data-u="' + u.id + '" data-name="' + u.username + '" onclick="admResetPass(this.dataset.u, this.dataset.name)" style="padding:.22rem .5rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:var(--muted);border-radius:5px;font-family:\'Exo 2\';font-size:.6rem;cursor:pointer;font-weight:700">Reset</button>'
         + '</div></div>';
@@ -964,7 +964,7 @@ function admLoadChat(){
     var h = '';
     rows.forEach(function(m){
       var fecha = m.created_at ? new Date(m.created_at).toLocaleString('es-MX', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
-      h += '<div style="background:#141828;border:1px solid rgba(255,255,255,.07);border-radius:7px;padding:.55rem .7rem;display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem">'
+      h += '<div style="background:#1c1d20;border:1px solid rgba(255,255,255,.07);border-radius:7px;padding:.55rem .7rem;display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem">'
         + '<div style="flex:1;min-width:0">'
         + '<span style="font-size:.72rem;font-weight:700;color:var(--c1)">' + m.username + '</span>'
         + ' <span style="font-size:.62rem;color:var(--muted)">' + fecha + '</span>'
