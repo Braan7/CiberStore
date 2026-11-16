@@ -18797,7 +18797,7 @@ function ckApi(action, extra, auth){
   var go = function(h){
     var body = Object.assign({ action: action }, extra || {});
     if(auth && authSession){ body.username = authSession.username; body.hash = h; }
-    return fetch(CK_API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) }).then(function(r){ return r.json(); });
+    return fetch(CK_API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) }).then(function(r){ return r.json().catch(function(){ return { ok:false, code:'http' + r.status, message:'Respuesta inválida del servidor (' + r.status + ')' }; }); });
   };
   if(!auth || typeof authSession === 'undefined' || !authSession) return go(null);
   return pfHash().then(go);
@@ -18820,13 +18820,19 @@ function ckCargarCatalogo(force){
   if(!force && CK.cat && !CK.offline && Date.now() - CK.catT < 60000) return Promise.resolve(CK.cat);
   var t = new Promise(function(_, rej){ setTimeout(function(){ rej(new Error('tiempo')); }, 12000); });
   return Promise.race([ckApi('catalogo', {}, true), t]).then(function(j){
-    if(!j || !j.ok) throw new Error((j && j.message) || 'catalogo');
+    if(!j || !j.ok){ var er = new Error((j && j.message) || 'catalogo'); er.code = j && j.code; throw er; }
     CK.cat = j.productos; CK.catT = Date.now(); CK.offline = false; CK.offMsg = '';
     if(j.saldo != null){ CK.saldo = Number(j.saldo) || 0; ckSyncSaldo(CK.saldo); }
     return CK.cat;
   }).catch(function(e){
-    CK.cat = CK_RESPALDO; CK.catT = Date.now(); CK.offline = true;
-    CK.offMsg = (e && /ejecutar checkout_saldo/.test(e.message || '')) ? 'La tienda aún no tiene activado el pago con saldo (falta ejecutar checkout_saldo.sql en Supabase).' : 'No pudimos conectar con el servidor. Mostramos los precios de referencia; al comprar se confirma el precio real.';
+    var c = (e && e.code) || '', msg = (e && e.message) || '';
+    CK.cat = CK_RESPALDO.map(function(p){ return Object.assign({}, p, { precio: null, mayoreo_min: null, mayoreo_precio: null, detalle: p.entrega === 'manual' ? 'Entrega por regalo en el juego' : 'Entrega automática' }); }); CK.catT = Date.now(); CK.offline = true;
+    CK.offMsg = c === 'http404' || c === 'http405' ? 'El servidor de compras no está activo: falta subir api/comprar.js a Vercel.'
+      : c === 'sin_configurar' ? 'Faltan SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY en Vercel (y hacer Redeploy).'
+      : c === 'db' || /checkout_saldo/.test(msg) ? 'Falta ejecutar checkout_saldo.sql en Supabase.'
+      : c === 'credenciales' ? 'Vuelve a iniciar sesión para ver los precios.'
+      : c === 'limite' ? 'Demasiadas solicitudes. Espera un momento y reintenta.'
+      : 'Sin conexión con el servidor de compras. Revisa tu internet y reintenta.';
     return CK.cat;
   });
 }
@@ -18864,6 +18870,7 @@ function ckAbrir(clave){
   ov.classList.add('on'); ckPosicion();
   document.documentElement.classList.add('cs-sin-nav', 'ck-abierto');
   ckCargarCatalogo(true).then(function(){
+    if(CK.offline){ ckCerrar(); ckToast(CK.offMsg, 5000); return; }
     if(!ckProd(clave)){ ckCerrar(); ckToast('Ese producto no está disponible por ahora'); return; }
     ckRender();
   }).catch(function(){ ckCerrar(); ckToast('No se pudo cargar el producto. Revisa tu conexión.', 4000); });
@@ -19050,10 +19057,10 @@ function ckPintarLista(){
     if(RG2.sel && p.grupo !== RG2.sel) return;
     if(!vistos[p.grupo] && !RG2.sel){ vistos[p.grupo] = 1; h += '<div class="rg2-sec">' + sec[p.grupo] + '</div>'; }
     var ag = !!CK.ag[p.clave];
-    h += '<div class="rg2-card' + (ag ? ' ag' : '') + '">' + ckImg(p.img, p.nombre) + '<div class="i"><b>' + ckEsc(p.nombre) + '</b><small>' + ckEsc(p.detalle || '') + '</small><div class="p">' + (ag ? 'Sin stock' : ckFmt(p.precio)) + '</div>' + (p.mayoreo_min && !ag ? '<small style="color:#22c55e">Desde ' + p.mayoreo_min + ' pases: ' + ckFmt(p.mayoreo_precio) + ' c/u</small>' : '') + '</div>'
-      + '<button type="button" class="rg2-buy" ' + (ag ? 'disabled' : 'onclick="ckAbrir(\'' + ckEsc(p.clave) + '\')"') + '>Comprar</button></div>';
+    h += '<div class="rg2-card' + (ag ? ' ag' : '') + '">' + ckImg(p.img, p.nombre) + '<div class="i"><b>' + ckEsc(p.nombre) + '</b><small>' + ckEsc(p.detalle || '') + '</small><div class="p">' + (ag ? 'Sin stock' : (p.precio == null ? 'Precio no disponible' : ckFmt(p.precio))) + '</div>' + (p.mayoreo_min && !ag ? '<small style="color:#22c55e">Desde ' + p.mayoreo_min + ' pases: ' + ckFmt(p.mayoreo_precio) + ' c/u</small>' : '') + '</div>'
+      + '<button type="button" class="rg2-buy" ' + (ag || p.precio == null ? 'disabled' : 'onclick="ckAbrir(\'' + ckEsc(p.clave) + '\')"') + '>Comprar</button></div>';
   });
-  if(CK.offline) h = '<div class="ck-note" style="margin-bottom:.7rem">' + ckEsc(CK.offMsg) + ' <button type="button" class="ck-ver" onclick="ckListaCargar()">Reintentar</button></div>' + h;
+  if(CK.offline) h = '<div class="ck-note" style="margin-bottom:.7rem;color:#ffd08a;border-color:rgba(255,184,77,.4)">' + ckEsc(CK.offMsg) + ' <button type="button" class="ck-ver" onclick="ckListaCargar()">Reintentar</button></div>' + h;
   c.innerHTML = h || '<div class="ck-note">No hay productos disponibles por ahora.</div>';
 }
 function ckListaCargar(){
@@ -19070,6 +19077,12 @@ function ckListaCargar(){
     if(id === 'regalos'){ RG2.sel = null; rg2Cats(); setTimeout(ckListaCargar, 60); }
     return r;
   };
+})();
+
+/* Precio REAL de la oferta del Inicio: viene del servidor (si no responde, se deja el que ya estaba) */
+(function(){
+  function px(){ ckCargarCatalogo(true).then(function(){ if(CK.offline) return; var p = ckProd('pase_oferta'), n = ckEl('ofx-precio'); if(p && n) n.textContent = '$' + (Math.round(p.precio * 100) / 100); }).catch(function(){}); }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(px, 1200); }); else setTimeout(px, 1200);
 })();
 /* ═══════════════ MIS COMPRAS (v5) ═══════════════
    Una sola sección: resumen, Compras / Recargas / En seguimiento, movimientos e historial de pedidos.
