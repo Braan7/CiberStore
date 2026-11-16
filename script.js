@@ -18821,7 +18821,7 @@ function ckCargarCatalogo(force){
   var t = new Promise(function(_, rej){ setTimeout(function(){ rej(new Error('tiempo')); }, 12000); });
   return Promise.race([ckApi('catalogo', {}, true), t]).then(function(j){
     if(!j || !j.ok){ var er = new Error((j && j.message) || 'catalogo'); er.code = j && j.code; throw er; }
-    CK.cat = j.productos; CK.catT = Date.now(); CK.offline = false; CK.offMsg = ''; CK.sinBd = !!j.sin_bd;
+    CK.cat = j.productos; CK.catT = Date.now(); CK.offline = false; CK.offMsg = ''; CK.sinBd = !!j.sin_bd; CK.diag = j.diag || '';
     if(j.saldo != null){ CK.saldo = Number(j.saldo) || 0; ckSyncSaldo(CK.saldo); }
     return CK.cat;
   }).catch(function(e){
@@ -19060,7 +19060,7 @@ function ckPintarLista(){
     h += '<div class="rg2-card' + (ag ? ' ag' : '') + '">' + ckImg(p.img, p.nombre) + '<div class="i"><b>' + ckEsc(p.nombre) + '</b><small>' + ckEsc(p.detalle || '') + '</small><div class="p">' + (ag ? 'Sin stock' : (p.precio == null ? 'Precio no disponible' : ckFmt(p.precio))) + '</div>' + (p.mayoreo_min && !ag ? '<small style="color:#22c55e">Desde ' + p.mayoreo_min + ' pases: ' + ckFmt(p.mayoreo_precio) + ' c/u</small>' : '') + '</div>'
       + '<button type="button" class="rg2-buy" ' + (ag || p.precio == null ? 'disabled' : 'onclick="ckAbrir(\'' + ckEsc(p.clave) + '\')"') + '>Comprar</button></div>';
   });
-  if(CK.sinBd) h = '<div class="ck-note" style="margin-bottom:.7rem;color:#ffd08a;border-color:rgba(255,184,77,.4)">Falta ejecutar <b>checkout_saldo.sql</b> en Supabase para poder pagar. Los productos y precios ya son los del servidor.</div>' + h;
+  if(CK.sinBd) h = '<div class="ck-note" style="margin-bottom:.7rem;color:#ffd08a;border-color:rgba(255,184,77,.4)">Falta ejecutar <b>checkout_saldo.sql</b> en Supabase para poder pagar. Los productos y precios ya son los del servidor.' + (CK.diag ? '<br><small style="opacity:.85">Diagnóstico: ' + ckEsc(CK.diag) + '</small>' : '') + '</div>' + h;
   if(CK.offline) h = '<div class="ck-note" style="margin-bottom:.7rem;color:#ffd08a;border-color:rgba(255,184,77,.4)">' + ckEsc(CK.offMsg) + ' <button type="button" class="ck-ver" onclick="ckListaCargar()">Reintentar</button></div>' + h;
   c.innerHTML = h || '<div class="ck-note">No hay productos disponibles por ahora.</div>';
 }
@@ -19424,4 +19424,22 @@ function otSticker(tipo, clave){
     }
   };
   if(typeof otRenderTodo === 'function') otRenderTodo();
+})();
+/* ═══ PC / tablet: sin barra inferior (solo el menú de hamburguesa). Servicios y Chat pasan al menú lateral ═══ */
+(function(){
+  var ICO = {
+    servicios: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l1 13H5z"/><path d="M9 7a3 3 0 016 0"/></svg>',
+    chat: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.6A8 8 0 1121 12z"/></svg>'
+  };
+  function item(id, txt, ic, fn){
+    var d = document.createElement('div'); d.className = 'nav-item'; d.id = id;
+    d.innerHTML = '<div class="nav-ico">' + ic + '</div>' + txt; d.onclick = fn; return d;
+  }
+  function montar(){
+    var home = document.getElementById('ni-home'); if(!home || document.getElementById('ni-servicios')) return;
+    var s = item('ni-servicios', 'Servicios', ICO.servicios, function(){ goPage('servicios'); });
+    var c = item('ni-chat', 'Chat global', ICO.chat, function(){ if(typeof closeSB === 'function') closeSB(); if(typeof ccAbrir === 'function') ccAbrir(); });
+    home.parentNode.insertBefore(s, home.nextSibling); home.parentNode.insertBefore(c, s.nextSibling);
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', montar); else montar();
 })();
