@@ -17758,15 +17758,71 @@ function rgDetalle(){
     d.push(k === 'pase' ? q + 'x Pase Booyah (regalo)' + (q >= RG.PASE_MAY_MIN ? ' [mayoreo]' : '') : q + 'x ' + RG.PAQ[k].t); });
   return d.join(' + ');
 }
+// Cajas y fragmentos de arma: entrega AUTOMÁTICA con Central One (api/recarga.js). Cada paquete es una orden y se cobra UNA por UNA:
+// si una falla (no se hizo), se devuelve solo esa y el resto ni se cobra ni se intenta. Si queda en duda, NO se devuelve y se avisa para revisar.
+RG.MAX_AUTO = 5;   // paquetes automáticos por pedido (el servidor limita recargas por hora)
+function rgSrv(k){ return k.replace(/^c/, 'cj').replace(/^f/, 'fa'); }
+function rgUnidades(){
+  var u = [];
+  Object.keys(RG.PAQ).forEach(function(k){ for(var i = 0; i < (RG.cant[k] || 0); i++) u.push({ k: k, srv: rgSrv(k), p: RG.PAQ[k].p, t: RG.PAQ[k].t }); });
+  return u;
+}
+function rgEsperaSpend(cb, n){ n = n || 0; if(typeof _addSpendBusy !== 'undefined' && _addSpendBusy && n < 60){ setTimeout(function(){ rgEsperaSpend(cb, n + 1); }, 200); } else cb(); }
+function rgTg(txt, monto, ord){ if(typeof tgNotifyPurchase === 'function') tgNotifyPurchase(authSession.username, txt, monto, ord); }
+// Procesa UNA unidad. cb(estado) con estado: 'ok' | 'rechazado' | 'verificar'
+function rgUnidad(u, id, nom, cb){
+  var ord = getNextOrder(), movId = null, cancelarPend = false;
+  var key = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : ('cs-' + ord + '-' + Date.now());
+  var etiqueta = nom && nom !== '-' ? (' (' + nom + ')') : '';
+  var verificar = function(titulo, errTxt){
+    registrarPedido(u.t + ' (AUTO - VERIFICAR)', 1, 'otro', id, u.p, 0, { ord: ord });
+    rgTg('⚠️ ' + titulo + ' - Regalo AUTO\n🎁 ' + u.t + '\n🎮 ID: ' + id + '\n❗ ' + errTxt + '\n🔑 Key: ' + key, u.p, ord);
+    cb('verificar');
+  };
+  rgEsperaSpend(function(){
+    addSpend._onMovId = function(mid){ movId = mid; if(cancelarPend) _cancelarMovPorId(mid); };
+    addSpend(u.p, u.t + ' (Regalo AUTO) - ID:' + id + etiqueta + ' - Pedido #' + ord);
+    otApi({ action: 'comprar', producto: u.srv, player_id: id, client_name: authSession.username, idempotency_key: key }).then(function(res){
+      if(res.success && (res.status === 'COMPLETED' || res.status === 'PENDING')){
+        registrarPedido(u.t + ' (AUTO)', 1, 'otro', id, u.p, 0, { res: res, ord: ord });
+        rgTg('⚡ Regalo AUTO\n🎁 ' + u.t + '\n🎮 ID: ' + id + (res.via ? ('\n📡 ' + res.via) : '') + '\n' + (res.status === 'COMPLETED' ? '✅ Completado' : '⏳ En proceso'), u.p, ord);
+        cb('ok'); return;
+      }
+      var errTxt = String(res.error || res.status || 'sin confirmar'), code = String(res.code || '');
+      if(code === 'DUPLICATE_REQUEST'){ verificar('PEDIDO DUPLICADO', errTxt); return; }
+      if(code === 'PROVIDER_ERROR'){ verificar('PROVEEDOR CONTACTADO, VERIFICAR', errTxt); return; }
+      if(code === 'PURCHASE_FAILED' || code === 'PRODUCT_INACTIVE' || code === 'ENDPOINT_DISABLED'){
+        // No se hizo: se devuelve el saldo de ESTA unidad
+        _rpcAjustarSaldo(authSession.id, u.p).then(function(sn){
+          sn = Number(sn) || 0; authSession.saldo = sn; _refreshSaldoUI(sn); if(typeof saveSession === 'function') saveSession(authSession);
+          if(typeof sbAddMovimiento === 'function') sbAddMovimiento(authSession.id, 'credito', u.p, 'Reembolso Pedido #' + ord + ' - regalo rechazado');
+          if(movId) _cancelarMovPorId(movId); else { cancelarPend = true; _cancelarMovimientoCompra(authSession.id, ord); }
+          registrarPedido(u.t + ' (RECHAZADO - reembolsado)', 1, 'otro', id, 0, 0, { estado: 'rechazado', ord: ord });
+          rgTg('🚨 <b>REGALO RECHAZADO</b>\n🎁 ' + u.t + '\n🎮 ID: ' + id + '\n❗ ' + errTxt + '\n✅ Saldo devuelto al cliente', u.p, ord);
+          RG.ultimoError = errTxt; cb('rechazado');
+        }).catch(function(e){
+          console.error('[REGALOS] reembolso falló:', e);
+          registrarPedido(u.t + ' (RECHAZADO - REEMBOLSO FALLIDO, REVISAR)', 1, 'otro', id, u.p, 0, { ord: ord });
+          rgTg('🔥 <b>URGENTE: REEMBOLSO FALLIDO</b>\n🎁 ' + u.t + '\n🎮 ID: ' + id + '\n❗ ' + errTxt + '\n❌ Hay que devolver ' + fmt(u.p) + ' al cliente a mano', u.p, ord);
+          cb('verificar');
+        });
+        return;
+      }
+      verificar('ERROR AMBIGUO', errTxt);
+    }).catch(function(e){ verificar('SIN RESPUESTA DEL SERVIDOR', String((e && e.message) || e)); });
+  });
+}
 function rgComprar(){
   if(typeof authSession === 'undefined' || !authSession){ showToast('Inicia sesion para comprar'); setTimeout(showAuthModal, 600); return; }
   if(RG.busy) return;
   rgError('');
   var id = rgIdVal();
   if(id.length < 5){ rgError('Escribe tu ID de Free Fire (mínimo 5 dígitos).'); return; }
-  if(rgKeys().some(function(k){ return RG.agotado[k] && RG.cant[k] > 0; })){ rgError('Quita los productos sin stock.'); return; }
-  var total = rgTotal();
   if(!rgKeys().some(function(k){ return RG.cant[k] > 0; })){ rgError('Elige al menos un producto.'); return; }
+  if(rgKeys().some(function(k){ return RG.agotado[k] && RG.cant[k] > 0; })){ rgError('Quita los productos sin stock.'); return; }
+  var unidades = rgUnidades();
+  if(unidades.length > RG.MAX_AUTO){ rgError('Máximo ' + RG.MAX_AUTO + ' paquetes de cajas/fragmentos por pedido. Haz otro pedido para el resto.'); return; }
+  var total = rgTotal();
   if(!(total > 0)){ rgError('Total inválido.'); return; }
   var btn = document.getElementById('rg-btn');
   // Segundo toque: confirmación
@@ -17782,20 +17838,42 @@ function rgComprar(){
   var libera = function(){ RG.busy = false; if(btn){ btn.disabled = false; btn.textContent = 'Comprar con saldo'; } };
   verificarSaldoFresco(total, function(alcanza, saldoReal){
     if(!alcanza){ rgError('Saldo insuficiente (' + rgFmt(saldoReal) + '). Necesitas ' + rgFmt(total) + '.'); rgPintar(); libera(); return; }
-    var ord = getNextOrder(), det = rgDetalle(), nom = RG.idOk === id ? RG.nick : '-';
-    addSpend(total, det + ' - ID:' + id + ' (' + nom + ') - Pedido #' + ord);
-    registrarPedido(det, 0, 'otro', id, total, 0);
-    if(typeof tgNotifyPurchase === 'function'){
-      tgNotifyPurchase(authSession.username, '🎁 REGALOS VÍA CORREO\n' + det + '\n🎮 ID: ' + id + (RG.nick && RG.idOk === id ? '\n👤 Cuenta: ' + RG.nick : '') + '\n⚠️ Entrega por REGALO', total, ord);
+    if(btn) btn.textContent = 'Procesando tu pedido...';
+    var nom = RG.idOk === id ? RG.nick : '-', qPase = RG.cant.pase || 0, res = { pase: 0, ok: 0, verificar: 0, rechazado: 0, sinIntentar: 0 }, hecho = [];
+    // 1) Pase Booyah: entrega manual por regalo (como siempre)
+    if(qPase > 0){
+      var ordP = getNextOrder(), subP = rgSub('pase'), detP = qPase + 'x Pase Booyah (regalo)' + (qPase >= RG.PASE_MAY_MIN ? ' [mayoreo]' : '');
+      addSpend(subP, detP + ' - ID:' + id + ' (' + nom + ') - Pedido #' + ordP);
+      registrarPedido(detP, 0, 'otro', id, subP, 0);
+      rgTg('🎁 REGALOS VÍA CORREO\n' + detP + '\n🎮 ID: ' + id + (RG.nick && RG.idOk === id ? '\n👤 Cuenta: ' + RG.nick : '') + '\n⚠️ Entrega por REGALO (manual)', subP, ordP);
+      res.pase = qPase;
     }
-    if(typeof _mostrarAvisoModal === 'function'){
-      _mostrarAvisoModal('PEDIDO #' + ord + ' CONFIRMADO', 'Tu pedido <b style="color:#fff">' + det + '</b> fue registrado para el ID <b style="color:#fff">' + id + '</b>.<br/><br/>Se envía mediante <b style="color:#fff">REGALO</b> y puede tardar <b style="color:#fff">1 día</b>.', '#1b87f5');
-    }
-    showToast('✅ Pedido #' + ord + ' confirmado!', 3000);
-    rgKeys().forEach(function(k){ RG.cant[k] = 0; });
-    rgKeys().forEach(function(k){ var i = document.getElementById('rg-' + k + '-cant'); if(i) i.value = 0; });
-    var ii = document.getElementById('rg-id'); if(ii) ii.value = ''; rgIdCambio();
-    setTimeout(function(){ rgPintar(); libera(); }, 1500);
+    // 2) Cajas y fragmentos: automático, uno por uno
+    var i = 0;
+    var fin = function(){
+      var l = [];
+      if(res.pase) l.push('🎟️ ' + res.pase + ' Pase Booyah: se envía por regalo (hasta 1 día).');
+      if(res.ok) l.push('✅ ' + res.ok + ' paquete(s) enviados automáticamente (pueden tardar unos minutos).');
+      if(res.verificar) l.push('⏳ ' + res.verificar + ' paquete(s) en verificación: si no llegan en unos minutos, contacta al administrador con tu ID.');
+      if(res.rechazado) l.push('↩️ ' + res.rechazado + ' paquete(s) no se pudieron hacer y se te devolvió el saldo' + (RG.ultimoError ? ' (' + RG.ultimoError + ')' : '') + '.');
+      if(res.sinIntentar) l.push('⛔ ' + res.sinIntentar + ' paquete(s) no se intentaron ni se cobraron.');
+      if(typeof _mostrarAvisoModal === 'function') _mostrarAvisoModal('PEDIDO PROCESADO', l.join('<br/><br/>'), (res.rechazado || res.verificar || res.sinIntentar) ? '#f59e0b' : '#1b87f5');
+      showToast(res.rechazado || res.verificar || res.sinIntentar ? '⚠️ Pedido con avisos, revisa el detalle' : '✅ Pedido confirmado!', 4000);
+      rgKeys().forEach(function(k){ RG.cant[k] = 0; var inp = document.getElementById('rg-' + k + '-cant'); if(inp) inp.value = 0; });
+      var ii = document.getElementById('rg-id'); if(ii) ii.value = ''; rgIdCambio();
+      setTimeout(function(){ rgPintar(); libera(); }, 1500);
+    };
+    var sig = function(){
+      if(i >= unidades.length){ fin(); return; }
+      var u = unidades[i++];
+      rgUnidad(u, id, nom, function(est){
+        if(est === 'ok'){ res.ok++; sig(); return; }
+        if(est === 'rechazado') res.rechazado++; else res.verificar++;
+        res.sinIntentar = unidades.length - i;   // lo que falta ni se cobra ni se intenta
+        fin();
+      });
+    };
+    sig();
   });
 }
 (function(){
