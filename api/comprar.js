@@ -132,6 +132,8 @@ const CATALOGO_BASE = [
   { clave: 'f500', nombre: '500 Fragmentos de arma Evo', grupo: 'fragmento', precio: 277.08, mayoreo_min: null, mayoreo_precio: null, max_cant: 5, img: 'img/fragmento-universal.png', detalle: 'LATAM · entrega automática', entrega: 'auto', srv: 'fa500', orden: 23 }
 ];
 
+function rolLlave(){ const k = String(cfg().key || ''); try{ return JSON.parse(Buffer.from(k.split('.')[1], 'base64').toString()).role || '?'; }catch(e){ return k.indexOf('sb_secret') === 0 ? 'secret' : (k.indexOf('sb_publishable') === 0 ? 'publishable(anon)' : '?'); } }
+const hostBd = () => { try{ return new URL(cfg().url).host; }catch(e){ return '?'; } };
 const COLS_CAT = 'clave,nombre,grupo,precio,mayoreo_min,mayoreo_precio,max_cant,img,detalle,entrega';
 // Lee el catálogo real. Si la tabla existe pero está vacía, la llena con los productos integrados (una sola vez, sin pisar nada).
 async function leerCatalogo(){
@@ -142,7 +144,7 @@ async function leerCatalogo(){
   }
   if(r.status >= 400 || !Array.isArray(r.json) || !r.json.length){
     let rol = '?'; try{ rol = JSON.parse(Buffer.from(String(cfg().key).split('.')[1], 'base64').toString()).role || '?'; }catch(e){ rol = String(cfg().key).slice(0, 10).indexOf('sb_secret') === 0 ? 'secret' : (String(cfg().key).slice(0, 15).indexOf('sb_publishable') === 0 ? 'publishable(anon)' : '?'); }
-    return { sin_bd: true, diag: 'Supabase respondió ' + r.status + (msgErr(r) ? ': ' + msgErr(r).slice(0, 160) : (Array.isArray(r.json) ? ': la tabla está vacía' : '')) + ' · rol de la llave configurada: ' + rol, productos: CATALOGO_BASE.map(x => { const y = Object.assign({}, x); delete y.srv; delete y.orden; return y; }) };
+    return { sin_bd: true, diag: 'Supabase respondió ' + r.status + (msgErr(r) ? ': ' + msgErr(r).slice(0, 160) : (Array.isArray(r.json) ? ': la tabla está vacía' : '')) + ' · llave: ' + rol + ' · proyecto: ' + hostBd(), productos: CATALOGO_BASE.map(x => { const y = Object.assign({}, x); delete y.srv; delete y.orden; return y; }) };
   }
   return { sin_bd: false, productos: r.json.map(x => Object.assign({}, x, { precio: Number(x.precio), mayoreo_precio: x.mayoreo_precio == null ? null : Number(x.mayoreo_precio) })) };
 }
@@ -225,8 +227,9 @@ module.exports = async function handler(req, res){
       if(r.status >= 400 || !r.json || !r.json.ok){
         const e = errorSql(msgErr(r));
         if(e) return enviar(res, Object.assign({ ok: false }, e));
-        if(/checkout_pagar|does not exist|relation/.test(msgErr(r))) return enviar(res, { ok: false, code: 'db', message: 'La tienda aún no tiene activado el pago con saldo (falta checkout_saldo.sql).' });
-        return enviar(res, { ok: false, code: 'db', message: 'No se pudo procesar el pago. No se te cobró. Intenta de nuevo.' });
+        const det = ' [Supabase ' + r.status + ': ' + msgErr(r).slice(0, 180) + ' · llave: ' + rolLlave() + ' · proyecto: ' + hostBd() + ']';
+        if(/checkout_pagar|does not exist|relation|schema cache|permission denied/.test(msgErr(r))) return enviar(res, { ok: false, code: 'db', message: 'No se pudo usar el pago con saldo.' + det });
+        return enviar(res, { ok: false, code: 'db', message: 'No se pudo procesar el pago. No se te cobró. Intenta de nuevo.' + det });
       }
       const oid = r.json.orden_id;
       if(!r.json.repetida){
