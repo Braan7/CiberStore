@@ -29,7 +29,17 @@ const PRODUCTOS = [
   { clave:'n15', grupo:'niveles', titulo:'Paquete de subida de nivel - Nivel 15', precio:8.10,  usd:0.4317, nivel:15 },
   { clave:'n20', grupo:'niveles', titulo:'Paquete de subida de nivel - Nivel 20', precio:8.10,  usd:0.4317, nivel:20 },
   { clave:'n25', grupo:'niveles', titulo:'Paquete de subida de nivel - Nivel 25', precio:8.10,  usd:0.4317, nivel:25 },
-  { clave:'n30', grupo:'niveles', titulo:'Paquete de subida de nivel - Nivel 30', precio:11.00, usd:0.5864, nivel:30 }
+  { clave:'n30', grupo:'niveles', titulo:'Paquete de subida de nivel - Nivel 30', precio:11.00, usd:0.5864, nivel:30 },
+
+  // Regalos vía correo (Free Fire LATAM): solo para verlos/detectarlos en el catálogo del proveedor. Precio de venta en MXN (precio); sin protección de margen porque no se conoce la moneda del proveedor.
+  { clave:'cj1',  grupo:'regalos', titulo:'1 Caja de Fragmentos Evo',    precio:2.90,   tipo:'caja',  num:1 },
+  { clave:'cj5',  grupo:'regalos', titulo:'5 Cajas de Fragmentos Evo',   precio:14.40,  tipo:'caja',  num:5 },
+  { clave:'cj10', grupo:'regalos', titulo:'10 Cajas de Fragmentos Evo',  precio:27.90,  tipo:'caja',  num:10 },
+  { clave:'cj50', grupo:'regalos', titulo:'50 Cajas de Fragmentos Evo',  precio:140.03, tipo:'caja',  num:50 },
+  { clave:'fa10', grupo:'regalos', titulo:'10 Fragmentos de arma Evo',   precio:5.70,   tipo:'arma',  num:10 },
+  { clave:'fa50', grupo:'regalos', titulo:'50 Fragmentos de arma Evo',   precio:27.91,  tipo:'arma',  num:50 },
+  { clave:'fa100',grupo:'regalos', titulo:'100 Fragmentos de arma Evo',  precio:55.10,  tipo:'arma',  num:100 },
+  { clave:'fa500',grupo:'regalos', titulo:'500 Fragmentos de arma Evo',  precio:277.08, tipo:'arma',  num:500 }
 ];
 const POR_CLAVE = {}; PRODUCTOS.forEach(p => { POR_CLAVE[p.clave] = p; });
 
@@ -78,10 +88,11 @@ function esFFLatam(it){
   const rx = process.env.CO_REGION_REGEX ? new RegExp(process.env.CO_REGION_REGEX, 'i') : /lat|latam|latin/i;
   return rx.test((it.region || '') + ' ' + (it.market || '') + ' ' + (it.name || ''));
 }
-const EXCLUIR_DIAM = /pase|pass|tarjeta|card|semanal|mensual|weekly|monthly|membres|member|nivel|level|lvl|upgrade|subida/i;
+const EXCLUIR_DIAM = /pase|pass|tarjeta|card|semanal|mensual|weekly|monthly|membres|member|nivel|level|lvl|upgrade|subida|fragment|caja|box|token/i;
 const BOOYAH = /b(?:oo|o)y(?:aa|a)h/;   // booyah, boyaah, boyah, booyaah
 function coincide(p, it){
   const t = norm((it.name || '') + ' ' + (it.sku || '')), booyah = BOOYAH.test(t);
+  if(p.grupo === 'regalos'){ const lat = /lat|latam|latin/i.test((it.region || '') + ' ' + (it.name || '')); const tipo = p.tipo === 'caja' ? /(caja|box|crate)/.test(t) && /fragment/.test(t) && !/arma|weapon/.test(t) : /fragment/.test(t) && /(arma|weapon)/.test(t); return lat && tipo && tieneNum(t, p.num) && !tieneNum(t, p.num * 10) ; }
   if(p.grupo === 'diamantes') return !EXCLUIR_DIAM.test(t) && (tieneNum(t, p.num) || (tieneNum(t, p.base) && /bono|bonus|%/.test(t)));
   if(p.grupo === 'tarjetas'){
     const basica = /(basic|lite|light)/.test(t);
@@ -103,7 +114,7 @@ function detectar(items, opts){
     const fj = fijo[p.clave] || (p.num ? fijo[String(p.num)] : null);
     if(fj){ item = items.find(x => x.product_id === fj) || null; via = 'CO_MAP'; n = item ? 1 : 0; }
     else {
-      const ac = cand.filter(it => coincide(p, it)); n = ac.length;
+      const ac = (p.grupo === 'regalos' ? items : cand).filter(it => coincide(p, it)); n = ac.length;
       if(p.grupo === 'diamantes') ac.sort((a, b) => Math.abs(parseFloat(a.reseller_price) - p.refUsd) - Math.abs(parseFloat(b.reseller_price) - p.refUsd));
       if(n === 1 || (n > 1 && p.grupo === 'diamantes')) item = ac[0];
       else if(n > 1) estado = 'ambiguo';
@@ -113,7 +124,7 @@ function detectar(items, opts){
       if(!item) estado = 'no_detectado';
       else if(!(precioUsd > 0)) estado = 'precio_invalido';
       else if(p.refUsd && Math.abs(precioUsd - p.refUsd) / p.refUsd > TOL) estado = 'precio_fuera_de_rango';
-      else if(margen && PROTEGER_MARGEN && p.usd < precioUsd) estado = 'bajo_costo';   // el proveedor cobra más de lo que vendes
+      else if(margen && PROTEGER_MARGEN && p.usd && p.usd < precioUsd) estado = 'bajo_costo';   // el proveedor cobra más de lo que vendes
       else if(item.in_stock === false) estado = 'sin_stock';
     }
     out[p.clave] = { clave: p.clave, estado, via, candidatos: n, producto: p, item, precioUsd: item ? item.reseller_price : null,
