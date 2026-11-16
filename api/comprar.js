@@ -140,7 +140,10 @@ async function leerCatalogo(){
     await rest('catalogo_checkout', { method: 'POST', headers: { Prefer: 'resolution=ignore-duplicates,return=minimal' }, body: J(CATALOGO_BASE) });
     r = await rest('catalogo_checkout?activo=eq.true&order=orden.asc&select=' + COLS_CAT);
   }
-  if(r.status >= 400 || !Array.isArray(r.json) || !r.json.length) return { sin_bd: true, productos: CATALOGO_BASE.map(x => { const y = Object.assign({}, x); delete y.srv; delete y.orden; return y; }) };
+  if(r.status >= 400 || !Array.isArray(r.json) || !r.json.length){
+    let rol = '?'; try{ rol = JSON.parse(Buffer.from(String(cfg().key).split('.')[1], 'base64').toString()).role || '?'; }catch(e){ rol = String(cfg().key).slice(0, 10).indexOf('sb_secret') === 0 ? 'secret' : (String(cfg().key).slice(0, 15).indexOf('sb_publishable') === 0 ? 'publishable(anon)' : '?'); }
+    return { sin_bd: true, diag: 'Supabase respondió ' + r.status + (msgErr(r) ? ': ' + msgErr(r).slice(0, 160) : (Array.isArray(r.json) ? ': la tabla está vacía' : '')) + ' · rol de la llave configurada: ' + rol, productos: CATALOGO_BASE.map(x => { const y = Object.assign({}, x); delete y.srv; delete y.orden; return y; }) };
+  }
   return { sin_bd: false, productos: r.json.map(x => Object.assign({}, x, { precio: Number(x.precio), mayoreo_precio: x.mayoreo_precio == null ? null : Number(x.mayoreo_precio) })) };
 }
 
@@ -195,7 +198,7 @@ module.exports = async function handler(req, res){
     // El catálogo (precios) es público: se puede ver antes de iniciar sesión. El saldo solo si la sesión es válida.
     if(a === 'catalogo' && (!u || !h)){
       const k = await leerCatalogo();
-      return enviar(res, { ok: true, sin_bd: k.sin_bd, productos: k.productos, saldo: null });
+      return enviar(res, { ok: true, sin_bd: k.sin_bd, diag: k.diag || null, productos: k.productos, saldo: null });
     }
     if(!u || !h) return enviar(res, { ok: false, code: 'credenciales', message: 'Inicia sesión para comprar' }, 401);
     if(limite('a|' + ip, 80, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Demasiados intentos, espera un momento' }, 429);
@@ -206,7 +209,7 @@ module.exports = async function handler(req, res){
 
     if(a === 'catalogo'){
       const k = await leerCatalogo();
-      return enviar(res, { ok: true, sin_bd: k.sin_bd, productos: k.productos, saldo: Number(p.saldo) || 0 });
+      return enviar(res, { ok: true, sin_bd: k.sin_bd, diag: k.diag || null, productos: k.productos, saldo: Number(p.saldo) || 0 });
     }
 
     // ───────── pagar ─────────
