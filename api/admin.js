@@ -57,7 +57,7 @@ module.exports = async function handler(req, res){
       if(!d) return enviar(res, 401, { ok: false, code: 'sesion_invalida', message: 'Tu sesión venció. Entra de nuevo.' });
       const fn = String(b.fn || ''), F = FUNCIONES[fn];
       if(!F) return enviar(res, 400, { ok: false, code: 'funcion', message: 'Acción no permitida' });
-      const url = String(process.env.SUPABASE_URL || '').replace(/\/+$/, ''), key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      const url = String((process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL) || '').replace(/\/+$/, ''), key = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SECRET_KEY || process.env.SERVICE_ROLE_KEY);
       if(!url || !key) return enviar(res, 200, { ok: false, code: 'sin_service_key', message: 'Falta configurar SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY en Vercel' });
       const a = (b.args && typeof b.args === 'object') ? b.args : {}, args = {};
       F.forEach(k => { if(a[k] !== undefined) args[k] = a[k]; });

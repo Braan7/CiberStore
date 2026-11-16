@@ -22,7 +22,7 @@ const S = require('./_sesion.js');
 
 function enviar(res, body, status){ res.statusCode = status || 200; res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.setHeader('Cache-Control', 'no-store'); res.end(JSON.stringify(body)); }
 function ipDe(req){ return String((req.headers['x-forwarded-for'] || (req.socket && req.socket.remoteAddress) || 'x')).split(',')[0].trim(); }
-const cfg = () => ({ url: String(process.env.SUPABASE_URL || '').replace(/\/+$/, ''), key: process.env.SUPABASE_SERVICE_ROLE_KEY });
+const cfg = () => ({ url: String((process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL) || '').replace(/\/+$/, ''), key: (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SECRET_KEY || process.env.SERVICE_ROLE_KEY) });
 const sha = s => crypto.createHash('sha256').update(String(s)).digest();
 const iguales = (a, b) => crypto.timingSafeEqual(sha(a), sha(b));
 const J = o => JSON.stringify(o);
@@ -122,7 +122,10 @@ module.exports = async function handler(req, res){
     if(req.method !== 'POST') return enviar(res, { ok: false, code: 'metodo' }, 405);
     const b = (req.body && typeof req.body === 'object') ? req.body : {}, ip = ipDe(req), a = String(b.action || '');
     const c = cfg();
-    if(!c.url || !c.key) return enviar(res, { ok: false, code: 'sin_configurar', message: 'Falta SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY en Vercel' });
+    if(!c.url || !c.key){
+      const vistas = Object.keys(process.env).filter(k => /SUPABASE|SERVICE_ROLE/i.test(k)).join(', ') || 'ninguna';
+      return enviar(res, { ok: false, code: 'sin_configurar', message: 'Este despliegue no ve ' + [!c.url ? 'SUPABASE_URL' : '', !c.key ? 'SUPABASE_SERVICE_ROLE_KEY' : ''].filter(Boolean).join(' ni ') + '. Variables SUPABASE que sí ve: ' + vistas + '. Revisa que estén en Production y haz Redeploy.' });
+    }
     if(limite('g|' + ip, 400, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Demasiadas solicitudes, espera un momento' }, 429);
 
     // ═════════════ ADMINISTRADOR ═════════════
