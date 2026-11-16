@@ -117,6 +117,21 @@ async function pedidoEstado(pedidoId, estado, nota){
   try{ await rest('pedidos?id=eq.' + encodeURIComponent(pedidoId), { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: J(cambios) }); }catch(e){}
 }
 
+// Catálogo integrado (mismos productos y precios que la semilla de checkout_saldo.sql). Se usa SOLO para MOSTRAR los productos
+// cuando la tabla catalogo_checkout aún no existe; el cobro siempre exige y usa la tabla real (checkout_pagar).
+const CATALOGO_BASE = [
+  { clave: 'pase_oferta', nombre: 'Pase Booyah', grupo: 'pase', precio: 22, mayoreo_min: null, mayoreo_precio: null, max_cant: 30, img: 'img/pase-booyah.png', detalle: 'Oferta exclusiva · entrega por regalo (hasta 1 día)', entrega: 'manual' },
+  { clave: 'pase', nombre: 'Pase Booyah', grupo: 'pase', precio: 23, mayoreo_min: 10, mayoreo_precio: 20, max_cant: 99, img: 'img/pase-booyah.png', detalle: 'Mayoreo: desde 10 pases a $20 c/u · entrega por regalo', entrega: 'manual' },
+  { clave: 'c1', nombre: 'Caja de Fragmentos Evo', grupo: 'caja', precio: 2.90, mayoreo_min: null, mayoreo_precio: null, max_cant: 5, img: 'img/caja-fragmentos.png', detalle: 'LATAM · entrega automática', entrega: 'auto' },
+  { clave: 'c5', nombre: '5 Cajas de Fragmentos Evo', grupo: 'caja', precio: 14.40, mayoreo_min: null, mayoreo_precio: null, max_cant: 5, img: 'img/caja-fragmentos.png', detalle: 'LATAM · entrega automática', entrega: 'auto' },
+  { clave: 'c10', nombre: '10 Cajas de Fragmentos Evo', grupo: 'caja', precio: 27.90, mayoreo_min: null, mayoreo_precio: null, max_cant: 5, img: 'img/caja-fragmentos.png', detalle: 'LATAM · entrega automática', entrega: 'auto' },
+  { clave: 'c50', nombre: '50 Cajas de Fragmentos Evo', grupo: 'caja', precio: 140.03, mayoreo_min: null, mayoreo_precio: null, max_cant: 5, img: 'img/caja-fragmentos.png', detalle: 'LATAM · entrega automática', entrega: 'auto' },
+  { clave: 'f10', nombre: '10 Fragmentos de arma Evo', grupo: 'fragmento', precio: 5.70, mayoreo_min: null, mayoreo_precio: null, max_cant: 5, img: 'img/fragmento-universal.png', detalle: 'LATAM · entrega automática', entrega: 'auto' },
+  { clave: 'f50', nombre: '50 Fragmentos de arma Evo', grupo: 'fragmento', precio: 27.91, mayoreo_min: null, mayoreo_precio: null, max_cant: 5, img: 'img/fragmento-universal.png', detalle: 'LATAM · entrega automática', entrega: 'auto' },
+  { clave: 'f100', nombre: '100 Fragmentos de arma Evo', grupo: 'fragmento', precio: 55.10, mayoreo_min: null, mayoreo_precio: null, max_cant: 5, img: 'img/fragmento-universal.png', detalle: 'LATAM · entrega automática', entrega: 'auto' },
+  { clave: 'f500', nombre: '500 Fragmentos de arma Evo', grupo: 'fragmento', precio: 277.08, mayoreo_min: null, mayoreo_precio: null, max_cant: 5, img: 'img/fragmento-universal.png', detalle: 'LATAM · entrega automática', entrega: 'auto' }
+];
+
 module.exports = async function handler(req, res){
   try{
     if(req.method !== 'POST') return enviar(res, { ok: false, code: 'metodo' }, 405);
@@ -168,7 +183,7 @@ module.exports = async function handler(req, res){
     // El catálogo (precios) es público: se puede ver antes de iniciar sesión. El saldo solo si la sesión es válida.
     if(a === 'catalogo' && (!u || !h)){
       const rc = await rest('catalogo_checkout?activo=eq.true&order=orden.asc&select=clave,nombre,grupo,precio,mayoreo_min,mayoreo_precio,max_cant,img,detalle,entrega');
-      if(rc.status >= 400 || !Array.isArray(rc.json)) return enviar(res, { ok: false, code: 'db', message: 'Falta ejecutar checkout_saldo.sql en Supabase' });
+      if(rc.status >= 400 || !Array.isArray(rc.json)) return enviar(res, { ok: true, sin_bd: true, productos: CATALOGO_BASE, saldo: null });
       return enviar(res, { ok: true, productos: rc.json.map(x => Object.assign({}, x, { precio: Number(x.precio), mayoreo_precio: x.mayoreo_precio == null ? null : Number(x.mayoreo_precio) })), saldo: null });
     }
     if(!u || !h) return enviar(res, { ok: false, code: 'credenciales', message: 'Inicia sesión para comprar' }, 401);
@@ -180,7 +195,7 @@ module.exports = async function handler(req, res){
 
     if(a === 'catalogo'){
       const r = await rest('catalogo_checkout?activo=eq.true&order=orden.asc&select=clave,nombre,grupo,precio,mayoreo_min,mayoreo_precio,max_cant,img,detalle,entrega');
-      if(r.status >= 400 || !Array.isArray(r.json)) return enviar(res, { ok: false, code: 'db', message: 'Falta ejecutar checkout_saldo.sql en Supabase' });
+      if(r.status >= 400 || !Array.isArray(r.json)) return enviar(res, { ok: true, sin_bd: true, productos: CATALOGO_BASE, saldo: Number(p.saldo) || 0 });
       return enviar(res, { ok: true, productos: r.json.map(x => Object.assign({}, x, { precio: Number(x.precio), mayoreo_precio: x.mayoreo_precio == null ? null : Number(x.mayoreo_precio) })), saldo: Number(p.saldo) || 0 });
     }
 
