@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta name="cs-build" content="f8efc33a6e">
-<script>var CS_BUILD="f8efc33a6e";</script>
+<meta name="cs-build" content="e33cbddad7">
+<script>var CS_BUILD="e33cbddad7";</script>
 <meta charset="UTF-8"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -5203,333 +5203,299 @@ select.ap-inp{flex:0 1 auto}
   <div class="mem-grid-wrap"><div class="mem-grid" id="mem-grid"></div></div>
 </div>
 <div class="page" id="page-perfil">
-  <div class="ph"><div class="stag">Mi cuenta</div><h2 class="ptitle">Mi <span>Perfil</span></h2><p class="psub">Tus datos y tu actividad en CiberStore.</p></div>
-  <div class="pf-wrap">
-    <!-- Datos rapidos: usuario, contrasena, hora Mexico -->
-    <div class="pf-card" style="margin-bottom:.85rem">
-      <div style="padding:1.1rem 1.25rem">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem">
-          <div>
-            <div style="font-size:.62rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase">Usuario</div>
-            <div style="font-family:Saira;font-weight:800;font-size:1.05rem;color:#fff" id="pf-quick-user">-</div>
-          </div>
-          <div class="pf-av" id="pf-quick-av" style="width:48px;height:48px;font-size:1.2rem">?</div>
-        </div>
+  <div class="pf2-wrap">
+    <div class="ph pf2-ph"><div class="stag">Mi cuenta</div><h2 class="ptitle">Mi <span>Perfil</span></h2><p class="psub">Gestiona tu cuenta, datos y actividad en CiberStore.</p></div>
 
-        <button onclick="openCambiarPass()" style="width:100%;padding:.7rem;background:var(--grad-soft);border:1px solid var(--border2);color:var(--c1);border-radius:10px;font-family:'Barlow';font-weight:800;font-size:.82rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;margin-bottom:.85rem">&#128273; Cambiar contrase&ntilde;a</button>
-
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem .9rem;background:rgba(27,135,245,.06);border:1px solid rgba(27,135,245,.18);border-radius:10px">
-          <div style="display:flex;align-items:center;gap:.5rem">
-            <span style="font-size:1.1rem">&#128197;</span>
-            <div>
-              <div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Hora local M&eacute;xico</div>
-              <div id="pf-hora-mx" style="font-family:Saira;font-weight:700;font-size:.92rem;color:#1b87f5">--:--:--</div>
-            </div>
-          </div>
-          <div id="pf-fecha-mx" style="font-size:.72rem;color:var(--muted);text-align:right;line-height:1.4">-</div>
+    <!-- Encabezado de la cuenta -->
+    <section class="pf2-card pf2-head">
+      <div class="pf2-hrow">
+        <button type="button" class="pf2-avwrap" onclick="pfFotoAbrir()" aria-label="Cambiar foto de perfil">
+          <span class="pf2-av" id="pf2-av">?</span><span class="pf2-cam"><i data-i="camera"></i></span><span class="pf2-dot" id="pf2-dot"></span>
+        </button>
+        <div class="pf2-hinfo">
+          <div class="pf2-name" id="pf2-name">—</div>
+          <span class="pf2-chip" id="pf2-rol"><i data-i="user"></i><span>Usuario</span></span>
+          <div class="pf2-conn" id="pf2-conn"><span class="pf2-cdot"></span><span id="pf2-conn-t">En línea</span></div>
         </div>
+        <button type="button" class="pf2-edit" onclick="pfEditarAbrir()" aria-label="Editar perfil"><i data-i="pencil"></i></button>
       </div>
+      <div class="pf2-btns">
+        <button type="button" class="pf2-btn pf2-btn-p" onclick="pfFotoAbrir()"><i data-i="image"></i> Cambiar foto</button>
+        <button type="button" class="pf2-btn" onclick="pfEditarAbrir()"><i data-i="pencil"></i> Editar perfil</button>
+      </div>
+      <div class="pf2-grid">
+        <div class="pf2-cell"><i data-i="id"></i><div><small>ID de usuario</small><b id="pf2-id">—</b><button type="button" class="pf2-copy" onclick="pfCopiar('id')" aria-label="Copiar ID"><i data-i="copy"></i></button></div></div>
+        <div class="pf2-cell"><i data-i="cal"></i><div><small>Miembro desde</small><b id="pf2-desde">—</b></div></div>
+        <div class="pf2-cell"><i data-i="user"></i><div><small>Nombre</small><b id="pf2-nombre">—</b></div></div>
+        <div class="pf2-cell"><i data-i="phone"></i><div><small>WhatsApp</small><b id="pf2-wa">—</b></div></div>
+        <div class="pf2-cell"><i data-i="globe"></i><div><small>Hora local</small><b id="pf2-hora">México (GMT-6)</b></div></div>
+        <div class="pf2-cell"><i data-i="clock"></i><div><small>Última actividad</small><b id="pf2-ult">—</b></div></div>
+      </div>
+    </section>
+
+    <!-- Pestañas -->
+    <nav class="pf2-tabs" role="tablist" aria-label="Secciones del perfil">
+      <button type="button" role="tab" class="on" data-t="perfil" onclick="pfTab('perfil')"><i data-i="user"></i><span>Perfil</span></button>
+      <button type="button" role="tab" data-t="seg" onclick="pfTab('seg')"><i data-i="shield"></i><span>Seguridad</span></button>
+      <button type="button" role="tab" data-t="pref" onclick="pfTab('pref')"><i data-i="gear"></i><span>Preferencias</span></button>
+      <button type="button" role="tab" data-t="ref" onclick="pfTab('ref')"><i data-i="users"></i><span>Referidos</span></button>
+    </nav>
+
+    <!-- ═══ PESTAÑA: PERFIL ═══ -->
+    <div class="pf2-pan on" id="pf2-p-perfil">
+      <section class="pf2-card">
+        <div class="pf2-sh"><span class="pf2-ib"><i data-i="wallet"></i></span><div><b>Billetera</b><small>Saldo y recargas</small></div>
+          <button type="button" class="pf2-ib pf2-ref" onclick="pfRefrescar()" aria-label="Actualizar"><i data-i="refresh"></i></button></div>
+        <div class="pf2-bal">
+          <small>Saldo disponible</small>
+          <div class="pf2-bal-n" id="wallet-saldo">$0</div>
+          <div class="pf2-bal-a" id="wallet-saldo-alt">&nbsp;</div>
+        </div>
+        <button type="button" class="pf2-gold" onclick="goPage('saldo')"><i data-i="plus"></i> Recargar saldo</button>
+        <div class="pf2-quick">
+          <button type="button" onclick="abrirRecargaSheet()"><i data-i="wallet"></i><span>Recargar</span></button>
+          <button type="button" onclick="goPage('transferir')"><i data-i="swap"></i><span>Transferir</span></button>
+          <button type="button" onclick="goPage('retirar')"><i data-i="up"></i><span>Retirar</span></button>
+          <button type="button" onclick="goPage('miscompras')"><i data-i="hist"></i><span>Historial</span></button>
+        </div>
+      </section>
+
+      <section class="pf2-card">
+        <div class="pf2-sh"><span class="pf2-ib"><i data-i="doc"></i></span><div><b>Movimientos recientes</b></div>
+          <button type="button" class="pf2-link" onclick="goPage('miscompras')">Ver todos <i data-i="arrow"></i></button></div>
+        <div class="pf2-filtros" id="pf2-filtros" role="tablist" aria-label="Filtrar movimientos">
+          <button type="button" class="on" data-f="todas" onclick="pfFiltro('todas')">Todas</button>
+          <button type="button" data-f="compra" onclick="pfFiltro('compra')">Compras</button>
+          <button type="button" data-f="recarga" onclick="pfFiltro('recarga')">Recargas</button>
+          <button type="button" data-f="transferencia" onclick="pfFiltro('transferencia')">Transferencias</button>
+          <button type="button" data-f="reembolso" onclick="pfFiltro('reembolso')">Reembolsos</button>
+        </div>
+        <div id="pf2-movs" class="pf2-movs"><div class="pf2-vacio">Cargando…</div></div>
+        <button type="button" class="pf2-btn pf2-wide" onclick="goPage('miscompras')"><i data-i="hist"></i> Consultar historial completo</button>
+      </section>
+
+      <section class="pf2-card">
+        <div class="pf2-sh"><span class="pf2-ib"><i data-i="grid"></i></span><div><b>Herramientas de tu cuenta</b></div></div>
+        <div class="pf2-tools">
+          <button type="button" onclick="goPage('miscompras')"><i data-i="cart"></i><span>Mis compras</span></button>
+          <button type="button" onclick="pfTickets()"><i data-i="headset"></i><span>Mis tickets</span><em id="pf2-tk-n" hidden></em></button>
+          <button type="button" onclick="pfTab('ref',true)"><i data-i="users"></i><span>Mis referidos</span></button>
+          <button type="button" onclick="pfCodigosAbrir()"><i data-i="ticket"></i><span>Códigos / Cupones</span></button>
+          <button type="button" onclick="pfTab('pref',true,'pf2-avisos')"><i data-i="bell"></i><span>Notificaciones</span><em id="pf2-nt-n" hidden></em></button>
+          <button type="button" onclick="pfTab('pref',true)"><i data-i="gear"></i><span>Configuración</span></button>
+        </div>
+        <button type="button" class="pf2-out" onclick="pfSalir()"><i data-i="out"></i> Cerrar sesión</button>
+      </section>
+
+      <section class="pf2-card">
+        <button type="button" class="pf2-acc" id="btn-reembolso" onclick="toggleReembolso()"><span><i data-i="refund"></i> Solicitar reembolso</span><span id="reembolso-arrow" class="pf2-arrow">&#9662;</span></button>
+        <div id="reembolso-form" class="pf2-reemb" style="display:none">
+          <p>Cuéntanos qué pasó y revisaremos tu caso. Te contactaremos con los datos de tu cuenta.</p>
+          <label class="flabel">Pedido / movimiento *</label>
+          <select class="finput" id="reemb-pedido"><option value="">Cargando tus pedidos...</option></select>
+          <label class="flabel">Motivo *</label>
+          <select class="finput" id="reemb-motivo">
+            <option value="">Selecciona un motivo</option><option value="No llego mi pedido">No llegó mi pedido</option><option value="Llego incompleto">Llegó incompleto</option>
+            <option value="Cobro duplicado">Me cobraron dos veces</option><option value="Compre por error">Compré por error</option><option value="ID equivocado">Puse el ID equivocado</option><option value="Otro">Otro motivo</option>
+          </select>
+          <label class="flabel">Explica qué pasó *</label>
+          <textarea class="finput" id="reemb-detalle" rows="3" placeholder="Danos detalles: qué compraste, qué pasó, tu ID..." style="resize:vertical;min-height:70px"></textarea>
+          <label class="flabel">Número de contacto *</label>
+          <input class="finput" id="reemb-wa" type="text" placeholder="Tu número de contacto"/>
+          <div id="reemb-err" class="pf2-err" style="display:none"></div>
+          <button type="button" class="pf2-gold" onclick="enviarReembolso()">Enviar solicitud</button>
+          <p class="pf2-mini">Las solicitudes se revisan manualmente. El reembolso no es automático.</p>
+        </div>
+      </section>
+
+      <section class="pf2-card pf2-help">
+        <span class="pf2-ib big"><i data-i="headset"></i></span>
+        <div><b>¿Necesitas ayuda con tu cuenta?</b><p>Nuestro equipo de soporte está disponible para ayudarte.</p></div>
+        <div class="pf2-hbtns">
+          <button type="button" class="pf2-btn pf2-btn-p" onclick="pfTicketNuevo()"><i data-i="plus"></i> Abrir un ticket de soporte</button>
+          <button type="button" class="pf2-btn" onclick="pfTickets()"><i data-i="list"></i> Consultar mis tickets</button>
+        </div>
+      </section>
     </div>
 
-    <!-- Panel billetera (estilo fintech) -->
-    <div class="pf-card" style="margin-bottom:.85rem">
-      <div style="padding:1.25rem">
-        <!-- Encabezado billetera -->
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;margin-bottom:1.15rem">
-          <div>
-            <div style="font-family:Saira;font-weight:800;font-size:1.35rem;color:#fff;letter-spacing:.3px;line-height:1.15">Billetera</div>
-            <div style="font-size:.78rem;color:var(--muted);margin-top:.1rem">Saldo y recargas</div>
-          </div>
-          <button onclick="cargarWalletPerfil()" title="Actualizar" style="width:44px;height:44px;flex-shrink:0;border-radius:13px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09);color:#c9d1e0;font-size:1.05rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s" onmouseover="this.style.background='rgba(255,180,60,.1)';this.style.borderColor='rgba(255,180,60,.3)';this.style.color='#ffb84d'" onmouseout="this.style.background='rgba(255,255,255,.03)';this.style.borderColor='rgba(255,255,255,.09)';this.style.color='#c9d1e0'">&#8635;</button>
-        </div>
-
-        <!-- Tarjeta de saldo -->
-        <div style="background:linear-gradient(160deg,rgba(255,180,60,.07),rgba(255,255,255,.012));border:1px solid rgba(255,180,60,.2);border-radius:18px;padding:1.35rem 1.25rem;margin-bottom:1rem">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem">
-            <div style="min-width:0">
-              <div style="font-size:.78rem;color:var(--muted);margin-bottom:.4rem">Saldo disponible</div>
-              <div id="wallet-saldo" style="font-family:Saira;font-weight:900;font-size:2.05rem;color:#fff;line-height:1.1;word-break:break-word">$0</div>
-              <div id="wallet-saldo-alt" style="font-size:.8rem;color:#6b7688;margin-top:.3rem">&nbsp;</div>
-            </div>
-            <div style="width:46px;height:46px;flex-shrink:0;border-radius:13px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);display:flex;align-items:center;justify-content:center;font-family:Saira;font-weight:800;color:#1b87f5;font-size:1.15rem">$</div>
-          </div>
-          <button onclick="goPage('saldo')" style="margin-top:1.15rem;display:inline-flex;align-items:center;gap:.45rem;background:rgba(255,180,60,.11);border:1px solid rgba(255,180,60,.38);color:#ffb84d;border-radius:12px;padding:.68rem 1.2rem;font-family:Barlow;font-weight:600;font-size:.88rem;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(255,180,60,.2)'" onmouseout="this.style.background='rgba(255,180,60,.11)'"><span style="font-size:1.05rem;line-height:1">+</span> Recargar</button>
-        </div>
-
-        <!-- Accesos rapidos -->
-        <div style="display:flex;gap:.55rem;margin-bottom:1.15rem;flex-wrap:wrap">
-          <button onclick="abrirRecargaSheet()" style="flex:1;min-width:105px;display:flex;align-items:center;justify-content:center;gap:.4rem;background:rgba(27,135,245,.09);border:1px solid rgba(27,135,245,.28);color:#1b87f5;border-radius:13px;padding:.8rem .55rem;font-family:Barlow;font-weight:600;font-size:.8rem;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(27,135,245,.16)'" onmouseout="this.style.background='rgba(27,135,245,.09)'"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1b87f5" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 12L2 9l4-6z"/><path d="M2 9h20"/><path d="M12 21 8 9l2.5-6"/><path d="m12 21 4-12-2.5-6"/></svg> Recargar</button>
-          <button onclick="goPage('transferir')" style="flex:1;min-width:105px;display:flex;align-items:center;justify-content:center;gap:.4rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09);color:#c9d1e0;border-radius:13px;padding:.8rem .55rem;font-family:Barlow;font-weight:600;font-size:.8rem;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(255,255,255,.07)'" onmouseout="this.style.background='rgba(255,255,255,.03)'"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c9d1e0" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8h11M15 5l3 3-3 3"/><path d="M17 16H6M9 13l-3 3 3 3"/></svg> Transferir</button>
-          <button onclick="goPage('retirar')" style="flex:1;min-width:105px;display:flex;align-items:center;justify-content:center;gap:.4rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09);color:#c9d1e0;border-radius:13px;padding:.8rem .55rem;font-family:Barlow;font-weight:600;font-size:.8rem;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(255,255,255,.07)'" onmouseout="this.style.background='rgba(255,255,255,.03)'"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c9d1e0" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M12 4 8 8M12 4l4 4"/><path d="M4 20h16"/></svg> Retirar</button>
-        </div>
-
-        <!-- Movimientos -->
-        <div style="background:rgba(255,255,255,.018);border:1px solid rgba(255,255,255,.07);border-radius:16px;overflow:hidden">
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:.95rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.06)">
-            <div style="font-family:Saira;font-weight:800;font-size:.95rem;color:#fff">Movimientos</div>
-            <button onclick="goPage('miscompras')" style="background:none;border:none;color:#1b87f5;font-family:Barlow;font-weight:600;font-size:.78rem;cursor:pointer;display:flex;align-items:center;gap:.25rem">Ver todos &#8594;</button>
-          </div>
-          <div id="wallet-movimientos" style="display:flex;flex-direction:column;gap:.35rem;padding:.8rem">
-            <div style="text-align:center;padding:1rem;color:var(--muted);font-size:.78rem">Cargando...</div>
-          </div>
-        </div>
-
-        <!-- Ayuda -->
-        <div onclick="openSmartWA()" style="display:flex;align-items:center;justify-content:center;gap:.5rem;margin-top:1.15rem;padding:.7rem;color:#6b7688;font-size:.8rem;cursor:pointer;transition:color .2s" onmouseover="this.style.color='#25d366'" onmouseout="this.style.color='#6b7688'">
-          <span style="font-size:.95rem">&#128172;</span> &iquest;Necesitas ayuda? Escr&iacute;benos por WhatsApp
-        </div>
-
-        <!-- SOLICITAR REEMBOLSO -->
-        <div style="margin-top:1.35rem;border-top:1px solid rgba(255,255,255,.06);padding-top:1.15rem">
-          <button onclick="toggleReembolso()" id="btn-reembolso" style="width:100%;display:flex;align-items:center;justify-content:space-between;background:rgba(255,180,60,.07);border:1px solid rgba(255,180,60,.22);border-radius:12px;padding:.85rem 1rem;cursor:pointer">
-            <span style="display:flex;align-items:center;gap:.6rem">
-              <span style="font-size:1.1rem">&#128260;</span>
-              <span style="font-family:Barlow;font-weight:600;font-size:.85rem;color:#1b87f5">Solicitar reembolso</span>
-            </span>
-            <span id="reembolso-arrow" style="color:#1b87f5;font-size:.8rem;transition:transform .3s">&#9662;</span>
-          </button>
-
-          <div id="reembolso-form" style="display:none;margin-top:.9rem;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:1rem">
-            <div style="font-size:.73rem;color:var(--muted);line-height:1.55;margin-bottom:.9rem">Cuentanos que paso y revisaremos tu caso. Te responderemos por WhatsApp.</div>
-
-            <label class="flabel">Pedido / movimiento *</label>
-            <select class="finput" id="reemb-pedido" style="margin-bottom:.7rem">
-              <option value="">Cargando tus pedidos...</option>
-            </select>
-
-            <label class="flabel">Motivo *</label>
-            <select class="finput" id="reemb-motivo" style="margin-bottom:.7rem">
-              <option value="">Selecciona un motivo</option>
-              <option value="No llego mi pedido">No llego mi pedido</option>
-              <option value="Llego incompleto">Llego incompleto</option>
-              <option value="Cobro duplicado">Me cobraron dos veces</option>
-              <option value="Compre por error">Compre por error</option>
-              <option value="ID equivocado">Puse el ID equivocado</option>
-              <option value="Otro">Otro motivo</option>
-            </select>
-
-            <label class="flabel">Explica que paso *</label>
-            <textarea class="finput" id="reemb-detalle" rows="3" placeholder="Danos detalles: que compraste, que paso, tu ID..." style="resize:vertical;min-height:70px;margin-bottom:.7rem"></textarea>
-
-            <label class="flabel">WhatsApp de contacto *</label>
-            <input class="finput" id="reemb-wa" type="text" placeholder="Tu numero de WhatsApp" style="margin-bottom:.8rem"/>
-
-            <div id="reemb-err" style="display:none;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.3);color:#ff6b6b;border-radius:9px;padding:.65rem .85rem;font-size:.76rem;margin-bottom:.75rem"></div>
-
-            <button onclick="enviarReembolso()" style="width:100%;padding:.9rem;background:linear-gradient(135deg,#ffb300,#ff8800);color:#fff;border:none;border-radius:11px;font-family:Saira;font-weight:900;font-size:.85rem;letter-spacing:.5px;cursor:pointer">ENVIAR SOLICITUD</button>
-
-            <div style="font-size:.68rem;color:var(--muted);text-align:center;margin-top:.75rem;line-height:1.5">Las solicitudes se revisan manualmente. El reembolso no es automatico.</div>
-          </div>
-        </div>
-      </div>
+    <!-- ═══ PESTAÑA: SEGURIDAD ═══ -->
+    <div class="pf2-pan" id="pf2-p-seg">
+      <section class="pf2-card">
+        <div class="pf2-sh"><span class="pf2-ib"><i data-i="key"></i></span><div><b>Cambiar contraseña</b><small>Usa mínimo 6 caracteres</small></div></div>
+        <form class="pf2-form" onsubmit="pfPassGuardar();return false" autocomplete="off">
+          <label for="pf2-pa">Contraseña actual</label>
+          <div class="pf2-pw"><input id="pf2-pa" type="password" autocomplete="current-password" placeholder="Tu contraseña actual"/><button type="button" onclick="pfVer('pf2-pa',this)" aria-label="Mostrar u ocultar"><i data-i="eye"></i></button></div>
+          <label for="pf2-pn">Nueva contraseña</label>
+          <div class="pf2-pw"><input id="pf2-pn" type="password" autocomplete="new-password" placeholder="Mínimo 6 caracteres"/><button type="button" onclick="pfVer('pf2-pn',this)" aria-label="Mostrar u ocultar"><i data-i="eye"></i></button></div>
+          <label for="pf2-pc">Confirmar nueva contraseña</label>
+          <div class="pf2-pw"><input id="pf2-pc" type="password" autocomplete="new-password" placeholder="Repite la nueva contraseña"/><button type="button" onclick="pfVer('pf2-pc',this)" aria-label="Mostrar u ocultar"><i data-i="eye"></i></button></div>
+          <div id="pf2-pmsg" class="pf2-msg" style="display:none"></div>
+          <button type="submit" class="pf2-btn pf2-btn-p pf2-wide" id="pf2-pbtn">Actualizar contraseña</button>
+          <p class="pf2-mini">Al cambiarla se cerrarán tus otras sesiones abiertas.</p>
+        </form>
+      </section>
+      <section class="pf2-card">
+        <div class="pf2-sh"><span class="pf2-ib"><i data-i="device"></i></span><div><b>Sesiones abiertas</b><small>Dispositivos donde está tu cuenta</small></div></div>
+        <div id="pf2-ses" class="pf2-ses"><div class="pf2-vacio">Cargando…</div></div>
+        <button type="button" class="pf2-btn pf2-wide" onclick="pfCerrarOtras()"><i data-i="shield"></i> Cerrar otras sesiones</button>
+        <button type="button" class="pf2-out" onclick="pfSalir()"><i data-i="out"></i> Cerrar sesión actual</button>
+      </section>
     </div>
 
-    <!-- Avatar + datos -->
-    <div class="pf-card">
-      <div class="pf-av-wrap">
-        <div class="pf-av" id="pf-avatar">?</div>
-        <div class="pf-uname" id="pf-username">-</div>
-        <div class="pf-tier" id="pf-tier-badge" style="display:none"></div>
-        <div class="pf-spent" id="pf-saldo-display" style="color:#00e676;font-family:Saira;font-size:1.1rem;font-weight:700;margin:.3rem 0">$0 MXN</div>
-        <div style="font-size:.72rem;color:var(--muted)" id="pf-role-display">Cargando...</div>
-      </div>
-      <div class="pf-stats">
-        <div class="pf-stat"><span class="pf-stat-n" id="pf-stat-nombre">-</span><span class="pf-stat-l">Nombre</span></div>
-        <div class="pf-stat"><span class="pf-stat-n" id="pf-stat-wa" style="font-size:.75rem">-</span><span class="pf-stat-l">WhatsApp</span></div>
-        <div class="pf-stat"><span class="pf-stat-n" id="pf-stat-fecha" style="font-size:.72rem">-</span><span class="pf-stat-l">Registro</span></div>
-      </div>
+    <!-- ═══ PESTAÑA: PREFERENCIAS ═══ -->
+    <div class="pf2-pan" id="pf2-p-pref">
+      <section class="pf2-card">
+        <div class="pf2-sh"><span class="pf2-ib"><i data-i="globe"></i></span><div><b>Moneda</b><small>En qué moneda ves precios y saldo</small></div></div>
+        <div class="pf2-mon" id="pf2-mon"></div>
+      </section>
+      <section class="pf2-card">
+        <div class="pf2-sh"><span class="pf2-ib"><i data-i="bell"></i></span><div><b>Notificaciones del navegador</b><small>Avisos de ofertas y novedades</small></div>
+          <button type="button" id="notif-btn" class="pf2-btn pf2-sm" onclick="requestNotifPerm()">Activar</button></div>
+      </section>
+      <section class="pf2-card" id="pf2-avisos">
+        <div class="pf2-sh"><span class="pf2-ib"><i data-i="bell"></i></span><div><b>Avisos de la cuenta</b><small id="pf2-av-sub">Compras, recargas, seguridad y anuncios</small></div>
+          <button type="button" class="pf2-link" onclick="pfAvisosLeer()">Marcar leídas</button></div>
+        <div id="pf2-av-l" class="pf2-av-l"><div class="pf2-vacio">Cargando…</div></div>
+      </section>
     </div>
-    <!-- Codigo referido -->
-    <div class="pf-card">
-      <div style="padding:.85rem 1.25rem">
-        <div style="font-family:Saira;font-size:.72rem;font-weight:700;color:var(--c4);margin-bottom:.5rem">&#127381; Tu codigo de referido</div>
-        <div style="display:flex;align-items:center;gap:.65rem">
-          <div style="font-family:Saira;font-size:1.1rem;font-weight:900;color:var(--c4);letter-spacing:3px" id="pf-ref-code">-</div>
-          <button onclick="copyRefCode()" style="padding:.35rem .75rem;background:rgba(255,208,0,.1);border:1px solid rgba(255,208,0,.3);color:var(--c4);border-radius:5px;font-family:'Barlow';font-weight:800;font-size:.7rem;cursor:pointer">Copiar</button>
+
+    <!-- ═══ PESTAÑA: REFERIDOS ═══ -->
+    <div class="pf2-pan" id="pf2-p-ref">
+      <section class="pf2-card">
+        <div class="pf2-sh"><span class="pf2-ib"><i data-i="star"></i></span><div><b>Tu código de referido</b></div></div>
+        <div class="pf2-refbox"><span id="pf2-refc">—</span><button type="button" onclick="pfCopiar('ref')" aria-label="Copiar código"><i data-i="copy"></i></button></div>
+        <div class="pf2-btns">
+          <button type="button" class="pf2-btn" onclick="pfCopiar('ref')"><i data-i="copy"></i> Copiar</button>
+          <button type="button" class="pf2-btn pf2-btn-p" onclick="pfCompartir()"><i data-i="share"></i> Compartir</button>
         </div>
-      </div>
-    </div>
-    <!-- Notificaciones -->
-    <div style="background:rgba(27,135,245,.05);border:1px solid rgba(27,135,245,.18);border-radius:9px;padding:.85rem 1.05rem;display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap">
-      <div style="font-size:.8rem;color:var(--text)">&#128276; Notificaciones push</div>
-      <button id="notif-btn" onclick="requestNotifPerm()" style="padding:.38rem .85rem;background:linear-gradient(90deg,var(--c2),var(--c1));color:#fff;border:none;border-radius:6px;font-family:'Barlow';font-weight:800;font-size:.72rem;cursor:pointer">Activar</button>
+        <p class="pf2-mini" style="text-align:left">Comparte tu código con otras personas. Las recompensas y condiciones vigentes están en el programa de referidos.</p>
+        <button type="button" class="pf2-btn pf2-wide" onclick="goPage('referidos')"><i data-i="users"></i> Ver programa de referidos</button>
+      </section>
     </div>
   </div>
+
+  <!-- Hojas (ventanas inferiores) -->
+  <div class="pf2-ov" id="pf2-ov" onclick="if(event.target===this)pfCerrarHoja()"></div>
 </div>
 
 <div class="page" id="page-saldo">
-  <div style="max-width:540px;margin:0 auto;padding:1.5rem 1.15rem 3rem">
-
-    <div style="margin-bottom:1.3rem">
-      <div style="font-family:Barlow,sans-serif;font-weight:800;font-size:1.6rem;color:#fff;letter-spacing:-.3px">Billetera</div>
-      <div style="font-size:.85rem;color:#8b93a3;margin-top:.15rem">Recarga y administra tu saldo</div>
+  <div class="bw-wrap">
+    <div class="bw-head">
+      <span class="bw-hico"><i data-i="wallet"></i></span>
+      <div><h1>Billetera</h1><p>Recarga y administra tu saldo</p></div>
     </div>
 
-    <!-- Saldo actual -->
-    <div class="wl-balance">
-      <div style="position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between">
-        <div>
-          <div class="wl-bal-label">Saldo actual</div>
-          <div class="wl-bal-amount" id="saldo-page-balance">$0 MXN</div>
+    <div class="bw-bal">
+      <span class="bw-bico"><i data-i="wallet"></i></span>
+      <div class="bw-bmid">
+        <small>Saldo actual</small>
+        <div class="bw-bnum" id="saldo-page-balance">$0 MXN</div>
+        <div class="bw-bsub"><span class="bw-cur" id="bw-cur">MXN</span><span id="bw-usd"></span></div>
+      </div>
+      <button type="button" class="bw-ref" id="bw-ref" onclick="bwRefrescar()" aria-label="Actualizar saldo"><i data-i="refresh"></i></button>
+    </div>
+
+    <div class="bw-nav" role="tablist">
+      <button type="button" class="on" onclick="bwIr('bw-metodos',this)"><i data-i="card"></i><span>Recargar saldo</span></button>
+      <button type="button" onclick="bwIr('bw-mis',this)"><i data-i="doc"></i><span>Mis recargas</span><em id="bw-pend-n" style="display:none">0</em></button>
+      <button type="button" onclick="bwIr('bw-hist',this)"><i data-i="hist"></i><span>Movimientos</span></button>
+    </div>
+
+    <div id="bw-login" class="bw-card" style="display:none">
+      <div class="bw-ch"><span class="bw-ib"><i data-i="user"></i></span><div><b>Inicia sesión</b><small>Para recargar y ver tu saldo necesitas una cuenta.</small></div></div>
+      <button type="button" class="bw-btn bw-p" onclick="showAuthModal()">Iniciar sesión</button>
+    </div>
+
+    <section class="bw-card" id="bw-metodos">
+      <div class="bw-ch"><span class="bw-ib"><i data-i="bank"></i></span><div><b>Métodos de depósito</b><small>Transfiere a una de nuestras cuentas y registra tu depósito.</small></div></div>
+      <div id="bw-cuentas"><div class="bw-vacio">Cargando cuentas…</div></div>
+    </section>
+
+    <section class="bw-card" id="bw-form">
+      <div class="bw-ch"><span class="bw-ib"><i data-i="up"></i></span><div><b>Solicitar recarga</b><small>Completa el formulario y sube tu comprobante.</small></div></div>
+      <div id="bw-f">
+        <label for="bw-cuenta">Método de depósito</label>
+        <div class="bw-fld bw-sel"><i data-i="bank"></i><select id="bw-cuenta"><option value="">Selecciona un método</option></select><i data-i="down" class="bw-chev"></i></div>
+        <label for="bw-monto">Cantidad a depositar (MXN)</label>
+        <div class="bw-fld"><span class="bw-pre">$</span><input id="bw-monto" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Ej. 200" autocomplete="off"></div>
+        <div class="bw-hint" id="bw-min"></div>
+        <label for="bw-titular">Titular de la transferencia</label>
+        <div class="bw-fld"><i data-i="user"></i><input id="bw-titular" type="text" maxlength="80" placeholder="Nombre completo del titular" autocomplete="off"></div>
+        <label for="bw-refe">Referencia / clave de rastreo</label>
+        <div class="bw-fld"><span class="bw-pre">#</span><input id="bw-refe" type="text" maxlength="40" placeholder="Ej. 1234567890" autocomplete="off"></div>
+        <label for="bw-fecha">Fecha y hora de la transferencia</label>
+        <div class="bw-fld"><i data-i="cal"></i><input id="bw-fecha" type="datetime-local"></div>
+        <label>Comprobante de pago</label>
+        <input type="file" id="bw-file" accept="image/jpeg,image/png,image/webp,application/pdf" style="display:none">
+        <div class="bw-drop" id="bw-drop" onclick="document.getElementById('bw-file').click()" role="button" tabindex="0">
+          <i data-i="up"></i><b>Sube tu comprobante</b><small>JPG, PNG, WEBP o PDF · las fotos se optimizan solas · PDF hasta 3 MB</small>
         </div>
-        <div style="width:56px;height:56px;border-radius:16px;background:rgba(27,135,245,.15);border:1px solid rgba(27,135,245,.35);display:flex;align-items:center;justify-content:center">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1b87f5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18M16 14.5h2"/></svg>
-        </div>
+        <div class="bw-prev" id="bw-prev" style="display:none"></div>
+        <div class="bw-err" id="bw-err" style="display:none"></div>
+        <button type="button" class="bw-btn bw-p bw-big" id="bw-send" onclick="bwResumen()"><i data-i="send"></i> Solicitar recarga</button>
+        <p class="bw-note">Revisaremos tu comprobante y acreditaremos el saldo en cuanto se apruebe. Te avisaremos aquí mismo, sin WhatsApp.</p>
       </div>
-    </div>
+    </section>
 
-    <!-- Advertencia monto minimo -->
-    <div class="wl-warn">
-      <div class="wl-warn-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffb84d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-      <div><div style="font-family:Saira,sans-serif;font-weight:800;font-size:.8rem;color:#ffb84d;letter-spacing:.3px;margin-bottom:.25rem">MONTO M&Iacute;NIMO: $200 MXN (&asymp; $11.80 USD)</div><div style="font-size:.75rem;color:#d5c9b0;line-height:1.5">Si env&iacute;as un monto menor al m&iacute;nimo, <b style="color:#ffb84d">NO ser&aacute; reembolsado</b>. El equivalente en USD es aproximado.</div></div>
-    </div>
+    <section class="bw-card" id="bw-mis">
+      <div class="bw-ch"><span class="bw-ib"><i data-i="doc"></i></span><div><b>Mis recargas</b><small>Estado de tus solicitudes de recarga.</small></div><button type="button" class="bw-link" onclick="bwCargarMis(true)"><i data-i="refresh"></i></button></div>
+      <div id="bw-mis-l"><div class="bw-vacio">Cargando…</div></div>
+    </section>
 
-    <!-- Monto a recargar -->
-    <div class="shop-sec-label">Monto a recargar</div>
-    <div class="wl-cur">
-      <button id="rec-cur-mxn" onclick="recSetMoneda('MXN')" class="wl-cur-tab on">MXN &middot; M&eacute;xico</button>
-      <button id="rec-cur-usd" onclick="recSetMoneda('USD')" class="wl-cur-tab">USD</button>
-    </div>
-
-    <div class="wl-input">
-      <span style="font-size:1.5rem;color:#0a63d1;font-weight:700">$</span>
-      <input id="rec-monto" type="number" inputmode="decimal" value="200" style="flex:1;background:none;border:none;color:#fff;font-family:Saira,sans-serif;font-weight:800;font-size:1.7rem;padding:.4rem .5rem;outline:none;min-width:0"/>
-      <span id="rec-cur-label" style="font-size:.85rem;color:#8b93a3;font-weight:600">MXN</span>
-    </div>
-    <div id="rec-min-aviso" style="font-size:.72rem;color:#8b93a3;margin-bottom:1.1rem;display:flex;align-items:center;gap:.35rem"><span style="color:#1b87f5">&#9432;</span> Minimo $200 MXN</div>
-
-    <div id="rec-montos" style="display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem;margin-bottom:1.9rem"></div>
-
-    <!-- Para que es tu saldo -->
-    <div class="shop-sec-label">&iquest;Para qu&eacute; es tu saldo? <span style="color:#ff6b6b">*</span></div>
-    <div style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.9rem">
-
-      <div id="rec-tipo-ilim" onclick="recSetTipo('ilim')" class="wl-opt">
-        <div class="wl-radio"><div class="wl-dot"></div></div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:.92rem;font-weight:700;color:#fff">Diamantes con Bono</div>
-          <div style="font-size:.72rem;color:#8b93a3;margin-top:.15rem">Entrega autom&aacute;tica &middot; sin l&iacute;mite de compras</div>
-        </div>
-        <div class="wl-opt-ico" style="background:rgba(27,135,245,.12)">&#128142;</div>
-      </div>
-
-      <div id="rec-tipo-pase" onclick="recSetTipo('pase')" class="wl-opt">
-        <div class="wl-radio"><div class="wl-dot"></div></div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:.92rem;font-weight:700;color:#fff">Pase Booyah</div>
-          <div style="font-size:.72rem;color:#8b93a3;margin-top:.15rem">Utiliza tu saldo para comprar tu Pase Booyah</div>
-        </div>
-        <div class="wl-opt-ico" style="background:rgba(10,99,209,.12)">&#127903;&#65039;</div>
-      </div>
-
-      <div id="rec-tipo-otro" onclick="recSetTipo('otro')" class="wl-opt">
-        <div class="wl-radio"><div class="wl-dot"></div></div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:.92rem;font-weight:700;color:#fff">Otro</div>
-          <div style="font-size:.72rem;color:#8b93a3;margin-top:.15rem">Escribe para qu&eacute; usar&aacute;s tu saldo</div>
-        </div>
-        <div class="wl-opt-ico" style="background:rgba(37,211,102,.12)">&#9998;</div>
-      </div>
-      <div id="rec-otro-wrap" style="display:none">
-        <input id="rec-otro-txt" type="text" maxlength="80" placeholder="Ej: comprar diamantes para revender..." style="width:100%;background:rgba(255,255,255,.03);border:1.5px solid rgba(37,211,102,.3);border-radius:13px;padding:.8rem 1rem;color:#fff;font-family:Barlow,sans-serif;font-size:.85rem;outline:none;box-sizing:border-box"/>
-      </div>
-
-      <div id="rec-tipo-err" style="display:none;background:rgba(255,60,60,.08);border:1px solid rgba(255,60,60,.25);color:#ff6b6b;border-radius:11px;padding:.6rem .85rem;font-size:.76rem">Selecciona para qu&eacute; es tu saldo antes de continuar.</div>
-    </div>
-
-    <!-- Metodos de pago -->
-    <div class="shop-sec-label">M&eacute;todo de pago</div>
-    <div style="display:flex;flex-direction:column;gap:.65rem">
-
-      <div onclick="recElegirMetodo('binance')" class="wl-pay" style="border-color:rgba(38,161,123,.2)">
-        <div class="wl-pay-ico" style="background:rgba(38,161,123,.12);border:1px solid rgba(38,161,123,.3)"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="#26a17b" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 9h8M12 9v6M9.5 14h5"/></svg></div>
-        <div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap"><span style="font-size:.96rem;font-weight:700;color:#fff">USDT</span><span class="wl-tag" style="background:rgba(38,161,123,.16);color:#26a17b">TRC-20</span></div><div style="font-size:.74rem;color:#8b93a3;margin-top:.15rem">Red TRON &middot; respondemos en menos de 5 min</div></div>
-        <span class="wl-arrow">&#8250;</span>
-      </div>
-
-    </div>
+    <section class="bw-card" id="bw-hist">
+      <div class="bw-ch"><span class="bw-ib"><i data-i="hist"></i></span><div><b>Historial</b><small>Movimientos de tu billetera.</small></div></div>
+      <div id="bw-mov"><div class="bw-vacio">Cargando…</div></div>
+    </section>
   </div>
+  <div class="bw-ov" id="bw-ov" onclick="if(event.target===this)bwCerrar()"></div>
 </div>
 
 <div class="page" id="page-miscompras">
-  <div class="ph">
-    <div class="stag">Historial</div>
-    <h2 class="ptitle">Mis <span>Compras</span></h2>
-    <p class="psub">Todos tus pedidos sincronizados en tiempo real.</p>
-  </div>
-  <div style="max-width:700px;margin:0 auto;padding:0 5vw 3rem">
+  <div class="mc2-wrap">
+    <div class="mc2-eye"><i></i>Historial</div>
+    <h1 class="mc2-h">Mis Compras</h1>
+    <p class="mc2-sub">Todos tus pedidos y recargas en un solo lugar.</p>
 
-    <!-- Stats -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1.5rem">
-      <div style="background:#0b0b0b;border:1px solid rgba(27,135,245,.15);border-radius:12px;padding:1rem;text-align:center">
-        <div style="font-family:Saira;font-size:1.4rem;font-weight:900;color:var(--c1)" id="mc-total-orders">-</div>
-        <div style="font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:.2rem">Pedidos</div>
-      </div>
-      <div style="background:#0b0b0b;border:1px solid rgba(0,230,118,.15);border-radius:12px;padding:1rem;text-align:center">
-        <div style="font-family:Saira;font-size:1.2rem;font-weight:900;color:#00e676" id="mc-total-spent">-</div>
-        <div style="font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:.2rem">Gastado</div>
-      </div>
-      <div style="background:#0b0b0b;border:1px solid rgba(255,208,0,.15);border-radius:12px;padding:1rem;text-align:center">
-        <div style="font-family:Saira;font-size:1.4rem;font-weight:900;color:var(--c4)" id="mc-total-saldo">-</div>
-        <div style="font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:.2rem">Saldo actual</div>
-      </div>
+    <div class="mc2-stats">
+      <div class="mc2-st"><span class="mc2-ic" data-ic="cart"></span><b id="mc2-n">–</b><small>Pedidos</small></div>
+      <div class="mc2-st g"><span class="mc2-ic" data-ic="wallet"></span><b id="mc2-gasto">–</b><small>Total gastado</small></div>
+      <div class="mc2-st a"><span class="mc2-ic" data-ic="layers"></span><b id="mc2-saldo">–</b><small>Saldo actual</small></div>
     </div>
 
-    <!-- Resumen de recargas por paquete -->
-    <div style="background:rgba(255,255,255,.022);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:1.35rem 1.2rem;margin-bottom:1.25rem">
-      <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:1.1rem">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1b87f5" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="11" rx="4"/><path d="M7 11v3M5.5 12.5h3M16 12h.01M18.5 14h.01"/></svg>
-        <span style="font-family:Barlow,sans-serif;font-weight:700;font-size:1.15rem;color:#fff">Recargas directas</span>
-      </div>
-      <div id="mc-resumen-lista" style="display:flex;flex-direction:column;gap:.5rem">
-        <div style="text-align:center;padding:1.5rem;color:#6b7280;font-size:.8rem">Cargando...</div>
-      </div>
-      <div id="mc-resumen-total" style="border-top:1px solid rgba(255,255,255,.09);margin-top:1rem;padding-top:1rem;display:none;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem">
-        <span style="font-family:Barlow,sans-serif;font-weight:700;font-size:1rem;color:#fff">Total</span>
-        <span style="font-size:.95rem;color:#6b7280;font-weight:600">
-          <span id="mc-res-n">0</span> recargas &middot; <span id="mc-res-monto" style="color:#25d366;font-weight:700">$0</span>
-        </span>
-      </div>
+    <div class="mc2-tabs" role="tablist">
+      <button type="button" class="on" id="mc2-t-compras" role="tab" onclick="mc2Tab('compras')"><span class="mc2-ic" data-ic="cart"></span>Compras</button>
+      <button type="button" id="mc2-t-recargas" role="tab" onclick="mc2Tab('recargas')"><span class="mc2-ic" data-ic="card"></span>Recargas</button>
+      <button type="button" id="mc2-t-seg" role="tab" onclick="mc2Tab('seg')"><span class="mc2-ic" data-ic="truck"></span>En seguimiento<em id="mc2-seg-n" style="display:none"></em></button>
     </div>
 
-    <!-- Saldo + Historial de movimientos (movido desde Perfil) -->
-    <div style="background:linear-gradient(160deg,rgba(0,230,118,.06),rgba(255,255,255,.02));border:1px solid rgba(0,230,118,.2);border-radius:16px;padding:1.1rem 1.25rem;margin-bottom:1.25rem">
-      <div style="font-family:Saira;font-size:.72rem;font-weight:700;color:#00e676;margin-bottom:.75rem;display:flex;align-items:center;gap:.45rem">&#128176; Saldo disponible</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem">
-        <div style="font-family:Saira;font-size:2rem;font-weight:900;color:#00e676" id="pf-saldo-big">$0 MXN</div>
-        <button onclick="goPage('saldo')" style="padding:.5rem 1.1rem;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff;border:none;border-radius:7px;font-family:Saira;font-weight:800;font-size:.78rem;cursor:pointer;letter-spacing:1px">+ Recargar</button>
+    <div id="mc2-p-compras">
+      <div class="mc2-bar">
+        <label class="mc2-bus"><span class="mc2-ic" data-ic="search"></span><input id="mc2-q" type="search" placeholder="Buscar en mis compras…" oninput="mc2Buscar(this.value)" autocomplete="off"></label>
+        <button type="button" class="mc2-fbtn" id="mc2-fbtn" onclick="mc2Filtros()"><span class="mc2-ic" data-ic="filter"></span>Filtrar<span class="mc2-ic" data-ic="down"></span></button>
       </div>
-      <div style="font-family:Saira;font-size:.7rem;color:var(--muted);margin-top:.65rem;letter-spacing:.5px">HISTORIAL DE MOVIMIENTOS</div>
-      <div id="pf-movimientos" style="margin-top:.55rem;max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:.35rem">
-        <div style="text-align:center;padding:1rem;color:var(--muted);font-size:.78rem">Cargando...</div>
+      <div class="mc2-filtros" id="mc2-filtros" style="display:none">
+        <label>Fecha<select id="mc2-f-fecha" onchange="mc2Filtro()"><option value="todo">Todas</option><option value="hoy">Hoy</option><option value="7">Últimos 7 días</option><option value="30">Últimos 30 días</option><option value="365">Último año</option></select></label>
+        <label>Producto<select id="mc2-f-prod" onchange="mc2Filtro()"><option value="todos">Todos</option><option value="diamantes">Diamantes</option><option value="pase">Pase Booyah</option><option value="caja">Cajas de fragmentos</option><option value="fragmento">Fragmentos</option><option value="likes">Likes</option><option value="honor">Honor de clan</option><option value="tarjeta">Tarjetas</option><option value="nivel">Niveles</option><option value="otro">Otros</option></select></label>
+        <label>Estado<select id="mc2-f-est" onchange="mc2Filtro()"><option value="todos">Todos</option><option value="pendiente">Recibido</option><option value="procesando">Preparando</option><option value="enviado">En proceso</option><option value="completado">Completado</option><option value="rechazado">Rechazado</option></select></label>
+        <button type="button" class="mc2-lnk" onclick="mc2Limpiar()">Limpiar filtros</button>
       </div>
+      <div class="mc2-card" id="mc2-grupos-c"><div class="mc2-ch"><span class="mc2-ic" data-ic="bolt"></span><b>Compras por producto</b><button type="button" class="mc2-lnk" onclick="mc2VerTodas()">Ver todas →</button></div><div id="mc2-grupos"><div class="mc2-vacio">Cargando…</div></div></div>
+      <div class="mc2-card" id="mc2-lista-c" style="display:none"><div class="mc2-ch"><span class="mc2-ic" data-ic="list"></span><b id="mc2-lista-t">Mis compras</b><button type="button" class="mc2-lnk" onclick="mc2VerTodas(true)">Ocultar</button></div><div id="mc2-lista"></div><button type="button" class="mc2-mas" id="mc2-mas" style="display:none" onclick="mc2Mas()">Cargar más</button></div>
     </div>
 
-    <!-- Pedidos en seguimiento -->
-    <div style="margin-bottom:1.25rem">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem">
-        <div style="font-family:Saira;font-size:.78rem;font-weight:800;color:#fff;letter-spacing:.5px">&#128230; PEDIDOS EN SEGUIMIENTO</div>
-        <button onclick="cargarPedidosSeguimiento()" style="background:var(--grad-soft);border:1px solid var(--border2);color:var(--c1);border-radius:8px;padding:.3rem .7rem;font-family:'Barlow';font-weight:700;font-size:.7rem;cursor:pointer">&#8635; Actualizar</button>
-      </div>
-      <div id="pedidos-seguimiento">
-        <div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Cargando pedidos...</div>
-      </div>
-    </div>
+    <div id="mc2-p-recargas" style="display:none"><div class="mc2-card"><div class="mc2-ch"><span class="mc2-ic" data-ic="card"></span><b>Mis recargas de saldo</b><button type="button" class="mc2-lnk" onclick="goPage('saldo')">+ Recargar</button></div><div id="mc2-recs"><div class="mc2-vacio">Cargando…</div></div></div></div>
 
-    <!-- Purchases list -->
-    <div style="background:#0b0b0b;border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.06)">
-        <div style="font-family:Saira;font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:1px">HISTORIAL DE PEDIDOS</div>
-        <button onclick="loadMisCompras()" style="background:rgba(27,135,245,.1);border:1px solid rgba(27,135,245,.2);color:var(--c1);border-radius:6px;padding:.25rem .65rem;font-family:'Barlow';font-weight:700;font-size:.72rem;cursor:pointer">&#8635; Actualizar</button>
-      </div>
-      <div id="mc-list-body" style="min-height:120px">
-        <div style="text-align:center;padding:2.5rem;color:var(--muted);font-size:.85rem">Cargando...</div>
-      </div>
-    </div>
+    <div id="mc2-p-seg" style="display:none"><div class="mc2-card"><div class="mc2-ch"><span class="mc2-ic" data-ic="box"></span><b>Pedidos en seguimiento</b><button type="button" class="mc2-act" id="mc2-act" onclick="mc2Actualizar()"><span class="mc2-ic" data-ic="refresh"></span>Actualizar</button></div><div id="mc2-seg"><div class="mc2-vacio">Cargando…</div></div></div></div>
+
+    <div class="mc2-card"><div class="mc2-ch"><span class="mc2-ic" data-ic="clock"></span><b>Historial de movimientos</b><button type="button" class="mc2-lnk" id="mc2-mov-v" onclick="mc2MovTodo()">Ver todo →</button></div><div id="mc2-movs"><div class="mc2-vacio">Cargando…</div></div></div>
+
+    <div class="mc2-card"><div class="mc2-ch"><span class="mc2-ic" data-ic="doc"></span><b>Historial de pedidos</b></div>
+      <div class="mc2-bar" style="margin:.2rem .8rem .5rem"><label class="mc2-bus"><span class="mc2-ic" data-ic="search"></span><input id="mc2-hq" type="search" placeholder="Buscar pedido o ID…" oninput="mc2HBuscar(this.value)" autocomplete="off"></label><select class="mc2-sel" id="mc2-hest" onchange="mc2HFiltro()"><option value="todos">Todos</option><option value="completado">Completados</option><option value="rechazado">Rechazados</option></select></div>
+      <div id="mc2-hist"><div class="mc2-vacio">Cargando…</div></div><button type="button" class="mc2-mas" id="mc2-hmas" style="display:none" onclick="mc2HMas()">Cargar más</button></div>
   </div>
 </div>
+<div class="mc2-ov" id="mc2-ov" onclick="if(event.target===this)mc2Cerrar()"></div>
 
-<!-- HONOR CUENTA FF -->
 <div class="page" id="page-honorcuenta">
   <div class="ph">
     <div class="stag">Cuenta Free Fire</div>
@@ -6921,61 +6887,10 @@ select.ap-inp{flex:0 1 auto}
   <div class="rg-wrap">
     <div class="rg-head">
       <button class="rg-back" onclick="goPage('freefire');setTimeout(ffIrTienda,150)" aria-label="Volver">&#8592;</button>
-      <div><div class="rg-title">Regalos v&iacute;a correo</div><div class="rg-sub">Free Fire &middot; Se entregan por regalo en el juego</div></div>
+      <div><div class="rg-title">Regalos v&iacute;a correo</div><div class="rg-sub">Free Fire &middot; Se pagan con tu saldo</div></div>
     </div>
-
-    <div class="rg-card" data-p="pase">
-      <div class="rg-row"><div class="rg-ico">&#127903;</div><div class="rg-info"><b>Pase Booyah</b><small>Mayoreo: desde 10 pases a $20 c/u</small></div><div class="rg-price" id="rg-pase-pu"></div></div>
-      <div class="rg-qty"><button type="button" onclick="rgCant('pase',-1)">&minus;</button><input id="rg-pase-cant" inputmode="numeric" value="0" oninput="rgSet('pase',this.value)"><button type="button" onclick="rgCant('pase',1)">+</button><span class="rg-sub2" id="rg-pase-sub">$0</span></div>
-    </div>
-    <div class="rg-sec">Cajas de Fragmentos Evo</div>
-    <div class="rg-card" data-p="c1">
-      <div class="rg-row"><div class="rg-ico">&#128230;</div><div class="rg-info"><b>1 Caja de Fragmentos Evo</b><small>LATAM</small></div><div class="rg-price" id="rg-c1-pu"></div></div>
-      <div class="rg-qty"><button type="button" onclick="rgCant('c1',-1)">&minus;</button><input id="rg-c1-cant" inputmode="numeric" value="0" oninput="rgSet('c1',this.value)"><button type="button" onclick="rgCant('c1',1)">+</button><span class="rg-sub2" id="rg-c1-sub">$0</span></div>
-    </div>
-    <div class="rg-card" data-p="c5">
-      <div class="rg-row"><div class="rg-ico">&#128230;</div><div class="rg-info"><b>5 Cajas de Fragmentos Evo</b><small>LATAM</small></div><div class="rg-price" id="rg-c5-pu"></div></div>
-      <div class="rg-qty"><button type="button" onclick="rgCant('c5',-1)">&minus;</button><input id="rg-c5-cant" inputmode="numeric" value="0" oninput="rgSet('c5',this.value)"><button type="button" onclick="rgCant('c5',1)">+</button><span class="rg-sub2" id="rg-c5-sub">$0</span></div>
-    </div>
-    <div class="rg-card" data-p="c10">
-      <div class="rg-row"><div class="rg-ico">&#128230;</div><div class="rg-info"><b>10 Cajas de Fragmentos Evo</b><small>LATAM</small></div><div class="rg-price" id="rg-c10-pu"></div></div>
-      <div class="rg-qty"><button type="button" onclick="rgCant('c10',-1)">&minus;</button><input id="rg-c10-cant" inputmode="numeric" value="0" oninput="rgSet('c10',this.value)"><button type="button" onclick="rgCant('c10',1)">+</button><span class="rg-sub2" id="rg-c10-sub">$0</span></div>
-    </div>
-    <div class="rg-card" data-p="c50">
-      <div class="rg-row"><div class="rg-ico">&#128230;</div><div class="rg-info"><b>50 Cajas de Fragmentos Evo</b><small>LATAM</small></div><div class="rg-price" id="rg-c50-pu"></div></div>
-      <div class="rg-qty"><button type="button" onclick="rgCant('c50',-1)">&minus;</button><input id="rg-c50-cant" inputmode="numeric" value="0" oninput="rgSet('c50',this.value)"><button type="button" onclick="rgCant('c50',1)">+</button><span class="rg-sub2" id="rg-c50-sub">$0</span></div>
-    </div>
-    <div class="rg-sec">Fragmentos de arma Evo</div>
-    <div class="rg-card" data-p="f10">
-      <div class="rg-row"><div class="rg-ico">&#128142;</div><div class="rg-info"><b>10 Fragmentos de arma Evo</b><small>LATAM</small></div><div class="rg-price" id="rg-f10-pu"></div></div>
-      <div class="rg-qty"><button type="button" onclick="rgCant('f10',-1)">&minus;</button><input id="rg-f10-cant" inputmode="numeric" value="0" oninput="rgSet('f10',this.value)"><button type="button" onclick="rgCant('f10',1)">+</button><span class="rg-sub2" id="rg-f10-sub">$0</span></div>
-    </div>
-    <div class="rg-card" data-p="f50">
-      <div class="rg-row"><div class="rg-ico">&#128142;</div><div class="rg-info"><b>50 Fragmentos de arma Evo</b><small>LATAM</small></div><div class="rg-price" id="rg-f50-pu"></div></div>
-      <div class="rg-qty"><button type="button" onclick="rgCant('f50',-1)">&minus;</button><input id="rg-f50-cant" inputmode="numeric" value="0" oninput="rgSet('f50',this.value)"><button type="button" onclick="rgCant('f50',1)">+</button><span class="rg-sub2" id="rg-f50-sub">$0</span></div>
-    </div>
-    <div class="rg-card" data-p="f100">
-      <div class="rg-row"><div class="rg-ico">&#128142;</div><div class="rg-info"><b>100 Fragmentos de arma Evo</b><small>LATAM</small></div><div class="rg-price" id="rg-f100-pu"></div></div>
-      <div class="rg-qty"><button type="button" onclick="rgCant('f100',-1)">&minus;</button><input id="rg-f100-cant" inputmode="numeric" value="0" oninput="rgSet('f100',this.value)"><button type="button" onclick="rgCant('f100',1)">+</button><span class="rg-sub2" id="rg-f100-sub">$0</span></div>
-    </div>
-    <div class="rg-card" data-p="f500">
-      <div class="rg-row"><div class="rg-ico">&#128142;</div><div class="rg-info"><b>500 Fragmentos de arma Evo</b><small>LATAM</small></div><div class="rg-price" id="rg-f500-pu"></div></div>
-      <div class="rg-qty"><button type="button" onclick="rgCant('f500',-1)">&minus;</button><input id="rg-f500-cant" inputmode="numeric" value="0" oninput="rgSet('f500',this.value)"><button type="button" onclick="rgCant('f500',1)">+</button><span class="rg-sub2" id="rg-f500-sub">$0</span></div>
-    </div>
-
-    <div class="rg-card">
-      <div class="rg-lbl">ID de Free Fire *</div>
-      <div style="display:flex;gap:.5rem"><input id="rg-id" class="rg-in" inputmode="numeric" placeholder="Ej: 123456789" oninput="rgIdCambio()"><button type="button" class="rg-vbtn" id="rg-vbtn" onclick="rgVerificar()">Verificar</button></div>
-      <div id="rg-nick" class="rg-nick" style="display:none"></div>
-    </div>
-
-    <div class="rg-card rg-tot">
-      <div class="rg-trow"><span>Total</span><b id="rg-total">$0</b></div>
-      <div class="rg-trow rg-t2"><span>Tu saldo</span><span id="rg-saldo">$0</span></div>
-      <div id="rg-err" class="rg-err" style="display:none"></div>
-      <button type="button" id="rg-btn" class="rg-pay" onclick="rgComprar()">Comprar con saldo</button>
-      <div class="rg-note">Entrega por regalo en el juego &middot; puede tardar hasta 1 d&iacute;a. Sigue tu pedido en Pedidos.</div>
-    </div>
+    <div id="rg2-lista"><div class="ck-note">Cargando productos&hellip;</div></div>
+    <div class="rg-note" style="margin-top:1rem">Pase Booyah: entrega por regalo en el juego (hasta 1 d&iacute;a). Cajas y fragmentos: entrega autom&aacute;tica. Sigue tu pedido en Mis Compras.</div>
   </div>
 </div>
 
@@ -7803,6 +7718,8 @@ select.ap-inp{flex:0 1 auto}
       <button class="adm-nav-btn active" id="admn-stats"   onclick="admFullTab('stats')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg> Dashboard</button>
       <div class="adm-nav-sec">Ventas</div>
       <button class="adm-nav-btn"        id="admn-pedidos" onclick="admFullTab('pedidos')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16l-1.5 12.5a1.5 1.5 0 0 1-1.5 1.5H7a1.5 1.5 0 0 1-1.5-1.5L4 7z"/><path d="M8 7V5.5a4 4 0 0 1 8 0V7"/></svg> Pedidos</button>
+      <button class="adm-nav-btn" id="admn-depositos" onclick="admFullTab('depositos')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/></svg> Dep&oacute;sitos <span class="crta-badge" id="dep-badge"></span></button>
+      <button class="adm-nav-btn" id="admn-osaldo" onclick="admFullTab('osaldo')">&#x1F9FE; &Oacute;rdenes saldo <span class="crta-badge" id="osa-badge"></span></button>
       <button class="adm-nav-btn" id="admn-recargas" onclick="admFullTab('recargas')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M2 9h20"/></svg> Recargas <span class="crta-badge" id="crta-badge"></span></button>
       <button class="adm-nav-btn" id="admn-catalogo" onclick="admFullTab('catalogo')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg> Catálogo</button>
       <button class="adm-nav-btn" id="admn-premios" onclick="admFullTab('premios')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg> Ranking y premios</button>
@@ -8275,6 +8192,10 @@ select.ap-inp{flex:0 1 auto}
     <div id="crta-lista"><div class="crta-vacio">Presiona Actualizar</div></div>
     <div style="font-size:.72rem;color:var(--muted);margin-top:.8rem;line-height:1.5">Revisa en tu banco que el pago llegó y luego pulsa <b>Confirmar pago y recargar</b>. Si el proveedor no tiene saldo o el paquete no está disponible, la recarga queda marcada para que la hagas a mano.</div>
   </div>
+<div class="adm-section" id="adms-depositos"></div>
+
+<div class="adm-section" id="adms-osaldo"></div>
+
 <div class="adm-section" id="adms-catalogo">
   <div class="adm-card-title">&#128450;&#65039; Gestión de catálogo</div>
   <p class="cat-nota">Blood Strike, PUBG Mobile, Fortnite, Discord, Minecraft, Call of Duty Mobile y Roblox. Los precios de venta son los tuyos y no cambian solos.</p>
@@ -9118,10 +9039,459 @@ html body:not(.light-mode) .hm-chat .hm-ico svg{width:30px;height:30px;stroke-wi
 #page-regalos .rg-note{margin-top:.7rem;font-size:.7rem;color:#8b93a3;text-align:center;line-height:1.45}
 #page-regalos .rg-sec{font-weight:800;color:#7cc0ff;font-size:.8rem;letter-spacing:.4px;text-transform:uppercase;margin:1.1rem 0 .5rem}
 
+/* ═══ Mi Perfil (v5) ═══ */
+:is(#page-perfil,#pf2-ov) .pf2-wrap{max-width:640px;margin:0 auto;padding:0 1rem 5.5rem}
+:is(#page-perfil,#pf2-ov) .pf2-ph{padding-left:.15rem;padding-right:.15rem}
+:is(#page-perfil,#pf2-ov) i[data-i]{display:inline-flex;width:1.15em;height:1.15em;flex-shrink:0}
+:is(#page-perfil,#pf2-ov) i[data-i] svg{width:100%;height:100%}
+:is(#page-perfil,#pf2-ov) .pf2-card{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:1rem;margin-bottom:.85rem;overflow:hidden}
+:is(#page-perfil,#pf2-ov) .pf2-head{padding:1.05rem}
+:is(#page-perfil,#pf2-ov) .pf2-hrow{display:flex;align-items:center;gap:.9rem}
+:is(#page-perfil,#pf2-ov) .pf2-avwrap{position:relative;width:84px;height:84px;border:0;background:none;padding:0;cursor:pointer;flex-shrink:0}
+:is(#page-perfil,#pf2-ov) .pf2-av{display:flex;align-items:center;justify-content:center;width:84px;height:84px;border-radius:50%;background:linear-gradient(135deg,#0a4fa8,#1b87f5);border:3px solid rgba(27,135,245,.55);box-shadow:0 0 0 4px rgba(27,135,245,.12);font-family:Saira,sans-serif;font-weight:800;font-size:2rem;color:#fff;overflow:hidden;background-size:cover;background-position:center}
+:is(#page-perfil,#pf2-ov) .pf2-av img{width:100%;height:100%;object-fit:cover;display:block}
+:is(#page-perfil,#pf2-ov) .pf2-cam{position:absolute;right:-2px;bottom:-2px;width:30px;height:30px;border-radius:10px;background:#1c2230;border:2px solid #0b0f17;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.85rem}
+:is(#page-perfil,#pf2-ov) .pf2-dot{position:absolute;right:4px;top:4px;width:14px;height:14px;border-radius:50%;background:#25d366;border:2px solid #0b0f17}
+:is(#page-perfil,#pf2-ov) .pf2-dot.off{background:#6b7280}
+:is(#page-perfil,#pf2-ov) .pf2-hinfo{flex:1;min-width:0}
+:is(#page-perfil,#pf2-ov) .pf2-name{font-family:Saira,sans-serif;font-weight:800;font-size:1.4rem;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+:is(#page-perfil,#pf2-ov) .pf2-chip{display:inline-flex;align-items:center;gap:.35rem;margin-top:.3rem;padding:.28rem .7rem;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#d6dbe6;font-size:.78rem}
+:is(#page-perfil,#pf2-ov) .pf2-conn{display:flex;align-items:center;gap:.4rem;margin-top:.4rem;color:#25d366;font-size:.82rem;font-weight:600}
+:is(#page-perfil,#pf2-ov) .pf2-conn.off{color:#9aa3b0}
+:is(#page-perfil,#pf2-ov) .pf2-cdot{width:9px;height:9px;border-radius:50%;background:currentColor}
+:is(#page-perfil,#pf2-ov) .pf2-edit{width:42px;height:42px;border-radius:13px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#d6dbe6;cursor:pointer;display:flex;align-items:center;justify-content:center;align-self:flex-start;flex-shrink:0}
+:is(#page-perfil,#pf2-ov) .pf2-btns{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin:.95rem 0}
+:is(#page-perfil,#pf2-ov) .pf2-btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:46px;padding:.6rem .9rem;border-radius:13px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#e7ebf3;font-family:Barlow,sans-serif;font-weight:700;font-size:.88rem;cursor:pointer;text-align:center}
+:is(#page-perfil,#pf2-ov) .pf2-btn-p{background:rgba(27,135,245,.14);border-color:rgba(27,135,245,.55);color:#7cc0ff}
+:is(#page-perfil,#pf2-ov) .pf2-btn:disabled{opacity:.55;cursor:default}
+:is(#page-perfil,#pf2-ov) .pf2-btn.pf2-wide,:is(#page-perfil,#pf2-ov) .pf2-out,:is(#page-perfil,#pf2-ov) .pf2-gold{width:100%;margin-top:.7rem}
+:is(#page-perfil,#pf2-ov) .pf2-sm{min-height:38px;padding:.4rem .9rem;font-size:.8rem}
+:is(#page-perfil,#pf2-ov) .pf2-grid{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid rgba(255,255,255,.07);margin:0 -1.05rem -1.05rem}
+:is(#page-perfil,#pf2-ov) .pf2-cell{display:flex;align-items:center;gap:.5rem;padding:.8rem .7rem;border-bottom:1px solid rgba(255,255,255,.05);min-width:0;font-size:1rem;color:#9aa3b0}
+:is(#page-perfil,#pf2-ov) .pf2-cell:nth-child(odd){border-right:1px solid rgba(255,255,255,.05)}
+:is(#page-perfil,#pf2-ov) .pf2-cell:nth-last-child(-n+2){border-bottom:0}
+:is(#page-perfil,#pf2-ov) .pf2-cell>div{min-width:0;position:relative;flex:1}
+:is(#page-perfil,#pf2-ov) .pf2-cell small{display:block;font-size:.7rem;color:#8b93a3;margin-bottom:.1rem}
+:is(#page-perfil,#pf2-ov) .pf2-cell b{display:block;font-size:.8rem;color:#fff;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+:is(#page-perfil,#pf2-ov) #pf2-id{padding-right:1.5rem}
+:is(#page-perfil,#pf2-ov) .pf2-copy{position:absolute;right:0;bottom:0;border:0;background:none;color:#8b93a3;cursor:pointer;padding:.2rem;font-size:.95rem}
+:is(#page-perfil,#pf2-ov) .pf2-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;margin:0 0 .85rem;position:sticky;top:0;z-index:5;padding:.4rem 0;background:linear-gradient(#0a0d14 70%,transparent)}
+:is(#page-perfil,#pf2-ov) .pf2-tabs button{display:flex;align-items:center;justify-content:center;gap:.35rem;min-height:44px;padding:.4rem .3rem;border-radius:13px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#aeb6c5;font-family:Barlow,sans-serif;font-weight:700;font-size:.78rem;cursor:pointer}
+:is(#page-perfil,#pf2-ov) .pf2-tabs button.on{background:#1b87f5;border-color:#1b87f5;color:#fff}
+:is(#page-perfil,#pf2-ov) .pf2-pan{display:none}:is(#page-perfil,#pf2-ov) .pf2-pan.on{display:block}
+:is(#page-perfil,#pf2-ov) .pf2-sh{display:flex;align-items:center;gap:.75rem;margin-bottom:.9rem}
+:is(#page-perfil,#pf2-ov) .pf2-sh>div{flex:1;min-width:0}
+:is(#page-perfil,#pf2-ov) .pf2-sh b{display:block;font-family:Saira,sans-serif;font-weight:800;font-size:1.02rem;color:#fff}
+:is(#page-perfil,#pf2-ov) .pf2-sh small{display:block;font-size:.74rem;color:#8b93a3;margin-top:.1rem}
+:is(#page-perfil,#pf2-ov) .pf2-ib{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:12px;background:rgba(27,135,245,.14);color:#4da3ff;flex-shrink:0;font-size:1.15rem;border:0}
+:is(#page-perfil,#pf2-ov) .pf2-ib.big{width:52px;height:52px;font-size:1.5rem}
+:is(#page-perfil,#pf2-ov) .pf2-ref{background:rgba(255,255,255,.05);color:#c9d1e0;border:1px solid rgba(255,255,255,.1);cursor:pointer}
+:is(#page-perfil,#pf2-ov) .pf2-link{display:inline-flex;align-items:center;gap:.25rem;border:0;background:none;color:#4da3ff;font-family:Barlow,sans-serif;font-weight:700;font-size:.8rem;cursor:pointer;white-space:nowrap;min-height:40px}
+:is(#page-perfil,#pf2-ov) .pf2-bal{padding:.35rem .1rem .9rem}
+:is(#page-perfil,#pf2-ov) .pf2-bal small{color:#8b93a3;font-size:.8rem}
+:is(#page-perfil,#pf2-ov) .pf2-bal-n{font-family:Saira,sans-serif;font-weight:900;font-size:2.2rem;color:#fff;line-height:1.15;word-break:break-word}
+:is(#page-perfil,#pf2-ov) .pf2-bal-a{font-size:.85rem;color:#8b93a3;margin-top:.15rem}
+:is(#page-perfil,#pf2-ov) .pf2-gold{display:flex;align-items:center;justify-content:center;gap:.5rem;min-height:48px;border-radius:13px;border:1px solid rgba(255,180,60,.5);background:rgba(255,180,60,.1);color:#ffb84d;font-family:Barlow,sans-serif;font-weight:800;font-size:.92rem;cursor:pointer;margin-top:0}
+:is(#page-perfil,#pf2-ov) .pf2-quick{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-top:.75rem}
+:is(#page-perfil,#pf2-ov) .pf2-quick button{display:flex;flex-direction:column;align-items:center;gap:.3rem;padding:.7rem .2rem;border-radius:13px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#c9d1e0;font-family:Barlow,sans-serif;font-weight:600;font-size:.74rem;cursor:pointer;min-height:58px}
+:is(#page-perfil,#pf2-ov) .pf2-quick button:first-child{background:rgba(27,135,245,.12);border-color:rgba(27,135,245,.4);color:#7cc0ff}
+:is(#page-perfil,#pf2-ov) .pf2-quick i{font-size:1.15rem}
+:is(#page-perfil,#pf2-ov) .pf2-filtros{display:flex;gap:.4rem;overflow-x:auto;padding-bottom:.55rem;margin:0 -.2rem;scrollbar-width:none}
+:is(#page-perfil,#pf2-ov) .pf2-filtros::-webkit-scrollbar{display:none}
+:is(#page-perfil,#pf2-ov) .pf2-filtros button{flex-shrink:0;min-height:36px;padding:.3rem .85rem;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#aeb6c5;font-family:Barlow,sans-serif;font-weight:700;font-size:.76rem;cursor:pointer}
+:is(#page-perfil,#pf2-ov) .pf2-filtros button.on{background:rgba(27,135,245,.2);border-color:#1b87f5;color:#fff}
+:is(#page-perfil,#pf2-ov) .pf2-movs{border-top:1px solid rgba(255,255,255,.06)}
+:is(#page-perfil,#pf2-ov) .pf2-mv{display:flex;align-items:center;gap:.7rem;padding:.7rem 0;border-bottom:1px solid rgba(255,255,255,.05)}
+:is(#page-perfil,#pf2-ov) .pf2-mi{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(255,255,255,.05);color:#9aa3b0;font-size:1.05rem}
+:is(#page-perfil,#pf2-ov) .pf2-mi.pos{background:rgba(37,211,102,.12);color:#25d366}
+:is(#page-perfil,#pf2-ov) .pf2-mi.neg{background:rgba(255,107,107,.1);color:#ff8a8a}
+:is(#page-perfil,#pf2-ov) .pf2-mt{flex:1;min-width:0}
+:is(#page-perfil,#pf2-ov) .pf2-mt b{display:block;font-size:.84rem;color:#fff;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+:is(#page-perfil,#pf2-ov) .pf2-mt small{display:flex;flex-wrap:wrap;gap:.2rem .5rem;font-size:.7rem;color:#8b93a3;margin-top:.1rem}
+:is(#page-perfil,#pf2-ov) .pf2-st{padding:0 .4rem;border-radius:6px;background:rgba(37,211,102,.12);color:#25d366;font-weight:700}
+:is(#page-perfil,#pf2-ov) .pf2-st.can{background:rgba(255,180,60,.12);color:#ffb84d}
+:is(#page-perfil,#pf2-ov) .pf2-mm{font-family:Saira,sans-serif;font-weight:800;font-size:.88rem;flex-shrink:0;white-space:nowrap}
+:is(#page-perfil,#pf2-ov) .pf2-mm.pos{color:#25d366}:is(#page-perfil,#pf2-ov) .pf2-mm.neg{color:#ff6b6b}
+:is(#page-perfil,#pf2-ov) .pf2-vacio{text-align:center;padding:1.2rem .5rem;color:#8b93a3;font-size:.82rem}
+:is(#page-perfil,#pf2-ov) .pf2-tools{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem}
+:is(#page-perfil,#pf2-ov) .pf2-tools button{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem;min-height:84px;padding:.6rem .3rem;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#e7ebf3;font-family:Barlow,sans-serif;font-weight:600;font-size:.76rem;line-height:1.2;cursor:pointer;text-align:center}
+:is(#page-perfil,#pf2-ov) .pf2-tools i{font-size:1.45rem;color:#4da3ff}
+:is(#page-perfil,#pf2-ov) .pf2-tools em{position:absolute;top:6px;right:8px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#1b87f5;color:#fff;font-style:normal;font-size:.68rem;font-weight:800;display:flex;align-items:center;justify-content:center}
+:is(#page-perfil,#pf2-ov) .pf2-out{display:flex;align-items:center;justify-content:center;gap:.5rem;min-height:48px;border-radius:13px;border:1px solid rgba(255,90,100,.35);background:rgba(255,90,100,.08);color:#ff7b86;font-family:Barlow,sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;margin-top:.7rem}
+:is(#page-perfil,#pf2-ov) .pf2-acc{width:100%;display:flex;align-items:center;justify-content:space-between;gap:.6rem;min-height:46px;border:0;background:none;color:#ffb84d;font-family:Barlow,sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;padding:0}
+:is(#page-perfil,#pf2-ov) .pf2-acc span:first-child{display:flex;align-items:center;gap:.6rem}
+:is(#page-perfil,#pf2-ov) .pf2-reemb{margin-top:.8rem}
+:is(#page-perfil,#pf2-ov) .pf2-reemb p{font-size:.76rem;color:#9aa3b0;line-height:1.5;margin:.2rem 0 .8rem}
+:is(#page-perfil,#pf2-ov) .pf2-reemb .finput{margin-bottom:.7rem}
+:is(#page-perfil,#pf2-ov) .pf2-err{background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.3);color:#ff6b6b;border-radius:10px;padding:.6rem .8rem;font-size:.78rem;margin-bottom:.7rem}
+:is(#page-perfil,#pf2-ov) .pf2-mini{font-size:.72rem;color:#8b93a3;text-align:center;line-height:1.5;margin-top:.7rem}
+:is(#page-perfil,#pf2-ov) .pf2-help{display:flex;flex-wrap:wrap;align-items:center;gap:.9rem;background:rgba(27,135,245,.06);border-color:rgba(27,135,245,.22)}
+:is(#page-perfil,#pf2-ov) .pf2-help>div:nth-child(2){flex:1;min-width:200px}
+:is(#page-perfil,#pf2-ov) .pf2-help b{display:block;font-family:Saira,sans-serif;color:#fff;font-size:1.02rem}
+:is(#page-perfil,#pf2-ov) .pf2-help p{margin:.25rem 0 0;color:#aeb6c5;font-size:.82rem;line-height:1.45}
+:is(#page-perfil,#pf2-ov) .pf2-hbtns{display:grid;grid-template-columns:1fr;gap:.55rem;width:100%}
+:is(#page-perfil,#pf2-ov) .pf2-form label{display:block;font-size:.78rem;color:#c8cfdb;font-weight:600;margin:.8rem 0 .35rem}
+:is(#page-perfil,#pf2-ov) .pf2-pw{display:flex;align-items:center;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.25);border-radius:12px;overflow:hidden}
+:is(#page-perfil,#pf2-ov) .pf2-pw input{flex:1;min-width:0;height:48px;border:0;background:none;color:#fff;padding:0 .9rem;font-size:.95rem;outline:none}
+:is(#page-perfil,#pf2-ov) .pf2-pw button{width:48px;height:48px;border:0;background:none;color:#9aa3b0;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center}
+:is(#page-perfil,#pf2-ov) .pf2-pw:focus-within{border-color:#1b87f5}
+:is(#page-perfil,#pf2-ov) .pf2-msg{margin-top:.8rem;padding:.65rem .8rem;border-radius:10px;font-size:.8rem;font-weight:600}
+:is(#page-perfil,#pf2-ov) .pf2-msg.ok{background:rgba(37,211,102,.12);color:#25d366;border:1px solid rgba(37,211,102,.3)}
+:is(#page-perfil,#pf2-ov) .pf2-msg.err{background:rgba(255,80,100,.1);color:#ff7b86;border:1px solid rgba(255,80,100,.3)}
+:is(#page-perfil,#pf2-ov) .pf2-ses .pf2-s{display:flex;align-items:center;gap:.75rem;padding:.7rem 0;border-bottom:1px solid rgba(255,255,255,.05)}
+:is(#page-perfil,#pf2-ov) .pf2-s>div{flex:1;min-width:0}
+:is(#page-perfil,#pf2-ov) .pf2-s b{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;font-size:.86rem;color:#fff}
+:is(#page-perfil,#pf2-ov) .pf2-s small{display:block;color:#8b93a3;font-size:.72rem;margin-top:.1rem}
+:is(#page-perfil,#pf2-ov) .pf2-s em{font-style:normal;font-size:.66rem;padding:.1rem .45rem;border-radius:6px;background:rgba(37,211,102,.14);color:#25d366;font-weight:800}
+:is(#page-perfil,#pf2-ov) .pf2-s button{min-height:38px;padding:0 .8rem;border-radius:10px;border:1px solid rgba(255,90,100,.35);background:rgba(255,90,100,.07);color:#ff7b86;font-weight:700;font-size:.76rem;cursor:pointer}
+:is(#page-perfil,#pf2-ov) .pf2-mon{display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem}
+:is(#page-perfil,#pf2-ov) .pf2-mon button{display:flex;align-items:center;gap:.55rem;min-height:46px;padding:.4rem .75rem;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#d6dbe6;font-family:Barlow,sans-serif;font-weight:600;font-size:.82rem;cursor:pointer;text-align:left}
+:is(#page-perfil,#pf2-ov) .pf2-mon button.on{background:rgba(27,135,245,.18);border-color:#1b87f5;color:#fff}
+:is(#page-perfil,#pf2-ov) .pf2-av-l .pf2-n{display:flex;align-items:flex-start;gap:.7rem;width:100%;padding:.75rem .1rem;border:0;border-bottom:1px solid rgba(255,255,255,.05);background:none;color:inherit;text-align:left;cursor:pointer;font-family:inherit}
+:is(#page-perfil,#pf2-ov) .pf2-n .e{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+:is(#page-perfil,#pf2-ov) .pf2-n b{display:block;font-size:.84rem;color:#fff;font-weight:700}
+:is(#page-perfil,#pf2-ov) .pf2-n small{display:block;font-size:.74rem;color:#9aa3b0;margin-top:.1rem;line-height:1.35}
+:is(#page-perfil,#pf2-ov) .pf2-n time{display:block;font-size:.68rem;color:#6f7888;margin-top:.15rem}
+:is(#page-perfil,#pf2-ov) .pf2-n .pf2-nw{margin-left:auto;font-size:.64rem;font-weight:800;padding:.15rem .5rem;border-radius:7px;background:rgba(255,255,255,.06);color:#8b93a3;flex-shrink:0}
+:is(#page-perfil,#pf2-ov) .pf2-n.nu .pf2-nw{background:#1b87f5;color:#fff}
+:is(#page-perfil,#pf2-ov) .pf2-n.nu b::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#1b87f5;margin-right:.4rem}
+:is(#page-perfil,#pf2-ov) .pf2-refbox{display:flex;align-items:center;justify-content:space-between;gap:.7rem;border:1px solid rgba(27,135,245,.35);background:rgba(0,0,0,.25);border-radius:13px;padding:.35rem .5rem .35rem 1rem;margin-bottom:.9rem}
+:is(#page-perfil,#pf2-ov) .pf2-refbox span{font-family:Saira,sans-serif;font-weight:900;font-size:1.25rem;letter-spacing:3px;color:#fff}
+:is(#page-perfil,#pf2-ov) .pf2-refbox button{width:44px;height:44px;border:0;border-radius:11px;background:rgba(255,255,255,.06);color:#c9d1e0;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center}
+/* Hojas inferiores (foto, editar perfil, cupones) */
+#pf2-ov.pf2-ov{position:fixed;inset:0;z-index:9000;background:rgba(3,6,12,.72);display:none;align-items:flex-end;justify-content:center;padding:0}
+#pf2-ov.pf2-ov.on{display:flex}
+:is(#page-perfil,#pf2-ov) .pf2-sheet{width:100%;max-width:520px;max-height:92vh;overflow-y:auto;background:#0f1420;border:1px solid rgba(255,255,255,.1);border-bottom:0;border-radius:22px 22px 0 0;padding:1.1rem 1.1rem calc(1.3rem + env(safe-area-inset-bottom))}
+@media(min-width:700px){#pf2-ov.pf2-ov{align-items:center}:is(#page-perfil,#pf2-ov) .pf2-sheet{border-radius:22px;border-bottom:1px solid rgba(255,255,255,.1)}}
+:is(#page-perfil,#pf2-ov) .pf2-sheet h3{font-family:Saira,sans-serif;font-weight:800;font-size:1.15rem;color:#fff;margin:0 0 .25rem;display:flex;align-items:center;justify-content:space-between}
+:is(#page-perfil,#pf2-ov) .pf2-sheet h3 button{border:0;background:rgba(255,255,255,.06);color:#c9d1e0;width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:1rem}
+:is(#page-perfil,#pf2-ov) .pf2-sheet p.s{margin:0 0 .9rem;color:#8b93a3;font-size:.8rem}
+:is(#page-perfil,#pf2-ov) .pf2-crop{position:relative;width:280px;height:280px;max-width:100%;margin:.4rem auto .9rem;border-radius:50%;overflow:hidden;background:#05080e;border:3px solid rgba(27,135,245,.6);touch-action:none;cursor:grab}
+:is(#page-perfil,#pf2-ov) .pf2-crop canvas{width:100%;height:100%;display:block}
+:is(#page-perfil,#pf2-ov) .pf2-zoom{display:flex;align-items:center;gap:.7rem;margin-bottom:.9rem;color:#9aa3b0}
+:is(#page-perfil,#pf2-ov) .pf2-zoom input{flex:1;accent-color:#1b87f5;height:30px}
+:is(#page-perfil,#pf2-ov) .pf2-opc{display:grid;gap:.6rem}
+:is(#page-perfil,#pf2-ov) .pf2-sheet .pf2-in{width:100%;height:48px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.25);color:#fff;padding:0 .9rem;font-size:.95rem;outline:none;margin-bottom:.4rem}
+:is(#page-perfil,#pf2-ov) .pf2-sheet .pf2-in:focus{border-color:#1b87f5}
+:is(#page-perfil,#pf2-ov) .pf2-sheet label{display:block;font-size:.78rem;color:#c8cfdb;font-weight:600;margin:.7rem 0 .35rem}
+:is(#page-perfil,#pf2-ov) .pf2-sheet .pf2-ro{padding:.7rem .9rem;border-radius:12px;background:rgba(255,255,255,.04);color:#9aa3b0;font-size:.88rem}
+:is(#page-perfil,#pf2-ov) .pf2-cup{padding:.7rem .9rem;border-radius:12px;background:rgba(255,255,255,.04);margin-bottom:.5rem;font-size:.84rem;color:#fff;display:flex;justify-content:space-between;gap:.6rem}
+:is(#page-perfil,#pf2-ov) .pf2-cup small{color:#8b93a3}
+@media(max-width:380px){:is(#page-perfil,#pf2-ov) .pf2-tabs button span{font-size:.7rem}:is(#page-perfil,#pf2-ov) .pf2-tools button{font-size:.72rem}}
+
+/* ═══ Billetera / Recarga de saldo (v5) ═══ */
+:is(#page-saldo,#bw-ov) i[data-i]{display:inline-flex;width:1.15em;height:1.15em;flex-shrink:0}
+:is(#page-saldo,#bw-ov) i[data-i] svg{width:100%;height:100%}
+#page-saldo .bw-wrap{max-width:560px;margin:0 auto;padding:1.2rem 1rem 6rem}
+#page-saldo .bw-head{display:flex;align-items:center;gap:.9rem;margin-bottom:1rem}
+#page-saldo .bw-hico{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:rgba(27,135,245,.14);color:#4da3ff;font-size:1.6rem}
+#page-saldo .bw-head h1{margin:0;font-family:Saira,sans-serif;font-weight:800;font-size:1.6rem;color:#fff;line-height:1.1}
+#page-saldo .bw-head p{margin:.15rem 0 0;color:#9aa3b0;font-size:.95rem}
+#page-saldo .bw-bal{display:flex;align-items:center;gap:.9rem;padding:1.1rem;border-radius:20px;background:linear-gradient(160deg,#101826,#0b0f17);border:1px solid rgba(27,135,245,.3);margin-bottom:.9rem}
+#page-saldo .bw-bico{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:rgba(27,135,245,.12);border:1px solid rgba(27,135,245,.25);color:#4da3ff;font-size:1.7rem;flex-shrink:0}
+#page-saldo .bw-bmid{flex:1;min-width:0}
+#page-saldo .bw-bmid small{color:#aeb6c5;font-size:.85rem}
+#page-saldo .bw-bnum{font-family:Saira,sans-serif;font-weight:900;font-size:2rem;color:#fff;line-height:1.15;word-break:break-word}
+#page-saldo .bw-bsub{display:flex;align-items:center;gap:.5rem;color:#9aa3b0;font-size:.85rem;margin-top:.1rem}
+#page-saldo .bw-cur{padding:.1rem .55rem;border-radius:8px;background:rgba(27,135,245,.16);color:#7cc0ff;font-weight:700;font-size:.75rem}
+#page-saldo .bw-ref{width:48px;height:48px;border-radius:13px;border:1px solid rgba(27,135,245,.35);background:rgba(27,135,245,.1);color:#4da3ff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+#page-saldo .bw-ref.gira i{animation:bwg .8s linear infinite}
+@keyframes bwg{to{transform:rotate(360deg)}}
+#page-saldo .bw-nav{display:grid;grid-template-columns:1.1fr 1.2fr 1fr;gap:.45rem;margin-bottom:.9rem}
+#page-saldo .bw-nav button{position:relative;display:flex;align-items:center;justify-content:center;gap:.4rem;min-height:46px;padding:.4rem .3rem;border-radius:13px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#c9d1e0;font-family:Barlow,sans-serif;font-weight:700;font-size:.82rem;cursor:pointer}
+#page-saldo .bw-nav button.on{background:#1b87f5;border-color:#1b87f5;color:#fff}
+#page-saldo .bw-nav em{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#ffb84d;color:#111;font-style:normal;font-size:.68rem;font-weight:800;align-items:center;justify-content:center;display:inline-flex}
+#page-saldo .bw-card{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:1rem;margin-bottom:.9rem;scroll-margin-top:70px}
+#page-saldo .bw-ch{display:flex;align-items:center;gap:.8rem;margin-bottom:.9rem}
+#page-saldo .bw-ch>div{flex:1;min-width:0}
+#page-saldo .bw-ch b{display:block;font-family:Saira,sans-serif;font-weight:800;font-size:1.1rem;color:#fff}
+#page-saldo .bw-ch small{display:block;color:#9aa3b0;font-size:.82rem;margin-top:.1rem;line-height:1.35}
+#page-saldo .bw-ib{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:rgba(27,135,245,.14);color:#4da3ff;font-size:1.3rem;flex-shrink:0}
+#page-saldo .bw-link{border:0;background:rgba(255,255,255,.05);color:#aeb6c5;width:40px;height:40px;border-radius:11px;cursor:pointer;font-size:1.05rem;display:flex;align-items:center;justify-content:center}
+#page-saldo .bw-vacio{text-align:center;color:#8b93a3;font-size:.88rem;padding:1.1rem .5rem;line-height:1.5}
+/* cuentas */
+#page-saldo .bw-ac{border:1px solid rgba(255,255,255,.09);background:rgba(0,0,0,.22);border-radius:15px;padding:.85rem;margin-bottom:.6rem}
+#page-saldo .bw-ac-t{display:flex;align-items:center;gap:.75rem}
+#page-saldo .bw-logo{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0a4fa8,#1b87f5);color:#fff;font-family:Saira,sans-serif;font-weight:900;font-size:1.25rem;flex-shrink:0}
+#page-saldo .bw-ac-t b{flex:1;font-size:1.05rem;color:#fff;font-weight:700;min-width:0;word-break:break-word}
+#page-saldo .bw-cp{display:inline-flex;align-items:center;gap:.4rem;min-height:42px;padding:.4rem .9rem;border-radius:11px;border:1px solid rgba(27,135,245,.5);background:rgba(27,135,245,.1);color:#7cc0ff;font-family:Barlow,sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;flex-shrink:0}
+#page-saldo .bw-cp.ok{background:rgba(37,211,102,.14);border-color:rgba(37,211,102,.5);color:#25d366}
+#page-saldo .bw-ac-d{display:grid;grid-template-columns:auto 1fr;gap:.25rem .8rem;margin-top:.7rem;font-size:.9rem}
+#page-saldo .bw-ac-d span{color:#8b93a3}
+#page-saldo .bw-ac-d b{color:#fff;font-weight:600;word-break:break-all;letter-spacing:.3px}
+/* formulario */
+#page-saldo .bw-card label{display:block;font-size:.88rem;color:#d6dbe6;font-weight:600;margin:.85rem 0 .4rem}
+#page-saldo .bw-fld{display:flex;align-items:center;gap:.6rem;min-height:50px;padding:0 .9rem;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.28);border-radius:13px;color:#9aa3b0;font-size:1.05rem}
+#page-saldo .bw-fld:focus-within{border-color:#1b87f5}
+#page-saldo .bw-fld input,#page-saldo .bw-fld select{flex:1;min-width:0;width:auto;height:48px;border:0!important;background:none!important;box-shadow:none!important;border-radius:0!important;padding:0!important;margin:0!important;color:#fff;font-size:1rem;outline:none!important;font-family:inherit;-webkit-appearance:none;appearance:none}
+#page-saldo .bw-fld select option{background:#0f1420;color:#fff}
+#page-saldo .bw-pre{font-weight:800;color:#c9d1e0;font-size:1.05rem;width:1.1em;text-align:center}
+#page-saldo .bw-chev{pointer-events:none;font-size:1rem}
+#page-saldo .bw-hint{font-size:.78rem;color:#8b93a3;margin-top:.35rem}
+#page-saldo .bw-drop{display:flex;flex-direction:column;align-items:center;gap:.25rem;padding:1.1rem .8rem;border:1.5px dashed rgba(255,255,255,.22);border-radius:14px;color:#aeb6c5;text-align:center;cursor:pointer;font-size:1.4rem}
+#page-saldo .bw-drop b{font-size:.98rem;color:#fff}
+#page-saldo .bw-drop small{font-size:.75rem;color:#8b93a3;line-height:1.4}
+#page-saldo .bw-drop.over,#page-saldo .bw-drop:focus{border-color:#1b87f5;outline:0}
+#page-saldo .bw-prev{display:flex;align-items:center;gap:.8rem;margin-top:.6rem;padding:.6rem;border-radius:13px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.22)}
+#page-saldo .bw-prev img{width:64px;height:64px;object-fit:cover;border-radius:10px;background:#000;flex-shrink:0}
+#page-saldo .bw-pdf{width:64px;height:64px;border-radius:10px;background:rgba(255,90,100,.12);color:#ff7b86;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.9rem;flex-shrink:0}
+#page-saldo .bw-prev div{flex:1;min-width:0;font-size:.85rem;color:#fff}
+#page-saldo .bw-prev small{display:block;color:#8b93a3;margin-top:.15rem}
+#page-saldo .bw-prev button{width:38px;height:38px;border:0;border-radius:10px;background:rgba(255,255,255,.07);color:#c9d1e0;cursor:pointer;font-size:1rem}
+#page-saldo .bw-err,#bw-ov .bw-err{margin-top:.8rem;padding:.65rem .8rem;border-radius:11px;background:rgba(255,80,100,.1);border:1px solid rgba(255,80,100,.3);color:#ff8a94;font-size:.85rem;line-height:1.4}
+:is(#page-saldo,#bw-ov) .bw-btn{display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;min-height:48px;padding:.6rem 1rem;border-radius:13px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#e7ebf3;font-family:Barlow,sans-serif;font-weight:700;font-size:.95rem;cursor:pointer;margin-top:.6rem}
+:is(#page-saldo,#bw-ov) .bw-btn.bw-p{background:#1b87f5;border-color:#1b87f5;color:#fff}
+:is(#page-saldo,#bw-ov) .bw-btn.bw-big{min-height:52px;font-size:1rem;margin-top:1rem}
+:is(#page-saldo,#bw-ov) .bw-btn:disabled{opacity:.55;cursor:default}
+:is(#page-saldo,#bw-ov) .bw-btn.bw-d{border-color:rgba(255,90,100,.4);background:rgba(255,90,100,.1);color:#ff8a94}
+:is(#page-saldo,#bw-ov) .bw-btn.bw-g{border-color:rgba(37,211,102,.5);background:rgba(37,211,102,.14);color:#25d366}
+#page-saldo .bw-note{margin:.8rem 0 0;font-size:.8rem;color:#8b93a3;line-height:1.5;text-align:center}
+/* lista de recargas */
+#page-saldo .bw-it{display:flex;align-items:center;gap:.75rem;width:100%;padding:.8rem .1rem;border:0;border-bottom:1px solid rgba(255,255,255,.06);background:none;color:inherit;text-align:left;cursor:pointer;font-family:inherit}
+#page-saldo .bw-it:last-child{border-bottom:0}
+#page-saldo .bw-mi{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.06);color:#9aa3b0;font-size:1.1rem;flex-shrink:0}
+#page-saldo .bw-mi.pos{background:rgba(37,211,102,.12);color:#25d366}
+#page-saldo .bw-mi.neg{background:rgba(255,107,107,.1);color:#ff8a8a}
+#page-saldo .bw-mi.pen{background:rgba(255,184,77,.12);color:#ffb84d}
+#page-saldo .bw-it>div{flex:1;min-width:0}
+#page-saldo .bw-it b{display:block;color:#fff;font-size:.95rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#page-saldo .bw-it small{display:block;color:#8b93a3;font-size:.78rem;margin-top:.1rem}
+#page-saldo .bw-am{font-family:Saira,sans-serif;font-weight:800;font-size:.95rem;white-space:nowrap}
+#page-saldo .bw-am.pos{color:#25d366}#page-saldo .bw-am.neg{color:#ff6b6b}
+:is(#page-saldo,#bw-ov) .bw-st{display:inline-block;margin-top:.25rem;padding:.12rem .55rem;border-radius:8px;font-size:.74rem;font-weight:700}
+:is(#page-saldo,#bw-ov) .bw-st.pendiente{background:rgba(255,184,77,.14);color:#ffb84d}
+:is(#page-saldo,#bw-ov) .bw-st.aprobada{background:rgba(37,211,102,.14);color:#25d366}
+:is(#page-saldo,#bw-ov) .bw-st.rechazada{background:rgba(255,90,100,.14);color:#ff7b86}
+/* hojas (resumen / detalle) */
+#bw-ov{position:fixed;inset:0;z-index:9000;background:rgba(3,6,12,.75);display:none;align-items:flex-end;justify-content:center}
+#bw-ov.on{display:flex}
+#bw-ov .bw-sheet{width:100%;max-width:520px;max-height:92vh;overflow-y:auto;background:#0f1420;border:1px solid rgba(255,255,255,.1);border-bottom:0;border-radius:22px 22px 0 0;padding:1.1rem 1.1rem calc(1.3rem + env(safe-area-inset-bottom));color:#e7ebf3}
+@media(min-width:700px){#bw-ov{align-items:center}#bw-ov .bw-sheet{border-radius:22px;border-bottom:1px solid rgba(255,255,255,.1)}}
+#bw-ov .bw-sheet h3{display:flex;align-items:center;justify-content:space-between;margin:0 0 .3rem;font-family:Saira,sans-serif;font-weight:800;font-size:1.2rem;color:#fff}
+#bw-ov .bw-sheet h3 button{border:0;background:rgba(255,255,255,.07);color:#c9d1e0;width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:1rem}
+#bw-ov .bw-sheet p.s{margin:0 0 .8rem;color:#9aa3b0;font-size:.85rem}
+#bw-ov .bw-kv{display:flex;justify-content:space-between;gap:1rem;padding:.65rem 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.92rem}
+#bw-ov .bw-kv span{color:#8b93a3;flex-shrink:0}
+#bw-ov .bw-kv b{color:#fff;font-weight:600;text-align:right;word-break:break-word}
+#bw-ov .bw-kv:last-of-type{border-bottom:0}
+#bw-ov .bw-rej{margin:.7rem 0;padding:.75rem .85rem;border-radius:12px;background:rgba(255,90,100,.1);border:1px solid rgba(255,90,100,.3);color:#ff8a94;font-size:.9rem;line-height:1.45}
+#bw-ov .bw-rej b{display:block;color:#ffb3ba;margin-bottom:.15rem}
+#bw-ov .bw-imgv{width:100%;max-height:60vh;object-fit:contain;border-radius:12px;background:#000;margin-top:.6rem}
+#bw-ov .bw-note{font-size:.8rem;color:#8b93a3;text-align:center;margin:.7rem 0 0;line-height:1.5}
+@media(max-width:380px){#page-saldo .bw-nav button span{font-size:.74rem}#page-saldo .bw-bnum{font-size:1.7rem}}
+/* Panel admin · Depósitos */
+#adms-depositos .dp-tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.9rem}
+#adms-depositos .dp-tabs button,#adms-depositos .dp-fl button{padding:.55rem .9rem;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#c9d1e0;font-weight:700;font-size:.82rem;cursor:pointer}
+#adms-depositos .dp-tabs button.on,#adms-depositos .dp-fl button.on{background:#1b87f5;border-color:#1b87f5;color:#fff}
+#adms-depositos .dp-fl{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.8rem}
+#adms-depositos .dp-rf{margin-left:auto}
+#adms-depositos .dp-c{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:.9rem;margin-bottom:.7rem}
+#adms-depositos .dp-top{display:flex;justify-content:space-between;gap:.8rem;align-items:flex-start;margin-bottom:.4rem}
+#adms-depositos .dp-top b{color:#fff;font-size:1rem}#adms-depositos .dp-top small{display:block;color:#8b93a3;font-size:.78rem;margin-top:.1rem}
+#adms-depositos .dp-mo{font-family:Saira,sans-serif;font-weight:800;color:#25d366;font-size:1.05rem;white-space:nowrap}
+#adms-depositos .dp-st{display:inline-block;padding:.12rem .55rem;border-radius:8px;font-size:.74rem;font-weight:700;margin-bottom:.5rem}
+#adms-depositos .dp-st.pendiente{background:rgba(255,184,77,.14);color:#ffb84d}#adms-depositos .dp-st.aprobada{background:rgba(37,211,102,.14);color:#25d366}#adms-depositos .dp-st.rechazada{background:rgba(255,90,100,.14);color:#ff7b86}
+#adms-depositos .dp-g{display:grid;grid-template-columns:auto 1fr;gap:.2rem .8rem;font-size:.84rem;margin-bottom:.6rem}
+#adms-depositos .dp-g span{color:#8b93a3}#adms-depositos .dp-g b{color:#fff;font-weight:600;word-break:break-word}
+#adms-depositos .dp-ac{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.3rem}
+#adms-depositos .dp-ac button{padding:.55rem .9rem;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#e7ebf3;font-weight:700;font-size:.82rem;cursor:pointer}
+#adms-depositos .dp-ac .ok{background:rgba(37,211,102,.16);border-color:rgba(37,211,102,.5);color:#25d366}#adms-depositos .dp-ac .no{background:rgba(255,90,100,.12);border-color:rgba(255,90,100,.45);color:#ff7b86}
+#adms-depositos .dp-rj{margin-top:.6rem;padding:.7rem;border-radius:11px;background:rgba(255,90,100,.06);border:1px solid rgba(255,90,100,.25)}
+#adms-depositos .dp-rj label,#adms-depositos .dp-fm label{display:block;font-size:.78rem;color:#c8cfdb;font-weight:600;margin:.6rem 0 .3rem}
+#adms-depositos textarea,#adms-depositos .dp-fm input:not([type=checkbox]){width:100%;box-sizing:border-box;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.14);border-radius:10px;color:#fff;padding:.6rem .8rem;font-size:.9rem;font-family:inherit}
+#adms-depositos .dp-ck{display:flex!important;align-items:center;gap:.5rem}
+#adms-depositos .dp-v{text-align:center;color:#8b93a3;padding:1.4rem .5rem;font-size:.88rem}
+#adms-depositos .dp-err{padding:.7rem;border-radius:10px;background:rgba(255,80,100,.1);border:1px solid rgba(255,80,100,.3);color:#ff8a94;font-size:.85rem}
+#adms-depositos .dp-au{padding:.55rem 0;border-bottom:1px solid rgba(255,255,255,.06)}#adms-depositos .dp-au:last-child{border-bottom:0}
+#adms-depositos .dp-au b{display:block;color:#fff;font-size:.88rem}#adms-depositos .dp-au small{color:#8b93a3;font-size:.76rem;word-break:break-word}
+#bw-ov .dp-img{width:100%;max-height:65vh;object-fit:contain;border-radius:12px;background:#000;margin-top:.5rem}
+#bw-ov .dp-pdf{display:block;padding:.9rem;text-align:center;border-radius:12px;background:rgba(255,90,100,.12);color:#ff8a94;font-weight:700;text-decoration:none}
+#page-saldo #saldo-page-balance{color:#fff!important;-webkit-text-fill-color:#fff!important;background:none!important}
+
+/* ═══ CHECKOUT CON SALDO (v5): Pase Booyah, Cajas y Fragmentos ═══ */
+.ck-ov{position:fixed;left:0;right:0;bottom:0;top:0;z-index:1250;display:none;background:#05080e;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;font-family:"Barlow","Segoe UI",system-ui,sans-serif;color:#eaf0ff}
+.ck-ov.on{display:block}
+.ck-wrap{max-width:540px;margin:0 auto;padding:.9rem .9rem calc(2.2rem + env(safe-area-inset-bottom))}
+.ck-card{position:relative;background:#0c131d;border:1px solid rgba(255,255,255,.09);border-radius:22px;padding:1.15rem 1rem 1.2rem}
+.ck-x{position:absolute;top:.9rem;right:.9rem;width:46px;height:46px;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:#0a1018;color:#fff;font-size:1.5rem;line-height:1;cursor:pointer}
+.ck-eye{font-size:.8rem;font-weight:800;letter-spacing:.2em;color:#f5c518;text-transform:uppercase;margin:.1rem 0 .15rem}
+.ck-h{font-size:2rem;font-weight:800;letter-spacing:-.5px;color:#fff;margin:0 3.2rem .9rem 0;line-height:1.1}
+.ck-item{display:grid;grid-template-columns:auto 1fr auto;grid-template-areas:"img info qty" "img info sub";gap:.2rem .65rem;align-items:center;background:#111a27;border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:.9rem .9rem}
+.ck-img{grid-area:img;width:56px;height:56px;border-radius:14px;background:#0a1018;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.ck-img img{width:100%;height:100%;object-fit:contain;display:block}
+.ck-img b{font-size:1.6rem;color:#6db3ff}
+.ck-info{grid-area:info;min-width:0}
+.ck-info b{display:block;font-size:1.05rem;font-weight:700;color:#fff;line-height:1.2}
+.ck-info small{display:block;color:#93a1b5;font-size:.95rem;margin-top:.15rem}
+.ck-info em{display:inline-block;margin-top:.25rem;font-style:normal;font-size:.72rem;font-weight:800;color:#22c55e;background:rgba(34,197,94,.12);border-radius:999px;padding:.12rem .5rem}
+.ck-qty{grid-area:qty;display:flex;align-items:center;gap:.4rem;justify-self:end}
+.ck-qty button{width:40px;height:40px;border-radius:13px;border:1px solid rgba(255,255,255,.12);background:#1b2636;color:#fff;font-size:1.4rem;font-weight:700;cursor:pointer}
+.ck-qty button:disabled{opacity:.4;cursor:not-allowed}
+.ck-qty span{min-width:1.6rem;text-align:center;font-size:1.3rem;font-weight:700}
+.ck-sub{grid-area:sub;justify-self:end;font-size:1.35rem;font-weight:800;color:#6db3ff;white-space:nowrap}
+.ck-sec{font-size:1.2rem;font-weight:700;color:#fff;margin:1.3rem 0 .6rem}
+.ck-opt{display:flex;align-items:center;gap:.85rem;width:100%;text-align:left;background:#0b121c;border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:.95rem .95rem;margin-bottom:.6rem;color:#fff;cursor:pointer;font:inherit}
+.ck-opt.sel{border-color:#1b87f5;background:linear-gradient(180deg,rgba(27,135,245,.13),rgba(27,135,245,.05))}
+.ck-opt .ck-dot{flex:0 0 auto;width:26px;height:26px;border-radius:50%;border:2px solid #4b586b;display:flex;align-items:center;justify-content:center}
+.ck-opt.sel .ck-dot{border-color:#1b87f5}
+.ck-opt.sel .ck-dot::after{content:"";width:12px;height:12px;border-radius:50%;background:#1b87f5}
+.ck-opt b{display:block;font-size:1.1rem;font-weight:700}
+.ck-opt small{display:block;color:#93a1b5;font-size:.92rem;margin-top:.1rem}
+.ck-lbl{display:block;font-size:.85rem;font-weight:800;letter-spacing:.07em;color:#aab6c8;text-transform:uppercase;margin:1rem 0 .45rem}
+.ck-in{width:100%;box-sizing:border-box;background:#0b121c;border:1px solid rgba(27,135,245,.45);border-radius:14px;padding:.95rem 1rem;color:#fff;font:600 1.05rem "Barlow",sans-serif;outline:none}
+.ck-in::placeholder{color:#5d6b7e;font-weight:500}
+.ck-in:focus{border-color:#1b87f5;box-shadow:0 0 0 3px rgba(27,135,245,.18)}
+.ck-in.bad{border-color:#ef4444}
+.ck-ver{margin-top:.5rem;background:none;border:1px solid rgba(27,135,245,.45);color:#6db3ff;border-radius:11px;padding:.45rem .8rem;font:700 .85rem "Barlow",sans-serif;cursor:pointer}
+.ck-nick{margin-top:.45rem;font-size:.9rem;color:#22c55e;font-weight:600}
+.ck-sum{margin-top:1.1rem;background:#0b121c;border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:.85rem 1rem}
+.ck-row{display:flex;justify-content:space-between;align-items:center;gap:.8rem;padding:.4rem 0;color:#aab6c8;font-size:1.05rem}
+.ck-row b{color:#fff;font-weight:700}
+.ck-row.tot{border-top:1px solid rgba(255,255,255,.1);margin-top:.25rem;padding-top:.75rem}
+.ck-row.tot b{font-size:1.45rem;font-weight:800;color:#6db3ff}
+.ck-row.rest b{color:#22c55e}.ck-row.rest.neg b{color:#ef4444}
+.ck-pay{display:flex;align-items:center;gap:.9rem;background:linear-gradient(180deg,rgba(27,135,245,.13),rgba(27,135,245,.05));border:1px solid #1b87f5;border-radius:16px;padding:.95rem}
+.ck-pay svg{width:42px;height:42px;color:#4aa3ff;flex:0 0 auto}
+.ck-pay div{flex:1}.ck-pay b{display:block;font-size:1.15rem;font-weight:700}.ck-pay small{display:block;color:#aab6c8;font-size:.95rem;margin-top:.1rem}
+.ck-pay .ck-dot{width:30px;height:30px;border-radius:50%;border:2px solid #1b87f5;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.ck-pay .ck-dot::after{content:"";width:14px;height:14px;border-radius:50%;background:#1b87f5}
+.ck-bal{display:flex;align-items:center;gap:.8rem;margin-top:.7rem;background:#0b121c;border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:.8rem .95rem}
+.ck-bal svg{width:34px;height:34px;color:#8a97ab;flex:0 0 auto}
+.ck-bal div{flex:1}.ck-bal small{display:block;color:#d5deec;font-size:.95rem}.ck-bal b{display:block;font-size:1.35rem;font-weight:800;color:#22c55e}.ck-bal b.cero{color:#ef4444}
+.ck-rec{border:1px solid #1b87f5;background:rgba(27,135,245,.14);color:#6db3ff;border-radius:999px;padding:.6rem 1rem;font:800 .95rem "Barlow",sans-serif;cursor:pointer;white-space:nowrap}
+.ck-err{margin-top:.8rem;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.4);color:#ffb4b4;border-radius:14px;padding:.8rem .95rem;font-size:.98rem;line-height:1.4}
+.ck-err .ck-rec{margin-top:.6rem;display:inline-block}
+.ck-buy{width:100%;margin-top:1rem;display:flex;align-items:center;justify-content:center;gap:.7rem;background:linear-gradient(90deg,#1b87f5,#2d6df0);border:none;color:#fff;border-radius:16px;padding:1.1rem;font:800 1.2rem "Barlow",sans-serif;cursor:pointer}
+.ck-buy svg{width:28px;height:28px}
+.ck-buy:disabled{opacity:.55;cursor:not-allowed}
+.ck-note{margin-top:.7rem;text-align:center;color:#8a97ab;font-size:.85rem;line-height:1.4}
+/* resultado */
+.ck-ok{text-align:center;padding:.4rem 0 0}
+.ck-ok .ic{width:64px;height:64px;margin:.3rem auto .6rem;border-radius:50%;background:rgba(34,197,94,.14);color:#22c55e;display:flex;align-items:center;justify-content:center}
+.ck-ok .ic svg{width:34px;height:34px}.ck-ok .ic.w{background:rgba(245,158,11,.14);color:#f59e0b}
+.ck-ok h3{font-size:1.6rem;margin:.2rem 0;font-weight:800}.ck-ok p{color:#aab6c8;margin:.2rem 0 .6rem;font-size:1rem}
+.ck-uni{text-align:left;margin:.9rem 0 0;display:flex;flex-direction:column;gap:.45rem}
+.ck-u{display:flex;align-items:center;gap:.7rem;background:#0b121c;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:.6rem .7rem}
+.ck-u .ck-img{width:44px;height:44px;border-radius:10px}
+.ck-u div{flex:1;min-width:0}.ck-u b{display:block;font-size:.95rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ck-u small{color:#8a97ab;font-size:.8rem}
+.ck-chip{font-size:.74rem;font-weight:800;border-radius:999px;padding:.2rem .6rem;white-space:nowrap;background:rgba(27,135,245,.15);color:#6db3ff}
+.ck-chip.ok{background:rgba(34,197,94,.15);color:#22c55e}.ck-chip.ko{background:rgba(239,68,68,.15);color:#ff7b7b}.ck-chip.wa{background:rgba(245,158,11,.15);color:#f5b43a}
+.ck-btn2{width:100%;margin-top:.6rem;background:#111a27;border:1px solid rgba(255,255,255,.12);color:#fff;border-radius:14px;padding:.9rem;font:700 1rem "Barlow",sans-serif;cursor:pointer}
+@media (min-width:700px){.ck-wrap{padding-top:1.4rem}.ck-h{font-size:2.2rem}}
+/* lista de productos (página Regalos) */
+.rg2-sec{font-size:.78rem;font-weight:800;letter-spacing:.14em;color:#7d8798;text-transform:uppercase;margin:1.3rem 0 .6rem}
+.rg2-card{display:flex;align-items:center;gap:.85rem;background:#0c131d;border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:.8rem;margin-bottom:.6rem}
+.rg2-card .ck-img{width:62px;height:62px}
+.rg2-card .i{flex:1;min-width:0}.rg2-card .i b{display:block;font-size:1.02rem;font-weight:700;color:#fff;line-height:1.25}.rg2-card .i small{display:block;color:#8a97ab;font-size:.82rem;margin-top:.12rem}
+.rg2-card .p{font-size:1.1rem;font-weight:800;color:#6db3ff;margin-top:.2rem}
+.rg2-buy{background:#1b87f5;border:none;color:#fff;border-radius:12px;padding:.7rem 1rem;font:800 .92rem "Barlow",sans-serif;cursor:pointer;white-space:nowrap}
+.rg2-card.ag{opacity:.5}.rg2-card.ag .rg2-buy{background:#2a3444;color:#8a97ab;cursor:not-allowed}
+html.ck-abierto{overflow:hidden}
+
+/* ═══ MIS COMPRAS (v5) ═══ */
+#page-miscompras .mc2-wrap{max-width:720px;margin:0 auto;padding:.6rem .9rem 3rem;font-family:"Barlow","Segoe UI",system-ui,sans-serif;color:#eaf0ff}
+.mc2-eye{display:flex;align-items:center;gap:.45rem;font-size:.8rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#4aa3ff}
+.mc2-eye i{width:9px;height:9px;border-radius:50%;background:#1b87f5}
+.mc2-h{font-size:2rem;font-weight:800;letter-spacing:-.5px;margin:.2rem 0 .1rem;color:#fff}
+.mc2-sub{color:#93a1b5;font-size:1rem;margin:0 0 1rem}
+:is(#page-miscompras,#mc2-ov) .mc2-ic{display:inline-flex;width:1.25em;height:1.25em;flex:0 0 auto}
+:is(#page-miscompras,#mc2-ov) .mc2-ic svg{width:100%;height:100%}
+.mc2-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem;margin-bottom:.9rem}
+.mc2-st{display:flex;flex-direction:column;align-items:center;gap:.15rem;background:#0c131d;border:1px solid rgba(27,135,245,.28);border-radius:16px;padding:.8rem .4rem;text-align:center;min-width:0}
+.mc2-st .mc2-ic{width:26px;height:26px;color:#4aa3ff}
+.mc2-st b{font-size:1.2rem;font-weight:800;color:#fff;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mc2-st small{color:#93a1b5;font-size:.82rem}
+.mc2-st.g{border-color:rgba(34,197,94,.45);background:linear-gradient(180deg,rgba(34,197,94,.09),#0c131d)}.mc2-st.g .mc2-ic{color:#22c55e}
+.mc2-tabs{display:flex;gap:.45rem;margin-bottom:.8rem}
+.mc2-tabs button{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:center;gap:.3rem;min-height:46px;padding:.5rem .25rem;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:#0c131d;color:#d5deec;font:700 .84rem "Barlow",sans-serif;cursor:pointer;white-space:nowrap;position:relative}
+.mc2-tabs button.on{background:#1b87f5;border-color:#1b87f5;color:#fff}
+.mc2-tabs em{font-style:normal;background:#ef4444;color:#fff;border-radius:999px;font-size:.66rem;line-height:1;padding:.18rem .36rem;position:absolute;top:-5px;right:6px}
+.mc2-bar{display:flex;gap:.5rem;margin-bottom:.6rem;align-items:center}
+.mc2-bus{flex:1;display:flex;align-items:center;gap:.5rem;background:#0c131d;border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:0 .8rem;min-height:46px;color:#8a97ab;min-width:0}
+.mc2-bus input{flex:1;min-width:0;background:none!important;border:none!important;outline:none;color:#fff;font:500 .98rem "Barlow",sans-serif;padding:.6rem 0!important;box-shadow:none!important}
+.mc2-fbtn{display:flex;align-items:center;gap:.4rem;min-height:46px;padding:0 .8rem;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:#0c131d;color:#fff;font:700 .92rem "Barlow",sans-serif;cursor:pointer}
+.mc2-fbtn.on{border-color:#1b87f5;color:#6db3ff}
+.mc2-sel{min-height:46px;border-radius:14px;border:1px solid rgba(255,255,255,.1)!important;background:#0c131d!important;color:#fff;padding:0 .6rem;font:600 .9rem "Barlow",sans-serif}
+.mc2-filtros{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem;margin-bottom:.7rem;background:#0c131d;border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:.7rem}
+.mc2-filtros label{display:flex;flex-direction:column;gap:.25rem;font-size:.72rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#93a1b5;min-width:0}
+.mc2-filtros select{min-height:42px;border-radius:11px;border:1px solid rgba(255,255,255,.12)!important;background:#101a28!important;color:#fff;font:600 .9rem "Barlow",sans-serif;padding:0 .4rem;width:100%}
+.mc2-filtros .mc2-lnk{grid-column:1/-1;justify-self:end}
+.mc2-card{background:#0c131d;border:1px solid rgba(255,255,255,.09);border-radius:20px;margin-bottom:.9rem;overflow:hidden}
+.mc2-ch{display:flex;align-items:center;gap:.55rem;padding:.9rem .95rem .6rem}
+.mc2-ch .mc2-ic{color:#4aa3ff;width:24px;height:24px}
+.mc2-ch b{flex:1;font-size:1.15rem;font-weight:700;color:#fff}
+.mc2-lnk{background:none;border:none;color:#4aa3ff;font:700 .9rem "Barlow",sans-serif;cursor:pointer;padding:.3rem;white-space:nowrap}
+.mc2-act{display:flex;align-items:center;gap:.35rem;border:1px solid rgba(27,135,245,.5);background:rgba(27,135,245,.13);color:#6db3ff;border-radius:999px;padding:.4rem .8rem;font:700 .85rem "Barlow",sans-serif;cursor:pointer}
+.mc2-act:disabled{opacity:.6}
+.mc2-vacio{padding:1.6rem 1rem;text-align:center;color:#8a97ab;font-size:.95rem;line-height:1.5}
+.mc2-row{display:flex;align-items:center;gap:.7rem;width:100%;background:#101a28;border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:.65rem .7rem;margin:0 0 .4rem;text-align:left;color:#fff;cursor:pointer;font:inherit}
+#mc2-grupos,#mc2-lista,#mc2-hist,#mc2-recs,#mc2-seg{padding:0 .75rem .5rem}
+#mc2-movs{padding:0 .75rem .5rem}
+.mc2-img{width:46px;height:46px;border-radius:12px;background:#0a1018;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:0 0 auto;color:#6db3ff}
+.mc2-img img{width:100%;height:100%;object-fit:contain;display:block}
+.mc2-img svg{width:26px;height:26px}
+.mc2-mid{flex:1;min-width:0}
+.mc2-mid b{display:block;font-size:.98rem;font-weight:700;line-height:1.25;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.mc2-mid small{display:block;color:#93a1b5;font-size:.82rem;margin-top:.1rem}
+.mc2-amt{text-align:right;flex:0 0 auto;font-weight:800;font-size:1.02rem;color:#22c55e;white-space:nowrap}
+.mc2-amt.neg{color:#ff6b6b}.mc2-amt .mc2-chip{display:block;margin:.25rem 0 0 auto;width:max-content}
+.mc2-chev{color:#6b7a90;font-size:1.3rem;flex:0 0 auto}
+.mc2-chip{display:inline-block;font-size:.72rem;font-weight:800;border-radius:999px;padding:.18rem .55rem;background:rgba(27,135,245,.15);color:#6db3ff;white-space:nowrap}
+.mc2-chip.ok{background:rgba(34,197,94,.15);color:#22c55e}.mc2-chip.ko{background:rgba(239,68,68,.15);color:#ff7b7b}.mc2-chip.wa{background:rgba(245,158,11,.15);color:#f5b43a}
+.mc2-tot{display:flex;align-items:center;gap:.6rem;border-top:1px solid rgba(255,255,255,.08);margin:.4rem .1rem 0;padding:.8rem .2rem .3rem;color:#fff}
+.mc2-tot .mc2-ic{width:26px;height:26px;color:#4aa3ff}.mc2-tot b{font-size:1.1rem;flex:1}.mc2-tot span{color:#93a1b5}.mc2-tot strong{color:#22c55e;font-weight:800}
+.mc2-mv{display:flex;align-items:center;gap:.7rem;padding:.6rem .15rem;border-top:1px solid rgba(255,255,255,.06)}
+.mc2-mv:first-child{border-top:none}
+.mc2-mvi{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:0 0 auto;background:rgba(27,135,245,.14);color:#6db3ff}
+.mc2-mvi.in{background:rgba(34,197,94,.14);color:#22c55e}.mc2-mvi.out{background:rgba(239,68,68,.14);color:#ff6b6b}
+.mc2-mvi svg{width:20px;height:20px}
+.mc2-prog{margin-top:.55rem}
+.mc2-prog .l{display:flex;justify-content:space-between;color:#93a1b5;font-size:.86rem;margin:.15rem 0}.mc2-prog .l b{color:#22c55e;font-weight:800}.mc2-prog .l b.az{color:#6db3ff}
+.mc2-bars{display:flex;gap:3px;height:9px;margin-top:.35rem}.mc2-bars i{flex:1;border-radius:5px;background:#243246}.mc2-bars i.on{background:#22c55e}.mc2-bars i.pr{background:#1b87f5}
+.mc2-sc{display:flex;flex-direction:column;background:#101a28;border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:.75rem;margin-bottom:.55rem}
+.mc2-sc .top{display:flex;align-items:center;gap:.7rem}
+.mc2-mas{display:block;width:calc(100% - 1.5rem);margin:.2rem .75rem .8rem;min-height:44px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:#101a28;color:#fff;font:700 .95rem "Barlow",sans-serif;cursor:pointer}
+/* hoja de detalle */
+.mc2-ov{position:fixed;inset:0;z-index:9650;display:none;align-items:flex-end;justify-content:center;background:rgba(5,8,14,.78);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.mc2-ov.on{display:flex}
+.mc2-sheet{width:min(560px,100%);max-height:90vh;overflow-y:auto;background:#0c131d;border:1px solid rgba(255,255,255,.12);border-radius:22px 22px 0 0;padding:1rem 1rem calc(1.2rem + env(safe-area-inset-bottom));color:#eaf0ff;font-family:"Barlow",sans-serif}
+@media (min-width:700px){.mc2-ov{align-items:center}.mc2-sheet{border-radius:22px}}
+.mc2-sheet h3{display:flex;align-items:center;justify-content:space-between;margin:0 0 .7rem;font-size:1.25rem}
+.mc2-sheet h3 button{background:#101a28;border:1px solid rgba(255,255,255,.12);color:#fff;width:40px;height:40px;border-radius:12px;font-size:1.1rem;cursor:pointer}
+.mc2-dl{display:grid;grid-template-columns:auto 1fr;gap:.35rem .9rem;margin:.6rem 0;font-size:.95rem}.mc2-dl dt{color:#93a1b5}.mc2-dl dd{margin:0;text-align:right;color:#fff;font-weight:600;word-break:break-word}
+.mc2-sheet .mc2-sc{margin-top:.5rem}
+@media (max-width:380px){.mc2-filtros{grid-template-columns:1fr 1fr}.mc2-tabs button{font-size:.8rem}}
+@media (max-width:430px){.topbar{padding:0 .7rem!important;gap:.4rem!important}.topbar-logo{min-width:0;font-size:1rem!important;letter-spacing:1.5px!important;overflow:hidden}}
+
+#adms-osaldo .dp-tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.9rem}
+#adms-osaldo .dp-tabs button,#adms-osaldo .dp-fl button{padding:.55rem .9rem;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#c9d1e0;font-weight:700;font-size:.82rem;cursor:pointer}
+#adms-osaldo .dp-tabs button.on,#adms-osaldo .dp-fl button.on{background:#1b87f5;border-color:#1b87f5;color:#fff}
+#adms-osaldo .dp-fl{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.8rem}
+#adms-osaldo .dp-rf{margin-left:auto}
+#adms-osaldo .dp-c{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:.9rem;margin-bottom:.7rem}
+#adms-osaldo .dp-top{display:flex;justify-content:space-between;gap:.8rem;align-items:flex-start;margin-bottom:.4rem}
+#adms-osaldo .dp-top b{color:#fff;font-size:1rem}#adms-osaldo .dp-top small{display:block;color:#8b93a3;font-size:.78rem;margin-top:.1rem}
+#adms-osaldo .dp-mo{font-family:Saira,sans-serif;font-weight:800;color:#25d366;font-size:1.05rem;white-space:nowrap}
+#adms-osaldo .dp-st{display:inline-block;padding:.12rem .55rem;border-radius:8px;font-size:.74rem;font-weight:700;margin-bottom:.5rem}
+#adms-osaldo .dp-st.pendiente{background:rgba(255,184,77,.14);color:#ffb84d}#adms-osaldo .dp-st.aprobada{background:rgba(37,211,102,.14);color:#25d366}#adms-osaldo .dp-st.rechazada{background:rgba(255,90,100,.14);color:#ff7b86}
+#adms-osaldo .dp-g{display:grid;grid-template-columns:auto 1fr;gap:.2rem .8rem;font-size:.84rem;margin-bottom:.6rem}
+#adms-osaldo .dp-g span{color:#8b93a3}#adms-osaldo .dp-g b{color:#fff;font-weight:600;word-break:break-word}
+#adms-osaldo .dp-ac{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.3rem}
+#adms-osaldo .dp-ac button{padding:.55rem .9rem;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#e7ebf3;font-weight:700;font-size:.82rem;cursor:pointer}
+#adms-osaldo .dp-ac .ok{background:rgba(37,211,102,.16);border-color:rgba(37,211,102,.5);color:#25d366}#adms-osaldo .dp-ac .no{background:rgba(255,90,100,.12);border-color:rgba(255,90,100,.45);color:#ff7b86}
+#adms-osaldo .dp-rj{margin-top:.6rem;padding:.7rem;border-radius:11px;background:rgba(255,90,100,.06);border:1px solid rgba(255,90,100,.25)}
+#adms-osaldo .dp-rj label,#adms-osaldo .dp-fm label{display:block;font-size:.78rem;color:#c8cfdb;font-weight:600;margin:.6rem 0 .3rem}
+#adms-osaldo textarea,#adms-osaldo .dp-fm input:not([type=checkbox]){width:100%;box-sizing:border-box;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.14);border-radius:10px;color:#fff;padding:.6rem .8rem;font-size:.9rem;font-family:inherit}
+#adms-osaldo .dp-ck{display:flex!important;align-items:center;gap:.5rem}
+#adms-osaldo .dp-v{text-align:center;color:#8b93a3;padding:1.4rem .5rem;font-size:.88rem}
+#adms-osaldo .dp-err{padding:.7rem;border-radius:10px;background:rgba(255,80,100,.1);border:1px solid rgba(255,80,100,.3);color:#ff8a94;font-size:.85rem}
+#adms-osaldo .dp-au{padding:.55rem 0;border-bottom:1px solid rgba(255,255,255,.06)}#adms-osaldo .dp-au:last-child{border-bottom:0}
+#adms-osaldo .dp-au b{display:block;color:#fff;font-size:.88rem}#adms-osaldo .dp-au small{color:#8b93a3;font-size:.76rem;word-break:break-word}
+
 </style>
-<script src="supabase.js?v=f8efc33a6e"></script>
-<script src="supabase_integration.js?v=f8efc33a6e"></script>
-<script src="script.js?v=f8efc33a6e"></script>
+<script src="supabase.js?v=e33cbddad7"></script>
+<script src="supabase_integration.js?v=e33cbddad7"></script>
+<script src="script.js?v=e33cbddad7"></script>
 
 <!-- BARRA DE NAVEGACION INFERIOR -->
 
