@@ -18821,7 +18821,7 @@ function ckCargarCatalogo(force){
   var t = new Promise(function(_, rej){ setTimeout(function(){ rej(new Error('tiempo')); }, 12000); });
   return Promise.race([ckApi('catalogo', {}, true), t]).then(function(j){
     if(!j || !j.ok){ var er = new Error((j && j.message) || 'catalogo'); er.code = j && j.code; throw er; }
-    CK.cat = j.productos; CK.catT = Date.now(); CK.offline = false; CK.offMsg = '';
+    CK.cat = j.productos; CK.catT = Date.now(); CK.offline = false; CK.offMsg = ''; CK.sinBd = !!j.sin_bd;
     if(j.saldo != null){ CK.saldo = Number(j.saldo) || 0; ckSyncSaldo(CK.saldo); }
     return CK.cat;
   }).catch(function(e){
@@ -19060,6 +19060,7 @@ function ckPintarLista(){
     h += '<div class="rg2-card' + (ag ? ' ag' : '') + '">' + ckImg(p.img, p.nombre) + '<div class="i"><b>' + ckEsc(p.nombre) + '</b><small>' + ckEsc(p.detalle || '') + '</small><div class="p">' + (ag ? 'Sin stock' : (p.precio == null ? 'Precio no disponible' : ckFmt(p.precio))) + '</div>' + (p.mayoreo_min && !ag ? '<small style="color:#22c55e">Desde ' + p.mayoreo_min + ' pases: ' + ckFmt(p.mayoreo_precio) + ' c/u</small>' : '') + '</div>'
       + '<button type="button" class="rg2-buy" ' + (ag || p.precio == null ? 'disabled' : 'onclick="ckAbrir(\'' + ckEsc(p.clave) + '\')"') + '>Comprar</button></div>';
   });
+  if(CK.sinBd) h = '<div class="ck-note" style="margin-bottom:.7rem;color:#ffd08a;border-color:rgba(255,184,77,.4)">Falta ejecutar <b>checkout_saldo.sql</b> en Supabase para poder pagar. Los productos y precios ya son los del servidor.</div>' + h;
   if(CK.offline) h = '<div class="ck-note" style="margin-bottom:.7rem;color:#ffd08a;border-color:rgba(255,184,77,.4)">' + ckEsc(CK.offMsg) + ' <button type="button" class="ck-ver" onclick="ckListaCargar()">Reintentar</button></div>' + h;
   c.innerHTML = h || '<div class="ck-note">No hay productos disponibles por ahora.</div>';
 }
