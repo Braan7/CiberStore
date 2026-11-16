@@ -161,6 +161,27 @@ function elegirExtra(items, clave){
   return { item, precio };
 }
 
+
+// ── Regalos vía correo: solo CONSULTA de stock (la tienda lo usa para mostrar "Sin stock" y no cobrar lo que no se puede entregar) ──
+const REGALOS = { cj1:['caja',1], cj5:['caja',5], cj10:['caja',10], cj50:['caja',50], fa10:['arma',10], fa50:['arma',50], fa100:['arma',100], fa500:['arma',500] };
+function stockRegalos(items){
+  let fijo = {}; try{ fijo = JSON.parse(process.env.CO_MAP || '{}'); }catch(e){}
+  const out = {};
+  Object.keys(REGALOS).forEach(k => {
+    const tipo = REGALOS[k][0], n = REGALOS[k][1]; let it = null;
+    if(fijo[k]) it = items.find(x => x.product_id === fijo[k]) || null;
+    else {
+      const ac = items.filter(x => { const t = sinAcentos((x.name || '') + ' ' + (x.sku || '')).replace(/(\d)[.,](?=\d{3}(?!\d))/g, '$1');
+        const lat = /lat|latam|latin/i.test((x.region || '') + ' ' + (x.name || ''));
+        const ty = tipo === 'caja' ? /(caja|box|crate)/.test(t) && /fragment/.test(t) && !/arma|weapon/.test(t) : /fragment/.test(t) && /(arma|weapon)/.test(t);
+        return lat && ty && tieneNum(t, n) && !tieneNum(t, n * 10); });
+      it = ac.length === 1 ? ac[0] : null;
+    }
+    out[k] = !it ? 'no_disponible' : (it.in_stock === false ? 'sin_stock' : 'ok');
+  });
+  return out;
+}
+
 // ── Respuestas en el formato de tu rapid-handler ──
 // PURCHASE_FAILED / ENDPOINT_DISABLED: no se hizo nada → tu tienda devuelve el saldo.
 // PROVIDER_ERROR / DUPLICATE_REQUEST: pudo haberse hecho → tu tienda NO devuelve y lo deja en revisión.
@@ -227,6 +248,11 @@ module.exports = async function handler(req, res){
       const e = await A.estado(0);
       if(e.verificado && e.pausa) await A.avisarSaldoBajo(e.saldo, e.motivo); else if(e.verificado) await A.avisarRecuperado(e.saldo);
       return enviar(res, { ok: true, disponible: !e.pausa, motivo: e.pausa ? 'saldo' : null, verificado: e.verificado });
+    }
+    if(b.action === 'stock_regalos'){
+      if(limite(ip, 's', 30)) return enviar(res, { ok: false });
+      const c = await catalogo(); if(!c.ok) return enviar(res, { ok: false });
+      return enviar(res, { ok: true, stock: stockRegalos(c.items) });
     }
     if(apagado) return enviar(res, NO_HECHO('Las recargas automáticas están desactivadas por ahora', 'ENDPOINT_DISABLED'));
 
