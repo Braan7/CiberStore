@@ -15355,7 +15355,6 @@ var OT_PRODUCTOS = {
   tarjetas: [
     { clave:'tsb', n:'Tarjeta Semanal Básica', mxn:6.76,   usd:0.3605 },
     { clave:'ts',  n:'Tarjeta Semanal',        mxn:28.98,  usd:1.5450 },
-    { clave:'pb',  n:'Pase Booyah',            mxn:20,     usd:1.1865 },
     { clave:'tm',  n:'Tarjeta Mensual',        mxn:135.25, usd:7.2100 }
   ],
   niveles: [
@@ -18803,12 +18802,31 @@ function ckApi(action, extra, auth){
   if(!auth || typeof authSession === 'undefined' || !authSession) return go(null);
   return pfHash().then(go);
 }
+/* Respaldo: si el servidor no responde (aún sin subir api/comprar.js, sin ejecutar el SQL, sin red…) los productos SIGUEN viéndose.
+   Son solo para mostrar: al comprar, el precio y el cobro los decide y valida SIEMPRE el servidor. */
+var CK_RESPALDO = [
+  { clave:'pase_oferta', nombre:'Pase Booyah', grupo:'pase', precio:22, mayoreo_min:null, mayoreo_precio:null, max_cant:30, img:'img/pase-booyah.png', detalle:'Oferta exclusiva · entrega por regalo (hasta 1 día)', entrega:'manual' },
+  { clave:'pase', nombre:'Pase Booyah', grupo:'pase', precio:23, mayoreo_min:10, mayoreo_precio:20, max_cant:99, img:'img/pase-booyah.png', detalle:'Mayoreo: desde 10 pases a $20 c/u · entrega por regalo', entrega:'manual' },
+  { clave:'c1', nombre:'Caja de Fragmentos Evo', grupo:'caja', precio:2.90, max_cant:5, img:'img/caja-fragmentos.png', detalle:'LATAM · entrega automática', entrega:'auto' },
+  { clave:'c5', nombre:'5 Cajas de Fragmentos Evo', grupo:'caja', precio:14.40, max_cant:5, img:'img/caja-fragmentos.png', detalle:'LATAM · entrega automática', entrega:'auto' },
+  { clave:'c10', nombre:'10 Cajas de Fragmentos Evo', grupo:'caja', precio:27.90, max_cant:5, img:'img/caja-fragmentos.png', detalle:'LATAM · entrega automática', entrega:'auto' },
+  { clave:'c50', nombre:'50 Cajas de Fragmentos Evo', grupo:'caja', precio:140.03, max_cant:5, img:'img/caja-fragmentos.png', detalle:'LATAM · entrega automática', entrega:'auto' },
+  { clave:'f10', nombre:'10 Fragmentos de arma Evo', grupo:'fragmento', precio:5.70, max_cant:5, img:'img/fragmento-universal.png', detalle:'LATAM · entrega automática', entrega:'auto' },
+  { clave:'f50', nombre:'50 Fragmentos de arma Evo', grupo:'fragmento', precio:27.91, max_cant:5, img:'img/fragmento-universal.png', detalle:'LATAM · entrega automática', entrega:'auto' },
+  { clave:'f100', nombre:'100 Fragmentos de arma Evo', grupo:'fragmento', precio:55.10, max_cant:5, img:'img/fragmento-universal.png', detalle:'LATAM · entrega automática', entrega:'auto' },
+  { clave:'f500', nombre:'500 Fragmentos de arma Evo', grupo:'fragmento', precio:277.08, max_cant:5, img:'img/fragmento-universal.png', detalle:'LATAM · entrega automática', entrega:'auto' }
+];
 function ckCargarCatalogo(force){
-  if(!force && CK.cat && Date.now() - CK.catT < 60000) return Promise.resolve(CK.cat);
-  return ckApi('catalogo', {}, true).then(function(j){
+  if(!force && CK.cat && !CK.offline && Date.now() - CK.catT < 60000) return Promise.resolve(CK.cat);
+  var t = new Promise(function(_, rej){ setTimeout(function(){ rej(new Error('tiempo')); }, 12000); });
+  return Promise.race([ckApi('catalogo', {}, true), t]).then(function(j){
     if(!j || !j.ok) throw new Error((j && j.message) || 'catalogo');
-    CK.cat = j.productos; CK.catT = Date.now();
+    CK.cat = j.productos; CK.catT = Date.now(); CK.offline = false; CK.offMsg = '';
     if(j.saldo != null){ CK.saldo = Number(j.saldo) || 0; ckSyncSaldo(CK.saldo); }
+    return CK.cat;
+  }).catch(function(e){
+    CK.cat = CK_RESPALDO; CK.catT = Date.now(); CK.offline = true;
+    CK.offMsg = (e && /ejecutar checkout_saldo/.test(e.message || '')) ? 'La tienda aún no tiene activado el pago con saldo (falta ejecutar checkout_saldo.sql en Supabase).' : 'No pudimos conectar con el servidor. Mostramos los precios de referencia; al comprar se confirma el precio real.';
     return CK.cat;
   });
 }
@@ -18992,29 +19010,36 @@ function ckStockCargar(cb){
     cb && cb();
   }).catch(function(){ cb && cb(); });
 }
-var RG2 = { sel: null };
-var RG2_CATS = [
+var RG2 = { sel: null, abierto: false };
+var RG2_REG = [
   { k:'pase', n:'Pase Booyah', d:'Entrega por regalo en el juego', img:'img/pase-booyah.png' },
   { k:'caja', n:'Cajas de Fragmentos', d:'Entrega automática', img:'img/caja-fragmentos.png' },
-  { k:'fragmento', n:'Fragmentos de arma Evo', d:'Entrega automática', img:'img/fragmento-universal.png' },
+  { k:'fragmento', n:'Fragmentos de arma Evo', d:'Entrega automática', img:'img/fragmento-universal.png' }
+];
+var RG2_OTROS = [
   { k:'tarjetas', n:'Tarjetas', d:'Semanal y mensual', go:'tarjetas', ic:'<rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M2 10h20M6 15h4"/>' },
   { k:'niveles', n:'Subidas de nivel', d:'Nivel 6 al 30', go:'niveles', ic:'<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>' }
 ];
+function rg2Fila(x, cls){
+  var ico = x.img ? ckImg(x.img, x.n) : '<span class="ck-img"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#6db3ff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + x.ic + '</svg></span>';
+  return '<button type="button" class="rg2-card rg2-cat ' + (cls || '') + '" onclick="rg2Abrir(\'' + x.k + '\')">' + ico + '<span class="i"><b>' + ckEsc(x.n) + '</b><small>' + ckEsc(x.d) + '</small></span><span class="rg2-arr">&#8250;</span></button>';
+}
 function rg2Cats(){
   var c = ckEl('rg2-cats'), l = ckEl('rg2-lista'); if(!c) return;
   c.style.display = RG2.sel ? 'none' : ''; if(l) l.style.display = RG2.sel ? '' : 'none';
-  c.innerHTML = RG2_CATS.map(function(x){
-    var ico = x.img ? ckImg(x.img, x.n) : '<span class="ck-img"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#6db3ff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + x.ic + '</svg></span>';
-    return '<button type="button" class="rg2-card rg2-cat" onclick="rg2Abrir(\'' + x.k + '\')">' + ico + '<span class="i"><b>' + ckEsc(x.n) + '</b><small>' + ckEsc(x.d) + '</small></span><span style="color:#6b7280;font-size:1.5rem">&#8250;</span></button>';
-  }).join('');
+  var ab = RG2.abierto;
+  c.innerHTML = '<button type="button" class="rg2-menu' + (ab ? ' on' : '') + '" aria-expanded="' + ab + '" onclick="rg2Menu()"><span class="rg2-mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M5 12v8a1 1 0 001 1h12a1 1 0 001-1v-8M12 8C10 8 7.5 7 7.5 5.2 7.5 3.8 8.6 3 9.8 3 11.4 3 12 5 12 8zm0 0c2 0 4.5-1 4.5-2.8C16.5 3.8 15.4 3 14.2 3 12.6 3 12 5 12 8z"/></svg></span><span class="i"><b>VÍA REGALO</b><small>Pase Booyah, cajas y fragmentos</small></span><span class="rg2-chv">&#8250;</span></button>'
+    + (ab ? '<div class="rg2-sub">' + RG2_REG.map(function(x){ return rg2Fila(x, 'sub'); }).join('') + '</div>' : '')
+    + RG2_OTROS.map(function(x){ return rg2Fila(x); }).join('');
 }
+function rg2Menu(){ RG2.abierto = !RG2.abierto; rg2Cats(); }
 function rg2Abrir(k){
-  var x = RG2_CATS.filter(function(c){ return c.k === k; })[0]; if(!x) return;
+  var x = RG2_REG.concat(RG2_OTROS).filter(function(c){ return c.k === k; })[0]; if(!x) return;
   if(x.go){ goPage(x.go); return; }
   RG2.sel = k; rg2Cats(); ckListaCargar(); try{ window.scrollTo(0, 0); }catch(e){}
 }
 function rg2Atras(){
-  if(RG2.sel){ RG2.sel = null; rg2Cats(); return; }
+  if(RG2.sel){ RG2.sel = null; RG2.abierto = true; rg2Cats(); return; }
   goPage('freefire'); setTimeout(function(){ if(typeof ffIrTienda === 'function') ffIrTienda(); }, 150);
 }
 function ckPintarLista(){
@@ -19028,6 +19053,7 @@ function ckPintarLista(){
     h += '<div class="rg2-card' + (ag ? ' ag' : '') + '">' + ckImg(p.img, p.nombre) + '<div class="i"><b>' + ckEsc(p.nombre) + '</b><small>' + ckEsc(p.detalle || '') + '</small><div class="p">' + (ag ? 'Sin stock' : ckFmt(p.precio)) + '</div>' + (p.mayoreo_min && !ag ? '<small style="color:#22c55e">Desde ' + p.mayoreo_min + ' pases: ' + ckFmt(p.mayoreo_precio) + ' c/u</small>' : '') + '</div>'
       + '<button type="button" class="rg2-buy" ' + (ag ? 'disabled' : 'onclick="ckAbrir(\'' + ckEsc(p.clave) + '\')"') + '>Comprar</button></div>';
   });
+  if(CK.offline) h = '<div class="ck-note" style="margin-bottom:.7rem">' + ckEsc(CK.offMsg) + ' <button type="button" class="ck-ver" onclick="ckListaCargar()">Reintentar</button></div>' + h;
   c.innerHTML = h || '<div class="ck-note">No hay productos disponibles por ahora.</div>';
 }
 function ckListaCargar(){
@@ -19358,3 +19384,30 @@ function osaAccion(id, accion){
   OSA.busy = true;
   osaApi('admin_item', { item_id:id, accion:accion }).then(function(r){ OSA.busy = false; if(typeof showToast === 'function') showToast(r && r.ok ? 'Listo' : ((r && r.message) || 'Error'), 3000); osaCargar(); });
 }
+/* ═══ STICKERS de Tarjetas y Subidas de nivel (no tienen foto): ilustraciones propias en SVG, con borde blanco tipo sticker ═══ */
+function otSticker(tipo, clave){
+  var W = 'stroke="#fff" stroke-width="4" stroke-linejoin="round"', id = 'st' + clave;
+  var defs = function(a, b){ return '<defs><linearGradient id="' + id + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="' + a + '"/><stop offset="1" stop-color="' + b + '"/></linearGradient></defs>'; };
+  var svg;
+  if(tipo === 'niveles'){
+    var n = String(clave).replace(/\D/g, '');
+    svg = defs('#ffd24a', '#f08a00') + '<path d="M40 6l26 9v22c0 17-11 30-26 37C25 67 14 54 14 37V15z" fill="url(#' + id + ')" ' + W + '/><path d="M40 14l19 6.5V37c0 12-8 22-19 28" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="3"/><text x="40" y="33" text-anchor="middle" font-family="Saira,Barlow,sans-serif" font-weight="800" font-size="10" fill="#5a3200">NIVEL</text><text x="40" y="57" text-anchor="middle" font-family="Saira,Barlow,sans-serif" font-weight="900" font-size="' + (n.length > 1 ? 25 : 30) + '" fill="#3b1f00">' + n + '</text>';
+  } else {
+    var mes = clave === 'tm', bas = clave === 'tsb', a = mes ? '#b266ff' : (bas ? '#4aa3ff' : '#ffd24a'), b = mes ? '#6a2fd6' : (bas ? '#1b5fd0' : '#f08a00'), tx = (bas || mes) ? '#fff' : '#3b1f00';
+    svg = defs(a, b) + '<g transform="rotate(-8 40 40)"><rect x="9" y="17" width="62" height="46" rx="9" fill="url(#' + id + ')" ' + W + '/><rect x="9" y="27" width="62" height="8" fill="rgba(0,0,0,.22)"/><text x="40" y="55" text-anchor="middle" font-family="Saira,Barlow,sans-serif" font-weight="900" font-size="' + (mes ? 21 : 22) + '" fill="' + tx + '">' + (mes ? '30' : '7') + '<tspan font-size="10" font-weight="800"> DÍAS</tspan></text><circle cx="62" cy="22" r="7" fill="#fff"/><path d="M62 17.5l1.4 3 3.2.4-2.4 2.2.6 3.2-2.8-1.6-2.8 1.6.6-3.2-2.4-2.2 3.2-.4z" fill="' + b + '"/></g>';
+  }
+  return '<div class="ot-stk" aria-hidden="true"><svg viewBox="0 0 80 80" width="76" height="76">' + svg + '</svg></div>';
+}
+(function(){
+  var orig = otRenderGrid;
+  otRenderGrid = window.otRenderGrid = function(tipo){
+    orig(tipo);
+    var g = document.getElementById('ot-grid-' + tipo); if(!g) return;
+    var cs = g.querySelectorAll('.jg-pc');
+    for(var i = 0; i < cs.length; i++){
+      var b = cs[i].querySelector('.jg-comprar'), m = b && /'([a-z0-9]+)'\)/.exec(b.getAttribute('onclick') || '');
+      if(m && !cs[i].querySelector('.ot-stk')) cs[i].insertAdjacentHTML('afterbegin', otSticker(tipo, m[1]));
+    }
+  };
+  if(typeof otRenderTodo === 'function') otRenderTodo();
+})();
