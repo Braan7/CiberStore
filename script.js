@@ -18828,7 +18828,7 @@ function ckCargarCatalogo(force){
     var c = (e && e.code) || '', msg = (e && e.message) || '';
     CK.cat = CK_RESPALDO.map(function(p){ return Object.assign({}, p, { precio: null, mayoreo_min: null, mayoreo_precio: null, detalle: p.entrega === 'manual' ? 'Entrega por regalo en el juego' : 'Entrega automática' }); }); CK.catT = Date.now(); CK.offline = true;
     CK.offMsg = c === 'http404' || c === 'http405' ? 'El servidor de compras no está activo: falta subir api/comprar.js a Vercel.'
-      : c === 'sin_configurar' ? 'Faltan SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY en Vercel (y hacer Redeploy).'
+      : c === 'sin_configurar' ? (msg || 'Faltan las variables de Supabase en Vercel.')
       : c === 'db' || /checkout_saldo/.test(msg) ? 'Falta ejecutar checkout_saldo.sql en Supabase.'
       : c === 'credenciales' ? 'Vuelve a iniciar sesión para ver los precios.'
       : c === 'limite' ? 'Demasiadas solicitudes. Espera un momento y reintenta.'
