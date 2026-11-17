@@ -47,7 +47,10 @@ module.exports = async function handler(req, res){
     if(req.method !== 'POST'){
       res.statusCode = 200; res.setHeader('Content-Type', 'application/json');
       const d = { ok: true, token: !!TOKEN(), chat_id: !!(process.env.TG_CHAT_ID || process.env.TG_CHAT || process.env.TG_ID), supabase_url: !!cfg().url, service_key: !!cfg().key };
-      if(TOKEN()){ try{ const me = await tg('getMe', {}); d.bot = me && me.ok ? ('@' + me.result.username) : 'TOKEN INVALIDO'; const wh = await tg('getWebhookInfo', {}); d.webhook = (wh && wh.result && wh.result.url) ? 'puesto' : 'sin webhook'; if(wh && wh.result && wh.result.last_error_message) d.webhook_error = wh.result.last_error_message; }catch(e){ d.bot = 'sin respuesta'; } }
+      if(TOKEN()){ try{ const me = await tg('getMe', {}); d.bot = me && me.ok ? ('@' + me.result.username) : 'TOKEN INVALIDO'; const wh = await tg('getWebhookInfo', {}); const urlOk = 'https://' + (req.headers['x-forwarded-host'] || req.headers.host) + '/api/telegram';
+        if(!(wh && wh.result && wh.result.url === urlOk)){ const sw = await tg('setWebhook', { url: urlOk, secret_token: secreto(), allowed_updates: ['callback_query'], drop_pending_updates: true }); d.webhook = sw && sw.ok ? 'REGISTRADO AHORA' : ('no se pudo: ' + (sw && sw.description)); d.webhook_antes = (wh && wh.result && wh.result.url) || 'ninguno'; }
+        else { d.webhook = 'puesto'; d.webhook_url = urlOk; if(wh.result.last_error_message){ await tg('setWebhook', { url: urlOk, secret_token: secreto(), allowed_updates: ['callback_query'], drop_pending_updates: true }); d.webhook = 'REINICIADO'; } }
+        d.webhook_ya = true; if(wh && wh.result && wh.result.last_error_message) d.webhook_error_anterior = wh.result.last_error_message; }catch(e){ d.bot = 'sin respuesta'; } }
       return res.end(JSON.stringify(d));
     }
     if(!TOKEN()){ res.statusCode = 200; return res.end('{"ok":false}'); }
