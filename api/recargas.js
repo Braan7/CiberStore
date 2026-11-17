@@ -96,7 +96,7 @@ async function avisoSolicitud(texto, id, buf, tipo, usuario, metodo, monto, extr
     }
     const url = process.env.RECARGA_AVISO_URL || process.env.CO_ALERTA_URL || 'https://pnotsqsudqpwqzssevig.supabase.co/functions/v1/bright-task';
     await fetch(url, { method: 'POST', signal: ctrl.signal, headers: { 'Content-Type': 'application/json' },
-      body: J({ usuario: usuario, metodo: metodo, monto: monto, extra: extra, foto_base64: esImg ? ('data:' + tipo + ';base64,' + buf.toString('base64')) : '' }) });
+      body: J({ usuario: usuario, metodo: metodo, monto: 0, extra: 'MONTO SOLICITADO: ' + monto + ' · ' + extra + ' · ⚠️ NO uses ACEPTAR/RECHAZAR de este aviso (es el sistema anterior y no abona bien): resuélvela en el panel → Depósitos, o configura TG_BOT_TOKEN y TG_CHAT_ID en Vercel para tener los botones nuevos.', foto_base64: esImg ? ('data:' + tipo + ';base64,' + buf.toString('base64')) : '' }) });
   }catch(e){} finally { clearTimeout(x); }
 }
 async function enlace(path){
