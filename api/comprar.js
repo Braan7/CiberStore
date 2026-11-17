@@ -47,7 +47,7 @@ const esc = s => String(s == null ? '' : s).replace(/[&<>]/g, c => ({ '&': '&amp
 const msgErr = r => String((r && r.json && (r.json.message || r.json.error || r.json.hint)) || '');
 
 async function telegram(texto){
-  const t = process.env.TG_BOT_TOKEN, ch = process.env.TG_CHAT_ID; if(!t || !ch) return;
+  const t = (process.env.TG_BOT_TOKEN || process.env.TG_TOKEN || process.env.BOT_TOKEN), ch = (process.env.TG_CHAT_ID || process.env.TG_CHAT || process.env.TG_ID); if(!t || !ch) return;
   try{ const ctrl = new AbortController(), x = setTimeout(() => ctrl.abort(), 5000);
     await fetch('https://api.telegram.org/bot' + t + '/sendMessage', { method: 'POST', signal: ctrl.signal, headers: { 'Content-Type': 'application/json' }, body: J({ chat_id: ch, text: texto, parse_mode: 'HTML' }) });
     clearTimeout(x); }catch(e){}

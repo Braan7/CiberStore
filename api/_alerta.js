@@ -54,7 +54,7 @@ async function estado(costo){
 // ── Avisos por Telegram ──
 async function enviarAviso(titulo, saldoTxt, detalle){
   try{
-    const tok = process.env.TG_BOT_TOKEN, chat = process.env.TG_CHAT_ID;
+    const tok = (process.env.TG_BOT_TOKEN || process.env.TG_TOKEN || process.env.BOT_TOKEN), chat = (process.env.TG_CHAT_ID || process.env.TG_CHAT || process.env.TG_ID);
     if(tok && chat){
       const r = await conTiempo('https://api.telegram.org/bot' + tok + '/sendMessage', { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ chat_id: chat, text: titulo + '\n' + saldoTxt + '\n\n' + detalle }) }, 5000);

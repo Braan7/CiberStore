@@ -9,7 +9,7 @@
 'use strict';
 const crypto = require('crypto');
 
-const TOKEN = () => process.env.TG_BOT_TOKEN || '';
+const TOKEN = () => process.env.TG_BOT_TOKEN || process.env.TG_TOKEN || process.env.BOT_TOKEN || '';
 const secreto = () => crypto.createHash('sha256').update('cs-tg|' + TOKEN()).digest('hex').slice(0, 32);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const esc = s => String(s == null ? '' : s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
@@ -22,7 +22,7 @@ async function tg(metodo, cuerpo){
   return r.json().catch(() => ({}));
 }
 function permitido(cb){
-  const ch = String(process.env.TG_CHAT_ID || ''), ids = String(process.env.TG_ADMIN_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
+  const ch = String(process.env.TG_CHAT_ID || process.env.TG_CHAT || process.env.TG_ID || ''), ids = String(process.env.TG_ADMIN_IDS || '').split(',').map(s => s.trim()).filter(Boolean);
   const quien = String(cb.from && cb.from.id), chat = String(cb.message && cb.message.chat && cb.message.chat.id);
   if(ids.length) return ids.indexOf(quien) >= 0;
   return !!ch && (chat === ch || quien === ch);
