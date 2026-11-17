@@ -3475,7 +3475,7 @@ function admToggleNav(force){
 }
 
 function admFullTab(tab){
-  var tabs=['stats','users','pedidos','saldos','top','puntos','codigos','chat','resenas','soporte','inactivos','seguridad','recargas','depositos','osaldo','vip','catalogo','premios','chatadm','config'];
+  var tabs=['stats','users','pedidos','saldos','top','puntos','codigos','chat','resenas','soporte','inactivos','seguridad','recargas','depositos','osaldo','vip','prime','catalogo','premios','chatadm','config'];
   tabs.forEach(function(t){
     var btn=document.getElementById('admn-'+t);
     var sec=document.getElementById('adms-'+t);
@@ -3501,6 +3501,7 @@ function admFullTab(tab){
   if(tab==='depositos') depAdmCargar();
   if(tab==='osaldo') osaCargar();
   if(tab==='vip') vipAdmCargar();
+  if(tab==='prime') primeAdmCargar();
   // Cerrar el drawer al elegir una opción en móvil
   if(window.innerWidth < 901) admToggleNav(false);
 }
@@ -15778,6 +15779,7 @@ function catAdmCopiarMapeo(){
 var ADMIN_URL = '/api/admin', ADMIN_SESION_KEY = 'cs_admin_sesion';
 function csAdminSesion(){ try{ var j = JSON.parse(localStorage.getItem(ADMIN_SESION_KEY) || 'null'); if(j && j.t && j.exp > Date.now()) return j; }catch(e){} return null; }
 function csAdminSesionToken(){ var s = csAdminSesion(); return s ? s.t : ''; }
+function csAdminRenovar(j){ try{ if(j && j.ok && j.token && j.exp) localStorage.setItem(ADMIN_SESION_KEY, JSON.stringify({t:j.token, exp:j.exp})); }catch(e){} }
 function csAdminBorrar(){ try{ localStorage.removeItem(ADMIN_SESION_KEY); }catch(e){} }
 function _admLoginErr(t){ var err = document.getElementById('adm-auth-err'); if(err){ err.textContent = t; err.style.display = t ? 'block' : 'none'; } }
 var _admLoginBusy = false;
@@ -15787,7 +15789,7 @@ window.doAdminLogin = function(){
   var pass = ((document.getElementById('adm-auth-pass') || {}).value || '');
   if(!email || !pass){ _admLoginErr('Escribe tu correo y contraseña'); return; }
   _admLoginBusy = true; _admLoginErr('');
-  fetch(ADMIN_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'login', email:email, password:pass})})
+  fetch(ADMIN_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'login', email:email, password:pass, recordar: !((document.getElementById('adm-recordar')||{}).checked === false)})})
     .then(function(r){ return r.json().catch(function(){ return {ok:false, code:(r.status === 404 ? 'sin_servidor' : 'error')}; }); })
     .then(function(j){
       _admLoginBusy = false;
@@ -15816,7 +15818,7 @@ window.doAdminLogout = csAdminCerrarSesion; window.adminLogout = csAdminCerrarSe
   adminAuthed = true;
   fetch(ADMIN_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'verificar', token:s.t})})
     .then(function(r){ return r.json(); })
-    .then(function(j){ if(j && j.ok === false && (j.code === 'sesion_invalida' || j.code === 'sin_configurar')){ csAdminBorrar(); adminAuthed = false; if(typeof closeFullAdmin === 'function') closeFullAdmin(); } })
+    .then(function(j){ csAdminRenovar(j); if(j && j.ok === false && (j.code === 'sesion_invalida' || j.code === 'sin_configurar')){ csAdminBorrar(); adminAuthed = false; if(typeof closeFullAdmin === 'function') closeFullAdmin(); } })
     .catch(function(){});   // sin conexión: se conserva; el servidor revisa la sesión en cada acción de todas formas
 })();
 // El panel del proveedor usa la misma sesión (ya no pide el token de Central One)
@@ -19693,6 +19695,241 @@ function vaGuardarConfig(k){
   var v = Number((document.getElementById('vc-' + k) || {}).value); if(!(v > 0)){ vaToast('Escribe un valor mayor a 0'); return; }
   vipAdmApi('admin_config', { clave:k, valor:v }).then(function(r){ vaToast(r && r.ok ? 'Guardado' : ((r && r.message) || 'Error')); });
 }
+/* ═══════════ NIVELES PRIME (1–8) ═══════════
+   Nivel ESTIMADO por el total histórico de recargas de diamantes en Ciber Store. No es una verificación oficial de Garena.
+   Lo calcula SIEMPRE el servidor (prime.sql + api/prime.js). Aquí solo se muestra; el usuario no puede editar sus puntos.
+   Si falta prime.sql / api/prime.js, nada se rompe: el ranking y el perfil siguen como siempre (PR.legacy). */
+var PR = { st:null, legacy:false, uid:null, niv:{}, av:{}, nivT:0 };
+var PR_IMG = 'img/prime/prime-';   // prime-1.png … prime-8.png (insignias). Si no existen, se dibuja el escudo numerado.
+function prE(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function prN(n){ return (Number(n) || 0).toLocaleString('es-MX'); }
+/* Insignia: la imagen oficial si existe; si no, un escudo con el número (sin emojis) */
+function primeBadge(n, px){
+  n = Math.floor(Number(n) || 0); if(n < 1 || n > 8) return '';
+  px = px || 28;
+  var svg = '<svg viewBox="0 0 40 46" aria-hidden="true"><defs><linearGradient id="prg' + n + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--c1)"/><stop offset="1" stop-color="var(--c2)"/></linearGradient></defs>'
+    + '<path d="M20 2 37 8v14c0 11-7 18-17 22C10 40 3 33 3 22V8z" fill="url(#prg' + n + ')" stroke="rgba(255,255,255,.75)" stroke-width="1.6"/>'
+    + '<path d="M20 6 33 10.6V22c0 8.6-5.4 14.4-13 17.8" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="1.2"/>'
+    + '<text x="20" y="28" text-anchor="middle" font-family="Saira,Arial,sans-serif" font-weight="900" font-size="20" fill="#fff" stroke="rgba(0,0,0,.35)" stroke-width=".6">' + n + '</text></svg>';
+  return '<span class="pr-bd pr-t' + n + '" style="--s:' + px + 'px" title="Prime ' + n + ' · estimado por recargas en Ciber Store">' + svg
+    + '<img src="' + PR_IMG + n + '.png" alt="Prime ' + n + '" loading="lazy" onload="this.parentNode.classList.add(\'pr-img\')" onerror="this.remove()"></span>';
+}
+/* Foto de perfil (si la hay) sobre la inicial del nombre; si la foto no carga, se queda la inicial */
+function primeAv(nombre, url, px){
+  var ini = String(nombre || '?').charAt(0).toUpperCase();
+  return '<span class="pr-av" data-u="' + prE(String(nombre).toLowerCase()) + '" style="--a:' + (px || 34) + 'px"><b>' + prE(ini) + '</b>'
+    + (url ? '<img src="' + prE(url) + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">' : '') + '</span>';
+}
+function primeTag(n, px, corto){ return n > 0 ? '<span class="pr-tag">' + primeBadge(n, px) + '<span class="pr-lab">PRIME ' + n + '</span></span>' : '<span class="pr-sin">Sin Prime</span>'; }
+/* ── API (cliente) ── */
+function prApi(action){
+  if(typeof authSession === 'undefined' || !authSession) return Promise.resolve({ ok:false, code:'credenciales' });
+  return pfHash().then(function(h){
+    return fetch('/api/prime', { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ action:action, username:authSession.username, hash:h }) })
+      .then(function(r){ return r.json().catch(function(){ return { ok:false, code:'http' + r.status }; }); })
+      .catch(function(){ return { ok:false, code:'red' }; });
+  });
+}
+function prSinServicio(j){ return !!j && (j.code === 'sin_prime' || /^http\d+$/.test(String(j.code || ''))); }
+/* ── Perfil: TU PROGRESO PRIME ── */
+function prMontar(){
+  var c = document.getElementById('prime-card'); if(c) return c;
+  var pg = document.getElementById('page-perfil'); if(!pg) return null;
+  var ref = document.getElementById('vip-card') || pg.querySelector('.pf2-tabs'); if(!ref) return null;
+  c = document.createElement('section'); c.id = 'prime-card'; c.className = 'pf2-card pr-card';
+  if(ref.id === 'vip-card') ref.parentNode.insertBefore(c, ref.nextSibling); else ref.parentNode.insertBefore(c, ref);
+  return c;
+}
+function prRender(){
+  var c = prMontar(); if(!c) return;
+  if(typeof authSession === 'undefined' || !authSession || PR.legacy){ c.style.display = 'none'; return; }
+  c.style.display = ''; var s = PR.st;
+  if(!s){ c.innerHTML = '<div class="pr-load">Cargando tu progreso Prime…</div>'; return; }
+  var n = s.nivel || 0, pct = Math.max(0, Math.min(100, Number(s.porcentaje) || 0));
+  var col = n < 8 ? ' pr-t' + (n + 1) : ' pr-t8';
+  c.innerHTML = '<div class="pr-h"><div class="pr-t">TU PROGRESO PRIME</div>' + (n ? primeBadge(n, 30) : '') + '</div>'
+    + '<div class="pr-big">' + (n ? primeBadge(n, 54) : '<span class="pr-sin">Sin Prime</span>') + '<div><b>' + (n ? 'Prime ' + n : 'Aún sin nivel') + '</b><small>' + prN(s.puntos) + ' puntos acumulados</small></div></div>'
+    + (s.maximo ? '<div class="pr-max"><b>NIVEL MÁXIMO ALCANZADO</b> · Prime 8. Eres de los mayores recargadores de Ciber Store.</div>'
+      : '<div class="pr-g"><div><small>Siguiente nivel</small><b>Prime ' + s.siguiente + '</b></div><div><small>Te faltan</small><b>' + prN(s.faltan) + ' pts</b></div><div><small>Progreso</small><b>' + pct + '%</b></div></div>'
+        + '<div class="pr-pl"><span>Prime ' + n + '</span><span>Prime ' + s.siguiente + '</span></div><div class="pr-bar' + col + '"><i data-w="' + pct + '"></i></div>')
+    + '<div class="pr-nota">Nivel estimado por tus recargas de diamantes en Ciber Store (suma de todas tus cuentas de Free Fire). No es una verificación oficial de Garena y no cambia el Prime real de tu cuenta de juego.</div>';
+  setTimeout(function(){ var i = c.querySelector('.pr-bar i'); if(i) i.style.width = i.getAttribute('data-w') + '%'; }, 60);
+}
+function prCargar(){
+  if(typeof authSession === 'undefined' || !authSession){ PR.st = null; prRender(); return Promise.resolve(null); }
+  return prApi('mi_progreso').then(function(j){
+    if(j && j.ok) PR.st = j; else if(prSinServicio(j)){ PR.legacy = true; PR.st = null; }
+    prRender(); return j;
+  });
+}
+/* ── Ranking: columnas POSICIÓN / USUARIO / RANGO PRIME / RECARGAS DE DIAMANTES (usa los mismos datos de siempre) ── */
+function prNiveles(nombres){
+  if(PR.legacy || typeof sb === 'undefined' || !sb.rpc || !nombres.length) return Promise.resolve(PR.niv);
+  return sb.rpc('prime_de_usuarios', { p_usernames: nombres }).then(function(r){
+    if(Array.isArray(r)) r.forEach(function(x){ var k = String(x.username).toLowerCase(); PR.niv[k] = Number(x.nivel) || 0; PR.av[k] = x.avatar_url || ''; }); PR.nivT = Date.now();
+    return PR.niv;
+  }).catch(function(){ PR.legacy = true; return PR.niv; });
+}
+function rkRenderLista(rows){
+  var ul = document.getElementById('rk-list'); if(!ul) return;
+  rows = Array.isArray(rows) ? rows : [];
+  var yo = (typeof authSession !== 'undefined' && authSession && authSession.username) ? String(authSession.username).toLowerCase() : '', h = '', usar = !PR.legacy;
+  var celda = function(u){ var n = PR.niv[String(u).toLowerCase()]; return n === undefined ? '<span class="pr-sin">…</span>' : primeTag(n, 40); };
+  h += '<li class="pr-head" aria-hidden="true"><span data-s="Pos.">Posición</span><span>Usuario</span>' + (usar ? '<span data-s="Prime">Rango Prime</span>' : '<span></span>') + '<span data-s="Diamantes">Recargas de diamantes</span></li>';
+  for(var i = 0; i < 10; i++){
+    var r = rows[i], pos = i + 1, cls = 'pr-row' + (i < 3 ? ' top' + pos : '');
+    if(r){
+      var esYo = yo && String(r.username).toLowerCase() === yo, nr = Number(r.compras) || 0;
+      h += '<li class="' + cls + (esYo ? ' yo' : '') + '"><span class="pr-pos">' + pos + '</span>'
+        + '<span class="pr-user">' + primeAv(r.username, PR.av[String(r.username).toLowerCase()], 36) + '<span class="pr-nm">' + prE(r.username) + (esYo ? ' <em>(tú)</em>' : '') + '<small>' + prN(nr) + ' recarga' + (nr === 1 ? '' : 's') + '</small></span></span>'
+        + (usar ? '<span class="pr-rank" data-u="' + prE(String(r.username).toLowerCase()) + '">' + celda(r.username) + '</span>' : '<span></span>')
+        + '<span class="pr-val">' + prN(r.diamantes) + '<small>diamantes</small></span></li>';
+    } else {
+      h += '<li class="pr-row libre"><span class="pr-pos">' + pos + '</span><span class="pr-user">Lugar libre<small>¡Puede ser el tuyo!</small></span><span></span><span class="pr-val">&mdash;</span></li>';
+    }
+  }
+  ul.innerHTML = h;
+  if(usar && rows.length){
+    prNiveles(rows.map(function(r){ return r.username; })).then(function(){
+      ul.querySelectorAll('.pr-rank').forEach(function(el){ var n = PR.niv[el.getAttribute('data-u')]; el.innerHTML = n === undefined ? '' : primeTag(n, 40); });
+      ul.querySelectorAll('.pr-av').forEach(function(el){ var u = PR.av[el.getAttribute('data-u')]; if(u && !el.querySelector('img')) el.insertAdjacentHTML('beforeend', '<img src="' + prE(u) + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">'); });
+    });
+  }
+  prFilaPropia(rows, ul);
+}
+/* Tu posición, fija hasta abajo (como en el juego), aunque no estés entre los 10 primeros */
+function prFilaPropia(rows, ul){
+  if(PR.legacy || typeof authSession === 'undefined' || !authSession || !ul) return;
+  var me = String(authSession.username), k = me.toLowerCase(), per = (typeof _rkPer !== 'undefined') ? _rkPer : 'historico';
+  var li = document.createElement('li'); li.className = 'pr-row pr-mine'; li.id = 'pr-mine';
+  var pintar = function(pos, diam, compras, total){
+    var n = PR.niv[k];
+    li.innerHTML = '<span class="pr-pos">' + (pos ? (pos > 999 ? '999+' : '#' + pos) : '&mdash;') + '</span>'
+      + '<span class="pr-user">' + primeAv(me, authSession.avatar_url || PR.av[k], 36) + '<span class="pr-nm">' + prE(me) + ' <em>(tú)</em><small>'
+      + (pos ? 'Tu posición' + (total ? ' de ' + prN(total) : '') + ' · ' + prN(compras) + ' recarga' + (Number(compras) === 1 ? '' : 's') : 'Aún sin recargas en este periodo') + '</small></span></span>'
+      + '<span class="pr-rank">' + (n === undefined ? '' : primeTag(n, 40)) + '</span>'
+      + '<span class="pr-val">' + prN(diam) + '<small>diamantes</small></span>';
+  };
+  var i = -1; rows.forEach(function(r, j){ if(String(r.username).toLowerCase() === k) i = j; });
+  if(i >= 0){ pintar(i + 1, rows[i].diamantes, rows[i].compras, 0); ul.appendChild(li); return; }
+  pintar(0, 0, 0, 0); li.querySelector('.pr-user small').textContent = 'Calculando tu posición…'; ul.appendChild(li);
+  if(typeof sb === 'undefined' || !sb.rpc){ pintar(0, 0, 0, 0); return; }
+  sb.rpc('prime_mi_posicion', { p_username: me, p_periodo: per }).then(function(r){
+    if(!document.body.contains(li) || (typeof _rkPer !== 'undefined' && _rkPer !== per)) return;
+    var x = Array.isArray(r) ? r[0] : null;
+    if(x) pintar(Number(x.posicion), x.diamantes, x.compras, x.participantes); else pintar(0, 0, 0, 0);
+    prNiveles([me]).then(function(){ var n = PR.niv[k], el = li.querySelector('.pr-rank'); if(el && n !== undefined) el.innerHTML = primeTag(n, 40); });
+  }).catch(function(){ pintar(0, 0, 0, 0); });
+}
+/* ── Inicio: la lista de top compradores también muestra la insignia junto al nombre ── */
+(function(){
+  var lista = null, ocupado = false;
+  function poner(){
+    if(ocupado || PR.legacy) return; lista = document.getElementById('diamond-top-list'); if(!lista) return;
+    var filas = [].slice.call(lista.children).filter(function(f){ return f.children && f.children.length >= 3 && !f.getAttribute('data-pr'); });
+    if(!filas.length) return;
+    var nom = filas.map(function(f){ var d = f.children[2] && f.children[2].firstElementChild; return d ? d.textContent.trim() : ''; });
+    ocupado = true;
+    prNiveles(nom.filter(Boolean)).then(function(){
+      filas.forEach(function(f, i){ try{ var d = f.children[2].firstElementChild, n = PR.niv[String(nom[i]).toLowerCase()]; f.setAttribute('data-pr', '1'); if(d && n > 0) d.insertAdjacentHTML('beforeend', ' <span style="display:inline-block;vertical-align:middle;margin-left:.3rem">' + primeBadge(n, 20) + '</span>'); }catch(e){} });
+    }).then(function(){ ocupado = false; }, function(){ ocupado = false; });
+  }
+  setInterval(poner, 1500);
+})();
+/* ── Arranque y cambios de sesión ── */
+setInterval(function(){
+  var id = (typeof authSession !== 'undefined' && authSession && authSession.id) ? String(authSession.id) : null;
+  if(id !== PR.uid){ PR.uid = id; PR.st = null; if(id) prCargar(); else prRender(); }
+}, 1300);
+setInterval(function(){ var p = document.getElementById('page-perfil'); if(typeof authSession !== 'undefined' && authSession && p && p.classList.contains('active') && !PR.legacy) prCargar(); }, 45000);
+(function(){
+  if(typeof goPage !== 'function') return; var og = goPage;
+  goPage = function(id){ var r = og.apply(this, arguments); if(id === 'perfil' && authSession){ setTimeout(function(){ prRender(); prCargar(); }, 250); } return r; };
+})();
+
+/* ═══════════ PANEL ADMIN · PRIME ═══════════
+   Usa /api/prime con la sesión del panel. Los ajustes de puntos exigen un motivo y quedan registrados con tu usuario. */
+var PA = { tab:'usr', q:'', busy:false };
+function paE(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function paN(n){ return (Number(n) || 0).toLocaleString('es-MX'); }
+function paFH(iso){ if(!iso) return '—'; try{ return new Date(iso).toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric', timeZone:'America/Mexico_City' }); }catch(e){ return '—'; } }
+function paToast(m){ if(typeof showToast === 'function') showToast(m, 3500); }
+function primeAdmApi(action, extra){
+  var tok = (typeof csAdminSesionToken === 'function') ? csAdminSesionToken() : '';
+  if(!tok) return Promise.resolve({ ok:false, code:'sesion_invalida', message:'Entra de nuevo al panel.' });
+  var body = { action:action, token:tok }; for(var k in (extra || {})) body[k] = extra[k];
+  return fetch('/api/prime', { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify(body) })
+    .then(function(r){ return r.json().catch(function(){ return { ok:false, message:'Respuesta inválida (' + r.status + ')' }; }); })
+    .catch(function(){ return { ok:false, message:'Sin conexión' }; });
+}
+function primeAdmCargar(){
+  var s = document.getElementById('adms-prime'); if(!s) return;
+  var T = [['usr','Usuarios'],['res','Cerca de subir'],['cfg','Niveles y equivalencias']];
+  s.innerHTML = '<div class="adm-card-title">Niveles Prime</div><div class="pa-tabs">' + T.map(function(t){ return '<button type="button" class="' + (PA.tab === t[0] ? 'on' : '') + '" onclick="paTab(\'' + t[0] + '\')">' + t[1] + '</button>'; }).join('') + '</div><div id="pa-body"><div class="pr-load">Cargando…</div></div>';
+  if(PA.tab === 'usr') paUsuarios(); else if(PA.tab === 'res') paCerca(); else paConfig();
+}
+function paTab(t){ PA.tab = t; primeAdmCargar(); }
+function paErr(r){ var b = document.getElementById('pa-body'); if(b) b.innerHTML = '<div class="pa-err">' + paE((r && r.message) || 'No se pudo cargar') + '</div>'; }
+function paUsuarios(){
+  var b = document.getElementById('pa-body'); if(!b) return;
+  b.innerHTML = '<div class="pa-fl"><input id="pa-q" type="search" placeholder="Buscar usuario" value="' + paE(PA.q) + '" onkeydown="if(event.key===\'Enter\')paBuscar()"><button type="button" onclick="paBuscar()">Buscar</button></div><div id="pa-lista"><div class="pr-load">Cargando…</div></div>';
+  primeAdmApi('admin_usuarios', { q:PA.q, limit:100 }).then(function(r){
+    var l = document.getElementById('pa-lista'); if(!l) return; if(!r || !r.ok){ l.innerHTML = '<div class="pa-err">' + paE((r && r.message) || 'Error') + '</div>'; return; }
+    var us = r.usuarios || [];
+    l.innerHTML = us.length ? us.map(function(u){
+      var i = u.info || {};
+      return '<div class="pa-c"><div class="pa-top"><div><b>' + paE(u.username) + '</b><small>' + paN(u.recargas) + ' recargas · ' + paN(u.diamantes) + ' diamantes</small></div>' + primeTag(u.nivel, 26) + '</div>'
+        + '<div class="pa-g"><span>Puntos</span><b>' + paN(u.puntos) + '</b><span>Siguiente</span><b>' + (i.maximo ? 'Nivel máximo' : 'Prime ' + i.siguiente + ' · faltan ' + paN(i.faltan) + ' (' + i.porcentaje + '%)') + '</b></div>'
+        + '<div class="pa-fl"><button type="button" onclick="paDetalle(\'' + u.user_id + '\')">Detalle</button><button type="button" onclick="paAjustar(\'' + u.user_id + '\',\'' + paE(u.username).replace(/'/g, '') + '\')">Ajustar puntos</button></div></div>';
+    }).join('') : '<div class="pr-load">Sin resultados (solo aparecen usuarios con recargas; busca por nombre para ver a cualquiera).</div>';
+  });
+}
+function paBuscar(){ PA.q = ((document.getElementById('pa-q') || {}).value || '').trim(); paUsuarios(); }
+function paDetalle(id){
+  var b = document.getElementById('pa-body'); if(!b) return; b.innerHTML = '<div class="pr-load">Cargando…</div>';
+  primeAdmApi('admin_detalle', { user_id:id }).then(function(r){
+    if(!r || !r.ok) return paErr(r); var i = r.info || {};
+    b.innerHTML = '<div class="pa-fl"><button type="button" onclick="paTab(\'usr\')">&larr; Volver</button></div>'
+      + '<div class="pa-c"><div class="pa-top"><div><b>' + paE(r.username) + '</b><small>' + paE(r.user_id) + '</small></div>' + primeTag(i.nivel, 28) + '</div>'
+      + '<div class="pa-g"><span>Puntos totales</span><b>' + paN(i.puntos) + '</b><span>De recargas</span><b>' + paN(i.puntos_recargas) + '</b><span>Ajustes manuales</span><b>' + paN(i.ajustes) + '</b>'
+      + '<span>Siguiente nivel</span><b>' + (i.maximo ? 'Nivel máximo' : 'Prime ' + i.siguiente + ' (faltan ' + paN(i.faltan) + ')') + '</b><span>IDs de Free Fire</span><b>' + ((r.ff_ids || []).length ? paE(r.ff_ids.join(', ')) : '—') + '</b></div>'
+      + '<div class="pa-fl"><button type="button" onclick="paAjustar(\'' + r.user_id + '\',\'' + paE(r.username).replace(/'/g, '') + '\')">Ajustar puntos</button></div></div>'
+      + '<div class="pa-h">Historial de recargas</div>' + ((r.ventas || []).length ? '<table class="pa-tb"><tr><th>Fecha</th><th>Diamantes</th><th>Puntos</th><th>Estado</th></tr>' + r.ventas.map(function(v){ return '<tr><td>' + paFH(v.fecha) + '</td><td>' + paN(v.diamantes) + '</td><td>' + (v.estado === 'valida' ? paN(v.puntos) : '—') + '</td><td>' + paE(v.estado) + '</td></tr>'; }).join('') + '</table>' : '<div class="pr-load">Sin recargas.</div>')
+      + '<div class="pa-h">Ajustes manuales</div>' + ((r.ajustes || []).length ? '<table class="pa-tb"><tr><th>Fecha</th><th>Puntos</th><th>Motivo</th><th>Admin</th></tr>' + r.ajustes.map(function(a){ return '<tr><td>' + paFH(a.creado) + '</td><td>' + (a.puntos > 0 ? '+' : '') + paN(a.puntos) + '</td><td>' + paE(a.motivo) + '</td><td>' + paE(a.actor) + '</td></tr>'; }).join('') + '</table>' : '<div class="pr-load">Sin ajustes.</div>');
+  });
+}
+function paAjustar(id, nombre){
+  if(PA.busy) return;
+  var v = prompt('Puntos a sumar (o restar con -) para ' + nombre + ':', '0'); if(v === null) return; var p = Math.trunc(Number(v));
+  if(!p){ paToast('Escribe un número distinto de 0'); return; }
+  var m = prompt('Motivo del ajuste (obligatorio, queda registrado):', ''); if(m === null) return; m = String(m).trim();
+  if(m.length < 3){ paToast('El motivo es obligatorio'); return; }
+  if(!confirm('¿Ajustar ' + (p > 0 ? '+' : '') + p + ' puntos a ' + nombre + '?\nMotivo: ' + m)) return;
+  PA.busy = true;
+  primeAdmApi('admin_ajustar', { user_id:id, puntos:p, motivo:m }).then(function(r){ PA.busy = false; if(r && r.ok){ paToast('Ajuste guardado: ' + nombre + ' ahora es Prime ' + (r.info.nivel || 0)); primeAdmCargar(); } else paToast((r && r.message) || 'No se pudo ajustar'); });
+}
+function paCerca(){
+  primeAdmApi('admin_resumen').then(function(r){
+    var b = document.getElementById('pa-body'); if(!b) return; if(!r || !r.ok) return paErr(r);
+    var c = r.cerca || [];
+    b.innerHTML = '<div class="pa-h">Usuarios a punto de subir de nivel (80% o más)</div>' + (c.length ? c.map(function(u){ var i = u.info; return '<div class="pa-c"><div class="pa-top"><div><b>' + paE(u.username) + '</b><small>Faltan ' + paN(i.faltan) + ' pts para Prime ' + i.siguiente + ' (' + i.porcentaje + '%)</small></div>' + primeTag(i.nivel, 26) + '</div></div>'; }).join('') : '<div class="pr-load">Nadie cerca por ahora.</div>');
+  });
+}
+function paConfig(){
+  primeAdmApi('admin_resumen').then(function(r){
+    var b = document.getElementById('pa-body'); if(!b) return; if(!r || !r.ok) return paErr(r);
+    b.innerHTML = '<div class="pa-h">Puntos necesarios por nivel</div>' + (r.config || []).map(function(c){ var n = c.clave.slice(6); return '<div class="pa-row"><span>' + primeBadge(n, 22) + ' Prime ' + n + '</span><input class="pa-in" id="pa-c-' + c.clave + '" type="number" min="1" value="' + c.valor + '"><button type="button" onclick="paGuardarCfg(\'' + c.clave + '\')">Guardar</button></div>'; }).join('')
+      + '<div class="pa-h">Equivalencia recarga → puntos</div><div class="pr-nota" style="margin-top:0">Diamantes de la recarga (con bono) → puntos. Si un paquete no aparece, 1 diamante = 1 punto.</div>'
+      + (r.equivalencias || []).map(function(e){ return '<div class="pa-row"><span>' + paN(e.diamantes) + ' 💎</span><input class="pa-in" id="pa-e-' + e.diamantes + '" type="number" min="0" value="' + e.puntos + '"><button type="button" onclick="paGuardarEq(' + e.diamantes + ')">Guardar</button></div>'; }).join('')
+      + '<div class="pa-row"><span>Nuevo paquete</span><input class="pa-in" id="pa-e-new-d" type="number" min="1" placeholder="Diamantes"><input class="pa-in" id="pa-e-new-p" type="number" min="0" placeholder="Puntos"><button type="button" onclick="paGuardarEq(0)">Agregar</button></div>';
+  });
+}
+function paGuardarCfg(k){ var v = Number((document.getElementById('pa-c-' + k) || {}).value); primeAdmApi('admin_config', { clave:k, valor:v }).then(function(r){ paToast(r && r.ok ? 'Guardado' : ((r && r.message) || 'No se pudo guardar')); if(!(r && r.ok)) paConfig(); }); }
+function paGuardarEq(d){
+  var dia = d || Number((document.getElementById('pa-e-new-d') || {}).value), pts = Number((document.getElementById(d ? 'pa-e-' + d : 'pa-e-new-p') || {}).value);
+  if(!(dia > 0) || !(pts >= 0)){ paToast('Revisa los números'); return; }
+  primeAdmApi('admin_equiv', { diamantes:dia, puntos:pts }).then(function(r){ paToast(r && r.ok ? 'Guardado' : ((r && r.message) || 'No se pudo guardar')); if(r && r.ok && !d) paConfig(); });
+}
 /* ═══════════ PANEL ADMIN · sesión vencida → pedir login de nuevo (en vez de un error muerto) ═══════════ */
 var _csAdmCad = false;
 function csAdminCaducada(msg){
@@ -19720,10 +19957,10 @@ function csAdminEnvolver(nombre){
   };
   w._csEnv = true; window[nombre] = w;
 }
-['depApi','osaApi','admDb','vipAdmApi'].forEach(csAdminEnvolver);
+['depApi','osaApi','admDb','vipAdmApi','primeAdmApi'].forEach(csAdminEnvolver);
 /* Al abrir las pestañas Depósitos / Órdenes saldo sin sesión válida: pedir login directo */
 (function(){
-  ['depAdmCargar','osaCargar','vipAdmCargar'].forEach(function(n){
+  ['depAdmCargar','osaCargar','vipAdmCargar','primeAdmCargar'].forEach(function(n){
     var f = window[n]; if(typeof f !== 'function') return;
     window[n] = function(){
       if(typeof csAdminSesionToken === 'function' && !csAdminSesionToken()){ csAdminCaducada('Entra de nuevo al panel para ver esto.'); return; }
@@ -19740,7 +19977,7 @@ function csAdminEnvolver(nombre){
     if(tok){
       fetch('/api/admin', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'verificar', token:tok})})
         .then(function(x){ return x.json().catch(function(){ return null; }); })
-        .then(function(j){ if(j && j.ok === false && (j.code === 'sesion_invalida' || j.code === 'sin_configurar')) csAdminCaducada('Tu acceso al panel se reinició. Entra una vez más y ya queda guardado.'); });
+              .then(function(j){ if(typeof csAdminRenovar === 'function') csAdminRenovar(j); if(j && j.ok === false && (j.code === 'sesion_invalida' || j.code === 'sin_configurar')) csAdminCaducada('Tu acceso al panel se reinició. Entra una vez más y ya queda guardado.'); });
     }
     return r;
   };
