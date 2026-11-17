@@ -19436,6 +19436,20 @@ function csAdminEnvolver(nombre){
     };
   });
 })();
+/* Al entrar al panel: confirmar la sesión con el servidor; si no vale, el login sale AL ENTRAR (no dentro de cada pestaña) */
+(function(){
+  var f = window.openFullAdmin; if(typeof f !== 'function') return;
+  window.openFullAdmin = function(){
+    var r = f.apply(this, arguments);
+    var tok = (typeof csAdminSesionToken === 'function') ? csAdminSesionToken() : '';
+    if(tok){
+      fetch('/api/admin', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'verificar', token:tok})})
+        .then(function(x){ return x.json().catch(function(){ return null; }); })
+        .then(function(j){ if(j && j.ok === false && (j.code === 'sesion_invalida' || j.code === 'sin_configurar')) csAdminCaducada('Tu acceso al panel se reinició. Entra una vez más y ya queda guardado.'); });
+    }
+    return r;
+  };
+})();
 /* ═══ STICKERS de Tarjetas y Subidas de nivel (no tienen foto): ilustraciones propias en SVG, con borde blanco tipo sticker ═══ */
 function otSticker(tipo, clave){
   var W = 'stroke="#fff" stroke-width="4" stroke-linejoin="round"', id = 'st' + clave;
