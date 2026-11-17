@@ -19995,6 +19995,95 @@ function csAdminEnvolver(nombre){
     return r;
   };
 })();
+/* ═══════════ PANEL ADMIN · CÓDIGOS PROMO ═══════════
+   Crear, activar/desactivar y borrar códigos pasa por /api/admin con tu sesión del panel (llave de servicio en Vercel).
+   Antes el navegador escribía directo en Supabase y, si la base lo rechazaba, el botón "Crear" parecía no hacer nada.
+   Ahora siempre se ve un aviso: creado, o el motivo exacto por el que no se pudo. */
+/* Ojo: el formulario de códigos existe DOS veces en la página (panel viejo oculto y panel completo) con los mismos ids.
+   Antes se leía siempre el primero —el oculto, vacío— y por eso "Crear" respondía "código muy corto" en un lugar que no se veía. Ahora se usa el que está a la vista. */
+function codEl(id){
+  var l = document.querySelectorAll('[id="' + id + '"]'), i, base = null;
+  var c = document.querySelectorAll('[id="adm-code"]');
+  for(i = 0; i < c.length; i++){ if(c[i].offsetParent !== null){ base = c[i]; break; } }
+  if(id !== 'adm-code' && base){ var root = base.closest('#adms-codigos, #adm-tab-codes, .admin-sec'); if(root){ var e = root.querySelector('[id="' + id + '"]'); if(e) return e; } }
+  for(i = 0; i < l.length; i++){ if(l[i].offsetParent !== null) return l[i]; }
+  return l[0] || null;
+}
+function codAviso(texto, color){
+  var m = codEl('adm-create-msg');
+  if(m){ m.style.display = 'block'; m.style.color = color || '#ff5252'; m.textContent = texto; try{ m.scrollIntoView({block:'nearest'}); }catch(e){} clearTimeout(m._t); m._t = setTimeout(function(){ m.style.display = 'none'; }, 7000); }
+  if(typeof showToast === 'function') showToast(texto, 4500);
+}
+function codApi(action, extra){
+  var tok = (typeof csAdminSesionToken === 'function') ? csAdminSesionToken() : '';
+  if(!tok){ if(typeof csAdminCaducada === 'function') csAdminCaducada('Entra de nuevo al panel para guardar códigos.'); return Promise.resolve({ ok:false, code:'sesion_invalida', message:'Entra de nuevo al panel.' }); }
+  var body = { action:action, token:tok }; for(var k in (extra || {})) body[k] = extra[k];
+  return fetch('/api/admin', { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify(body) })
+    .then(function(r){ return r.json().catch(function(){ return { ok:false, code:(r.status === 404 ? 'sin_servidor' : 'error') }; }); })
+    .then(function(j){
+      if(j && j.code === 'sesion_invalida' && typeof csAdminCaducada === 'function') csAdminCaducada(j.message);
+      if(j && j.code === 'sin_servidor') j.message = 'No encuentro /api/admin: sube api/admin.js a GitHub y espera a que Vercel termine.';
+      if(j && !j.ok && !j.message) j.message = 'No se pudo guardar. Intenta otra vez.';
+      return j;
+    })
+    .catch(function(){ return { ok:false, code:'red', message:'Sin conexión. Intenta otra vez.' }; });
+}
+function codRefrescar(){
+  var fin = function(){ try{ renderAdminCodes(); renderAdminStats(); }catch(e){} };
+  try{ if(typeof loadPromos === 'function') return Promise.resolve(loadPromos()).then(fin, fin); }catch(e){}
+  fin(); return Promise.resolve();
+}
+var _codBusy = false;
+window.adminCreateCode = adminCreateCode = function(){
+  if(_codBusy) return;
+  var g = function(id){ return (codEl(id) || {}).value || ''; };
+  var code = g('adm-code').trim().toUpperCase().replace(/\s+/g, ''), disc = parseInt(g('adm-disc'), 10), uses = parseInt(g('adm-uses'), 10), desc = g('adm-desc').trim();
+  if(code.length < 3){ codAviso('El código es muy corto (mínimo 3 caracteres).'); return; }
+  if(!/^[A-Z0-9_-]+$/.test(code)){ codAviso('El código solo puede llevar letras, números, guion o guion bajo.'); return; }
+  if(!(disc >= 1 && disc <= 99)){ codAviso('El descuento debe estar entre 1 y 99%.'); return; }
+  if(!(uses >= 1)){ codAviso('Escribe cuántos usos máximos tendrá (mínimo 1).'); return; }
+  _codBusy = true; var btn = document.querySelector('#adms-codigos .btn-admin-create'); if(btn){ btn.disabled = true; btn.textContent = 'Creando…'; }
+  codApi('codigo_guardar', { code:code, disc:disc, max_uses:uses, descripcion:desc }).then(function(j){
+    _codBusy = false; if(btn){ btn.disabled = false; btn.textContent = 'Crear'; }
+    if(!j || !j.ok){ codAviso((j && j.message) || 'No se pudo crear el código.'); return; }
+    ['adm-code','adm-disc','adm-uses','adm-desc'].forEach(function(id){ var e = codEl(id); if(e) e.value = ''; });
+    codAviso('Código ' + code + ' creado', '#00e676'); codRefrescar();
+  });
+};
+window.adminToggleCode = adminToggleCode = function(code){
+  var cur = null; getPromoCodes().forEach(function(c){ if(c.code === code) cur = c; });
+  codApi('codigo_estado', { code:code, active: !(cur && cur.active) }).then(function(j){ if(!j || !j.ok){ codAviso((j && j.message) || 'No se pudo cambiar el estado.'); return; } codRefrescar(); });
+};
+window.adminDeleteCode = adminDeleteCode = function(code){
+  if(!confirm('¿Eliminar el código ' + code + '?')) return;
+  codApi('codigo_borrar', { code:code }).then(function(j){ if(!j || !j.ok){ codAviso((j && j.message) || 'No se pudo eliminar.'); return; } codAviso('Código ' + code + ' eliminado', '#00e676'); codRefrescar(); });
+};
+/* La lista y las estadísticas también se dibujaban en el primer elemento con ese id (el oculto): ahora van al panel visible */
+function codE(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+window.renderAdminCodes = renderAdminCodes = function(){
+  var codes = getPromoCodes(), el = codEl('adm-codes-list'), cnt = codEl('adm-codes-count');
+  if(!el) return;
+  if(cnt) cnt.textContent = codes.length + ' código' + (codes.length !== 1 ? 's' : '');
+  if(!codes.length){ el.innerHTML = '<div style="text-align:center;padding:1.2rem;color:var(--muted);font-size:.8rem">Sin códigos</div>'; return; }
+  var rows = '';
+  for(var i = codes.length - 1; i >= 0; i--){
+    var c = codes[i];
+    rows += '<div class="admin-code-item">'
+      + '<div class="code-active" style="background:' + (c.active ? '#00e676' : '#555') + '"></div>'
+      + '<div class="code-badge">' + codE(c.code) + '</div>'
+      + '<div class="code-disc">-' + codE(c.disc) + '%</div>'
+      + '<div class="code-uses">' + (c.uses || 0) + '/' + (c.maxUses || 100) + '</div>'
+      + '<div style="flex:1;font-size:.62rem;color:var(--muted)">' + codE(c.desc || '') + '</div>'
+      + '<button class="code-del" data-c="' + codE(c.code) + '" onclick="adminToggleCode(this.dataset.c)">' + (c.active ? 'OFF' : 'ON') + '</button>'
+      + '<button class="code-del" data-c="' + codE(c.code) + '" onclick="adminDeleteCode(this.dataset.c)">&#215;</button></div>';
+  }
+  el.innerHTML = rows;
+};
+window.renderAdminStats = renderAdminStats = function(){
+  var codes = getPromoCodes(), el = codEl('adm-stats'); if(!el) return;
+  var tot = codes.reduce(function(s, c){ return s + (c.uses || 0); }, 0);
+  el.innerHTML = 'Total usos: <strong style="color:#fff">' + tot + '</strong><br/>Activos: <strong style="color:#00e676">' + codes.filter(function(c){ return c.active; }).length + '</strong><br/>Inactivos: <strong style="color:#ff5252">' + codes.filter(function(c){ return !c.active; }).length + '</strong>';
+};
 /* ═══ STICKERS de Tarjetas y Subidas de nivel (no tienen foto): ilustraciones propias en SVG, con borde blanco tipo sticker ═══ */
 function otSticker(tipo, clave){
   var W = 'stroke="#fff" stroke-width="4" stroke-linejoin="round"', id = 'st' + clave;
