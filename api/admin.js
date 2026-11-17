@@ -39,14 +39,17 @@ module.exports = async function handler(req, res){
 
     if(b.action === 'verificar'){
       const d = S.verificar(b.token);
-      return enviar(res, 200, d ? { ok: true, exp: d.exp } : { ok: false, code: 'sesion_invalida' });
+      if(!d) return enviar(res, 200, { ok: false, code: 'sesion_invalida' });
+      // Sesión "mantener iniciada": se renueva sola mientras la uses (así no vuelve a pedir correo y contraseña)
+      if(d.r && d.exp - Date.now() < 90 * 86400000){ const n = S.firmar(d.u, true); if(n) return enviar(res, 200, { ok: true, exp: n.exp, token: n.token }); }
+      return enviar(res, 200, { ok: true, exp: d.exp });
     }
     if(b.action === 'login'){
       if(bloqueada(ip)) return enviar(res, 429, { ok: false, code: 'demasiados_intentos', message: 'Demasiados intentos. Espera 10 minutos.' });
       const email = String(b.email || '').trim().toLowerCase(), pass = String(b.password || '');
       const ok = iguales(email, E) & iguales(pass, P);   // se comparan las dos siempre (mismo tiempo de respuesta)
       if(!ok){ anotarFallo(ip); return enviar(res, 401, { ok: false, code: 'credenciales', message: 'Correo o contraseña incorrectos' }); }
-      const s = S.firmar(E);
+      const s = S.firmar(E, b.recordar === false ? false : true);   // por defecto se mantiene la sesión
       if(!s) return enviar(res, 200, { ok: false, code: 'sin_configurar', message: 'Falta configurar ADMIN_PASSWORD en Vercel' });
       return enviar(res, 200, { ok: true, token: s.token, exp: s.exp });
     }
