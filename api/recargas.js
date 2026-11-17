@@ -70,6 +70,24 @@ async function telegram(texto){
   try{ const ctrl = new AbortController(), x = setTimeout(() => ctrl.abort(), 5000);
     await fetch('https://api.telegram.org/bot' + t + '/sendMessage', { method: 'POST', signal: ctrl.signal, headers: { 'Content-Type': 'application/json' }, body: J({ chat_id: ch, text: texto, parse_mode: 'HTML' }) }); clearTimeout(x); }catch(e){}
 }
+// Aviso de solicitud + COMPROBANTE a tu Telegram.
+//  · Si pones TG_BOT_TOKEN + TG_CHAT_ID en Vercel: va directo por tu bot (foto o PDF con el texto).
+//  · Si no: usa la misma función de Supabase que ya te mandaba los comprobantes (bright-task), con la foto adjunta.
+async function avisoSolicitud(texto, plano, buf, tipo, usuario, metodo, monto, extra){
+  const t = process.env.TG_BOT_TOKEN, ch = process.env.TG_CHAT_ID, esImg = /^image\//.test(tipo);
+  const ctrl = new AbortController(), x = setTimeout(() => ctrl.abort(), 8000);
+  try{
+    if(t && ch){
+      const fd = new FormData(); fd.append('chat_id', ch); fd.append('caption', texto.slice(0, 1000)); fd.append('parse_mode', 'HTML');
+      fd.append(esImg ? 'photo' : 'document', new Blob([buf], { type: tipo }), 'comprobante.' + (EXT[tipo] || 'bin'));
+      const r = await fetch('https://api.telegram.org/bot' + t + (esImg ? '/sendPhoto' : '/sendDocument'), { method: 'POST', signal: ctrl.signal, body: fd });
+      if(r.status >= 200 && r.status < 300) return;
+    }
+    const url = process.env.RECARGA_AVISO_URL || process.env.CO_ALERTA_URL || 'https://pnotsqsudqpwqzssevig.supabase.co/functions/v1/bright-task';
+    await fetch(url, { method: 'POST', signal: ctrl.signal, headers: { 'Content-Type': 'application/json' },
+      body: J({ usuario: usuario, metodo: metodo, monto: monto, extra: extra, foto_base64: esImg ? ('data:' + tipo + ';base64,' + buf.toString('base64')) : '' }) });
+  }catch(e){} finally { clearTimeout(x); }
+}
 async function enlace(path){
   const r = await db('/storage/v1/object/sign/' + BUCKET + '/' + path.split('/').map(encodeURIComponent).join('/'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: J({ expiresIn: 300 }) });
   if(r.status >= 400 || !r.json || !r.json.signedURL) return null;
@@ -259,7 +277,7 @@ module.exports = async function handler(req, res){
       const row = Array.isArray(ins.json) ? ins.json[0] : null;
       await auditar(row && row.id, 'solicitar', p.username, { monto, banco: cuenta.nombre, referencia });
       await aviso(uid, 'Solicitud de recarga recibida', 'Recibimos tu solicitud de ' + dinero(monto) + ' (' + cuenta.nombre + '). Está en revisión; te avisaremos cuando se resuelva.');
-      telegram('💳 <b>Nueva solicitud de recarga</b>\n👤 ' + esc(p.username) + '\n💰 ' + esc(dinero(monto)) + ' · ' + esc(cuenta.nombre) + '\n🔑 Ref: ' + esc(referencia) + '\nRevísala en el panel → Depósitos.');
+      await avisoSolicitud('💳 <b>Nueva solicitud de recarga</b>\n👤 ' + esc(p.username) + '\n💰 ' + esc(dinero(monto)) + ' · ' + esc(cuenta.nombre) + '\n🔑 Ref: ' + esc(referencia) + '\n👥 Titular: ' + esc(titular) + '\nRevísala en el panel → Depósitos', '', buf, tipo, p.username, cuenta.nombre, dinero(monto), 'Recarga de saldo | ' + cuenta.nombre + ' | Ref: ' + referencia + ' | Titular: ' + titular + ' | Revísala en el panel → Depósitos');
       return enviar(res, { ok: true, item: row ? publica(row) : null });
     }
     return enviar(res, { ok: false, code: 'accion', message: 'Acción no permitida' }, 400);
