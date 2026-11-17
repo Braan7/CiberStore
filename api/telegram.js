@@ -44,7 +44,12 @@ function original(m){ return String(m.caption !== undefined ? m.caption : m.text
 module.exports = async function handler(req, res){
   res.setHeader('Content-Type', 'application/json');
   try{
-    if(req.method !== 'POST'){ res.statusCode = 200; return res.end('{"ok":true}'); }
+    if(req.method !== 'POST'){
+      res.statusCode = 200; res.setHeader('Content-Type', 'application/json');
+      const d = { ok: true, token: !!TOKEN(), chat_id: !!(process.env.TG_CHAT_ID || process.env.TG_CHAT || process.env.TG_ID), supabase_url: !!cfg().url, service_key: !!cfg().key };
+      if(TOKEN()){ try{ const me = await tg('getMe', {}); d.bot = me && me.ok ? ('@' + me.result.username) : 'TOKEN INVALIDO'; const wh = await tg('getWebhookInfo', {}); d.webhook = (wh && wh.result && wh.result.url) ? 'puesto' : 'sin webhook'; if(wh && wh.result && wh.result.last_error_message) d.webhook_error = wh.result.last_error_message; }catch(e){ d.bot = 'sin respuesta'; } }
+      return res.end(JSON.stringify(d));
+    }
     if(!TOKEN()){ res.statusCode = 200; return res.end('{"ok":false}'); }
     if(String(req.headers['x-telegram-bot-api-secret-token'] || '') !== secreto()){ res.statusCode = 401; return res.end('{"ok":false}'); }
     const u = (req.body && typeof req.body === 'object') ? req.body : {}, cb = u.callback_query;
