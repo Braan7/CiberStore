@@ -19763,12 +19763,23 @@ function prCargar(){
   });
 }
 /* ── Ranking: columnas POSICIÓN / USUARIO / RANGO PRIME / RECARGAS DE DIAMANTES (usa los mismos datos de siempre) ── */
-function prNiveles(nombres){
-  if(PR.legacy || typeof sb === 'undefined' || !sb.rpc || !nombres.length) return Promise.resolve(PR.niv);
-  return sb.rpc('prime_de_usuarios', { p_usernames: nombres }).then(function(r){
-    if(Array.isArray(r)) r.forEach(function(x){ var k = String(x.username).toLowerCase(); PR.niv[k] = Number(x.nivel) || 0; PR.av[k] = x.avatar_url || ''; }); PR.nivT = Date.now();
+/* Respaldo: si prime.sql aún no está en Supabase, las fotos de perfil se leen directo de la tabla de perfiles (los niveles no se muestran) */
+function prAvatares(nombres){
+  if(typeof sb === 'undefined' || !sb.get || !nombres.length) return Promise.resolve(PR.niv);
+  var lista = nombres.map(function(n){ return '"' + String(n).replace(/["\\]/g, '') + '"'; }).join(',');
+  return sb.get('profiles', 'select=username,avatar_url&username=in.(' + encodeURIComponent(lista) + ')').then(function(r){
+    if(Array.isArray(r)) r.forEach(function(x){ PR.av[String(x.username).toLowerCase()] = x.avatar_url || ''; });
     return PR.niv;
-  }).catch(function(){ PR.legacy = true; return PR.niv; });
+  }).catch(function(){ return PR.niv; });
+}
+function prNiveles(nombres){
+  if(typeof sb === 'undefined' || !sb.rpc || !nombres.length) return Promise.resolve(PR.niv);
+  if(PR.legacy) return prAvatares(nombres);
+  return sb.rpc('prime_de_usuarios', { p_usernames: nombres }).then(function(r){
+    if(!Array.isArray(r)){ PR.legacy = true; return prAvatares(nombres); }   // prime.sql todavía no está instalado
+    r.forEach(function(x){ var k = String(x.username).toLowerCase(); PR.niv[k] = Number(x.nivel) || 0; PR.av[k] = x.avatar_url || ''; }); PR.nivT = Date.now();
+    return PR.niv;
+  }).catch(function(){ PR.legacy = true; return prAvatares(nombres); });
 }
 function rkRenderLista(rows){
   var ul = document.getElementById('rk-list'); if(!ul) return;
@@ -19846,6 +19857,8 @@ setInterval(function(){ var p = document.getElementById('page-perfil'); if(typeo
   if(typeof goPage !== 'function') return; var og = goPage;
   goPage = function(id){ var r = og.apply(this, arguments); if(id === 'perfil' && authSession){ setTimeout(function(){ prRender(); prCargar(); }, 250); } return r; };
 })();
+/* si el servidor de Prime falló por un momento, se vuelve a intentar cada 2 minutos (sin recargar la página) */
+setInterval(function(){ if(PR.legacy){ PR.legacy = false; if(typeof authSession !== 'undefined' && authSession) prCargar(); } }, 120000);
 
 /* ═══════════ PANEL ADMIN · PRIME ═══════════
    Usa /api/prime con la sesión del panel. Los ajustes de puntos exigen un motivo y quedan registrados con tu usuario. */
