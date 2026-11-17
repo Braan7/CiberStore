@@ -3475,7 +3475,7 @@ function admToggleNav(force){
 }
 
 function admFullTab(tab){
-  var tabs=['stats','users','pedidos','saldos','top','puntos','codigos','chat','resenas','soporte','inactivos','seguridad','recargas','depositos','osaldo','catalogo','premios','chatadm','config'];
+  var tabs=['stats','users','pedidos','saldos','top','puntos','codigos','chat','resenas','soporte','inactivos','seguridad','recargas','depositos','osaldo','vip','catalogo','premios','chatadm','config'];
   tabs.forEach(function(t){
     var btn=document.getElementById('admn-'+t);
     var sec=document.getElementById('adms-'+t);
@@ -3500,6 +3500,7 @@ function admFullTab(tab){
   if(tab==='recargas') admCrtCargar();
   if(tab==='depositos') depAdmCargar();
   if(tab==='osaldo') osaCargar();
+  if(tab==='vip') vipAdmCargar();
   // Cerrar el drawer al elegir una opción en móvil
   if(window.innerWidth < 901) admToggleNav(false);
 }
@@ -7806,12 +7807,12 @@ var _diamSeleccionado = null;
 // ═══════════ RECARGAS AUTOMÁTICAS (Recargas América type=recharge) ═══════════
 // package_id = el ID de Recargas América | precio = costo USD × 20 (redondeado)
 var RECARGAS_AUTO = [
-  { package_id:351, catalog_id:5,  sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.6650, precioUSD:0.6799, precioMXN:null, precio:12.71,   img:'img/diam-100.png'  },
-  { package_id:348, catalog_id:6,  sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:1.9999, precioUSD:2.5098, precioMXN:null, precio:46.93,   img:'img/diam-310.png'  },
-  { package_id:350, catalog_id:7,  sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.3955, precioUSD:3.9576, precioMXN:null, precio:74.01,   img:'img/diam-520.png'  },
-  { package_id:347, catalog_id:8,  sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.3089, precioUSD:6.9909, precioMXN:null, precio:130.73,  img:'img/diam-1060.png' },
-  { package_id:346, catalog_id:9,  sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:12.5203, precioUSD:13.0209, precioMXN:null, precio:243.49,  img:'img/diam-2180.png' },
-  { package_id:349, catalog_id:10, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:31.8640, precioUSD:32.1046, precioMXN:null, precio:600.36,  img:'img/diam-5600.png' },
+  { package_id:351, catalog_id:5,  sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.6650, precioUSD:0.6799, precioMXN:17, precio:17,   img:'img/diam-100.png'  },
+  { package_id:348, catalog_id:6,  sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:1.9999, precioUSD:2.5098, precioMXN:55, precio:55,   img:'img/diam-310.png'  },
+  { package_id:350, catalog_id:7,  sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.3955, precioUSD:3.9576, precioMXN:85, precio:85,   img:'img/diam-520.png'  },
+  { package_id:347, catalog_id:8,  sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.3089, precioUSD:6.9909, precioMXN:150, precio:150,  img:'img/diam-1060.png' },
+  { package_id:346, catalog_id:9,  sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:12.5203, precioUSD:13.0209, precioMXN:260, precio:260,  img:'img/diam-2180.png' },
+  { package_id:349, catalog_id:10, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:31.8640, precioUSD:32.1046, precioMXN:620, precio:620,  img:'img/diam-5600.png' },
   { package_id:null, catalog_id:null, nombre:'11.200 Diamantes + 1.120 Bono', diamantes:12320, costoUSD:66.32, precio:1300, manual:true }
 ];
 // Precios de los diamantes: en USD (precioUSD) y en MXN (precioMXN) son FIJOS y salen de tu lista de precios.
@@ -19398,6 +19399,300 @@ function osaAccion(id, accion){
   OSA.busy = true;
   osaApi('admin_item', { item_id:id, accion:accion }).then(function(r){ OSA.busy = false; if(typeof showToast === 'function') showToast(r && r.ok ? 'Listo' : ((r && r.message) || 'Error'), 3000); osaCargar(); });
 }
+/* ═══════════ RANGOS CLIENTE / VIP ═══════════
+   El rango y los precios los decide SIEMPRE el servidor (api/vip.js + vip.sql). Aquí solo se muestran y se piden.
+   Si el servidor aún no tiene vip.sql, la tienda sigue con los precios y el cobro de siempre (VIP.legacy). */
+var VIP_API = '/api/vip';
+var VIP = { st:null, rango:'CLIENTE', precios:null, legacy:false, uid:null, buying:false, prepago:null, vistoVenc:null };
+function vipEl(id){ return document.getElementById(id); }
+/* ¿El servidor de VIP no está disponible/instalado? (falta subir api/vip.js o ejecutar vip.sql): la tienda sigue como siempre */
+function vipSinServicio(j){ return !!j && (j.code === 'sin_vip' || /^http\d+$/.test(String(j.code || ''))); }
+function vipE(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function vipMXN(n){ return '$' + Number(n || 0).toLocaleString('es-MX', { minimumFractionDigits:0, maximumFractionDigits:2 }) + ' MXN'; }
+function vipFecha(iso){ if(!iso) return '—'; try{ return new Date(iso).toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric', timeZone:'America/Mexico_City' }); }catch(e){ return '—'; } }
+function vipToast(m, ms){ if(typeof showToast === 'function') showToast(m, ms || 4000); }
+function vipApi(action, extra, auth){
+  var go = function(h){
+    var body = Object.assign({ action:action }, extra || {});
+    if(auth && authSession){ body.username = authSession.username; body.hash = h; }
+    return fetch(VIP_API, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(body) })
+      .then(function(r){ return r.json().catch(function(){ return { ok:false, code:'http' + r.status, message:'El servidor no respondió bien (' + r.status + ').' }; }); })
+      .catch(function(){ return { ok:false, code:'red', message:'Sin conexión. Revisa tu internet.' }; });
+  };
+  if(!auth || typeof authSession === 'undefined' || !authSession) return go(null);
+  return pfHash().then(go);
+}
+/* ── PRECIOS DE DIAMANTES POR RANGO ── */
+function vipAplicarPrecios(){
+  if(!VIP.precios || typeof RECARGAS_AUTO === 'undefined') return;
+  VIP.precios.forEach(function(p){ RECARGAS_AUTO.forEach(function(r){ if(Number(r.package_id) === Number(p.package_id)){ r.precioMXN = Number(p.precio); r.precio = Number(p.precio); } }); });
+}
+function vipRefrescarCatalogo(){
+  try{ if(typeof renderDiamCatalogo === 'function' && vipEl('diam-grid')) renderDiamCatalogo(); }catch(e){}
+  vipBanner();
+}
+function vipCargarPrecios(){
+  return vipApi('precios', null, !!authSession).then(function(j){
+    if(j && j.ok && Array.isArray(j.precios)){ VIP.legacy = false; VIP.rango = j.rango === 'VIP' ? 'VIP' : 'CLIENTE'; VIP.precios = j.precios; vipAplicarPrecios(); vipRefrescarCatalogo(); }
+    else if(vipSinServicio(j)){ VIP.legacy = true; }
+    return j;
+  });
+}
+/* los precios de la tienda se recalculan cada cierto tiempo: se vuelven a poner los de tu rango */
+(function(){
+  if(typeof recalcularPreciosDiamantes !== 'function') return;
+  var o = recalcularPreciosDiamantes;
+  recalcularPreciosDiamantes = function(){ var r = o.apply(this, arguments); try{ vipAplicarPrecios(); }catch(e){} return r; };
+})();
+/* ── ESTADO (perfil) ── */
+function vipCargarEstado(){
+  if(!authSession){ VIP.st = null; vipRenderPerfil(); return Promise.resolve(null); }
+  return vipApi('estado', null, true).then(function(j){
+    if(j && j.ok){ VIP.st = j; vipAvisos(j); }
+    else if(vipSinServicio(j)){ VIP.legacy = true; VIP.st = null; }
+    vipRenderPerfil(); return j;
+  });
+}
+function vipAvisos(j){
+  try{
+    if(j.vencio && j.vencio_el && localStorage.getItem('cs_vip_venc') !== String(j.vencio_el)){ localStorage.setItem('cs_vip_venc', String(j.vencio_el)); vipToast('💎 Tu VIP venció. Volviste a los precios Cliente. Puedes renovarlo desde tu perfil.', 7000); }
+    if(j.renovacion_gratis === 'desbloqueada' && localStorage.getItem('cs_vip_ren') !== String(j.fin)){ localStorage.setItem('cs_vip_ren', String(j.fin)); vipToast('🎉 ¡Desbloqueaste 30 días de VIP gratis! Se aplican al terminar tu periodo.', 7000); }
+  }catch(e){}
+}
+function vipBadge(r){ return r === 'VIP' ? '<span class="vip-bdg vip">💎 VIP</span>' : '<span class="vip-bdg cli">CLIENTE</span>'; }
+/* ── Aviso en el catálogo de diamantes ── */
+function vipBanner(){
+  var wrap = vipEl('diam-catalogo'); if(!wrap) return;
+  var b = vipEl('vip-banner');
+  if(!b){ b = document.createElement('div'); b.id = 'vip-banner'; wrap.insertBefore(b, wrap.firstChild); }
+  if(VIP.legacy || !VIP.precios){ b.style.display = 'none'; return; }
+  b.style.display = '';
+  if(VIP.rango === 'VIP') b.innerHTML = '<div class="vip-ban vip"><span>' + vipBadge('VIP') + '</span><div><b>Precios VIP activos</b><small>Estás pagando precio de proveedor.</small></div></div>';
+  else b.innerHTML = '<div class="vip-ban cli"><span>' + vipBadge('CLIENTE') + '</span><div><b>Precios Cliente</b><small>Con VIP pagas precio de proveedor en tus recargas.</small></div><button type="button" onclick="vipIrPerfil()">Ver VIP</button></div>';
+}
+function vipIrPerfil(){ try{ goPage('perfil'); setTimeout(function(){ var c = vipEl('vip-card'); if(c) c.scrollIntoView({ behavior:'smooth', block:'center' }); }, 350); }catch(e){} }
+/* ── Tarjeta del perfil ── */
+function vipMontarCard(){
+  var pg = vipEl('page-perfil'); if(!pg) return null;
+  var c = vipEl('vip-card'); if(c) return c;
+  var tabs = pg.querySelector('.pf2-tabs'); if(!tabs) return null;
+  c = document.createElement('section'); c.id = 'vip-card'; c.className = 'pf2-card vip-card'; tabs.parentNode.insertBefore(c, tabs); return c;
+}
+function vipRenderPerfil(){
+  var c = vipMontarCard(); if(!c) return;
+  var chip = vipEl('pf2-rol'); 
+  if(!authSession || VIP.legacy){ c.style.display = 'none'; return; }
+  var s = VIP.st;
+  if(!s){ c.style.display = ''; c.innerHTML = '<div class="vip-load">Cargando tu plan…</div>'; return; }
+  c.style.display = '';
+  if(chip && (authSession.role !== 'admin')) chip.innerHTML = vipBadge(s.rango);
+  if(s.rango === 'VIP'){
+    var pct = Math.max(0, Math.min(100, Number(s.progreso) || 0)), ok = s.renovacion_gratis === 'desbloqueada';
+    c.className = 'pf2-card vip-card vip-on';
+    c.innerHTML = '<div class="vip-h"><div class="vip-t">PLAN VIP 💎</div>' + vipBadge('VIP') + '</div>'
+      + '<div class="vip-g"><div><small>Activo desde</small><b>' + vipE(vipFecha(s.inicio)) + '</b></div><div><small>Vence</small><b>' + vipE(vipFecha(s.fin)) + '</b></div><div><small>Días restantes</small><b>' + Number(s.dias_restantes) + '</b></div></div>'
+      + '<div class="vip-p"><div class="vip-pl"><span>Compras acumuladas</span><b>' + vipMXN(s.acumulado) + ' / ' + vipMXN(s.meta) + '</b></div>'
+      + '<div class="vip-bar"><i style="width:' + pct + '%"></i></div><div class="vip-pl"><span>Progreso: ' + pct + '%</span><span>' + (ok ? 'Meta cumplida' : 'Te faltan ' + vipMXN(s.falta)) + '</span></div></div>'
+      + (ok ? '<div class="vip-fel"><b>¡FELICIDADES!</b> Has desbloqueado 30 días adicionales de VIP completamente gratis. Tu renovación se aplicará automáticamente al finalizar tu periodo actual' + (s.renovacion_inicia ? ' (' + vipE(vipFecha(s.renovacion_inicia)) + ')' : '') + '.</div>'
+        : '<div class="vip-nota">Te faltan <b>' + vipMXN(s.falta) + '</b> para desbloquear tu renovación VIP gratuita. Solo cuentan compras completadas de productos y recargas (no el pago del VIP).</div>')
+      + '<div class="vip-ren">Renovación gratis: <b>' + (ok ? 'Desbloqueada ✔' : 'Bloqueada') + '</b></div>'
+      + (s.puede_comprar && !ok ? '<button type="button" class="vip-btn" onclick="vipAbrirCompra()">Renovar VIP · ' + vipMXN(s.precio_vip) + '</button>' : (s.puede_comprar ? '<button type="button" class="vip-btn alt" onclick="vipAbrirCompra()">Renovar ahora · ' + vipMXN(s.precio_vip) + '</button>' : ''));
+  } else {
+    c.className = 'pf2-card vip-card';
+    c.innerHTML = '<div class="vip-h"><div class="vip-t">TU PLAN</div>' + vipBadge('CLIENTE') + '</div>'
+      + '<div class="vip-free">Plan gratuito · precios estándar de la tienda</div>'
+      + (s.vencio ? '<div class="vip-nota">Tu VIP venció el ' + vipE(vipFecha(s.vencio_el)) + '. Puedes renovarlo cuando quieras.</div>' : '')
+      + '<div class="vip-ben"><b>💎 Hazte VIP</b><ul><li>Precios de proveedor en recargas de Free Fire</li><li>Mejores márgenes para revender</li><li>Promociones exclusivas y atención prioritaria</li><li>Renovación gratis al comprar ' + vipMXN(s.meta) + ' en 30 días</li></ul></div>'
+      + '<button type="button" class="vip-btn" onclick="vipAbrirCompra()">Hazte VIP · ' + vipMXN(s.precio_vip) + ' / ' + s.dias_vip + ' días</button>';
+  }
+}
+/* ── Compra del VIP ── */
+function vipAbrirCompra(){
+  if(!authSession){ if(typeof showAuthModal === 'function') showAuthModal(); return; }
+  var s = VIP.st; if(!s) return;
+  var ov = vipEl('vip-ov'); if(!ov){ ov = document.createElement('div'); ov.id = 'vip-ov'; ov.onclick = function(e){ if(e.target === ov) vipCerrarCompra(); }; document.body.appendChild(ov); }
+  var saldo = Number(authSession.saldo) || 0, falta = saldo < s.precio_vip;
+  ov.innerHTML = '<div class="vip-m"><button type="button" class="vip-x" onclick="vipCerrarCompra()" aria-label="Cerrar">×</button><div class="vip-mt">💎 ' + (s.rango === 'VIP' ? 'Renovar' : 'Hazte') + ' VIP</div>'
+    + '<ul><li>' + s.dias_vip + ' días de VIP desde el pago</li><li>Precios de proveedor en recargas de Free Fire</li><li>Renovación gratis al llegar a ' + vipMXN(s.meta) + ' en compras</li><li>Sin cobros automáticos: tú decides cuándo renovar</li></ul>'
+    + '<div class="vip-row"><span>Precio</span><b>' + vipMXN(s.precio_vip) + '</b></div><div class="vip-row"><span>Tu saldo</span><b>' + vipMXN(saldo) + '</b></div>'
+    + '<div class="vip-err" id="vip-err"' + (falta ? '' : ' style="display:none"') + '>' + (falta ? 'Saldo insuficiente. Recarga tu saldo para activar el VIP.' : '') + '</div>'
+    + '<button type="button" class="vip-btn" id="vip-pagar" onclick="vipPagar()">' + (falta ? 'Recargar saldo' : 'Pagar ' + vipMXN(s.precio_vip) + ' con saldo') + '</button></div>';
+  ov.className = 'on';
+}
+function vipCerrarCompra(){ var ov = vipEl('vip-ov'); if(ov) ov.className = ''; VIP.buying = false; }
+function vipIdem(){ return (typeof crypto !== 'undefined' && crypto.randomUUID) ? 'vip-' + crypto.randomUUID() : 'vip-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10); }
+function vipPagar(){
+  if(VIP.buying || !VIP.st) return;
+  var saldo = Number(authSession.saldo) || 0, btn = vipEl('vip-pagar'), err = vipEl('vip-err');
+  if(saldo < VIP.st.precio_vip){ vipCerrarCompra(); try{ if(typeof goPage === 'function') goPage('saldo'); }catch(e){} return; }
+  VIP.buying = true; if(btn){ btn.disabled = true; btn.textContent = 'Procesando…'; } if(err) err.style.display = 'none';
+  /* misma idempotencia en reintentos de este mismo pago: nunca se cobra dos veces */
+  if(!VIP._idem) VIP._idem = vipIdem();
+  vipApi('comprar', { idem: VIP._idem }, true).then(function(j){
+    VIP.buying = false;
+    if(j && j.ok){
+      VIP._idem = null;
+      if(typeof j.saldo === 'number'){ authSession.saldo = j.saldo; try{ _refreshSaldoUI(j.saldo); saveSession(authSession); }catch(e){} }
+      VIP.st = Object.assign({}, VIP.st, j); vipCerrarCompra(); vipToast('💎 ¡VIP activado! Ya tienes precios de proveedor.', 6000);
+      vipCargarPrecios(); vipCargarEstado(); return;
+    }
+    if(btn){ btn.disabled = false; btn.textContent = 'Pagar ' + vipMXN(VIP.st.precio_vip) + ' con saldo'; }
+    if(j && (j.code === 'saldo_insuficiente' || j.code === 'vip_cubierto' || j.code === 'suspendida' || j.code === 'solicitud')) VIP._idem = null;
+    if(err){ err.textContent = (j && j.message) || 'No se pudo activar. No se te cobró.'; err.style.display = 'block'; }
+    try{ if(typeof refreshUserBalance === 'function') refreshUserBalance(); }catch(e){}
+  });
+}
+/* ── COBRO DE DIAMANTES: el servidor pone el precio de TU rango y cobra; solo entonces se hace la recarga ── */
+(function(){
+  var orig = window._ejecutarRecargaVerificada, origSpend = window.addSpend;
+  if(typeof orig === 'function'){
+    window._ejecutarRecargaVerificada = function(p, ffId, nombre, status, btn, msg){
+      var args = arguments, self = this;
+      if(VIP.legacy || !authSession || !p || !p.package_id) return orig.apply(self, args);
+      var esV = status === 'verified', ord = getNextOrder(), restaurar = window.getNextOrder;
+      var desc = p.diamantes + ' Diamantes (Recarga AUTO ' + p.nombre + ') - ID:' + ffId + (esV ? (' (' + nombre + ')') : ' (SIN VERIFICAR)') + ' - Pedido #' + ord;
+      var seguir = function(){ window.getNextOrder = function(){ window.getNextOrder = restaurar; return ord; }; try{ return orig.apply(self, args); } finally { window.getNextOrder = restaurar; } };
+      if(btn){ btn.disabled = true; btn.className = 'ddet-btn off'; btn.innerHTML = '<span class="rc-spin"></span> Cobrando…'; }
+      vipApi('cobrar_diamante', { package_id: p.package_id, idem: vipIdem(), desc: desc, precio_esperado: p.precio }, true).then(function(j){
+        if(j && j.ok){ VIP.prepago = { desc: desc, movId: j.movimiento_id, saldo: j.saldo }; seguir(); setTimeout(vipCargarEstado, 1500); return; }
+        if(vipSinServicio(j)){ VIP.legacy = true; seguir(); return; }   // aún sin api/vip.js o vip.sql: cobro de siempre
+        if(btn){ btn.disabled = false; btn.className = 'ddet-btn on'; btn.innerHTML = 'Recargar con saldo &#8594;'; }
+        if(msg){ msg.className = 'ddet-msg'; msg.innerHTML = (typeof _rcEstadoHTML === 'function') ? _rcEstadoHTML('err', 'NO SE COBRÓ', vipE((j && j.message) || 'No se pudo cobrar. Intenta de nuevo.')) : ''; }
+        try{ _comprandoDiam = false; }catch(e){}
+        if(j && j.code === 'precio_cambio') vipCargarPrecios();
+        try{ if(typeof refreshUserBalance === 'function') refreshUserBalance(); }catch(e){}
+      });
+    };
+  }
+  if(typeof origSpend === 'function'){
+    window.addSpend = function(amount, description){
+      var pp = VIP.prepago;
+      if(pp && description === pp.desc){   // ya cobrado por el servidor: solo se actualiza la pantalla y se avisa el movimiento
+        VIP.prepago = null;
+        try{ authSession.saldo = pp.saldo; _refreshSaldoUI(pp.saldo); saveSession(authSession); }catch(e){}
+        try{ if(pp.movId && typeof addSpend._onMovId === 'function'){ var cb = addSpend._onMovId; addSpend._onMovId = null; cb(pp.movId); } }catch(e){}
+        vipToast('✓ Compra registrada. Saldo: ' + (typeof fmt === 'function' ? fmt(pp.saldo) : pp.saldo), 3000);
+        return;
+      }
+      return origSpend.apply(this, arguments);
+    };
+    window.addSpend._onMovId = origSpend._onMovId;
+  }
+})();
+/* ── Arranque y cambios de sesión ── */
+setInterval(function(){
+  var id = (typeof authSession !== 'undefined' && authSession && authSession.id) ? String(authSession.id) : null;
+  if(id !== VIP.uid){ VIP.uid = id; VIP.st = null; VIP.rango = 'CLIENTE'; vipCargarPrecios(); if(id) vipCargarEstado(); else vipRenderPerfil(); }
+}, 1200);
+setInterval(function(){ var p = vipEl('page-perfil'); if(authSession && p && p.classList.contains('active') && !VIP.legacy) vipCargarEstado(); }, 60000);
+setInterval(function(){ if(!VIP.legacy) vipCargarPrecios(); }, 300000);
+(function(){
+  if(typeof goPage !== 'function') return; var og = goPage;
+  goPage = function(id){ var r = og.apply(this, arguments);
+    if(id === 'perfil' && authSession){ setTimeout(function(){ vipRenderPerfil(); vipCargarEstado(); }, 200); }
+    if(id === 'diamantes' || id === 'servicios'){ setTimeout(function(){ if(!VIP.precios) vipCargarPrecios(); else vipBanner(); }, 250); }
+    return r; };
+})();
+(function(){ if(typeof abrirDiamDetalle !== 'function') return; var o = abrirDiamDetalle; abrirDiamDetalle = function(){ var r = o.apply(this, arguments); try{ vipBanner(); }catch(e){} return r; }; })();
+
+/* ═══════════ PANEL ADMIN · GESTIÓN DE CLIENTES Y VIP ═══════════
+   Todo pasa por /api/vip con tu sesión del panel (token firmado). Cada cambio queda en el registro de auditoría. */
+var VA = { tab:'res', q:'', rango:'', users:[], busy:false, det:null };
+function vaE(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function vaMXN(n){ return '$' + Number(n || 0).toLocaleString('es-MX', { minimumFractionDigits:2, maximumFractionDigits:2 }); }
+function vaFH(iso){ if(!iso) return '—'; try{ var d = new Date(iso); return d.toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric', timeZone:'America/Mexico_City' }) + ' ' + d.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit', timeZone:'America/Mexico_City' }); }catch(e){ return '—'; } }
+function vaToast(m){ if(typeof showToast === 'function') showToast(m, 3500); }
+function vipAdmApi(action, extra){
+  var tok = (typeof csAdminSesionToken === 'function') ? csAdminSesionToken() : '';
+  if(!tok) return Promise.resolve({ ok:false, code:'sesion_invalida', message:'Entra de nuevo al panel.' });
+  var body = { action:action, token:tok }; for(var k in (extra || {})) body[k] = extra[k];
+  return fetch('/api/vip', { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify(body) })
+    .then(function(r){ return r.json().catch(function(){ return { ok:false, message:'Respuesta inválida (' + r.status + ')' }; }); })
+    .catch(function(){ return { ok:false, message:'Sin conexión' }; });
+}
+function vipAdmCargar(){
+  var s = document.getElementById('adms-vip'); if(!s) return;
+  var T = [['res','Resumen'],['usr','Usuarios'],['pre','Precios y ajustes']];
+  s.innerHTML = '<div class="adm-card-title">💎 Gestión de clientes y VIP</div><div class="va-tabs">' + T.map(function(t){ return '<button type="button" class="' + (VA.tab === t[0] ? 'on' : '') + '" onclick="vaTab(\'' + t[0] + '\')">' + t[1] + '</button>'; }).join('') + '</div><div id="va-body"><div class="va-v">Cargando…</div></div>';
+  if(VA.tab === 'res') vaResumen(); else if(VA.tab === 'usr') vaUsuarios(); else vaPrecios();
+}
+function vaTab(t){ VA.tab = t; VA.det = null; vipAdmCargar(); }
+function vaErr(r){ var b = document.getElementById('va-body'); if(b) b.innerHTML = '<div class="va-err">' + vaE((r && r.message) || 'No se pudo cargar') + '</div>'; }
+/* ── Resumen / estadísticas ── */
+function vaResumen(){
+  vipAdmApi('admin_resumen').then(function(r){
+    var b = document.getElementById('va-body'); if(!b) return; if(!r || !r.ok) return vaErr(r);
+    var st = r.stats, K = function(n, v, c){ return '<div class="va-k' + (c ? ' ' + c : '') + '"><b>' + v + '</b><span>' + n + '</span></div>'; };
+    b.innerHTML = '<div class="va-ks">' + K('Usuarios CLIENTE', st.clientes) + K('VIP activos', st.vip_activos, 'g') + K('Suscripciones vendidas', st.suscripciones_vendidas) + K('Ingresos por suscripciones', vaMXN(st.ingresos), 'g') + K('Renovaciones gratis', st.renovaciones_gratis) + '</div>'
+      + '<div class="va-h">Cerca de la meta de ' + vaMXN(st.meta) + ' (70% o más)</div>'
+      + ((st.proximos_meta || []).length ? st.proximos_meta.map(function(u){ var p = Math.min(100, Math.round(u.acumulado / st.meta * 100)); return '<div class="va-c"><div class="va-top"><b>' + vaE(u.username || u.user_id) + '</b><span>' + vaMXN(u.acumulado) + ' / ' + vaMXN(st.meta) + '</span></div><div class="va-bar"><i style="width:' + p + '%"></i></div></div>'; }).join('') : '<div class="va-v">Nadie cerca de la meta por ahora.</div>');
+  });
+}
+/* ── Usuarios ── */
+function vaUsuarios(){
+  var b = document.getElementById('va-body'); if(!b) return;
+  b.innerHTML = '<div class="va-fl"><input id="va-q" type="search" placeholder="Buscar por nombre, correo o ID" value="' + vaE(VA.q) + '" onkeydown="if(event.key===\'Enter\')vaBuscar()"><button type="button" onclick="vaBuscar()">Buscar</button></div>'
+    + '<div class="va-fl">' + [['', 'Todos'], ['VIP', 'VIP'], ['CLIENTE', 'Cliente']].map(function(f){ return '<button type="button" class="' + (VA.rango === f[0] ? 'on' : '') + '" onclick="vaRango(\'' + f[0] + '\')">' + f[1] + '</button>'; }).join('') + '</div><div id="va-lista"><div class="va-v">Cargando…</div></div><div id="va-det"></div>';
+  vipAdmApi('admin_usuarios', { q:VA.q, rango:VA.rango, limit:60 }).then(function(r){
+    var l = document.getElementById('va-lista'); if(!l) return; if(!r || !r.ok){ l.innerHTML = '<div class="va-err">' + vaE((r && r.message) || 'Error') + '</div>'; return; }
+    VA.users = r.usuarios || [];
+    l.innerHTML = VA.users.length ? VA.users.map(function(u){
+      var p = Math.min(100, Math.round(u.acumulado / u.meta * 100)), vip = u.rango === 'VIP';
+      return '<div class="va-c"><div class="va-top"><div><b>' + vaE(u.username) + '</b><small>' + vaE(u.email || '') + ' · ' + vaE(String(u.id).slice(0, 8)) + (u.baneado ? ' · SUSPENDIDO' : '') + '</small></div><span class="va-bd ' + (vip ? 'vip' : 'cli') + '">' + (vip ? '💎 VIP' : 'CLIENTE') + '</span></div>'
+        + '<div class="va-g"><span>Saldo</span><b>' + vaMXN(u.saldo) + '</b>' + (vip ? '<span>Vence</span><b>' + vaFH(u.vence) + '</b><span>Compras del periodo</span><b>' + vaMXN(u.acumulado) + ' / ' + vaMXN(u.meta) + ' (' + p + '%)</b>' : '') + '</div>'
+        + '<div class="va-fl"><button type="button" onclick="vaDetalle(\'' + u.id + '\')">Detalle</button>'
+        + '<button type="button" onclick="vaAccion(\'' + u.id + '\',\'activar\',\'' + vaE(u.username) + '\')">' + (vip ? 'Agregar periodo VIP' : 'Activar VIP') + '</button>'
+        + (vip ? '<button type="button" onclick="vaAccion(\'' + u.id + '\',\'extender\',\'' + vaE(u.username) + '\')">Extender</button><button type="button" class="va-red" onclick="vaAccion(\'' + u.id + '\',\'desactivar\',\'' + vaE(u.username) + '\')">Desactivar</button>' : '') + '</div></div>';
+    }).join('') : '<div class="va-v">Sin resultados.</div>';
+  });
+}
+function vaBuscar(){ VA.q = ((document.getElementById('va-q') || {}).value || '').trim(); vaUsuarios(); }
+function vaRango(r){ VA.rango = r; vaUsuarios(); }
+function vaAccion(id, accion, nombre){
+  if(VA.busy) return; var dias = 0;
+  if(accion === 'activar' || accion === 'extender'){
+    var v = prompt((accion === 'activar' ? 'Días de VIP a activar' : 'Días a extender') + ' para ' + nombre + ' (1–3650):', '30'); if(v === null) return; dias = Math.floor(Number(v));
+    if(!(dias >= 1 && dias <= 3650)){ vaToast('Escribe un número de días entre 1 y 3650'); return; }
+  } else if(!confirm('¿Desactivar el VIP de ' + nombre + '? Volverá al rango CLIENTE ahora mismo.')) return;
+  VA.busy = true;
+  vipAdmApi('admin_accion', { user_id:id, accion:accion, dias:dias }).then(function(r){ VA.busy = false; vaToast(r && r.ok ? 'Listo' : ((r && r.message) || 'Error')); if(r && r.ok) vaUsuarios(); });
+}
+function vaDetalle(id){
+  var d = document.getElementById('va-det'); if(!d) return; d.innerHTML = '<div class="va-v">Cargando detalle…</div>'; d.scrollIntoView({ behavior:'smooth', block:'start' });
+  vipAdmApi('admin_detalle', { user_id:id }).then(function(r){
+    if(!r || !r.ok){ d.innerHTML = '<div class="va-err">' + vaE((r && r.message) || 'Error') + '</div>'; return; }
+    var e = r.estado, EV = { compra_vip:'Compró VIP', renovacion_gratis:'Ganó renovación gratis', renovacion_revocada:'Renovación revocada', renovacion_restaurada:'Renovación restaurada', vencimiento:'VIP venció', admin_activar:'Admin activó VIP', admin_extender:'Admin extendió VIP', admin_desactivar:'Admin desactivó VIP' };
+    var tb = function(h, rows){ return '<div class="va-h">' + h + '</div>' + (rows.length ? rows.join('') : '<div class="va-v">Sin registros.</div>'); };
+    d.innerHTML = '<div class="va-c va-dt"><div class="va-top"><b>Detalle · ' + (e.rango === 'VIP' ? '💎 VIP' : 'CLIENTE') + '</b><button type="button" onclick="document.getElementById(\'va-det\').innerHTML=\'\'">Cerrar</button></div>'
+      + '<div class="va-g"><span>Compras totales</span><b>' + vaMXN(r.compras_totales) + '</b><span>Compras válidas del periodo</span><b>' + vaMXN(e.acumulado) + ' / ' + vaMXN(e.meta) + ' (' + e.progreso + '%)</b><span>Renovación gratis</span><b>' + vaE(e.renovacion_gratis) + '</b><span>Vence</span><b>' + vaFH(e.fin_total || e.fin) + '</b></div>'
+      + tb('Periodos VIP', (r.periodos || []).map(function(p){ return '<div class="va-ln"><b>' + vaFH(p.inicio) + ' → ' + vaFH(p.fin) + '</b><span>' + vaE(p.origen) + (p.estado === 'cancelada' ? ' · cancelado' : '') + ' · compras ' + vaMXN(p.compras) + '</span></div>'; }))
+      + tb('Pagos de suscripción', (r.pagos || []).map(function(p){ return '<div class="va-ln"><b>' + vaE(p.transaccion) + '</b><span>' + vaMXN(p.monto) + ' · ' + vaFH(p.creada) + '</span></div>'; }))
+      + tb('Renovaciones gratis', (r.renovaciones || []).map(function(p){ return '<div class="va-ln"><b>' + vaE(p.estado) + '</b><span>' + vaMXN(p.acumulado) + ' de ' + vaMXN(p.meta) + ' · ' + vaFH(p.creada) + '</span></div>'; }))
+      + tb('Historial de cambios de rango', (r.historial || []).map(function(p){ return '<div class="va-ln"><b>' + vaE(EV[p.evento] || p.evento) + '</b><span>' + vaE(p.actor || '') + ' · ' + vaFH(p.creada) + '</span></div>'; })) + '</div>';
+  });
+}
+/* ── Precios y ajustes ── */
+var VA_CFG = { precio_vip:'Precio de la suscripción VIP (MXN)', meta_compras:'Meta de compras para renovación gratis (MXN)', dias_vip:'Duración de la suscripción (días)', dias_renovacion_gratis:'Duración de la renovación gratis (días)' };
+function vaPrecios(){
+  vipAdmApi('admin_resumen').then(function(r){
+    var b = document.getElementById('va-body'); if(!b) return; if(!r || !r.ok) return vaErr(r);
+    b.innerHTML = '<div class="va-h">Precios de recargas de Free Fire (por rango)</div>'
+      + (r.precios || []).map(function(p){ return '<div class="va-c"><div class="va-top"><b>' + vaE(p.nombre) + '</b><small>ID ' + p.package_id + '</small></div><div class="va-pr"><label>Cliente<input id="vp-c-' + p.package_id + '" type="number" step="0.01" min="0.01" value="' + p.precio_cliente + '"></label><label>VIP<input id="vp-v-' + p.package_id + '" type="number" step="0.01" min="0.01" value="' + p.precio_vip + '"></label><button type="button" onclick="vaGuardarPrecio(' + p.package_id + ')">Guardar</button></div></div>'; }).join('')
+      + '<div class="va-h">Ajustes del VIP</div>'
+      + (r.config || []).map(function(c){ return '<div class="va-c"><div class="va-pr"><label style="flex:1">' + vaE(VA_CFG[c.clave] || c.clave) + '<input id="vc-' + c.clave + '" type="number" step="' + (/dias/.test(c.clave) ? '1' : '0.01') + '" min="1" value="' + c.valor + '"></label><button type="button" onclick="vaGuardarConfig(\'' + c.clave + '\')">Guardar</button></div></div>'; }).join('')
+      + '<div class="va-v">Los cambios aplican a compras nuevas. Los pedidos anteriores conservan el precio con el que se cobraron.</div>';
+  });
+}
+function vaGuardarPrecio(id){
+  var c = Number((document.getElementById('vp-c-' + id) || {}).value), v = Number((document.getElementById('vp-v-' + id) || {}).value);
+  if(!(c > 0) || !(v > 0)){ vaToast('Los precios deben ser mayores a 0'); return; }
+  if(v > c && !confirm('El precio VIP ($' + v + ') es MAYOR que el Cliente ($' + c + '). ¿Guardar así?')) return;
+  vipAdmApi('admin_precio', { package_id:id, cliente:c, vip:v }).then(function(r){ vaToast(r && r.ok ? 'Precio guardado' : ((r && r.message) || 'Error')); });
+}
+function vaGuardarConfig(k){
+  var v = Number((document.getElementById('vc-' + k) || {}).value); if(!(v > 0)){ vaToast('Escribe un valor mayor a 0'); return; }
+  vipAdmApi('admin_config', { clave:k, valor:v }).then(function(r){ vaToast(r && r.ok ? 'Guardado' : ((r && r.message) || 'Error')); });
+}
 /* ═══════════ PANEL ADMIN · sesión vencida → pedir login de nuevo (en vez de un error muerto) ═══════════ */
 var _csAdmCad = false;
 function csAdminCaducada(msg){
@@ -19425,10 +19720,10 @@ function csAdminEnvolver(nombre){
   };
   w._csEnv = true; window[nombre] = w;
 }
-['depApi','osaApi','admDb'].forEach(csAdminEnvolver);
+['depApi','osaApi','admDb','vipAdmApi'].forEach(csAdminEnvolver);
 /* Al abrir las pestañas Depósitos / Órdenes saldo sin sesión válida: pedir login directo */
 (function(){
-  ['depAdmCargar','osaCargar'].forEach(function(n){
+  ['depAdmCargar','osaCargar','vipAdmCargar'].forEach(function(n){
     var f = window[n]; if(typeof f !== 'function') return;
     window[n] = function(){
       if(typeof csAdminSesionToken === 'function' && !csAdminSesionToken()){ csAdminCaducada('Entra de nuevo al panel para ver esto.'); return; }

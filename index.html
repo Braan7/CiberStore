@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta name="cs-build" content="1f42615b64">
-<script>var CS_BUILD="1f42615b64";</script>
+<meta name="cs-build" content="f1f8419d4d">
+<script>var CS_BUILD="f1f8419d4d";</script>
 <meta charset="UTF-8"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -7720,6 +7720,7 @@ select.ap-inp{flex:0 1 auto}
       <button class="adm-nav-btn"        id="admn-pedidos" onclick="admFullTab('pedidos')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16l-1.5 12.5a1.5 1.5 0 0 1-1.5 1.5H7a1.5 1.5 0 0 1-1.5-1.5L4 7z"/><path d="M8 7V5.5a4 4 0 0 1 8 0V7"/></svg> Pedidos</button>
       <button class="adm-nav-btn" id="admn-depositos" onclick="admFullTab('depositos')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/></svg> Dep&oacute;sitos <span class="crta-badge" id="dep-badge"></span></button>
       <button class="adm-nav-btn" id="admn-osaldo" onclick="admFullTab('osaldo')">&#x1F9FE; &Oacute;rdenes saldo <span class="crta-badge" id="osa-badge"></span></button>
+      <button class="adm-nav-btn" id="admn-vip" onclick="admFullTab('vip')">&#x1F48E; Clientes y VIP</button>
       <button class="adm-nav-btn" id="admn-recargas" onclick="admFullTab('recargas')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M2 9h20"/></svg> Recargas <span class="crta-badge" id="crta-badge"></span></button>
       <button class="adm-nav-btn" id="admn-catalogo" onclick="admFullTab('catalogo')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg> Catálogo</button>
       <button class="adm-nav-btn" id="admn-premios" onclick="admFullTab('premios')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg> Ranking y premios</button>
@@ -8195,6 +8196,8 @@ select.ap-inp{flex:0 1 auto}
 <div class="adm-section" id="adms-depositos"></div>
 
 <div class="adm-section" id="adms-osaldo"></div>
+
+<div class="adm-section" id="adms-vip"></div>
 
 <div class="adm-section" id="adms-catalogo">
   <div class="adm-card-title">&#128450;&#65039; Gestión de catálogo</div>
@@ -9507,6 +9510,65 @@ html.ck-abierto{overflow:hidden}
 #adms-osaldo .dp-au{padding:.55rem 0;border-bottom:1px solid rgba(255,255,255,.06)}#adms-osaldo .dp-au:last-child{border-bottom:0}
 #adms-osaldo .dp-au b{display:block;color:#fff;font-size:.88rem}#adms-osaldo .dp-au small{color:#8b93a3;font-size:.76rem;word-break:break-word}
 
+/* ═══ Rangos CLIENTE / VIP ═══ */
+.vip-bdg{display:inline-flex;align-items:center;gap:.25rem;padding:.2rem .6rem;border-radius:999px;font-family:Saira,sans-serif;font-weight:800;font-size:.72rem;letter-spacing:.6px;white-space:nowrap}
+.vip-bdg.cli{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);color:#c4cbd8}
+.vip-bdg.vip{background:linear-gradient(135deg,#ffd76a,#b78bff);color:#1b1230;border:1px solid rgba(255,215,106,.55);box-shadow:0 0 14px rgba(183,139,255,.35)}
+.vip-card{margin:.9rem 0}
+.vip-card.vip-on{border-color:rgba(255,215,106,.4)!important;background:linear-gradient(160deg,rgba(255,215,106,.07),rgba(183,139,255,.07) 55%,rgba(255,255,255,.02))!important}
+.vip-h{display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin-bottom:.7rem}
+.vip-t{font-family:Saira,sans-serif;font-weight:900;font-size:1.05rem;letter-spacing:.6px;color:#fff}
+.vip-on .vip-t{background:linear-gradient(90deg,#ffd76a,#d3b4ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.vip-free{color:#9aa3b5;font-size:.86rem;margin-bottom:.6rem}
+.vip-g{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.8rem}
+.vip-g>div{background:rgba(255,255,255,.04);border-radius:10px;padding:.5rem .6rem;min-width:0}
+.vip-g small{display:block;color:#8b93a3;font-size:.7rem}.vip-g b{color:#fff;font-size:.86rem}
+.vip-pl{display:flex;justify-content:space-between;gap:.5rem;color:#aab2c3;font-size:.8rem;flex-wrap:wrap}.vip-pl b{color:#fff}
+.vip-bar{height:10px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin:.4rem 0}
+.vip-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#1b87f5,#b78bff 60%,#ffd76a);transition:width .6s}
+.vip-nota,.vip-fel{margin-top:.6rem;font-size:.84rem;color:#c4cbd8;line-height:1.45}
+.vip-fel{background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);border-radius:12px;padding:.7rem .85rem;color:#d4ffe3}.vip-fel b{color:#25d366;display:block;font-family:Saira,sans-serif;letter-spacing:.5px}
+.vip-ren{margin-top:.55rem;font-size:.82rem;color:#aab2c3}.vip-ren b{color:#fff}
+.vip-ben{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.7rem .85rem;margin:.6rem 0 .8rem}.vip-ben b{color:#ffd76a}
+.vip-ben ul,.vip-m ul{margin:.4rem 0 0;padding-left:1.1rem;color:#c4cbd8;font-size:.84rem;line-height:1.55}
+.vip-btn{width:100%;margin-top:.8rem;padding:.8rem 1rem;border-radius:12px;border:0;background:#1b87f5;color:#fff;font-family:Saira,sans-serif;font-weight:800;font-size:.95rem;cursor:pointer}
+.vip-btn.alt{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14)}
+.vip-btn:disabled{opacity:.6}
+.vip-load{color:#8b93a3;font-size:.85rem}
+#vip-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99999;align-items:center;justify-content:center;padding:1rem}#vip-ov.on{display:flex}
+.vip-m{position:relative;width:100%;max-width:400px;background:#0e1422;border:1px solid rgba(255,215,106,.35);border-radius:18px;padding:1.2rem}
+.vip-mt{font-family:Saira,sans-serif;font-weight:900;font-size:1.2rem;color:#fff;margin-bottom:.5rem}
+.vip-x{position:absolute;top:.5rem;right:.7rem;background:none;border:0;color:#8b93a3;font-size:1.6rem;cursor:pointer}
+.vip-row{display:flex;justify-content:space-between;margin-top:.55rem;color:#aab2c3;font-size:.9rem}.vip-row b{color:#fff}
+.vip-err{margin-top:.7rem;background:rgba(255,90,100,.12);border:1px solid rgba(255,90,100,.3);color:#ff9aa2;border-radius:10px;padding:.55rem .7rem;font-size:.82rem}
+#vip-banner{margin-bottom:.8rem}
+.vip-ban{display:flex;align-items:center;gap:.7rem;padding:.6rem .8rem;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1)}
+.vip-ban.vip{border-color:rgba(255,215,106,.4);background:linear-gradient(135deg,rgba(255,215,106,.08),rgba(183,139,255,.08))}
+.vip-ban div{flex:1;min-width:0}.vip-ban b{display:block;color:#fff;font-size:.88rem}.vip-ban small{color:#9aa3b5;font-size:.76rem}
+.vip-ban button{padding:.45rem .8rem;border-radius:10px;border:1px solid rgba(255,215,106,.5);background:transparent;color:#ffd76a;font-weight:700;font-size:.8rem;cursor:pointer}
+@media (max-width:430px){.vip-g{grid-template-columns:1fr 1fr}.vip-g>div:last-child{grid-column:1/-1}}
+
+#adms-vip .va-tabs,#adms-vip .va-fl{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.8rem}
+#adms-vip .va-tabs button,#adms-vip .va-fl button,#adms-vip .va-pr button,#adms-vip .va-top button{padding:.55rem .9rem;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#c9d1e0;font-weight:700;font-size:.82rem;cursor:pointer}
+#adms-vip .va-tabs button.on,#adms-vip .va-fl button.on{background:#1b87f5;border-color:#1b87f5;color:#fff}
+#adms-vip .va-fl input{flex:1;min-width:160px;padding:.6rem .8rem;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.25);color:#fff;font-size:16px}
+#adms-vip .va-red{border-color:rgba(255,90,100,.4)!important;color:#ff7b86!important}
+#adms-vip .va-ks{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.6rem;margin-bottom:1rem}
+#adms-vip .va-k{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:.8rem}
+#adms-vip .va-k b{display:block;font-family:Saira,sans-serif;font-size:1.35rem;color:#fff}#adms-vip .va-k span{color:#8b93a3;font-size:.76rem}#adms-vip .va-k.g b{color:#25d366}
+#adms-vip .va-h{font-family:Saira,sans-serif;font-weight:800;color:#fff;margin:1rem 0 .5rem;font-size:.95rem}
+#adms-vip .va-c{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:.85rem;margin-bottom:.65rem}
+#adms-vip .va-top{display:flex;justify-content:space-between;gap:.8rem;align-items:flex-start;margin-bottom:.4rem}
+#adms-vip .va-top b{color:#fff}#adms-vip .va-top small{display:block;color:#8b93a3;font-size:.76rem;margin-top:.1rem;word-break:break-all}#adms-vip .va-top span{color:#aab2c3;font-size:.8rem}
+#adms-vip .va-bd{padding:.15rem .6rem;border-radius:999px;font-size:.72rem;font-weight:800;white-space:nowrap}
+#adms-vip .va-bd.vip{background:linear-gradient(135deg,#ffd76a,#b78bff);color:#1b1230}#adms-vip .va-bd.cli{background:rgba(255,255,255,.07);color:#c4cbd8}
+#adms-vip .va-g{display:grid;grid-template-columns:auto 1fr;gap:.2rem .8rem;font-size:.84rem;margin:.3rem 0 .6rem}#adms-vip .va-g span{color:#8b93a3}#adms-vip .va-g b{color:#fff;text-align:right}
+#adms-vip .va-bar{height:8px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}#adms-vip .va-bar i{display:block;height:100%;background:linear-gradient(90deg,#1b87f5,#b78bff)}
+#adms-vip .va-pr{display:flex;gap:.6rem;align-items:flex-end;flex-wrap:wrap}#adms-vip .va-pr label{display:flex;flex-direction:column;gap:.25rem;color:#8b93a3;font-size:.76rem}
+#adms-vip .va-pr input{width:120px;padding:.55rem .6rem;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.25);color:#fff;font-size:16px}
+#adms-vip .va-ln{display:flex;justify-content:space-between;gap:.6rem;padding:.4rem 0;border-top:1px solid rgba(255,255,255,.06);font-size:.8rem;flex-wrap:wrap}#adms-vip .va-ln b{color:#fff}#adms-vip .va-ln span{color:#8b93a3}
+#adms-vip .va-v{color:#8b93a3;font-size:.84rem;padding:.4rem 0}#adms-vip .va-err{background:rgba(255,90,100,.12);border:1px solid rgba(255,90,100,.3);color:#ff9aa2;border-radius:10px;padding:.7rem}
+
 /* PC y tablet: sin barra de abajo; contenido bien centrado */
 @media (min-width:768px){
   .cs-nav{display:none!important}
@@ -9529,9 +9591,9 @@ html.ck-abierto{overflow:hidden}
 }
 
 </style>
-<script src="supabase.js?v=1f42615b64"></script>
-<script src="supabase_integration.js?v=1f42615b64"></script>
-<script src="script.js?v=1f42615b64"></script>
+<script src="supabase.js?v=f1f8419d4d"></script>
+<script src="supabase_integration.js?v=f1f8419d4d"></script>
+<script src="script.js?v=f1f8419d4d"></script>
 
 <!-- BARRA DE NAVEGACION INFERIOR -->
 
