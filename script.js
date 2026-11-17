@@ -19398,6 +19398,44 @@ function osaAccion(id, accion){
   OSA.busy = true;
   osaApi('admin_item', { item_id:id, accion:accion }).then(function(r){ OSA.busy = false; if(typeof showToast === 'function') showToast(r && r.ok ? 'Listo' : ((r && r.message) || 'Error'), 3000); osaCargar(); });
 }
+/* ═══════════ PANEL ADMIN · sesión vencida → pedir login de nuevo (en vez de un error muerto) ═══════════ */
+var _csAdmCad = false;
+function csAdminCaducada(msg){
+  if(_csAdmCad) return; _csAdmCad = true; setTimeout(function(){ _csAdmCad = false; }, 1500);
+  try{ if(typeof csAdminBorrar === 'function') csAdminBorrar(); }catch(e){}
+  try{ adminAuthed = false; }catch(e){}
+  try{ if(typeof closeFullAdmin === 'function') closeFullAdmin(); }catch(e){}
+  try{
+    if(typeof showAuthModal === 'function') showAuthModal();
+    setTimeout(function(){
+      if(typeof authTab === 'function') authTab('admin');
+      var err = document.getElementById('adm-auth-err');
+      if(err){ err.textContent = msg || 'Tu sesión del panel venció. Escribe tu correo y contraseña otra vez.'; err.style.display = 'block'; }
+    }, 120);
+  }catch(e){}
+  try{ if(typeof showToast === 'function') showToast(msg || 'Tu sesión del panel venció. Entra de nuevo.', 4500); }catch(e){}
+}
+function csAdminEnvolver(nombre){
+  var f = window[nombre]; if(typeof f !== 'function' || f._csEnv) return;
+  var w = function(){
+    return f.apply(this, arguments).then(function(r){
+      if(r && (r.code === 'sesion_invalida' || r.code === 'no_autorizado')) csAdminCaducada(r.message);
+      return r;
+    });
+  };
+  w._csEnv = true; window[nombre] = w;
+}
+['depApi','osaApi','admDb'].forEach(csAdminEnvolver);
+/* Al abrir las pestañas Depósitos / Órdenes saldo sin sesión válida: pedir login directo */
+(function(){
+  ['depAdmCargar','osaCargar'].forEach(function(n){
+    var f = window[n]; if(typeof f !== 'function') return;
+    window[n] = function(){
+      if(typeof csAdminSesionToken === 'function' && !csAdminSesionToken()){ csAdminCaducada('Entra de nuevo al panel para ver esto.'); return; }
+      return f.apply(this, arguments);
+    };
+  });
+})();
 /* ═══ STICKERS de Tarjetas y Subidas de nivel (no tienen foto): ilustraciones propias en SVG, con borde blanco tipo sticker ═══ */
 function otSticker(tipo, clave){
   var W = 'stroke="#fff" stroke-width="4" stroke-linejoin="round"', id = 'st' + clave;
