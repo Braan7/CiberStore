@@ -2143,7 +2143,7 @@ function comprarMembresia(){
       } else {
         // El proveedor NO confirmo el exito: NO cobrar. Este flujo cobra DESPUES
         // de la confirmacion (no antes), asi que si falla no se descuenta nada.
-        var errTxt = String(res.error||res.status||'sin confirmar');
+        var errTxt = String(res.error||res.status||('sin confirmar · respuesta: '+(function(){try{return JSON.stringify(res).slice(0,220);}catch(e){return '?';}})()));
         showToast('No se pudo completar: '+errTxt+'. No se te cobro.', 4000);
         _comprandoMem = false;
         if(btn){ btn.disabled = false; btn.textContent = 'Comprar'; }
@@ -8349,7 +8349,7 @@ function _ejecutarRecargaVerificada(p, ffId, nombre, verificationStatus, btn, ms
       showToast(txt, 3000);
       _comprandoDiam = false;
     } else {
-      var errTxt = String(res.error||res.status||'sin confirmar');
+      var errTxt = String(res.error||res.status||('sin confirmar · respuesta: '+(function(){try{return JSON.stringify(res).slice(0,220);}catch(e){return '?';}})()));
       var errCode = String(res.code||'');
       // La Edge Function nueva devuelve un "code" explicito del proveedor
       // (PURCHASE_FAILED, PRODUCT_INACTIVE, PROVIDER_ERROR, DUPLICATE_REQUEST,
@@ -15478,7 +15478,7 @@ function otComprar(){
         showToast(res.status === 'COMPLETED' ? '\u2705 Recarga COMPLETADA!' : '\u23F3 Recarga en proceso...', 3000);
         return;
       }
-      var errTxt = String(res.error || res.status || 'sin confirmar'), code = String(res.code || '');
+      var errTxt = String(res.error || res.status || ('sin confirmar · respuesta: ' + (function(){ try{ return JSON.stringify(res).slice(0, 220); }catch(e){ return '?'; } })())), code = String(res.code || '');
       if(code === 'DUPLICATE_REQUEST'){ verificar('PEDIDO DUPLICADO (idempotencia)', errTxt, 'DUPLICADA, VERIFICAR'); return; }
       if(code === 'PROVIDER_ERROR'){ verificar('PROVEEDOR CONTACTADO, VERIFICAR', errTxt, 'VERIFICAR'); return; }
       if(code === 'PURCHASE_FAILED' || code === 'PRODUCT_INACTIVE' || code === 'ENDPOINT_DISABLED'){
