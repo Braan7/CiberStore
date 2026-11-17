@@ -73,12 +73,23 @@ async function telegram(texto){
 // Aviso de solicitud + COMPROBANTE a tu Telegram.
 //  · Si pones TG_BOT_TOKEN + TG_CHAT_ID en Vercel: va directo por tu bot (foto o PDF con el texto).
 //  · Si no: usa la misma función de Supabase que ya te mandaba los comprobantes (bright-task), con la foto adjunta.
-async function avisoSolicitud(texto, plano, buf, tipo, usuario, metodo, monto, extra){
+let webhookListo = false;
+async function asegurarWebhook(t, host){
+  if(webhookListo || !host) return;
+  try{
+    const sec = require('./telegram.js').secreto(), url = 'https://' + host + '/api/telegram';
+    const w = await (await fetch('https://api.telegram.org/bot' + t + '/getWebhookInfo')).json();
+    if(!w.result || w.result.url !== url){ await fetch('https://api.telegram.org/bot' + t + '/setWebhook', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: J({ url, secret_token: sec, allowed_updates: ['callback_query'] }) }); }
+    webhookListo = true;
+  }catch(e){}
+}
+async function avisoSolicitud(texto, id, buf, tipo, usuario, metodo, monto, extra, host){
   const t = process.env.TG_BOT_TOKEN, ch = process.env.TG_CHAT_ID, esImg = /^image\//.test(tipo);
   const ctrl = new AbortController(), x = setTimeout(() => ctrl.abort(), 8000);
   try{
     if(t && ch){
-      const fd = new FormData(); fd.append('chat_id', ch); fd.append('caption', texto.slice(0, 1000)); fd.append('parse_mode', 'HTML');
+      await asegurarWebhook(t, host);
+      const fd = new FormData(); fd.append('chat_id', ch); if(id) fd.append('reply_markup', J({ inline_keyboard: [[{ text: '✅ Aceptar', callback_data: 'ap:' + id }, { text: '❌ Rechazar', callback_data: 'rj:' + id }]] })); fd.append('caption', texto.slice(0, 1000)); fd.append('parse_mode', 'HTML');
       fd.append(esImg ? 'photo' : 'document', new Blob([buf], { type: tipo }), 'comprobante.' + (EXT[tipo] || 'bin'));
       const r = await fetch('https://api.telegram.org/bot' + t + (esImg ? '/sendPhoto' : '/sendDocument'), { method: 'POST', signal: ctrl.signal, body: fd });
       if(r.status >= 200 && r.status < 300) return;
@@ -277,7 +288,7 @@ module.exports = async function handler(req, res){
       const row = Array.isArray(ins.json) ? ins.json[0] : null;
       await auditar(row && row.id, 'solicitar', p.username, { monto, banco: cuenta.nombre, referencia });
       await aviso(uid, 'Solicitud de recarga recibida', 'Recibimos tu solicitud de ' + dinero(monto) + ' (' + cuenta.nombre + '). Está en revisión; te avisaremos cuando se resuelva.');
-      await avisoSolicitud('💳 <b>Nueva solicitud de recarga</b>\n👤 ' + esc(p.username) + '\n💰 ' + esc(dinero(monto)) + ' · ' + esc(cuenta.nombre) + '\n🔑 Ref: ' + esc(referencia) + '\n👥 Titular: ' + esc(titular) + '\nRevísala en el panel → Depósitos', '', buf, tipo, p.username, cuenta.nombre, dinero(monto), 'Recarga de saldo | ' + cuenta.nombre + ' | Ref: ' + referencia + ' | Titular: ' + titular + ' | Revísala en el panel → Depósitos');
+      await avisoSolicitud('💳 <b>Nueva solicitud de recarga</b>\n👤 ' + esc(p.username) + '\n💰 ' + esc(dinero(monto)) + ' · ' + esc(cuenta.nombre) + '\n🔑 Ref: ' + esc(referencia) + '\n👥 Titular: ' + esc(titular) + '\n🆔 ' + (row ? row.id : ''), row ? row.id : '', buf, tipo, p.username, cuenta.nombre, dinero(monto), 'Recarga de saldo | ' + cuenta.nombre + ' | Ref: ' + referencia + ' | Titular: ' + titular + ' | Revísala en el panel → Depósitos', req.headers.host);
       return enviar(res, { ok: true, item: row ? publica(row) : null });
     }
     return enviar(res, { ok: false, code: 'accion', message: 'Acción no permitida' }, 400);
