@@ -74,6 +74,37 @@ module.exports = async function handler(req, res){
         return enviar(res, 200, { ok: true, data: j });
       } finally { clearTimeout(t); }
     }
+    // ── Códigos promocionales (se guardan con la llave de servicio: no dependen de permisos del navegador) ──
+    if(b.action === 'codigo_guardar' || b.action === 'codigo_estado' || b.action === 'codigo_borrar'){
+      const d = S.verificar(b.token);
+      if(!d) return enviar(res, 401, { ok: false, code: 'sesion_invalida', message: 'Tu sesión venció. Entra de nuevo.' });
+      const url = String((process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL) || '').replace(/\/+$/, ''), key = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY || '');
+      if(!url || !key) return enviar(res, 200, { ok: false, code: 'sin_service_key', message: 'Falta configurar SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY en Vercel' });
+      const code = String(b.code || '').trim().toUpperCase();
+      if(!/^[A-Z0-9_-]{3,30}$/.test(code)) return enviar(res, 200, { ok: false, code: 'codigo', message: 'El código debe tener de 3 a 30 letras, números, guion o guion bajo (sin espacios).' });
+      const H = { apikey: key, Authorization: 'Bearer ' + key, 'Content-Type': 'application/json' };
+      const rq = async (path, opts) => { const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), 9000); try{ const r = await fetch(url + '/rest/v1/' + path, Object.assign({ signal: ctrl.signal }, opts, { headers: Object.assign({}, H, (opts && opts.headers) || {}) })); let j = null; try{ j = await r.json(); }catch(e){} return { status: r.status, json: j }; } finally { clearTimeout(t); } };
+      const falla = r => enviar(res, 200, { ok: false, code: 'db', message: (r.json && r.json.message) ? String(r.json.message).slice(0, 200) : 'Error de la base de datos (' + r.status + ')' });
+      if(b.action === 'codigo_guardar'){
+        const disc = Math.floor(Number(b.disc)), usos = Math.floor(Number(b.max_uses));
+        if(!(disc >= 1 && disc <= 99)) return enviar(res, 200, { ok: false, code: 'valor', message: 'El descuento debe estar entre 1 y 99%.' });
+        if(!(usos >= 1 && usos <= 10000000)) return enviar(res, 200, { ok: false, code: 'valor', message: 'Los usos máximos deben ser un número mayor a 0.' });
+        const ya = await rq('codigos?code=eq.' + encodeURIComponent(code) + '&select=code&limit=1');
+        if(ya.status >= 400) return falla(ya);
+        if(Array.isArray(ya.json) && ya.json.length) return enviar(res, 200, { ok: false, code: 'existe', message: 'Ese código ya existe. Elige otro nombre o elimina el anterior.' });
+        const r = await rq('codigos', { method: 'POST', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ code, disc, max_uses: usos, uses: 0, descripcion: String(b.descripcion || '').slice(0, 120), active: true }) });
+        if(r.status >= 400) return falla(r);
+        return enviar(res, 200, { ok: true });
+      }
+      if(b.action === 'codigo_estado'){
+        const r = await rq('codigos?code=eq.' + encodeURIComponent(code), { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ active: b.active !== false }) });
+        if(r.status >= 400) return falla(r);
+        return enviar(res, 200, { ok: true });
+      }
+      const r = await rq('codigos?code=eq.' + encodeURIComponent(code), { method: 'DELETE', headers: { Prefer: 'return=minimal' } });
+      if(r.status >= 400) return falla(r);
+      return enviar(res, 200, { ok: true });
+    }
     return enviar(res, 400, { ok: false, code: 'accion' });
   }catch(e){ return enviar(res, 200, { ok: false, code: 'error', message: 'Error del servidor' }); }
 };
