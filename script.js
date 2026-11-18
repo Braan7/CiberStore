@@ -12156,10 +12156,10 @@ var BOYAAH_ENTREGA = '25 a 30 minutos';
 // Métodos de pago. Para agregar el segundo método, solo añade otro objeto
 // a este arreglo (id, nombre, filas, copiar); la interfaz lo muestra solo.
 var BOYAAH_METODOS = [
-  { id:'klar', nombre:'Klar',
-    filas:[ {k:'Titular', v:'Francisco Menesses'}, {k:'CLABE', v:'661180006413009414'} ],
-    copiar:'661180006413009414' }
-];
+  { id:'albo', nombre:'Albo',
+    filas:[ {k:'Titular', v:'Claudia Reyes'}, {k:'CLABE', v:'721180100034317033'} ],
+    copiar:'721180100034317033' }
+];   // Klar desactivada (Francisco Menesses · 661180006413009414): para reactivarla, vuelve a agregarla aquí
 
 var _boyaahCant = {};          // { b30: 2, b90: 1 }
 
@@ -12935,9 +12935,13 @@ var KLAR = {id:'klar', nombre:'Klar',
 var HEY_BANCO = {id:'heybanco', nombre:'Hey Banco',
    filas:[{k:'Titular',v:'Yamileth Z'},{k:'CLABE',v:'167078000087693211'}],
    copiar:'167078000087693211', copiarLabel:'Copiar CLABE'};
-var MANUAL_METODOS = [KLAR, HEY_BANCO];
+var ALBO = {id:'albo', nombre:'Albo',
+   filas:[{k:'Titular',v:'Claudia Reyes'},{k:'CLABE',v:'721180100034317033'}],
+   copiar:'721180100034317033', copiarLabel:'Copiar CLABE'};
+// Cuenta ACTIVA: solo Albo. Klar y Hey Banco quedan desactivadas (siguen definidas arriba: para reactivarlas, agrégalas a estas listas)
+var MANUAL_METODOS = [ALBO];
 // Métodos para RECARGAR SALDO (Billetera / botón Depositar)
-var SALDO_METODOS = [KLAR, HEY_BANCO];
+var SALDO_METODOS = [ALBO];
 
 var _manLista = [], _manOrden = null, _manMetodo = null, _manFoto = '', _manFotoNom = '', _manEnviando = false, _manUltFoco = null;
 
