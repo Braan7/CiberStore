@@ -109,7 +109,7 @@ function armarTarget(it, playerId){
     const s = esq.find(x => x.key === key) || {};
     if(/^(player_?id|uid|id)$/i.test(key)) payload[key] = String(playerId);
     else if(s.type === 'select' && Array.isArray(s.options) && s.options.length === 1) payload[key] = s.options[0].value;
-    else faltan = true;
+    else { faltan = true; (armarTarget.falta = armarTarget.falta || []).push(key); }
   });
   return faltan ? null : payload;
 }
@@ -171,7 +171,7 @@ function buscarRegalo(items, k){
   const ac = items.filter(x => { const t = sinAcentos((x.name || '') + ' ' + (x.sku || '')).replace(/(\d)[.,](?=\d{3}(?!\d))/g, '$1');
     const lat = /lat|latam|latin/i.test((x.region || '') + ' ' + (x.name || ''));
     const ty = tipo === 'caja' ? /(caja|box|crate)/.test(t) && /fragment/.test(t) && !/arma|weapon/.test(t) : /fragment/.test(t) && /(arma|weapon)/.test(t);
-    return lat && ty && tieneNum(t, n) && !tieneNum(t, n * 10); });
+    const tn = sinAcentos(x.name || '').replace(/(\d)[.,](?=\d{3}(?!\d))/g, '$1'); return lat && ty && tieneNum(tn, n) && !tieneNum(tn, n * 10); });
   return ac.length === 1 ? ac[0] : null;
 }
 function stockRegalos(items){
@@ -307,7 +307,7 @@ module.exports = async function handler(req, res){
     const u = await usuarioValido(cliente); if(!u.ok) return enviar(res, NO_HECHO(u.motivo, 'ENDPOINT_DISABLED'));
     const c = await catalogo(); if(!c.ok) return enviar(res, NO_HECHO('Proveedor no disponible', 'ENDPOINT_DISABLED'));
     const d = elegir(c.items); if(d.error) return enviar(res, NO_HECHO(d.error));
-    const tg = armarTarget(d.item, pid); if(!tg) return enviar(res, NO_HECHO('El proveedor pide datos que no se pueden completar'));
+    armarTarget.falta = []; const tg = armarTarget(d.item, pid); if(!tg) return enviar(res, NO_HECHO('El proveedor pide datos que no se pueden completar (' + armarTarget.falta.join(', ') + ')'));
 
     // ¿Ya existe este mismo pedido? (reintento tras un corte): se devuelve su estado sin gastar de nuevo ni aplicar fusibles
     const rev = await revisarPedidos(cliente, key);
@@ -324,7 +324,7 @@ module.exports = async function handler(req, res){
     if(r.status !== 201 && r.status !== 200){
       const code = (r.json && r.json.error && r.json.error.code) || '';
       if(r.status === 422 || code === 'idempotency_key_reused') return enviar(res, DUDOSO('Pedido repetido, se está verificando', 'DUPLICATE_REQUEST'));
-      if(r.status === 409 || r.status === 400 || r.status === 429 || r.status === 404) return enviar(res, NO_HECHO('El proveedor no pudo tomar la recarga (' + (code || r.status) + ')'));
+      if(r.status === 409 || r.status === 400 || r.status === 429 || r.status === 404) return enviar(res, NO_HECHO('El proveedor no pudo tomar la recarga (' + (code || r.status) + (r.json && r.json.error && r.json.error.message ? ': ' + String(r.json.error.message).slice(0, 160) : '') + ')'));
       if(r.status === 401 || r.status === 403) return enviar(res, NO_HECHO('Proveedor no disponible', 'ENDPOINT_DISABLED'));
       return enviar(res, DUDOSO('Sin respuesta clara del proveedor (' + (code || r.status) + ')'));
     }

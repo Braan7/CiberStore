@@ -92,7 +92,7 @@ const EXCLUIR_DIAM = /pase|pass|tarjeta|card|semanal|mensual|weekly|monthly|memb
 const BOOYAH = /b(?:oo|o)y(?:aa|a)h/;   // booyah, boyaah, boyah, booyaah
 function coincide(p, it){
   const t = norm((it.name || '') + ' ' + (it.sku || '')), booyah = BOOYAH.test(t);
-  if(p.grupo === 'regalos'){ const lat = /lat|latam|latin/i.test((it.region || '') + ' ' + (it.name || '')); const tipo = p.tipo === 'caja' ? /(caja|box|crate)/.test(t) && /fragment/.test(t) && !/arma|weapon/.test(t) : /fragment/.test(t) && /(arma|weapon)/.test(t); return lat && tipo && tieneNum(t, p.num) && !tieneNum(t, p.num * 10) ; }
+  if(p.grupo === 'regalos'){ const lat = /lat|latam|latin/i.test((it.region || '') + ' ' + (it.name || '')); const tipo = p.tipo === 'caja' ? /(caja|box|crate)/.test(t) && /fragment/.test(t) && !/arma|weapon/.test(t) : /fragment/.test(t) && /(arma|weapon)/.test(t); const tn = norm(it.name || ''); return lat && tipo && tieneNum(tn, p.num) && !tieneNum(tn, p.num * 10); }
   if(p.grupo === 'diamantes') return !EXCLUIR_DIAM.test(t) && (tieneNum(t, p.num) || (tieneNum(t, p.base) && /bono|bonus|%/.test(t)));
   if(p.grupo === 'tarjetas'){
     const basica = /(basic|lite|light)/.test(t);
