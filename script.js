@@ -20062,6 +20062,118 @@ setInterval(function(){
   if(!document.getElementById('rkp')){ rkpMontar(); RKP.ini = false; rkpCargar(true); return; }
   if(document.visibilityState === 'visible' && Date.now() - RKP.t > 30000) rkpCargar(false);
 }, 1000);
+/* ═══════════ MENÚ HAMBURGUESA NUEVO ═══════════
+   Reorganiza el menú lateral que ya existe (mismos botones, mismos ids y mismas funciones):
+   tarjeta de perfil con saldo, "Panel principal" destacado, secciones plegables con subtítulo y sin el bloque de marca/redes del fondo.
+   Para volver al menú anterior: SIDEBAR_NUEVO = false. */
+var SIDEBAR_NUEVO = true;
+var SBX_GRUPOS = [
+  { id:'cuenta',  t:'Cuenta',            ic:'user',   items:[ ['ni-perfil','Datos y nivel Prime'], ['ni-saldo','Agrega saldo'], ['ni-miscompras','Pedidos y seguimiento'], ['ni-transferir','Envía saldo'], ['ni-referidos','Gana invitando'], ['ni-retirar','Retira tus fondos'] ] },
+  { id:'juegos',  t:'Juegos y recargas', ic:'game',   items:[ ['ni-freefire','Diamantes y más'], ['ni-recargas','Recargas y pines'], ['ni-giftcards','Tarjetas de regalo'] ] },
+  { id:'serv',    t:'Servicios',         ic:'bolt',   items:[ ['ni-likes','Likes para tu cuenta'], ['ni-clanes','Clanes en venta'], ['ni-api',''] ] },
+  { id:'otras',   t:'Otras cosas',       ic:'grid',   items:[ ['ni-tarjetas',''], ['ni-niveles','Subidas de nivel'] ] },
+  { id:'ayuda',   t:'Comunidad y ayuda', ic:'help',   items:[ ['ni-ranking','Top compradores'], ['ni-soporte','Te ayudamos'], ['ni-faq','Preguntas frecuentes'], ['ni-creadores',''], ['ni-sobre',''] ] }
+];
+var SBX = { hecho:false, abiertos:null };
+function sbxEsc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function sbxLeer(){ try{ var v = JSON.parse(localStorage.getItem('cs_sbx') || 'null'); if(Array.isArray(v)) return v; }catch(e){} return null; }
+function sbxGuardar(){ try{ localStorage.setItem('cs_sbx', JSON.stringify(SBX.abiertos)); }catch(e){} }
+function sbxToggle(id){
+  var g = document.getElementById('sbx-g-' + id); if(!g) return;
+  var abre = !g.classList.contains('open'); g.classList.toggle('open', abre);
+  var i = SBX.abiertos.indexOf(id); if(abre && i < 0) SBX.abiertos.push(id); if(!abre && i >= 0) SBX.abiertos.splice(i, 1); sbxGuardar();
+}
+function sbxItem(el, sub){
+  // el texto suelto del botón se envuelve para poder poner el subtítulo debajo
+  var txt = '';
+  Array.prototype.slice.call(el.childNodes).forEach(function(n){ if(n.nodeType === 3){ txt += n.nodeValue; el.removeChild(n); } });
+  txt = txt.replace(/\s+/g, ' ').trim();
+  var s = document.createElement('span'); s.className = 'sbx-t'; s.innerHTML = '<b>' + txt + '</b>' + (sub ? '<small>' + sbxEsc(sub) + '</small>' : '');
+  el.appendChild(s);
+  var ch = document.createElement('span'); ch.className = 'sbx-go'; ch.innerHTML = '&rsaquo;'; el.appendChild(ch);
+}
+function sbxConstruir(){
+  var sb = document.getElementById('sidebar'), nav = sb && sb.querySelector('.sb-nav'); if(!sb || !nav || SBX.hecho) return;
+  SBX.hecho = true; sb.classList.add('sbx');
+  var get = function(id){ return document.getElementById(id); };
+  // 1) tarjeta de perfil
+  var us = get('sb-user');
+  if(us){
+    us.classList.add('sbx-user');
+    var card = document.createElement('div'); card.className = 'sbx-card'; card.id = 'sbx-card';
+    card.innerHTML = '<div class="sbx-row"><div class="sbx-av" id="sbx-av">V</div><div class="sbx-who"><b id="sbx-name">Visitante</b><small id="sbx-role">Inicia sesión para comprar</small></div></div>'
+      + '<div class="sbx-chips" id="sbx-chips"></div>';
+    us.parentNode.insertBefore(card, us.nextSibling);
+  }
+  // 2) panel principal
+  var home = get('ni-home'); if(home){ home.classList.add('sbx-main'); sbxItem(home, ''); home.querySelector('.sbx-t b').textContent = 'Panel principal'; }
+  // 3) grupos plegables
+  var act = null; nav.querySelectorAll('.nav-item.active').forEach(function(n){ act = n.id; });
+  var primero = SBX.abiertos === null;
+  if(primero) SBX.abiertos = sbxLeer() || ['juegos'];
+  var frag = document.createDocumentFragment();
+  SBX_GRUPOS.forEach(function(g){
+    var box = document.createElement('div'); box.className = 'sbx-g'; box.id = 'sbx-g-' + g.id;
+    box.innerHTML = '<button type="button" class="sbx-gh" onclick="sbxToggle(\'' + g.id + '\')"><span>' + sbxEsc(g.t) + '</span><i>&#9662;</i></button><div class="sbx-gb"></div>';
+    var body = box.querySelector('.sbx-gb');
+    g.items.forEach(function(it){ var el = get(it[0]); if(el){ sbxItem(el, it[1]); body.appendChild(el); } });
+    if(g.id === 'ayuda'){
+      // WhatsApp / TikTok / Instagram: una sola fila de iconos en vez de tres botones largos
+      var soc = document.createElement('div'); soc.className = 'sbx-soc';
+      Array.prototype.slice.call(nav.querySelectorAll('.nav-item')).forEach(function(n){
+        var oc = n.getAttribute('onclick') || ''; if(!/window\.open/.test(oc) || n.id) return;
+        var ico = n.querySelector('.nav-ico'), b = document.createElement('button'); b.type = 'button'; b.className = 'sbx-sb';
+        b.setAttribute('aria-label', n.textContent.trim()); b.setAttribute('onclick', oc); b.innerHTML = ico ? ico.innerHTML : ''; soc.appendChild(b);
+        n.parentNode.removeChild(n);
+      });
+      if(soc.children.length) body.appendChild(soc);
+    }
+    if(SBX.abiertos.indexOf(g.id) >= 0 || (act && g.items.some(function(it){ return it[0] === act; }))) box.classList.add('open');
+    frag.appendChild(box);
+  });
+  Array.prototype.slice.call(nav.children).forEach(function(n){ if(n.classList.contains('nav-item') && !n.querySelector('.sbx-t')) sbxItem(n, ''); });   // botones sueltos que agregan otros módulos
+  nav.querySelectorAll('.sb-section').forEach(function(s){ s.parentNode.removeChild(s); });
+  nav.appendChild(frag);
+  // 4) fondo: se quita el bloque de marca y el duplicado de "Mi perfil"; queda cerrar sesión y términos
+  var br = sb.querySelector('.sb-brand'); if(br) br.parentNode.removeChild(br);
+  var ft = sb.querySelector('.sb-footer');
+  if(ft){
+    ft.classList.add('sbx-foot');
+    ft.querySelectorAll('.sb-footer-item').forEach(function(f){ if(!f.classList.contains('danger')) f.parentNode.removeChild(f); });
+    var t = document.createElement('div'); t.className = 'sbx-terms'; t.innerHTML = 'T&eacute;rminos y reembolso';
+    t.setAttribute('onclick', "goPage('terminos');closeSB&&closeSB()"); ft.appendChild(t);
+  }
+  sbxActualizar();
+}
+function sbxActualizar(){
+  var card = document.getElementById('sbx-card'); if(!card) return;
+  var u = (typeof authSession !== 'undefined') ? authSession : null;
+  var av = document.getElementById('sbx-av'), nm = document.getElementById('sbx-name'), rl = document.getElementById('sbx-role'), ch = document.getElementById('sbx-chips');
+  if(!u){
+    av.innerHTML = 'V'; nm.textContent = 'Visitante'; rl.textContent = 'Inicia sesión para comprar';
+    ch.innerHTML = '<button type="button" class="sbx-login" onclick="closeSB();showAuthModal()">Iniciar sesión</button>'; return;
+  }
+  var ini = String(u.username || '?').charAt(0).toUpperCase();
+  av.innerHTML = u.avatar_url ? '<img src="' + sbxEsc(u.avatar_url) + '" alt="" onerror="this.remove()">' : ini;
+  nm.textContent = '@' + u.username; rl.textContent = u.role === 'admin' ? 'Administrador' : 'Usuario';
+  var n = (typeof PR !== 'undefined' && PR.st && PR.st.nivel) ? PR.st.nivel : 0;
+  var h = '';
+  if(n) h += '<span class="sbx-chip pr">' + (typeof primeBadge === 'function' ? primeBadge(n, 16) : '') + 'Prime ' + n + '</span>';
+  h += '<span class="sbx-chip sal">Saldo: $' + (Number(u.saldo) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' MXN</span>';
+  if(ch.getAttribute('data-h') !== h){ ch.innerHTML = h; ch.setAttribute('data-h', h); }
+}
+(function(){
+  if(!SIDEBAR_NUEVO) return;
+  var iv = setInterval(function(){ if(document.getElementById('sidebar') && document.querySelector('#sidebar .sb-nav .nav-item')){ clearInterval(iv); sbxConstruir(); } }, 200);
+  setInterval(function(){ if(SBX.hecho) sbxActualizar(); }, 1500);
+  // al abrir otra página, se despliega la sección donde está
+  var gp = window.goPage;
+  if(typeof gp === 'function') window.goPage = function(id){
+    var r = gp.apply(this, arguments);
+    try{ var ni = document.getElementById('ni-' + id), g = ni && ni.closest && ni.closest('.sbx-g'); if(g && SBX.hecho && !g.classList.contains('open')) g.classList.add('open'); }catch(e){}
+    return r;
+  };
+})();
 /* ═══════════ PANEL ADMIN · sesión vencida → pedir login de nuevo (en vez de un error muerto) ═══════════ */
 var _csAdmCad = false;
 function csAdminCaducada(msg){
