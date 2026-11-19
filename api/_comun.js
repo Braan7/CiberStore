@@ -12,12 +12,12 @@ const PROTEGER_MARGEN = !/^(0|false|off|no)$/i.test(String(process.env.CO_PROTEG
 // ── PRECIOS DE VENTA (los de tu lista): usd = dólares; precio = MXN de referencia (en la tienda los diamantes se calculan con el tipo de cambio del día). Sirven para proteger el margen: si el proveedor cobra más que "usd", ese producto se bloquea.
 // refUsd = costo de referencia del proveedor (solo diamantes), sirve para no comprar un producto equivocado.
 const PRODUCTOS = [
-  { clave:'d110',  grupo:'diamantes', titulo:'110 Diamantes',   precio:12.71,  usd:0.6799,  num:110,  base:100,  refUsd:0.6650 },
-  { clave:'d341',  grupo:'diamantes', titulo:'341 Diamantes',   precio:46.93,  usd:2.5098,  num:341,  base:310,  refUsd:1.9999 },
-  { clave:'d572',  grupo:'diamantes', titulo:'572 Diamantes',   precio:74.01,  usd:3.9576,  num:572,  base:520,  refUsd:3.3955 },
-  { clave:'d1166', grupo:'diamantes', titulo:'1,166 Diamantes', precio:130.73, usd:6.9909,  num:1166, base:1060, refUsd:6.3089 },
-  { clave:'d2398', grupo:'diamantes', titulo:'2,398 Diamantes', precio:243.49, usd:13.0209, num:2398, base:2180, refUsd:12.5203 },
-  { clave:'d6160', grupo:'diamantes', titulo:'6,160 Diamantes', precio:600.36, usd:32.1046, num:6160, base:5600, refUsd:31.8640 },
+  { clave:'d110',  grupo:'diamantes', titulo:'110 Diamantes',   precio:14.50,  usd:0.7754,  num:110,  base:100,  refUsd:0.6650 },
+  { clave:'d341',  grupo:'diamantes', titulo:'341 Diamantes',   precio:42.34,  usd:2.2642,  num:341,  base:310,  refUsd:1.9999 },
+  { clave:'d572',  grupo:'diamantes', titulo:'572 Diamantes',   precio:66.80,  usd:3.5722,  num:572,  base:520,  refUsd:3.3955 },
+  { clave:'d1166', grupo:'diamantes', titulo:'1,166 Diamantes', precio:123.40, usd:6.5989,  num:1166, base:1060, refUsd:6.3089 },
+  { clave:'d2398', grupo:'diamantes', titulo:'2,398 Diamantes', precio:240.85, usd:12.8797, num:2398, base:2180, refUsd:12.5203 },
+  { clave:'d6160', grupo:'diamantes', titulo:'6,160 Diamantes', precio:597.52, usd:31.9529, num:6160, base:5600, refUsd:31.8640 },
 
   { clave:'tsb', grupo:'tarjetas', titulo:'Tarjeta Semanal Básica', precio:6.76,   usd:0.3605, tipo:'semanal_basica' },
   { clave:'ts',  grupo:'tarjetas', titulo:'Tarjeta Semanal',        precio:28.98,  usd:1.5450, tipo:'semanal' },
@@ -32,14 +32,14 @@ const PRODUCTOS = [
   { clave:'n30', grupo:'niveles', titulo:'Paquete de subida de nivel - Nivel 30', precio:11.00, usd:0.5864, nivel:30 },
 
   // Regalos vía correo (Free Fire LATAM): solo para verlos/detectarlos en el catálogo del proveedor. Precio de venta en MXN (precio); sin protección de margen porque no se conoce la moneda del proveedor.
-  { clave:'cj1',  grupo:'regalos', titulo:'1 Caja de Fragmentos Evo',    precio:2.90,   tipo:'caja',  num:1 },
-  { clave:'cj5',  grupo:'regalos', titulo:'5 Cajas de Fragmentos Evo',   precio:14.40,  tipo:'caja',  num:5 },
-  { clave:'cj10', grupo:'regalos', titulo:'10 Cajas de Fragmentos Evo',  precio:27.90,  tipo:'caja',  num:10 },
-  { clave:'cj50', grupo:'regalos', titulo:'50 Cajas de Fragmentos Evo',  precio:140.03, tipo:'caja',  num:50 },
-  { clave:'fa10', grupo:'regalos', titulo:'10 Fragmentos de arma Evo',   precio:5.70,   tipo:'arma',  num:10 },
-  { clave:'fa50', grupo:'regalos', titulo:'50 Fragmentos de arma Evo',   precio:27.91,  tipo:'arma',  num:50 },
-  { clave:'fa100',grupo:'regalos', titulo:'100 Fragmentos de arma Evo',  precio:55.10,  tipo:'arma',  num:100 },
-  { clave:'fa500',grupo:'regalos', titulo:'500 Fragmentos de arma Evo',  precio:277.08, tipo:'arma',  num:500 }
+  { clave:'cj1',  grupo:'regalos', titulo:'1 Caja de Fragmentos Evo',    precio:2.95,   tipo:'caja',  num:1 },
+  { clave:'cj5',  grupo:'regalos', titulo:'5 Cajas de Fragmentos Evo',   precio:14.50,  tipo:'caja',  num:5 },
+  { clave:'cj10', grupo:'regalos', titulo:'10 Cajas de Fragmentos Evo',  precio:29.30,  tipo:'caja',  num:10 },
+  { clave:'cj50', grupo:'regalos', titulo:'50 Cajas de Fragmentos Evo',  precio:145.70, tipo:'caja',  num:50 },
+  { clave:'fa10', grupo:'regalos', titulo:'10 Fragmentos de arma Evo',   precio:6.40,   tipo:'arma',  num:10 },
+  { clave:'fa50', grupo:'regalos', titulo:'50 Fragmentos de arma Evo',   precio:31.70,  tipo:'arma',  num:50 },
+  { clave:'fa100',grupo:'regalos', titulo:'100 Fragmentos de arma Evo',  precio:62.80,  tipo:'arma',  num:100 },
+  { clave:'fa500',grupo:'regalos', titulo:'500 Fragmentos de arma Evo',  precio:297.40, tipo:'arma',  num:500 }
 ];
 const POR_CLAVE = {}; PRODUCTOS.forEach(p => { POR_CLAVE[p.clave] = p; });
 

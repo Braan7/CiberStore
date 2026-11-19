@@ -1,7 +1,7 @@
 /* CiberStore v1779504760 */
 /* \u2500\u2500 DATA \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 /* ══ CONTACTO OFICIAL DE SOPORTE ══ Para cambiar el WhatsApp de toda la web, edita SOLO estas 3 líneas. */
-var CS_SOPORTE = { wa:'573158844459', visible:'+57 315 8844459', mensaje:'Hola, necesito ayuda con CIBERSTORE. Mi usuario es:' };
+var CS_SOPORTE = { wa:'573503173878', visible:'+57 350 3173878', mensaje:'Hola, necesito ayuda con CIBERSTORE. Mi usuario es:' };
 var WA = CS_SOPORTE.wa;
 
 /* Fallback if supabase_integration.js not loaded yet */
@@ -7808,12 +7808,12 @@ var _diamSeleccionado = null;
 // ═══════════ RECARGAS AUTOMÁTICAS (Recargas América type=recharge) ═══════════
 // package_id = el ID de Recargas América | precio = costo USD × 20 (redondeado)
 var RECARGAS_AUTO = [
-  { package_id:351, catalog_id:5,  sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.6650, precioUSD:0.6799, precioMXN:17, precio:17,   img:'img/diam-100.png'  },
-  { package_id:348, catalog_id:6,  sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:1.9999, precioUSD:2.5098, precioMXN:55, precio:55,   img:'img/diam-310.png'  },
-  { package_id:350, catalog_id:7,  sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.3955, precioUSD:3.9576, precioMXN:85, precio:85,   img:'img/diam-520.png'  },
-  { package_id:347, catalog_id:8,  sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.3089, precioUSD:6.9909, precioMXN:150, precio:150,  img:'img/diam-1060.png' },
-  { package_id:346, catalog_id:9,  sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:12.5203, precioUSD:13.0209, precioMXN:260, precio:260,  img:'img/diam-2180.png' },
-  { package_id:349, catalog_id:10, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:31.8640, precioUSD:32.1046, precioMXN:620, precio:620,  img:'img/diam-5600.png' },
+  { package_id:351, catalog_id:5,  sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.6650, precioUSD:0.7754, precioMXN:14.50, precio:14.50,   img:'img/diam-100.png'  },
+  { package_id:348, catalog_id:6,  sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:1.9999, precioUSD:2.2642, precioMXN:42.34, precio:42.34,   img:'img/diam-310.png'  },
+  { package_id:350, catalog_id:7,  sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.3955, precioUSD:3.5722, precioMXN:66.80, precio:66.80,   img:'img/diam-520.png'  },
+  { package_id:347, catalog_id:8,  sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.3089, precioUSD:6.5989, precioMXN:123.40, precio:123.40,  img:'img/diam-1060.png' },
+  { package_id:346, catalog_id:9,  sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:12.5203, precioUSD:12.8797, precioMXN:240.85, precio:240.85,  img:'img/diam-2180.png' },
+  { package_id:349, catalog_id:10, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:31.8640, precioUSD:31.9529, precioMXN:597.52, precio:597.52,  img:'img/diam-5600.png' },
   { package_id:null, catalog_id:null, nombre:'11.200 Diamantes + 1.120 Bono', diamantes:12320, costoUSD:66.32, precio:1300, manual:true }
 ];
 // Precios de los diamantes: en USD (precioUSD) y en MXN (precioMXN) son FIJOS y salen de tu lista de precios.
@@ -17702,8 +17702,8 @@ function ntCerrar(){ NT.abierto = false; var sh = document.getElementById('nt-sh
 var RG = {
   PASE: 23, PASE_MAY: 20, PASE_MAY_MIN: 10,
   // paquetes del proveedor (precio de venta en MXN por paquete)
-  PAQ: { c1:{t:'Caja de Fragmentos Evo',p:2.90}, c5:{t:'5 Cajas de Fragmentos Evo',p:14.40}, c10:{t:'10 Cajas de Fragmentos Evo',p:27.90}, c50:{t:'50 Cajas de Fragmentos Evo',p:140.03},
-         f10:{t:'10 Fragmentos de arma Evo',p:5.70}, f50:{t:'50 Fragmentos de arma Evo',p:27.91}, f100:{t:'100 Fragmentos de arma Evo',p:55.10}, f500:{t:'500 Fragmentos de arma Evo',p:277.08} },
+  PAQ: { c1:{t:'Caja de Fragmentos Evo',p:2.95}, c5:{t:'5 Cajas de Fragmentos Evo',p:14.50}, c10:{t:'10 Cajas de Fragmentos Evo',p:29.30}, c50:{t:'50 Cajas de Fragmentos Evo',p:145.70},
+         f10:{t:'10 Fragmentos de arma Evo',p:6.40}, f50:{t:'50 Fragmentos de arma Evo',p:31.70}, f100:{t:'100 Fragmentos de arma Evo',p:62.80}, f500:{t:'500 Fragmentos de arma Evo',p:297.40} },
   cant: { pase:0, c1:0, c5:0, c10:0, c50:0, f10:0, f50:0, f100:0, f500:0 }, busy: false, idOk: null, nick: ''
 };
 function rgR2(n){ return Math.round(n * 100) / 100; }
@@ -18814,14 +18814,14 @@ function ckApi(action, extra, auth){
 var CK_RESPALDO = [
   { clave:'pase_oferta', nombre:'Pase Booyah', grupo:'pase', precio:22, mayoreo_min:null, mayoreo_precio:null, max_cant:30, img:'img/pase-booyah.png', detalle:'Oferta exclusiva · entrega por regalo (hasta 1 día)', entrega:'manual' },
   { clave:'pase', nombre:'Pase Booyah', grupo:'pase', precio:23, mayoreo_min:10, mayoreo_precio:20, max_cant:99, img:'img/pase-booyah.png', detalle:'Mayoreo: desde 10 pases a $20 c/u · entrega por regalo', entrega:'manual' },
-  { clave:'c1', nombre:'Caja de Fragmentos Evo', grupo:'caja', precio:2.90, max_cant:5, img:'img/caja-fragmentos.png', detalle:'LATAM · entrega automática', entrega:'auto' },
-  { clave:'c5', nombre:'5 Cajas de Fragmentos Evo', grupo:'caja', precio:14.40, max_cant:5, img:'img/caja-fragmentos.png', detalle:'LATAM · entrega automática', entrega:'auto' },
-  { clave:'c10', nombre:'10 Cajas de Fragmentos Evo', grupo:'caja', precio:27.90, max_cant:5, img:'img/caja-fragmentos.png', detalle:'LATAM · entrega automática', entrega:'auto' },
-  { clave:'c50', nombre:'50 Cajas de Fragmentos Evo', grupo:'caja', precio:140.03, max_cant:5, img:'img/caja-fragmentos.png', detalle:'LATAM · entrega automática', entrega:'auto' },
-  { clave:'f10', nombre:'10 Fragmentos de arma Evo', grupo:'fragmento', precio:5.70, max_cant:5, img:'img/fragmento-universal.png', detalle:'LATAM · entrega automática', entrega:'auto' },
-  { clave:'f50', nombre:'50 Fragmentos de arma Evo', grupo:'fragmento', precio:27.91, max_cant:5, img:'img/fragmento-universal.png', detalle:'LATAM · entrega automática', entrega:'auto' },
-  { clave:'f100', nombre:'100 Fragmentos de arma Evo', grupo:'fragmento', precio:55.10, max_cant:5, img:'img/fragmento-universal.png', detalle:'LATAM · entrega automática', entrega:'auto' },
-  { clave:'f500', nombre:'500 Fragmentos de arma Evo', grupo:'fragmento', precio:277.08, max_cant:5, img:'img/fragmento-universal.png', detalle:'LATAM · entrega automática', entrega:'auto' }
+  { clave:'c1', nombre:'Caja de Fragmentos Evo', grupo:'caja', precio:2.95, max_cant:5, img:'img/caja-fragmentos.png', detalle:'LATAM · entrega automática', entrega:'auto' },
+  { clave:'c5', nombre:'5 Cajas de Fragmentos Evo', grupo:'caja', precio:14.50, max_cant:5, img:'img/caja-fragmentos.png', detalle:'LATAM · entrega automática', entrega:'auto' },
+  { clave:'c10', nombre:'10 Cajas de Fragmentos Evo', grupo:'caja', precio:29.30, max_cant:5, img:'img/caja-fragmentos.png', detalle:'LATAM · entrega automática', entrega:'auto' },
+  { clave:'c50', nombre:'50 Cajas de Fragmentos Evo', grupo:'caja', precio:145.70, max_cant:5, img:'img/caja-fragmentos.png', detalle:'LATAM · entrega automática', entrega:'auto' },
+  { clave:'f10', nombre:'10 Fragmentos de arma Evo', grupo:'fragmento', precio:6.40, max_cant:5, img:'img/fragmento-universal.png', detalle:'LATAM · entrega automática', entrega:'auto' },
+  { clave:'f50', nombre:'50 Fragmentos de arma Evo', grupo:'fragmento', precio:31.70, max_cant:5, img:'img/fragmento-universal.png', detalle:'LATAM · entrega automática', entrega:'auto' },
+  { clave:'f100', nombre:'100 Fragmentos de arma Evo', grupo:'fragmento', precio:62.80, max_cant:5, img:'img/fragmento-universal.png', detalle:'LATAM · entrega automática', entrega:'auto' },
+  { clave:'f500', nombre:'500 Fragmentos de arma Evo', grupo:'fragmento', precio:297.40, max_cant:5, img:'img/fragmento-universal.png', detalle:'LATAM · entrega automática', entrega:'auto' }
 ];
 function ckCargarCatalogo(force){
   if(!force && CK.cat && !CK.offline && Date.now() - CK.catT < 60000) return Promise.resolve(CK.cat);
@@ -19409,6 +19409,8 @@ function osaAccion(id, accion){
    El rango y los precios los decide SIEMPRE el servidor (api/vip.js + vip.sql). Aquí solo se muestran y se piden.
    Si el servidor aún no tiene vip.sql, la tienda sigue con los precios y el cobro de siempre (VIP.legacy). */
 var VIP_API = '/api/vip';
+/* Interruptor: false = el sistema VIP queda oculto para los clientes (sin banner, tarjeta ni avisos). Los precios siguen saliendo del servidor; si pones true vuelve todo. */
+var VIP_ACTIVO = false;
 var VIP = { st:null, rango:'CLIENTE', precios:null, legacy:false, uid:null, buying:false, prepago:null, vistoVenc:null };
 function vipEl(id){ return document.getElementById(id); }
 /* ¿El servidor de VIP no está disponible/instalado? (falta subir api/vip.js o ejecutar vip.sql): la tienda sigue como siempre */
@@ -19452,6 +19454,7 @@ function vipCargarPrecios(){
 })();
 /* ── ESTADO (perfil) ── */
 function vipCargarEstado(){
+  if(!VIP_ACTIVO) return Promise.resolve(null);
   if(!authSession){ VIP.st = null; vipRenderPerfil(); return Promise.resolve(null); }
   return vipApi('estado', null, true).then(function(j){
     if(j && j.ok){ VIP.st = j; vipAvisos(j); }
@@ -19460,6 +19463,7 @@ function vipCargarEstado(){
   });
 }
 function vipAvisos(j){
+  if(!VIP_ACTIVO) return;
   try{
     if(j.vencio && j.vencio_el && localStorage.getItem('cs_vip_venc') !== String(j.vencio_el)){ localStorage.setItem('cs_vip_venc', String(j.vencio_el)); vipToast('💎 Tu VIP venció. Volviste a los precios Cliente. Puedes renovarlo desde tu perfil.', 7000); }
     if(j.renovacion_gratis === 'desbloqueada' && localStorage.getItem('cs_vip_ren') !== String(j.fin)){ localStorage.setItem('cs_vip_ren', String(j.fin)); vipToast('🎉 ¡Desbloqueaste 30 días de VIP gratis! Se aplican al terminar tu periodo.', 7000); }
@@ -19470,6 +19474,7 @@ function vipBadge(r){ return r === 'VIP' ? '<span class="vip-bdg vip">💎 VIP</
 function vipBanner(){
   var wrap = vipEl('diam-catalogo'); if(!wrap) return;
   var b = vipEl('vip-banner');
+  if(!VIP_ACTIVO) return;   // apagado: no se toca el banner (el id 'vip-banner' también lo usa el aviso de precio especial de la tienda)
   if(!b){ b = document.createElement('div'); b.id = 'vip-banner'; wrap.insertBefore(b, wrap.firstChild); }
   if(VIP.legacy || !VIP.precios){ b.style.display = 'none'; return; }
   b.style.display = '';
@@ -19480,7 +19485,9 @@ function vipIrPerfil(){ try{ goPage('perfil'); setTimeout(function(){ var c = vi
 /* ── Tarjeta del perfil ── */
 function vipMontarCard(){
   var pg = vipEl('page-perfil'); if(!pg) return null;
-  var c = vipEl('vip-card'); if(c) return c;
+  var c = vipEl('vip-card');
+  if(!VIP_ACTIVO){ if(c && c.parentNode) c.parentNode.removeChild(c); return null; }
+  if(c) return c;
   var tabs = pg.querySelector('.pf2-tabs'); if(!tabs) return null;
   c = document.createElement('section'); c.id = 'vip-card'; c.className = 'pf2-card vip-card'; tabs.parentNode.insertBefore(c, tabs); return c;
 }
@@ -19947,6 +19954,105 @@ function paGuardarEq(d){
   if(!(dia > 0) || !(pts >= 0)){ paToast('Revisa los números'); return; }
   primeAdmApi('admin_equiv', { diamantes:dia, puntos:pts }).then(function(r){ paToast(r && r.ok ? 'Guardado' : ((r && r.message) || 'No se pudo guardar')); if(r && r.ok && !d) paConfig(); });
 }
+/* ═══════════ RANKINGS POR PRODUCTO: PASES · FRAGMENTOS · CAJAS ═══════════
+   Va debajo del ranking de diamantes (no lo modifica). Datos: ranking_productos.sql (compras con saldo, sin reembolsos).
+   Si el SQL aún no está instalado, la sección muestra un aviso y todo lo demás sigue igual. */
+var RKP = { g:'pase', per:'historico', seq:0, ini:false, t:0 };
+var RKP_GR = [ { id:'pase', n:'Pases', u:'pases', u1:'pase' }, { id:'fragmento', n:'Fragmentos', u:'fragmentos', u1:'fragmento' }, { id:'caja', n:'Cajas', u:'cajas', u1:'caja' } ];
+var RKP_PER = [ { id:'historico', n:'Histórico' }, { id:'dia', n:'Hoy' }, { id:'semana', n:'Semana' }, { id:'mes', n:'Mes' } ];
+function rkpE(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function rkpN(n){ return (Number(n) || 0).toLocaleString('es-MX'); }
+function rkpG(){ for(var i = 0; i < RKP_GR.length; i++) if(RKP_GR[i].id === RKP.g) return RKP_GR[i]; return RKP_GR[0]; }
+function rkpMontar(){
+  var s = document.getElementById('rkp'); if(s) return s;
+  var ref = document.getElementById('rk-nuevo'); if(!ref || !ref.parentNode) return null;
+  s = document.createElement('section'); s.id = 'rkp'; s.className = 'rk-wrap rkp';
+  s.innerHTML = '<h3 class="rk-h">Rankings por producto</h3>'
+    + '<div class="rkp-cats" id="rkp-cats" role="tablist" aria-label="Producto"></div>'
+    + '<div class="rk-tabs" id="rkp-tabs" role="tablist" aria-label="Periodo"></div>'
+    + '<div class="rk-info" id="rkp-info"></div>'
+    + '<ol class="rk-list" id="rkp-list" aria-live="polite"><li class="rk-vacio">Cargando&hellip;</li></ol>'
+    + '<p class="rk-nota">Cuentan las compras con saldo de Pases, Fragmentos de arma y Cajas de fragmentos. Las unidades reembolsadas no suman. D&iacute;a, semana y mes con hora de M&eacute;xico.</p>';
+  ref.parentNode.insertBefore(s, ref.nextSibling);
+  return s;
+}
+function rkpTabs(){
+  var c = document.getElementById('rkp-cats'), t = document.getElementById('rkp-tabs'); if(!c || !t) return;
+  c.innerHTML = RKP_GR.map(function(g){ var sel = g.id === RKP.g; return '<button type="button" role="tab" class="rkp-cat' + (sel ? ' sel' : '') + '" aria-selected="' + sel + '" data-g="' + g.id + '" onclick="rkpGrupo(\'' + g.id + '\')">' + g.n + '</button>'; }).join('');
+  t.innerHTML = RKP_PER.map(function(p){ var sel = p.id === RKP.per; return '<button type="button" role="tab" class="rk-tab' + (sel ? ' sel' : '') + '" aria-selected="' + sel + '" data-p="' + p.id + '" onclick="rkpPeriodo(\'' + p.id + '\')">' + p.n + '</button>'; }).join('');
+  var i = document.getElementById('rkp-info'); if(i && typeof rkInfoTexto === 'function') i.textContent = rkInfoTexto(RKP.per);
+}
+function rkpGrupo(g){ RKP.g = g; rkpTabs(); rkpCargar(true); }
+function rkpPeriodo(p){ RKP.per = p; rkpTabs(); rkpCargar(true); }
+function rkpAv(nombre, url){ return (typeof primeAv === 'function') ? primeAv(nombre, url, 36) : '<span class="pr-av"><b>' + rkpE(String(nombre).charAt(0).toUpperCase()) + '</b></span>'; }
+function rkpPrime(k){ var ok = typeof PR !== 'undefined' && !PR.legacy && typeof primeTag === 'function'; if(!ok) return '<span></span>'; var n = PR.niv[k]; return '<span class="pr-rank" data-u="' + rkpE(k) + '">' + (n === undefined ? '' : primeTag(n, 40)) + '</span>'; }
+function rkpAvatar(k){ return (typeof PR !== 'undefined' && PR.av) ? PR.av[k] : ''; }
+function rkpRender(rows, ul, g, aviso){
+  var yo = (typeof authSession !== 'undefined' && authSession && authSession.username) ? String(authSession.username).toLowerCase() : '';
+  var usar = typeof PR !== 'undefined' && !PR.legacy && typeof primeTag === 'function';
+  var h = '<li class="pr-head" aria-hidden="true"><span data-s="Pos.">Posición</span><span>Usuario</span>' + (usar ? '<span data-s="Prime">Rango Prime</span>' : '<span></span>') + '<span>' + rkpE(g.n) + '</span></li>';
+  for(var i = 0; i < 10; i++){
+    var r = rows[i], pos = i + 1, cls = 'pr-row' + (i < 3 ? ' top' + pos : '');
+    if(r){
+      var k = String(r.username).toLowerCase(), esYo = yo && k === yo, nc = Number(r.compras) || 0;
+      h += '<li class="' + cls + (esYo ? ' yo' : '') + '"><span class="pr-pos">' + pos + '</span>'
+        + '<span class="pr-user">' + rkpAv(r.username, rkpAvatar(k)) + '<span class="pr-nm">' + rkpE(r.username) + (esYo ? ' <em>(tú)</em>' : '') + '<small>' + rkpN(nc) + ' compra' + (nc === 1 ? '' : 's') + '</small></span></span>'
+        + rkpPrime(k) + '<span class="pr-val">' + rkpN(r.cantidad) + '<small>' + g.u + '</small></span></li>';
+    } else {
+      h += '<li class="pr-row libre"><span class="pr-pos">' + pos + '</span><span class="pr-user">Lugar libre<small>¡Puede ser el tuyo!</small></span><span></span><span class="pr-val">&mdash;</span></li>';
+    }
+  }
+  if(aviso) h = '<li class="rk-vacio">' + rkpE(aviso) + '</li>';
+  ul.innerHTML = h;
+}
+function rkpNiveles(rows, ul){
+  if(typeof PR === 'undefined' || PR.legacy || typeof prNiveles !== 'function' || !rows.length) return;
+  prNiveles(rows.map(function(r){ return r.username; })).then(function(){
+    ul.querySelectorAll('.pr-rank').forEach(function(el){ var n = PR.niv[el.getAttribute('data-u')]; el.innerHTML = n === undefined ? '' : primeTag(n, 40); });
+    ul.querySelectorAll('.pr-av').forEach(function(el){ var u = PR.av[el.getAttribute('data-u')]; if(u && !el.querySelector('img')) el.insertAdjacentHTML('beforeend', '<img src="' + rkpE(u) + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">'); });
+  });
+}
+/* Tu posición, fija hasta abajo aunque no estés entre los 10 primeros */
+function rkpFilaPropia(rows, ul, g, seq){
+  if(typeof authSession === 'undefined' || !authSession || !ul) return;
+  var me = String(authSession.username), k = me.toLowerCase(), li = document.createElement('li'); li.className = 'pr-row pr-mine'; li.id = 'rkp-mine';
+  var pintar = function(pos, cant, compras, total){
+    var n = (typeof PR !== 'undefined' && PR.niv) ? PR.niv[k] : undefined, usar = typeof PR !== 'undefined' && !PR.legacy && typeof primeTag === 'function';
+    li.innerHTML = '<span class="pr-pos">' + (pos ? (pos > 999 ? '999+' : '#' + pos) : '&mdash;') + '</span>'
+      + '<span class="pr-user">' + rkpAv(me, authSession.avatar_url || rkpAvatar(k)) + '<span class="pr-nm">' + rkpE(me) + ' <em>(tú)</em><small>'
+      + (pos ? 'Tu posición' + (total ? ' de ' + rkpN(total) : '') + ' · ' + rkpN(compras) + ' compra' + (Number(compras) === 1 ? '' : 's') : 'Aún sin compras en este periodo') + '</small></span></span>'
+      + (usar ? '<span class="pr-rank">' + (n === undefined ? '' : primeTag(n, 40)) + '</span>' : '<span></span>')
+      + '<span class="pr-val">' + rkpN(cant) + '<small>' + g.u + '</small></span>';
+  };
+  var i = -1; rows.forEach(function(r, j){ if(String(r.username).toLowerCase() === k) i = j; });
+  if(i >= 0){ pintar(i + 1, rows[i].cantidad, rows[i].compras, 0); ul.appendChild(li); return; }
+  pintar(0, 0, 0, 0); li.querySelector('.pr-user small').textContent = 'Calculando tu posición…'; ul.appendChild(li);
+  if(typeof sb === 'undefined' || !sb.rpc) { pintar(0, 0, 0, 0); return; }
+  sb.rpc('ranking_productos_mi_posicion', { p_username: me, p_grupo: g.id, p_periodo: RKP.per }).then(function(r){
+    if(seq !== RKP.seq || !document.body.contains(li)) return;
+    var x = Array.isArray(r) ? r[0] : null;
+    if(x) pintar(Number(x.posicion), x.cantidad, x.compras, x.participantes); else pintar(0, 0, 0, 0);
+    if(typeof prNiveles === 'function' && typeof PR !== 'undefined' && !PR.legacy) prNiveles([me]).then(function(){ var n = PR.niv[k], el = li.querySelector('.pr-rank'); if(el && n !== undefined) el.innerHTML = primeTag(n, 40); });
+  }).catch(function(){ pintar(0, 0, 0, 0); });
+}
+function rkpCargar(forzar){
+  var s = rkpMontar(); if(!s) return;
+  var ul = document.getElementById('rkp-list'); if(!ul) return;
+  if(!RKP.ini){ RKP.ini = true; rkpTabs(); }
+  var g = rkpG(), seq = ++RKP.seq, per = RKP.per;
+  RKP.t = Date.now();
+  if(typeof sb === 'undefined' || !sb.rpc){ rkpRender([], ul, g, 'Ranking no disponible por ahora.'); return; }
+  sb.rpc('ranking_productos', { p_grupo: g.id, p_periodo: per, p_limite: 10 }).then(function(r){
+    if(seq !== RKP.seq) return;
+    if(!Array.isArray(r)){ rkpRender([], ul, g, 'Este ranking se activará muy pronto.'); return; }
+    rkpRender(r, ul, g); rkpNiveles(r, ul); rkpFilaPropia(r, ul, g, seq);
+  }).catch(function(){ if(seq === RKP.seq) rkpRender([], ul, g, 'No se pudo cargar. Intenta de nuevo en un momento.'); });
+}
+setInterval(function(){
+  var p = document.getElementById('page-ranking'); if(!p || !p.classList.contains('active')) return;
+  if(!document.getElementById('rkp')){ rkpMontar(); RKP.ini = false; rkpCargar(true); return; }
+  if(document.visibilityState === 'visible' && Date.now() - RKP.t > 30000) rkpCargar(false);
+}, 1000);
 /* ═══════════ PANEL ADMIN · sesión vencida → pedir login de nuevo (en vez de un error muerto) ═══════════ */
 var _csAdmCad = false;
 function csAdminCaducada(msg){
