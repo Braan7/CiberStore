@@ -12155,7 +12155,7 @@ var BOYAAH_ENTREGA = '25 a 30 minutos';
 
 // Métodos de pago. Para agregar el segundo método, solo añade otro objeto
 // a este arreglo (id, nombre, filas, copiar); la interfaz lo muestra solo.
-var BOYAAH_METODOS = [];   // SIN banca por ahora. Albo (Claudia Reyes · CLABE 721180100034317033): para reactivarla, agrégala aquí con {id:'albo', nombre:'Albo', filas:[{k:'Titular',v:'Claudia Reyes'},{k:'CLABE',v:'721180100034317033'}], copiar:'721180100034317033'}   // Klar desactivada (Francisco Menesses · 661180006413009414): para reactivarla, vuelve a agregarla aquí
+var BOYAAH_METODOS = [{id:'heybanco', nombre:'Hey Banco', filas:[{k:'Titular',v:'Jesús B'},{k:'CLABE',v:'167420000088370356'}], copiar:'167420000088370356'}];   // Cuenta activa: Hey Banco. (antes sin banca.) Albo (Claudia Reyes · CLABE 721180100034317033): para reactivarla, agrégala aquí con {id:'albo', nombre:'Albo', filas:[{k:'Titular',v:'Claudia Reyes'},{k:'CLABE',v:'721180100034317033'}], copiar:'721180100034317033'}   // Klar desactivada (Francisco Menesses · 661180006413009414): para reactivarla, vuelve a agregarla aquí
 
 var _boyaahCant = {};          // { b30: 2, b90: 1 }
 
@@ -12930,15 +12930,15 @@ var KLAR = {id:'klar', nombre:'Klar',
    filas:[{k:'Titular',v:'Francisco Menesses'},{k:'CLABE',v:'661180006413009414'}],
    copiar:'661180006413009414', copiarLabel:'Copiar CLABE'};
 var HEY_BANCO = {id:'heybanco', nombre:'Hey Banco',
-   filas:[{k:'Titular',v:'Yamileth Z'},{k:'CLABE',v:'167078000087693211'}],
-   copiar:'167078000087693211', copiarLabel:'Copiar CLABE'};
+   filas:[{k:'Titular',v:'Jesús B'},{k:'CLABE',v:'167420000088370356'}],
+   copiar:'167420000088370356', copiarLabel:'Copiar CLABE'};
 var ALBO = {id:'albo', nombre:'Albo',
    filas:[{k:'Titular',v:'Claudia Reyes'},{k:'CLABE',v:'721180100034317033'}],
    copiar:'721180100034317033', copiarLabel:'Copiar CLABE'};
 // Cuenta ACTIVA: solo Albo. Klar y Hey Banco quedan desactivadas (siguen definidas arriba: para reactivarlas, agrégalas a estas listas)
-var MANUAL_METODOS = [];   // SIN banca por ahora (Albo queda definida arriba: para reactivarla pon [ALBO])
+var MANUAL_METODOS = [HEY_BANCO];   // Cuenta activa: Hey Banco (Jesús B). Para quitarla deja [] y se muestra 'Se ocupa una banca'
 // Métodos para RECARGAR SALDO (Billetera / botón Depositar)
-var SALDO_METODOS = [];
+var SALDO_METODOS = [HEY_BANCO];
 
 var _manLista = [], _manOrden = null, _manMetodo = null, _manFoto = '', _manFotoNom = '', _manEnviando = false, _manUltFoco = null;
 
