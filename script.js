@@ -19006,7 +19006,7 @@ function ckRenderOk(){
   h += '<div class="ck-uni">' + o.items.map(function(i){ var f = CK_FASE[i.fase] || CK_FASE.recibido;
     return '<div class="ck-u">' + ckImg(i.img, i.nombre) + '<div><b>' + ckEsc(i.nombre) + '</b><small>ID ' + ckEsc(i.ff_id) + '</small></div><span class="ck-chip ' + f[1] + '">' + f[0] + '</span></div>'; }).join('') + '</div>';
   var rem = o.items.filter(function(i){ return i.fase === 'reembolsado'; }).length, ver = o.items.filter(function(i){ return i.fase === 'verificar'; }).length;
-  if(rem) h += '<div class="ck-note" style="margin-top:.8rem;color:#f5b43a">↩ ' + rem + ' unidad(es) no se pudieron hacer y se devolvió su importe a tu saldo.</div>';
+  if(rem) h += '<div class="ck-note" style="margin-top:.8rem;color:#f5b43a">↩ ' + rem + ' unidad(es) no se pudieron hacer y se devolvió su importe a tu saldo.' + (function(){ var m = o.items.filter(function(i){ return i.fase === 'reembolsado' && i.error; }).map(function(i){ return i.error; })[0]; return m ? '<br><small style="opacity:.8">Motivo: ' + ckEsc(String(m).slice(0, 220)) + '</small>' : ''; })() + '</div>';
   if(ver) h += '<div class="ck-note" style="margin-top:.5rem;color:#f5b43a">⏳ ' + ver + ' unidad(es) están en verificación con el equipo. No se cobra doble: si no llegan, se te reembolsan.</div>';
   if(o.por_entregar > 0) h += '<div class="ck-note" style="margin-top:.8rem">Entregando tu pedido automáticamente… puedes cerrar esta ventana; sigue en Mis Compras.</div>';
   h += '<button type="button" class="ck-buy" onclick="ckCerrar();goPage(\'miscompras\')">Ver en Mis Compras</button><button type="button" class="ck-btn2" onclick="ckCerrar()">Seguir comprando</button></div></div></div>';
