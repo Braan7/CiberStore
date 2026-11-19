@@ -1,7 +1,7 @@
 /* CiberStore v1779504760 */
 /* \u2500\u2500 DATA \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 /* ══ CONTACTO OFICIAL DE SOPORTE ══ Para cambiar el WhatsApp de toda la web, edita SOLO estas 3 líneas. */
-var CS_SOPORTE = { wa:'573503173878', visible:'+57 350 3173878', mensaje:'Hola, necesito ayuda con CIBERSTORE. Mi usuario es:' };
+var CS_SOPORTE = { wa:'573158844459', visible:'+57 315 884 4459', mensaje:'Hola, necesito ayuda con CIBERSTORE. Mi usuario es:' };
 var WA = CS_SOPORTE.wa;
 
 /* Fallback if supabase_integration.js not loaded yet */
@@ -12155,11 +12155,7 @@ var BOYAAH_ENTREGA = '25 a 30 minutos';
 
 // Métodos de pago. Para agregar el segundo método, solo añade otro objeto
 // a este arreglo (id, nombre, filas, copiar); la interfaz lo muestra solo.
-var BOYAAH_METODOS = [
-  { id:'albo', nombre:'Albo',
-    filas:[ {k:'Titular', v:'Claudia Reyes'}, {k:'CLABE', v:'721180100034317033'} ],
-    copiar:'721180100034317033' }
-];   // Klar desactivada (Francisco Menesses · 661180006413009414): para reactivarla, vuelve a agregarla aquí
+var BOYAAH_METODOS = [];   // SIN banca por ahora. Albo (Claudia Reyes · CLABE 721180100034317033): para reactivarla, agrégala aquí con {id:'albo', nombre:'Albo', filas:[{k:'Titular',v:'Claudia Reyes'},{k:'CLABE',v:'721180100034317033'}], copiar:'721180100034317033'}   // Klar desactivada (Francisco Menesses · 661180006413009414): para reactivarla, vuelve a agregarla aquí
 
 var _boyaahCant = {};          // { b30: 2, b90: 1 }
 
@@ -12169,7 +12165,7 @@ var BOYAAH_MED_PRECIO  = 655;   // MXN por paquete
 var BOYAAH_MED_MAX     = 999;
 var _boyaahMedPaq = 1;          // valor del selector [-] n [+]
 var _boyaahMedEnPedido = false; // si los paquetes ya forman parte del pedido
-var _boyaahMetodo = BOYAAH_METODOS[0].id;
+var _boyaahMetodo = BOYAAH_METODOS.length ? BOYAAH_METODOS[0].id : '';
 var _boyaahFotoB64 = '';
 var _boyaahUltimoWA = '';
 var _boyaahEnviando = false;
@@ -12295,6 +12291,7 @@ function boyaahRenderResumen(){
 
 function boyaahRenderMetodos(){
   var el = document.getElementById('boyaah-metodos'); if(!el) return;
+  if(!BOYAAH_METODOS.length){ el.innerHTML = '<div class="boyaah-pay" style="cursor:default"><div class="boyaah-pay-h">&#128179; Método de pago</div><div class="boyaah-pay-row" style="display:block">'+_boyaahEsc('Se ocupa una banca. Si alguien tiene una, contacte al +57 315 884 4459.')+'</div></div>'; return; }
   el.innerHTML = BOYAAH_METODOS.map(function(m){
     var sel = m.id === _boyaahMetodo;
     return '<div class="boyaah-pay'+(sel?' sel':'')+'" role="radio" aria-checked="'+sel+'" tabindex="0" onclick="boyaahElegirMetodo(\''+m.id+'\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();boyaahElegirMetodo(\''+m.id+'\');}">'
@@ -12370,7 +12367,7 @@ function boyaahEnviar(){
   if(wa.replace(/\D/g,'').length < 10){ _boyaahToast('Escribe un WhatsApp válido (10 dígitos o más)'); focus('boyaah-wa'); return; }
   if(!_boyaahFotoB64){ _boyaahToast('\u26A0 Sube tu comprobante de pago'); focus('boyaah-up'); return; }
 
-  var metodo = _boyaahMetodoSel();
+  var metodo = _boyaahMetodoSel(); if(!metodo){ _boyaahToast('Se ocupa una banca. Si alguien tiene una, contacte al +57 315 884 4459.', 5000); return; }
   var total = _boyaahTotal();
   var folio = 'BY-' + Date.now().toString(36).toUpperCase().slice(-6);
 
@@ -12663,7 +12660,7 @@ var PAGOS_DESACTIVADOS = true;
 
 (function(){
   if(!PAGOS_DESACTIVADOS) return;
-  var MSG = 'Buscamos banca, ya que la nuestra está llena.';
+  var MSG = 'Se ocupa una banca. Si alguien tiene una, contacte al +57 315 884 4459.';
 
   // Estilos
   var st = document.createElement('style'); st.id = 'pagos-off-css';
@@ -12939,9 +12936,9 @@ var ALBO = {id:'albo', nombre:'Albo',
    filas:[{k:'Titular',v:'Claudia Reyes'},{k:'CLABE',v:'721180100034317033'}],
    copiar:'721180100034317033', copiarLabel:'Copiar CLABE'};
 // Cuenta ACTIVA: solo Albo. Klar y Hey Banco quedan desactivadas (siguen definidas arriba: para reactivarlas, agrégalas a estas listas)
-var MANUAL_METODOS = [ALBO];
+var MANUAL_METODOS = [];   // SIN banca por ahora (Albo queda definida arriba: para reactivarla pon [ALBO])
 // Métodos para RECARGAR SALDO (Billetera / botón Depositar)
-var SALDO_METODOS = [ALBO];
+var SALDO_METODOS = [];
 
 var _manLista = [], _manOrden = null, _manMetodo = null, _manFoto = '', _manFotoNom = '', _manEnviando = false, _manUltFoco = null;
 
@@ -13118,7 +13115,7 @@ function manualMontoCambia(){ var i = document.getElementById('man-monto'), t = 
 function manualPintarMetodos(){
   var el = document.getElementById('man-metodos'), btn = document.getElementById('man-send'); if(!el) return;
   if(!_manLista.length){
-    el.innerHTML = '<div class="mn-warn"><span style="font-size:1.4rem">&#128179;</span><div><b>Método de pago</b>Buscamos banca, ya que la nuestra está llena.</div></div>';
+    el.innerHTML = '<div class="mn-warn"><span style="font-size:1.4rem">&#128179;</span><div><b>Método de pago</b>Se ocupa una banca. Si alguien tiene una, contacte al +57 315 884 4459.</div></div>';
     if(btn) btn.disabled = true; return;
   }
   if(btn) btn.disabled = false;
@@ -13398,7 +13395,7 @@ function crtRender(){
 
   h += '<div class="mn-sec">Método de pago</div>';
   if(!MANUAL_METODOS.length){
-    h += '<div class="mn-warn"><span style="font-size:1.4rem">&#128179;</span><div><b>Método de pago</b>Buscamos banca, ya que la nuestra está llena.</div></div>';
+    h += '<div class="mn-warn"><span style="font-size:1.4rem">&#128179;</span><div><b>Método de pago</b>Se ocupa una banca. Si alguien tiene una, contacte al +57 315 884 4459.</div></div>';
   } else {
     h += MANUAL_METODOS.map(function(m){
       var sel = m.id === _crtMetodo, id = _manEsc(m.id);
@@ -13815,7 +13812,7 @@ function ofxRender(){
   h += '<div class="mn-sum" style="margin-top:1rem"><div class="mn-row"><span>Pases</span><b>' + _ofxQ + '</b></div><div class="mn-row tot"><span>Total a pagar</span><b>' + _manEsc(_manMXN(total)) + '</b></div></div>';
   h += '<div class="mn-sec">Método de pago</div>';
   if(!MANUAL_METODOS.length){
-    h += '<div class="mn-warn"><span style="font-size:1.4rem">&#128179;</span><div><b>Método de pago</b>Buscamos banca, ya que la nuestra está llena.</div></div>';
+    h += '<div class="mn-warn"><span style="font-size:1.4rem">&#128179;</span><div><b>Método de pago</b>Se ocupa una banca. Si alguien tiene una, contacte al +57 315 884 4459.</div></div>';
   } else {
     h += MANUAL_METODOS.map(function(mt){
       var sel = mt.id === _ofxMetodo, id = _manEsc(mt.id);
@@ -14145,7 +14142,7 @@ function gcRender(){
   h += '<div class="mn-sum" style="margin-top:1rem"><div class="mn-row"><span>Cantidad</span><b>' + _gcQ + '</b></div><div class="mn-row tot"><span>Total a pagar</span><b>' + _manEsc(_manMXN(total)) + '</b></div></div>';
   h += '<div class="mn-sec">Método de pago</div>';
   if(!MANUAL_METODOS.length){
-    h += '<div class="mn-warn"><span style="font-size:1.4rem">&#128179;</span><div><b>Método de pago</b>Buscamos banca, ya que la nuestra está llena.</div></div>';
+    h += '<div class="mn-warn"><span style="font-size:1.4rem">&#128179;</span><div><b>Método de pago</b>Se ocupa una banca. Si alguien tiene una, contacte al +57 315 884 4459.</div></div>';
   } else {
     h += MANUAL_METODOS.map(function(mt){
       var sel = mt.id === _gcMetodo, id = _manEsc(mt.id);
@@ -18449,7 +18446,7 @@ function bwCargarCuentas(){
     if(!r||!r.ok){ box.innerHTML='<div class="bw-vacio">'+bwEsc((r&&r.message)||'No se pudieron cargar las cuentas')+'</div>'; return; }
     BW.cuentas=r.cuentas||[]; BW.min=r.min||200; BW.max=r.max||50000; BW.cargoCuentas=true;
     var h=bwEl('bw-min'); if(h) h.textContent='Monto mínimo '+bwMXN(BW.min)+'.';
-    if(!BW.cuentas.length){ box.innerHTML='<div class="bw-vacio">Buscamos banca, ya que la nuestra está llena. Vuelve a intentar más tarde.</div>'; }
+    if(!BW.cuentas.length){ box.innerHTML='<div class="bw-vacio">Se ocupa una banca. Si alguien tiene una, contacte al +57 315 884 4459.</div>'; }
     else box.innerHTML=BW.cuentas.map(function(c,i){
       return '<div class="bw-ac"><div class="bw-ac-t"><span class="bw-logo">'+bwEsc(String(c.nombre).charAt(0).toUpperCase())+'</span><b>'+bwEsc(c.nombre)+'</b>'
         +'<button type="button" class="bw-cp" onclick="bwCopiar('+i+',this)"><i data-i="copy"></i><span>Copiar</span></button></div>'
