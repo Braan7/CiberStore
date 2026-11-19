@@ -18404,7 +18404,7 @@ function bwApi(action,extra){
     if(!h) return {ok:false,message:'Vuelve a iniciar sesión'};
     var body={action:action,username:usr,hash:h}; for(var k in (extra||{})) body[k]=extra[k];
     return fetch(BW_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
-      .then(function(r){ return r.json().catch(function(){ return {ok:false,message:'Respuesta no válida del servidor'}; }); })
+      .then(function(r){ var st=r.status; return r.text().then(function(t){ var j=null; try{ j=JSON.parse(t); }catch(e){} if(j&&typeof j==='object'){ if(!j.ok&&!j.message) j.message='Respuesta inesperada ('+st+'): '+String(t).slice(0,140); return j; } return {ok:false,message:'Respuesta no válida ('+st+'): '+String(t).replace(/\s+/g,' ').slice(0,140)}; }); })
       .catch(function(){ return {ok:false,message:'Sin conexión con el servidor'}; });
   });
 }
