@@ -1,296 +1,351 @@
-// ═════════════════════════════════════════════════════════════════
-// api/recargas.js · Billetera / Recarga de saldo de CiberStore (todo se valida en el servidor).
+// ═══════════════════════════════════════════════════════════════════════════
+// api/recarga.js · Recargas AUTOMÁTICAS con Central One (para tus clientes): diamantes, tarjetas y paquetes de nivel
 //
-// CLIENTE (cada llamada lleva {username, hash}, igual que api/perfil.js; solo toca SU cuenta):
-//   cuentas                     → cuentas bancarias activas (Klar, Hey Banco… las que configure el panel)
-//   solicitar {cuenta_id, monto, titular, referencia, fecha, comprobante(data URL), idem}
-//   mis                         → mis solicitudes (estado, banco, monto, fechas, motivo de rechazo)
-//   comprobante_url {id}        → enlace temporal (5 min) a MI comprobante
-// ADMINISTRADOR (llevan {token} de la sesión del panel; nunca el saldo viene del navegador):
-//   admin_lista {estado}        → solicitudes con datos del usuario        admin_pendientes → contador
-//   admin_comprobante {id}      → enlace temporal al comprobante           admin_resolver {id, accion:'aprobar'|'rechazar', motivo}
-//   admin_cuentas / admin_cuenta_guardar / admin_cuenta_borrar             admin_auditoria
+// Habla el mismo "idioma" que tu antiguo rapid-handler (acciones validar y comprar), así tu tienda
+// sigue funcionando igual. La llave del proveedor vive SOLO aquí (variable CO_API_KEY de Vercel).
 //
-// El saldo SOLO lo mueve la función SQL recarga_resolver (transacción + bloqueo de fila): imposible acreditar dos veces.
-// Variables de entorno: SUPABASE_URL · SUPABASE_SERVICE_ROLE_KEY (las mismas del chat/perfil) · ADMIN_* (las del panel)
-//   Opcionales: RECARGA_MIN_MXN (por defecto 200) · RECARGA_MAX_MXN (por defecto 50000) · TG_BOT_TOKEN + TG_CHAT_ID (aviso a tu Telegram)
-// Base de datos: ejecutar recargas_saldo.sql una vez.
-// ═════════════════════════════════════════════════════════════════
+// ⚠ Este endpoint lo puede llamar cualquiera que conozca la dirección (igual que rapid-handler), así
+// que lleva FUSIBLES que limitan lo máximo que se puede perder si alguien lo abusa:
+//   · tope de gasto por día en US$ (CO_LIMITE_DIA_USD, por defecto 40), leído del propio proveedor. Pon 0 = sin tope
+//   · tope de recargas por usuario por hora (CO_LIMITE_USUARIO_HORA, por defecto 8). Pon 0 = sin tope
+//   · solo los 6 paquetes de diamantes, y solo si el precio del proveedor es el esperado
+//   · interruptor de emergencia: CO_AUTO_ACTIVO=0 apaga todo al instante
+//   · versión: solo compran las páginas actuales (mandan su huella X-CS-Build); una página vieja es rechazada y se le devuelve el saldo.
+//     CO_EXIGIR_VERSION=0 desactiva esta revisión.
+//
+// Variables de entorno en Vercel:
+//   CO_API_KEY             (la misma de api/co.js)
+//   CO_LIMITE_DIA_USD      tope diario de gasto en US$ (por defecto 40)
+//   CO_LIMITE_USUARIO_HORA recargas por usuario por hora (por defecto 8)
+//   CO_AUTO_ACTIVO         pon 0 para apagar las recargas automáticas
+//   CO_SALDO_MINIMO_USD    protección de saldo: si el proveedor baja a este saldo (por defecto US$ 5) se pausan las compras y te avisa por Telegram (ver api/_alerta.js)
+//   SUPABASE_URL y SUPABASE_ANON_KEY   (recomendado) comprueba que el usuario exista y no esté baneado
+//   (opcionales) CO_MAP, CO_TOLERANCIA, CO_REGION_REGEX, CO_BASE → igual que en api/co.js
+// ═══════════════════════════════════════════════════════════════════════════
 'use strict';
-const crypto = require('crypto');
-const S = require('./_sesion.js');
 
-const BUCKET = 'comprobantes';
-const MAX_BYTES = 3200 * 1024;     // Vercel admite ~4.5 MB por petición: las fotos se reducen en el navegador y el PDF puede pesar hasta ~3 MB
-const EXT = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'application/pdf': 'pdf' };
-const MIN = () => { const n = Number(process.env.RECARGA_MIN_MXN); return isFinite(n) && n > 0 ? n : 200; };
-const MAX = () => { const n = Number(process.env.RECARGA_MAX_MXN); return isFinite(n) && n > 0 ? n : 50000; };
+const A = require('./_alerta.js');
+const BASE = (process.env.CO_BASE || 'https://portal.centraloneglobal.com/api/v1').replace(/\/+$/, '');
+const TOL = Number(process.env.CO_TOLERANCIA || 0.35);
+const LIM_DIA = Number(process.env.CO_LIMITE_DIA_USD || 40);
+const LIM_USER_H = Number(process.env.CO_LIMITE_USUARIO_HORA || 8);
+const ESPERA_MS = Number(process.env.CO_ESPERA_MS || 7000);   // cuánto esperar a que el pedido termine antes de decir "en proceso"
+const POLL_MS = Number(process.env.CO_POLL_MS || 1500);
 
-function enviar(res, body, status){ res.statusCode = status || 200; res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.setHeader('Cache-Control', 'no-store'); res.end(JSON.stringify(body)); }
-function ipDe(req){ return String((req.headers['x-forwarded-for'] || (req.socket && req.socket.remoteAddress) || 'x')).split(',')[0].trim(); }
-const cfg = () => ({ url: String((process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL) || '').replace(/\/+$/, ''), key: (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SECRET_KEY || process.env.SERVICE_ROLE_KEY) });
-const sha = s => crypto.createHash('sha256').update(String(s)).digest();
-const iguales = (a, b) => crypto.timingSafeEqual(sha(a), sha(b));
-const J = o => JSON.stringify(o);
+const PAQUETES = {
+  110:  { base: 100,  ref: 0.6550 },
+  341:  { base: 310,  ref: 1.9649 },
+  572:  { base: 520,  ref: 3.3222 },
+  1166: { base: 1060, ref: 6.1709 },
+  2398: { base: 2180, ref: 12.2471 },
+  6160: { base: 5600, ref: 31.1701 }
+};
+// package_id de tu tienda (RECARGAS_AUTO) → total de diamantes
+const PKG = { 351: 110, 348: 341, 350: 572, 347: 1166, 346: 2398, 349: 6160 };
+const EXCLUIR = /pase|pass|tarjeta|card|semanal|mensual|weekly|monthly|membres|member|nivel|level|upgrade|subida/i;
 
-const cubos = new Map();
-function limite(clave, max, ms){
-  const t = Date.now(), l = (cubos.get(clave) || []).filter(x => t - x < ms);
-  if(l.length >= max){ cubos.set(clave, l); return true; }
-  l.push(t); cubos.set(clave, l); if(cubos.size > 5000) cubos.clear(); return false;
+function enviar(res, body){
+  res.statusCode = 200;
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-store');
+  res.end(JSON.stringify(body));
 }
-async function db(path, opts){
-  const c = cfg(), ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), 15000);
+const dormir = ms => new Promise(r => setTimeout(r, ms));
+
+// ── Límites por IP (en memoria; frenan abuso ligero) ──
+const hits = new Map();
+function ipDe(req){ return String((req.headers['x-forwarded-for'] || (req.socket && req.socket.remoteAddress) || 'x')).split(',')[0].trim(); }
+function limite(ip, clave, max){ const k = clave + ip, t = Date.now(), l = (hits.get(k) || []).filter(x => t - x < 60000); l.push(t); hits.set(k, l); return l.length > max; }
+
+async function co(path, opts){
+  opts = opts || {};
+  const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), 9000);
   try{
-    const r = await fetch(c.url + path, Object.assign({ signal: ctrl.signal }, opts, { headers: Object.assign({ apikey: c.key, Authorization: 'Bearer ' + c.key }, (opts && opts.headers) || {}) }));
+    const r = await fetch(BASE + path, {
+      method: opts.method || 'GET',
+      headers: Object.assign({ Authorization: 'Bearer ' + process.env.CO_API_KEY, Accept: 'application/json' }, opts.body ? { 'Content-Type': 'application/json' } : {}, opts.headers || {}),
+      body: opts.body ? JSON.stringify(opts.body) : undefined, signal: ctrl.signal
+    });
     let j = null; try{ j = await r.json(); }catch(e){}
-    return { status: r.status, json: j };
+    return { status: r.status, json: j, retry: r.headers.get('retry-after') };
   } finally { clearTimeout(t); }
 }
-const rest = (path, opts) => db('/rest/v1/' + path, Object.assign({}, opts, { headers: Object.assign({ 'Content-Type': 'application/json' }, (opts && opts.headers) || {}) }));
-const dinero = n => '$' + Number(n).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' MXN';
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-// Formato REAL del archivo por sus primeros bytes (no se confía en lo que diga el navegador)
-function formatoReal(buf){
-  if(buf.length > 3 && buf[0] === 0xFF && buf[1] === 0xD8 && buf[2] === 0xFF) return 'image/jpeg';
-  if(buf.length > 8 && buf[0] === 0x89 && buf.slice(1, 4).toString() === 'PNG') return 'image/png';
-  if(buf.length > 12 && buf.slice(0, 4).toString() === 'RIFF' && buf.slice(8, 12).toString() === 'WEBP') return 'image/webp';
-  if(buf.length > 5 && buf.slice(0, 5).toString() === '%PDF-') return 'application/pdf';
-  return null;
+// ── Catálogo y reconocimiento de producto (igual que api/co.js) ──
+let cache = { t: 0, items: null };
+async function catalogo(){
+  if(cache.items && Date.now() - cache.t < 60000) return { ok: true, items: cache.items };
+  const r = await co('/catalog');
+  if(r.status !== 200 || !r.json || !Array.isArray(r.json.items)) return { ok: false, http: r.status, code: (r.json && r.json.error && r.json.error.code) || ('http_' + r.status) };
+  cache = { t: Date.now(), items: r.json.items }; return { ok: true, items: cache.items };
 }
-async function aviso(userId, titulo, cuerpo){
-  try{ await rest('notificaciones_cuenta', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: J({ user_id: String(userId), tipo: 'recarga', titulo, cuerpo }) }); }catch(e){}
+function norm(txt){ return String(txt || '').replace(/(\d)[.,](?=\d{3}(?!\d))/g, '$1'); }
+function tieneNum(txt, n){ return new RegExp('(?<![0-9])' + n + '(?![0-9])').test(norm(txt)); }
+function esFFLatam(it){
+  if(!/free\s*fire/i.test((it.product_family_name || '') + ' ' + (it.name || ''))) return false;
+  const rx = process.env.CO_REGION_REGEX ? new RegExp(process.env.CO_REGION_REGEX, 'i') : /lat|latam|latin/i;
+  return rx.test((it.region || '') + ' ' + (it.market || '') + ' ' + (it.name || ''));
 }
-async function auditar(id, accion, actor, detalle){
-  try{ await rest('recargas_auditoria', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: J({ recarga_id: id || null, accion, actor, detalle: detalle || {} }) }); }catch(e){}
+function detectar(items, d){
+  let fijo = {}; try{ fijo = JSON.parse(process.env.CO_MAP || '{}'); }catch(e){}
+  const p = PAQUETES[d]; let item = null;
+  if(fijo[d]) item = items.find(x => x.product_id === fijo[d]) || null;
+  else {
+    const cand = items.filter(it => esFFLatam(it) && !EXCLUIR.test((it.name || '') + ' ' + (it.sku || '')) && it.requires_target !== false);
+    const ac = cand.filter(it => { const t = (it.name || '') + ' ' + (it.sku || ''); return tieneNum(t, d) || (tieneNum(t, p.base) && /bono|bonus|%/i.test(t)); });
+    ac.sort((a, b) => Math.abs(parseFloat(a.reseller_price) - p.ref) - Math.abs(parseFloat(b.reseller_price) - p.ref));
+    item = ac[0] || null;
+  }
+  if(!item) return { error: 'No se encontró el paquete en el catálogo del proveedor' };
+  const precio = parseFloat(item.reseller_price);
+  if(!(precio > 0) || Math.abs(precio - p.ref) / p.ref > TOL) return { error: 'El precio del proveedor está fuera de lo esperado' };
+  if(item.in_stock === false) return { error: 'Paquete sin stock en el proveedor' };
+  return { item, precio };
 }
-async function telegram(texto){
-  const t = (process.env.TG_BOT_TOKEN || process.env.TG_TOKEN || process.env.BOT_TOKEN), ch = (process.env.TG_CHAT_ID || process.env.TG_CHAT || process.env.TG_ID); if(!t || !ch) return;
-  try{ const ctrl = new AbortController(), x = setTimeout(() => ctrl.abort(), 5000);
-    await fetch('https://api.telegram.org/bot' + t + '/sendMessage', { method: 'POST', signal: ctrl.signal, headers: { 'Content-Type': 'application/json' }, body: J({ chat_id: ch, text: texto, parse_mode: 'HTML' }) }); clearTimeout(x); }catch(e){}
+function armarTarget(it, playerId){
+  const campos = Array.isArray(it.target_fields) ? it.target_fields : [], esq = Array.isArray(it.target_schema) ? it.target_schema : [];
+  const payload = {}; let faltan = false;
+  campos.forEach(key => {
+    const s = esq.find(x => x.key === key) || {};
+    if(/^(player_?id|uid|id)$/i.test(key)) payload[key] = String(playerId);
+    else if(s.type === 'select' && Array.isArray(s.options) && s.options.length === 1) payload[key] = s.options[0].value;
+    else { faltan = true; (armarTarget.falta = armarTarget.falta || []).push(key); }
+  });
+  return faltan ? null : payload;
 }
-// Aviso de solicitud + COMPROBANTE a tu Telegram.
-//  · Si pones TG_BOT_TOKEN + TG_CHAT_ID en Vercel: va directo por tu bot (foto o PDF con el texto).
-//  · Si no: usa la misma función de Supabase que ya te mandaba los comprobantes (bright-task), con la foto adjunta.
-let webhookListo = false;
-async function asegurarWebhook(t, host){
-  if(webhookListo || !host) return;
-  try{
-    const sec = require('./telegram.js').secreto(), url = 'https://' + host + '/api/telegram';
-    const w = await (await fetch('https://api.telegram.org/bot' + t + '/getWebhookInfo')).json();
-    if(!w.result || w.result.url !== url){ await fetch('https://api.telegram.org/bot' + t + '/setWebhook', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: J({ url, secret_token: sec, allowed_updates: ['callback_query'] }) }); }
-    webhookListo = true;
-  }catch(e){}
+
+// ── "Otras cosas": tarjetas y paquetes de nivel de Free Fire (se piden con "producto": clave) ──
+// "usd" es el precio de VENTA en dólares (el de tu lista); solo sirve para proteger el margen: si el proveedor cobra más que eso, ese producto se bloquea.
+const EXTRA = {
+  tsb: { titulo: 'Tarjeta Semanal Básica', usd: 0.3605, tipo: 'semanal_basica' },
+  ts:  { titulo: 'Tarjeta Semanal',        usd: 1.5450, tipo: 'semanal' },
+  pb:  { titulo: 'Pase Booyah',            usd: 1.1865, tipo: 'booyah' },
+  tm:  { titulo: 'Tarjeta Mensual',        usd: 7.2100, tipo: 'mensual' },
+  n6:  { titulo: 'Paquete de mejora de nivel - Nivel 6',  usd: 0.2719, nivel: 6 },
+  n10: { titulo: 'Paquete de subida de nivel - Nivel 10', usd: 0.4317, nivel: 10 },
+  n15: { titulo: 'Paquete de subida de nivel - Nivel 15', usd: 0.4317, nivel: 15 },
+  n20: { titulo: 'Paquete de subida de nivel - Nivel 20', usd: 0.4317, nivel: 20 },
+  n25: { titulo: 'Paquete de subida de nivel - Nivel 25', usd: 0.4317, nivel: 25 },
+  n30: { titulo: 'Paquete de subida de nivel - Nivel 30', usd: 0.5864, nivel: 30 }
+};
+const TC = Number(process.env.CO_TC || 19.5);
+const PROTEGER_MARGEN = !/^(0|false|off|no)$/i.test(String(process.env.CO_PROTEGER_MARGEN || '1'));
+const sinAcentos = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+const BOOYAH = /b(?:oo|o)y(?:aa|a)h/;   // booyah, boyaah, boyah, booyaah
+function coincideExtra(p, it){
+  const t = sinAcentos((it.name || '') + ' ' + (it.sku || '')), booyah = BOOYAH.test(t);
+  if(p.tipo){
+    const basica = /(basic|lite|light)/.test(t);
+    if(p.tipo === 'booyah') return booyah && /(pase|pass)/.test(t);
+    if(p.tipo === 'semanal_basica') return /(semanal|weekly)/.test(t) && basica && !booyah;
+    if(p.tipo === 'semanal') return /(semanal|weekly)/.test(t) && !basica && !booyah;
+    if(p.tipo === 'mensual') return /(mensual|monthly)/.test(t) && !booyah;
+  }
+  return new RegExp('(nivel|level|lvl|lv)\\.?\\s*' + p.nivel + '(?![0-9])').test(t) && !/(semanal|weekly|mensual|monthly|diamante|diamond)/.test(t) && !booyah;
 }
-async function avisoSolicitud(texto, id, buf, tipo, usuario, metodo, monto, extra, host){
-  const t = (process.env.TG_BOT_TOKEN || process.env.TG_TOKEN || process.env.BOT_TOKEN), ch = (process.env.TG_CHAT_ID || process.env.TG_CHAT || process.env.TG_ID), esImg = /^image\//.test(tipo);
-  const ctrl = new AbortController(), x = setTimeout(() => ctrl.abort(), 8000);
-  try{
-    if(t && ch){
-      await asegurarWebhook(t, host);
-      const fd = new FormData(); fd.append('chat_id', ch); if(id) fd.append('reply_markup', J({ inline_keyboard: [[{ text: '✅ Aceptar', callback_data: 'ap:' + id }, { text: '❌ Rechazar', callback_data: 'rj:' + id }]] })); fd.append('caption', texto.slice(0, 1000)); fd.append('parse_mode', 'HTML');
-      fd.append(esImg ? 'photo' : 'document', new Blob([buf], { type: tipo }), 'comprobante.' + (EXT[tipo] || 'bin'));
-      const r = await fetch('https://api.telegram.org/bot' + t + (esImg ? '/sendPhoto' : '/sendDocument'), { method: 'POST', signal: ctrl.signal, body: fd });
-      if(r.status >= 200 && r.status < 300) return;
+// Igual que detectar(): devuelve { item, precio } o { error }. Si hay más de un candidato NO elige (salvo que lo fijes con CO_MAP).
+function elegirExtra(items, clave){
+  const p = EXTRA[clave]; let fijo = {}; try{ fijo = JSON.parse(process.env.CO_MAP || '{}'); }catch(e){}
+  let item = null;
+  if(fijo[clave]) item = items.find(x => x.product_id === fijo[clave]) || null;
+  else {
+    const cand = items.filter(it => esFFLatam(it) && coincideExtra(p, it));
+    if(cand.length > 1) return { error: 'Hay varios productos que coinciden: fija el correcto con CO_MAP' };
+    item = cand[0] || null;
+  }
+  if(!item) return { error: 'No se encontró el producto en el catálogo del proveedor' };
+  const precio = parseFloat(item.reseller_price);
+  if(!(precio > 0)) return { error: 'Precio del proveedor inválido' };
+  if(PROTEGER_MARGEN && p.usd < precio) return { error: 'Producto no disponible por ahora' };   // el proveedor cobra más de lo que vendes
+  if(item.in_stock === false) return { error: 'Producto sin stock en el proveedor' };
+  return { item, precio };
+}
+
+
+// ── Regalos vía correo: solo CONSULTA de stock (la tienda lo usa para mostrar "Sin stock" y no cobrar lo que no se puede entregar) ──
+const REGALOS = { cj1:['caja',1,2.95], cj5:['caja',5,14.50], cj10:['caja',10,29.30], cj50:['caja',50,145.70], fa10:['arma',10,6.40], fa50:['arma',50,31.70], fa100:['arma',100,62.80], fa500:['arma',500,297.40] };   // [tipo, cantidad, precio de venta MXN]
+function buscarRegalo(items, k){
+  let fijo = {}; try{ fijo = JSON.parse(process.env.CO_MAP || '{}'); }catch(e){}
+  const tipo = REGALOS[k][0], n = REGALOS[k][1];
+  if(fijo[k]) return items.find(x => x.product_id === fijo[k]) || null;
+  const ac = items.filter(x => { const t = sinAcentos((x.name || '') + ' ' + (x.sku || '')).replace(/(\d)[.,](?=\d{3}(?!\d))/g, '$1');
+    const lat = /lat|latam|latin/i.test((x.region || '') + ' ' + (x.name || ''));
+    const ty = tipo === 'caja' ? /(caja|box|crate)/.test(t) && /fragment/.test(t) && !/arma|weapon/.test(t) : /fragment/.test(t) && /(arma|weapon)/.test(t);
+    const tn = sinAcentos(x.name || '').replace(/(\d)[.,](?=\d{3}(?!\d))/g, '$1'); return lat && ty && tieneNum(tn, n) && !tieneNum(tn, n * 10); });
+  return ac.length === 1 ? ac[0] : null;
+}
+function stockRegalos(items){
+  const out = {};
+  Object.keys(REGALOS).forEach(k => { const it = buscarRegalo(items, k); out[k] = !it ? 'no_disponible' : (it.in_stock === false ? 'sin_stock' : 'ok'); });
+  return out;
+}
+// Igual que elegirExtra(): { item, precio } o { error }. Protege el margen: si el proveedor cobra (en MXN) más de lo que vendes, se bloquea.
+function elegirRegalo(items, k){
+  const it = buscarRegalo(items, k); if(!it) return { error: 'No se encontró el producto en el catálogo del proveedor' };
+  const precio = parseFloat(it.reseller_price); if(!(precio > 0)) return { error: 'Precio del proveedor inválido' };
+  if(PROTEGER_MARGEN && precio * TC > REGALOS[k][2]) return { error: 'Producto no disponible por ahora' };
+  if(it.in_stock === false) return { error: 'Producto sin stock en el proveedor' };
+  return { item: it, precio };
+}
+
+// ── Respuestas en el formato de tu rapid-handler ──
+// PURCHASE_FAILED / ENDPOINT_DISABLED: no se hizo nada → tu tienda devuelve el saldo.
+// PROVIDER_ERROR / DUPLICATE_REQUEST: pudo haberse hecho → tu tienda NO devuelve y lo deja en revisión.
+const NO_HECHO = (error, code) => ({ success: false, code: code || 'PURCHASE_FAILED', error });
+const DUDOSO = (error, code) => ({ success: false, code: code || 'PROVIDER_ERROR', error });
+
+function mapearOrden(o){
+  const ref = o.reference_code || '';
+  if(o.status === 'completed') return { success: true, status: 'COMPLETED', via: 'Central One ' + ref, reference: ref, order_id: o.id };
+  if(o.status === 'failed' || o.status === 'cancelled'){
+    const f = o.failure || {}, ls = (o.items || []).map(i => String(i.status || '')).filter(Boolean);
+    // Si el pedido dice "failed" pero alguna línea figura como entregada, NO se da por fallido (evita reembolsar algo que sí llegó): se manda a verificar a mano
+    if(ls.some(s => /^(completed|delivered|fulfilled|succeeded|success)$/i.test(s))) return Object.assign(DUDOSO('El pedido figura fallido pero una línea aparece entregada: verifícalo en Central One (' + ref + ')'), { reference: ref, order_id: o.id });
+    return Object.assign(NO_HECHO((f.message_es || 'El proveedor no pudo completar la recarga') + (ls.length ? ' [líneas: ' + ls.join(',') + ']' : '') + (ref ? ' ' + ref : '')), { reference: ref, order_id: o.id });
+  }
+  return { success: true, status: 'PENDING', via: 'Central One ' + ref + ' (pendiente)', reference: ref, order_id: o.id };
+}
+
+// ── Fusibles: gasto de las últimas 24 h y recargas del usuario en la última hora, leídos del proveedor ──
+async function revisarPedidos(cliente, key){
+  const desde = Date.now() - 86400000, hora = Date.now() - 3600000;
+  let total = 0, delUsuario = 0, existente = null, cursor = null;
+  for(let pag = 0; pag < 3; pag++){
+    const r = await co('/orders?limit=50' + (cursor ? '&cursor=' + encodeURIComponent(cursor) : ''));
+    if(r.status !== 200 || !r.json || !Array.isArray(r.json.orders)) return { ok: false };
+    let viejo = false;
+    for(const o of r.json.orders){
+      const t = Date.parse(o.created_at);
+      if(!(t >= desde)){ viejo = true; continue; }
+      const nota = String(o.reseller_note || '');
+      if(key && nota.endsWith('|' + key)) existente = o;
+      if(o.status === 'failed' || o.status === 'cancelled') continue;
+      total += parseFloat(o.total_sale_amount) || 0;
+      if(t >= hora && nota.startsWith('CS|' + cliente + '|')) delUsuario++;
     }
-    const url = process.env.RECARGA_AVISO_URL || process.env.CO_ALERTA_URL || 'https://pnotsqsudqpwqzssevig.supabase.co/functions/v1/bright-task';
-    await fetch(url, { method: 'POST', signal: ctrl.signal, headers: { 'Content-Type': 'application/json' },
-      body: J({ usuario: usuario, metodo: metodo, monto: 0, extra: 'MONTO SOLICITADO: ' + monto + ' · ' + extra + ' · ⚠️ NO uses ACEPTAR/RECHAZAR de este aviso (es el sistema anterior y no abona bien): resuélvela en el panel → Depósitos, o configura TG_BOT_TOKEN y TG_CHAT_ID en Vercel para tener los botones nuevos.', foto_base64: esImg ? ('data:' + tipo + ';base64,' + buf.toString('base64')) : '' }) });
-  }catch(e){} finally { clearTimeout(x); }
+    cursor = r.json.pagination && r.json.pagination.next_cursor;
+    if(viejo || !cursor) break;
+  }
+  return { ok: true, total, delUsuario, existente };
 }
-async function enlace(path){
-  const r = await db('/storage/v1/object/sign/' + BUCKET + '/' + path.split('/').map(encodeURIComponent).join('/'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: J({ expiresIn: 300 }) });
-  if(r.status >= 400 || !r.json || !r.json.signedURL) return null;
-  return cfg().url + '/storage/v1' + r.json.signedURL;
-}
-const esc = s => String(s == null ? '' : s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
-const limpiaTxt = (s, n) => String(s == null ? '' : s).replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, n);
 
-// Lo que el cliente ve de una solicitud (nunca la ruta del archivo ni el hash)
-const publica = r => ({ id: r.id, banco: r.banco, monto: Number(r.monto), titular: r.titular, referencia: r.referencia, fecha_transferencia: r.fecha_transferencia,
-  estado: r.estado, motivo_rechazo: r.motivo_rechazo || null, creada: r.creada, resuelta: r.resuelta || null, comprobante_tipo: r.comprobante_tipo });
+async function usuarioValido(nombre){
+  const u = process.env.SUPABASE_URL, k = process.env.SUPABASE_ANON_KEY;
+  if(!u || !k) return { ok: true };
+  try{
+    const r = await fetch(u.replace(/\/+$/, '') + '/rest/v1/profiles?username=eq.' + encodeURIComponent(nombre) + '&select=id,banned&limit=1', { headers: { apikey: k, Authorization: 'Bearer ' + k } });
+    const j = await r.json(); if(!Array.isArray(j)) return { ok: false, motivo: 'No se pudo verificar al usuario' };
+    if(!j.length) return { ok: false, motivo: 'Usuario no encontrado' };
+    if(j[0].banned) return { ok: false, motivo: 'Cuenta suspendida' };
+    return { ok: true };
+  }catch(e){ return { ok: false, motivo: 'No se pudo verificar al usuario' }; }
+}
 
 module.exports = async function handler(req, res){
   try{
-    if(req.method !== 'POST') return enviar(res, { ok: false, code: 'metodo' }, 405);
-    const b = (req.body && typeof req.body === 'object') ? req.body : {}, ip = ipDe(req), a = String(b.action || '');
-    const c = cfg();
-    if(!c.url || !c.key) return enviar(res, { ok: false, code: 'sin_configurar', message: 'Falta SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY en Vercel' });
-    if(limite('g|' + ip, 300, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Demasiadas solicitudes, espera un momento' }, 429);
+    if(req.method !== 'POST') return enviar(res, NO_HECHO('Método no permitido', 'ENDPOINT_DISABLED'));
+    if(!process.env.CO_API_KEY) return enviar(res, NO_HECHO('Recargas automáticas no configuradas', 'ENDPOINT_DISABLED'));
+    const b = (req.body && typeof req.body === 'object') ? req.body : {};
+    const ip = ipDe(req);
+    const apagado = /^(0|false|off|no)$/i.test(String(process.env.CO_AUTO_ACTIVO || '1'));
 
-    // ═════════════ ADMINISTRADOR ═════════════
-    if(a.slice(0, 6) === 'admin_'){
-      const d = S.verificar(b.token);
-      if(!d) return enviar(res, { ok: false, code: 'sesion_invalida', message: 'Tu sesión del panel venció. Entra de nuevo.' }, 401);
-      const adm = String(d.u || 'admin').slice(0, 80);
+    // ── ¿se puede comprar ahora? (la tienda lo consulta para mostrar la protección; NO devuelve el saldo, solo sí/no) ──
+    if(b.action === 'disponibilidad'){
+      if(apagado) return enviar(res, { ok: true, disponible: false, motivo: 'apagado' });
+      if(limite(ip, 'd', 60)) return enviar(res, { ok: true, disponible: true, verificado: false });
+      const e = await A.estado(0);
+      if(e.verificado && e.pausa) await A.avisarSaldoBajo(e.saldo, e.motivo); else if(e.verificado) await A.avisarRecuperado(e.saldo);
+      return enviar(res, { ok: true, disponible: !e.pausa, motivo: e.pausa ? 'saldo' : null, verificado: e.verificado });
+    }
+    if(b.action === 'stock_regalos'){
+      if(limite(ip, 's', 30)) return enviar(res, { ok: false });
+      const c = await catalogo(); if(!c.ok) return enviar(res, { ok: false });
+      return enviar(res, { ok: true, stock: stockRegalos(c.items) });
+    }
+    if(apagado) return enviar(res, NO_HECHO('Las recargas automáticas están desactivadas por ahora', 'ENDPOINT_DISABLED'));
 
-      if(a === 'admin_pendientes'){
-        const r = await rest('recargas_saldo?estado=eq.pendiente&select=id');
-        if(r.status >= 400) return enviar(res, { ok: false, code: 'db', message: 'Falta ejecutar recargas_saldo.sql en Supabase' });
-        return enviar(res, { ok: true, pendientes: Array.isArray(r.json) ? r.json.length : 0 });
-      }
-      if(a === 'admin_lista'){
-        const est = ['pendiente', 'aprobada', 'rechazada'].indexOf(b.estado) >= 0 ? '&estado=eq.' + b.estado : '';
-        const r = await rest('recargas_saldo?select=id,user_id,username,banco,monto,titular,referencia,fecha_transferencia,comprobante_tipo,estado,motivo_rechazo,creada,resuelta,resuelta_por,movimiento_id' + est + '&order=creada.desc&limit=200');
-        if(r.status >= 400) return enviar(res, { ok: false, code: 'db', message: 'Falta ejecutar recargas_saldo.sql en Supabase' });
-        const lista = r.json || [], ids = Array.from(new Set(lista.map(x => x.user_id))).filter(x => /^[0-9a-zA-Z-]{1,64}$/.test(x));
-        let us = {};
-        if(ids.length){
-          const p = await rest('profiles?id=in.(' + ids.join(',') + ')&select=id,username,nombre,whatsapp,saldo,created_at');
-          (Array.isArray(p.json) ? p.json : []).forEach(x => { us[String(x.id)] = { username: x.username, nombre: x.nombre, whatsapp: x.whatsapp, saldo: x.saldo, desde: x.created_at }; });
-        }
-        return enviar(res, { ok: true, items: lista.map(x => Object.assign(publica(x), { user_id: x.user_id, username: x.username, resuelta_por: x.resuelta_por, usuario: us[x.user_id] || null })) });
-      }
-      if(a === 'admin_comprobante'){
-        if(!UUID.test(String(b.id || ''))) return enviar(res, { ok: false, code: 'id', message: 'Solicitud no válida' });
-        const r = await rest('recargas_saldo?id=eq.' + b.id + '&select=comprobante_path,comprobante_tipo&limit=1');
-        const x = Array.isArray(r.json) ? r.json[0] : null;
-        if(!x) return enviar(res, { ok: false, code: 'no_existe', message: 'No se encontró la solicitud' });
-        const url = await enlace(x.comprobante_path);
-        if(!url) return enviar(res, { ok: false, code: 'storage', message: 'No se pudo abrir el comprobante' });
-        await auditar(b.id, 'ver_comprobante', adm, {});
-        return enviar(res, { ok: true, url, tipo: x.comprobante_tipo });
-      }
-      if(a === 'admin_resolver'){
-        if(limite('ar|' + adm, 60, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Demasiadas acciones seguidas' }, 429);
-        const id = String(b.id || ''), acc = b.accion === 'aprobar' ? 'aprobar' : b.accion === 'rechazar' ? 'rechazar' : '';
-        if(!UUID.test(id) || !acc) return enviar(res, { ok: false, code: 'datos', message: 'Datos no válidos' });
-        const motivo = limpiaTxt(b.motivo, 300);
-        if(acc === 'rechazar' && motivo.length < 3) return enviar(res, { ok: false, code: 'motivo', message: 'Escribe el motivo del rechazo' });
-        const r = await db('/rest/v1/rpc/recarga_resolver', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: J({ p_id: id, p_accion: acc, p_motivo: motivo || null, p_admin: adm }) });
-        if(r.status >= 400){
-          const m = String((r.json && (r.json.message || r.json.hint)) || '');
-          if(/ya_resuelta:(\w+)/.test(m)) return enviar(res, { ok: false, code: 'ya_resuelta', message: 'Esta solicitud ya fue ' + /ya_resuelta:(\w+)/.exec(m)[1] + '. No se acreditó de nuevo.' });
-          if(/no_existe/.test(m)) return enviar(res, { ok: false, code: 'no_existe', message: 'No se encontró la solicitud' });
-          if(/usuario_no_existe/.test(m)) return enviar(res, { ok: false, code: 'usuario', message: 'El usuario de esta solicitud ya no existe' });
-          if(/motivo_requerido/.test(m)) return enviar(res, { ok: false, code: 'motivo', message: 'Escribe el motivo del rechazo' });
-          if(r.status === 404) return enviar(res, { ok: false, code: 'db', message: 'Falta ejecutar recargas_saldo.sql en Supabase (función recarga_resolver)' });
-          return enviar(res, { ok: false, code: 'db', message: 'No se pudo completar la operación' });
-        }
-        return enviar(res, { ok: true, resultado: r.json });
-      }
-      if(a === 'admin_cuentas'){
-        const r = await rest('cuentas_deposito?select=*&order=orden.asc,created_at.asc');
-        if(r.status >= 400) return enviar(res, { ok: false, code: 'db', message: 'Falta ejecutar recargas_saldo.sql en Supabase' });
-        return enviar(res, { ok: true, items: r.json || [] });
-      }
-      if(a === 'admin_cuenta_guardar'){
-        const nombre = limpiaTxt(b.nombre, 40), titular = limpiaTxt(b.titular, 80), clabe = String(b.clabe || '').replace(/\s/g, '');
-        if(nombre.length < 2) return enviar(res, { ok: false, code: 'nombre', message: 'Escribe el nombre del banco' });
-        if(titular.length < 3) return enviar(res, { ok: false, code: 'titular', message: 'Escribe el titular de la cuenta' });
-        if(!/^[0-9]{18}$/.test(clabe)) return enviar(res, { ok: false, code: 'clabe', message: 'La CLABE debe tener 18 dígitos' });
-        const cuerpo = { nombre, titular, clabe, activa: b.activa !== false, orden: Math.max(0, Math.min(999, parseInt(b.orden, 10) || 0)) };
-        let r;
-        if(b.id){
-          if(!UUID.test(String(b.id))) return enviar(res, { ok: false, code: 'id', message: 'Cuenta no válida' });
-          r = await rest('cuentas_deposito?id=eq.' + b.id, { method: 'PATCH', headers: { Prefer: 'return=representation' }, body: J(cuerpo) });
-        } else r = await rest('cuentas_deposito', { method: 'POST', headers: { Prefer: 'return=representation' }, body: J(cuerpo) });
-        if(r.status >= 400) return enviar(res, { ok: false, code: 'db', message: 'No se pudo guardar la cuenta' });
-        await auditar(null, b.id ? 'cuenta_editar' : 'cuenta_crear', adm, { nombre, titular, activa: cuerpo.activa });
-        return enviar(res, { ok: true, item: Array.isArray(r.json) ? r.json[0] : null });
-      }
-      if(a === 'admin_cuenta_borrar'){
-        if(!UUID.test(String(b.id || ''))) return enviar(res, { ok: false, code: 'id', message: 'Cuenta no válida' });
-        const r = await rest('cuentas_deposito?id=eq.' + b.id, { method: 'DELETE', headers: { Prefer: 'return=representation' } });
-        if(r.status >= 400) return enviar(res, { ok: false, code: 'db', message: 'No se pudo eliminar la cuenta' });
-        await auditar(null, 'cuenta_borrar', adm, { id: b.id, nombre: Array.isArray(r.json) && r.json[0] ? r.json[0].nombre : null });
-        return enviar(res, { ok: true });
-      }
-      if(a === 'admin_auditoria'){
-        const r = await rest('recargas_auditoria?select=id,recarga_id,accion,actor,detalle,created_at&order=created_at.desc&limit=100');
-        if(r.status >= 400) return enviar(res, { ok: false, code: 'db', message: 'Falta ejecutar recargas_saldo.sql en Supabase' });
-        return enviar(res, { ok: true, items: r.json || [] });
-      }
-      return enviar(res, { ok: false, code: 'accion', message: 'Acción no permitida' }, 400);
+    // ── estado de un pedido (por si hace falta consultarlo después) ──
+    if(b.action === 'estado'){
+      const id = String(b.order_id || ''); if(!/^[0-9a-fA-F-]{36}$/.test(id)) return enviar(res, { success: false, error: 'order_id inválido' });
+      const r = await co('/orders/' + id); if(r.status !== 200 || !r.json || !r.json.order) return enviar(res, { success: false, error: 'No encontrado' });
+      const o = r.json.order, m = mapearOrden(o);
+      if((o.items || []).some(i => i.status === 'refunded')) return enviar(res, { success: true, status: 'REFUNDED', reference: o.reference_code });
+      return enviar(res, m.success ? { success: true, status: m.status, reference: m.reference } : (m.code === 'PROVIDER_ERROR' ? { success: true, status: 'PENDING', reference: m.reference, error: m.error } : { success: true, status: 'FAILED', reference: m.reference, error: m.error }));
     }
 
-    // ═════════════ CLIENTE ═════════════
-    const u = String(b.username || '').trim().slice(0, 60), h = String(b.hash || '').slice(0, 200);
-    if(!u || !h) return enviar(res, { ok: false, code: 'credenciales', message: 'Inicia sesión de nuevo' }, 401);
-    if(limite('a|' + ip, 120, 600000)) return enviar(res, { ok: false, code: 'limite', message: 'Demasiados intentos, espera unos minutos' }, 429);
-    const r0 = await rest('profiles?username=eq.' + encodeURIComponent(u) + '&select=id,username,password_hash,nombre,whatsapp,banned&limit=1');
-    if(r0.status >= 400) return enviar(res, { ok: false, code: 'db', message: 'Error de la base de datos' });
-    const p = Array.isArray(r0.json) ? r0.json[0] : null;
-    if(!p || !p.password_hash || !iguales(h, p.password_hash)) return enviar(res, { ok: false, code: 'credenciales', message: 'Vuelve a iniciar sesión' }, 401);
-    if(p.banned) return enviar(res, { ok: false, code: 'cuenta_suspendida', message: 'Tu cuenta está suspendida' }, 403);
-    const uid = String(p.id);
+    const extra = EXTRA[String(b.producto || '')] ? String(b.producto) : null;
+    const reg = (!extra && REGALOS[String(b.producto || '')]) ? String(b.producto) : null;
+    const diam = (extra || reg) ? null : PKG[Number(b.package_id != null ? b.package_id : b.product_id)];
+    const elegir = items => extra ? elegirExtra(items, extra) : (reg ? elegirRegalo(items, reg) : detectar(items, diam));
+    if(!extra && !reg && !diam) return enviar(res, NO_HECHO('Paquete no disponible para recarga automática', 'ENDPOINT_DISABLED'));
+    const pid = String(b.player_id != null ? b.player_id : b.service_user_id || '').trim();
 
-    if(a === 'cuentas'){
-      const r = await rest('cuentas_deposito?activa=eq.true&select=id,nombre,titular,clabe&order=orden.asc,created_at.asc');
-      if(r.status >= 400) return enviar(res, { ok: false, code: 'db', message: 'Falta ejecutar recargas_saldo.sql en Supabase' });
-      return enviar(res, { ok: true, cuentas: r.json || [], min: MIN(), max: MAX() });
+    // ── validar ID ──
+    if(b.action === 'validar'){
+      if(limite(ip, 'v', 30)) return enviar(res, { success: false, error: 'Demasiadas consultas, espera un momento' });
+      if(!/^\d{5,15}$/.test(pid)) return enviar(res, { success: true, valido: false });
+      const c = await catalogo(); if(!c.ok) return enviar(res, { success: false, error: 'No se pudo verificar' });
+      const d = elegir(c.items); if(d.error) return enviar(res, { success: false, error: 'No se pudo verificar' });
+      const tg = armarTarget(d.item, pid); if(!tg) return enviar(res, { success: false, error: 'No se pudo verificar' });
+      const r = await co('/player/validate', { method: 'POST', body: { product_id: d.item.product_id, target_payload: tg } });
+      if(r.status !== 200 || !r.json) return enviar(res, { success: false, error: 'No se pudo verificar' });
+      if(r.json.status === 'valid') return enviar(res, { success: true, valido: true, nombre: (r.json.player && r.json.player.name) || '' });
+      if(r.json.status === 'invalid') return enviar(res, { success: true, valido: false });
+      return enviar(res, { success: false, error: 'No se pudo verificar' });
     }
-    if(a === 'mis'){
-      const r = await rest('recargas_saldo?user_id=eq.' + encodeURIComponent(uid) + '&select=id,banco,monto,titular,referencia,fecha_transferencia,comprobante_tipo,estado,motivo_rechazo,creada,resuelta&order=creada.desc&limit=50');
-      if(r.status >= 400) return enviar(res, { ok: false, code: 'db', message: 'Falta ejecutar recargas_saldo.sql en Supabase' });
-      return enviar(res, { ok: true, items: (r.json || []).map(publica) });
+
+    if(b.action !== 'comprar') return enviar(res, NO_HECHO('Acción desconocida', 'ENDPOINT_DISABLED'));
+
+    // ── comprar ──
+    // Versión de la tienda: las páginas actuales mandan su huella (X-CS-Build). Una página vieja no la manda y no puede comprar.
+    if(!/^(0|false|off|no)$/i.test(String(process.env.CO_EXIGIR_VERSION || '1')) && !/^[a-f0-9]{10}$/.test(String(req.headers['x-cs-build'] || '')))
+      return enviar(res, NO_HECHO('Tu versión de la tienda está desactualizada. Actualiza la página (recárgala) y vuelve a intentar. No se te cobró.', 'ENDPOINT_DISABLED'));
+    const cliente = String(b.client_name || '').trim(), key = String(b.idempotency_key || '');
+    if(!/^[A-Za-z0-9_.-]{2,40}$/.test(cliente)) return enviar(res, NO_HECHO('Usuario inválido', 'ENDPOINT_DISABLED'));
+    if(!/^[A-Za-z0-9_-]{8,128}$/.test(key)) return enviar(res, NO_HECHO('Clave de pedido inválida', 'ENDPOINT_DISABLED'));
+    if(!/^\d{5,15}$/.test(pid)) return enviar(res, NO_HECHO('ID de Free Fire inválido'));
+    if(limite(ip, 'c', 20)) return enviar(res, NO_HECHO('Demasiadas compras seguidas, espera un momento', 'ENDPOINT_DISABLED'));
+
+    const u = await usuarioValido(cliente); if(!u.ok) return enviar(res, NO_HECHO(u.motivo, 'ENDPOINT_DISABLED'));
+    const c = await catalogo(); if(!c.ok) return enviar(res, NO_HECHO('Proveedor no disponible', 'ENDPOINT_DISABLED'));
+    const d = elegir(c.items); if(d.error) return enviar(res, NO_HECHO(d.error));
+    armarTarget.falta = []; const tg = armarTarget(d.item, pid); if(!tg) return enviar(res, NO_HECHO('El proveedor pide datos que no se pueden completar (' + armarTarget.falta.join(', ') + ')'));
+
+    // ¿Ya existe este mismo pedido? (reintento tras un corte): se devuelve su estado sin gastar de nuevo ni aplicar fusibles
+    const rev = await revisarPedidos(cliente, key);
+    if(!rev.ok) return enviar(res, NO_HECHO('No se pudo verificar el límite de gasto', 'ENDPOINT_DISABLED'));
+    if(rev.existente) return enviar(res, Object.assign(mapearOrden(rev.existente), { costo_usd: d.precio }));
+    // Protección de saldo con el proveedor: si queda poco (o no alcanza para este pedido) se pausa y se te avisa por Telegram
+    const sp = await A.estado(d.precio);
+    if(sp.pausa){ await A.avisarSaldoBajo(sp.saldo, sp.motivo); return enviar(res, NO_HECHO('Recargas en pausa por unos minutos: estamos reponiendo saldo del sistema. Intenta de nuevo en un rato.', 'ENDPOINT_DISABLED')); }
+    if(LIM_DIA > 0 && rev.total + d.precio > LIM_DIA) return enviar(res, NO_HECHO('Recargas automáticas en pausa por hoy. Intenta más tarde o contacta al administrador', 'ENDPOINT_DISABLED'));
+    if(LIM_USER_H > 0 && rev.delUsuario >= LIM_USER_H) return enviar(res, NO_HECHO('Alcanzaste el límite de recargas por hora. Intenta más tarde', 'ENDPOINT_DISABLED'));
+
+    const r = await co('/orders', { method: 'POST', headers: { 'Idempotency-Key': key },
+      body: { items: [{ catalog_item_id: d.item.product_id, quantity: 1, target_payload: tg }], note: ('CS|' + cliente + '|' + key).slice(0, 400) } });
+    if(r.status !== 201 && r.status !== 200){
+      const code = (r.json && r.json.error && r.json.error.code) || '';
+      if(r.status === 422 || code === 'idempotency_key_reused') return enviar(res, DUDOSO('Pedido repetido, se está verificando', 'DUPLICATE_REQUEST'));
+      if(r.status === 409 || r.status === 400 || r.status === 429 || r.status === 404) return enviar(res, NO_HECHO('El proveedor no pudo tomar la recarga (' + (code || r.status) + (r.json && r.json.error && r.json.error.message ? ': ' + String(r.json.error.message).slice(0, 160) : '') + ')'));
+      if(r.status === 401 || r.status === 403) return enviar(res, NO_HECHO('Proveedor no disponible', 'ENDPOINT_DISABLED'));
+      return enviar(res, DUDOSO('Sin respuesta clara del proveedor (' + (code || r.status) + ')'));
     }
-    if(a === 'comprobante_url'){
-      if(!UUID.test(String(b.id || ''))) return enviar(res, { ok: false, code: 'id', message: 'Solicitud no válida' });
-      const r = await rest('recargas_saldo?id=eq.' + b.id + '&user_id=eq.' + encodeURIComponent(uid) + '&select=comprobante_path,comprobante_tipo&limit=1');
-      const x = Array.isArray(r.json) ? r.json[0] : null;
-      if(!x) return enviar(res, { ok: false, code: 'no_existe', message: 'No se encontró la solicitud' });
-      const url = await enlace(x.comprobante_path);
-      return url ? enviar(res, { ok: true, url, tipo: x.comprobante_tipo }) : enviar(res, { ok: false, code: 'storage', message: 'No se pudo abrir el comprobante' });
+    if(!r.json || !r.json.order) return enviar(res, DUDOSO('Respuesta inválida del proveedor'));
+    let o = r.json.order;
+
+    // Esperar un poco a que termine (las recargas directas suelen tardar segundos)
+    const fin = Date.now() + ESPERA_MS;
+    while(Date.now() < fin){
+      await dormir(POLL_MS);
+      const s = await co('/orders/' + o.id);
+      if(s.status === 200 && s.json && s.json.order){ o = Object.assign({}, o, s.json.order); if(['completed', 'failed', 'cancelled'].indexOf(o.status) >= 0) break; }
     }
-    if(a === 'solicitar'){
-      // — validaciones de datos —
-      const idem = String(b.idem || '');
-      if(!/^[a-zA-Z0-9-]{16,64}$/.test(idem)) return enviar(res, { ok: false, code: 'idem', message: 'Recarga la página e intenta de nuevo' });
-      const ya = await rest('recargas_saldo?idem=eq.' + encodeURIComponent(idem) + '&user_id=eq.' + encodeURIComponent(uid) + '&select=id,banco,monto,titular,referencia,fecha_transferencia,comprobante_tipo,estado,motivo_rechazo,creada,resuelta&limit=1');
-      if(Array.isArray(ya.json) && ya.json[0]) return enviar(res, { ok: true, repetida: true, item: publica(ya.json[0]) });   // mismo envío repetido: no se duplica
-      if(!UUID.test(String(b.cuenta_id || ''))) return enviar(res, { ok: false, code: 'cuenta', message: 'Elige un método de depósito' });
-      const cu = await rest('cuentas_deposito?id=eq.' + b.cuenta_id + '&activa=eq.true&select=id,nombre&limit=1');
-      const cuenta = Array.isArray(cu.json) ? cu.json[0] : null;
-      if(!cuenta) return enviar(res, { ok: false, code: 'cuenta', message: 'Ese método de depósito ya no está disponible' });
-      const monto = Math.round(Number(b.monto) * 100) / 100;
-      if(!isFinite(monto) || monto <= 0) return enviar(res, { ok: false, code: 'monto', message: 'Escribe un monto válido' });
-      if(monto < MIN()) return enviar(res, { ok: false, code: 'monto', message: 'El monto mínimo es ' + dinero(MIN()) });
-      if(monto > MAX()) return enviar(res, { ok: false, code: 'monto', message: 'El monto máximo por solicitud es ' + dinero(MAX()) });
-      const titular = limpiaTxt(b.titular, 80); if(titular.length < 3) return enviar(res, { ok: false, code: 'titular', message: 'Escribe el nombre del titular que hizo la transferencia' });
-      const referencia = limpiaTxt(b.referencia, 40).replace(/[^\w\-./ ]/g, ''); if(referencia.length < 4) return enviar(res, { ok: false, code: 'referencia', message: 'Escribe la referencia o clave de rastreo (mín. 4 caracteres)' });
-      const refNorm = referencia.toLowerCase().replace(/[^a-z0-9]/g, '');
-      if(refNorm.length < 4) return enviar(res, { ok: false, code: 'referencia', message: 'La referencia no es válida' });
-      const fecha = new Date(String(b.fecha || '')); if(isNaN(fecha.getTime())) return enviar(res, { ok: false, code: 'fecha', message: 'Indica la fecha y hora de la transferencia' });
-      if(fecha.getTime() > Date.now() + 10 * 60000) return enviar(res, { ok: false, code: 'fecha', message: 'La fecha de la transferencia no puede ser futura' });
-      if(fecha.getTime() < Date.now() - 30 * 86400000) return enviar(res, { ok: false, code: 'fecha', message: 'La transferencia es demasiado antigua (máximo 30 días)' });
-      const m = /^data:([a-z\/+-]+);base64,([A-Za-z0-9+/=]+)$/.exec(String(b.comprobante || ''));
-      if(!m) return enviar(res, { ok: false, code: 'comprobante', message: 'Sube tu comprobante (JPG, PNG, WEBP o PDF)' });
-      const buf = Buffer.from(m[2], 'base64');
-      if(!buf.length || buf.length > MAX_BYTES) return enviar(res, { ok: false, code: 'comprobante', message: 'El comprobante pesa demasiado (máximo ' + Math.round(MAX_BYTES / 1024 / 1024 * 10) / 10 + ' MB)' });
-      const tipo = formatoReal(buf);
-      if(!tipo || !EXT[tipo]) return enviar(res, { ok: false, code: 'comprobante', message: 'El archivo no es una imagen o PDF válido' });
-      // — límites (solo cuentan los envíos que pasaron las validaciones; un error de captura no te bloquea) —
-      if(limite('s|' + uid, 6, 3600000)) return enviar(res, { ok: false, code: 'limite', message: 'Hiciste muchas solicitudes. Intenta de nuevo en una hora.' }, 429);
-      const pen = await rest('recargas_saldo?user_id=eq.' + encodeURIComponent(uid) + '&estado=eq.pendiente&select=id');
-      if(Array.isArray(pen.json) && pen.json.length >= 3) return enviar(res, { ok: false, code: 'pendientes', message: 'Ya tienes 3 solicitudes en revisión. Espera a que se resuelvan.' });
-      // — guardar comprobante en almacenamiento PRIVADO —
-      const hash = crypto.createHash('sha256').update(buf).digest('hex');
-      const dup = await rest('recargas_saldo?comprobante_hash=eq.' + hash + '&estado=neq.rechazada&select=id&limit=1');
-      if(Array.isArray(dup.json) && dup.json.length) return enviar(res, { ok: false, code: 'duplicada', message: 'Ese comprobante ya fue enviado en otra solicitud' });
-      const dupR = await rest('recargas_saldo?referencia_norm=eq.' + refNorm + '&estado=neq.rechazada&select=id&limit=1');
-      if(Array.isArray(dupR.json) && dupR.json.length) return enviar(res, { ok: false, code: 'duplicada', message: 'Esa referencia ya fue registrada en otra solicitud' });
-      const ruta = uid + '/' + crypto.randomUUID() + '.' + EXT[tipo];
-      const up = await db('/storage/v1/object/' + BUCKET + '/' + ruta, { method: 'POST', headers: { 'Content-Type': tipo, 'x-upsert': 'false' }, body: buf });
-      if(up.status >= 400) return enviar(res, { ok: false, code: 'storage', message: 'No se pudo guardar el comprobante. ¿Ejecutaste recargas_saldo.sql (crea el almacenamiento "comprobantes")?' });
-      const ins = await rest('recargas_saldo', { method: 'POST', headers: { Prefer: 'return=representation' }, body: J({
-        user_id: uid, username: p.username, cuenta_id: cuenta.id, banco: cuenta.nombre, monto, titular, referencia, referencia_norm: refNorm,
-        fecha_transferencia: fecha.toISOString(), comprobante_path: ruta, comprobante_tipo: tipo, comprobante_hash: hash, idem }) });
-      if(ins.status >= 400){
-        await db('/storage/v1/object/' + BUCKET, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: J({ prefixes: [ruta] }) });
-        const msg = String((ins.json && ins.json.message) || '');
-        if(/recargas_saldo_idem_uq/.test(msg)){ const y = await rest('recargas_saldo?idem=eq.' + encodeURIComponent(idem) + '&select=id,banco,monto,titular,referencia,fecha_transferencia,comprobante_tipo,estado,motivo_rechazo,creada,resuelta&limit=1'); if(Array.isArray(y.json) && y.json[0]) return enviar(res, { ok: true, repetida: true, item: publica(y.json[0]) }); }
-        if(/recargas_saldo_(ref|hash)_uq/.test(msg)) return enviar(res, { ok: false, code: 'duplicada', message: 'Esa referencia o comprobante ya fue registrado en otra solicitud' });
-        if(ins.status === 404) return enviar(res, { ok: false, code: 'db', message: 'Falta ejecutar recargas_saldo.sql en Supabase' });
-        return enviar(res, { ok: false, code: 'db', message: 'No se pudo registrar la solicitud' });
-      }
-      const row = Array.isArray(ins.json) ? ins.json[0] : null;
-      await auditar(row && row.id, 'solicitar', p.username, { monto, banco: cuenta.nombre, referencia });
-      await aviso(uid, 'Solicitud de recarga recibida', 'Recibimos tu solicitud de ' + dinero(monto) + ' (' + cuenta.nombre + '). Está en revisión; te avisaremos cuando se resuelva.');
-      await avisoSolicitud('💳 <b>Nueva solicitud de recarga</b>\n👤 ' + esc(p.username) + '\n💰 ' + esc(dinero(monto)) + ' · ' + esc(cuenta.nombre) + '\n🔑 Ref: ' + esc(referencia) + '\n👥 Titular: ' + esc(titular) + '\n🆔 ' + (row ? row.id : ''), row ? row.id : '', buf, tipo, p.username, cuenta.nombre, dinero(monto), 'Recarga de saldo | ' + cuenta.nombre + ' | Ref: ' + referencia + ' | Titular: ' + titular + ' | Revísala en el panel → Depósitos', req.headers.host);
-      return enviar(res, { ok: true, item: row ? publica(row) : null });
-    }
-    return enviar(res, { ok: false, code: 'accion', message: 'Acción no permitida' }, 400);
-  }catch(e){ return enviar(res, { ok: false, code: 'error', message: 'Error del servidor' }); }
+    try{ await A.despuesDeCompra(); }catch(e){}
+    // costo_usd: lo que cobró el proveedor (para el aviso de Telegram con la ganancia)
+    const final = mapearOrden(o); if(final.success) final.costo_usd = d.precio;
+    return enviar(res, final);
+  }catch(e){
+    const timeout = e && e.name === 'AbortError';
+    return enviar(res, DUDOSO(timeout ? 'El proveedor tardó demasiado: se está verificando' : 'Error al contactar al proveedor'));
+  }
 };
