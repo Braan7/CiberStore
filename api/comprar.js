@@ -265,7 +265,7 @@ module.exports = async function handler(req, res){
       const item = rc.json.item;
       if(item){
         const ped = await (async () => { const ri = await rest('ordenes_saldo_items?id=eq.' + item.id + '&select=pedido_id'); return Array.isArray(ri.json) && ri.json[0] ? ri.json[0].pedido_id : null; })();
-        const llave = 'os' + oid + '-' + item.id;
+        const llave = 'cs-os' + oid + '-' + item.id;
         const pr = await llamarProveedor({ action: 'comprar', producto: item.srv, player_id: item.ff_id, client_name: p.username, idempotency_key: llave }, req);
         let est, err = null, ref = null;
         if(pr && pr.success && pr.status === 'COMPLETED'){ est = 'completada'; ref = { order_id: pr.order_id || null, reference: pr.reference || null, via: pr.via || null }; }
