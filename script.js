@@ -1,7 +1,7 @@
 /* CiberStore v1779504760 */
 /* \u2500\u2500 DATA \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 /* ══ CONTACTO OFICIAL DE SOPORTE ══ Para cambiar el WhatsApp de toda la web, edita SOLO estas 3 líneas. */
-var CS_SOPORTE = { wa:'573503173878', visible:'+57 350 3173878', mensaje:'Hola, necesito ayuda con CIBERSTORE. Mi usuario es:' };
+var CS_SOPORTE = { wa:'573158844459', visible:'+57 315 8844459', mensaje:'Hola, necesito ayuda con CIBERSTORE. Mi usuario es:' };
 var WA = CS_SOPORTE.wa;
 
 /* Fallback if supabase_integration.js not loaded yet */
