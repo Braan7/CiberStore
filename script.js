@@ -19313,7 +19313,7 @@ function mc2PintarSeg(){
 }
 function mc2Actualizar(){
   var b = mcEl('mc2-act'); if(b){ b.disabled = true; }
-  var rec = (MC.ordenes || []).filter(function(o){ return o.items.some(function(i){ return i.estado === 'enviada'; }); }).slice(0, 5);
+  var rec = (MC.ordenes || []).filter(function(o){ return o.items.some(function(i){ return i.estado === 'enviada' || i.estado === 'verificar'; }); }).slice(0, 5);
   var pend = (MC.ordenes || []).filter(function(o){ return o.por_entregar > 0; }).slice(0, 5);
   Promise.all(rec.map(function(o){ return ckApi('refrescar', { orden_id: o.id }, true).catch(function(){}); }).concat(pend.map(function(o){ return ckApi('entregar', { orden_id: o.id }, true).catch(function(){}); }))).then(function(){ return mc2Cargar(); }).then(function(){ if(b) b.disabled = false; if(typeof showToast === 'function') showToast('Estado actualizado', 1800); }).catch(function(){ if(b) b.disabled = false; });
 }
@@ -19357,6 +19357,18 @@ function mc2Tab(t){
   window.loadMisCompras = function(){ mc2Cargar(); };
   window.renderResumenRecargas = function(){ };
 })();
+
+/* Auto-verificación: mientras estás en Mis Compras, las unidades "en proceso" o "en verificación" se consultan solas con el proveedor (cada 15 s, máx. 3 pedidos) */
+setInterval(function(){
+  try{
+    var pg = document.getElementById('page-miscompras'); if(!pg || !pg.classList.contains('active') || document.visibilityState !== 'visible') return;
+    if(typeof authSession === 'undefined' || !authSession || !MC.ordenes || MC._auto) return;
+    var rec = MC.ordenes.filter(function(o){ return o.items.some(function(i){ return i.estado === 'enviada' || i.estado === 'verificar'; }); }).slice(0, 3);
+    if(!rec.length) return;
+    MC._auto = true;
+    Promise.all(rec.map(function(o){ return ckApi('refrescar', { orden_id: o.id }, true).catch(function(){}); })).then(function(){ return mc2Cargar(); }).then(function(){ MC._auto = false; }, function(){ MC._auto = false; });
+  }catch(e){ MC._auto = false; }
+}, 15000);
 /* ═══════════ PANEL ADMIN · ÓRDENES CON SALDO ═══════════
    Compras pagadas con saldo CiberStore: usuario, producto, cantidad, IDs, total, método, ID de transacción, estado de entrega.
    Las unidades "en verificación" se resuelven aquí (Reembolsar / Marcar entregada) vía /api/comprar con tu token del panel. */

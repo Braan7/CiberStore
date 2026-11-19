@@ -246,6 +246,7 @@ async function usuarioValido(nombre){
 }
 
 module.exports = async function handler(req, res){
+  let _cc = null;   // para poder recuperar el pedido si se corta la conexión
   try{
     if(req.method !== 'POST') return enviar(res, NO_HECHO('Método no permitido', 'ENDPOINT_DISABLED'));
     if(!process.env.CO_API_KEY) return enviar(res, NO_HECHO('Recargas automáticas no configuradas', 'ENDPOINT_DISABLED'));
@@ -277,6 +278,17 @@ module.exports = async function handler(req, res){
       return enviar(res, m.success ? { success: true, status: m.status, reference: m.reference } : (m.code === 'PROVIDER_ERROR' ? { success: true, status: 'PENDING', reference: m.reference, error: m.error } : { success: true, status: 'FAILED', reference: m.reference, error: m.error }));
     }
 
+    // ── buscar un pedido por su clave (para resolver unidades "en verificación") ──
+    if(b.action === 'buscar'){
+      const cl = String(b.client_name || '').trim(), k = String(b.idempotency_key || '');
+      if(!/^[A-Za-z0-9_.-]{2,40}$/.test(cl) || !/^[A-Za-z0-9_-]{8,128}$/.test(k)) return enviar(res, { success: false, error: 'Datos inválidos' });
+      const rv = await revisarPedidos(cl, k); if(!rv.ok) return enviar(res, { success: false, error: 'No se pudo consultar al proveedor' });
+      if(!rv.existente) return enviar(res, { success: true, status: 'NOT_FOUND' });
+      const o = rv.existente, m = mapearOrden(o, !!b.regalo);
+      if((o.items || []).some(i => i.status === 'refunded')) return enviar(res, { success: true, status: 'REFUNDED', reference: o.reference_code, order_id: o.id });
+      return enviar(res, m.success ? { success: true, status: m.status, reference: m.reference, order_id: o.id, via: m.via } : (m.code === 'PROVIDER_ERROR' ? { success: true, status: 'PENDING', reference: m.reference, order_id: o.id, via: 'Central One ' + (o.reference_code || '') } : { success: true, status: 'FAILED', reference: m.reference, order_id: o.id, error: m.error }));
+    }
+
     const extra = EXTRA[String(b.producto || '')] ? String(b.producto) : null;
     const reg = (!extra && REGALOS[String(b.producto || '')]) ? String(b.producto) : null;
     const diam = (extra || reg) ? null : PKG[Number(b.package_id != null ? b.package_id : b.product_id)];
@@ -305,6 +317,7 @@ module.exports = async function handler(req, res){
     if(!/^(0|false|off|no)$/i.test(String(process.env.CO_EXIGIR_VERSION || '1')) && !/^[a-f0-9]{10}$/.test(String(req.headers['x-cs-build'] || '')))
       return enviar(res, NO_HECHO('Tu versión de la tienda está desactualizada. Actualiza la página (recárgala) y vuelve a intentar. No se te cobró.', 'ENDPOINT_DISABLED'));
     const cliente = String(b.client_name || '').trim(), key = String(b.idempotency_key || '');
+    _cc = { cliente, key, reg: !!reg, precio: null };
     if(!/^[A-Za-z0-9_.-]{2,40}$/.test(cliente)) return enviar(res, NO_HECHO('Usuario inválido', 'ENDPOINT_DISABLED'));
     if(!/^[A-Za-z0-9_-]{8,128}$/.test(key)) return enviar(res, NO_HECHO('Clave de pedido inválida', 'ENDPOINT_DISABLED'));
     if(!/^\d{5,15}$/.test(pid)) return enviar(res, NO_HECHO('ID de Free Fire inválido'));
@@ -341,7 +354,7 @@ module.exports = async function handler(req, res){
     const fin = Date.now() + ESPERA_MS;
     while(Date.now() < fin){
       await dormir(POLL_MS);
-      const s = await co('/orders/' + o.id);
+      let s; try{ s = await co('/orders/' + o.id); }catch(e){ break; }
       if(s.status === 200 && s.json && s.json.order){ o = Object.assign({}, o, s.json.order); if(['completed', 'failed', 'cancelled'].indexOf(o.status) >= 0) break; }
     }
     try{ await A.despuesDeCompra(); }catch(e){}
@@ -350,6 +363,8 @@ module.exports = async function handler(req, res){
     return enviar(res, final);
   }catch(e){
     const timeout = e && e.name === 'AbortError';
+    // Se cortó la espera, pero el pedido pudo haberse creado: se busca por su clave y se devuelve su estado real (así no queda en "verificar" algo que el proveedor sí entregó)
+    if(_cc && _cc.key){ try{ const rv = await revisarPedidos(_cc.cliente, _cc.key); if(rv.ok && rv.existente) return enviar(res, mapearOrden(rv.existente, _cc.reg)); }catch(e2){} }
     return enviar(res, DUDOSO(timeout ? 'El proveedor tardó demasiado: se está verificando' : 'Error al contactar al proveedor'));
   }
 };

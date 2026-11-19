@@ -294,10 +294,18 @@ module.exports = async function handler(req, res){
       const oid = Number(b.orden_id); if(!(oid > 0)) return enviar(res, { ok: false, code: 'solicitud', message: 'Pedido inválido' });
       const ro = await rest('ordenes_saldo?id=eq.' + oid + '&user_id=eq.' + encodeURIComponent(uid) + '&select=id'); if(!(Array.isArray(ro.json) && ro.json.length)) return enviar(res, { ok: false, code: 'no_existe', message: 'No encontramos ese pedido' }, 404);
       if(limite('r|' + uid, 30, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Espera un momento' }, 429);
-      const ri = await rest('ordenes_saldo_items?orden_id=eq.' + oid + '&estado=eq.enviada&select=id,proveedor,pedido_id,nombre,ff_id'); const its = Array.isArray(ri.json) ? ri.json : [];
+      const ri = await rest('ordenes_saldo_items?orden_id=eq.' + oid + '&estado=in.(enviada,verificar)&select=id,estado,proveedor,pedido_id,nombre,ff_id'); const its = Array.isArray(ri.json) ? ri.json : [];
       let consultadas = 0, cambios = 0;
       for(const i of its){
-        const oidp = i.proveedor && i.proveedor.order_id; if(!oidp) continue; consultadas++;
+        let oidp = i.proveedor && i.proveedor.order_id;
+        if(!oidp && i.estado === 'verificar'){
+          // Unidad "en verificación" (se cortó la espera): se busca el pedido en el proveedor por su clave
+          const bu = await llamarProveedor({ action: 'buscar', client_name: p.username, idempotency_key: 'cs-os' + oid + '-' + i.id, regalo: true }, req); consultadas++;
+          if(bu && bu.success && bu.status === 'COMPLETED'){ await rpc('checkout_item_resultado', { p_item: i.id, p_estado: 'completada', p_ref: { order_id: bu.order_id || null, reference: bu.reference || null, via: bu.via || null }, p_error: null }); await pedidoEstado(i.pedido_id, 'completado'); cambios++; }
+          else if(bu && bu.success && bu.status === 'PENDING'){ await rpc('checkout_item_resultado', { p_item: i.id, p_estado: 'enviada', p_ref: { order_id: bu.order_id || null, reference: bu.reference || null, via: bu.via || null }, p_error: null }); cambios++; }
+          continue;   // si no se encuentra o figura fallido, se queda en verificación para revisarlo a mano (no se reembolsa solo)
+        }
+        if(!oidp) continue; consultadas++;
         const pr = await llamarProveedor({ action: 'estado', order_id: oidp }, req);
         if(pr && pr.success && pr.status === 'COMPLETED'){ await rpc('checkout_item_resultado', { p_item: i.id, p_estado: 'completada', p_ref: null, p_error: null }); await pedidoEstado(i.pedido_id, 'completado'); cambios++; }
         else if(pr && pr.success && (pr.status === 'FAILED' || pr.status === 'REFUNDED')){
