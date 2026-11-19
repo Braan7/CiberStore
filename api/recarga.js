@@ -194,12 +194,18 @@ function elegirRegalo(items, k){
 const NO_HECHO = (error, code) => ({ success: false, code: code || 'PURCHASE_FAILED', error });
 const DUDOSO = (error, code) => ({ success: false, code: code || 'PROVIDER_ERROR', error });
 
-function mapearOrden(o){
+function mapearOrden(o, esRegalo){
   const ref = o.reference_code || '';
   if(o.status === 'completed') return { success: true, status: 'COMPLETED', via: 'Central One ' + ref, reference: ref, order_id: o.id };
   if(o.status === 'failed' || o.status === 'cancelled'){
-    const f = o.failure || {};
-    return Object.assign(NO_HECHO(f.message_es || 'El proveedor no pudo completar la recarga'), { reference: ref, order_id: o.id });
+    // Cajas y fragmentos: el proveedor suele marcar "failed" un momento y luego la entrega sí se completa. En los primeros 15 min NO se da por fallida: queda pendiente y se vuelve a consultar.
+    const edad = Date.now() - Date.parse(o.created_at || '');
+    if((esRegalo || /fragment|caja|crate|box/i.test(JSON.stringify(o.items || []))) && edad >= 0 && edad < 15 * 60000)
+      return { success: true, status: 'PENDING', via: 'Central One ' + ref + ' (verificando)', reference: ref, order_id: o.id };
+    const f = o.failure || {}, ls = (o.items || []).map(i => String(i.status || '')).filter(Boolean);
+    // Si el pedido dice "failed" pero alguna línea figura como entregada, NO se da por fallido (evita reembolsar algo que sí llegó): se manda a verificar a mano
+    if(ls.some(s => /^(completed|delivered|fulfilled|succeeded|success)$/i.test(s))) return Object.assign(DUDOSO('El pedido figura fallido pero una línea aparece entregada: verifícalo en Central One (' + ref + ')'), { reference: ref, order_id: o.id });
+    return Object.assign(NO_HECHO((f.message_es || 'El proveedor no pudo completar la recarga') + (ls.length ? ' [líneas: ' + ls.join(',') + ']' : '') + (ref ? ' ' + ref : '')), { reference: ref, order_id: o.id });
   }
   return { success: true, status: 'PENDING', via: 'Central One ' + ref + ' (pendiente)', reference: ref, order_id: o.id };
 }
@@ -268,7 +274,7 @@ module.exports = async function handler(req, res){
       const r = await co('/orders/' + id); if(r.status !== 200 || !r.json || !r.json.order) return enviar(res, { success: false, error: 'No encontrado' });
       const o = r.json.order, m = mapearOrden(o);
       if((o.items || []).some(i => i.status === 'refunded')) return enviar(res, { success: true, status: 'REFUNDED', reference: o.reference_code });
-      return enviar(res, m.success ? { success: true, status: m.status, reference: m.reference } : { success: true, status: 'FAILED', reference: m.reference, error: m.error });
+      return enviar(res, m.success ? { success: true, status: m.status, reference: m.reference } : (m.code === 'PROVIDER_ERROR' ? { success: true, status: 'PENDING', reference: m.reference, error: m.error } : { success: true, status: 'FAILED', reference: m.reference, error: m.error }));
     }
 
     const extra = EXTRA[String(b.producto || '')] ? String(b.producto) : null;
@@ -312,7 +318,7 @@ module.exports = async function handler(req, res){
     // ¿Ya existe este mismo pedido? (reintento tras un corte): se devuelve su estado sin gastar de nuevo ni aplicar fusibles
     const rev = await revisarPedidos(cliente, key);
     if(!rev.ok) return enviar(res, NO_HECHO('No se pudo verificar el límite de gasto', 'ENDPOINT_DISABLED'));
-    if(rev.existente) return enviar(res, Object.assign(mapearOrden(rev.existente), { costo_usd: d.precio }));
+    if(rev.existente) return enviar(res, Object.assign(mapearOrden(rev.existente, !!reg), { costo_usd: d.precio }));
     // Protección de saldo con el proveedor: si queda poco (o no alcanza para este pedido) se pausa y se te avisa por Telegram
     const sp = await A.estado(d.precio);
     if(sp.pausa){ await A.avisarSaldoBajo(sp.saldo, sp.motivo); return enviar(res, NO_HECHO('Recargas en pausa por unos minutos: estamos reponiendo saldo del sistema. Intenta de nuevo en un rato.', 'ENDPOINT_DISABLED')); }
@@ -340,7 +346,7 @@ module.exports = async function handler(req, res){
     }
     try{ await A.despuesDeCompra(); }catch(e){}
     // costo_usd: lo que cobró el proveedor (para el aviso de Telegram con la ganancia)
-    const final = mapearOrden(o); if(final.success) final.costo_usd = d.precio;
+    const final = mapearOrden(o, !!reg); if(final.success) final.costo_usd = d.precio;
     return enviar(res, final);
   }catch(e){
     const timeout = e && e.name === 'AbortError';
