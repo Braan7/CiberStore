@@ -4190,8 +4190,9 @@ var SOP_ESTADO_LABEL = { pendiente:'Pendiente', en_atencion:'En atencion', resue
    PÁGINA FREE FIRE — navegación Tienda / Cuentas
 ================================================================ */
 function ffVolverInicio(){
-  document.getElementById('ff-vista-inicio').style.display = 'block';
-  document.getElementById('ff-vista-tienda').style.display = 'none';
+  // Free Fire ahora solo tiene la Tienda (diamantes, cajas, fragmentos y regalos por ID): se abre directo ahí
+  document.getElementById('ff-vista-inicio').style.display = 'none';
+  document.getElementById('ff-vista-tienda').style.display = 'block';
   document.getElementById('ff-vista-cuentas').style.display = 'none';
 }
 function ffIrTienda(){
@@ -11182,19 +11183,20 @@ document.addEventListener('DOMContentLoaded', function(){
     el.addEventListener('paste', function(e){
       try {
         var pegado = (e.clipboardData || window.clipboardData).getData('text');
-        if(pegado){
-          // Decidir si limpiar a solo numeros: campos de ID/tel/numericos
-          var esNumerico = (el.type === 'tel') || (el.inputMode === 'numeric') ||
-                           (el.getAttribute && el.getAttribute('inputmode') === 'numeric') ||
-                           (camposId.indexOf(el.id) >= 0);
-          var limpio = esNumerico ? limpiarId(pegado) : pegado.trim();
-          e.preventDefault();
-          var ini = el.selectionStart || 0;
-          var fin = el.selectionEnd || 0;
-          var val = el.value || '';
-          el.value = val.slice(0, ini) + limpio + val.slice(fin);
-          el.dispatchEvent(new Event('input', { bubbles:true }));
-        }
+        if(!pegado) return;
+        // Solo los campos de ID de Free Fire se limpian a números. Todo lo demás (códigos, referencias, letras…) se pega tal cual.
+        var esId = (camposId.indexOf(el.id) >= 0) || /(^|[-_])(ff)?id$/i.test(el.id || '');
+        var limpio = esId ? limpiarId(pegado) : pegado.trim();
+        // Si la limpieza deja el campo vacío, NO se bloquea: se deja el pegado normal del navegador
+        if(!limpio || (esId && limpio.length < 5)) return;
+        e.preventDefault();
+        var val = el.value || '', ini = el.selectionStart, fin = el.selectionEnd;
+        if(ini == null || fin == null){ ini = fin = val.length; }
+        var nuevo = val.slice(0, ini) + limpio + val.slice(fin);
+        var max = parseInt(el.getAttribute && el.getAttribute('maxlength'), 10); if(max > 0 && nuevo.length > max) nuevo = nuevo.slice(0, max);
+        el.value = nuevo;
+        try{ var pos = Math.min(nuevo.length, ini + limpio.length); el.setSelectionRange(pos, pos); }catch(e2){}
+        el.dispatchEvent(new Event('input', { bubbles:true }));
       } catch(err){ /* si falla, dejar el pegado normal */ }
     });
   }
@@ -15883,7 +15885,14 @@ function _admEsPC(){ return window.matchMedia && window.matchMedia('(min-width:9
 var _csViejo = false, _csChequeando = false, _csUltimo = 0, _csTimerRecarga = null, _csNuevo = null;
 function _csParse(txt){ var m = String(txt || '').match(/name="cs-build" content="([^"]+)"/); return m ? m[1] : null; }
 // Lee solo el principio de la página publicada (donde está la huella), no el archivo entero
+// Lee la huella desde un archivo diminuto (version.json); si no existe, usa el método anterior
 function csLeerBuild(){
+  return fetch(location.origin + '/version.json?cs_check=' + Date.now(), {cache:'no-store'}).then(function(r){
+    if(!r.ok) return null;
+    return r.text().then(function(t){ try{ var j = JSON.parse(t); return (j && typeof j.b === 'string' && j.b) ? j.b : null; }catch(e){ return null; } });
+  }).catch(function(){ return null; }).then(function(b){ return b || csLeerBuildHtml(); });
+}
+function csLeerBuildHtml(){
   var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null, url = location.origin + location.pathname + '?cs_check=' + Date.now();
   return fetch(url, {cache:'no-store', signal: ctrl ? ctrl.signal : undefined}).then(function(r){
     if(!r.ok) return null;
@@ -15943,7 +15952,7 @@ function csMarcarViejo(nuevo){
 (function(){ try{ if(/[?&]cs_v=/.test(location.search)){ var q = location.search.replace(/([?&])cs_v=[^&]*&?/g, '$1').replace(/[?&]$/, ''); history.replaceState(null, '', location.pathname + q + location.hash); } }catch(e){} })();
 // Cuándo revisar: al abrir, cada minuto, al volver a la pestaña, al recuperar internet y al volver con el botón "atrás"
 setTimeout(function(){ csVerificarVersion(true); }, 4000);
-setInterval(function(){ if(document.visibilityState === 'visible') csVerificarVersion(); }, 30000);
+setInterval(function(){ if(document.visibilityState === 'visible') csVerificarVersion(); }, 60000);
 document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible') csVerificarVersion(); });
 window.addEventListener('pageshow', function(e){ if(e.persisted) csVerificarVersion(true); });
 window.addEventListener('online', function(){ csVerificarVersion(true); });
@@ -20070,7 +20079,7 @@ var SIDEBAR_NUEVO = true;
 var SBX_GRUPOS = [
   { id:'cuenta',  t:'Cuenta',            ic:'user',   items:[ ['ni-perfil','Datos y nivel Prime'], ['ni-saldo','Agrega saldo'], ['ni-miscompras','Pedidos y seguimiento'], ['ni-transferir','Envía saldo'], ['ni-referidos','Gana invitando'], ['ni-retirar','Retira tus fondos'] ] },
   { id:'juegos',  t:'Juegos y recargas', ic:'game',   items:[ ['ni-freefire','Diamantes y más'], ['ni-recargas','Recargas y pines'], ['ni-giftcards','Tarjetas de regalo'] ] },
-  { id:'serv',    t:'Servicios',         ic:'bolt',   items:[ ['ni-likes','Likes para tu cuenta'], ['ni-clanes','Clanes en venta'], ['ni-api',''] ] },
+  { id:'serv',    t:'Servicios',         ic:'bolt',   items:[ ['ni-likes','Likes para tu cuenta'], ['ni-api',''] ] },
   { id:'otras',   t:'Otras cosas',       ic:'grid',   items:[ ['ni-tarjetas',''], ['ni-niveles','Subidas de nivel'] ] },
   { id:'ayuda',   t:'Comunidad y ayuda', ic:'help',   items:[ ['ni-ranking','Top compradores'], ['ni-soporte','Te ayudamos'], ['ni-faq','Preguntas frecuentes'], ['ni-estado','Estado del servicio'], ['ni-creadores',''], ['ni-sobre',''] ] }
 ];
@@ -20551,3 +20560,108 @@ function uxDescargarComp(){
     }catch(e){}
   };
 })();
+/* ═══════════ DIAMANTES AL 50 %: pestaña dentro de Diamantes · consulta a Volsever (vía api/comprar.js) · una vez por ID ═══════════ */
+var D50 = { id:'', nick:'', region:'', packs:[], busy:false, idem:{}, sel:null };
+function d50Esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function d50M(n){ return (typeof fmt === 'function') ? fmt(n) : ('$' + Number(n).toFixed(2)); }
+function d50Normal(n){ var p = null; try{ RECARGAS_AUTO.forEach(function(r){ if(r.diamantes === n && !r.manual) p = r.precio; }); }catch(e){} return p; }
+function d50Img(n){ try{ return _imgPorDiamantes(n); }catch(e){ return null; } }
+function d50N(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+
+(function(){
+  if(typeof setDiamTipo !== 'function') return;
+  var o = setDiamTipo;
+  window.setDiamTipo = function(tipo){
+    var pan = document.getElementById('diam-d50'), tab = document.getElementById('dtab-d50'), tabI = document.getElementById('dtab-ilim');
+    if(tipo === 'd50'){
+      o('ilim');
+      var cat = document.getElementById('diam-catalogo'); if(cat) cat.style.display = 'none';
+      if(pan) pan.style.display = '';
+      if(tab) tab.classList.add('active'); if(tabI) tabI.classList.remove('active');
+      d50Preparar();
+      return;
+    }
+    if(pan) pan.style.display = 'none'; if(tab) tab.classList.remove('active');
+    return o.apply(this, arguments);
+  };
+})();
+
+function d50Preparar(){
+  var i = document.getElementById('d50-id');
+  if(i && !i.value){ try{ var l = (typeof uxUltima === 'function') ? uxUltima() : null; if(l && l.ff) i.value = l.ff; }catch(e){} }
+  var box = document.getElementById('d50-ids'), h = '';
+  try{ (uxIds() || []).forEach(function(x){ h += '<span class="uxid"><button type="button" onclick="d50UsarId(\'' + x.id + '\')"><b>' + d50Esc(x.n || x.id) + '</b>' + (x.n ? '<small>' + x.id + '</small>' : '') + '</button></span>'; }); }catch(e){}
+  if(box) box.innerHTML = h;
+}
+function d50UsarId(id){ var i = document.getElementById('d50-id'); if(i){ i.value = id; d50Consultar(); } }
+
+function d50Consultar(){
+  if(typeof authSession === 'undefined' || !authSession){ if(typeof showToast === 'function') showToast('Inicia sesión para ver tus descuentos'); if(typeof showAuthModal === 'function') setTimeout(showAuthModal, 500); return; }
+  var id = ((document.getElementById('d50-id') || {}).value || '').replace(/\D/g, '');
+  var res = document.getElementById('d50-res'), btn = document.getElementById('d50-btn');
+  if(!/^\d{5,15}$/.test(id)){ res.innerHTML = '<div class="d50-msg ko">Escribe un ID de Free Fire válido (solo números).</div>'; return; }
+  if(D50.busy) return; D50.busy = true; if(btn){ btn.disabled = true; btn.innerHTML = '<span class="rc-spin"></span> Consultando…'; }
+  res.innerHTML = '<div class="d50-msg">Consultando los descuentos de tu cuenta…</div>';
+  ckApi('d50_check', { ff_id: id }, true).then(function(j){
+    D50.busy = false; if(btn){ btn.disabled = false; btn.textContent = 'Ver mis descuentos'; }
+    if(!j || !j.ok){ res.innerHTML = '<div class="d50-msg ko">' + d50Esc((j && j.message) || 'No se pudo consultar. Intenta de nuevo.') + '</div>'; return; }
+    D50.id = j.ff_id; D50.nick = j.nick || ''; D50.region = j.region || ''; D50.packs = j.packs || [];
+    try{ if(typeof ckSyncSaldo === 'function') ckSyncSaldo(j.saldo); }catch(e){}
+    d50Pintar();
+  }).catch(function(){ D50.busy = false; if(btn){ btn.disabled = false; btn.textContent = 'Ver mis descuentos'; } res.innerHTML = '<div class="d50-msg ko">Sin conexión. Intenta de nuevo.</div>'; });
+}
+
+function d50Pintar(){
+  var res = document.getElementById('d50-res'); if(!res) return;
+  var h = '<div class="d50-who"><span>👤</span><div><b>' + d50Esc(D50.nick || 'Cuenta encontrada') + '</b><small>ID ' + d50Esc(D50.id) + (D50.region ? ' · ' + d50Esc(D50.region) : '') + '</small></div></div><div class="d50-grid">';
+  var hay = false;
+  D50.packs.forEach(function(p){
+    var ok = p.disponible && p.activo, n = d50Normal(p.diamantes), img = d50Img(p.diamantes);
+    var est = ok ? '' : (p.ya_pedido ? 'Pedido en curso' : p.usado ? 'Ya usado en esta cuenta' : !p.activo ? 'No disponible' : 'No disponible');
+    if(ok) hay = true;
+    h += '<div class="d50-c' + (ok ? '' : ' off') + '">' + (img ? '<img src="' + img + '" alt="" onerror="this.style.display=\'none\'"/>' : '<span class="d50-e">💎</span>')
+      + '<div class="d50-t"><b>' + d50N(p.diamantes) + ' 💎</b><span class="d50-pr">' + (p.precio != null ? d50M(p.precio) : '') + (n && p.precio && n > p.precio ? '<s>' + d50M(n) + '</s>' : '') + '</span></div>'
+      + (ok ? '<button type="button" onclick="d50Comprar(\'' + p.clave + '\')">Comprar</button>' : '<em>' + est + '</em>') + '</div>';
+  });
+  h += '</div>';
+  if(!hay) h += '<div class="d50-msg">Esta cuenta no tiene descuentos disponibles ahora. Cada paquete con descuento se usa una sola vez por ID.</div>';
+  res.innerHTML = h;
+}
+
+function d50Comprar(clave){
+  var p = null; D50.packs.forEach(function(x){ if(x.clave === clave) p = x; }); if(!p) return; D50.sel = p;
+  var saldo = (authSession && Number(authSession.saldo)) || 0, falta = saldo < p.precio;
+  d50Sheet('<h3>Confirmar compra<button type="button" onclick="d50Cerrar()" aria-label="Cerrar">✕</button></h3>'
+    + '<div class="d50-sum"><div class="d50-big">' + d50N(p.diamantes) + ' 💎</div><div class="d50-bs">Diamantes al 50%</div></div>'
+    + '<dl class="d50-dl"><dt>ID de Free Fire</dt><dd>' + d50Esc(D50.id) + '</dd>' + (D50.nick ? '<dt>Jugador</dt><dd>' + d50Esc(D50.nick) + '</dd>' : '') + '<dt>Precio</dt><dd>' + d50M(p.precio) + '</dd><dt>Tu saldo</dt><dd>' + d50M(saldo) + '</dd></dl>'
+    + '<div class="d50-note">⚠️ Se puede usar <b>una sola vez</b> por ID. La entrega es <b>manual</b>: la procesamos y la verás en Mis compras.</div>'
+    + '<div id="d50-err"></div>'
+    + (falta ? '<button type="button" class="d50-go" onclick="d50Cerrar();goPage(\'saldo\')">Recargar saldo</button>' : '<button type="button" class="d50-go" id="d50-ok" onclick="d50Pagar()">Pagar ' + d50M(p.precio) + '</button>'));
+}
+function d50Sheet(h){ var o = document.getElementById('d50-ov'); if(!o) return; if(o.parentNode !== document.body) document.body.appendChild(o); o.innerHTML = '<div class="d50-sheet">' + h + '</div>'; o.classList.add('on'); }
+function d50Cerrar(){ var o = document.getElementById('d50-ov'); if(o){ o.classList.remove('on'); o.innerHTML = ''; } }
+function d50Pagar(){
+  var p = D50.sel; if(!p || D50.busy) return;
+  var k = p.clave + '|' + D50.id; if(!D50.idem[k]) D50.idem[k] = 'd50-' + (typeof ckUUID === 'function' ? ckUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2, 10));
+  var b = document.getElementById('d50-ok'), er = document.getElementById('d50-err'); D50.busy = true; if(b){ b.disabled = true; b.innerHTML = '<span class="rc-spin"></span> Procesando…'; }
+  ckApi('pagar', { items: [{ clave: p.clave, ff_id: D50.id }], idem: D50.idem[k] }, true).then(function(j){
+    D50.busy = false;
+    if(!j || !j.ok){
+      if(b){ b.disabled = false; b.textContent = 'Pagar ' + d50M(p.precio); }
+      if(er) er.innerHTML = '<div class="d50-msg ko">' + d50Esc((j && j.message) || 'No se pudo completar. No se te cobró.') + '</div>';
+      if(j && (j.code === 'd50_ya' || j.code === 'd50_usado')){ delete D50.idem[k]; setTimeout(function(){ d50Cerrar(); d50Consultar(); }, 1800); }
+      if(j && j.code === 'saldo_insuficiente'){ try{ ckSyncSaldo(Number(j.saldo) || 0); }catch(e){} }
+      return;
+    }
+    delete D50.idem[k];
+    try{ ckSyncSaldo(Number(j.saldo)); }catch(e){} try{ if(typeof refreshUserBalance === 'function') refreshUserBalance(); }catch(e){}
+    p.disponible = false; p.ya_pedido = 'pendiente'; d50Pintar();
+    d50Sheet('<div class="d50-okk"><div class="d50-chk">✓</div><h3 style="justify-content:center">¡Pedido recibido!</h3><p>' + d50N(p.diamantes) + ' diamantes al 50% para el ID <b>' + d50Esc(D50.id) + '</b>.</p>'
+      + '<p class="d50-sub">Saldo restante: <b>' + d50M(j.saldo) + '</b>. La entrega es manual; sigue el estado en Mis compras.</p>'
+      + '<button type="button" class="d50-go" onclick="d50Cerrar();goPage(\'miscompras\')">Ver en Mis compras</button><button type="button" class="d50-ghost" onclick="d50Cerrar()">Cerrar</button></div>');
+    try{ if(typeof mc2Refrescar === 'function') mc2Refrescar(); }catch(e){}
+  }).catch(function(){
+    D50.busy = false; if(b){ b.disabled = false; b.textContent = 'Pagar ' + d50M(p.precio); }
+    if(er) er.innerHTML = '<div class="d50-msg ko">Sin conexión. Si se descontó saldo aparecerá en Mis compras; puedes pulsar Pagar otra vez: no se cobra dos veces.</div>';
+  });
+}

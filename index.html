@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta name="cs-build" content="0124870e75">
-<script>var CS_BUILD="0124870e75";</script>
+<meta name="cs-build" content="36384f3d6b">
+<script>var CS_BUILD="36384f3d6b";</script>
 <meta charset="UTF-8"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -4315,7 +4315,7 @@ select.ap-inp{flex:0 1 auto}
       <div class="nav-item" id="ni-giftcards" onclick="goPage('giftcards')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div> Gift Cards</div>
       <div class="sb-section">Servicios</div>
       <div class="nav-item" id="ni-likes" onclick="goPage('likes2k')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11v10H4a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1z"/><path d="M7 11l3.5-7a1.5 1.5 0 0 1 2.7 1.3L12 9h6.3a2 2 0 0 1 1.9 2.6l-2 6.5a2 2 0 0 1-1.9 1.4H7"/></svg></div> Likes</div>
-      <div class="nav-item" id="ni-clanes" onclick="goPage('clanes')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div> Venta de Clanes</div>
+      <div class="nav-item" id="ni-clanes" style="display:none" onclick="goPage('clanes')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div> Venta de Clanes</div>
       <div class="nav-item" id="ni-api" onclick="goPage('api')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v4M15 3v4M9 17v4M15 17v4M3 9h4M3 15h4M17 9h4M17 15h4"/><rect x="7" y="7" width="10" height="10" rx="2"/></svg></div> API Revendedores <span class="nb" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);color:#cbd5e1">PRONTO</span></div>
       <div class="sb-section">Otras cosas</div>
       <div class="nav-item" id="ni-tarjetas" onclick="goPage('tarjetas')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div> Tarjetas</div>
@@ -4473,7 +4473,7 @@ select.ap-inp{flex:0 1 auto}
   <div class="page-wrap" style="max-width:640px;margin:0 auto;padding:0 5vw 3rem">
 
     <!-- Vista 1: Elegir Tienda o Cuentas -->
-    <div id="ff-vista-inicio">
+    <div id="ff-vista-inicio" style="display:none">
       <button onclick="goPage('home')" class="sop-back" style="margin-top:1rem">&#8592; Todos los juegos</button>
 
       <div class="ds-hero" style="margin-bottom:1.6rem">
@@ -4503,21 +4503,16 @@ select.ap-inp{flex:0 1 auto}
           <div style="flex:1"><div class="ds-cat-name" style="font-size:.95rem">Tienda</div><div class="ds-cat-sub" style="font-size:.72rem">Pases, tokens y cajas</div></div>
           <span style="color:#6b7280;font-size:1.2rem">&#8250;</span>
         </button>
-        <button type="button" class="ds-cat-card" style="width:100%;flex-direction:row;align-items:center;text-align:left;padding:1.2rem 1.1rem;gap:1rem;font-family:inherit;color:inherit" onclick="ffIrCuentas()">
-          <span class="ds-cat-ico"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#7cc0ff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg></span>
-          <div style="flex:1"><div class="ds-cat-name" style="font-size:.95rem">Cuentas</div><div class="ds-cat-sub" style="font-size:.72rem">Pases de nivel</div></div>
-          <span style="color:#6b7280;font-size:1.2rem">&#8250;</span>
-        </button>
       </div>
     </div>
 
     <!-- Vista 2: Tienda (6 subcategorías) -->
-    <div id="ff-vista-tienda" style="display:none">
-      <button onclick="ffVolverInicio()" class="sop-back" style="margin-top:1rem">&#8592; Volver a Free Fire</button>
+    <div id="ff-vista-tienda">
+      <button onclick="goPage('home')" class="sop-back" style="margin-top:1rem">&#8592; Volver al inicio</button>
       <div style="margin:1.3rem 0 1.1rem">
         <div class="ds-eyebrow"><div class="ds-eyebrow-bar"></div><div class="ds-eyebrow-txt">Explora el cat&aacute;logo</div></div>
         <div style="font-family:Saira,sans-serif;font-weight:900;font-size:1.35rem;color:#fff;letter-spacing:-.3px">TIENDA</div>
-        <div style="font-size:.8rem;color:#8b93a3;margin-top:.15rem">Pases, tokens y cajas</div>
+        <div style="font-size:.8rem;color:#8b93a3;margin-top:.15rem">Diamantes, cajas, fragmentos y regalos por ID</div>
       </div>
       <div class="tienda-ff-grid" style="display:flex;flex-direction:column;gap:1rem">
 
@@ -4536,24 +4531,10 @@ select.ap-inp{flex:0 1 auto}
           </div>
         </div>
 
-        
-
-        <div class="ff-acc-card" onclick="goPage('clanes')">
-          <div class="ff-acc-img" style="background-image:url('img/clanes-nvl7.png');aspect-ratio:21/9">
-            <span class="ff-acc-badge" style="background:linear-gradient(135deg,#285aa3,#7cc0ff)">CLANES NVL 7</span>
-          </div>
-          <div class="ff-acc-body" style="padding:.9rem 1rem">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:.75rem">
-              <div>
-                <div class="ff-acc-title" style="font-size:.95rem;margin-bottom:.2rem">Clanes NVL 7</div>
-                <div style="font-size:.75rem;color:#9aa3b0">Clanes listos para usar</div>
-              </div>
-              <span style="color:#6b7280;font-size:1.3rem;flex-shrink:0">&#8250;</span>
-            </div>
-          </div>
-        </div>
-
         <div class="ff-acc-card" onclick="goPage('regalos')"><div class="ff-acc-img" style="background:linear-gradient(135deg,#0a4fa8,#1b87f5);aspect-ratio:21/9"><span class="ff-acc-badge" style="background:rgba(0,0,0,.45)">REGALOS</span></div><div class="ff-acc-body" style="padding:.9rem 1rem"><div style="display:flex;align-items:center;justify-content:space-between;gap:.75rem"><div><div class="ff-acc-title" style="font-size:.95rem;margin-bottom:.2rem">Regalos v&iacute;a correo</div><div style="font-size:.75rem;color:#9aa3b0">Pase, cajas, fragmentos, tarjetas y niveles</div></div><span style="color:#6b7280;font-size:1.3rem;flex-shrink:0">&#8250;</span></div></div></div>
+
+
+        
 
 
         
@@ -4783,9 +4764,7 @@ select.ap-inp{flex:0 1 auto}
     </section>
 
     <!-- Selector de tipo -->
-    <div style="display:none;gap:.5rem;margin-bottom:1.5rem;background:rgba(0,0,0,.25);padding:.35rem;border-radius:12px">
-      <button id="dtab-ilim" onclick="setDiamTipo('ilim')" class="dtab-btn active">&#52555b; Con Bono</button>
-    </div>
+    <div class="d50-tabs" id="d50-tabs"><button id="dtab-ilim" onclick="setDiamTipo('ilim')" class="dtab-btn active">Diamantes ilimitados</button><button id="dtab-d50" onclick="setDiamTipo('d50')" class="dtab-btn">Diamantes al 50% <span class="d50-new">NUEVO</span></button></div>
 
     <!-- Catálogo (cuadrícula) -->
     <div id="diam-catalogo">
@@ -4825,6 +4804,21 @@ select.ap-inp{flex:0 1 auto}
         </button>
       </div>
     </div>
+
+    <!-- ═══ DIAMANTES AL 50 % (pestaña dentro de Diamantes) ═══ -->
+    <div id="diam-d50" style="display:none">
+      <div class="d50-hero">
+        <div class="d50-ey">DESCUENTO OFICIAL</div>
+        <div class="d50-h">Diamantes al 50%</div>
+        <div class="d50-s">Paquetes con descuento de Free Fire. Cada paquete se puede usar <b>una sola vez por ID</b>.</div>
+      </div>
+      <label class="flabel" for="d50-id">Tu ID de Free Fire *</label>
+      <input class="finput" id="d50-id" type="text" inputmode="numeric" placeholder="Ej: 123456789" autocomplete="off" onkeydown="if(event.key==='Enter')d50Consultar()"/>
+      <div id="d50-ids" class="uxids"></div>
+      <button type="button" id="d50-btn" class="d50-go" onclick="d50Consultar()">Ver mis descuentos</button>
+      <div id="d50-res"></div>
+    </div>
+    <div class="d50-ov" id="d50-ov" onclick="if(event.target===this)d50Cerrar()"></div>
 
     <!-- Detalle (oculto hasta seleccionar) -->
     <div id="diam-detalle" style="display:none"></div>
@@ -9812,10 +9806,58 @@ body.light-mode .ux-tx b{color:#0f172a}
 .ux-hora{font-size:.7rem;color:#6b7280;text-align:center;margin-top:.8rem}
 .ux-dl{display:block;width:100%;margin-top:.8rem;border:0;border-radius:12px;padding:.8rem;background:#1b87f5;color:#fff;font-weight:700;font-size:.88rem;cursor:pointer}
 
+/* ═══ Diamantes al 50 % ═══ */
+.d50-tabs{display:flex;gap:.4rem;margin:0 0 1.1rem;background:rgba(0,0,0,.25);padding:.3rem;border-radius:14px;max-width:640px}
+.d50-tabs .dtab-btn{flex:1;font-size:.8rem;padding:.65rem .4rem;white-space:nowrap}
+.d50-new{display:inline-block;margin-left:.25rem;font-size:.58rem;font-weight:800;letter-spacing:.5px;padding:.12rem .38rem;border-radius:99px;background:#ff4d6d;color:#fff;vertical-align:middle}
+#diam-d50{max-width:640px}
+.d50-hero{border-radius:16px;padding:1rem 1.05rem;margin-bottom:1rem;background:linear-gradient(135deg,rgba(255,77,109,.14),rgba(255,184,77,.08));border:1px solid rgba(255,120,100,.3)}
+.d50-ey{font-size:.64rem;font-weight:800;letter-spacing:1.6px;color:#ff8a7a}
+.d50-h{font-family:Saira,Barlow,sans-serif;font-weight:900;font-size:1.45rem;color:#fff;margin:.15rem 0}
+body.light-mode .d50-h{color:#0f172a}
+.d50-s{font-size:.8rem;color:#c3cad6;line-height:1.5}
+.d50-go{display:block;width:100%;margin:.2rem 0 .9rem;border:0;border-radius:13px;padding:.85rem;background:linear-gradient(135deg,#0a4fa8,#1b87f5);color:#fff;font-family:Barlow,sans-serif;font-weight:700;font-size:.92rem;cursor:pointer}
+.d50-go:disabled{opacity:.6}
+.d50-ghost{display:block;width:100%;border:0;background:none;color:#9aa4b2;padding:.6rem;font-size:.85rem;cursor:pointer}
+.d50-msg{padding:.8rem .95rem;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);font-size:.8rem;color:#b6bfcc;line-height:1.5;margin-bottom:.8rem}
+.d50-msg.ko{background:rgba(255,80,80,.08);border-color:rgba(255,80,80,.3);color:#ffb3b3}
+.d50-who{display:flex;align-items:center;gap:.65rem;padding:.65rem .85rem;border-radius:13px;background:rgba(37,211,102,.07);border:1px solid rgba(37,211,102,.28);margin-bottom:.8rem;font-size:1.3rem}
+.d50-who b{display:block;font-size:.9rem;color:#fff}
+body.light-mode .d50-who b{color:#0f172a}
+.d50-who small{font-size:.72rem;color:#8b93a3}
+.d50-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+@media(min-width:560px){.d50-grid{grid-template-columns:repeat(3,1fr)}}
+.d50-c{display:flex;flex-direction:column;align-items:center;gap:.35rem;padding:.75rem .55rem;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,120,100,.28);text-align:center}
+.d50-c img{width:54px;height:54px;object-fit:contain}
+.d50-e{font-size:2.2rem}
+.d50-t b{display:block;font-size:.95rem;color:#fff}
+body.light-mode .d50-t b{color:#0f172a}
+.d50-pr{display:block;font-weight:800;color:#4ade80;font-size:.95rem}
+.d50-pr s{margin-left:.35rem;color:#6b7280;font-weight:500;font-size:.72rem}
+.d50-c button{width:100%;border:0;border-radius:10px;padding:.5rem;background:#1b87f5;color:#fff;font-weight:700;font-size:.8rem;cursor:pointer}
+.d50-c em{font-style:normal;font-size:.7rem;color:#8b93a3;padding:.35rem 0}
+.d50-c.off{opacity:.55;border-color:rgba(255,255,255,.07)}
+.d50-ov{position:fixed;inset:0;z-index:10050;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center}
+.d50-ov.on{display:flex}
+.d50-sheet{width:100%;max-width:440px;max-height:92vh;overflow:auto;background:#10151f;border:1px solid rgba(255,255,255,.1);border-radius:20px 20px 0 0;padding:1.1rem 1.1rem 1.4rem;animation:uxIn .25s ease both}
+@media(min-width:560px){.d50-ov{align-items:center}.d50-sheet{border-radius:20px}}
+.d50-sheet h3{display:flex;justify-content:space-between;align-items:center;margin:0 0 .8rem;font-family:Barlow,sans-serif;font-size:1.05rem;color:#fff}
+.d50-sheet h3 button{border:0;background:none;color:#8b93a3;font-size:1.1rem;cursor:pointer}
+.d50-sum{text-align:center;margin-bottom:.7rem}
+.d50-big{font-family:Saira,Barlow,sans-serif;font-weight:900;font-size:2rem;color:#fff}
+.d50-bs{font-size:.78rem;color:#ff8a7a;font-weight:700}
+.d50-dl{display:grid;grid-template-columns:auto 1fr;gap:.35rem .8rem;margin:0 0 .8rem;padding:.7rem .85rem;border-radius:12px;background:rgba(255,255,255,.04);font-size:.82rem}
+.d50-dl dt{color:#8b93a3}.d50-dl dd{margin:0;text-align:right;color:#fff;font-weight:600;word-break:break-all}
+.d50-note{font-size:.76rem;color:#ffb84d;background:rgba(255,184,77,.08);border:1px solid rgba(255,184,77,.25);border-radius:11px;padding:.6rem .75rem;margin-bottom:.8rem;line-height:1.5}
+.d50-okk{text-align:center}
+.d50-chk{width:58px;height:58px;margin:.2rem auto .7rem;border-radius:50%;background:#16a34a;color:#fff;font-size:1.9rem;display:grid;place-items:center}
+.d50-okk p{font-size:.85rem;color:#c3cad6;margin:.2rem 0}
+.d50-sub{font-size:.78rem!important;color:#8b93a3!important;margin-bottom:.9rem!important}
+
 </style>
-<script src="supabase.js?v=0124870e75"></script>
-<script src="supabase_integration.js?v=0124870e75"></script>
-<script src="script.js?v=0124870e75"></script>
+<script src="supabase.js?v=36384f3d6b"></script>
+<script src="supabase_integration.js?v=36384f3d6b"></script>
+<script src="script.js?v=36384f3d6b"></script>
 
 <!-- BARRA DE NAVEGACION INFERIOR -->
 
