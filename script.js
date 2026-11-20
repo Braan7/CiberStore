@@ -20072,7 +20072,7 @@ var SBX_GRUPOS = [
   { id:'juegos',  t:'Juegos y recargas', ic:'game',   items:[ ['ni-freefire','Diamantes y más'], ['ni-recargas','Recargas y pines'], ['ni-giftcards','Tarjetas de regalo'] ] },
   { id:'serv',    t:'Servicios',         ic:'bolt',   items:[ ['ni-likes','Likes para tu cuenta'], ['ni-clanes','Clanes en venta'], ['ni-api',''] ] },
   { id:'otras',   t:'Otras cosas',       ic:'grid',   items:[ ['ni-tarjetas',''], ['ni-niveles','Subidas de nivel'] ] },
-  { id:'ayuda',   t:'Comunidad y ayuda', ic:'help',   items:[ ['ni-ranking','Top compradores'], ['ni-soporte','Te ayudamos'], ['ni-faq','Preguntas frecuentes'], ['ni-creadores',''], ['ni-sobre',''] ] }
+  { id:'ayuda',   t:'Comunidad y ayuda', ic:'help',   items:[ ['ni-ranking','Top compradores'], ['ni-soporte','Te ayudamos'], ['ni-faq','Preguntas frecuentes'], ['ni-estado','Estado del servicio'], ['ni-creadores',''], ['ni-sobre',''] ] }
 ];
 var SBX = { hecho:false, abiertos:null };
 function sbxEsc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
@@ -20359,4 +20359,195 @@ function otSticker(tipo, clave){
     home.parentNode.insertBefore(s, home.nextSibling); home.parentNode.insertBefore(c, s.nextSibling);
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', montar); else montar();
+})();
+/* ═══════════ UX: progreso 0–100 %, resultado móvil, repetir recarga, IDs favoritos, saldo bajo, estado y comprobantes ═══════════ */
+var UXS = { t0:0, tf:0, p:0, floor:0, timer:null, done:false };
+var UX_SALDO_BAJO = 20;   // MXN: por debajo de esto se sugiere recargar saldo (solo a quien ya compró antes)
+function uxEsc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function uxUser(){ try{ return (typeof authSession !== 'undefined' && authSession && authSession.username) ? String(authSession.username).toLowerCase() : ''; }catch(e){ return ''; } }
+function uxGet(k, def){ try{ var v = JSON.parse(localStorage.getItem(k) || 'null'); return v == null ? def : v; }catch(e){ return def; } }
+function uxSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+function uxMoney(n){ return (typeof fmt === 'function') ? fmt(n) : ('$' + Number(n || 0).toFixed(2)); }
+
+/* ── 1) Barra de progreso 0 → 100 % ── */
+function uxTick(){
+  var els = document.querySelectorAll('.rcx');
+  if(!els.length){ if(Date.now() - UXS.t0 > 1500){ clearInterval(UXS.timer); UXS.timer = null; } return; }
+  var t = Date.now() - UXS.tf, p = UXS.done ? 100 : Math.min(94, UXS.floor + (94 - UXS.floor) * (1 - Math.exp(-t / 6000)));
+  p = Math.max(UXS.p, p); UXS.p = p; var n = Math.floor(p);
+  var st = UXS.done ? '¡Recarga completada!' : n < 20 ? 'Verificando tu saldo…' : n < 45 ? 'Validando tu ID…' : n < 85 ? 'Enviando tus diamantes…' : 'Confirmando con el proveedor…';
+  for(var i = 0; i < els.length; i++){
+    var e = els[i]; e.style.setProperty('--p', p.toFixed(1));
+    var a = e.querySelector('.rcx-n'); if(a) a.textContent = n + '%';
+    var b = e.querySelector('.rcx-st'); if(b) b.textContent = st;
+    var f = e.querySelector('.rcx-bar i'); if(f) f.style.width = p.toFixed(1) + '%';
+    if(UXS.done) e.classList.add('rcx-ok');
+  }
+}
+(function(){
+  if(typeof _rcEstadoHTML === 'function'){
+    var orig = _rcEstadoHTML;
+    window._rcEstadoHTML = function(tipo, titulo, sub){
+      if(tipo !== 'pending') return orig(tipo, titulo, sub);
+      var s = String(sub || ''), fl = /Validando/i.test(s) ? 18 : /encontrada|Procesando/i.test(s) ? 40 : /sin verificar/i.test(s) ? 30 : 4;
+      if(!UXS.timer){ UXS.t0 = UXS.tf = Date.now(); UXS.p = 0; UXS.floor = 0; UXS.done = false; UXS.timer = setInterval(uxTick, 120); }
+      if(fl > UXS.floor){ UXS.floor = fl; UXS.tf = Date.now(); }
+      return '<div class="rc-state rc-state--pending rcx" style="--p:' + UXS.p.toFixed(1) + '">'
+        + '<div class="rcx-ring"><div class="rcx-in"><b class="rcx-n">' + Math.floor(UXS.p) + '%</b></div></div>'
+        + '<div class="rcx-tx"><div class="rcx-t">Recarga en proceso</div><div class="rcx-st">Verificando tu saldo…</div><div class="rcx-sub">' + s + '</div></div>'
+        + '<div class="rcx-bar"><i style="width:' + UXS.p.toFixed(1) + '%"></i></div></div>';
+    };
+  }
+  if(typeof _mostrarReciboRecarga === 'function'){
+    var oRec = _mostrarReciboRecarga;
+    window._mostrarReciboRecarga = function(p, ffId, nombre, status){
+      try{ uxGuardarUltima(p, ffId, nombre); }catch(e){}
+      var args = arguments;
+      function mostrar(){ oRec.apply(null, args); try{ uxSaldoEnRecibo(); }catch(e){} }
+      if(document.querySelector('.rcx') && status !== 'PENDING'){ UXS.done = true; uxTick(); setTimeout(function(){ UXS.done = false; mostrar(); }, 800); return; }
+      mostrar();
+    };
+  }
+})();
+
+/* ── 2) Última recarga + IDs guardados ── */
+function uxUltima(){ var u = uxUser(); return u ? uxGet('cs_ux_last_' + u, null) : null; }
+function uxIds(){ var u = uxUser(); return u ? uxGet('cs_ux_ids_' + u, []) : []; }
+function uxAddId(id, nombre){
+  var u = uxUser(); id = String(id || '').trim(); if(!u || !/^\d{6,14}$/.test(id)) return;
+  var l = uxIds().filter(function(x){ return x.id !== id; }); l.unshift({ id: id, n: String(nombre || '').slice(0, 24) }); uxSet('cs_ux_ids_' + u, l.slice(0, 5));
+}
+function uxGuardarUltima(p, ffId, nombre){
+  var u = uxUser(); if(!u || !p) return;
+  uxSet('cs_ux_last_' + u, { nombre: p.nombre, tipo: (typeof _diamTipoActual !== 'undefined' ? _diamTipoActual : ''), ff: String(ffId || ''), jug: nombre || '', t: Date.now() });
+  if(nombre) uxAddId(ffId, nombre);
+}
+function uxUsarId(id){ var i = document.getElementById('diam-ffid'); if(i){ i.value = id; try{ i.dispatchEvent(new Event('input', { bubbles: true })); }catch(e){} uxPintarChips(); } }
+function uxQuitarId(id){ var u = uxUser(); if(!u) return; uxSet('cs_ux_ids_' + u, uxIds().filter(function(x){ return x.id !== id; })); uxPintarChips(); }
+function uxGuardarActual(){
+  var i = document.getElementById('diam-ffid'), v = i ? i.value.trim() : '';
+  if(!/^\d{6,14}$/.test(v)){ if(typeof showToast === 'function') showToast('Escribe un ID válido para guardarlo'); return; }
+  uxAddId(v, ''); uxPintarChips(); if(typeof showToast === 'function') showToast('⭐ ID guardado en este dispositivo');
+}
+function uxPintarChips(){
+  var inp = document.getElementById('diam-ffid'); if(!inp) return;
+  var box = document.getElementById('uxids');
+  if(!box){ box = document.createElement('div'); box.id = 'uxids'; box.className = 'uxids'; inp.parentNode.insertBefore(box, inp.nextSibling); }
+  var l = uxIds(), h = '';
+  l.forEach(function(x){ h += '<span class="uxid"><button type="button" onclick="uxUsarId(\'' + x.id + '\')"><b>' + uxEsc(x.n || x.id) + '</b>' + (x.n ? '<small>' + x.id + '</small>' : '') + '</button><i onclick="uxQuitarId(\'' + x.id + '\')" aria-label="Quitar">×</i></span>'; });
+  h += '<button type="button" class="uxsave" onclick="uxGuardarActual()">⭐ Guardar este ID</button>';
+  box.innerHTML = h;
+}
+(function(){
+  if(typeof abrirDiamDetalle === 'function'){ var o = abrirDiamDetalle; window.abrirDiamDetalle = function(idx){ var r = o.apply(this, arguments); try{ uxPintarChips(); }catch(e){} return r; }; }
+  if(typeof renderDiamCatalogo === 'function'){ var o2 = renderDiamCatalogo; window.renderDiamCatalogo = function(){ var r = o2.apply(this, arguments); try{ uxTop(); }catch(e){} return r; }; }
+})();
+
+/* ── 3) Tarjetas superiores del catálogo: repetir recarga y saldo bajo ── */
+function uxTop(){
+  var cat = document.getElementById('diam-catalogo'); if(!cat) return;
+  var box = document.getElementById('ux-top');
+  if(!box){ box = document.createElement('div'); box.id = 'ux-top'; box.className = 'ux-top'; cat.insertBefore(box, cat.firstChild); }
+  var u = uxUser(), h = '';
+  if(!u){ box.innerHTML = ''; return; }
+  var last = uxUltima(), saldo = (authSession && Number(authSession.saldo)) || 0;
+  if(last && saldo < UX_SALDO_BAJO && Date.now() > uxGet('cs_ux_sb_' + u, 0)){
+    h += '<div class="ux-card ux-low"><div class="ux-ic">💳</div><div class="ux-tx"><b>Tu saldo es ' + uxMoney(saldo) + '</b><span>Recárgalo para tu próxima recarga sin esperas.</span></div><button type="button" class="ux-b" onclick="goPage(\'saldo\')">Recargar</button><i class="ux-x" onclick="uxCerrarSaldo()" aria-label="Cerrar">×</i></div>';
+  }
+  if(last && last.nombre){
+    h += '<div class="ux-card ux-rep"><div class="ux-ic">🔁</div><div class="ux-tx"><b>Repetir mi última recarga</b><span>' + uxEsc(last.nombre) + (last.ff ? ' · ID ' + uxEsc(last.ff) : '') + '</span></div>'
+      + '<div class="ux-bs">' + (last.ff ? '<button type="button" class="ux-b" onclick="uxRepetir(true)">Mismo ID</button>' : '') + '<button type="button" class="ux-b ux-b2" onclick="uxRepetir(false)">Otro ID</button></div></div>';
+  }
+  box.innerHTML = h;
+}
+function uxCerrarSaldo(){ var u = uxUser(); if(u) uxSet('cs_ux_sb_' + u, Date.now() + 12 * 3600 * 1000); uxTop(); }
+function uxRepetir(mismo){
+  var last = uxUltima(); if(!last) return;
+  if(last.tipo && typeof _diamTipoActual !== 'undefined' && _diamTipoActual !== last.tipo){ _diamTipoActual = last.tipo; try{ renderDiamCatalogo(); }catch(e){} }
+  var lista = []; try{ lista = _getDiamProductos(_diamTipoActual) || []; }catch(e){}
+  var idx = -1; lista.forEach(function(p, i){ if(idx < 0 && p.nombre === last.nombre) idx = i; });
+  if(idx < 0){ if(typeof showToast === 'function') showToast('Ese paquete ya no está disponible'); return; }
+  abrirDiamDetalle(idx);
+  var i = document.getElementById('diam-ffid');
+  if(i){ if(mismo) i.value = last.ff; else { i.value = ''; try{ i.focus(); }catch(e){} } }
+  uxPintarChips();
+}
+function uxSaldoEnRecibo(){
+  var card = document.querySelector('#diam-detalle .cy-card'), acts = card && card.querySelector('.cy-actions'); if(!card || !acts || card.querySelector('.ux-saldo')) return;
+  var s = (authSession && Number(authSession.saldo)) || 0, d = document.createElement('div'); d.className = 'ux-saldo';
+  d.innerHTML = '<span>Saldo restante <b>' + uxMoney(s) + '</b></span>' + (s < UX_SALDO_BAJO ? '<button type="button" onclick="goPage(\'saldo\')">Recargar</button>' : '');
+  card.insertBefore(d, acts);
+}
+
+/* ── 4) Página de estado del servicio ── */
+var UXE = { t: null };
+var UXE_TXT = { ok: ['Operativo', 'ok'], parcial: ['Stock limitado', 'wa'], sin_stock: ['Sin stock', 'ko'], pausa: ['En pausa', 'wa'], caido: ['Sin conexión', 'ko'], lento: ['Lento', 'wa'], apagado: ['Desactivado', 'ko'] };
+function uxEstadoCargar(){
+  var box = document.getElementById('ux-estado-c'); if(!box) return;
+  fetch('/api/recarga', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'salud' }) })
+    .then(function(r){ return r.json(); }).then(function(j){
+      if(!j || !j.ok) throw new Error('x');
+      var f = function(k){ return UXE_TXT[k] || ['Desconocido', 'wa']; };
+      var filas = [['Diamantes', '💎', j.diamantes], ['Cajas Evo', '📦', j.cajas], ['Fragmentos Evo', '🔧', j.fragmentos]];
+      var malo = filas.some(function(x){ return x[2] !== 'ok'; }) || (j.proveedor && j.proveedor !== 'ok');
+      var h = '<div class="ux-ban ' + (malo ? 'wa' : 'ok') + '"><b>' + (malo ? 'Algunos servicios tienen retrasos' : 'Todo funciona con normalidad') + '</b><span>' + (j.ms ? 'El proveedor responde en ' + (j.ms < 1000 ? j.ms + ' ms' : (j.ms / 1000).toFixed(1) + ' s') : '') + '</span></div>';
+      filas.forEach(function(x){ var e = f(x[2]); h += '<div class="ux-row"><span class="ux-ri">' + x[1] + '</span><b>' + x[0] + '</b><em class="ux-chip ' + e[1] + '">' + e[0] + '</em></div>'; });
+      h += '<div class="ux-row"><span class="ux-ri">🎫</span><b>Pases y regalos</b><em class="ux-chip ok">Entrega por regalo (1–4 días)</em></div>';
+      h += '<div class="ux-hora">Actualizado ' + new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' · se refresca solo cada 30 s</div>';
+      box.innerHTML = h;
+    }).catch(function(){ box.innerHTML = '<div class="ux-ban ko"><b>No pudimos consultar el estado</b><span>Intenta de nuevo en un momento.</span></div>'; });
+}
+(function(){
+  if(typeof goPage !== 'function') return;
+  var o = goPage;
+  window.goPage = function(id){
+    var r = o.apply(this, arguments);
+    clearInterval(UXE.t); UXE.t = null;
+    if(id === 'estado'){ uxEstadoCargar(); UXE.t = setInterval(uxEstadoCargar, 30000); }
+    if(id === 'diamantes') setTimeout(function(){ try{ uxTop(); }catch(e){} }, 150);
+    return r;
+  };
+})();
+
+/* ── 5) Comprobante descargable de cualquier pedido (Mis compras) ── */
+function uxRR(c, x, y, w, h, r){ c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+function uxComprobante(d){
+  var filas = d.filas.filter(function(f){ return f[1] != null && f[1] !== ''; }), W = 720, H = 330 + filas.length * 62 + 110;
+  var cv = document.createElement('canvas'); cv.width = W; cv.height = H; var c = cv.getContext('2d');
+  c.fillStyle = '#0d1117'; c.fillRect(0, 0, W, H); uxRR(c, 30, 30, W - 60, H - 60, 28); c.fillStyle = '#161b24'; c.fill();
+  c.beginPath(); c.arc(W / 2, 110, 38, 0, Math.PI * 2); c.fillStyle = d.ok ? '#16a34a' : '#f59e0b'; c.fill();
+  c.strokeStyle = '#fff'; c.lineWidth = 7; c.lineCap = 'round'; c.lineJoin = 'round'; c.beginPath();
+  if(d.ok){ c.moveTo(W / 2 - 16, 110); c.lineTo(W / 2 - 3, 123); c.lineTo(W / 2 + 18, 98); } else { c.moveTo(W / 2, 94); c.lineTo(W / 2, 112); c.lineTo(W / 2 + 12, 120); } c.stroke();
+  c.textAlign = 'center'; c.fillStyle = '#fff'; c.font = 'bold 38px Barlow, sans-serif'; c.fillText(d.titulo, W / 2, 205);
+  c.fillStyle = '#8b93a3'; c.font = '22px Barlow, sans-serif'; c.fillText(d.sub || 'Comprobante de compra', W / 2, 240);
+  var y = 290; filas.forEach(function(f){
+    c.strokeStyle = 'rgba(255,255,255,.07)'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(70, y + 20); c.lineTo(W - 70, y + 20); c.stroke();
+    c.textAlign = 'left'; c.fillStyle = '#8b93a3'; c.font = '22px Barlow, sans-serif'; c.fillText(f[0], 74, y + 4);
+    c.textAlign = 'right'; c.fillStyle = '#fff'; c.font = 'bold 24px Barlow, sans-serif'; c.fillText(String(f[1]).slice(0, 34), W - 74, y + 4); y += 62;
+  });
+  c.textAlign = 'center'; c.fillStyle = '#5aa9ff'; c.font = 'bold 24px Barlow, sans-serif'; c.fillText('CIBERSTORE · ciberstore.lat', W / 2, H - 62);
+  return cv;
+}
+function uxDescargarComp(){
+  var d = window._uxComp; if(!d) return;
+  try{ var cv = uxComprobante(d), a = document.createElement('a'); a.href = cv.toDataURL('image/png'); a.download = 'comprobante-ciberstore-' + String(d.ref || Date.now()).replace(/[^\w-]/g, '') + '.png'; document.body.appendChild(a); a.click(); document.body.removeChild(a); if(typeof showToast === 'function') showToast('Comprobante descargado'); }
+  catch(e){ if(typeof showToast === 'function') showToast('No se pudo descargar'); }
+}
+(function(){
+  if(typeof mc2Detalle !== 'function') return;
+  var o = mc2Detalle;
+  window.mc2Detalle = function(lista, i){
+    o.apply(this, arguments);
+    try{
+      var oo = null, p = null;
+      if(lista === 's'){ var x = (MC._seg || [])[i]; if(!x) return; oo = x.o || null; p = x.p || null; }
+      else { p = ((lista === 'h' ? MC._hist : MC._lista) || [])[i]; if(!p) return; var oid = mcOrdDe(p.producto); (MC.ordenes || []).forEach(function(q){ if(q.id === oid) oo = q; }); }
+      var d;
+      if(oo && !p){ if(!(oo.entregadas > 0)) return; d = { ok: oo.fase === 'completado' || oo.fase === 'entregado', titulo: 'Pedido ' + oo.codigo, ref: oo.codigo, filas: [['Pedido', oo.codigo], ['Fecha', mcFecha(oo.creada)], ['Pago', 'Saldo CiberStore'], ['Entregado', oo.entregadas + ' de ' + (oo.unidades - oo.reembolsadas)], ['Total pagado', mcFmt(oo.total)]] }; }
+      else { if(!(p.estado === 'completado')) return; d = { ok: true, titulo: 'Compra completada', ref: p.id, filas: [['Producto', mcLimpio(p.producto)], ['ID Free Fire', p.ff_id], ['Fecha', mcFecha(p.created_at)], ['Pedido', p.id != null ? '#' + p.id : ''], ['Importe', Number(p.precio) > 0 ? mcFmt(p.precio) : '']] }; }
+      window._uxComp = d;
+      var sh = document.querySelector('#mc2-ov .mc2-sheet'); if(!sh) return;
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'ux-dl'; b.innerHTML = '⬇ Descargar comprobante'; b.onclick = uxDescargarComp; sh.appendChild(b);
+    }catch(e){}
+  };
 })();

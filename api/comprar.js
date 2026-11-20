@@ -46,6 +46,15 @@ const dinero = n => '$' + Number(n).toLocaleString('es-MX', { minimumFractionDig
 const esc = s => String(s == null ? '' : s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 const msgErr = r => String((r && r.json && (r.json.message || r.json.error || r.json.hint)) || '');
 
+// Ganancia de una unidad: venta en MXN vs costo del proveedor en USD (tipo de cambio CO_TC, el mismo de la protección de margen)
+const TC_GAN = Number(process.env.CO_TC || 19.5);
+function gananciaTxt(ventaMxn, costoUsd){
+  const v = Number(ventaMxn), c = parseFloat(costoUsd);
+  if(!(v > 0) || !(c > 0)) return '';
+  const g = v - c * TC_GAN, pct = (c * TC_GAN) > 0 ? g / (c * TC_GAN) * 100 : 0;
+  return '\n──────────\n💰 Venta: ' + dinero(v) + '\n🏭 Proveedor: US$ ' + c.toFixed(4) + ' (≈ ' + dinero(c * TC_GAN) + ')\n'
+    + (g < 0 ? '🔻 <b>PÉRDIDA: ' : g === 0 ? '⚠️ <b>Sin ganancia: ' : '✅ Ganancia: ') + dinero(g) + (g <= 0 ? '</b>' : '') + ' (' + pct.toFixed(1) + ' %)';
+}
 async function telegram(texto){
   const t = (process.env.TG_BOT_TOKEN || process.env.TG_TOKEN || process.env.BOT_TOKEN), ch = (process.env.TG_CHAT_ID || process.env.TG_CHAT || process.env.TG_ID); if(!t || !ch) return;
   try{ const ctrl = new AbortController(), x = setTimeout(() => ctrl.abort(), 5000);
@@ -282,7 +291,7 @@ module.exports = async function handler(req, res){
           await pedidoEstado(ped, PEDIDO_EST[est] || 'procesando', est === 'rechazada' ? 'Reembolsado a tu saldo: ' + (err || '') : (est === 'verificar' ? 'En verificación por el equipo' : null));
           if(est === 'rechazada') telegram('↩️ <b>OS' + oid + ' · unidad rechazada y reembolsada</b>\n👤 ' + esc(p.username) + '\n🎁 ' + esc(item.nombre) + ' → ID ' + esc(item.ff_id) + '\n❗ ' + esc(err));
           if(est === 'verificar') telegram('🚨 <b>OS' + oid + ' · VERIFICAR a mano</b>\n👤 ' + esc(p.username) + '\n🎁 ' + esc(item.nombre) + ' → ID ' + esc(item.ff_id) + '\n❗ ' + esc(err) + '\n🔑 ' + llave + '\nNo se reembolsó: revisa con el proveedor y resuélvelo en el panel (Órdenes con saldo).');
-          if(est === 'enviada' || est === 'completada') telegram('⚡ <b>OS' + oid + ' · entrega automática ' + (est === 'completada' ? '✅ completada' : '⏳ en proceso') + '</b>\n👤 ' + esc(p.username) + '\n🎁 ' + esc(item.nombre) + ' → ID ' + esc(item.ff_id) + (ref && ref.via ? '\n📡 ' + esc(ref.via) : ''));
+          if(est === 'enviada' || est === 'completada') telegram('⚡ <b>OS' + oid + ' · entrega automática ' + (est === 'completada' ? '✅ completada' : '⏳ en proceso') + '</b>\n👤 ' + esc(p.username) + '\n🎁 ' + esc(item.nombre) + ' → ID ' + esc(item.ff_id) + (ref && ref.via ? '\n📡 ' + esc(ref.via) : '') + gananciaTxt(item.precio, pr && pr.costo_usd));
         }
       }
       const snap = await snapshot(oid);

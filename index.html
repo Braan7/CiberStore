@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta name="cs-build" content="0d69e159f4">
-<script>var CS_BUILD="0d69e159f4";</script>
+<meta name="cs-build" content="0124870e75">
+<script>var CS_BUILD="0124870e75";</script>
 <meta charset="UTF-8"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -4322,6 +4322,7 @@ select.ap-inp{flex:0 1 auto}
       <div class="nav-item" id="ni-niveles" onclick="goPage('niveles')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div> Subidas de Nivel</div>
       <div class="sb-section">Comunidad & ayuda</div>
       <div class="nav-item" id="ni-ranking" onclick="goPage('ranking')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16l-1.5 9h-13z"/><path d="M8 14v3h8v-3"/><path d="M6 21h12"/><path d="M4 5 2 8l2 2M20 5l2 3-2 2"/></svg></div> Ranking &amp; Premios</div>
+      <div class="nav-item" id="ni-estado" onclick="goPage('estado')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div> Estado del servicio</div>
       <div class="nav-item" id="ni-faq" onclick="goPage('faq')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 1-1 1.7"/><path d="M12 17h.01"/></svg></div> FAQ / Ayuda</div>
       <div class="nav-item" id="ni-soporte" onclick="goPage('soporte')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11a9 9 0 0 1 18 0v5a3 3 0 0 1-3 3h-1v-7h4M3 11v5a3 3 0 0 0 3 3h1v-7H3"/></svg></div> Centro de Soporte</div>
       <div class="nav-item" id="ni-creadores" onclick="goPage('creadores')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m23 7-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div> Creadores</div>
@@ -6894,6 +6895,13 @@ select.ap-inp{flex:0 1 auto}
   </div>
 </div>
 
+<div class="page" id="page-estado">
+  <div class="ux-pg">
+    <h2 class="ux-h">Estado del servicio</h2>
+    <p class="ux-p">Revisa en vivo si las recargas están funcionando antes de comprar.</p>
+    <div id="ux-estado-c"><div class="ux-ban"><b>Consultando…</b></div></div>
+  </div>
+</div>
 <div class="page" id="page-cajas">
   <div class="ph">
     <div class="stag">Nuevo &middot; Mejorado</div>
@@ -9713,10 +9721,101 @@ html.ck-abierto{overflow:hidden}
   #rg2-lista .rg2-sec,#rg2-lista .ck-note{grid-column:1/-1}
 }
 
+/* ═══ UX: progreso, resultado compacto, repetir, IDs, estado ═══ */
+.rcx{display:grid!important;grid-template-columns:auto 1fr;gap:.75rem .9rem;align-items:center;padding:.85rem .95rem!important;--p:0}
+.rcx-ring{width:58px;height:58px;border-radius:50%;background:conic-gradient(#1b87f5 calc(var(--p)*1%),rgba(255,255,255,.09) 0);display:grid;place-items:center;transition:background .15s}
+.rcx-in{width:46px;height:46px;border-radius:50%;background:#0d1320;display:grid;place-items:center}
+body.light-mode .rcx-in{background:#fff}
+.rcx-n{font-family:Saira,Barlow,sans-serif;font-weight:800;font-size:.82rem;color:#fff}
+body.light-mode .rcx-n{color:#0f172a}
+.rcx-t{font-family:Saira,Barlow,sans-serif;font-weight:800;font-size:.88rem;color:#1b87f5;letter-spacing:.3px}
+.rcx-st{font-size:.8rem;font-weight:600;color:#e6edf7;margin-top:.1rem}
+body.light-mode .rcx-st{color:#0f172a}
+.rcx-sub{font-size:.7rem;color:#8b93a3;margin-top:.15rem;line-height:1.35}
+.rcx-bar{grid-column:1/-1;height:6px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}
+.rcx-bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#1b87f5,#5aa9ff);transition:width .15s linear}
+.rcx.rcx-ok .rcx-ring{background:conic-gradient(#22c55e 100%,#22c55e 0)}
+.rcx.rcx-ok .rcx-t,.rcx.rcx-ok .rcx-n{color:#4ade80}
+.rcx.rcx-ok .rcx-bar i{background:linear-gradient(90deg,#16a34a,#4ade80)}
+.rcx.rcx-ok{border-color:rgba(37,211,102,.4)!important;background:rgba(37,211,102,.07)!important}
+
+/* Resultado: más compacto y moderno en celular */
+.cy-card{max-width:420px;padding:1.1rem .95rem .95rem;border-radius:22px;background:linear-gradient(180deg,rgba(34,197,94,.07),rgba(255,255,255,.02) 38%);border:1px solid rgba(255,255,255,.08);box-shadow:0 18px 40px -22px rgba(0,0,0,.7);animation:uxIn .35s ease both}
+@keyframes uxIn{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+.cy-okzone{padding:.1rem 0 .7rem}
+.cy-ring,.cy-core{width:58px;height:58px}
+.cy-ring{margin-bottom:.65rem}
+.cy-core svg{width:28px;height:28px}
+.cy-title{font-size:1.2rem}
+.cy-sub{font-size:.8rem;margin-top:.2rem}
+.cy-reward{padding:.8rem .8rem;margin-bottom:.7rem;gap:.7rem;border-radius:14px}
+.cy-reward .rc-emoji{font-size:1.9rem}
+.cy-reward .big{font-size:2rem}
+.cy-diam-lbl{font-size:.64rem;letter-spacing:2.4px}
+.cy-desglose{margin-top:.2rem;font-size:.76rem;padding:.3rem .7rem}
+.cy-panel{padding:.1rem .8rem;margin-bottom:.7rem;border-radius:14px}
+.cy-row{gap:.65rem;padding:.55rem .05rem}
+.cy-row-ic{width:30px;height:30px;border-radius:9px}
+.cy-row-ic svg{width:15px;height:15px}
+.cy-row-k{font-size:.8rem}
+.cy-row-v{font-size:.84rem;line-height:1.3;word-break:break-word}
+.cy-actions{gap:.5rem;margin-bottom:.6rem;grid-template-columns:1fr 1fr!important}
+.cy-act{padding:.55rem .6rem;gap:.5rem;border-radius:12px}
+.cy-act-ic{width:30px;height:30px}
+.cy-act-t{font-size:.76rem}
+.cy-act-s{display:none}
+.cy-btn{padding:.7rem;font-size:.85rem;border-radius:12px}
+.ux-saldo{display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin:0 0 .6rem;padding:.55rem .8rem;border-radius:12px;background:rgba(255,255,255,.04);font-size:.8rem;color:#9aa4b2}
+.ux-saldo b{color:#fff}
+.ux-saldo button{border:0;border-radius:9px;background:#1b87f5;color:#fff;font-weight:700;font-size:.74rem;padding:.4rem .75rem;cursor:pointer}
+
+/* Tarjetas superiores */
+.ux-top{display:flex;flex-direction:column;gap:.6rem;margin-bottom:.9rem;max-width:640px}
+.ux-top:empty{display:none}
+.ux-card{position:relative;display:flex;align-items:center;gap:.7rem;padding:.7rem .8rem;border-radius:14px;background:rgba(27,135,245,.07);border:1px solid rgba(27,135,245,.25)}
+.ux-low{background:rgba(255,184,77,.07);border-color:rgba(255,184,77,.3)}
+.ux-ic{font-size:1.4rem;flex-shrink:0}
+.ux-tx{min-width:0;flex:1;display:flex;flex-direction:column}
+.ux-tx b{font-size:.86rem;color:#fff}
+body.light-mode .ux-tx b{color:#0f172a}
+.ux-tx span{font-size:.74rem;color:#8b93a3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ux-bs{display:flex;gap:.4rem;flex-shrink:0}
+.ux-b{border:0;border-radius:10px;background:#1b87f5;color:#fff;font-weight:700;font-size:.76rem;padding:.5rem .8rem;cursor:pointer;flex-shrink:0}
+.ux-b2{background:rgba(255,255,255,.08);color:#cbd5e1}
+.ux-x{position:absolute;top:2px;right:8px;font-style:normal;color:#8b93a3;font-size:1.1rem;cursor:pointer;line-height:1}
+.ux-low .ux-tx{padding-right:.6rem}
+@media(max-width:420px){.ux-rep{flex-wrap:wrap}.ux-rep .ux-bs{width:100%}.ux-rep .ux-b{flex:1}}
+
+/* IDs guardados */
+.uxids{display:flex;flex-wrap:wrap;gap:.4rem;margin:.1rem 0 .7rem}
+.uxid{display:inline-flex;align-items:center;border-radius:99px;background:rgba(27,135,245,.1);border:1px solid rgba(27,135,245,.3);overflow:hidden}
+.uxid button{border:0;background:none;color:#cfe3ff;padding:.35rem .3rem .35rem .75rem;font-size:.76rem;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;line-height:1.15}
+.uxid small{font-size:.62rem;color:#7b8fb0}
+.uxid i{font-style:normal;padding:.3rem .65rem .3rem .3rem;color:#7b8fb0;cursor:pointer}
+.uxsave{border:1px dashed rgba(255,255,255,.2);background:none;color:#9aa4b2;border-radius:99px;font-size:.74rem;padding:.35rem .75rem;cursor:pointer}
+
+/* Estado del servicio */
+.ux-pg{max-width:560px;margin:0 auto;padding:.4rem .2rem 2rem}
+.ux-h{font-family:Barlow,sans-serif;font-weight:800;font-size:1.4rem;margin:.2rem 0}
+.ux-p{font-size:.82rem;color:#8b93a3;margin:0 0 1rem}
+.ux-ban{display:flex;flex-direction:column;gap:.15rem;padding:.8rem 1rem;border-radius:14px;margin-bottom:.7rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+.ux-ban b{font-size:.92rem}
+.ux-ban span{font-size:.76rem;color:#8b93a3}
+.ux-ban.ok{background:rgba(37,211,102,.08);border-color:rgba(37,211,102,.3)}.ux-ban.ok b{color:#4ade80}
+.ux-ban.wa{background:rgba(255,184,77,.08);border-color:rgba(255,184,77,.3)}.ux-ban.wa b{color:#ffb84d}
+.ux-ban.ko{background:rgba(255,80,80,.08);border-color:rgba(255,80,80,.3)}.ux-ban.ko b{color:#ff6b6b}
+.ux-row{display:flex;align-items:center;gap:.7rem;padding:.75rem .9rem;border-radius:13px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);margin-bottom:.5rem}
+.ux-ri{font-size:1.2rem}
+.ux-row b{flex:1;font-size:.88rem}
+.ux-chip{font-style:normal;font-size:.7rem;font-weight:700;border-radius:99px;padding:.25rem .65rem;white-space:nowrap}
+.ux-chip.ok{background:rgba(37,211,102,.14);color:#4ade80}.ux-chip.wa{background:rgba(255,184,77,.14);color:#ffb84d}.ux-chip.ko{background:rgba(255,80,80,.14);color:#ff6b6b}
+.ux-hora{font-size:.7rem;color:#6b7280;text-align:center;margin-top:.8rem}
+.ux-dl{display:block;width:100%;margin-top:.8rem;border:0;border-radius:12px;padding:.8rem;background:#1b87f5;color:#fff;font-weight:700;font-size:.88rem;cursor:pointer}
+
 </style>
-<script src="supabase.js?v=0d69e159f4"></script>
-<script src="supabase_integration.js?v=0d69e159f4"></script>
-<script src="script.js?v=0d69e159f4"></script>
+<script src="supabase.js?v=0124870e75"></script>
+<script src="supabase_integration.js?v=0124870e75"></script>
+<script src="script.js?v=0124870e75"></script>
 
 <!-- BARRA DE NAVEGACION INFERIOR -->
 

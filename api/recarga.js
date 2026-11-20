@@ -262,6 +262,16 @@ module.exports = async function handler(req, res){
       if(e.verificado && e.pausa) await A.avisarSaldoBajo(e.saldo, e.motivo); else if(e.verificado) await A.avisarRecuperado(e.saldo);
       return enviar(res, { ok: true, disponible: !e.pausa, motivo: e.pausa ? 'saldo' : null, verificado: e.verificado });
     }
+    // ── estado del servicio para la página pública "Estado" (solo sí/no y milisegundos; no devuelve saldos ni costos) ──
+    if(b.action === 'salud'){
+      if(limite(ip, 'h', 40)) return enviar(res, { ok: false });
+      if(apagado) return enviar(res, { ok: true, proveedor: 'apagado', diamantes: 'pausa', cajas: 'pausa', fragmentos: 'pausa', ms: 0 });
+      const t0 = Date.now(), c = await catalogo(), ms = Date.now() - t0;
+      if(!c.ok) return enviar(res, { ok: true, proveedor: 'caido', diamantes: 'pausa', cajas: 'pausa', fragmentos: 'pausa', ms });
+      let pausa = false; try{ const e = await A.estado(0); pausa = !!(e.verificado && e.pausa); }catch(e){}
+      const st = stockRegalos(c.items), grupo = pre => { const v = Object.keys(st).filter(k => k.indexOf(pre) === 0).map(k => st[k]); return v.length && v.every(x => x === 'ok') ? 'ok' : v.some(x => x === 'ok') ? 'parcial' : 'sin_stock'; };
+      return enviar(res, { ok: true, proveedor: ms > 4000 ? 'lento' : 'ok', diamantes: pausa ? 'pausa' : 'ok', cajas: pausa ? 'pausa' : grupo('cj'), fragmentos: pausa ? 'pausa' : grupo('fa'), ms });
+    }
     if(b.action === 'stock_regalos'){
       if(limite(ip, 's', 30)) return enviar(res, { ok: false });
       const c = await catalogo(); if(!c.ok) return enviar(res, { ok: false });
