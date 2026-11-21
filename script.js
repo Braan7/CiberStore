@@ -3477,7 +3477,7 @@ function admToggleNav(force){
 }
 
 function admFullTab(tab){
-  var tabs=['stats','users','pedidos','saldos','top','puntos','codigos','chat','resenas','soporte','inactivos','seguridad','recargas','depositos','osaldo','vip','prime','catalogo','premios','chatadm','config'];
+  var tabs=['stats','users','pedidos','saldos','top','puntos','codigos','chat','resenas','soporte','inactivos','seguridad','recargas','depositos','ganancias','osaldo','vip','prime','catalogo','premios','chatadm','config'];
   tabs.forEach(function(t){
     var btn=document.getElementById('admn-'+t);
     var sec=document.getElementById('adms-'+t);
@@ -3502,6 +3502,7 @@ function admFullTab(tab){
   if(tab==='recargas') admCrtCargar();
   if(tab==='depositos') depAdmCargar();
   if(tab==='osaldo') osaCargar();
+  if(tab==='ganancias') gananciasCargar();
   if(tab==='vip') vipAdmCargar();
   if(tab==='prime') primeAdmCargar();
   // Cerrar el drawer al elegir una opción en móvil
@@ -20666,4 +20667,51 @@ function d50Pagar(){
     D50.busy = false; if(b){ b.disabled = false; b.textContent = 'Pagar ' + d50M(p.precio); }
     if(er) er.innerHTML = '<div class="d50-msg ko">Sin conexión. Si se descontó saldo aparecerá en Mis compras; puedes pulsar Pagar otra vez: no se cobra dos veces.</div>';
   });
+}
+/* ═══════════ PANEL ADMIN · GANANCIAS ═══════════
+   Ventas, ganancia estimada y margen por día y producto (/api/comprar admin_ganancias) + estado del stock de regalos del proveedor. */
+var GN = { dias:7 };
+function gnE(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function gnM(n){ return '$' + Number(n || 0).toLocaleString('es-MX', { minimumFractionDigits:2, maximumFractionDigits:2 }); }
+function gnApi(extra){
+  var tok = (typeof csAdminSesionToken === 'function') ? csAdminSesionToken() : '';
+  if(!tok){ if(typeof csAdminCaducada === 'function') csAdminCaducada('Entra de nuevo al panel para ver las ganancias.'); return Promise.resolve({ ok:false, message:'Entra de nuevo al panel.' }); }
+  var body = { action:'admin_ganancias', token:tok }; for(var k in (extra || {})) body[k] = extra[k];
+  return fetch('/api/comprar', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) })
+    .then(function(r){ return r.json().catch(function(){ return { ok:false, message:'Respuesta inválida (' + r.status + ')' }; }); })
+    .catch(function(){ return { ok:false, message:'Sin conexión' }; });
+}
+function gananciasDias(d){ GN.dias = d; gananciasCargar(); }
+function gananciasCargar(){
+  var s = document.getElementById('adms-ganancias'); if(!s) return;
+  var fl = [[1,'Hoy'],[7,'7 días'],[30,'30 días'],[90,'90 días']];
+  s.innerHTML = '<div class="adm-card-title">💰 Ganancias</div><div class="gn-fl">' + fl.map(function(f){ return '<button type="button" class="' + (GN.dias === f[0] ? 'on' : '') + '" onclick="gananciasDias(' + f[0] + ')">' + f[1] + '</button>'; }).join('') + '</div><div id="gn-body"><div class="gn-nota">Cargando…</div></div><div class="gn-c"><h4>📦 Stock de regalos en el proveedor</h4><div class="gn-st" id="gn-stock"><span class="gn-nota">Consultando…</span></div></div>';
+  gnApi({ dias:GN.dias }).then(function(r){
+    var b = document.getElementById('gn-body'); if(!b) return;
+    if(!r || !r.ok){ b.innerHTML = '<div class="gn-err">' + gnE((r && r.message) || 'No se pudo cargar') + '</div>'; return; }
+    var R = r.resumen, gan = R.ganancia, cls = gan < 0 ? 'gn-neg' : 'gn-pos';
+    var max = 1; r.por_dia.forEach(function(x){ max = Math.max(max, Math.abs(x.venta), Math.abs(x.ganancia)); });
+    var h = '<div class="gn-kp">'
+      + '<div class="gn-k"><small>Ventas</small><b>' + gnM(R.ventas) + '</b></div>'
+      + '<div class="gn-k"><small>Ganancia estimada</small><b class="' + cls + '">' + gnM(gan) + '</b></div>'
+      + '<div class="gn-k"><small>Margen</small><b class="' + cls + '">' + (R.margen == null ? '—' : R.margen.toFixed(1) + ' %') + '</b></div>'
+      + '<div class="gn-k"><small>Pedidos</small><b>' + R.pedidos + '</b></div></div>';
+    if(r.dias > 1){
+      h += '<div class="gn-c"><h4>Ventas por día</h4><div class="gn-bars">' + r.por_dia.map(function(x){ return '<div class="gn-bar' + (x.ganancia < 0 ? ' neg' : '') + '" title="' + gnE(x.d) + ': ' + gnM(x.venta) + '" style="height:' + Math.max(2, Math.round(x.venta / max * 100)) + '%"></div>'; }).join('') + '</div><div class="gn-ej"><span>' + gnE(r.por_dia[0].d) + '</span><span>' + gnE(r.por_dia[r.por_dia.length - 1].d) + '</span></div></div>';
+    }
+    h += '<div class="gn-c"><h4>Por producto</h4>' + (r.por_producto.length ? r.por_producto.map(function(x){
+      return '<div class="gn-row"><span>' + gnE(x.nombre) + ' <small class="gn-nota">×' + x.n + '</small></span><span>' + gnM(x.venta) + (x.ganancia == null ? ' <small class="gn-nota">sin costo</small>' : ' · <b class="' + (x.ganancia < 0 ? 'gn-neg' : 'gn-pos') + '">' + gnM(x.ganancia) + '</b>') + '</span></div>';
+    }).join('') : '<div class="gn-nota">Sin ventas en este periodo.</div>') + '</div>';
+    if(r.perdidas && r.perdidas.length){
+      h += '<div class="gn-c"><h4>🔻 Ventas con pérdida</h4>' + r.perdidas.map(function(x){ return '<div class="gn-row"><span>#' + x.id + ' ' + gnE(x.producto) + ' <small class="gn-nota">' + gnE(x.usuario) + '</small></span><span class="gn-neg">' + gnM(x.ganancia) + '</span></div>'; }).join('') + '<div class="gn-nota" style="margin-top:.5rem">Revisa el precio de esos paquetes: se vendieron por debajo del costo del proveedor.</div></div>';
+    }
+    h += '<div class="gn-nota">La ganancia es una <b>estimación</b>: precio de venta menos el costo de referencia del proveedor en diamantes (tipo de cambio $' + Number(r.tc).toFixed(2) + '). ' + (R.sin_costo_n ? gnM(R.sin_costo_venta) + ' en ' + R.sin_costo_n + ' pedidos (cajas, fragmentos, diamantes al 50 % u otros) no tienen costo cargado y cuentan como venta, sin ganancia.' : '') + (r.truncado ? ' Hay más de 5,000 pedidos en el periodo: se muestran los más recientes.' : '') + '</div>';
+    b.innerHTML = h;
+  });
+  fetch('/api/recarga', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ action:'stock_regalos' }) }).then(function(r){ return r.json(); }).then(function(j){
+    var el = document.getElementById('gn-stock'); if(!el) return;
+    if(!j || !j.ok){ el.innerHTML = '<span class="gn-chip mal">No se pudo consultar al proveedor</span>'; return; }
+    var N = { cj1:'Caja x1', cj5:'Caja x5', cj10:'Caja x10', cj50:'Caja x50', fa10:'Frag. x10', fa50:'Frag. x50', fa100:'Frag. x100', fa500:'Frag. x500' };
+    el.innerHTML = Object.keys(j.stock).map(function(k){ var ok = j.stock[k] === 'ok'; return '<span class="gn-chip ' + (ok ? 'ok' : 'mal') + '">' + (ok ? '✓ ' : '✗ ') + gnE(N[k] || k) + (ok ? '' : (j.stock[k] === 'sin_stock' ? ' · sin stock' : ' · no disponible')) + '</span>'; }).join('');
+  }).catch(function(){ var el = document.getElementById('gn-stock'); if(el) el.innerHTML = '<span class="gn-chip mal">Sin conexión</span>'; });
 }

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta name="cs-build" content="a18b3f9f78">
-<script>var CS_BUILD="a18b3f9f78";</script>
+<meta name="cs-build" content="9d5625e823">
+<script>var CS_BUILD="9d5625e823";</script>
 <meta charset="UTF-8"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,10 +19,18 @@
 <meta property="og:url" content="https://ciberstore.lat/"/>
 <meta property="og:title" content="CiberStore - Diamantes Free Fire Mexico"/>
 <meta property="og:description" content="Compra diamantes de Free Fire al mejor precio. Entrega instantanea. Pago con transferencia y Binance."/>
-<meta property="og:image" content="https://ciberstore.lat/og-image.png"/>
+<meta property="og:image" content="https://ciberstore.lat/og-ciberstore.jpg"/>
+<meta property="og:image:secure_url" content="https://ciberstore.lat/og-ciberstore.jpg"/>
+<meta property="og:image:type" content="image/jpeg"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta property="og:image:alt" content="CiberStore - Diamantes Free Fire en Mexico"/>
+<meta property="og:site_name" content="CiberStore"/>
+<meta property="og:locale" content="es_MX"/>
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:title" content="CiberStore - Diamantes Free Fire Mexico"/>
+<meta name="twitter:image" content="https://ciberstore.lat/og-ciberstore.jpg"/>
 <meta name="twitter:description" content="Recargas FF instantaneas al mejor precio. Diamantes, likes y honor de clan."/>
 <!-- PWA -->
 <link rel="manifest" href="manifest.json"/>
@@ -7722,6 +7730,7 @@ select.ap-inp{flex:0 1 auto}
       <div class="adm-nav-sec">Ventas</div>
       <button class="adm-nav-btn"        id="admn-pedidos" onclick="admFullTab('pedidos')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16l-1.5 12.5a1.5 1.5 0 0 1-1.5 1.5H7a1.5 1.5 0 0 1-1.5-1.5L4 7z"/><path d="M8 7V5.5a4 4 0 0 1 8 0V7"/></svg> Pedidos</button>
       <button class="adm-nav-btn" id="admn-depositos" onclick="admFullTab('depositos')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/></svg> Dep&oacute;sitos <span class="crta-badge" id="dep-badge"></span></button>
+      <button class="adm-nav-btn" id="admn-ganancias" onclick="admFullTab('ganancias')">&#x1F4B0; Ganancias</button>
       <button class="adm-nav-btn" id="admn-osaldo" onclick="admFullTab('osaldo')">&#x1F9FE; &Oacute;rdenes saldo <span class="crta-badge" id="osa-badge"></span></button>
       <button class="adm-nav-btn" id="admn-vip" onclick="admFullTab('vip')">&#x1F48E; Clientes y VIP</button>
       <button class="adm-nav-btn" id="admn-prime" onclick="admFullTab('prime')">&#x1F3C5; Niveles Prime</button>
@@ -8198,6 +8207,8 @@ select.ap-inp{flex:0 1 auto}
     <div style="font-size:.72rem;color:var(--muted);margin-top:.8rem;line-height:1.5">Revisa en tu banco que el pago llegó y luego pulsa <b>Confirmar pago y recargar</b>. Si el proveedor no tiene saldo o el paquete no está disponible, la recarga queda marcada para que la hagas a mano.</div>
   </div>
 <div class="adm-section" id="adms-depositos"></div>
+
+<div class="adm-section" id="adms-ganancias"></div>
 
 <div class="adm-section" id="adms-osaldo"></div>
 
@@ -9854,10 +9865,34 @@ body.light-mode .d50-t b{color:#0f172a}
 .d50-okk p{font-size:.85rem;color:#c3cad6;margin:.2rem 0}
 .d50-sub{font-size:.78rem!important;color:#8b93a3!important;margin-bottom:.9rem!important}
 
+#adms-ganancias .gn-fl{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.9rem}
+#adms-ganancias .gn-fl button{padding:.55rem .9rem;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#c9d1e0;font-weight:700;font-size:.82rem;cursor:pointer}
+#adms-ganancias .gn-fl button.on{background:#1b87f5;border-color:#1b87f5;color:#fff}
+#adms-ganancias .gn-kp{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem;margin-bottom:.9rem}
+#adms-ganancias .gn-k{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:.85rem}
+#adms-ganancias .gn-k small{display:block;color:#8b97ad;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+#adms-ganancias .gn-k b{display:block;font-size:1.25rem;margin-top:.2rem}
+#adms-ganancias .gn-pos{color:#3ddc97}#adms-ganancias .gn-neg{color:#ff6b6b}
+#adms-ganancias .gn-c{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:.9rem;margin-bottom:.8rem}
+#adms-ganancias .gn-c h4{margin:0 0 .6rem;font-size:.9rem}
+#adms-ganancias .gn-bars{display:flex;align-items:flex-end;gap:3px;height:110px}
+#adms-ganancias .gn-bar{flex:1;min-width:2px;border-radius:4px 4px 0 0;background:#1b87f5;opacity:.85}
+#adms-ganancias .gn-bar.neg{background:#ff6b6b}
+#adms-ganancias .gn-ej{display:flex;justify-content:space-between;color:#8b97ad;font-size:.7rem;margin-top:.3rem}
+#adms-ganancias .gn-row{display:flex;justify-content:space-between;gap:.6rem;padding:.5rem 0;border-top:1px solid rgba(255,255,255,.06);font-size:.84rem}
+#adms-ganancias .gn-row:first-of-type{border-top:0}
+#adms-ganancias .gn-row span:last-child{text-align:right;white-space:nowrap}
+#adms-ganancias .gn-nota{color:#8b97ad;font-size:.76rem;line-height:1.5}
+#adms-ganancias .gn-st{display:flex;flex-wrap:wrap;gap:.4rem}
+#adms-ganancias .gn-chip{padding:.3rem .6rem;border-radius:999px;font-size:.74rem;font-weight:700;border:1px solid rgba(255,255,255,.12)}
+#adms-ganancias .gn-chip.ok{color:#3ddc97;border-color:rgba(61,220,151,.4)}#adms-ganancias .gn-chip.mal{color:#ff6b6b;border-color:rgba(255,107,107,.45)}
+#adms-ganancias .gn-err{color:#ff6b6b;padding:.8rem}
+@media(min-width:700px){#adms-ganancias .gn-kp{grid-template-columns:repeat(4,1fr)}}
+
 </style>
-<script src="supabase.js?v=a18b3f9f78"></script>
-<script src="supabase_integration.js?v=a18b3f9f78"></script>
-<script src="script.js?v=a18b3f9f78"></script>
+<script src="supabase.js?v=9d5625e823"></script>
+<script src="supabase_integration.js?v=9d5625e823"></script>
+<script src="script.js?v=9d5625e823"></script>
 
 <!-- BARRA DE NAVEGACION INFERIOR -->
 
