@@ -20,6 +20,7 @@
 const crypto = require('crypto');
 const S = require('./_sesion.js');
 const AL = require('./_alerta.js');
+const E = require('./_estado.js');
 
 function enviar(res, body, status){ res.statusCode = status || 200; res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.setHeader('Cache-Control', 'no-store'); res.end(JSON.stringify(body)); }
 function ipDe(req){ return String((req.headers['x-forwarded-for'] || (req.socket && req.socket.remoteAddress) || 'x')).split(',')[0].trim(); }
@@ -301,6 +302,14 @@ async function cvCrear(owner, b, admin){
 
 module.exports = async function handler(req, res){
   try{
+    // Pulso externo opcional (UptimeRobot / cron-job.org) para que el historial del Estado del Sistema se llene aunque nadie abra el panel.
+    // Solo funciona si pones ESTADO_CRON_KEY en Vercel y la llamas con ?estado_cron=ESA_LLAVE. Respeta la frecuencia configurada.
+    if(req.method === 'GET'){
+      let k = ''; try{ k = new URL(String(req.url || ''), 'http://x').searchParams.get('estado_cron') || ''; }catch(e){}
+      const llave = process.env.ESTADO_CRON_KEY, c0 = cfg();
+      if(!llave || !k || !c0.url || !c0.key || !iguales(k, llave) || limite('p|' + ipDe(req), 30, 60000)) return enviar(res, { ok: false, code: 'metodo' }, 405);
+      return enviar(res, await E.pulso({ rest, db }));
+    }
     if(req.method !== 'POST') return enviar(res, { ok: false, code: 'metodo' }, 405);
     const b = (req.body && typeof req.body === 'object') ? req.body : {}, ip = ipDe(req), a = String(b.action || '');
     const c = cfg();
@@ -347,6 +356,11 @@ module.exports = async function handler(req, res){
       }
       if(a === 'admin_cuenta_crear') return enviar(res, await cvCrear({ id: 'admin', username: adm }, b, true));
       if(a === 'admin_ganancias') return enviar(res, await calcularGanancias(Number(b.dias) || 7));
+      if(a === 'admin_estado'){
+        if(limite('es|' + adm, 60, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Demasiadas consultas, espera un momento' }, 429);
+        return enviar(res, await E.estado({ rest, db }, { forzar: b.forzar === true }));
+      }
+      if(a === 'admin_estado_config') return enviar(res, await E.configurar({ rest, db }, b));
       if(a === 'admin_ordenes'){
         const est = ['pagada', 'entregando', 'verificar', 'parcial', 'reembolsada'].indexOf(b.estado) >= 0 ? '&estado=eq.' + b.estado : '';
         const lim = Math.max(1, Math.min(200, Number(b.limit) || 60));

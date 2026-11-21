@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta name="cs-build" content="3d1df4cc6e">
-<script>var CS_BUILD="3d1df4cc6e";</script>
+<meta name="cs-build" content="1ae7ec9afb">
+<script>var CS_BUILD="1ae7ec9afb";</script>
 <meta charset="UTF-8"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -7750,6 +7750,7 @@ select.ap-inp{flex:0 1 auto}
       <button class="adm-nav-btn" id="admn-depositos" onclick="admFullTab('depositos')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/></svg> Dep&oacute;sitos <span class="crta-badge" id="dep-badge"></span></button>
       <button class="adm-nav-btn" id="admn-ganancias" onclick="admFullTab('ganancias')">&#x1F4B0; Ganancias</button>
       <button class="adm-nav-btn" id="admn-cuentas" onclick="admFullTab('cuentas')">&#x1F3AE; Cuentas <span class="crta-badge" id="cva-badge"></span></button>
+      <button class="adm-nav-btn" id="admn-sistema" onclick="admFullTab('sistema')">&#x1F5A5;&#xFE0F; Estado del Sistema</button>
       <button class="adm-nav-btn" id="admn-osaldo" onclick="admFullTab('osaldo')">&#x1F9FE; &Oacute;rdenes saldo <span class="crta-badge" id="osa-badge"></span></button>
       <button class="adm-nav-btn" id="admn-vip" onclick="admFullTab('vip')">&#x1F48E; Clientes y VIP</button>
       <button class="adm-nav-btn" id="admn-prime" onclick="admFullTab('prime')">&#x1F3C5; Niveles Prime</button>
@@ -8230,6 +8231,8 @@ select.ap-inp{flex:0 1 auto}
 <div class="adm-section" id="adms-ganancias"></div>
 
 <div class="adm-section" id="adms-cuentas"></div>
+
+<div class="adm-section" id="adms-sistema"></div>
 
 <div class="adm-section" id="adms-osaldo"></div>
 
@@ -10053,10 +10056,108 @@ body.light-mode .cv-ri b{color:#0f172a}
 #cvi-m{min-height:70px}
 #adms-cuentas .cv-lnk{display:inline-flex;align-items:center;border:1px solid rgba(34,197,94,.45);background:rgba(34,197,94,.1);color:#4ade80;border-radius:10px;padding:.45rem .8rem;font-size:.78rem;font-weight:700;text-decoration:none;min-height:38px}
 
+#adms-sistema{--es-v:#8b5cf6;--es-g:#22c55e;--es-a:#f59e0b;--es-r:#ef4444;--es-t:#8b94b0}
+#adms-sistema .es-wrap{display:flex;flex-direction:column;gap:.8rem;color:#e7e9f5}
+#adms-sistema .es-top{display:flex;justify-content:space-between;align-items:flex-start;gap:.8rem;flex-wrap:wrap}
+#adms-sistema .es-top h3{margin:0;font-size:1.35rem}
+#adms-sistema .es-top p{margin:.15rem 0 0;color:var(--es-t);font-size:.82rem}
+#adms-sistema .es-top2{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+#adms-sistema .es-upd{font-size:.72rem;color:var(--es-t);text-align:right;line-height:1.35}
+#adms-sistema .es-upd b{color:#e7e9f5;font-weight:700}
+#adms-sistema .es-ref{width:40px;height:40px;border-radius:12px;border:1px solid rgba(139,92,246,.4);background:rgba(139,92,246,.12);color:#cdb8ff;font-size:1.25rem;cursor:pointer;line-height:1}
+#adms-sistema .es-ref.gira{animation:es-gira .8s linear infinite}
+@keyframes es-gira{to{transform:rotate(360deg)}}
+#adms-sistema .es-pill{display:inline-flex;align-items:center;gap:.4rem;padding:.28rem .65rem;border-radius:999px;font-size:.74rem;font-weight:800;letter-spacing:.02em;border:1px solid transparent;white-space:nowrap}
+#adms-sistema .es-pill i{width:8px;height:8px;border-radius:50%;background:currentColor}
+#adms-sistema .es-pill.ok{color:#4ade80;background:rgba(34,197,94,.13);border-color:rgba(34,197,94,.4)}
+#adms-sistema .es-pill.aviso{color:#fbbf24;background:rgba(245,158,11,.13);border-color:rgba(245,158,11,.4)}
+#adms-sistema .es-pill.error{color:#f87171;background:rgba(239,68,68,.13);border-color:rgba(239,68,68,.45)}
+#adms-sistema .es-pill.sin_datos,#adms-sistema .es-pill.no_configurado,#adms-sistema .es-pill.desconocido{color:#9aa3bd;background:rgba(154,163,189,.1);border-color:rgba(154,163,189,.3)}
+#adms-sistema .es-card{background:linear-gradient(160deg,rgba(24,20,48,.85),rgba(12,12,28,.9));border:1px solid rgba(139,92,246,.25);border-radius:16px;padding:1rem;box-shadow:0 0 0 1px rgba(255,255,255,.02) inset}
+#adms-sistema .es-card h4{margin:0 0 .7rem;font-size:.98rem;display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+#adms-sistema .es-card h4 small{color:var(--es-t);font-weight:600}
+#adms-sistema .es-gg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem}
+#adms-sistema .es-g{display:flex;align-items:center;gap:.7rem;padding:.8rem;border-radius:14px;border:1px solid rgba(139,92,246,.3);background:rgba(139,92,246,.07)}
+#adms-sistema .es-g.error{border-color:rgba(239,68,68,.5);background:rgba(239,68,68,.07)}
+#adms-sistema .es-g.aviso{border-color:rgba(245,158,11,.5);background:rgba(245,158,11,.06)}
+#adms-sistema .es-g>div:last-child{min-width:0}
+#adms-sistema .es-g .es-pill{white-space:normal;line-height:1.2;font-size:.68rem}
+#adms-sistema .es-gi{width:42px;height:42px;border-radius:12px;background:rgba(139,92,246,.2);display:flex;align-items:center;justify-content:center;font-size:1.15rem;color:#cdb8ff;flex:0 0 auto;font-weight:800}
+#adms-sistema .es-g small{display:block;font-weight:800;font-size:.86rem;margin-bottom:.25rem}
+#adms-sistema .es-2{display:grid;grid-template-columns:1fr;gap:.8rem}
+#adms-sistema .es-3{display:grid;grid-template-columns:1fr;gap:.7rem}
+#adms-sistema .es-perf{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+#adms-sistema .es-donut{position:relative;width:128px;height:128px;flex:0 0 auto}
+#adms-sistema .es-donut svg{width:100%;height:100%}
+#adms-sistema .es-d0{fill:none;stroke:rgba(255,255,255,.08);stroke-width:12}
+#adms-sistema .es-d1{fill:none;stroke-width:12;stroke-linecap:round}
+#adms-sistema .es-d1.ok{stroke:#22c55e}#adms-sistema .es-d1.aviso{stroke:#f59e0b}#adms-sistema .es-d1.mal{stroke:#ef4444}
+#adms-sistema .es-donut div{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#adms-sistema .es-donut b{font-size:1.3rem}#adms-sistema .es-donut small{font-size:.66rem;color:var(--es-t)}
+#adms-sistema .es-ptab{flex:1;min-width:150px}
+#adms-sistema .es-ptab div,#adms-sistema .es-row{display:flex;justify-content:space-between;gap:.6rem;padding:.5rem 0;border-top:1px solid rgba(255,255,255,.07);font-size:.86rem}
+#adms-sistema .es-ptab div:first-child,#adms-sistema .es-row:first-of-type{border-top:0}
+#adms-sistema .es-row span:last-child{white-space:nowrap;text-align:right}
+#adms-sistema .es-row small{font-size:.72rem;color:var(--es-t)}
+#adms-sistema .es-nota{color:var(--es-t);font-size:.76rem;line-height:1.5;margin-top:.4rem}
+#adms-sistema .es-svg{width:100%;height:auto;display:block}
+#adms-sistema .es-gl{stroke:rgba(255,255,255,.08);stroke-width:1}
+#adms-sistema .es-ax{fill:#8b94b0;font-size:11px}
+#adms-sistema .es-le{fill:none;stroke:#8b5cf6;stroke-width:2.5;stroke-linejoin:round}
+#adms-sistema .es-la{fill:none;stroke:#f59e0b;stroke-width:2;stroke-dasharray:5 4}
+#adms-sistema .es-pe{fill:#ef4444}#adms-sistema .es-p0{fill:#8b5cf6}
+#adms-sistema .es-leyenda{display:flex;gap:1rem;font-size:.72rem;color:var(--es-t);margin-top:.3rem}
+#adms-sistema .es-leyenda i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:.3rem}
+#adms-sistema .es-leyenda .e{background:#8b5cf6}#adms-sistema .es-leyenda .a{background:#f59e0b}
+#adms-sistema .es-tag{font-size:.7rem;font-weight:800;padding:.15rem .5rem;border-radius:999px;border:1px solid rgba(255,255,255,.15)}
+#adms-sistema .es-tag.ok{color:#4ade80;border-color:rgba(34,197,94,.4);background:rgba(34,197,94,.1)}
+#adms-sistema .es-tag.mal{color:#f87171;border-color:rgba(239,68,68,.45);background:rgba(239,68,68,.1)}
+#adms-sistema .es-tag.aviso{color:#fbbf24;border-color:rgba(245,158,11,.4)}
+#adms-sistema .es-sec{margin:.4rem 0 0;font-size:1rem}
+#adms-sistema .es-meter{height:8px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin:.7rem 0 .3rem}
+#adms-sistema .es-meter i{display:block;height:100%;border-radius:99px;background:#22c55e}
+#adms-sistema .es-meter i.aviso{background:#f59e0b}#adms-sistema .es-meter i.error,#adms-sistema .es-meter i.sin_datos{background:#ef4444}
+#adms-sistema .es-cant{font-size:.84rem;margin:.3rem 0}
+#adms-sistema .es-cant span{color:var(--es-t)}
+#adms-sistema .es-chips{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.5rem}
+#adms-sistema .es-chip{padding:.22rem .55rem;border-radius:999px;font-size:.7rem;font-weight:700;border:1px solid rgba(255,255,255,.12)}
+#adms-sistema .es-chip.ok{color:#4ade80;border-color:rgba(34,197,94,.4)}#adms-sistema .es-chip.mal{color:#f87171;border-color:rgba(239,68,68,.45)}#adms-sistema .es-chip.nd{color:#9aa3bd}
+#adms-sistema .es-saldo{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap}
+#adms-sistema .es-saldo b{font-size:1.25rem;color:#4ade80}#adms-sistema .es-saldo b.mal{color:#f87171}
+#adms-sistema .es-apis{padding:.4rem .9rem .8rem}
+#adms-sistema .es-api{border-top:1px solid rgba(255,255,255,.07)}
+#adms-sistema .es-api:first-of-type{border-top:0}
+#adms-sistema .es-api summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.75rem 0;cursor:pointer;flex-wrap:wrap}
+#adms-sistema .es-api summary::-webkit-details-marker{display:none}
+#adms-sistema .es-an{font-size:.9rem;font-weight:700}
+#adms-sistema .es-av{display:flex;align-items:center;gap:.7rem}
+#adms-sistema .es-av b{font-size:.82rem;min-width:58px;text-align:right;white-space:nowrap}
+#adms-sistema .es-ad{display:grid;grid-template-columns:1fr 1fr;gap:.5rem .9rem;padding:.2rem 0 .8rem;font-size:.8rem}
+#adms-sistema .es-ad span{display:block;color:var(--es-t);font-size:.7rem}
+#adms-sistema .es-det{grid-column:1/-1;color:#c9cfe6;background:rgba(255,255,255,.04);padding:.5rem .7rem;border-radius:10px}
+#adms-sistema .es-regs summary{cursor:pointer;font-weight:800;list-style:none}
+#adms-sistema .es-regs summary::-webkit-details-marker{display:none}
+#adms-sistema .es-reg{padding:.55rem 0;border-top:1px solid rgba(255,255,255,.07);font-size:.78rem}
+#adms-sistema .es-reg:first-of-type{margin-top:.6rem}
+#adms-sistema .es-reg span{color:var(--es-t);margin-right:.5rem}#adms-sistema .es-reg b{margin-right:.5rem}
+#adms-sistema .es-reg em{font-style:normal;font-weight:800;font-size:.7rem}
+#adms-sistema .es-reg.error em{color:#f87171}#adms-sistema .es-reg.aviso em{color:#fbbf24}
+#adms-sistema .es-reg p{margin:.2rem 0 0;color:#c9cfe6}
+#adms-sistema .es-cfg{display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end}
+#adms-sistema .es-cfg label{display:flex;flex-direction:column;gap:.3rem;font-size:.78rem;color:var(--es-t)}
+#adms-sistema .es-cfg select{padding:.6rem .8rem;border-radius:10px;border:1px solid rgba(139,92,246,.4);background:#14102a;color:#e7e9f5;font-size:16px}
+#adms-sistema .es-cfg .es-chk{flex-direction:row;align-items:center;color:#e7e9f5;font-size:.85rem;gap:.5rem}
+#adms-sistema .es-ban{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.4);color:#fbbf24;padding:.7rem .9rem;border-radius:12px;font-size:.82rem;line-height:1.5}
+#adms-sistema .es-err{color:#f87171;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.4);padding:.8rem;border-radius:12px}
+#adms-sistema .es-vacio{color:var(--es-t);padding:1.2rem;text-align:center;font-size:.85rem}
+#adms-sistema .es-btn{padding:.6rem 1rem;border-radius:10px;border:1px solid rgba(139,92,246,.5);background:rgba(139,92,246,.18);color:#e7e9f5;font-weight:700;cursor:pointer}
+@media(min-width:760px){#adms-sistema .es-gg{grid-template-columns:repeat(4,minmax(0,1fr))}#adms-sistema .es-2{grid-template-columns:1fr 1.2fr}#adms-sistema .es-3{grid-template-columns:repeat(3,1fr)}#adms-sistema .es-ad{grid-template-columns:repeat(5,1fr)}}
+@media(max-width:420px){#adms-sistema .es-top h3{font-size:1.15rem}#adms-sistema .es-upd{text-align:left}#adms-sistema .es-av b{min-width:46px}}
+
 </style>
-<script src="supabase.js?v=3d1df4cc6e"></script>
-<script src="supabase_integration.js?v=3d1df4cc6e"></script>
-<script src="script.js?v=3d1df4cc6e"></script>
+<script src="supabase.js?v=1ae7ec9afb"></script>
+<script src="supabase_integration.js?v=1ae7ec9afb"></script>
+<script src="script.js?v=1ae7ec9afb"></script>
 
 <!-- BARRA DE NAVEGACION INFERIOR -->
 

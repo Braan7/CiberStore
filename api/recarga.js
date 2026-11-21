@@ -393,3 +393,34 @@ module.exports = async function handler(req, res){
     return enviar(res, DUDOSO(timeout ? 'El proveedor tardó demasiado: se está verificando' : 'Error al contactar al proveedor'));
   }
 };
+
+// ── Inventario para el panel "Estado del Sistema" (solo consulta; lo usa api/_estado.js desde el panel admin) ──
+// La cantidad SOLO se muestra si el proveedor la manda en el catálogo (campos de stock). Si no, queda en null: nunca se inventa.
+const CAMPOS_CANT = ['stock', 'stock_quantity', 'stock_count', 'available_stock', 'available_quantity', 'quantity_available', 'inventory'];
+function cantidadDe(it){
+  for(const f of CAMPOS_CANT){ const v = it && it[f]; if(v !== undefined && v !== null && v !== '' && isFinite(Number(v)) && Number(v) >= 0) return Number(v); }
+  return null;
+}
+function estadoItem(it){
+  if(!it) return 'no_disponible';
+  if(it.in_stock === false) return 'sin_stock';
+  if(it.in_stock === true) return 'ok';
+  const c = cantidadDe(it); if(c !== null) return c > 0 ? 'ok' : 'sin_stock';
+  return 'no_informado';
+}
+function buscarDiamante(items, d){
+  const p = PAQUETES[d]; let fijo = {}; try{ fijo = JSON.parse(process.env.CO_MAP || '{}'); }catch(e){}
+  if(fijo[d]) return items.find(x => x.product_id === fijo[d]) || null;
+  const cand = items.filter(it => esFFLatam(it) && !EXCLUIR.test((it.name || '') + ' ' + (it.sku || '')) && it.requires_target !== false);
+  const ac = cand.filter(it => { const t = (it.name || '') + ' ' + (it.sku || ''); return tieneNum(t, d) || (tieneNum(t, p.base) && /bono|bonus|%/i.test(t)); });
+  ac.sort((a, b) => Math.abs(parseFloat(a.reseller_price) - p.ref) - Math.abs(parseFloat(b.reseller_price) - p.ref));
+  return ac[0] || null;
+}
+function inventario(items){
+  const f = it => ({ estado: estadoItem(it), cantidad: it ? cantidadDe(it) : null });
+  const diamantes = Object.keys(PAQUETES).map(d => Object.assign({ clave: 'd' + d, nombre: Number(d).toLocaleString('es-MX') + ' 💎' }, f(buscarDiamante(items, Number(d)))));
+  const cajas = [], fragmentos = [];
+  Object.keys(REGALOS).forEach(k => { const o = Object.assign({ clave: k, nombre: NOMBRE_REGALO[k] || k }, f(buscarRegalo(items, k))); (k.indexOf('cj') === 0 ? cajas : fragmentos).push(o); });
+  return { diamantes, cajas, fragmentos };
+}
+module.exports.inventario = inventario;

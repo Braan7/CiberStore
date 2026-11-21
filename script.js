@@ -3477,7 +3477,7 @@ function admToggleNav(force){
 }
 
 function admFullTab(tab){
-  var tabs=['stats','users','pedidos','saldos','top','puntos','codigos','chat','resenas','soporte','inactivos','seguridad','recargas','depositos','cuentas','ganancias','osaldo','vip','prime','catalogo','premios','chatadm','config'];
+  var tabs=['stats','users','pedidos','saldos','top','puntos','codigos','chat','resenas','soporte','inactivos','seguridad','recargas','depositos','sistema','cuentas','ganancias','osaldo','vip','prime','catalogo','premios','chatadm','config'];
   tabs.forEach(function(t){
     var btn=document.getElementById('admn-'+t);
     var sec=document.getElementById('adms-'+t);
@@ -3504,6 +3504,7 @@ function admFullTab(tab){
   if(tab==='osaldo') osaCargar();
   if(tab==='ganancias') gananciasCargar();
   if(tab==='cuentas') cuentasAdmCargar();
+  if(tab==='sistema') sistemaCargar(false);
   if(tab==='vip') vipAdmCargar();
   if(tab==='prime') primeAdmCargar();
   // Cerrar el drawer al elegir una opción en móvil
@@ -21026,3 +21027,149 @@ function cvGrupo(id){
   if(typeof openFullAdmin !== 'function') return; var o = openFullAdmin;
   window.openFullAdmin = function(){ var r = o.apply(this, arguments); setTimeout(function(){ try{ if(typeof csAdminSesionToken === 'function' && csAdminSesionToken()) cvAdminApi('admin_cuentas', { estado:'revision' }).then(function(j){ var bd = document.getElementById('cva-badge'); if(bd && j && j.ok){ var n = (j.en_revision || 0) + (j.intereses_nuevos || 0); bd.textContent = n ? n : ''; } }); }catch(e){} }, 1800); return r; };
 })();
+/* ═══════════ PANEL ADMIN · ESTADO DEL SISTEMA ═══════════
+   Centro de monitoreo (solo administrador). Todo viene de /api/comprar admin_estado, que sondea de verdad y valida la sesión en el servidor.
+   La pestaña solo existe dentro del panel admin; ningún dato de aquí llega a clientes ni a la página pública. */
+var ESIS = { d:null, timer:null, cargando:false, intervalo:300, auto:true, reg:false };
+function esE(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function esF(ts, corto){
+  if(!ts) return '—';
+  try{ return new Date(ts).toLocaleString('es-MX', corto ? { timeZone:'America/Mexico_City', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false } : { timeZone:'America/Mexico_City', day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false }); }catch(e){ return '—'; }
+}
+function esHace(ts){
+  if(!ts) return '—'; var s = Math.max(0, Math.round((Date.now() - ts) / 1000));
+  if(s < 60) return 'hace ' + s + ' s'; if(s < 3600) return 'hace ' + Math.round(s / 60) + ' min'; return 'hace ' + Math.round(s / 3600) + ' h';
+}
+function esPct(n){ return n == null ? '—' : (Math.round(n * 100) / 100) + '%'; }
+function esApi(extra){
+  var tok = (typeof csAdminSesionToken === 'function') ? csAdminSesionToken() : '';
+  if(!tok){ if(typeof csAdminCaducada === 'function') csAdminCaducada('Entra de nuevo al panel para ver el estado del sistema.'); return Promise.resolve({ ok:false, code:'sesion_invalida', message:'Entra de nuevo al panel.' }); }
+  var body = { token:tok }; for(var k in (extra || {})) body[k] = extra[k];
+  return fetch('/api/comprar', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) })
+    .then(function(r){ return r.json().catch(function(){ return { ok:false, message:'Respuesta inválida (' + r.status + ')' }; }); })
+    .catch(function(){ return { ok:false, message:'No se pudo conectar con el servidor' }; });
+}
+var ES_LBL = { ok:'Operativa', aviso:'Advertencia', error:'Falla', no_configurado:'No configurada', desconocido:'Sin datos', sin_datos:'Sin datos' };
+var ES_ICO = { bd:'🗄️', likes220:'👍', likes2k:'⚡', diamantes:'💎', d50:'🏷️', cuentas:'🎮', transferencias:'🔁' };
+function esPill(e, txt){ return '<span class="es-pill ' + esE(e) + '"><i></i>' + esE(txt || ES_LBL[e] || e) + '</span>'; }
+
+function sistemaCargar(forzar){
+  var s = document.getElementById('adms-sistema'); if(!s) return;
+  if(!s.getAttribute('data-es')){ s.setAttribute('data-es', '1'); s.innerHTML = '<div class="es-wrap"><div class="es-vacio">Consultando el estado del sistema…</div></div>'; }
+  if(ESIS.cargando) return; ESIS.cargando = true;
+  var bt = document.getElementById('es-ref'); if(bt) bt.classList.add('gira');
+  var a = { action:'admin_estado' }; if(forzar === true) a.forzar = true;
+  esApi(a).then(function(r){
+    ESIS.cargando = false; var b2 = document.getElementById('es-ref'); if(b2) b2.classList.remove('gira');
+    if(!r || !r.ok){
+      if(r && r.code === 'sesion_invalida') return;
+      if(!ESIS.d){ s.innerHTML = '<div class="es-wrap"><div class="es-err">' + esE((r && r.message) || 'No se pudo consultar') + '</div><button class="es-btn" onclick="sistemaCargar(true)">Reintentar</button></div>'; }
+      else { var er = document.getElementById('es-aviso-red'); if(er) er.textContent = '⚠️ No se pudo actualizar (' + ((r && r.message) || 'sin conexión') + '). Se muestran los últimos datos.'; }
+      return;
+    }
+    ESIS.d = r; ESIS.intervalo = r.config.intervalo; sistemaPintar(); sistemaProgramar();
+  });
+}
+function sistemaProgramar(){
+  if(ESIS.timer){ clearInterval(ESIS.timer); ESIS.timer = null; }
+  try{ ESIS.auto = localStorage.getItem('cs_es_auto') !== '0'; }catch(e){}
+  if(!ESIS.auto) return;
+  ESIS.timer = setInterval(function(){
+    var s = document.getElementById('adms-sistema');
+    if(!s || !s.classList.contains('active') || document.hidden || s.offsetParent === null){ return; }   // solo consulta mientras la pestaña está a la vista
+    sistemaCargar(false);
+  }, Math.max(30, ESIS.intervalo) * 1000);
+}
+function sistemaAuto(on){ try{ localStorage.setItem('cs_es_auto', on ? '1' : '0'); }catch(e){} ESIS.auto = !!on; sistemaProgramar(); if(on) sistemaCargar(false); }
+function sistemaFreq(v){
+  var sel = document.getElementById('es-freq'); if(sel) sel.disabled = true;
+  esApi({ action:'admin_estado_config', intervalo:Number(v) }).then(function(r){
+    var m = document.getElementById('es-freq-msg');
+    if(!r || !r.ok){ if(m) m.textContent = '✗ ' + ((r && r.message) || 'No se pudo guardar'); if(sel) sel.disabled = false; return; }
+    ESIS.intervalo = r.intervalo; if(m) m.textContent = '✓ Guardado: se comprueba cada ' + esFreqTxt(r.intervalo) + '.'; if(sel) sel.disabled = false; sistemaProgramar();
+  });
+}
+function esFreqTxt(s){ return s < 3600 ? (s / 60) + ' min' : (s / 3600) + ' h'; }
+
+function sistemaGrafica(horas){
+  var W = 640, Hh = 190, pl = 42, pr = 20, pt = 10, pb = 26, w = W - pl - pr, h = Hh - pt - pb, mx = 1;
+  horas.forEach(function(x){ if(x.err_pct != null) mx = Math.max(mx, x.err_pct); if(x.aviso_pct != null) mx = Math.max(mx, x.aviso_pct); });
+  mx = Math.ceil(mx); if(mx > 5) mx = Math.ceil(mx / 5) * 5;
+  var X = function(i){ return pl + (w * i / 23); }, Y = function(v){ return pt + h - (h * v / mx); };
+  var g = '';
+  for(var t = 0; t <= 2; t++){ var v = mx * t / 2; g += '<line x1="' + pl + '" x2="' + (W - pr) + '" y1="' + Y(v) + '" y2="' + Y(v) + '" class="es-gl"/><text x="' + (pl - 6) + '" y="' + (Y(v) + 4) + '" text-anchor="end" class="es-ax">' + (Math.round(v * 10) / 10) + '%</text>'; }
+  horas.forEach(function(x, i){ if(i % 3 === 0 || i === 23) g += '<text x="' + X(i) + '" y="' + (Hh - 8) + '" text-anchor="middle" class="es-ax">' + (x.h < 10 ? '0' : '') + x.h + ':00</text>'; });
+  function ruta(campo){ var d = '', pen = false; horas.forEach(function(x, i){ var v = x[campo]; if(v == null){ pen = false; return; } d += (pen ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(v).toFixed(1) + ' '; pen = true; }); return d; }
+  var pe = ruta('err_pct'), pa = ruta('aviso_pct'), pts = '';
+  horas.forEach(function(x, i){ if(x.n) pts += '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(x.err_pct || 0).toFixed(1) + '" r="' + (x.err_pct ? 4 : 2.2) + '" class="' + (x.err_pct ? 'es-pe' : 'es-p0') + '"><title>' + (x.h < 10 ? '0' : '') + x.h + ':00 · ' + x.n + ' comprobaciones · errores ' + esPct(x.err_pct) + ' · advertencias ' + esPct(x.aviso_pct) + '</title></circle>'; });
+  if(!pe && !pa) return '<div class="es-vacio">Aún no hay comprobaciones guardadas. Se irán sumando cada vez que se consulte el estado.</div>';
+  return '<svg viewBox="0 0 ' + W + ' ' + Hh + '" class="es-svg" role="img" aria-label="Errores y advertencias por hora, últimas 24 horas">' + g + (pa ? '<path d="' + pa + '" class="es-la"/>' : '') + (pe ? '<path d="' + pe + '" class="es-le"/>' : '') + pts + '</svg>';
+}
+function sistemaDonut(R){
+  var c = 2 * Math.PI * 52, v = R.disponibilidad == null ? 0 : R.disponibilidad;
+  var cls = v >= 99 ? 'ok' : (v >= 95 ? 'aviso' : 'mal');
+  return '<div class="es-donut"><svg viewBox="0 0 130 130"><circle cx="65" cy="65" r="52" class="es-d0"/>' + (R.total ? '<circle cx="65" cy="65" r="52" class="es-d1 ' + cls + '" stroke-dasharray="' + (c * (v / 100)).toFixed(1) + ' ' + c.toFixed(1) + '" transform="rotate(-90 65 65)"/>' : '') + '</svg><div><b>' + (R.total ? esPct(R.disponibilidad) : '—') + '</b><small>Disponibilidad</small></div></div>';
+}
+function sistemaInv(nombre, ico, g){
+  var ESTL = { ok:['ok','EN STOCK'], parcial:['aviso','STOCK PARCIAL'], sin_stock:['error','AGOTADO'], no_disponible:['error','NO APARECE EN EL CATÁLOGO'], no_informado:['sin_datos','DISPONIBILIDAD NO INFORMADA POR EL PROVEEDOR'] };
+  if(!g) return '<div class="es-card es-inv"><h4>' + ico + ' ' + esE(nombre) + '</h4><div class="es-nota">No se pudo consultar al proveedor todavía. Si el proveedor no responde, no se muestran cantidades inventadas.</div></div>';
+  var e = ESTL[g.estado] || ['sin_datos', g.estado], pc = g.total ? Math.round(g.disponibles / g.total * 100) : 0;
+  var chips = g.items.map(function(x){
+    var t = x.estado === 'ok' ? '✓' : (x.estado === 'sin_stock' ? '✗' : '?'), c = x.estado === 'ok' ? 'ok' : (x.estado === 'sin_stock' ? 'mal' : 'nd');
+    return '<span class="es-chip ' + c + '">' + t + ' ' + esE(x.nombre) + (x.cantidad != null ? ' · ' + Number(x.cantidad).toLocaleString('es-MX') : '') + (x.estado === 'sin_stock' ? ' · agotado' : (x.estado === 'no_disponible' ? ' · no aparece' : (x.estado === 'no_informado' ? ' · no informado' : ''))) + '</span>';
+  }).join('');
+  return '<div class="es-card es-inv"><h4>' + ico + ' ' + esE(nombre) + '</h4>' + esPill(e[0], e[1])
+    + '<div class="es-meter"><i class="' + e[0] + '" style="width:' + pc + '%"></i></div>'
+    + '<div class="es-nota">' + g.disponibles + ' de ' + g.total + ' presentaciones disponibles</div>'
+    + '<div class="es-cant">' + (g.cantidad != null ? '<b>' + Number(g.cantidad).toLocaleString('es-MX') + '</b> unidades en existencia' : '<span>Cantidad exacta: no informada por el proveedor</span>') + '</div>'
+    + '<div class="es-chips">' + chips + '</div></div>';
+}
+function sistemaPintar(){
+  var s = document.getElementById('adms-sistema'), d = ESIS.d; if(!s || !d) return;
+  var G = d.generales, R = d.resumen, C = d.categorias;
+  var cardG = function(ico, t, o){ return '<div class="es-g ' + esE(o.e) + '"><div class="es-gi">' + ico + '</div><div><small>' + t + '</small>' + esPill(o.e, o.t) + '</div></div>'; };
+  var peor = (G.sistema.e === 'error' || G.apis.e === 'error' || G.transferencias.e === 'error' || G.servicios.e === 'error') ? ['error', 'CON FALLAS'] : ((G.apis.e === 'aviso' || G.servicios.e === 'aviso' || G.sistema.e === 'aviso' || G.transferencias.e === 'aviso') ? ['aviso', 'CON ADVERTENCIAS'] : ((G.sistema.e === 'ok') ? ['ok', 'EN LÍNEA'] : ['sin_datos', 'SIN DATOS']));
+  var h = '<div class="es-wrap">';
+  h += '<div class="es-top"><div><p>Monitoreo en tiempo real · solo visible para administradores</p></div>'
+    + '<div class="es-top2"><span class="es-upd">Última comprobación<br><b>' + esE(esF(d.ultima_actualizacion)) + '</b></span><button type="button" id="es-ref" class="es-ref" title="Comprobar ahora" onclick="sistemaCargar(true)">⟳</button>' + esPill(peor[0], peor[1]) + '</div></div>';
+  h += '<div id="es-aviso-red" class="es-nota"></div>';
+  if(d.aviso_tablas) h += '<div class="es-ban">⚠️ ' + esE(d.aviso_tablas) + '</div>';
+  h += '<div class="es-gg">' + cardG('🖥️', 'Sistema', G.sistema) + cardG('&lt;/&gt;', 'APIs', G.apis) + cardG('🔁', 'Transferencias', G.transferencias) + cardG('💎', 'Servicios', G.servicios) + '</div>';
+  // Rendimiento + gráfica
+  h += '<div class="es-2"><div class="es-card"><h4>📊 Rendimiento general <small>(últimas ' + (R.cobertura_h >= 24 ? '24' : R.cobertura_h) + ' h)</small></h4><div class="es-perf">' + sistemaDonut(R)
+    + '<div class="es-ptab"><div><span>✅ Operativo</span><b>' + esPct(R.ok_pct) + '</b></div><div><span>⚠️ Advertencias</span><b>' + esPct(R.aviso_pct) + '</b></div><div><span>❌ Errores</span><b>' + esPct(R.error_pct) + '</b></div></div></div>'
+    + '<div class="es-nota">Calculado con ' + R.total + ' comprobaciones reales guardadas' + (R.cobertura_h < 24 ? ' (el historial lleva ' + R.cobertura_h + ' h)' : '') + '.</div></div>';
+  h += '<div class="es-card"><h4>📈 Errores <small>(últimas 24 h)</small> <span class="es-tag ' + (R.error_pct > 0 ? 'mal' : 'ok') + '">' + esPct(R.error_pct) + '</span></h4>' + sistemaGrafica(d.horas)
+    + '<div class="es-leyenda"><span><i class="e"></i> % con error</span><span><i class="a"></i> % con advertencia</span></div></div></div>';
+  // Categorías
+  var fa = C.fallidas == null ? ['—', '—'] : [C.fallidas, C.items_total ? esPct(Math.round(C.fallidas / C.items_total * 10000) / 100) : '0%'];
+  var cat = [['🔌', 'Errores de conexión', C.conexion, esPct(R.total ? Math.round(C.conexion / R.total * 10000) / 100 : null), 'comprobaciones que no pudieron conectar o se agotó el tiempo'],
+    ['📨', 'Solicitudes fallidas', fa[0], fa[1], 'compras con saldo que quedaron en verificación o reembolsadas'],
+    ['🧩', 'Errores de API', C.api, esPct(R.total ? Math.round(C.api / R.total * 10000) / 100 : null), 'el servidor respondió con error o rechazó la llave'],
+    ['⏱️', 'Tiempo de inactividad', C.inactivo_min + ' min', esPct(R.inactivo_pct), 'estimado: al menos un servicio en falla'],
+    ['⚠️', 'Advertencias del proveedor', C.advertencias, esPct(R.aviso_pct), 'lentitud, stock agotado o saldo bajo']];
+  h += '<div class="es-card"><h4>🧮 Resumen de incidencias <small>(24 h)</small></h4>' + cat.map(function(x){ return '<div class="es-row"><span>' + x[0] + ' ' + esE(x[1]) + '<small class="es-nota"> · ' + esE(x[4]) + '</small></span><span><b>' + esE(x[2]) + '</b> <small>' + esE(x[3]) + '</small></span></div>'; }).join('') + '</div>';
+  // Inventario
+  h += '<h4 class="es-sec">📦 Inventario del proveedor</h4><div class="es-3">' + sistemaInv('Diamantes', '💎', d.inventario && d.inventario.diamantes) + sistemaInv('Cajas', '📦', d.inventario && d.inventario.cajas) + sistemaInv('Fragmentos', '🔫', d.inventario && d.inventario.fragmentos) + '</div>';
+  if(d.saldo){ h += '<div class="es-card es-saldo"><span>💳 Saldo disponible con el proveedor</span><b class="' + (d.saldo.pausa ? 'mal' : '') + '">US$ ' + Number(d.saldo.disponible).toFixed(2) + '</b><small class="es-nota">Mínimo de seguridad US$ ' + Number(d.saldo.umbral).toFixed(2) + (d.saldo.pausa ? ' · compras automáticas en pausa' : '') + '</small></div>'; }
+  // APIs
+  h += '<h4 class="es-sec">🔌 Estado de APIs</h4><div class="es-card es-apis">' + d.servicios.map(function(x){
+    var viejo = x.viejo ? ' <span class="es-tag aviso">dato antiguo</span>' : '';
+    return '<details class="es-api ' + esE(x.estado) + '"><summary><span class="es-an">' + (ES_ICO[x.k] || '•') + ' ' + esE(x.nombre) + '</span><span class="es-av">' + esPill(x.estado) + '<b>' + (x.estado === 'no_configurado' || x.ms == null ? '—' : (x.estado === 'error' && x.tipo === 'conexion' ? 'sin respuesta' : x.ms + ' ms')) + '</b></span></summary>'
+      + '<div class="es-ad"><div><span>Última comprobación</span><b>' + (x.ultima ? esE(esF(x.ultima, true)) + ' · ' + esHace(x.ultima) : '—') + '</b>' + viejo + '</div>'
+      + '<div><span>Disponibilidad 24 h</span><b>' + esPct(x.disponibilidad) + '</b></div><div><span>Errores / advertencias</span><b>' + x.errores + ' / ' + x.advertencias + '</b></div>'
+      + '<div><span>Tiempo promedio</span><b>' + (x.ms_prom != null ? x.ms_prom + ' ms' : '—') + '</b></div><div><span>Inactivo (estimado)</span><b>' + x.inactivo_min + ' min</b></div>'
+      + '<div class="es-det">' + (x.detalle ? esE(x.detalle) : (x.estado === 'error' ? 'No se pudo consultar' : '—')) + (x.http ? ' · HTTP ' + x.http : '') + '</div></div></details>';
+  }).join('') + '<div class="es-nota">Likes 220 y 2K solo comprueban que el servidor del proveedor esté en línea (no gastan likes). Si una API no se puede consultar se muestra como falla: nunca como operativa sin comprobar.</div></div>';
+  // Registros
+  h += '<details class="es-card es-regs"><summary>🧾 Registros técnicos <small>(' + d.registros.length + ' recientes)</small></summary>' + (d.registros.length ? d.registros.map(function(x){
+    return '<div class="es-reg ' + esE(x.nivel) + '"><span>' + esE(esF(x.ts)) + '</span><b>' + esE(x.servicio) + '</b><em>' + (x.nivel === 'error' ? 'FALLA' : 'AVISO') + (x.tipo ? ' · ' + esE(x.tipo) : '') + '</em><p>' + esE(x.detalle || '') + (x.ms ? ' (' + x.ms + ' ms)' : '') + '</p></div>';
+  }).join('') : '<div class="es-nota">Sin incidencias en las últimas 24 h.</div>') + '</details>';
+  // Configuración
+  var ops = d.config.opciones.map(function(n){ return '<option value="' + n + '"' + (n === d.config.intervalo ? ' selected' : '') + '>Cada ' + esFreqTxt(n) + '</option>'; }).join('');
+  h += '<div class="es-card"><h4>⚙️ Configuración de actualización</h4><div class="es-cfg"><label>Frecuencia de comprobación<select id="es-freq" onchange="sistemaFreq(this.value)">' + ops + '</select></label>'
+    + '<label class="es-chk"><input type="checkbox" ' + (ESIS.auto ? 'checked' : '') + ' onchange="sistemaAuto(this.checked)"> Actualizar sola esta pantalla</label></div><div id="es-freq-msg" class="es-nota"></div>'
+    + '<div class="es-nota">El servidor solo consulta a los proveedores cuando pasó la frecuencia elegida; abrir varias pestañas o tocar ⟳ de seguido no genera más solicitudes. Para que el historial se llene también cuando nadie tiene el panel abierto, se puede usar un monitor externo gratuito (ver instrucciones).</div></div>';
+  h += '</div>';
+  s.innerHTML = h;
+}
