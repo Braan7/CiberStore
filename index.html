@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta name="cs-build" content="c82beacba7">
-<script>var CS_BUILD="c82beacba7";</script>
+<meta name="cs-build" content="6e5fd82a63">
+<script>var CS_BUILD="6e5fd82a63";</script>
 <meta charset="UTF-8"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -4331,6 +4331,7 @@ select.ap-inp{flex:0 1 auto}
       <div class="sb-section">Comunidad & ayuda</div>
       <div class="nav-item" id="ni-ranking" onclick="goPage('ranking')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16l-1.5 9h-13z"/><path d="M8 14v3h8v-3"/><path d="M6 21h12"/><path d="M4 5 2 8l2 2M20 5l2 3-2 2"/></svg></div> Ranking &amp; Premios</div>
       <div class="nav-item" id="ni-estado" onclick="goPage('estado')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div> Estado del servicio</div>
+      <div class="nav-item" id="ni-cuentas" onclick="goPage('cuentas')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div> Venta de cuentas</div>
       <div class="nav-item" id="ni-faq" onclick="goPage('faq')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 1-1 1.7"/><path d="M12 17h.01"/></svg></div> FAQ / Ayuda</div>
       <div class="nav-item" id="ni-soporte" onclick="goPage('soporte')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11a9 9 0 0 1 18 0v5a3 3 0 0 1-3 3h-1v-7h4M3 11v5a3 3 0 0 0 3 3h1v-7H3"/></svg></div> Centro de Soporte</div>
       <div class="nav-item" id="ni-creadores" onclick="goPage('creadores')"><div class="nav-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m23 7-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div> Creadores</div>
@@ -6906,6 +6907,20 @@ select.ap-inp{flex:0 1 auto}
     <div id="ux-estado-c"><div class="ux-ban"><b>Consultando…</b></div></div>
   </div>
 </div>
+<div class="page" id="page-cuentas">
+  <div class="cv-pg">
+    <div class="cv-top">
+      <div><h2 class="cv-h">Venta de cuentas</h2><p class="cv-p">Compra o vende cuentas de Free Fire. Cada cuenta de un cliente se revisa antes de publicarse.</p></div>
+      <button type="button" class="cv-sell" onclick="cvVender()">＋ Vender mi cuenta</button>
+    </div>
+    <div class="cv-tabs"><button type="button" id="cvt-lista" class="on" onclick="cvTab('lista')">Cuentas en venta</button><button type="button" id="cvt-mias" onclick="cvTab('mias')">Mis cuentas <span id="cv-nmias"></span></button></div>
+    <div id="cv-v-lista">
+      <div class="cv-tools"><input id="cv-q" type="search" placeholder="Buscar cuenta…" autocomplete="off" oninput="cvPintarLista()"/><select id="cv-o" onchange="cvPintarLista()"><option value="n">Más recientes</option><option value="a">Precio: menor a mayor</option><option value="d">Precio: mayor a menor</option></select></div>
+      <div id="cv-grid" class="cv-grid"><div class="cv-vacio">Cargando cuentas…</div></div>
+    </div>
+    <div id="cv-v-mias" style="display:none"></div>
+  </div>
+</div>
 <div class="page" id="page-cajas">
   <div class="ph">
     <div class="stag">Nuevo &middot; Mejorado</div>
@@ -7733,6 +7748,7 @@ select.ap-inp{flex:0 1 auto}
       <button class="adm-nav-btn"        id="admn-pedidos" onclick="admFullTab('pedidos')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16l-1.5 12.5a1.5 1.5 0 0 1-1.5 1.5H7a1.5 1.5 0 0 1-1.5-1.5L4 7z"/><path d="M8 7V5.5a4 4 0 0 1 8 0V7"/></svg> Pedidos</button>
       <button class="adm-nav-btn" id="admn-depositos" onclick="admFullTab('depositos')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/></svg> Dep&oacute;sitos <span class="crta-badge" id="dep-badge"></span></button>
       <button class="adm-nav-btn" id="admn-ganancias" onclick="admFullTab('ganancias')">&#x1F4B0; Ganancias</button>
+      <button class="adm-nav-btn" id="admn-cuentas" onclick="admFullTab('cuentas')">&#x1F3AE; Cuentas <span class="crta-badge" id="cva-badge"></span></button>
       <button class="adm-nav-btn" id="admn-osaldo" onclick="admFullTab('osaldo')">&#x1F9FE; &Oacute;rdenes saldo <span class="crta-badge" id="osa-badge"></span></button>
       <button class="adm-nav-btn" id="admn-vip" onclick="admFullTab('vip')">&#x1F48E; Clientes y VIP</button>
       <button class="adm-nav-btn" id="admn-prime" onclick="admFullTab('prime')">&#x1F3C5; Niveles Prime</button>
@@ -8211,6 +8227,8 @@ select.ap-inp{flex:0 1 auto}
 <div class="adm-section" id="adms-depositos"></div>
 
 <div class="adm-section" id="adms-ganancias"></div>
+
+<div class="adm-section" id="adms-cuentas"></div>
 
 <div class="adm-section" id="adms-osaldo"></div>
 
@@ -9919,10 +9937,108 @@ body.d50-on #vip-banner{display:none!important}
 #adms-ganancias .gn-err{color:#ff6b6b;padding:.8rem}
 @media(min-width:700px){#adms-ganancias .gn-kp{grid-template-columns:repeat(4,1fr)}}
 
+/* ═══ Venta de cuentas ═══ */
+.cv-pg{max-width:1080px;margin:0 auto;padding:1rem 5vw 7rem}
+.cv-top{display:flex;gap:1rem;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;margin-bottom:1rem}
+.cv-h{font-family:Saira,Barlow,sans-serif;font-weight:900;font-size:1.6rem;margin:0;color:#fff}
+body.light-mode .cv-h{color:#0f172a}
+.cv-p{margin:.25rem 0 0;color:#9aa4b2;font-size:.86rem;line-height:1.5;max-width:520px}
+.cv-sell{border:0;border-radius:13px;padding:.8rem 1.2rem;background:linear-gradient(135deg,#0a4fa8,#1b87f5);color:#fff;font-family:Barlow,sans-serif;font-weight:800;font-size:.9rem;cursor:pointer;min-height:46px;-webkit-appearance:none;appearance:none;touch-action:manipulation;white-space:nowrap}
+.cv-tabs{display:flex;gap:.4rem;background:rgba(0,0,0,.25);padding:.3rem;border-radius:14px;max-width:420px;margin-bottom:1rem}
+.cv-tabs button{flex:1;border:1px solid transparent;border-radius:11px;padding:.65rem .4rem;background:none;color:#9aa4b2;font-weight:700;font-size:.82rem;cursor:pointer;-webkit-appearance:none;appearance:none}
+.cv-tabs button.on{background:rgba(27,135,245,.14);border-color:rgba(27,135,245,.45);color:#5aa8ff}
+.cv-tools{display:flex;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap}
+.cv-tools input,.cv-tools select{flex:1;min-width:150px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:#e8e8ea;border-radius:12px;padding:.75rem .9rem;font-size:.9rem;font-family:Barlow,sans-serif}
+.cv-tools select{flex:0 1 220px}
+.cv-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem}
+@media(min-width:700px){.cv-grid{grid-template-columns:repeat(3,1fr);gap:1rem}}
+@media(min-width:1000px){.cv-grid{grid-template-columns:repeat(4,1fr)}}
+.cv-c{display:flex;flex-direction:column;border-radius:16px;overflow:hidden;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09);cursor:pointer;text-align:left;padding:0;color:inherit;font:inherit;-webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent;transition:transform .15s,border-color .15s}
+.cv-c:hover{border-color:rgba(27,135,245,.5);transform:translateY(-2px)}
+.cv-ph{position:relative;aspect-ratio:4/3;background:#0b0f18 center/cover no-repeat;overflow:hidden}
+.cv-ph img{width:100%;height:100%;object-fit:cover;display:block}
+.cv-n{position:absolute;right:.5rem;bottom:.5rem;background:rgba(0,0,0,.65);color:#fff;font-size:.68rem;font-weight:700;padding:.15rem .45rem;border-radius:99px}
+.cv-b{padding:.7rem .75rem .85rem;display:flex;flex-direction:column;gap:.3rem;flex:1}
+.cv-t{font-weight:700;font-size:.88rem;line-height:1.3;color:#fff;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+body.light-mode .cv-t{color:#0f172a}
+.cv-chip{display:inline-block;align-self:flex-start;font-size:.68rem;font-weight:700;padding:.15rem .5rem;border-radius:99px;background:rgba(27,135,245,.12);border:1px solid rgba(27,135,245,.3);color:#8fc1ff}
+.cv-pr{margin-top:auto;font-family:Saira,Barlow,sans-serif;font-weight:900;font-size:1.1rem;color:#4ade80}
+.cv-vacio{grid-column:1/-1;text-align:center;color:#8b93a3;padding:2.5rem 1rem;font-size:.9rem;line-height:1.6}
+.cv-vacio button{margin-top:.8rem}
+/* Mis cuentas */
+.cv-row{display:flex;gap:.8rem;padding:.8rem;border-radius:15px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09);margin-bottom:.7rem}
+.cv-row .cv-th{width:84px;height:84px;border-radius:11px;object-fit:cover;background:#0b0f18;flex:none}
+.cv-ri{flex:1;min-width:0}
+.cv-ri b{display:block;font-size:.92rem;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.light-mode .cv-ri b{color:#0f172a}
+.cv-ri small{display:block;color:#8b93a3;font-size:.74rem;margin:.1rem 0 .35rem}
+.cv-est{display:inline-block;font-size:.7rem;font-weight:800;padding:.15rem .55rem;border-radius:99px;border:1px solid}
+.cv-est.revision{color:#ffb84d;border-color:rgba(255,184,77,.4);background:rgba(255,184,77,.08)}
+.cv-est.publicada{color:#4ade80;border-color:rgba(74,222,128,.4);background:rgba(74,222,128,.08)}
+.cv-est.rechazada{color:#ff6b6b;border-color:rgba(255,107,107,.4);background:rgba(255,107,107,.08)}
+.cv-est.vendida{color:#9aa4b2;border-color:rgba(154,164,178,.4)}
+.cv-est.oculta{color:#9aa4b2;border-color:rgba(154,164,178,.4)}
+.cv-mot{font-size:.76rem;color:#ffb3b3;margin-top:.35rem;line-height:1.4}
+.cv-ac{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.55rem}
+.cv-ac button{border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#d6dbe6;border-radius:10px;padding:.45rem .8rem;font-size:.78rem;font-weight:700;cursor:pointer;min-height:38px;-webkit-appearance:none;appearance:none;touch-action:manipulation}
+.cv-ac button.ok{background:#16a34a;border-color:#16a34a;color:#fff}
+.cv-ac button.mal{color:#ff8a8a;border-color:rgba(255,107,107,.4)}
+/* Hojas (detalle y formulario) */
+.cv-ov{position:fixed;inset:0;z-index:10060;background:rgba(0,0,0,.65);display:none;align-items:flex-end;justify-content:center;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.cv-ov.on{display:flex}
+.cv-sheet{width:100%;max-width:560px;max-height:94vh;max-height:94dvh;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;background:#10151f;border:1px solid rgba(255,255,255,.1);border-radius:22px 22px 0 0;padding:1.1rem 1.1rem calc(1.4rem + env(safe-area-inset-bottom,0px));animation:uxIn .25s ease both;color:#e8e8ea}
+@media(min-width:700px){.cv-ov{align-items:center}.cv-sheet{border-radius:22px;max-width:620px}}
+.cv-sheet h3{display:flex;justify-content:space-between;align-items:center;margin:0 0 .9rem;font-family:Barlow,sans-serif;font-size:1.1rem;color:#fff}
+.cv-x{border:0;background:rgba(255,255,255,.07);color:#cfd6e4;width:36px;height:36px;border-radius:50%;font-size:1rem;cursor:pointer;flex:none}
+.cv-gal{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:.5rem;-webkit-overflow-scrolling:touch;border-radius:14px;margin-bottom:.5rem;scrollbar-width:none}
+.cv-gal::-webkit-scrollbar{display:none}
+.cv-gal img{flex:0 0 100%;scroll-snap-align:center;aspect-ratio:4/3;object-fit:cover;border-radius:14px;background:#0b0f18;cursor:zoom-in}
+.cv-dots{display:flex;justify-content:center;gap:.35rem;margin-bottom:.8rem}
+.cv-dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.25)}
+.cv-dots i.on{background:#1b87f5}
+.cv-big{font-family:Saira,Barlow,sans-serif;font-weight:900;font-size:1.7rem;color:#4ade80;margin:.2rem 0 .3rem}
+.cv-ti{font-weight:800;font-size:1.1rem;color:#fff;line-height:1.3;margin:0 0 .4rem}
+.cv-ds{white-space:pre-wrap;word-break:break-word;font-size:.88rem;line-height:1.6;color:#c3cad6;margin:.7rem 0}
+.cv-seg{font-size:.76rem;color:#ffb84d;background:rgba(255,184,77,.08);border:1px solid rgba(255,184,77,.25);border-radius:11px;padding:.65rem .8rem;margin:.8rem 0;line-height:1.5}
+.cv-wa{display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;border:0;border-radius:13px;padding:.9rem;background:#22c55e;color:#06260f;font-weight:800;font-size:.95rem;cursor:pointer;min-height:50px;-webkit-appearance:none;appearance:none;touch-action:manipulation}
+.cv-sheet label{display:block;font-size:.78rem;font-weight:700;color:#9aa4b2;margin:.7rem 0 .3rem}
+.cv-sheet input[type=text],.cv-sheet input[type=number],.cv-sheet select,.cv-sheet textarea{width:100%;box-sizing:border-box;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);color:#e8e8ea;border-radius:12px;padding:.8rem .9rem;font-size:.95rem;font-family:Barlow,sans-serif}
+.cv-sheet textarea{min-height:110px;resize:vertical}
+.cv-sheet small.cv-ct{display:block;text-align:right;color:#6b7280;font-size:.7rem;margin-top:.2rem}
+.cv-fts{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-top:.2rem}
+@media(min-width:560px){.cv-fts{grid-template-columns:repeat(5,1fr)}}
+.cv-ft{position:relative;aspect-ratio:1;border-radius:11px;overflow:hidden;background:#0b0f18}
+.cv-ft img{width:100%;height:100%;object-fit:cover}
+.cv-ft button{position:absolute;top:3px;right:3px;width:26px;height:26px;border:0;border-radius:50%;background:rgba(0,0,0,.7);color:#fff;font-size:.85rem;cursor:pointer}
+.cv-add{aspect-ratio:1;border:1.5px dashed rgba(27,135,245,.5);border-radius:11px;background:rgba(27,135,245,.06);color:#5aa8ff;font-size:1.6rem;cursor:pointer;display:grid;place-items:center;-webkit-appearance:none;appearance:none}
+.cv-chk{display:flex;gap:.55rem;align-items:flex-start;margin:.9rem 0;font-size:.78rem;color:#b6bfcc;line-height:1.45}
+.cv-chk input{margin-top:.15rem;width:18px;height:18px;flex:none}
+.cv-go{display:block;width:100%;border:0;border-radius:13px;padding:.9rem;background:linear-gradient(135deg,#0a4fa8,#1b87f5);color:#fff;font-weight:800;font-size:.95rem;cursor:pointer;min-height:50px;-webkit-appearance:none;appearance:none}
+.cv-go:disabled{opacity:.55}
+.cv-er{color:#ff8a8a;font-size:.82rem;margin:.6rem 0 0;display:none}
+.cv-lb{position:fixed;inset:0;z-index:10070;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;padding:1rem}
+.cv-lb.on{display:flex}
+.cv-lb img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px}
+.cv-lb .cv-x{position:absolute;top:calc(.8rem + env(safe-area-inset-top,0px));right:.8rem}
+@supports (-webkit-touch-callout:none){.cv-sheet input,.cv-sheet select,.cv-sheet textarea,.cv-tools input,.cv-tools select{font-size:16px!important}}
+@media(max-width:380px){.cv-h{font-size:1.35rem}.cv-row .cv-th{width:68px;height:68px}}
+/* Panel admin */
+#adms-cuentas .cv-fl{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.9rem}
+#adms-cuentas .cv-fl button{padding:.55rem .9rem;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#c9d1e0;font-weight:700;font-size:.82rem;cursor:pointer}
+#adms-cuentas .cv-fl button.on{background:#1b87f5;border-color:#1b87f5;color:#fff}
+#adms-cuentas .cv-fl .cv-new{margin-left:auto;background:#16a34a;border-color:#16a34a;color:#fff}
+#adms-cuentas .cv-ap{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:.9rem;margin-bottom:.7rem}
+#adms-cuentas .cv-strip{display:flex;gap:.4rem;overflow-x:auto;margin:.5rem 0}
+#adms-cuentas .cv-strip img{width:96px;height:72px;object-fit:cover;border-radius:8px;flex:none;cursor:zoom-in}
+#adms-cuentas .cv-top2{display:flex;justify-content:space-between;gap:.6rem}
+#adms-cuentas .cv-top2 b{color:#fff}
+#adms-cuentas .cv-top2 small{display:block;color:#8b97ad;font-size:.74rem}
+#adms-cuentas .cv-dsa{font-size:.82rem;color:#c3cad6;white-space:pre-wrap;word-break:break-word;margin:.3rem 0}
+
 </style>
-<script src="supabase.js?v=c82beacba7"></script>
-<script src="supabase_integration.js?v=c82beacba7"></script>
-<script src="script.js?v=c82beacba7"></script>
+<script src="supabase.js?v=6e5fd82a63"></script>
+<script src="supabase_integration.js?v=6e5fd82a63"></script>
+<script src="script.js?v=6e5fd82a63"></script>
 
 <!-- BARRA DE NAVEGACION INFERIOR -->
 

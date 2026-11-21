@@ -246,6 +246,56 @@ async function calcularGanancias(dias){
     por_dia, por_producto, perdidas };
 }
 
+
+// ═════════════ VENTA DE CUENTAS ═════════════
+// Clientes y administrador publican cuentas de Free Fire. Las del cliente pasan por revisión del administrador.
+// Las fotos llegan comprimidas desde el navegador (data URL) y se guardan en el bucket público "cuentas" de Supabase Storage.
+const CV_VINC = ['Facebook', 'Google', 'Apple', 'VK', 'X (Twitter)', 'Huawei', 'Sin vincular', 'Otra'];
+const CV_ESTADOS = ['revision', 'publicada', 'rechazada', 'vendida', 'oculta'];
+const limpio = (t, max) => String(t == null ? '' : t).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '').replace(/\r\n/g, '\n').trim().slice(0, max);
+function cvDatos(b){
+  const titulo = limpio(b.titulo, 80), descripcion = limpio(b.descripcion, 1500), precio = Math.round(Number(b.precio) * 100) / 100;
+  const vinculacion = CV_VINC.includes(b.vinculacion) ? b.vinculacion : null;
+  if(titulo.length < 4) return { error: 'Escribe un título de al menos 4 letras' };
+  if(!(precio > 0) || precio > 500000) return { error: 'Escribe un precio válido en MXN' };
+  if(!vinculacion) return { error: 'Elige con qué está vinculada la cuenta' };
+  return { titulo, descripcion, precio, vinculacion };
+}
+const cvPublico = x => ({ id: x.id, codigo: 'CV' + x.id, titulo: x.titulo, precio: Number(x.precio), vinculacion: x.vinculacion, foto: (x.fotos || [])[0] || null, n_fotos: (x.fotos || []).length, creada: x.creada });
+async function cvSubirFoto(idc, i, dataUrl){
+  const m = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/.exec(String(dataUrl || '')); if(!m) return { error: 'Una de las fotos no tiene un formato válido (usa JPG, PNG o WEBP)' };
+  const buf = Buffer.from(m[2], 'base64'); if(buf.length < 500 || buf.length > 520000) return { error: 'Una foto es demasiado grande o está vacía' };
+  const jpg = buf[0] === 0xFF && buf[1] === 0xD8, png = buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4E && buf[3] === 0x47, web = buf.slice(0, 4).toString() === 'RIFF' && buf.slice(8, 12).toString() === 'WEBP';
+  if(!(jpg || png || web)) return { error: 'Una de las fotos no es una imagen válida' };
+  const ext = jpg ? 'jpg' : png ? 'png' : 'webp', mime = jpg ? 'image/jpeg' : png ? 'image/png' : 'image/webp', path = idc + '/' + Date.now().toString(36) + '-' + i + crypto.randomBytes(3).toString('hex') + '.' + ext, c = cfg();
+  try{
+    const r = await fetch(c.url + '/storage/v1/object/cuentas/' + path, { method: 'POST', headers: { apikey: c.key, Authorization: 'Bearer ' + c.key, 'Content-Type': mime, 'x-upsert': 'false', 'Cache-Control': 'max-age=31536000' }, body: buf });
+    if(!r.ok) return { error: 'No se pudo guardar una foto (falta ejecutar cuentas.sql en Supabase)' };
+  }catch(e){ return { error: 'No se pudo guardar una foto. Intenta de nuevo' }; }
+  return { url: c.url + '/storage/v1/object/public/cuentas/' + path };
+}
+async function cvBorrarFotos(urls){
+  const c = cfg(), pre = c.url + '/storage/v1/object/public/cuentas/', paths = (urls || []).filter(u => String(u).startsWith(pre)).map(u => String(u).slice(pre.length));
+  if(!paths.length) return;
+  try{ await fetch(c.url + '/storage/v1/object/cuentas', { method: 'DELETE', headers: { apikey: c.key, Authorization: 'Bearer ' + c.key, 'Content-Type': 'application/json' }, body: J({ prefixes: paths }) }); }catch(e){}
+}
+async function cvCrear(owner, b, admin){
+  const d = cvDatos(b); if(d.error) return { ok: false, code: 'datos', message: d.error };
+  const fotos = Array.isArray(b.fotos) ? b.fotos.slice(0, 5) : []; if(!fotos.length) return { ok: false, code: 'fotos', message: 'Sube al menos 1 foto de la cuenta' };
+  const r = await rest('cuentas_venta', { method: 'POST', headers: { Prefer: 'return=representation' }, body: J({ user_id: admin ? null : String(owner.id), username: admin ? 'CiberStore' : owner.username, propia: !!admin, titulo: d.titulo, descripcion: d.descripcion || null, precio: d.precio, vinculacion: d.vinculacion, estado: admin ? 'publicada' : 'revision' }) });
+  const fila = Array.isArray(r.json) ? r.json[0] : null;
+  if(r.status >= 400 || !fila) return { ok: false, code: 'db', message: 'Falta ejecutar cuentas.sql en Supabase' };
+  const urls = [];
+  for(let i = 0; i < fotos.length; i++){
+    const f = await cvSubirFoto(fila.id, i, fotos[i]);
+    if(f.error){ await cvBorrarFotos(urls); await rest('cuentas_venta?id=eq.' + fila.id, { method: 'DELETE' }); return { ok: false, code: 'foto', message: f.error }; }
+    urls.push(f.url);
+  }
+  await rest('cuentas_venta?id=eq.' + fila.id, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: J({ fotos: urls }) });
+  if(!admin) telegram('🆕 <b>Cuenta en revisión · CV' + fila.id + '</b>\n👤 ' + esc(owner.username) + '\n🎮 ' + esc(d.titulo) + '\n💵 ' + dinero(d.precio) + ' · ' + esc(d.vinculacion) + '\n📷 ' + urls.length + ' foto(s)\nApruébala o recházala en el panel → Cuentas.');
+  return { ok: true, id: fila.id, estado: fila.estado };
+}
+
 module.exports = async function handler(req, res){
   try{
     if(req.method !== 'POST') return enviar(res, { ok: false, code: 'metodo' }, 405);
@@ -262,6 +312,24 @@ module.exports = async function handler(req, res){
       const d = S.verificar(b.token);
       if(!d) return enviar(res, { ok: false, code: 'sesion_invalida', message: 'Tu sesión del panel venció. Entra de nuevo.' }, 401);
       const adm = String(d.u || 'admin').slice(0, 80);
+      if(a === 'admin_cuentas'){
+        const e = CV_ESTADOS.includes(b.estado) ? '&estado=eq.' + b.estado : '';
+        const r = await rest('cuentas_venta?id=gt.0' + e + '&select=id,username,propia,titulo,descripcion,precio,vinculacion,fotos,estado,motivo,creada&order=creada.desc&limit=200');
+        const rq = await rest('cuentas_venta?estado=eq.revision&select=id');
+        return enviar(res, { ok: true, en_revision: Array.isArray(rq.json) ? rq.json.length : 0, cuentas: (Array.isArray(r.json) ? r.json : []).map(x => Object.assign(cvPublico(x), { descripcion: x.descripcion || '', fotos: x.fotos || [], estado: x.estado, motivo: x.motivo || null, usuario: x.username, propia: !!x.propia })) });
+      }
+      if(a === 'admin_cuenta_estado'){
+        const id = Number(b.id), est = String(b.estado || ''); if(!(id > 0) || !CV_ESTADOS.includes(est)) return enviar(res, { ok: false, code: 'solicitud', message: 'Datos inválidos' });
+        const r = await rest('cuentas_venta?id=eq.' + id, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: J({ estado: est, motivo: est === 'rechazada' ? (limpio(b.motivo, 200) || null) : null, actualizada: new Date().toISOString() }) });
+        return enviar(res, r.status >= 400 ? { ok: false, code: 'db', message: 'No se pudo guardar' } : { ok: true });
+      }
+      if(a === 'admin_cuenta_borrar'){
+        const id = Number(b.id); if(!(id > 0)) return enviar(res, { ok: false, code: 'solicitud', message: 'Cuenta inválida' });
+        const rc = await rest('cuentas_venta?id=eq.' + id + '&select=fotos&limit=1'), c0 = Array.isArray(rc.json) ? rc.json[0] : null;
+        await rest('cuentas_venta?id=eq.' + id, { method: 'DELETE' }); if(c0) await cvBorrarFotos(c0.fotos);
+        return enviar(res, { ok: true });
+      }
+      if(a === 'admin_cuenta_crear') return enviar(res, await cvCrear({ id: 'admin', username: adm }, b, true));
       if(a === 'admin_ganancias') return enviar(res, await calcularGanancias(Number(b.dias) || 7));
       if(a === 'admin_ordenes'){
         const est = ['pagada', 'entregando', 'verificar', 'parcial', 'reembolsada'].indexOf(b.estado) >= 0 ? '&estado=eq.' + b.estado : '';
@@ -300,12 +368,61 @@ module.exports = async function handler(req, res){
       const k = await leerCatalogo();
       return enviar(res, { ok: true, sin_bd: k.sin_bd, diag: k.diag || null, productos: k.productos.filter(x => x.grupo !== 'd50'), saldo: null });
     }
+    // ── Venta de cuentas: lo público se ve sin iniciar sesión ──
+    if(a === 'cuentas_lista'){
+      if(limite('cl|' + ip, 90, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Espera un momento' }, 429);
+      const r = await rest('cuentas_venta?estado=eq.publicada&select=id,titulo,precio,vinculacion,fotos,creada&order=creada.desc&limit=200');
+      if(r.status >= 400 || !Array.isArray(r.json)) return enviar(res, { ok: true, cuentas: [], sin_bd: true });
+      return enviar(res, { ok: true, cuentas: r.json.map(cvPublico) });
+    }
+    if(a === 'cuentas_detalle'){
+      const id = Number(b.id); if(!(id > 0)) return enviar(res, { ok: false, code: 'solicitud', message: 'Cuenta inválida' });
+      if(limite('cd|' + ip, 120, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Espera un momento' }, 429);
+      const r = await rest('cuentas_venta?id=eq.' + id + '&estado=eq.publicada&select=id,titulo,descripcion,precio,vinculacion,fotos,propia,creada&limit=1'), x = Array.isArray(r.json) ? r.json[0] : null;
+      if(!x) return enviar(res, { ok: false, code: 'no_existe', message: 'Esta cuenta ya no está disponible' }, 404);
+      return enviar(res, { ok: true, cuenta: Object.assign(cvPublico(x), { descripcion: x.descripcion || '', fotos: x.fotos || [], vendedor: x.propia ? 'CiberStore' : 'Cliente' }) });
+    }
     if(!u || !h) return enviar(res, { ok: false, code: 'credenciales', message: 'Inicia sesión para comprar' }, 401);
     if(limite('a|' + ip, 80, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Demasiados intentos, espera un momento' }, 429);
     const r0 = await rest('profiles?username=eq.' + encodeURIComponent(u) + '&select=id,username,password_hash,banned,saldo&limit=1');
     const p = Array.isArray(r0.json) ? r0.json[0] : null;
     if(!p || !p.password_hash || !iguales(h, p.password_hash)) return enviar(res, { ok: false, code: 'credenciales', message: 'Vuelve a iniciar sesión' }, 401);
     const uid = String(p.id);
+
+    // ── Venta de cuentas: acciones del cliente (sus propias cuentas) ──
+    if(a.slice(0, 8) === 'cuentas_'){
+      if(p.banned) return enviar(res, { ok: false, code: 'suspendida', message: 'Tu cuenta está suspendida. Contacta a soporte.' });
+      if(a === 'cuentas_mias'){
+        const r = await rest('cuentas_venta?user_id=eq.' + encodeURIComponent(uid) + '&select=id,titulo,descripcion,precio,vinculacion,fotos,estado,motivo,creada&order=creada.desc&limit=100');
+        return enviar(res, { ok: true, cuentas: (Array.isArray(r.json) ? r.json : []).map(x => Object.assign(cvPublico(x), { descripcion: x.descripcion || '', fotos: x.fotos || [], estado: x.estado, motivo: x.motivo || null })) });
+      }
+      if(a === 'cuentas_crear'){
+        if(limite('cc|' + uid, 5, 3600000)) return enviar(res, { ok: false, code: 'limite', message: 'Publicaste muchas cuentas seguidas. Intenta más tarde.' }, 429);
+        const ra = await rest('cuentas_venta?user_id=eq.' + encodeURIComponent(uid) + '&estado=in.(revision,publicada)&select=id');
+        if(Array.isArray(ra.json) && ra.json.length >= 5) return enviar(res, { ok: false, code: 'tope', message: 'Ya tienes 5 cuentas activas. Borra o marca como vendida alguna para subir otra.' });
+        return enviar(res, await cvCrear(p, b, false));
+      }
+      const id = Number(b.id); if(!(id > 0)) return enviar(res, { ok: false, code: 'solicitud', message: 'Cuenta inválida' });
+      const rc = await rest('cuentas_venta?id=eq.' + id + '&user_id=eq.' + encodeURIComponent(uid) + '&select=id,estado,fotos,titulo&limit=1'), c0 = Array.isArray(rc.json) ? rc.json[0] : null;
+      if(!c0) return enviar(res, { ok: false, code: 'no_existe', message: 'No encontramos esa cuenta' }, 404);
+      if(a === 'cuentas_borrar'){
+        await rest('cuentas_venta?id=eq.' + id, { method: 'DELETE' }); await cvBorrarFotos(c0.fotos);
+        return enviar(res, { ok: true });
+      }
+      if(a === 'cuentas_vendida'){
+        if(c0.estado !== 'publicada') return enviar(res, { ok: false, code: 'estado', message: 'Solo una cuenta publicada se puede marcar como vendida' });
+        await rest('cuentas_venta?id=eq.' + id, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: J({ estado: 'vendida', actualizada: new Date().toISOString() }) });
+        return enviar(res, { ok: true });
+      }
+      if(a === 'cuentas_editar'){
+        if(c0.estado === 'vendida') return enviar(res, { ok: false, code: 'estado', message: 'Una cuenta vendida ya no se puede editar' });
+        const d = cvDatos(b); if(d.error) return enviar(res, { ok: false, code: 'datos', message: d.error });
+        await rest('cuentas_venta?id=eq.' + id, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: J({ titulo: d.titulo, descripcion: d.descripcion || null, precio: d.precio, vinculacion: d.vinculacion, estado: 'revision', motivo: null, actualizada: new Date().toISOString() }) });
+        telegram('✏️ <b>Cuenta editada · CV' + id + '</b> (vuelve a revisión)\n👤 ' + esc(p.username) + '\n🎮 ' + esc(d.titulo) + ' · ' + dinero(d.precio));
+        return enviar(res, { ok: true, estado: 'revision' });
+      }
+      return enviar(res, { ok: false, code: 'accion', message: 'Acción desconocida' });
+    }
 
     if(a === 'catalogo'){
       const k = await leerCatalogo();
