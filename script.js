@@ -3447,6 +3447,8 @@ function startAdmClock(){
 }
 
 function openFullAdmin(){
+  // "Salir" solo cierra el panel: si la sesión guardada ya no existe o venció, se pide entrar de nuevo
+  try{ if(adminAuthed && typeof csAdminSesionToken === 'function' && !csAdminSesionToken()) adminAuthed = false; }catch(e){}
   if(!adminAuthed){
     showAuthModal();
     authTab('admin');
@@ -17089,7 +17091,7 @@ function ccLlamar(body){
   });
 }
 function ccAdminLlamar(body){
-  var t = ccAdminTok(); if(!t) return Promise.resolve({ok:false, code:'sesion_invalida', message:'Entra de nuevo al panel de administrador.'});
+  var t = ccAdminTok(); if(!t){ try{ if(typeof csAdminCaducada === 'function') csAdminCaducada('Tu sesión del panel venció. Escribe tu correo y contraseña otra vez.'); }catch(e){} return Promise.resolve({ok:false, code:'sesion_invalida', message:'Entra de nuevo al panel de administrador.'}); }
   body.admin_token = t; return ccApi(body);
 }
 
