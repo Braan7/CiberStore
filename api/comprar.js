@@ -253,13 +253,16 @@ async function calcularGanancias(dias){
 const CV_VINC = ['Facebook', 'Google', 'Apple', 'VK', 'X (Twitter)', 'Huawei', 'Sin vincular', 'Otra'];
 const CV_ESTADOS = ['revision', 'publicada', 'rechazada', 'vendida', 'oculta'];
 const limpio = (t, max) => String(t == null ? '' : t).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '').replace(/\r\n/g, '\n').trim().slice(0, max);
-function cvDatos(b){
+function cvTel(t){ let d = String(t == null ? '' : t).replace(/\D/g, ''); if(d.length === 10) d = '52' + d; return (d.length >= 10 && d.length <= 15) ? d : null; }
+function cvDatos(b, exigirContacto){
   const titulo = limpio(b.titulo, 80), descripcion = limpio(b.descripcion, 1500), precio = Math.round(Number(b.precio) * 100) / 100;
   const vinculacion = CV_VINC.includes(b.vinculacion) ? b.vinculacion : null;
   if(titulo.length < 4) return { error: 'Escribe un título de al menos 4 letras' };
   if(!(precio > 0) || precio > 500000) return { error: 'Escribe un precio válido en MXN' };
   if(!vinculacion) return { error: 'Elige con qué está vinculada la cuenta' };
-  return { titulo, descripcion, precio, vinculacion };
+  const contacto = cvTel(b.contacto);
+  if(exigirContacto && !contacto) return { error: 'Escribe tu número de WhatsApp (10 dígitos, o con lada de tu país)' };
+  return { titulo, descripcion, precio, vinculacion, contacto };
 }
 const cvPublico = x => ({ id: x.id, codigo: 'CV' + x.id, titulo: x.titulo, precio: Number(x.precio), vinculacion: x.vinculacion, foto: (x.fotos || [])[0] || null, n_fotos: (x.fotos || []).length, creada: x.creada });
 async function cvSubirFoto(idc, i, dataUrl){
@@ -280,9 +283,9 @@ async function cvBorrarFotos(urls){
   try{ await fetch(c.url + '/storage/v1/object/cuentas', { method: 'DELETE', headers: { apikey: c.key, Authorization: 'Bearer ' + c.key, 'Content-Type': 'application/json' }, body: J({ prefixes: paths }) }); }catch(e){}
 }
 async function cvCrear(owner, b, admin){
-  const d = cvDatos(b); if(d.error) return { ok: false, code: 'datos', message: d.error };
+  const d = cvDatos(b, !admin); if(d.error) return { ok: false, code: 'datos', message: d.error };
   const fotos = Array.isArray(b.fotos) ? b.fotos.slice(0, 5) : []; if(!fotos.length) return { ok: false, code: 'fotos', message: 'Sube al menos 1 foto de la cuenta' };
-  const r = await rest('cuentas_venta', { method: 'POST', headers: { Prefer: 'return=representation' }, body: J({ user_id: admin ? null : String(owner.id), username: admin ? 'CiberStore' : owner.username, propia: !!admin, titulo: d.titulo, descripcion: d.descripcion || null, precio: d.precio, vinculacion: d.vinculacion, estado: admin ? 'publicada' : 'revision' }) });
+  const r = await rest('cuentas_venta', { method: 'POST', headers: { Prefer: 'return=representation' }, body: J({ user_id: admin ? null : String(owner.id), username: admin ? 'CiberStore' : owner.username, propia: !!admin, titulo: d.titulo, descripcion: d.descripcion || null, precio: d.precio, vinculacion: d.vinculacion, contacto: d.contacto || null, estado: admin ? 'publicada' : 'revision' }) });
   const fila = Array.isArray(r.json) ? r.json[0] : null;
   if(r.status >= 400 || !fila) return { ok: false, code: 'db', message: 'Falta ejecutar cuentas.sql en Supabase' };
   const urls = [];
@@ -292,7 +295,7 @@ async function cvCrear(owner, b, admin){
     urls.push(f.url);
   }
   await rest('cuentas_venta?id=eq.' + fila.id, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: J({ fotos: urls }) });
-  if(!admin) telegram('🆕 <b>Cuenta en revisión · CV' + fila.id + '</b>\n👤 ' + esc(owner.username) + '\n🎮 ' + esc(d.titulo) + '\n💵 ' + dinero(d.precio) + ' · ' + esc(d.vinculacion) + '\n📷 ' + urls.length + ' foto(s)\nApruébala o recházala en el panel → Cuentas.');
+  if(!admin) telegram('🆕 <b>Cuenta en revisión · CV' + fila.id + '</b>\n👤 ' + esc(owner.username) + '\n🎮 ' + esc(d.titulo) + '\n💵 ' + dinero(d.precio) + ' · ' + esc(d.vinculacion) + '\n📷 ' + urls.length + ' foto(s)\n📱 Vendedor: +' + d.contacto + '\nApruébala o recházala en el panel → Cuentas.');
   return { ok: true, id: fila.id, estado: fila.estado };
 }
 
@@ -314,9 +317,22 @@ module.exports = async function handler(req, res){
       const adm = String(d.u || 'admin').slice(0, 80);
       if(a === 'admin_cuentas'){
         const e = CV_ESTADOS.includes(b.estado) ? '&estado=eq.' + b.estado : '';
-        const r = await rest('cuentas_venta?id=gt.0' + e + '&select=id,username,propia,titulo,descripcion,precio,vinculacion,fotos,estado,motivo,creada&order=creada.desc&limit=200');
-        const rq = await rest('cuentas_venta?estado=eq.revision&select=id');
-        return enviar(res, { ok: true, en_revision: Array.isArray(rq.json) ? rq.json.length : 0, cuentas: (Array.isArray(r.json) ? r.json : []).map(x => Object.assign(cvPublico(x), { descripcion: x.descripcion || '', fotos: x.fotos || [], estado: x.estado, motivo: x.motivo || null, usuario: x.username, propia: !!x.propia })) });
+        const r = await rest('cuentas_venta?id=gt.0' + e + '&select=id,username,propia,titulo,descripcion,precio,vinculacion,contacto,fotos,estado,motivo,creada&order=creada.desc&limit=200');
+        const rq = await rest('cuentas_venta?estado=eq.revision&select=id'), rn = await rest('cuentas_interes?estado=eq.nuevo&select=id'), ri = await rest('cuentas_interes?estado=in.(nuevo,en_trato)&select=cuenta_id'), cnt = {};
+        (Array.isArray(ri.json) ? ri.json : []).forEach(i => { cnt[i.cuenta_id] = (cnt[i.cuenta_id] || 0) + 1; });
+        return enviar(res, { ok: true, en_revision: Array.isArray(rq.json) ? rq.json.length : 0, intereses_nuevos: Array.isArray(rn.json) ? rn.json.length : 0, cuentas: (Array.isArray(r.json) ? r.json : []).map(x => Object.assign(cvPublico(x), { descripcion: x.descripcion || '', fotos: x.fotos || [], estado: x.estado, motivo: x.motivo || null, usuario: x.username, propia: !!x.propia, contacto: x.contacto || '', interesados: cnt[x.id] || 0 })) });
+      }
+      if(a === 'admin_intereses'){
+        const e = ['nuevo', 'en_trato', 'cerrado', 'descartado'].includes(b.estado) ? '&estado=eq.' + b.estado : '';
+        const r = await rest('cuentas_interes?id=gt.0' + e + '&select=id,cuenta_id,username,contacto,mensaje,estado,creada&order=creada.desc&limit=200'), l = Array.isArray(r.json) ? r.json : [];
+        const ids = Array.from(new Set(l.map(x => x.cuenta_id))), cu = {};
+        if(ids.length){ const rc = await rest('cuentas_venta?id=in.(' + ids.join(',') + ')&select=id,titulo,precio,username,contacto,propia,estado'); (Array.isArray(rc.json) ? rc.json : []).forEach(c => { cu[c.id] = c; }); }
+        return enviar(res, { ok: true, intereses: l.map(x => { const c = cu[x.cuenta_id] || {}; return { id: x.id, cuenta_id: x.cuenta_id, codigo: 'CV' + x.cuenta_id, titulo: c.titulo || '(cuenta borrada)', precio: Number(c.precio) || 0, cuenta_estado: c.estado || null, vendedor: c.propia ? 'CiberStore' : (c.username || ''), vendedor_contacto: c.contacto || '', propia: !!c.propia, comprador: x.username, comprador_contacto: x.contacto, mensaje: x.mensaje || '', estado: x.estado, creada: x.creada }; }) });
+      }
+      if(a === 'admin_interes_estado'){
+        const id = Number(b.id), est = String(b.estado || ''); if(!(id > 0) || !['nuevo', 'en_trato', 'cerrado', 'descartado'].includes(est)) return enviar(res, { ok: false, code: 'solicitud', message: 'Datos inválidos' });
+        const r = await rest('cuentas_interes?id=eq.' + id, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: J({ estado: est }) });
+        return enviar(res, r.status >= 400 ? { ok: false, code: 'db', message: 'No se pudo guardar' } : { ok: true });
       }
       if(a === 'admin_cuenta_estado'){
         const id = Number(b.id), est = String(b.estado || ''); if(!(id > 0) || !CV_ESTADOS.includes(est)) return enviar(res, { ok: false, code: 'solicitud', message: 'Datos inválidos' });
@@ -393,10 +409,25 @@ module.exports = async function handler(req, res){
     if(a.slice(0, 8) === 'cuentas_'){
       if(p.banned) return enviar(res, { ok: false, code: 'suspendida', message: 'Tu cuenta está suspendida. Contacta a soporte.' });
       if(a === 'cuentas_mias'){
-        const r = await rest('cuentas_venta?user_id=eq.' + encodeURIComponent(uid) + '&select=id,titulo,descripcion,precio,vinculacion,fotos,estado,motivo,creada&order=creada.desc&limit=100');
-        return enviar(res, { ok: true, cuentas: (Array.isArray(r.json) ? r.json : []).map(x => Object.assign(cvPublico(x), { descripcion: x.descripcion || '', fotos: x.fotos || [], estado: x.estado, motivo: x.motivo || null })) });
+        const r = await rest('cuentas_venta?user_id=eq.' + encodeURIComponent(uid) + '&select=id,titulo,descripcion,precio,vinculacion,contacto,fotos,estado,motivo,creada&order=creada.desc&limit=100');
+        return enviar(res, { ok: true, cuentas: (Array.isArray(r.json) ? r.json : []).map(x => Object.assign(cvPublico(x), { descripcion: x.descripcion || '', contacto: x.contacto || '', fotos: x.fotos || [], estado: x.estado, motivo: x.motivo || null })) });
+      }
+      if(a === 'cuentas_interes'){
+        const idc = Number(b.id), tel = cvTel(b.contacto); if(!(idc > 0)) return enviar(res, { ok: false, code: 'solicitud', message: 'Cuenta inválida' });
+        if(!tel) return enviar(res, { ok: false, code: 'contacto', message: 'Escribe tu número de WhatsApp (10 dígitos, o con lada de tu país)' });
+        if(limite('ci|' + uid, 8, 3600000)) return enviar(res, { ok: false, code: 'limite', message: 'Enviaste muchas solicitudes seguidas. Intenta más tarde.' }, 429);
+        const rc = await rest('cuentas_venta?id=eq.' + idc + '&estado=eq.publicada&select=id,titulo,precio,username,user_id,contacto,propia&limit=1'), cu = Array.isArray(rc.json) ? rc.json[0] : null;
+        if(!cu) return enviar(res, { ok: false, code: 'no_existe', message: 'Esta cuenta ya no está disponible' }, 404);
+        if(!cu.propia && String(cu.user_id) === uid) return enviar(res, { ok: false, code: 'propia', message: 'Esta cuenta es tuya' });
+        const msg = limpio(b.mensaje, 300) || null;
+        const ex = await rest('cuentas_interes?cuenta_id=eq.' + idc + '&user_id=eq.' + encodeURIComponent(uid) + '&select=id,estado&limit=1'), e0 = Array.isArray(ex.json) ? ex.json[0] : null;
+        if(e0) await rest('cuentas_interes?id=eq.' + e0.id, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: J({ contacto: tel, mensaje: msg, estado: (e0.estado === 'cerrado' || e0.estado === 'descartado') ? 'nuevo' : e0.estado }) });
+        else { const ri = await rest('cuentas_interes', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: J({ cuenta_id: idc, user_id: uid, username: p.username, contacto: tel, mensaje: msg }) }); if(ri.status >= 400) return enviar(res, { ok: false, code: 'db', message: 'Falta ejecutar cuentas_contacto.sql en Supabase' }); }
+        telegram('🤝 <b>Nuevo interesado · CV' + idc + '</b>\n🎮 ' + esc(cu.titulo) + ' · ' + dinero(cu.precio) + '\n🛒 Comprador: ' + esc(p.username) + ' → +' + tel + (msg ? '\n💬 «' + esc(msg) + '»' : '') + '\n📱 Vendedor: ' + (cu.propia ? 'CiberStore' : esc(cu.username) + (cu.contacto ? ' → +' + cu.contacto : '')) + '\nOrganiza el trato en el panel → Cuentas → Interesados.');
+        return enviar(res, { ok: true });
       }
       if(a === 'cuentas_crear'){
+        { const dv = cvDatos(b, true); if(dv.error) return enviar(res, { ok: false, code: 'datos', message: dv.error }); }   // un dato mal escrito no gasta el límite por hora
         if(limite('cc|' + uid, 5, 3600000)) return enviar(res, { ok: false, code: 'limite', message: 'Publicaste muchas cuentas seguidas. Intenta más tarde.' }, 429);
         const ra = await rest('cuentas_venta?user_id=eq.' + encodeURIComponent(uid) + '&estado=in.(revision,publicada)&select=id');
         if(Array.isArray(ra.json) && ra.json.length >= 5) return enviar(res, { ok: false, code: 'tope', message: 'Ya tienes 5 cuentas activas. Borra o marca como vendida alguna para subir otra.' });
@@ -416,8 +447,8 @@ module.exports = async function handler(req, res){
       }
       if(a === 'cuentas_editar'){
         if(c0.estado === 'vendida') return enviar(res, { ok: false, code: 'estado', message: 'Una cuenta vendida ya no se puede editar' });
-        const d = cvDatos(b); if(d.error) return enviar(res, { ok: false, code: 'datos', message: d.error });
-        await rest('cuentas_venta?id=eq.' + id, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: J({ titulo: d.titulo, descripcion: d.descripcion || null, precio: d.precio, vinculacion: d.vinculacion, estado: 'revision', motivo: null, actualizada: new Date().toISOString() }) });
+        const d = cvDatos(b, true); if(d.error) return enviar(res, { ok: false, code: 'datos', message: d.error });
+        await rest('cuentas_venta?id=eq.' + id, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: J({ titulo: d.titulo, descripcion: d.descripcion || null, precio: d.precio, vinculacion: d.vinculacion, contacto: d.contacto, estado: 'revision', motivo: null, actualizada: new Date().toISOString() }) });
         telegram('✏️ <b>Cuenta editada · CV' + id + '</b> (vuelve a revisión)\n👤 ' + esc(p.username) + '\n🎮 ' + esc(d.titulo) + ' · ' + dinero(d.precio));
         return enviar(res, { ok: true, estado: 'revision' });
       }

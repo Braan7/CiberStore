@@ -20726,6 +20726,8 @@ var CV_VINC = ['Facebook','Google','Apple','VK','X (Twitter)','Huawei','Sin vinc
 var CV_EST = { revision:'En revisión', publicada:'Publicada', rechazada:'Rechazada', vendida:'Vendida', oculta:'Oculta' };
 function cvE(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 function cvM(n){ return (typeof fmt === 'function') ? fmt(n) : ('$' + Number(n).toFixed(2) + ' MXN'); }
+function cvTelTxt(n){ return n ? '+' + String(n).replace(/\D/g, '') : '—'; }
+function cvWaLink(n, texto){ return 'https://wa.me/' + String(n || '').replace(/\D/g, '') + '?text=' + encodeURIComponent(texto || ''); }
 function cvImgOk(u){ return /^https:\/\/[^\s"'<>]+$/.test(String(u || '')); }
 function cvToast(t){ if(typeof showToast === 'function') showToast(t); else if(typeof _manToast === 'function') _manToast(t, 3500); }
 function cvApi(action, extra, auth){ return ckApi(action, extra, auth).catch(function(){ return { ok:false, message:'Sin conexión. Intenta otra vez.' }; }); }
@@ -20739,16 +20741,35 @@ function cvAdminApi(action, extra){
 }
 function cvOv(id){
   var el = document.getElementById(id);
-  if(!el){ el = document.createElement('div'); el.id = id; el.className = id === 'cv-lb' ? 'cv-lb' : 'cv-ov'; document.body.appendChild(el); }   // en <body>: así nada la tapa
+  if(!el){ el = document.createElement('div'); el.id = id; el.className = id === 'cv-lb' ? 'cv-lb' : (id === 'cv-ov2' ? 'cv-ov cv-ov2' : 'cv-ov'); document.body.appendChild(el); }   // en <body>: así nada la tapa
   return el;
 }
 function cvCerrar(){ var o = document.getElementById('cv-ov'); if(o){ o.classList.remove('on'); o.innerHTML = ''; } document.body.style.overflow = ''; }
-function cvAbrir(html){
-  var o = cvOv('cv-ov'); o.innerHTML = html; o.classList.add('on'); document.body.style.overflow = 'hidden';
-  o.onclick = function(e){ if(e.target === o) cvCerrar(); };
+function cvAbrir(html, id){
+  var o = cvOv(id || 'cv-ov'); o.innerHTML = html; o.classList.add('on'); document.body.style.overflow = 'hidden';
+  o.onclick = function(e){ if(e.target === o){ if(id) cvCerrar2(); else cvCerrar(); } };
 }
+// El reglamento se abre ENCIMA (otra capa) para no perder lo que el cliente ya escribió en el formulario
+function cvCerrar2(){ var o = document.getElementById('cv-ov2'); if(o){ o.classList.remove('on'); o.innerHTML = ''; } if(!(document.getElementById('cv-ov') || {}).classList || !document.getElementById('cv-ov').classList.contains('on')) document.body.style.overflow = ''; }
 function cvZoom(u){ if(!cvImgOk(u)) return; var l = cvOv('cv-lb'); l.innerHTML = '<button type="button" class="cv-x" onclick="cvZoomOff()">✕</button><img src="' + cvE(u) + '" alt=""/>'; l.classList.add('on'); l.onclick = function(e){ if(e.target === l) cvZoomOff(); }; }
 function cvZoomOff(){ var l = document.getElementById('cv-lb'); if(l){ l.classList.remove('on'); l.innerHTML = ''; } }
+
+
+/* ── Reglamento de compra y venta ── */
+function cvReglamento(){
+  cvAbrir('<div class="cv-sheet cv-reg"><h3>🛡️ Política de compra y venta de cuentas <button type="button" class="cv-x" onclick="cvCerrar2()">✕</button></h3>'
+  + '<p class="cv-rp"><b>CIBER STORE</b></p>'
+  + '<p class="cv-rp">En Ciber Store buscamos ofrecer un espacio seguro para que nuestros usuarios puedan publicar, comprar y vender cuentas de Free Fire.</p>'
+  + '<p class="cv-rp">Para evitar fraudes, conflictos o malos entendidos, es obligatorio cumplir con las siguientes condiciones:</p>'
+  + '<h4>1. Responsabilidad de las operaciones</h4><ul><li>Ciber Store no se hace responsable por estafas, engaños o acuerdos realizados entre compradores y vendedores fuera de los canales oficiales de administración.</li><li>Toda operación realizada por cuenta propia será responsabilidad exclusiva de las partes involucradas.</li></ul>'
+  + '<h4>2. Garantía y recuperación de cuentas</h4><ul><li>Una vez completada la venta y entregada la cuenta, queda prohibido que el vendedor intente recuperarla, reclamarla o acceder nuevamente a ella.</li><li>Cualquier intento de recuperación fraudulenta después de una venta podrá ocasionar la suspensión o expulsión del usuario de Ciber Store.</li><li>No se permite vender cuentas robadas, comprometidas o que no pertenezcan legítimamente al vendedor.</li></ul>'
+  + '<h4>3. Operaciones mediante administración</h4><ul><li>Para contar con intermediación y respaldo de Ciber Store, la compra y venta deberá realizarse mediante un administrador autorizado.</li><li>Si la operación se realiza directamente entre usuarios, Ciber Store no garantiza la legitimidad de la cuenta ni podrá asegurar la recuperación del dinero o de la cuenta ante un fraude.</li></ul>'
+  + '<h4>4. Publicaciones y sanciones</h4><ul><li>Está prohibido publicar información falsa, cuentas inexistentes o utilizar imágenes engañosas.</li><li>Ciber Store se reserva el derecho de eliminar publicaciones, restringir cuentas o expulsar a usuarios que incumplan estas normas.</li></ul>'
+  + '<div class="cv-seg"><b>⚠️ IMPORTANTE</b><br>Ciber Store funciona como plataforma de publicación y contacto entre compradores y vendedores. La intervención de la administración deberá solicitarse antes de concretar cualquier operación.</div>'
+  + '<p class="cv-rp"><b>Al publicar, comprar o vender una cuenta, aceptas estas condiciones.</b></p>'
+  + '<p class="cv-rp cv-cp">© Ciber Store — Compra y venta bajo responsabilidad y reglas claras.</p>'
+  + '<button type="button" class="cv-go" onclick="cvCerrar2()">Entendido</button></div>', 'cv-ov2');
+}
 
 /* ── Lista pública ── */
 function cvCargar(){
@@ -20789,7 +20810,8 @@ function cvDetalle(id){
       + '<p class="cv-ti">' + cvE(c.titulo) + '</p><span class="cv-chip">' + cvE(c.vinculacion || '') + '</span><span class="cv-chip" style="margin-left:.3rem">Vendedor: ' + cvE(c.vendedor) + '</span>'
       + '<div class="cv-big">' + cvM(c.precio) + '</div>' + (c.descripcion ? '<div class="cv-ds">' + cvE(c.descripcion) + '</div>' : '')
       + '<div class="cv-seg">🔒 Compra siempre por CiberStore: escríbenos por WhatsApp con el código <b>' + cvE(c.codigo) + '</b>. Nunca pagues ni des datos fuera de aquí.</div>'
-      + '<button type="button" class="cv-wa" onclick="cvWA(' + c.id + ')">💬 Me interesa esta cuenta</button></div>';
+      + '<div class="cv-how"><b>¿Cómo es el trato?</b><ol><li>Pides la cuenta aquí con tu WhatsApp.</li><li>Un administrador te escribe y habla con el vendedor.</li><li>Se arma un <b>grupo de WhatsApp</b> contigo, el vendedor y la administración.</li><li>Cierran el trato con respaldo de CiberStore.</li></ol><small>Tu número y el del vendedor solo los ve la administración.</small></div>'
+      + '<button type="button" class="cv-go" onclick="cvInteres(' + c.id + ')">🤝 Quiero esta cuenta</button><button type="button" class="cv-wa cv-wa2" onclick="cvWA(' + c.id + ')">💬 Preguntar a CiberStore por WhatsApp</button><p class="cv-acp">Al contactarnos aceptas el <a href="#" onclick="cvReglamento();return false">reglamento de compra y venta</a>.</p></div>';
     CV._det = c;
   });
 }
@@ -20798,6 +20820,33 @@ function cvWA(id){
   var c = CV._det || {}; if(typeof WA === 'undefined' || !WA) return;
   var t = 'Hola, me interesa la cuenta ' + (c.codigo || ('CV' + id)) + ' "' + (c.titulo || '') + '" (' + (c.precio != null ? '$' + Number(c.precio).toFixed(2) + ' MXN' : '') + ') que vi en CiberStore.';
   window.open('https://wa.me/' + WA + '?text=' + encodeURIComponent(t), '_blank', 'noopener');
+}
+
+
+/* ── Quiero esta cuenta: el comprador deja su WhatsApp y la administración organiza el trato ── */
+function cvInteres(id){
+  if(!(typeof authSession !== 'undefined' && authSession && authSession.username)){ cvCerrar(); cvToast('Inicia sesión para pedir esta cuenta'); if(typeof showAuthModal === 'function') showAuthModal(); return; }
+  var c = CV._det || {};
+  cvAbrir('<div class="cv-sheet"><h3>Quiero esta cuenta <button type="button" class="cv-x" onclick="cvCerrar()">✕</button></h3>'
+    + '<p class="cv-ti">' + cvE(c.titulo || '') + '</p><div class="cv-big" style="font-size:1.3rem">' + cvM(c.precio || 0) + '</div>'
+    + '<label for="cvi-t">Tu WhatsApp</label><input type="text" id="cvi-t" inputmode="tel" autocomplete="tel" maxlength="20" placeholder="Ej: 55 1234 5678"/>'
+    + '<small class="cv-ct" style="text-align:left">10 dígitos (México) o con lada de tu país. Solo lo ve la administración.</small>'
+    + '<label for="cvi-m">Mensaje (opcional)</label><textarea id="cvi-m" maxlength="300" placeholder="Ej: ¿Aceptas una oferta? ¿Tiene pase élite?"></textarea>'
+    + '<div class="cv-seg">Al enviar aceptas el <a href="#" onclick="cvReglamento();return false" style="color:#ffcf85;text-decoration:underline">reglamento de compra y venta</a>. Un administrador te escribirá por WhatsApp para organizar el trato y armar el grupo con el vendedor.</div>'
+    + '<div class="cv-er" id="cvi-e"></div><button type="button" class="cv-go" id="cvi-go" onclick="cvInteresEnviar(' + id + ')">Enviar solicitud</button></div>');
+}
+function cvInteresEnviar(id){
+  if(CV.enviando) return; var e = document.getElementById('cvi-e'), t = document.getElementById('cvi-t').value.trim(), m = document.getElementById('cvi-m').value.trim(), d = t.replace(/\D/g, '');
+  if(d.length < 10 || d.length > 15){ e.textContent = 'Escribe tu número de WhatsApp (10 dígitos, o con lada de tu país).'; e.style.display = 'block'; return; }
+  e.style.display = 'none'; var b = document.getElementById('cvi-go'); CV.enviando = true; b.disabled = true; b.textContent = 'Enviando…';
+  cvApi('cuentas_interes', { id:id, contacto:t, mensaje:m }, true).then(function(r){
+    CV.enviando = false;
+    if(r && r.ok){
+      cvAbrir('<div class="cv-sheet" style="text-align:center"><h3>Solicitud enviada <button type="button" class="cv-x" onclick="cvCerrar()">✕</button></h3><div style="width:58px;height:58px;margin:.2rem auto .8rem;border-radius:50%;background:#16a34a;color:#fff;font-size:1.9rem;display:grid;place-items:center">✓</div>'
+        + '<p class="cv-rp">Recibimos tu solicitud por <b>' + cvE((CV._det || {}).codigo || '') + '</b>. Un administrador te escribirá a tu WhatsApp para organizar el trato y armar un grupo con el vendedor.</p>'
+        + '<p class="cv-rp" style="color:#8b93a3">¿Tienes prisa? También puedes escribirnos tú.</p><button type="button" class="cv-wa" onclick="cvWA(' + id + ')">💬 Escribir a CiberStore ahora</button></div>');
+    } else { b.disabled = false; b.textContent = 'Enviar solicitud'; e.textContent = (r && r.message) || 'No se pudo enviar. Intenta otra vez.'; e.style.display = 'block'; }
+  });
 }
 
 /* ── Mis cuentas ── */
@@ -20840,10 +20889,11 @@ function cvForm(x){
     + '<label for="cvf-t">Título</label><input type="text" id="cvf-t" maxlength="80" placeholder="Ej: Cuenta nivel 70 con skins épicas" autocomplete="off" value="' + cvE(x ? x.titulo : '') + '"/>'
     + '<label for="cvf-p">Precio en pesos mexicanos (MXN)</label><input type="number" id="cvf-p" inputmode="decimal" min="1" step="0.01" placeholder="Ej: 850" value="' + (x ? x.precio : '') + '"/>'
     + '<label for="cvf-v">Vinculada con</label><select id="cvf-v">' + CV_VINC.map(function(v){ return '<option' + (x && x.vinculacion === v ? ' selected' : '') + '>' + cvE(v) + '</option>'; }).join('') + '</select>'
+    + (CV.admin ? '' : '<label for="cvf-w">Tu WhatsApp (solo lo ve la administración)</label><input type="text" id="cvf-w" inputmode="tel" autocomplete="tel" maxlength="20" placeholder="Ej: 55 1234 5678" value="' + cvE(x ? (x.contacto || '') : '') + '"/><small class="cv-ct" style="text-align:left">Nunca se muestra a los compradores: la administración te escribe cuando alguien se interese.</small>')
     + '<label for="cvf-d">Descripción</label><textarea id="cvf-d" maxlength="1500" placeholder="Nivel, rango, skins, personajes, diamantes, pase élite… Cuanto más detalle, mejor." oninput="cvCont()">' + cvE(x ? x.descripcion : '') + '</textarea><small class="cv-ct" id="cvf-c">0 / 1500</small>'
     + (ed ? '<div class="cv-seg">Al guardar los cambios la cuenta vuelve a revisión. Las fotos no se pueden cambiar: si necesitas otras, borra la cuenta y súbela de nuevo.</div>'
       : '<label>Fotos (de 1 a 5)</label><div class="cv-fts" id="cvf-f"></div><input type="file" id="cvf-file" accept="image/*" multiple style="display:none" onchange="cvFotos(this)"/>')
-    + (ed || CV.admin ? '' : '<label class="cv-chk"><input type="checkbox" id="cvf-ok"/><span>Confirmo que la cuenta es mía y que puedo venderla. Entiendo que CiberStore la revisa antes de publicarla y puede rechazarla.</span></label>')
+    + (ed || CV.admin ? '' : '<label class="cv-chk"><input type="checkbox" id="cvf-ok"/><span>He leído y acepto el <a href="#" onclick="cvReglamento();return false">reglamento de compra y venta</a>. Confirmo que la cuenta es mía y que puedo venderla, y entiendo que CiberStore la revisa antes de publicarla y puede rechazarla.</span></label>')
     + '<div class="cv-er" id="cvf-e"></div><button type="button" class="cv-go" id="cvf-go" onclick="cvEnviar()">' + (ed ? 'Guardar cambios' : (CV.admin ? 'Publicar ahora' : 'Enviar a revisión')) + '</button></div>');
   cvCont(); if(!ed) cvPintarFotos();
 }
@@ -20882,10 +20932,12 @@ function cvEnviar(){
   var t = document.getElementById('cvf-t').value.trim(), p = Number(document.getElementById('cvf-p').value), v = document.getElementById('cvf-v').value, d = document.getElementById('cvf-d').value.trim(), ed = !!CV.editId;
   if(t.length < 4){ cvError('Escribe un título de al menos 4 letras.'); return; }
   if(!(p > 0)){ cvError('Escribe el precio en pesos mexicanos.'); return; }
+  var wl = (document.getElementById('cvf-w') || { value:'' }).value.replace(/\D/g, '').length; if(document.getElementById('cvf-w') && (wl < 10 || wl > 15)){ cvError('Escribe tu número de WhatsApp (10 dígitos, o con lada de tu país).'); return; }
   if(!ed && !CV.fotos.length){ cvError('Sube al menos 1 foto de la cuenta.'); return; }
-  var ok = document.getElementById('cvf-ok'); if(ok && !ok.checked){ cvError('Confirma que la cuenta es tuya para continuar.'); return; }
+  var ok = document.getElementById('cvf-ok'); if(ok && !ok.checked){ cvError('Acepta el reglamento y confirma que la cuenta es tuya para continuar.'); return; }
   var btn = document.getElementById('cvf-go'); CV.enviando = true; btn.disabled = true; btn.textContent = ed ? 'Guardando…' : 'Subiendo fotos…';
-  var datos = { titulo:t, precio:p, vinculacion:v, descripcion:d };
+  var wEl = document.getElementById('cvf-w'), w = wEl ? wEl.value.trim() : '';
+  var datos = { titulo:t, precio:p, vinculacion:v, descripcion:d, contacto:w };
   var req = ed ? cvApi('cuentas_editar', Object.assign({ id:CV.editId }, datos), true)
     : (CV.admin ? cvAdminApi('admin_cuenta_crear', Object.assign({ fotos:CV.fotos }, datos)) : cvApi('cuentas_crear', Object.assign({ fotos:CV.fotos }, datos), true));
   req.then(function(r){
@@ -20912,12 +20964,13 @@ var CVA = { estado:'revision' };
 function cuentasAdmFiltro(e){ CVA.estado = e; cuentasAdmCargar(); }
 function cuentasAdmCargar(){
   var s = document.getElementById('adms-cuentas'); if(!s) return;
-  var fl = [['revision','En revisión'],['publicada','Publicadas'],['rechazada','Rechazadas'],['vendida','Vendidas'],['oculta','Ocultas'],['todas','Todas']];
+  var fl = [['interes','🤝 Interesados'],['revision','En revisión'],['publicada','Publicadas'],['rechazada','Rechazadas'],['vendida','Vendidas'],['oculta','Ocultas'],['todas','Todas']];
+  if(CVA.estado === 'interes') return cvInteresesAdm(s, fl);
   s.innerHTML = '<div class="adm-card-title">🎮 Venta de cuentas</div><div class="cv-fl">' + fl.map(function(f){ return '<button type="button" class="' + (CVA.estado === f[0] ? 'on' : '') + '" onclick="cuentasAdmFiltro(\'' + f[0] + '\')">' + f[1] + '</button>'; }).join('') + '<button type="button" class="cv-new" onclick="cvVender(true)">＋ Publicar cuenta</button></div><div id="cva-body"><div class="cv-vacio">Cargando…</div></div>';
   cvAdminApi('admin_cuentas', { estado: CVA.estado === 'todas' ? '' : CVA.estado }).then(function(r){
     var b = document.getElementById('cva-body'); if(!b) return;
     if(!r || !r.ok){ b.innerHTML = '<div class="cv-vacio">' + cvE((r && r.message) || 'No se pudo cargar') + '</div>'; return; }
-    var bd = document.getElementById('cva-badge'); if(bd) bd.textContent = r.en_revision ? r.en_revision : '';
+    var bd = document.getElementById('cva-badge'), nb = (r.en_revision || 0) + (r.intereses_nuevos || 0); if(bd) bd.textContent = nb ? nb : '';
     CV.adm = r.cuentas || [];
     if(!CV.adm.length){ b.innerHTML = '<div class="cv-vacio">No hay cuentas en esta vista.</div>'; return; }
     b.innerHTML = CV.adm.map(function(x){
@@ -20926,7 +20979,7 @@ function cuentasAdmCargar(){
       if(x.estado === 'revision' || x.estado === 'publicada') ac += '<button type="button" class="mal" onclick="cuentasAdmRechazar(' + x.id + ')">✕ Rechazar</button>';
       if(x.estado === 'publicada') ac += '<button type="button" onclick="cuentasAdmEstado(' + x.id + ',\'oculta\')">Ocultar</button><button type="button" onclick="cuentasAdmEstado(' + x.id + ',\'vendida\')">Vendida</button>';
       ac += '<button type="button" class="mal" onclick="cvBorrar(' + x.id + ',true)">🗑 Borrar</button>';
-      return '<div class="cv-ap"><div class="cv-top2"><div><b>' + cvE(x.codigo) + ' · ' + cvE(x.titulo) + '</b><small>' + (x.propia ? 'CiberStore (admin)' : 'Cliente: <b>' + cvE(x.usuario) + '</b>') + ' · ' + cvE(x.vinculacion || '') + '</small></div><div style="text-align:right"><b>' + cvM(x.precio) + '</b><br><span class="cv-est ' + cvE(x.estado) + '">' + cvE(CV_EST[x.estado] || x.estado) + '</span></div></div>'
+      return '<div class="cv-ap"><div class="cv-top2"><div><b>' + cvE(x.codigo) + ' · ' + cvE(x.titulo) + '</b><small>' + (x.propia ? 'CiberStore (admin)' : 'Cliente: <b>' + cvE(x.usuario) + '</b> · 📱 ' + (x.contacto ? '<a href="' + cvE(cvWaLink(x.contacto, 'Hola, te escribe la administración de CiberStore sobre tu cuenta ' + x.codigo + ' «' + x.titulo + '».')) + '" target="_blank" rel="noopener" style="color:#4ade80">' + cvE(cvTelTxt(x.contacto)) + '</a>' : 'sin número')) + ' · ' + cvE(x.vinculacion || '') + (x.interesados ? ' · <b style="color:#ffb84d">🤝 ' + x.interesados + ' interesado(s)</b>' : '') + '</small></div><div style="text-align:right"><b>' + cvM(x.precio) + '</b><br><span class="cv-est ' + cvE(x.estado) + '">' + cvE(CV_EST[x.estado] || x.estado) + '</span></div></div>'
         + '<div class="cv-strip">' + (x.fotos || []).filter(cvImgOk).map(function(u){ return '<img loading="lazy" src="' + cvE(u) + '" alt="" onclick="cvZoom(this.src)"/>'; }).join('') + '</div>'
         + (x.descripcion ? '<div class="cv-dsa">' + cvE(x.descripcion) + '</div>' : '') + (x.motivo ? '<div class="cv-mot">Motivo: ' + cvE(x.motivo) + '</div>' : '') + '<div class="cv-ac">' + ac + '</div></div>';
     }).join('');
@@ -20936,3 +20989,40 @@ function cuentasAdmEstado(id, est, motivo){
   cvAdminApi('admin_cuenta_estado', { id:id, estado:est, motivo:motivo || '' }).then(function(r){ if(r && r.ok){ cvToast('Listo'); cuentasAdmCargar(); cvCargar(); } else cvToast((r && r.message) || 'No se pudo guardar'); });
 }
 function cuentasAdmRechazar(id){ var m = prompt('Motivo del rechazo (lo verá el cliente):', 'Las fotos no son claras'); if(m === null) return; cuentasAdmEstado(id, 'rechazada', m); }
+
+/* ── Panel admin: interesados (organizar el trato y armar el grupo) ── */
+var CVI = { estado:'nuevo' };
+function cvIntFiltro(e){ CVI.estado = e; cuentasAdmCargar(); }
+function cvInteresesAdm(s, fl){
+  var sub = [['nuevo','Nuevos'],['en_trato','En trato'],['cerrado','Cerrados'],['descartado','Descartados']];
+  s.innerHTML = '<div class="adm-card-title">🎮 Venta de cuentas</div><div class="cv-fl">' + fl.map(function(f){ return '<button type="button" class="' + (CVA.estado === f[0] ? 'on' : '') + '" onclick="cuentasAdmFiltro(\'' + f[0] + '\')">' + f[1] + '</button>'; }).join('') + '<button type="button" class="cv-new" onclick="cvVender(true)">＋ Publicar cuenta</button></div>'
+    + '<div class="cv-fl">' + sub.map(function(f){ return '<button type="button" class="' + (CVI.estado === f[0] ? 'on' : '') + '" onclick="cvIntFiltro(\'' + f[0] + '\')">' + f[1] + '</button>'; }).join('') + '</div><div id="cva-body"><div class="cv-vacio">Cargando…</div></div>';
+  cvAdminApi('admin_intereses', { estado:CVI.estado }).then(function(r){
+    var b = document.getElementById('cva-body'); if(!b) return;
+    if(!r || !r.ok){ b.innerHTML = '<div class="cv-vacio">' + cvE((r && r.message) || 'No se pudo cargar (¿ejecutaste cuentas_contacto.sql?)') + '</div>'; return; }
+    CV.ints = r.intereses || [];
+    if(!CV.ints.length){ b.innerHTML = '<div class="cv-vacio">No hay interesados en esta vista.</div>'; return; }
+    b.innerHTML = CV.ints.map(function(x){
+      var msgC = 'Hola ' + x.comprador + ', te escribe la administración de CiberStore. Vimos que te interesa la cuenta ' + x.codigo + ' «' + x.titulo + '» ($' + Number(x.precio).toFixed(2) + ' MXN). ¿Seguimos con el trato?';
+      var msgV = 'Hola, te escribe la administración de CiberStore. Hay un interesado en tu cuenta ' + x.codigo + ' «' + x.titulo + '». ¿Sigue disponible?';
+      var ac = '<a class="cv-lnk" target="_blank" rel="noopener" href="' + cvE(cvWaLink(x.comprador_contacto, msgC)) + '">💬 Comprador</a>';
+      if(!x.propia && x.vendedor_contacto) ac += '<a class="cv-lnk" target="_blank" rel="noopener" href="' + cvE(cvWaLink(x.vendedor_contacto, msgV)) + '">💬 Vendedor</a><button type="button" onclick="cvGrupo(' + x.id + ')">👥 Copiar datos para el grupo</button>';
+      if(x.estado === 'nuevo') ac += '<button type="button" class="ok" onclick="cvIntEstado(' + x.id + ',\'en_trato\')">En trato</button>';
+      if(x.estado !== 'cerrado') ac += '<button type="button" onclick="cvIntEstado(' + x.id + ',\'cerrado\')">Cerrado</button>';
+      if(x.estado !== 'descartado') ac += '<button type="button" class="mal" onclick="cvIntEstado(' + x.id + ',\'descartado\')">Descartar</button>';
+      return '<div class="cv-ap"><div class="cv-top2"><div><b>' + cvE(x.codigo) + ' · ' + cvE(x.titulo) + '</b><small>' + cvM(x.precio) + (x.cuenta_estado && x.cuenta_estado !== 'publicada' ? ' · cuenta ' + cvE(CV_EST[x.cuenta_estado] || x.cuenta_estado) : '') + '</small></div><span class="cv-est ' + (x.estado === 'nuevo' ? 'revision' : x.estado === 'en_trato' ? 'publicada' : 'vendida') + '">' + cvE({nuevo:'Nuevo',en_trato:'En trato',cerrado:'Cerrado',descartado:'Descartado'}[x.estado]) + '</span></div>'
+        + '<div class="cv-dsa">🛒 <b>Comprador:</b> ' + cvE(x.comprador) + ' · ' + cvE(cvTelTxt(x.comprador_contacto)) + '<br>📱 <b>Vendedor:</b> ' + cvE(x.vendedor) + (x.propia ? '' : ' · ' + cvE(cvTelTxt(x.vendedor_contacto))) + (x.mensaje ? '<br>💬 «' + cvE(x.mensaje) + '»' : '') + '</div><div class="cv-ac">' + ac + '</div></div>';
+    }).join('');
+  });
+}
+function cvIntEstado(id, est){ cvAdminApi('admin_interes_estado', { id:id, estado:est }).then(function(r){ if(r && r.ok){ cvToast('Listo'); cuentasAdmCargar(); } else cvToast((r && r.message) || 'No se pudo guardar'); }); }
+function cvGrupo(id){
+  var x = (CV.ints || []).filter(function(i){ return i.id === id; })[0]; if(!x) return;
+  var t = '🛡️ TRATO CIBERSTORE · ' + x.codigo + '\nCuenta: ' + x.titulo + ' · $' + Number(x.precio).toFixed(2) + ' MXN\n\nComprador: ' + x.comprador + ' ' + cvTelTxt(x.comprador_contacto) + '\nVendedor: ' + x.vendedor + ' ' + cvTelTxt(x.vendedor_contacto) + '\n\nReglas: el pago y la entrega se hacen con la administración presente en este grupo. No hagas pagos ni entregues datos fuera del grupo.';
+  var listo = function(){ cvToast('Copiado. En WhatsApp crea un grupo, agrega a los dos números y pega este mensaje.'); };
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(listo, function(){ prompt('Copia este texto:', t); }); else prompt('Copia este texto:', t);
+}
+(function(){
+  if(typeof openFullAdmin !== 'function') return; var o = openFullAdmin;
+  window.openFullAdmin = function(){ var r = o.apply(this, arguments); setTimeout(function(){ try{ if(typeof csAdminSesionToken === 'function' && csAdminSesionToken()) cvAdminApi('admin_cuentas', { estado:'revision' }).then(function(j){ var bd = document.getElementById('cva-badge'); if(bd && j && j.ok){ var n = (j.en_revision || 0) + (j.intereses_nuevos || 0); bd.textContent = n ? n : ''; } }); }catch(e){} }, 1800); return r; };
+})();

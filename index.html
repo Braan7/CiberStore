@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta name="cs-build" content="6e5fd82a63">
-<script>var CS_BUILD="6e5fd82a63";</script>
+<meta name="cs-build" content="3d1df4cc6e">
+<script>var CS_BUILD="3d1df4cc6e";</script>
 <meta charset="UTF-8"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -6913,6 +6913,7 @@ select.ap-inp{flex:0 1 auto}
       <div><h2 class="cv-h">Venta de cuentas</h2><p class="cv-p">Compra o vende cuentas de Free Fire. Cada cuenta de un cliente se revisa antes de publicarse.</p></div>
       <button type="button" class="cv-sell" onclick="cvVender()">＋ Vender mi cuenta</button>
     </div>
+    <button type="button" class="cv-regb" onclick="cvReglamento()">🛡️ Reglamento de compra y venta — léelo antes de comprar o vender</button>
     <div class="cv-tabs"><button type="button" id="cvt-lista" class="on" onclick="cvTab('lista')">Cuentas en venta</button><button type="button" id="cvt-mias" onclick="cvTab('mias')">Mis cuentas <span id="cv-nmias"></span></button></div>
     <div id="cv-v-lista">
       <div class="cv-tools"><input id="cv-q" type="search" placeholder="Buscar cuenta…" autocomplete="off" oninput="cvPintarLista()"/><select id="cv-o" onchange="cvPintarLista()"><option value="n">Más recientes</option><option value="a">Precio: menor a mayor</option><option value="d">Precio: mayor a menor</option></select></div>
@@ -10035,10 +10036,27 @@ body.light-mode .cv-ri b{color:#0f172a}
 #adms-cuentas .cv-top2 small{display:block;color:#8b97ad;font-size:.74rem}
 #adms-cuentas .cv-dsa{font-size:.82rem;color:#c3cad6;white-space:pre-wrap;word-break:break-word;margin:.3rem 0}
 
+.cv-regb{display:block;width:100%;text-align:left;margin:0 0 1rem;padding:.75rem .9rem;border-radius:12px;border:1px solid rgba(255,184,77,.35);background:rgba(255,184,77,.07);color:#ffcf85;font-size:.82rem;font-weight:700;line-height:1.4;cursor:pointer;-webkit-appearance:none;appearance:none;font-family:Barlow,sans-serif}
+.cv-reg h4{margin:1rem 0 .3rem;font-size:.92rem;color:#fff}
+.cv-reg ul{margin:.2rem 0 0;padding-left:1.1rem}
+.cv-reg li{font-size:.84rem;line-height:1.55;color:#c3cad6;margin-bottom:.35rem}
+.cv-rp{font-size:.85rem;line-height:1.55;color:#c3cad6;margin:.4rem 0}
+.cv-cp{color:#8b93a3;font-size:.76rem;margin:.9rem 0}
+.cv-reg .cv-go{margin-top:.6rem}
+.cv-chk a,.cv-acp a{color:#5aa8ff;text-decoration:underline}
+.cv-acp{text-align:center;font-size:.74rem;color:#8b93a3;margin:.7rem 0 0}
+.cv-ov2{z-index:10065}
+
+.cv-how{margin:.9rem 0;padding:.8rem .9rem;border-radius:12px;background:rgba(27,135,245,.07);border:1px solid rgba(27,135,245,.25);font-size:.8rem;color:#c3cad6;line-height:1.5}
+.cv-how ol{margin:.35rem 0 .4rem;padding-left:1.15rem}.cv-how li{margin-bottom:.2rem}.cv-how small{color:#8b93a3}
+.cv-wa2{margin-top:.6rem;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.4);color:#4ade80}
+#cvi-m{min-height:70px}
+#adms-cuentas .cv-lnk{display:inline-flex;align-items:center;border:1px solid rgba(34,197,94,.45);background:rgba(34,197,94,.1);color:#4ade80;border-radius:10px;padding:.45rem .8rem;font-size:.78rem;font-weight:700;text-decoration:none;min-height:38px}
+
 </style>
-<script src="supabase.js?v=6e5fd82a63"></script>
-<script src="supabase_integration.js?v=6e5fd82a63"></script>
-<script src="script.js?v=6e5fd82a63"></script>
+<script src="supabase.js?v=3d1df4cc6e"></script>
+<script src="supabase_integration.js?v=3d1df4cc6e"></script>
+<script src="script.js?v=3d1df4cc6e"></script>
 
 <!-- BARRA DE NAVEGACION INFERIOR -->
 
