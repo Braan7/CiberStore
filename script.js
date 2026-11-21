@@ -20581,9 +20581,11 @@ function d50N(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
       var cat = document.getElementById('diam-catalogo'); if(cat) cat.style.display = 'none';
       if(pan) pan.style.display = '';
       if(tab) tab.classList.add('active'); if(tabI) tabI.classList.remove('active');
+      document.body.classList.add('d50-on');   // oculta el aviso de "más de $1,000 USD" mientras se ve esta pestaña
       d50Preparar();
       return;
     }
+    document.body.classList.remove('d50-on');
     if(pan) pan.style.display = 'none'; if(tab) tab.classList.remove('active');
     return o.apply(this, arguments);
   };

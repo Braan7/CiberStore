@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta name="cs-build" content="9d5625e823">
-<script>var CS_BUILD="9d5625e823";</script>
+<meta name="cs-build" content="c82beacba7">
+<script>var CS_BUILD="c82beacba7";</script>
 <meta charset="UTF-8"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -4821,9 +4821,11 @@ select.ap-inp{flex:0 1 auto}
         <div class="d50-s">Paquetes con descuento de Free Fire. Cada paquete se puede usar <b>una sola vez por ID</b>.</div>
       </div>
       <label class="flabel" for="d50-id">Tu ID de Free Fire *</label>
-      <input class="finput" id="d50-id" type="text" inputmode="numeric" placeholder="Ej: 123456789" autocomplete="off" onkeydown="if(event.key==='Enter')d50Consultar()"/>
+      <div class="d50-row">
+        <input class="finput" id="d50-id" type="text" inputmode="numeric" enterkeyhint="go" placeholder="Ej: 123456789" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" onkeydown="if(event.key==='Enter')d50Consultar()"/>
+        <button type="button" id="d50-btn" class="d50-go" onclick="d50Consultar()">Ver mis descuentos</button>
+      </div>
       <div id="d50-ids" class="uxids"></div>
-      <button type="button" id="d50-btn" class="d50-go" onclick="d50Consultar()">Ver mis descuentos</button>
       <div id="d50-res"></div>
     </div>
     <div class="d50-ov" id="d50-ov" onclick="if(event.target===this)d50Cerrar()"></div>
@@ -9821,13 +9823,13 @@ body.light-mode .ux-tx b{color:#0f172a}
 .d50-tabs{display:flex;gap:.4rem;margin:0 0 1.1rem;background:rgba(0,0,0,.25);padding:.3rem;border-radius:14px;max-width:640px}
 .d50-tabs .dtab-btn{flex:1;font-size:.8rem;padding:.65rem .4rem;white-space:nowrap}
 .d50-new{display:inline-block;margin-left:.25rem;font-size:.58rem;font-weight:800;letter-spacing:.5px;padding:.12rem .38rem;border-radius:99px;background:#ff4d6d;color:#fff;vertical-align:middle}
-#diam-d50{max-width:640px}
+#diam-d50{max-width:none}
 .d50-hero{border-radius:16px;padding:1rem 1.05rem;margin-bottom:1rem;background:linear-gradient(135deg,rgba(255,77,109,.14),rgba(255,184,77,.08));border:1px solid rgba(255,120,100,.3)}
 .d50-ey{font-size:.64rem;font-weight:800;letter-spacing:1.6px;color:#ff8a7a}
 .d50-h{font-family:Saira,Barlow,sans-serif;font-weight:900;font-size:1.45rem;color:#fff;margin:.15rem 0}
 body.light-mode .d50-h{color:#0f172a}
 .d50-s{font-size:.8rem;color:#c3cad6;line-height:1.5}
-.d50-go{display:block;width:100%;margin:.2rem 0 .9rem;border:0;border-radius:13px;padding:.85rem;background:linear-gradient(135deg,#0a4fa8,#1b87f5);color:#fff;font-family:Barlow,sans-serif;font-weight:700;font-size:.92rem;cursor:pointer}
+.d50-go{display:block;width:100%;margin:0;-webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;min-height:48px;border:0;border-radius:13px;padding:.85rem;background:linear-gradient(135deg,#0a4fa8,#1b87f5);color:#fff;font-family:Barlow,sans-serif;font-weight:700;font-size:.92rem;cursor:pointer}
 .d50-go:disabled{opacity:.6}
 .d50-ghost{display:block;width:100%;border:0;background:none;color:#9aa4b2;padding:.6rem;font-size:.85rem;cursor:pointer}
 .d50-msg{padding:.8rem .95rem;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);font-size:.8rem;color:#b6bfcc;line-height:1.5;margin-bottom:.8rem}
@@ -9837,7 +9839,7 @@ body.light-mode .d50-h{color:#0f172a}
 body.light-mode .d50-who b{color:#0f172a}
 .d50-who small{font-size:.72rem;color:#8b93a3}
 .d50-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
-@media(min-width:560px){.d50-grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:560px){.d50-grid{grid-template-columns:repeat(3,1fr);gap:.8rem}}
 .d50-c{display:flex;flex-direction:column;align-items:center;gap:.35rem;padding:.75rem .55rem;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,120,100,.28);text-align:center}
 .d50-c img{width:54px;height:54px;object-fit:contain}
 .d50-e{font-size:2.2rem}
@@ -9845,12 +9847,12 @@ body.light-mode .d50-who b{color:#0f172a}
 body.light-mode .d50-t b{color:#0f172a}
 .d50-pr{display:block;font-weight:800;color:#4ade80;font-size:.95rem}
 .d50-pr s{margin-left:.35rem;color:#6b7280;font-weight:500;font-size:.72rem}
-.d50-c button{width:100%;border:0;border-radius:10px;padding:.5rem;background:#1b87f5;color:#fff;font-weight:700;font-size:.8rem;cursor:pointer}
+.d50-c button{-webkit-appearance:none;appearance:none;touch-action:manipulation;min-height:40px;width:100%;border:0;border-radius:10px;padding:.5rem;background:#1b87f5;color:#fff;font-weight:700;font-size:.8rem;cursor:pointer}
 .d50-c em{font-style:normal;font-size:.7rem;color:#8b93a3;padding:.35rem 0}
 .d50-c.off{opacity:.55;border-color:rgba(255,255,255,.07)}
 .d50-ov{position:fixed;inset:0;z-index:10050;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center}
 .d50-ov.on{display:flex}
-.d50-sheet{width:100%;max-width:440px;max-height:92vh;overflow:auto;background:#10151f;border:1px solid rgba(255,255,255,.1);border-radius:20px 20px 0 0;padding:1.1rem 1.1rem 1.4rem;animation:uxIn .25s ease both}
+.d50-sheet{width:100%;max-width:440px;max-height:92vh;max-height:92dvh;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;background:#10151f;border:1px solid rgba(255,255,255,.1);border-radius:20px 20px 0 0;padding:1.1rem 1.1rem calc(1.4rem + env(safe-area-inset-bottom,0px));animation:uxIn .25s ease both}
 @media(min-width:560px){.d50-ov{align-items:center}.d50-sheet{border-radius:20px}}
 .d50-sheet h3{display:flex;justify-content:space-between;align-items:center;margin:0 0 .8rem;font-family:Barlow,sans-serif;font-size:1.05rem;color:#fff}
 .d50-sheet h3 button{border:0;background:none;color:#8b93a3;font-size:1.1rem;cursor:pointer}
@@ -9864,6 +9866,34 @@ body.light-mode .d50-t b{color:#0f172a}
 .d50-chk{width:58px;height:58px;margin:.2rem auto .7rem;border-radius:50%;background:#16a34a;color:#fff;font-size:1.9rem;display:grid;place-items:center}
 .d50-okk p{font-size:.85rem;color:#c3cad6;margin:.2rem 0}
 .d50-sub{font-size:.78rem!important;color:#8b93a3!important;margin-bottom:.9rem!important}
+
+/* Campo de ID + botón: en pantalla chica uno bajo otro; en PC/tablet en una sola fila */
+.d50-row{display:flex;flex-direction:column;gap:.6rem;margin:.1rem 0 .8rem}
+.d50-row .finput{margin:0}
+body.d50-on #vip-banner{display:none!important}
+#diam-d50{padding-bottom:1.5rem}
+#diam-d50 .flabel{display:block;margin-bottom:.4rem}
+.d50-hero,.d50-msg,.d50-who{max-width:none}
+@media(min-width:700px){
+  .d50-row{flex-direction:row;align-items:stretch}
+  .d50-row .finput{flex:1;min-width:0;font-size:1rem!important;padding:.85rem 1rem!important}
+  .d50-go{width:auto;white-space:nowrap;padding:0 2rem}
+  .d50-hero{padding:1.3rem 1.5rem}.d50-h{font-size:1.75rem}.d50-s{font-size:.92rem}
+  .d50-c{padding:1.1rem .8rem;gap:.5rem}.d50-c img{width:72px;height:72px}.d50-t b{font-size:1.1rem}.d50-pr{font-size:1.05rem}.d50-c button{font-size:.88rem;min-height:44px}
+  .d50-who{padding:.8rem 1rem}
+}
+@media(max-width:380px){
+  .d50-tabs .dtab-btn{font-size:.72rem;padding:.6rem .2rem}
+  .d50-h{font-size:1.25rem}.d50-pr s{display:block;margin:0}
+  .d50-grid{gap:.5rem}.d50-c{padding:.65rem .4rem}
+}
+/* iPhone/iPad: con menos de 16 px Safari hace zoom al tocar un campo */
+@supports (-webkit-touch-callout:none){
+  #d50-id,#diam-ffid,.d50-sheet input,.d50-sheet select{font-size:16px!important}
+}
+@media(hover:none){.d50-c button:active,.d50-go:active{transform:scale(.98)}}
+@media(max-width:699px){.d50-pr s{display:block;margin:.05rem 0 0}.d50-c{padding:.8rem .45rem}}
+@media(max-width:699px){#diam-d50{padding-bottom:6rem}}
 
 #adms-ganancias .gn-fl{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.9rem}
 #adms-ganancias .gn-fl button{padding:.55rem .9rem;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#c9d1e0;font-weight:700;font-size:.82rem;cursor:pointer}
@@ -9890,9 +9920,9 @@ body.light-mode .d50-t b{color:#0f172a}
 @media(min-width:700px){#adms-ganancias .gn-kp{grid-template-columns:repeat(4,1fr)}}
 
 </style>
-<script src="supabase.js?v=9d5625e823"></script>
-<script src="supabase_integration.js?v=9d5625e823"></script>
-<script src="script.js?v=9d5625e823"></script>
+<script src="supabase.js?v=c82beacba7"></script>
+<script src="supabase_integration.js?v=c82beacba7"></script>
+<script src="script.js?v=c82beacba7"></script>
 
 <!-- BARRA DE NAVEGACION INFERIOR -->
 
