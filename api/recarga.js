@@ -73,6 +73,20 @@ async function co(path, opts){
 
 // ── Catálogo y reconocimiento de producto (igual que api/co.js) ──
 let cache = { t: 0, items: null };
+
+// ── Avisos a Telegram: proveedor caído/lento y stock agotado (con memoria, no repiten en cada visita) ──
+const NOMBRE_REGALO = { cj1: 'Caja x1', cj5: 'Caja x5', cj10: 'Caja x10', cj50: 'Caja x50', fa10: 'Fragmentos arma x10', fa50: 'Fragmentos arma x50', fa100: 'Fragmentos arma x100', fa500: 'Fragmentos arma x500' };
+async function vigilarProveedor(c, ms){
+  try{
+    if(!c.ok){ await A.avisarFalla('proveedor', '🔴 EL PROVEEDOR NO RESPONDE (Central One)', 'La tienda no pudo leer el catálogo (' + (c.code || 'error') + '). Las recargas automáticas y los regalos no se pueden entregar hasta que vuelva.', 30 * 60000); return; }
+    if(ms > 4000){ await A.avisarFalla('proveedor', '🟠 EL PROVEEDOR ESTÁ LENTO (Central One)', 'Tardó ' + (ms / 1000).toFixed(1) + ' s en responder el catálogo. Puede haber demoras o fallas en las entregas.', 60 * 60000); return; }
+    await A.avisarVolvio('proveedor', '✅ EL PROVEEDOR VOLVIÓ A RESPONDER', 'El catálogo de Central One responde normal (' + ms + ' ms).');
+    const st = stockRegalos(c.items), mal = Object.keys(st).filter(k => st[k] !== 'ok');
+    if(mal.length) await A.avisarFalla('stock', '📦 STOCK BAJO O AGOTADO EN EL PROVEEDOR', mal.map(k => '• ' + (NOMBRE_REGALO[k] || k) + ': ' + (st[k] === 'sin_stock' ? 'SIN STOCK' : 'no aparece en el catálogo')).join('\n') + '\n\nEstos productos no se pueden vender por ahora. Reponlos en Central One.', 6 * 3600000);
+    else await A.avisarVolvio('stock', '✅ STOCK REPUESTO', 'Todos los regalos (cajas y fragmentos) tienen stock otra vez.');
+  }catch(e){}
+}
+
 async function catalogo(){
   if(cache.items && Date.now() - cache.t < 60000) return { ok: true, items: cache.items };
   const r = await co('/catalog');
@@ -267,6 +281,7 @@ module.exports = async function handler(req, res){
       if(limite(ip, 'h', 40)) return enviar(res, { ok: false });
       if(apagado) return enviar(res, { ok: true, proveedor: 'apagado', diamantes: 'pausa', cajas: 'pausa', fragmentos: 'pausa', ms: 0 });
       const t0 = Date.now(), c = await catalogo(), ms = Date.now() - t0;
+      await vigilarProveedor(c, ms);
       if(!c.ok) return enviar(res, { ok: true, proveedor: 'caido', diamantes: 'pausa', cajas: 'pausa', fragmentos: 'pausa', ms });
       let pausa = false; try{ const e = await A.estado(0); pausa = !!(e.verificado && e.pausa); }catch(e){}
       const st = stockRegalos(c.items), grupo = pre => { const v = Object.keys(st).filter(k => k.indexOf(pre) === 0).map(k => st[k]); return v.length && v.every(x => x === 'ok') ? 'ok' : v.some(x => x === 'ok') ? 'parcial' : 'sin_stock'; };
@@ -274,7 +289,7 @@ module.exports = async function handler(req, res){
     }
     if(b.action === 'stock_regalos'){
       if(limite(ip, 's', 30)) return enviar(res, { ok: false });
-      const c = await catalogo(); if(!c.ok) return enviar(res, { ok: false });
+      const t1 = Date.now(), c = await catalogo(); await vigilarProveedor(c, Date.now() - t1); if(!c.ok) return enviar(res, { ok: false });
       return enviar(res, { ok: true, stock: stockRegalos(c.items) });
     }
     if(apagado) return enviar(res, NO_HECHO('Las recargas automáticas están desactivadas por ahora', 'ENDPOINT_DISABLED'));
@@ -334,7 +349,7 @@ module.exports = async function handler(req, res){
     if(limite(ip, 'c', 20)) return enviar(res, NO_HECHO('Demasiadas compras seguidas, espera un momento', 'ENDPOINT_DISABLED'));
 
     const u = await usuarioValido(cliente); if(!u.ok) return enviar(res, NO_HECHO(u.motivo, 'ENDPOINT_DISABLED'));
-    const c = await catalogo(); if(!c.ok) return enviar(res, NO_HECHO('Proveedor no disponible', 'ENDPOINT_DISABLED'));
+    const c = await catalogo(); if(!c.ok){ await vigilarProveedor(c, 0); return enviar(res, NO_HECHO('Proveedor no disponible', 'ENDPOINT_DISABLED')); }
     const d = elegir(c.items); if(d.error) return enviar(res, NO_HECHO(d.error));
     armarTarget.falta = []; const tg = armarTarget(d.item, pid); if(!tg) return enviar(res, NO_HECHO('El proveedor pide datos que no se pueden completar (' + armarTarget.falta.join(', ') + ')'));
 

@@ -19,6 +19,7 @@
 'use strict';
 const crypto = require('crypto');
 const S = require('./_sesion.js');
+const AL = require('./_alerta.js');
 
 function enviar(res, body, status){ res.statusCode = status || 200; res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.setHeader('Cache-Control', 'no-store'); res.end(JSON.stringify(body)); }
 function ipDe(req){ return String((req.headers['x-forwarded-for'] || (req.socket && req.socket.remoteAddress) || 'x')).split(',')[0].trim(); }
@@ -71,6 +72,7 @@ function errorSql(msg){
   if(/id_invalido/.test(msg)) return { code: 'id', message: 'Revisa los IDs de Free Fire (solo números, de 5 a 15 dígitos).' };
   if(/maximo_automaticas/.test(msg)) return { code: 'maximo', message: 'Máximo 5 paquetes de entrega automática por pedido. Haz otro pedido para el resto.' };
   if(/cantidad_maxima/.test(msg)) return { code: 'maximo', message: 'Superaste la cantidad máxima por pedido de ese producto.' };
+  if(/ordenes_saldo_items_d50_uni/.test(msg)) return { code: 'd50_ya', message: 'Ya hay un pedido de ese paquete al 50% para ese ID. Cada paquete se usa una sola vez por cuenta.' };
   if(/cuenta_suspendida/.test(msg)) return { code: 'suspendida', message: 'Tu cuenta está suspendida. Contacta a soporte.' };
   if(/idem_ajena|idem_invalida|items_invalidos/.test(msg)) return { code: 'solicitud', message: 'Solicitud inválida. Recarga la página e inténtalo de nuevo.' };
   return null;
@@ -158,6 +160,92 @@ async function leerCatalogo(){
   return { sin_bd: false, productos: r.json.map(x => Object.assign({}, x, { precio: Number(x.precio), mayoreo_precio: x.mayoreo_precio == null ? null : Number(x.mayoreo_precio) })) };
 }
 
+
+// ═══════════ DIAMANTES AL 50 % (Volsever · Pagostore): cada paquete se puede usar UNA sola vez por ID de Free Fire ═══════════
+// La llave vive SOLO en Vercel: VOLSEVER_API_KEY. Los precios están en la tabla catalogo_checkout (claves d50_110 … d50_6160).
+const D50_PACKS = [110, 341, 572, 1166, 2398, 6160];
+const D50_BASE = { 100: 110, 310: 341, 520: 572, 1060: 1166, 2180: 2398, 5600: 6160 };   // diamantes sin bono → paquete
+const _d50Cache = new Map();
+async function checkD50(uid, fresh){
+  if(!process.env.VOLSEVER_API_KEY) return { ok: false, code: 'CONFIG', message: 'El servicio de diamantes al 50% no está configurado todavía.' };
+  const run = async () => {
+    const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), 9000);
+    try{
+      const r = await fetch('https://gate.volsever.com/garena/api/v1/pagostore/free-fire/check-discounts-paypal-dom?id=' + encodeURIComponent(uid),
+        { headers: { 'X-API-KEY': process.env.VOLSEVER_API_KEY, Accept: 'application/json' }, signal: ctrl.signal });
+      const d = await r.json().catch(() => null);
+      if(r.status === 404) return { ok: false, code: 'NOT_FOUND', message: 'No se encontró esa cuenta de Free Fire. Revisa el ID.' };
+      if(r.status === 400) return { ok: false, code: 'BAD_ID', message: 'El ID no es válido.' };
+      if(r.status === 401 || r.status === 403){ AL.avisarFalla('volsever', '🔴 VOLSEVER RECHAZÓ LA LLAVE (diamantes al 50%)', 'Volsever respondió ' + r.status + '. Revisa VOLSEVER_API_KEY en Vercel o si te cambiaron permisos. Mientras tanto nadie puede comprar diamantes al 50%.', 30 * 60000).catch(() => {}); }
+      else if(r.status >= 500){ AL.avisarFalla('volsever', '🟠 VOLSEVER NO RESPONDE BIEN (diamantes al 50%)', 'Volsever respondió ' + r.status + ' al consultar el descuento de un ID.', 30 * 60000).catch(() => {}); }
+      else if(r.ok && d && d.status === true){ AL.avisarVolvio('volsever', '✅ VOLSEVER VOLVIÓ A RESPONDER', 'La consulta del descuento al 50% funciona otra vez.').catch(() => {}); }
+      if(!r.ok || !d || d.status !== true || !d.data) return { ok: false, code: 'UNAVAILABLE', message: 'No se pudo consultar el descuento en este momento. Intenta en unos minutos.' };
+      const elig = {}, seen = {};
+      for(const it of d.data.discount_items || []){
+        const dia = Number(it.diamonds) || 0, bono = Number(it.bonus_diamonds) || 0;
+        const pack = D50_PACKS.includes(dia) ? dia : D50_PACKS.includes(dia + bono) ? dia + bono : D50_BASE[dia] || null;
+        if(!pack) continue;
+        seen[pack] = true; if(it.is_discount === true) elig[pack] = true;
+      }
+      return { ok: true, nick: d.data.username || null, region: d.data.region || null, eligible: elig, seen };
+    }catch(e){
+      AL.avisarFalla('volsever', '🟠 VOLSEVER NO RESPONDE (diamantes al 50%)', e && e.name === 'AbortError' ? 'La consulta tardó más de 9 segundos.' : 'No se pudo conectar con Volsever.', 30 * 60000).catch(() => {});
+      return { ok: false, code: 'UNAVAILABLE', message: e && e.name === 'AbortError' ? 'La consulta del descuento tardó demasiado. Intenta de nuevo.' : 'No se pudo consultar el descuento en este momento.' };
+    }finally{ clearTimeout(t); }
+  };
+  if(fresh) return run();
+  const key = 'd50:' + uid, hit = _d50Cache.get(key);
+  if(hit && Date.now() - hit.at < 60000) return hit.v;
+  const v = await run(); if(v.ok){ _d50Cache.set(key, { at: Date.now(), v }); if(_d50Cache.size > 500) _d50Cache.clear(); }
+  return v;
+}
+// Paquetes al 50% que ese ID ya tiene pedidos y siguen vigentes (los reembolsados no cuentan)
+async function d50Pedidos(ffId){
+  const r = await rest('ordenes_saldo_items?clave=like.d50_*&estado=neq.reembolsada&ff_id=eq.' + encodeURIComponent(ffId) + '&select=clave,estado');
+  const out = {}; (Array.isArray(r.json) ? r.json : []).forEach(x => { out[Number(String(x.clave).slice(4))] = x.estado; }); return out;
+}
+
+
+// ═════════════ GANANCIAS (panel admin) ═════════════
+// Se calcula con los pedidos completados. El costo de los diamantes es el precio de referencia del proveedor (US$) × CO_TC.
+// Productos sin costo conocido (cajas, fragmentos, diamantes al 50%, otros) se cuentan como venta, sin ganancia calculada.
+const COSTO_DIAM_USD = { 110: 0.6550, 341: 1.9649, 572: 3.3222, 1166: 6.1709, 2398: 12.2471, 6160: 31.1701 };
+function diamantesDe(prod){
+  const t = String(prod || ''); if(/50\s*%/.test(t)) return 0;
+  const m = t.match(/^\s*([0-9][0-9.,]*)\s*Diamantes/i); if(!m) return 0;
+  const base = Number(m[1].replace(/[.,]/g, '')) || 0, b = t.match(/\+\s*([0-9][0-9.,]*)\s*Bono/i);
+  return base + (b ? (Number(b[1].replace(/[.,]/g, '')) || 0) : 0);
+}
+const diaMX = iso => { try{ return new Date(iso).toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' }); }catch(e){ return String(iso).slice(0, 10); } };
+async function calcularGanancias(dias){
+  const d = [1, 7, 30, 90].includes(dias) ? dias : 7;
+  const hoyMX = diaMX(new Date().toISOString()), desde = new Date(Date.now() - (d - 1) * 86400000 - 86400000).toISOString();
+  const r = await rest('pedidos?estado=eq.completado&created_at=gte.' + encodeURIComponent(desde) + '&select=id,username,producto,precio,created_at&order=created_at.desc&limit=5000');
+  if(r.status >= 400 || !Array.isArray(r.json)) return { ok: false, code: 'db', message: 'No se pudieron leer los pedidos' };
+  const lim = new Date(Date.now() - d * 86400000), minDia = diaMX(new Date(Date.now() - (d - 1) * 86400000).toISOString());
+  const dias_ = {}, prods = {}, perdidas = [];
+  const R = { pedidos: 0, ventas: 0, ventas_costo: 0, costo: 0, sin_costo_n: 0, sin_costo_venta: 0 };
+  for(const p of r.json){
+    const dia = diaMX(p.created_at); if(dia < minDia || dia > hoyMX) continue;
+    const venta = Number(p.precio) || 0; if(!(venta > 0)) continue;
+    const dm = diamantesDe(p.producto), usd = COSTO_DIAM_USD[dm], costo = usd ? usd * TC_GAN : null;
+    const nombre = String(p.producto || 'Otro').replace(/\s*\(.*$/, '').replace(/\s+\+\s*[0-9.,]+\s*Bono.*$/i, '').trim().slice(0, 60) || 'Otro';
+    R.pedidos++; R.ventas += venta;
+    const dd = dias_[dia] || (dias_[dia] = { d: dia, n: 0, venta: 0, ganancia: 0 }); dd.n++; dd.venta += venta;
+    const pp = prods[nombre] || (prods[nombre] = { nombre, n: 0, venta: 0, ganancia: 0, con_costo: 0 }); pp.n++; pp.venta += venta;
+    if(costo !== null){
+      const g = venta - costo; R.ventas_costo += venta; R.costo += costo; dd.ganancia += g; pp.ganancia += g; pp.con_costo++;
+      if(g < 0 && perdidas.length < 15) perdidas.push({ id: p.id, producto: nombre, usuario: p.username, venta, ganancia: Math.round(g * 100) / 100, fecha: p.created_at });
+    } else { R.sin_costo_n++; R.sin_costo_venta += venta; }
+  }
+  const f2 = n => Math.round(n * 100) / 100, ganancia = R.ventas_costo - R.costo;
+  const por_dia = []; for(let i = d - 1; i >= 0; i--){ const k = diaMX(new Date(Date.now() - i * 86400000).toISOString()); const x = dias_[k] || { d: k, n: 0, venta: 0, ganancia: 0 }; por_dia.push({ d: k, n: x.n, venta: f2(x.venta), ganancia: f2(x.ganancia) }); }
+  const por_producto = Object.values(prods).sort((a, b) => b.venta - a.venta).slice(0, 12).map(x => ({ nombre: x.nombre, n: x.n, venta: f2(x.venta), ganancia: x.con_costo ? f2(x.ganancia) : null, con_costo: x.con_costo }));
+  return { ok: true, dias: d, tc: TC_GAN, truncado: r.json.length >= 5000,
+    resumen: { pedidos: R.pedidos, ventas: f2(R.ventas), ganancia: f2(ganancia), costo: f2(R.costo), margen: R.ventas_costo > 0 ? f2(ganancia / R.ventas_costo * 100) : null, ventas_con_costo: f2(R.ventas_costo), sin_costo_n: R.sin_costo_n, sin_costo_venta: f2(R.sin_costo_venta) },
+    por_dia, por_producto, perdidas };
+}
+
 module.exports = async function handler(req, res){
   try{
     if(req.method !== 'POST') return enviar(res, { ok: false, code: 'metodo' }, 405);
@@ -174,6 +262,7 @@ module.exports = async function handler(req, res){
       const d = S.verificar(b.token);
       if(!d) return enviar(res, { ok: false, code: 'sesion_invalida', message: 'Tu sesión del panel venció. Entra de nuevo.' }, 401);
       const adm = String(d.u || 'admin').slice(0, 80);
+      if(a === 'admin_ganancias') return enviar(res, await calcularGanancias(Number(b.dias) || 7));
       if(a === 'admin_ordenes'){
         const est = ['pagada', 'entregando', 'verificar', 'parcial', 'reembolsada'].indexOf(b.estado) >= 0 ? '&estado=eq.' + b.estado : '';
         const lim = Math.max(1, Math.min(200, Number(b.limit) || 60));
@@ -209,7 +298,7 @@ module.exports = async function handler(req, res){
     // El catálogo (precios) es público: se puede ver antes de iniciar sesión. El saldo solo si la sesión es válida.
     if(a === 'catalogo' && (!u || !h)){
       const k = await leerCatalogo();
-      return enviar(res, { ok: true, sin_bd: k.sin_bd, diag: k.diag || null, productos: k.productos, saldo: null });
+      return enviar(res, { ok: true, sin_bd: k.sin_bd, diag: k.diag || null, productos: k.productos.filter(x => x.grupo !== 'd50'), saldo: null });
     }
     if(!u || !h) return enviar(res, { ok: false, code: 'credenciales', message: 'Inicia sesión para comprar' }, 401);
     if(limite('a|' + ip, 80, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Demasiados intentos, espera un momento' }, 429);
@@ -220,7 +309,23 @@ module.exports = async function handler(req, res){
 
     if(a === 'catalogo'){
       const k = await leerCatalogo();
-      return enviar(res, { ok: true, sin_bd: k.sin_bd, diag: k.diag || null, productos: k.productos, saldo: Number(p.saldo) || 0 });
+      return enviar(res, { ok: true, sin_bd: k.sin_bd, diag: k.diag || null, productos: k.productos.filter(x => x.grupo !== 'd50'), saldo: Number(p.saldo) || 0 });
+    }
+
+    // ───────── diamantes al 50%: qué paquetes le quedan a un ID ─────────
+    if(a === 'd50_check'){
+      if(limite('d5|' + uid, 15, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Demasiadas consultas, espera un momento.' }, 429);
+      const id = String(b.ff_id || '').replace(/\D/g, '');
+      if(!/^\d{5,15}$/.test(id)) return enviar(res, { ok: false, code: 'id', message: 'Escribe un ID de Free Fire válido.' }, 400);
+      const k = await leerCatalogo();
+      const prods = {}; (k.productos || []).forEach(x => { if(x.grupo === 'd50') prods[x.clave] = x; });
+      if(!Object.keys(prods).length) return enviar(res, { ok: false, code: 'sin_catalogo', message: 'Este servicio aún no está activado. Falta ejecutar d50.sql en Supabase.' });
+      const r = await checkD50(id);
+      if(!r.ok) return enviar(res, { ok: false, code: r.code, message: r.message }, r.code === 'NOT_FOUND' ? 404 : r.code === 'BAD_ID' ? 400 : 503);
+      const pedidos = await d50Pedidos(id);
+      const packs = D50_PACKS.map(n => { const it = prods['d50_' + n];
+        return { clave: 'd50_' + n, diamantes: n, precio: it ? Number(it.precio) : null, activo: !!it, disponible: !!it && !!r.eligible[n] && !pedidos[n], ya_pedido: pedidos[n] || null, usado: !r.eligible[n] }; });
+      return enviar(res, { ok: true, ff_id: id, nick: r.nick, region: r.region, packs, saldo: Number(p.saldo) || 0 });
     }
 
     // ───────── pagar ─────────
@@ -231,6 +336,22 @@ module.exports = async function handler(req, res){
       const lim = items.map(x => ({ clave: String((x && x.clave) || '').slice(0, 40), ff_id: String((x && x.ff_id) || '').replace(/\s+/g, '') }));
       const idem = String(b.idem || '');
       if(!/^[A-Za-z0-9_-]{8,100}$/.test(idem)) return enviar(res, { ok: false, code: 'solicitud', message: 'Solicitud inválida. Recarga la página.' });
+      // Diamantes al 50%: se compran solos, de a un paquete, y solo si la cuenta aún tiene ese descuento (consulta nueva a Volsever)
+      const d50 = lim.filter(x => /^d50_\d+$/.test(x.clave));
+      if(d50.length){
+        if(d50.length !== lim.length || d50.length !== 1) return enviar(res, { ok: false, code: 'solicitud', message: 'Los diamantes al 50% se piden de uno en uno, sin otros productos.' });
+        const x = d50[0], n = Number(x.clave.slice(4));
+        if(!/^\d{5,15}$/.test(x.ff_id)) return enviar(res, { ok: false, code: 'id', message: 'Revisa tu ID de Free Fire (solo números, de 5 a 15 dígitos).' });
+        const rep = await rest('ordenes_saldo?idem=eq.' + encodeURIComponent(idem) + '&select=id&limit=1');
+        if(!(Array.isArray(rep.json) && rep.json.length)){   // si es el reintento de un pedido ya hecho, no se vuelve a validar
+          if(limite('d5b|' + uid, 3, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Espera un momento antes de otro pedido al 50%.' }, 429);
+          const ya = await d50Pedidos(x.ff_id);
+          if(ya[n]) return enviar(res, { ok: false, code: 'd50_ya', message: 'Ya hay un pedido de ' + n.toLocaleString('en-US') + ' diamantes al 50% para ese ID. Cada paquete se usa una sola vez por cuenta.' }, 409);
+          const chk = await checkD50(x.ff_id, true);
+          if(!chk.ok) return enviar(res, { ok: false, code: chk.code, message: chk.message }, chk.code === 'NOT_FOUND' ? 404 : 503);
+          if(!chk.eligible[n]) return enviar(res, { ok: false, code: 'd50_usado', message: 'Esa cuenta ya usó el descuento del paquete de ' + n.toLocaleString('en-US') + ' diamantes. Elige otro paquete.' }, 409);
+        }
+      }
       if(limite('p|' + uid, 25, 3600000)) return enviar(res, { ok: false, code: 'limite', message: 'Hiciste muchas compras seguidas. Espera un poco.' }, 429);
       const r = await rpc('checkout_pagar', { p_user: uid, p_idem: idem, p_items: lim });
       if(r.status >= 400 || !r.json || !r.json.ok){

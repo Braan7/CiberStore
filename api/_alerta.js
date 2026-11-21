@@ -89,4 +89,24 @@ async function despuesDeCompra(){
 async function enviarPrueba(){
   return enviarAviso('🔔 PRUEBA DE AVISO · CIBERSTORE', 'Esto es una prueba', 'Si lo ves, los avisos de saldo bajo te van a llegar por aquí.');
 }
-module.exports = { umbral, cadaMin, estado, leerSaldo, invalidar, avisarSaldoBajo, avisarRecuperado, despuesDeCompra, enviarPrueba };
+
+// ── Avisos genéricos con memoria: "se cayó algo" (se repite cada cierto tiempo) y "ya volvió" (una sola vez) ──
+// clave: 'proveedor', 'stock', 'volsever'… La memoria vive en la instancia; si Vercel la reinicia, el peor caso es un aviso repetido.
+const _fallas = {};
+async function avisarFalla(clave, titulo, detalle, cadaMs){
+  const f = _fallas[clave] || (_fallas[clave] = { mal: false, t: 0, firma: '' });
+  const firma = String(detalle || '');
+  const cambio = f.mal && f.firma !== firma;   // si cambia el detalle (otro producto sin stock) se avisa de nuevo
+  f.mal = true;
+  if(!cambio && Date.now() - f.t < (cadaMs || 3 * 3600000)) return { enviado: false, motivo: 'espera' };
+  f.t = Date.now(); f.firma = firma;
+  const r = await enviarAviso(titulo, 'Revisa tu proveedor', detalle || '');
+  if(!r.enviado){ f.t = 0; }
+  return r;
+}
+async function avisarVolvio(clave, titulo, detalle){
+  const f = _fallas[clave]; if(!f || !f.mal) return { enviado: false };
+  f.mal = false; f.t = 0; f.firma = '';
+  return enviarAviso(titulo, 'Todo normal otra vez', detalle || '');
+}
+module.exports = { avisarFalla, avisarVolvio, enviarAviso, umbral, cadaMin, estado, leerSaldo, invalidar, avisarSaldoBajo, avisarRecuperado, despuesDeCompra, enviarPrueba };
