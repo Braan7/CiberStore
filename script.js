@@ -19402,7 +19402,7 @@ var OSA_FASE = { recibido:'Recibido', preparando:'Preparando', en_proceso:'En pr
 function osaCargar(){
   var s = document.getElementById('adms-osaldo'); if(!s) return;
   var fl = [['todas','Todas'],['verificar','En verificación'],['entregando','Entregando'],['parcial','Parciales'],['pagada','Pagadas'],['reembolsada','Reembolsadas']];
-  s.innerHTML = '<div class="adm-card-title">Órdenes con saldo</div><div class="dp-fl">' + fl.map(function(f){ return '<button type="button" class="' + (OSA.filtro === f[0] ? 'on' : '') + '" onclick="osaFiltro(\'' + f[0] + '\')">' + f[1] + '</button>'; }).join('') + '<button type="button" class="dp-rf" onclick="osaCargar()">↻ Actualizar</button></div><div id="osa-body"><div class="dp-v">Cargando…</div></div>';
+  s.innerHTML = '<div class="adm-card-title">Órdenes con saldo</div><div class="dp-fl">' + fl.map(function(f){ return '<button type="button" class="' + (OSA.filtro === f[0] ? 'on' : '') + '" onclick="osaFiltro(\'' + f[0] + '\')">' + f[1] + '</button>'; }).join('') + '<button type="button" class="dp-rf" onclick="osaCargar()">↻ Actualizar</button><button type="button" class="dp-rf" onclick="osaAuditar(3)">🔍 Auditar entregas</button></div><div id="osa-aud"></div><div id="osa-body"><div class="dp-v">Cargando…</div></div>';
   osaApi('admin_ordenes', { estado: OSA.filtro === 'todas' ? '' : OSA.filtro, limit:100 }).then(function(r){
     var b = document.getElementById('osa-body'); if(!b) return;
     if(!r || !r.ok){ b.innerHTML = '<div class="dp-err">' + osaE((r && r.message) || 'No se pudo cargar') + '</div>'; return; }
@@ -19426,7 +19426,23 @@ function osaAccion(id, accion){
   if(OSA.busy) return;
   if(!confirm(accion === 'reembolsar' ? '¿Reembolsar esta unidad al saldo del usuario? Solo se hace una vez.' : '¿Confirmas que esta unidad SÍ fue entregada?')) return;
   OSA.busy = true;
-  osaApi('admin_item', { item_id:id, accion:accion }).then(function(r){ OSA.busy = false; if(typeof showToast === 'function') showToast(r && r.ok ? 'Listo' : ((r && r.message) || 'Error'), 3000); osaCargar(); });
+  osaApi('admin_item', { item_id:id, accion:accion }).then(function(r){ OSA.busy = false; if(typeof showToast === 'function') showToast(r && r.ok ? 'Listo' : ((r && r.message) || 'Error'), 3000); var au = document.getElementById('osa-aud'), hab = au && au.innerHTML; osaCargar(); if(hab && r && r.ok){ setTimeout(function(){ osaAuditar(3); }, 400); } });
+}
+/* Auditoría: busca unidades marcadas "completadas" que el proveedor luego devolvió/canceló (se cobró al cliente sin entregar) */
+function osaAuditar(dias, off){
+  var box = document.getElementById('osa-aud'); if(!box) return;
+  box.innerHTML = '<div class="dp-v">Comparando con el proveedor' + (off ? ' (siguientes)' : '') + '… puede tardar unos segundos.</div>';
+  osaApi('admin_auditar', { dias:dias, offset:off || 0 }).then(function(r){
+    box = document.getElementById('osa-aud'); if(!box) return;
+    if(!r || !r.ok){ box.innerHTML = '<div class="dp-err">' + osaE((r && r.message) || 'No se pudo auditar') + '</div>'; return; }
+    var h = '<div class="dp-c"><b>🔍 Auditoría de entregas (últimos ' + r.dias + ' días)</b><div class="dp-g"><span>Comprobadas</span><b>' + r.revisadas + '</b><span>Sin referencia del proveedor</span><b>' + r.sin_referencia + '</b><span>No se pudieron consultar</span><b>' + r.no_consultadas + '</b></div>';
+    if(!r.sospechosas.length) h += '<div class="dp-v">✅ Ninguna unidad completada figura devuelta o fallida en el proveedor.</div>';
+    else h += '<div class="dp-err" style="margin:.5rem 0">⚠️ ' + r.sospechosas.length + ' unidad(es) figuran como COMPLETADAS aquí, pero el proveedor las devolvió o falló. Al cliente se le cobró sin entregar:</div>' + r.sospechosas.map(function(x){
+      return '<div class="dp-g" style="margin:0 0 .35rem;border-top:1px solid rgba(255,255,255,.06);padding-top:.35rem"><span>' + osaE(x.codigo) + ' · ' + osaE(x.usuario) + '</span><b>' + osaE(x.nombre) + ' · ID ' + osaE(x.ff_id) + ' · ' + osaMXN(x.precio) + ' · proveedor: ' + osaE(x.proveedor) + (x.referencia ? ' · ' + osaE(x.referencia) : '') + '</b></div><div class="dp-fl"><button type="button" onclick="osaAccion(' + x.item_id + ',\'reembolsar\')">Reembolsar al saldo</button></div>';
+    }).join('');
+    if(r.hay_mas) h += '<div class="dp-fl"><button type="button" onclick="osaAuditar(' + r.dias + ',' + r.siguiente + ')">Revisar las siguientes 30</button></div>';
+    box.innerHTML = h + '</div>';
+  });
 }
 /* ═══════════ RANGOS CLIENTE / VIP ═══════════
    El rango y los precios los decide SIEMPRE el servidor (api/vip.js + vip.sql). Aquí solo se muestran y se piden.

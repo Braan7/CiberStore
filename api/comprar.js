@@ -368,12 +368,43 @@ module.exports = async function handler(req, res){
         if(x.error) return enviar(res, { ok: false, code: 'db', message: 'Falta ejecutar checkout_saldo.sql en Supabase' });
         return enviar(res, { ok: true, ordenes: x.os.map(o => Object.assign(armar(o, x.items, x.peds), { usuario: o.username, user_id: o.user_id, idem: o.idem })) });
       }
+      // Auditoría: compara las unidades "completadas" con lo que dice el proveedor ahora (por si devolvió el saldo después)
+      if(a === 'admin_auditar'){
+        if(limite('au|' + adm, 10, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Espera un momento' }, 429);
+        const dias = [1, 3, 7, 30].includes(Number(b.dias)) ? Number(b.dias) : 3, desde = new Date(Date.now() - dias * 86400000).toISOString(), off = Math.max(0, Math.min(2000, Number(b.offset) || 0));
+        const ri = await rest('ordenes_saldo_items?entrega=eq.auto&estado=eq.completada&actualizada=gte.' + encodeURIComponent(desde) + '&select=id,orden_id,nombre,ff_id,precio,proveedor&order=id.desc&limit=30&offset=' + off);
+        if(ri.status >= 400 || !Array.isArray(ri.json)) return enviar(res, { ok: false, code: 'db', message: 'No se pudieron leer las órdenes' });
+        const its = ri.json, sosp = []; let revisadas = 0, sin = 0, nocons = 0;
+        const un = async i => {
+          const opv = i.proveedor && i.proveedor.order_id; if(!opv){ sin++; return; }
+          const pr = await llamarProveedor({ action: 'estado', order_id: opv }, req);
+          if(!(pr && pr.success)){ nocons++; return; }
+          revisadas++; if(pr.status === 'REFUNDED' || pr.status === 'FAILED') sosp.push({ item_id: i.id, orden_id: i.orden_id, codigo: 'OS' + i.orden_id, nombre: i.nombre, ff_id: i.ff_id, precio: Number(i.precio) || 0, proveedor: pr.status, referencia: pr.reference || (i.proveedor && i.proveedor.reference) || '' });
+        };
+        for(let k = 0; k < its.length; k += 5) await Promise.all(its.slice(k, k + 5).map(un));
+        if(sosp.length){ const ro = await rest('ordenes_saldo?id=in.(' + Array.from(new Set(sosp.map(x => x.orden_id))).join(',') + ')&select=id,username'), m = {}; (Array.isArray(ro.json) ? ro.json : []).forEach(o => { m[o.id] = o.username; }); sosp.forEach(x => { x.usuario = m[x.orden_id] || ''; }); }
+        return enviar(res, { ok: true, dias, revisadas, sin_referencia: sin, no_consultadas: nocons, sospechosas: sosp, hay_mas: its.length === 30, siguiente: off + 30 });
+      }
       if(a === 'admin_item'){
         const id = Number(b.item_id); if(!(id > 0)) return enviar(res, { ok: false, code: 'solicitud', message: 'Unidad inválida' });
         const ri = await rest('ordenes_saldo_items?id=eq.' + id + '&select=id,orden_id,estado,pedido_id,nombre,precio,ff_id'); const it = Array.isArray(ri.json) && ri.json[0];
         if(!it) return enviar(res, { ok: false, code: 'no_existe', message: 'No existe esa unidad' });
         if(b.accion === 'reembolsar'){
           if(it.estado === 'reembolsada') return enviar(res, { ok: false, code: 'ya', message: 'Esa unidad ya fue reembolsada' });
+          if(it.estado === 'completada'){
+            // Unidad que quedó "completada" pero el proveedor luego devolvió el saldo: solo se reembolsa si el proveedor lo confirma (o el admin fuerza)
+            const ref = await rest('ordenes_saldo_items?id=eq.' + id + '&select=proveedor'), pv = Array.isArray(ref.json) && ref.json[0] && ref.json[0].proveedor, opv = pv && pv.order_id;
+            if(b.forzar !== true){
+              if(!opv) return enviar(res, { ok: false, code: 'sin_ref', message: 'Esa unidad no tiene referencia del proveedor: no se puede comprobar. Verifícala en Central One.' });
+              const pr = await llamarProveedor({ action: 'estado', order_id: opv }, req);
+              if(!(pr && pr.success && (pr.status === 'REFUNDED' || pr.status === 'FAILED'))) return enviar(res, { ok: false, code: 'entregada', message: 'El proveedor NO reporta esa unidad como devuelta o fallida: no se reembolsó.' });
+            }
+            const rr = await rpc('checkout_reembolsar_item', { p_item: id, p_motivo: 'El proveedor devolvió el saldo (reembolsada por ' + adm + ')' });
+            if(rr.status >= 400) return enviar(res, { ok: false, code: 'db', message: 'No se pudo reembolsar: ' + msgErr(rr) });
+            await pedidoEstado(it.pedido_id, 'rechazado', 'Reembolsado a tu saldo');
+            telegram('↩️ <b>OS' + it.orden_id + ' · unidad reembolsada después de marcarse completada</b>\n🎁 ' + esc(it.nombre) + ' → ID ' + esc(it.ff_id) + '\nEl proveedor devolvió el saldo. Por: ' + esc(adm));
+            return enviar(res, { ok: true });
+          }
           const r = await rpc('checkout_item_resultado', { p_item: id, p_estado: 'rechazada', p_ref: null, p_error: 'Reembolsada por ' + adm });
           if(r.status >= 400) return enviar(res, { ok: false, code: 'db', message: 'No se pudo reembolsar: ' + msgErr(r) });
           await pedidoEstado(it.pedido_id, 'rechazado', 'Reembolsado a tu saldo');

@@ -210,6 +210,14 @@ const DUDOSO = (error, code) => ({ success: false, code: code || 'PROVIDER_ERROR
 
 function mapearOrden(o, esRegalo){
   const ref = o.reference_code || '';
+  // El proveedor puede devolver el saldo de una línea (refunded) aunque el pedido figure "completed": eso NO es una entrega.
+  // Antes se daba por completado y se cobraba al cliente sin entregar ni reembolsar.
+  const ls0 = (o.items || []).map(i => String(i.status || '').toLowerCase()).filter(Boolean), stO = String(o.status || '').toLowerCase();
+  const devuelto = ls0.some(x => /^(refunded|reversed|voided)$/.test(x)) || /^(refunded|reversed|voided)$/.test(stO) || (stO === 'completed' && ls0.some(x => /^(failed|cancelled|canceled|rejected)$/.test(x)));
+  if(devuelto){
+    if(ls0.some(x => /^(completed|delivered|fulfilled|succeeded|success)$/.test(x))) return Object.assign(DUDOSO('El pedido tiene líneas entregadas y líneas devueltas: verifícalo en Central One (' + ref + ')'), { reference: ref, order_id: o.id });
+    return Object.assign(NO_HECHO('El proveedor no completó la entrega y devolvió el saldo' + (ref ? ' ' + ref : '')), { reference: ref, order_id: o.id, devuelto: true });
+  }
   if(o.status === 'completed') return { success: true, status: 'COMPLETED', via: 'Central One ' + ref, reference: ref, order_id: o.id };
   if(o.status === 'failed' || o.status === 'cancelled'){
     // Cajas y fragmentos: el proveedor suele marcar "failed" un momento y luego la entrega sí se completa. En los primeros 15 min NO se da por fallida: queda pendiente y se vuelve a consultar.
