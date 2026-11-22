@@ -15929,7 +15929,12 @@ function csVerificarVersion(forzar){
   _csChequeando = true; _csUltimo = Date.now();
   return csLeerBuild().then(function(b){
     _csChequeando = false;
-    if(b && b !== CS_BUILD){ csMarcarViejo(b); return true; }
+    if(b && b !== CS_BUILD){
+      /* Anti-bucle: si ya se intentó actualizar a esta misma versión 2 veces y la página sigue igual (archivos publicados que no coinciden), se deja de insistir */
+      var n = 0; try{ n = Number(sessionStorage.getItem('cs_reload_' + b)) || 0; }catch(e){}
+      if(n >= 2) return false;
+      csMarcarViejo(b); return true;
+    }
     return false;
   }).catch(function(){ _csChequeando = false; return false; });   // sin red o error: no se molesta al cliente
 }
@@ -15942,7 +15947,7 @@ function csUrlNueva(){
   var q = location.search.replace(/([?&])cs_v=[^&]*&?/g, '$1').replace(/[?&]$/, '');
   return location.pathname + (q ? q + '&' : '?') + 'cs_v=' + encodeURIComponent(_csNuevo || Date.now()) + location.hash;
 }
-function csActualizarAhora(){ location.replace(csUrlNueva()); }
+function csActualizarAhora(){ try{ var k = 'cs_reload_' + _csNuevo; sessionStorage.setItem(k, String((Number(sessionStorage.getItem(k)) || 0) + 1)); }catch(e){} location.replace(csUrlNueva()); }
 function csMarcarViejo(nuevo){
   if(_csViejo) return; _csViejo = true; _csNuevo = nuevo;
   var ov = document.getElementById('cs-actualizar');
