@@ -193,6 +193,56 @@ function stockRegalos(items){
   Object.keys(REGALOS).forEach(k => { const it = buscarRegalo(items, k); out[k] = !it ? 'no_disponible' : (it.in_stock === false ? 'sin_stock' : 'ok'); });
   return out;
 }
+// ── Robux PIN (solo GLOBAL): código que se entrega al cliente al pagar con saldo. [robux, precio de venta MXN] ──
+const ROBUX = { rbx800:[800, 185], rbx2000:[2000, 440], rbx4500:[4500, 945], rbx10000:[10000, 2009] };
+function buscarRobux(items, k){
+  let fijo = {}; try{ fijo = JSON.parse(process.env.CO_MAP || '{}'); }catch(e){}
+  if(fijo[k]) return items.find(x => x.product_id === fijo[k]) || null;
+  const n = ROBUX[k][0];
+  const ac = items.filter(x => { const t = sinAcentos((x.name || '') + ' ' + (x.sku || '') + ' ' + (x.product_family_name || '')).replace(/(\d)[.,](?=\d{3}(?!\d))/g, '$1');
+    const reg = String(x.region || '');
+    if(!/robux|roblox/.test(t) || !/global/i.test(reg)) return false;        // SOLO región GLOBAL (nunca RU ni US)
+    if(/\(ru\)|\bru\b|russia|rusia/i.test(t + ' ' + reg)) return false;
+    return tieneNum(t, n) && !tieneNum(t, n * 10) && x.requires_target !== true; });
+  return ac.length === 1 ? ac[0] : null;
+}
+function stockRobux(items){ const out = {}; Object.keys(ROBUX).forEach(k => { const it = buscarRobux(items, k); out[k] = !it ? 'no_disponible' : (it.in_stock === false ? 'sin_stock' : 'ok'); }); return out; }
+function elegirRobux(items, k){
+  const it = buscarRobux(items, k); if(!it) return { error: 'No se encontró el producto en el catálogo del proveedor' };
+  const precio = parseFloat(it.reseller_price); if(!(precio > 0)) return { error: 'Precio del proveedor inválido' };
+  if(PROTEGER_MARGEN && precio * TC > ROBUX[k][1]) return { error: 'Producto no disponible por ahora' };
+  if(it.in_stock === false) return { error: 'Producto sin stock en el proveedor' };
+  return { item: it, precio };
+}
+// Lee el/los código(s) PIN de la orden del proveedor. Busca en los campos habituales (code, pin, serial, redeem…) de cada línea; nunca toma IDs ni referencias.
+const RX_CODIGO = /^(code|codes|pin|pins|serial|serials|redeem_?code|redemption_?code|voucher|vouchers|gift_?card_?code|card_?code|claim_?code|activation_?code|license|license_?key|key|keys|secret|value|values|delivered_?codes|delivery_?codes)$/i;
+const RX_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+function extraerCodigos(o){
+  const out = [], ya = new Set();
+  const ok = v => { if(typeof v !== 'string') return false; const t = v.trim(); return t.length >= 6 && t.length <= 200 && !/\s{2,}/.test(t) && !RX_UUID.test(t) && !/^https?:/i.test(t) && !/^CO-ORD-/i.test(t) && t !== (o && o.reference_code); };
+  const add = v => { const t = String(v).trim(); if(ok(t) && !ya.has(t)){ ya.add(t); out.push(t); } };
+  const rec = (v, dentro, d) => {
+    if(d > 6 || v == null) return;
+    if(typeof v === 'string'){ if(dentro) add(v); return; }
+    if(Array.isArray(v)){ v.forEach(x => rec(x, dentro, d + 1)); return; }
+    if(typeof v === 'object') Object.keys(v).forEach(k => {
+      if(/^(id|order_id|reference_code|product_id|catalog_item_id|status|name|sku|currency|created_at|updated_at|note|message|reason)$/i.test(k)) return;
+      rec(v[k], dentro || RX_CODIGO.test(k), d + 1); });
+  };
+  (o && o.items || []).forEach(i => rec(i, false, 0));
+  return out;
+}
+// Resumen corto de lo que manda el proveedor en las líneas (SIN los códigos) para que el admin vea los nombres de campo si algo no se pudo leer
+function formaEntrega(o){
+  const m = (v, d) => (v == null || d > 3) ? v : Array.isArray(v) ? v.slice(0, 3).map(x => m(x, d + 1)) : typeof v === 'object' ? Object.fromEntries(Object.keys(v).slice(0, 25).map(k => [k, m(v[k], d + 1)])) : (typeof v === 'string' ? (v.length > 6 && RX_UUID.test(v) ? 'uuid' : (v.length > 24 ? v.slice(0, 4) + '…(' + v.length + ')' : (/^[A-Za-z0-9_-]{8,}$/.test(v) && !/^(completed|delivered|pending|failed|refunded|cancelled)$/i.test(v) ? v.slice(0, 2) + '…(' + v.length + ')' : v))) : v);
+  try{ return JSON.stringify(m(o.items || [], 0)).slice(0, 1200); }catch(e){ return ''; }
+}
+// Si la orden es de Robux y ya se entregó: agrega el código leído (o, si no se pudo leer, la forma de lo que mandó el proveedor para el admin)
+function conCodigos(r, o, esRobux){
+  if(!esRobux || !r || !r.success || r.status !== 'COMPLETED') return r;
+  const c = extraerCodigos(o); r.codigos = c; if(!c.length) r.forma = formaEntrega(o); return r;
+}
+function codigosDe(o, m, forzar){ const esR = !!forzar || /robux|roblox/i.test(JSON.stringify(o.items || [])); if(!esR || !m || m.status !== 'COMPLETED') return {}; const c = extraerCodigos(o); return c.length ? { codigos: c } : { forma: formaEntrega(o) }; }
 // Igual que elegirExtra(): { item, precio } o { error }. Protege el margen: si el proveedor cobra (en MXN) más de lo que vendes, se bloquea.
 function elegirRegalo(items, k){
   const it = buscarRegalo(items, k); if(!it) return { error: 'No se encontró el producto en el catálogo del proveedor' };
@@ -298,7 +348,11 @@ module.exports = async function handler(req, res){
     if(b.action === 'stock_regalos'){
       if(limite(ip, 's', 30)) return enviar(res, { ok: false });
       const t1 = Date.now(), c = await catalogo(); await vigilarProveedor(c, Date.now() - t1); if(!c.ok) return enviar(res, { ok: false });
-      return enviar(res, { ok: true, stock: stockRegalos(c.items) });
+      // Cantidad disponible por producto (solo si el proveedor la informa; si no, null) y total por grupo
+      const cant = {}, tot = { caja: 0, fragmento: 0 }, comp = { caja: true, fragmento: true };
+      Object.keys(REGALOS).forEach(k => { const it = buscarRegalo(c.items, k), g = k.indexOf('cj') === 0 ? 'caja' : 'fragmento', n = it ? cantidadDe(it) : null; cant[k] = n; if(n === null){ comp[g] = false; } else tot[g] += n * REGALOS[k][1]; });
+      const sr = stockRobux(c.items), cr = {}; Object.keys(ROBUX).forEach(k => { const it = buscarRobux(c.items, k); cr[k] = it ? cantidadDe(it) : null; });
+      return enviar(res, { ok: true, robux: sr, robux_cantidad: cr, stock: stockRegalos(c.items), cantidad: cant, total: { caja: comp.caja ? tot.caja : null, fragmento: comp.fragmento ? tot.fragmento : null } });
     }
     if(apagado) return enviar(res, NO_HECHO('Las recargas automáticas están desactivadas por ahora', 'ENDPOINT_DISABLED'));
 
@@ -308,7 +362,7 @@ module.exports = async function handler(req, res){
       const r = await co('/orders/' + id); if(r.status !== 200 || !r.json || !r.json.order) return enviar(res, { success: false, error: 'No encontrado' });
       const o = r.json.order, m = mapearOrden(o);
       if((o.items || []).some(i => i.status === 'refunded')) return enviar(res, { success: true, status: 'REFUNDED', reference: o.reference_code });
-      return enviar(res, m.success ? { success: true, status: m.status, reference: m.reference } : (m.code === 'PROVIDER_ERROR' ? { success: true, status: 'PENDING', reference: m.reference, error: m.error } : { success: true, status: 'FAILED', reference: m.reference, error: m.error }));
+      return enviar(res, m.success ? Object.assign({ success: true, status: m.status, reference: m.reference }, codigosDe(o, m, b.robux)) : (m.code === 'PROVIDER_ERROR' ? { success: true, status: 'PENDING', reference: m.reference, error: m.error } : { success: true, status: 'FAILED', reference: m.reference, error: m.error }));
     }
 
     // ── buscar un pedido por su clave (para resolver unidades "en verificación") ──
@@ -319,14 +373,15 @@ module.exports = async function handler(req, res){
       if(!rv.existente) return enviar(res, { success: true, status: 'NOT_FOUND' });
       const o = rv.existente, m = mapearOrden(o, !!b.regalo);
       if((o.items || []).some(i => i.status === 'refunded')) return enviar(res, { success: true, status: 'REFUNDED', reference: o.reference_code, order_id: o.id });
-      return enviar(res, m.success ? { success: true, status: m.status, reference: m.reference, order_id: o.id, via: m.via } : (m.code === 'PROVIDER_ERROR' ? { success: true, status: 'PENDING', reference: m.reference, order_id: o.id, via: 'Central One ' + (o.reference_code || '') } : { success: true, status: 'FAILED', reference: m.reference, order_id: o.id, error: m.error }));
+      return enviar(res, m.success ? Object.assign({ success: true, status: m.status, reference: m.reference, order_id: o.id, via: m.via }, codigosDe(o, m, b.robux)) : (m.code === 'PROVIDER_ERROR' ? { success: true, status: 'PENDING', reference: m.reference, order_id: o.id, via: 'Central One ' + (o.reference_code || '') } : { success: true, status: 'FAILED', reference: m.reference, order_id: o.id, error: m.error }));
     }
 
     const extra = EXTRA[String(b.producto || '')] ? String(b.producto) : null;
     const reg = (!extra && REGALOS[String(b.producto || '')]) ? String(b.producto) : null;
-    const diam = (extra || reg) ? null : PKG[Number(b.package_id != null ? b.package_id : b.product_id)];
-    const elegir = items => extra ? elegirExtra(items, extra) : (reg ? elegirRegalo(items, reg) : detectar(items, diam));
-    if(!extra && !reg && !diam) return enviar(res, NO_HECHO('Paquete no disponible para recarga automática', 'ENDPOINT_DISABLED'));
+    const rbx = (!extra && !reg && ROBUX[String(b.producto || '')]) ? String(b.producto) : null;
+    const diam = (extra || reg || rbx) ? null : PKG[Number(b.package_id != null ? b.package_id : b.product_id)];
+    const elegir = items => extra ? elegirExtra(items, extra) : (reg ? elegirRegalo(items, reg) : (rbx ? elegirRobux(items, rbx) : detectar(items, diam)));
+    if(!extra && !reg && !rbx && !diam) return enviar(res, NO_HECHO('Paquete no disponible para recarga automática', 'ENDPOINT_DISABLED'));
     const pid = String(b.player_id != null ? b.player_id : b.service_user_id || '').trim();
 
     // ── validar ID ──
@@ -350,21 +405,21 @@ module.exports = async function handler(req, res){
     if(!/^(0|false|off|no)$/i.test(String(process.env.CO_EXIGIR_VERSION || '1')) && !/^[a-f0-9]{10}$/.test(String(req.headers['x-cs-build'] || '')))
       return enviar(res, NO_HECHO('Tu versión de la tienda está desactualizada. Actualiza la página (recárgala) y vuelve a intentar. No se te cobró.', 'ENDPOINT_DISABLED'));
     const cliente = String(b.client_name || '').trim(), key = String(b.idempotency_key || '');
-    _cc = { cliente, key, reg: !!reg, precio: null };
+    _cc = { cliente, key, reg: !!(reg || rbx), rbx: !!rbx, precio: null };
     if(!/^[A-Za-z0-9_.-]{2,40}$/.test(cliente)) return enviar(res, NO_HECHO('Usuario inválido', 'ENDPOINT_DISABLED'));
     if(!/^[A-Za-z0-9_-]{8,128}$/.test(key)) return enviar(res, NO_HECHO('Clave de pedido inválida', 'ENDPOINT_DISABLED'));
-    if(!/^\d{5,15}$/.test(pid)) return enviar(res, NO_HECHO('ID de Free Fire inválido'));
+    if(!rbx && !/^\d{5,15}$/.test(pid)) return enviar(res, NO_HECHO('ID de Free Fire inválido'));
     if(limite(ip, 'c', 20)) return enviar(res, NO_HECHO('Demasiadas compras seguidas, espera un momento', 'ENDPOINT_DISABLED'));
 
     const u = await usuarioValido(cliente); if(!u.ok) return enviar(res, NO_HECHO(u.motivo, 'ENDPOINT_DISABLED'));
     const c = await catalogo(); if(!c.ok){ await vigilarProveedor(c, 0); return enviar(res, NO_HECHO('Proveedor no disponible', 'ENDPOINT_DISABLED')); }
     const d = elegir(c.items); if(d.error) return enviar(res, NO_HECHO(d.error));
-    armarTarget.falta = []; const tg = armarTarget(d.item, pid); if(!tg) return enviar(res, NO_HECHO('El proveedor pide datos que no se pueden completar (' + armarTarget.falta.join(', ') + ')'));
+    armarTarget.falta = []; const tg = rbx ? undefined : armarTarget(d.item, pid); if(!rbx && !tg) return enviar(res, NO_HECHO('El proveedor pide datos que no se pueden completar (' + armarTarget.falta.join(', ') + ')'));
 
     // ¿Ya existe este mismo pedido? (reintento tras un corte): se devuelve su estado sin gastar de nuevo ni aplicar fusibles
     const rev = await revisarPedidos(cliente, key);
     if(!rev.ok) return enviar(res, NO_HECHO('No se pudo verificar el límite de gasto', 'ENDPOINT_DISABLED'));
-    if(rev.existente) return enviar(res, Object.assign(mapearOrden(rev.existente, !!reg), { costo_usd: d.precio }));
+    if(rev.existente) return enviar(res, conCodigos(Object.assign(mapearOrden(rev.existente, !!(reg || rbx)), { costo_usd: d.precio }), rev.existente, !!rbx));
     // Protección de saldo con el proveedor: si queda poco (o no alcanza para este pedido) se pausa y se te avisa por Telegram
     const sp = await A.estado(d.precio);
     if(sp.pausa){ await A.avisarSaldoBajo(sp.saldo, sp.motivo); return enviar(res, NO_HECHO('Recargas en pausa por unos minutos: estamos reponiendo saldo del sistema. Intenta de nuevo en un rato.', 'ENDPOINT_DISABLED')); }
@@ -372,7 +427,7 @@ module.exports = async function handler(req, res){
     if(LIM_USER_H > 0 && rev.delUsuario >= LIM_USER_H) return enviar(res, NO_HECHO('Alcanzaste el límite de recargas por hora. Intenta más tarde', 'ENDPOINT_DISABLED'));
 
     const r = await co('/orders', { method: 'POST', headers: { 'Idempotency-Key': key },
-      body: { items: [{ catalog_item_id: d.item.product_id, quantity: 1, target_payload: tg }], note: ('CS|' + cliente + '|' + key).slice(0, 400) } });
+      body: { items: [rbx ? { catalog_item_id: d.item.product_id, quantity: 1 } : { catalog_item_id: d.item.product_id, quantity: 1, target_payload: tg }], note: ('CS|' + cliente + '|' + key).slice(0, 400) } });
     if(r.status !== 201 && r.status !== 200){
       const code = (r.json && r.json.error && r.json.error.code) || '';
       if(r.status === 422 || code === 'idempotency_key_reused') return enviar(res, DUDOSO('Pedido repetido, se está verificando', 'DUPLICATE_REQUEST'));
@@ -392,8 +447,8 @@ module.exports = async function handler(req, res){
     }
     try{ await A.despuesDeCompra(); }catch(e){}
     // costo_usd: lo que cobró el proveedor (para el aviso de Telegram con la ganancia)
-    const final = mapearOrden(o, !!reg); if(final.success) final.costo_usd = d.precio;
-    return enviar(res, final);
+    const final = mapearOrden(o, !!(reg || rbx)); if(final.success) final.costo_usd = d.precio;
+    return enviar(res, conCodigos(final, o, !!rbx));
   }catch(e){
     const timeout = e && e.name === 'AbortError';
     // Se cortó la espera, pero el pedido pudo haberse creado: se busca por su clave y se devuelve su estado real (así no queda en "verificar" algo que el proveedor sí entregó)
@@ -404,10 +459,24 @@ module.exports = async function handler(req, res){
 
 // ── Inventario para el panel "Estado del Sistema" (solo consulta; lo usa api/_estado.js desde el panel admin) ──
 // La cantidad SOLO se muestra si el proveedor la manda en el catálogo (campos de stock). Si no, queda en null: nunca se inventa.
-const CAMPOS_CANT = ['stock', 'stock_quantity', 'stock_count', 'available_stock', 'available_quantity', 'quantity_available', 'inventory'];
+const RX_CANT = /^(stock|stock_quantity|stock_count|stock_level|stock_available|available_stock|available|available_quantity|quantity_available|available_units|units_available|inventory|inventory_quantity|inventory_count|remaining|remaining_stock|existencias?|disponible|disponibles|qty_available)$/i;
+const RX_ANIDADA = /^(quantity|available|count|total|stock|units|amount)$/i;
+function numOk(v){ return v !== undefined && v !== null && v !== '' && typeof v !== 'boolean' && isFinite(Number(v)) && Number(v) >= 0; }
 function cantidadDe(it){
-  for(const f of CAMPOS_CANT){ const v = it && it[f]; if(v !== undefined && v !== null && v !== '' && isFinite(Number(v)) && Number(v) >= 0) return Number(v); }
+  if(!it || typeof it !== 'object') return null;
+  for(const k of Object.keys(it)){
+    if(!RX_CANT.test(k)) continue;
+    const v = it[k];
+    if(numOk(v)) return Number(v);
+    if(v && typeof v === 'object'){ for(const k2 of Object.keys(v)){ if(RX_ANIDADA.test(k2) && numOk(v[k2])) return Number(v[k2]); } }
+  }
   return null;
+}
+// Campos sencillos que manda el proveedor para un producto (solo para que el admin vea si trae cantidades; sin textos largos)
+function muestraDe(it){
+  if(!it) return null; const o = {};
+  Object.keys(it).forEach(k => { const v = it[k]; if(v === null || ['string', 'number', 'boolean'].indexOf(typeof v) >= 0){ if(typeof v !== 'string' || v.length <= 60) o[k] = v; } else if(typeof v === 'object' && !Array.isArray(v)){ o[k] = '{' + Object.keys(v).slice(0, 6).join(', ') + '}'; } else if(Array.isArray(v)) o[k] = '[' + v.length + ']'; });
+  return o;
 }
 function estadoItem(it){
   if(!it) return 'no_disponible';
@@ -427,8 +496,8 @@ function buscarDiamante(items, d){
 function inventario(items){
   const f = it => ({ estado: estadoItem(it), cantidad: it ? cantidadDe(it) : null });
   const diamantes = Object.keys(PAQUETES).map(d => Object.assign({ clave: 'd' + d, nombre: Number(d).toLocaleString('es-MX') + ' 💎' }, f(buscarDiamante(items, Number(d)))));
-  const cajas = [], fragmentos = [];
-  Object.keys(REGALOS).forEach(k => { const o = Object.assign({ clave: k, nombre: NOMBRE_REGALO[k] || k }, f(buscarRegalo(items, k))); (k.indexOf('cj') === 0 ? cajas : fragmentos).push(o); });
-  return { diamantes, cajas, fragmentos };
+  const cajas = [], fragmentos = []; let muestra = null;
+  Object.keys(REGALOS).forEach(k => { const it = buscarRegalo(items, k); if(it && !muestra) muestra = muestraDe(it); const o = Object.assign({ clave: k, nombre: k.indexOf('cj') === 0 ? (REGALOS[k][1] === 1 ? '1 caja' : REGALOS[k][1] + ' cajas') : 'Fragmentos de arma ×' + REGALOS[k][1], unidades: REGALOS[k][1] }, f(it)); (k.indexOf('cj') === 0 ? cajas : fragmentos).push(o); });
+  return { diamantes, cajas, fragmentos, muestra };
 }
 module.exports.inventario = inventario;

@@ -89,7 +89,7 @@ function faseItem(i, ped){
 function armar(o, items, peds){
   const its = items.filter(i => i.orden_id === o.id).map(i => {
     const p = i.pedido_id ? peds[String(i.pedido_id)] : null;
-    return { id: i.id, clave: i.clave, nombre: i.nombre, grupo: i.grupo, img: i.img, entrega: i.entrega, precio: Number(i.precio), ff_id: i.ff_id, estado: i.estado, fase: faseItem(i, p), error: i.error || null, actualizada: i.actualizada };
+    return { id: i.id, clave: i.clave, nombre: i.nombre, grupo: i.grupo, img: i.img, entrega: i.entrega, precio: Number(i.precio), ff_id: i.ff_id, estado: i.estado, fase: faseItem(i, p), error: i.error || null, actualizada: i.actualizada, codigos: (i.grupo === 'robux' && i.proveedor && Array.isArray(i.proveedor.codigos) && i.proveedor.codigos.length) ? i.proveedor.codigos : null };
   });
   const act = its.filter(i => i.fase !== 'reembolsado'), ent = act.filter(i => i.fase === 'entregado').length;
   let fase = 'recibido';
@@ -591,7 +591,12 @@ module.exports = async function handler(req, res){
         const llave = 'cs-os' + oid + '-' + item.id;
         const pr = await llamarProveedor({ action: 'comprar', producto: item.srv, player_id: item.ff_id, client_name: p.username, idempotency_key: llave }, req);
         let est, err = null, ref = null;
-        if(pr && pr.success && pr.status === 'COMPLETED'){ est = 'completada'; ref = { order_id: pr.order_id || null, reference: pr.reference || null, via: pr.via || null }; }
+        if(pr && pr.success && pr.status === 'COMPLETED'){ est = 'completada'; ref = { order_id: pr.order_id || null, reference: pr.reference || null, via: pr.via || null };
+          if(/^rbx/.test(String(item.srv || ''))){
+            if(Array.isArray(pr.codigos) && pr.codigos.length) ref.codigos = pr.codigos;
+            else { est = 'verificar'; err = 'El proveedor entregó el Robux pero no se pudo leer el código: revísalo en Central One (' + (pr.reference || '') + ') y envíaselo al cliente'; ref.forma = pr.forma || null; }
+          }
+        }
         else if(pr && pr.success && pr.status === 'PENDING'){ est = 'enviada'; ref = { order_id: pr.order_id || null, reference: pr.reference || null, via: pr.via || null }; }
         else {
           err = String((pr && (pr.error || pr.status)) || 'sin confirmar'); const code = String((pr && pr.code) || '');
@@ -604,6 +609,7 @@ module.exports = async function handler(req, res){
         } else {
           await pedidoEstado(ped, PEDIDO_EST[est] || 'procesando', est === 'rechazada' ? 'Reembolsado a tu saldo: ' + (err || '') : (est === 'verificar' ? 'En verificación por el equipo' : null));
           if(est === 'rechazada') telegram('↩️ <b>OS' + oid + ' · unidad rechazada y reembolsada</b>\n👤 ' + esc(p.username) + '\n🎁 ' + esc(item.nombre) + ' → ID ' + esc(item.ff_id) + '\n❗ ' + esc(err));
+          if(est === 'verificar' && ref && ref.forma) telegram('🔎 <b>OS' + oid + ' · formato que mandó Central One (sin códigos)</b>\n<code>' + esc(String(ref.forma).slice(0, 900)) + '</code>\nPásaselo a tu desarrollador para que el código se lea solo.');
           if(est === 'verificar') telegram('🚨 <b>OS' + oid + ' · VERIFICAR a mano</b>\n👤 ' + esc(p.username) + '\n🎁 ' + esc(item.nombre) + ' → ID ' + esc(item.ff_id) + '\n❗ ' + esc(err) + '\n🔑 ' + llave + '\nNo se reembolsó: revisa con el proveedor y resuélvelo en el panel (Órdenes con saldo).');
           if(est === 'enviada' || est === 'completada') telegram('⚡ <b>OS' + oid + ' · entrega automática ' + (est === 'completada' ? '✅ completada' : '⏳ en proceso') + '</b>\n👤 ' + esc(p.username) + '\n🎁 ' + esc(item.nombre) + ' → ID ' + esc(item.ff_id) + (ref && ref.via ? '\n📡 ' + esc(ref.via) : '') + gananciaTxt(item.precio, pr && pr.costo_usd));
         }
@@ -617,20 +623,23 @@ module.exports = async function handler(req, res){
       const oid = Number(b.orden_id); if(!(oid > 0)) return enviar(res, { ok: false, code: 'solicitud', message: 'Pedido inválido' });
       const ro = await rest('ordenes_saldo?id=eq.' + oid + '&user_id=eq.' + encodeURIComponent(uid) + '&select=id'); if(!(Array.isArray(ro.json) && ro.json.length)) return enviar(res, { ok: false, code: 'no_existe', message: 'No encontramos ese pedido' }, 404);
       if(limite('r|' + uid, 30, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Espera un momento' }, 429);
-      const ri = await rest('ordenes_saldo_items?orden_id=eq.' + oid + '&estado=in.(enviada,verificar)&select=id,estado,proveedor,pedido_id,nombre,ff_id'); const its = Array.isArray(ri.json) ? ri.json : [];
+      const ri = await rest('ordenes_saldo_items?orden_id=eq.' + oid + '&estado=in.(enviada,verificar)&select=id,estado,grupo,proveedor,pedido_id,nombre,ff_id'); const its = Array.isArray(ri.json) ? ri.json : [];
       let consultadas = 0, cambios = 0;
       for(const i of its){
         let oidp = i.proveedor && i.proveedor.order_id;
         if(!oidp && i.estado === 'verificar'){
           // Unidad "en verificación" (se cortó la espera): se busca el pedido en el proveedor por su clave
-          const bu = await llamarProveedor({ action: 'buscar', client_name: p.username, idempotency_key: 'cs-os' + oid + '-' + i.id, regalo: true }, req); consultadas++;
-          if(bu && bu.success && bu.status === 'COMPLETED'){ await rpc('checkout_item_resultado', { p_item: i.id, p_estado: 'completada', p_ref: { order_id: bu.order_id || null, reference: bu.reference || null, via: bu.via || null }, p_error: null }); await pedidoEstado(i.pedido_id, 'completado'); cambios++; }
+          const bu = await llamarProveedor({ action: 'buscar', client_name: p.username, idempotency_key: 'cs-os' + oid + '-' + i.id, regalo: true, robux: i.grupo === 'robux' }, req); consultadas++;
+          if(bu && bu.success && bu.status === 'COMPLETED' && i.grupo === 'robux' && !(Array.isArray(bu.codigos) && bu.codigos.length)){ continue; }
+          if(bu && bu.success && bu.status === 'COMPLETED'){ await rpc('checkout_item_resultado', { p_item: i.id, p_estado: 'completada', p_ref: { order_id: bu.order_id || null, reference: bu.reference || null, via: bu.via || null, codigos: (bu.codigos && bu.codigos.length) ? bu.codigos : undefined }, p_error: null }); await pedidoEstado(i.pedido_id, 'completado'); cambios++; }
           else if(bu && bu.success && bu.status === 'PENDING'){ await rpc('checkout_item_resultado', { p_item: i.id, p_estado: 'enviada', p_ref: { order_id: bu.order_id || null, reference: bu.reference || null, via: bu.via || null }, p_error: null }); cambios++; }
           continue;   // si no se encuentra o figura fallido, se queda en verificación para revisarlo a mano (no se reembolsa solo)
         }
         if(!oidp) continue; consultadas++;
-        const pr = await llamarProveedor({ action: 'estado', order_id: oidp }, req);
-        if(pr && pr.success && pr.status === 'COMPLETED'){ await rpc('checkout_item_resultado', { p_item: i.id, p_estado: 'completada', p_ref: null, p_error: null }); await pedidoEstado(i.pedido_id, 'completado'); cambios++; }
+        const pr = await llamarProveedor({ action: 'estado', order_id: oidp, robux: i.grupo === 'robux' }, req);
+        if(pr && pr.success && pr.status === 'COMPLETED'){
+          if(i.grupo === 'robux' && !(Array.isArray(pr.codigos) && pr.codigos.length)) continue;   // sin código leído no se marca entregada: se queda para revisar
+          await rpc('checkout_item_resultado', { p_item: i.id, p_estado: 'completada', p_ref: (i.grupo === 'robux' ? Object.assign({}, i.proveedor || {}, { codigos: pr.codigos }) : null), p_error: null }); await pedidoEstado(i.pedido_id, 'completado'); cambios++; }
         else if(pr && pr.success && (pr.status === 'FAILED' || pr.status === 'REFUNDED')){
           await rpc('checkout_item_resultado', { p_item: i.id, p_estado: 'rechazada', p_ref: null, p_error: String(pr.error || 'El proveedor canceló la entrega') }); await pedidoEstado(i.pedido_id, 'rechazado', 'Reembolsado a tu saldo'); cambios++;
           telegram('↩️ <b>OS' + oid + ' · el proveedor canceló una unidad (reembolsada)</b>\n👤 ' + esc(p.username) + '\n🎁 ' + esc(i.nombre) + ' → ID ' + esc(i.ff_id));

@@ -3477,7 +3477,7 @@ function admToggleNav(force){
 }
 
 function admFullTab(tab){
-  var tabs=['stats','users','pedidos','saldos','top','puntos','codigos','chat','resenas','soporte','inactivos','seguridad','recargas','depositos','sistema','cuentas','ganancias','osaldo','vip','prime','catalogo','premios','chatadm','config'];
+  var tabs=['stats','users','pedidos','saldos','top','puntos','codigos','chat','resenas','soporte','inactivos','seguridad','recargas','depositos','precios','sistema','cuentas','ganancias','osaldo','vip','prime','catalogo','premios','chatadm','config'];
   tabs.forEach(function(t){
     var btn=document.getElementById('admn-'+t);
     var sec=document.getElementById('adms-'+t);
@@ -3505,6 +3505,7 @@ function admFullTab(tab){
   if(tab==='ganancias') gananciasCargar();
   if(tab==='cuentas') cuentasAdmCargar();
   if(tab==='sistema') sistemaCargar(false);
+  if(tab==='precios') preciosAdmCargar();
   if(tab==='vip') vipAdmCargar();
   if(tab==='prime') primeAdmCargar();
   // Cerrar el drawer al elegir una opción en móvil
@@ -7814,12 +7815,12 @@ var _diamSeleccionado = null;
 // ═══════════ RECARGAS AUTOMÁTICAS (Recargas América type=recharge) ═══════════
 // package_id = el ID de Recargas América | precio = costo USD × 20 (redondeado)
 var RECARGAS_AUTO = [
-  { package_id:351, catalog_id:5,  sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.6650, precioUSD:0.7754, precioMXN:14.50, precio:14.50,   img:'img/diam-100.png'  },
-  { package_id:348, catalog_id:6,  sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:1.9999, precioUSD:2.2642, precioMXN:42.34, precio:42.34,   img:'img/diam-310.png'  },
-  { package_id:350, catalog_id:7,  sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.3955, precioUSD:3.5722, precioMXN:66.80, precio:66.80,   img:'img/diam-520.png'  },
-  { package_id:347, catalog_id:8,  sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.3089, precioUSD:6.5989, precioMXN:123.40, precio:123.40,  img:'img/diam-1060.png' },
-  { package_id:346, catalog_id:9,  sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:12.5203, precioUSD:12.8797, precioMXN:240.85, precio:240.85,  img:'img/diam-2180.png' },
-  { package_id:349, catalog_id:10, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:31.8640, precioUSD:31.9529, precioMXN:597.52, precio:597.52,  img:'img/diam-5600.png' },
+  { package_id:351, catalog_id:5,  sku:'FFCH100Z',  nombre:'100 Diamantes + 10 Bono',      diamantes:110,   costoUSD:0.6650, precioUSD:0.7754, precioMXN:14.34, precio:14.34,   img:'img/diam-100.png'  },
+  { package_id:348, catalog_id:6,  sku:'FFCH310Z',  nombre:'310 Diamantes + 31 Bono',      diamantes:341,   costoUSD:1.9999, precioUSD:2.2642, precioMXN:42.01, precio:42.01,   img:'img/diam-310.png'  },
+  { package_id:350, catalog_id:7,  sku:'FFCH520Z',  nombre:'520 Diamantes + 52 Bono',      diamantes:572,   costoUSD:3.3955, precioUSD:3.5722, precioMXN:66.58, precio:66.58,   img:'img/diam-520.png'  },
+  { package_id:347, catalog_id:8,  sku:'FFCH1060Z', nombre:'1.060 Diamantes + 106 Bono',   diamantes:1166,  costoUSD:6.3089, precioUSD:6.5989, precioMXN:123.25, precio:123.25,  img:'img/diam-1060.png' },
+  { package_id:346, catalog_id:9,  sku:'FFCH2180Z', nombre:'2.180 Diamantes + 218 Bono',   diamantes:2398,  costoUSD:12.5203, precioUSD:12.8797, precioMXN:239.71, precio:239.71,  img:'img/diam-2180.png' },
+  { package_id:349, catalog_id:10, sku:'FFCH5600Z', nombre:'5.600 Diamantes + 560 Bono',   diamantes:6160,  costoUSD:31.8640, precioUSD:31.9529, precioMXN:597.17, precio:597.17,  img:'img/diam-5600.png' },
   { package_id:null, catalog_id:null, nombre:'11.200 Diamantes + 1.120 Bono', diamantes:12320, costoUSD:66.32, precio:1300, manual:true }
 ];
 // Precios de los diamantes: en USD (precioUSD) y en MXN (precioMXN) son FIJOS y salen de tu lista de precios.
@@ -14126,6 +14127,7 @@ var _gcPID = '';
 var _gc = null, _gcQ = 1, _gcWA = '', _gcMetodo = null, _gcFoto = '', _gcFotoRaw = '', _gcFotoNom = '', _gcEnviando = false, _gcFoco = null;
 function gcPedir(tipo, catId, subId, idx){
   var g = _jgBuscar(tipo, catId), sc = g && g.subcats ? g.subcats.filter(function(s){ return s.id === subId; })[0] : null, p = sc ? sc.productos[idx] : null; if(!p || p.agotado || p.estado === 'pendiente') return;
+  if(p.clave && typeof ckAbrir === 'function'){ ckAbrir(p.clave); return; }   /* Robux PIN: compra automática con saldo */
   _gc = {cat: g.n, sub: sc.n, p: p, mxn: _jgMXN(p), usd: _jgUSD(p), nota: sc.nota, tipo: tipo, entrega: (typeof _jgEntrega === 'function' ? _jgEntrega(p, sc) : '') || 'pin'};
   _gcQ = 1; _gcPID = ''; _gcEnviando = false; if(!_gcMetodo && MANUAL_METODOS.length) _gcMetodo = MANUAL_METODOS[0].id;
   gcRender();
@@ -15136,23 +15138,14 @@ var CATALOGO_NUEVO = {
   "n": "Robux PIN",
   "titulo": "ROBLOX · ROBUX",
   "entrega": "pin",
-  "nota": "ENTREGA PIN · Código para canjear Robux en tu cuenta de Roblox. Respeta las condiciones de canje y la región del código.",
+  "nota": "ENTREGA PIN · Código GLOBAL para canjear Robux en tu cuenta de Roblox. Pagas con tu saldo y recibes tu código al instante. No pide usuario ni contraseña.",
   "productos": [
    {
     "id": "rbx-800-robux",
+    "clave": "rbx_800",
     "n": "800 Robux",
     "usd": 9.833,
-    "mxn": 184.86,
-    "region": "",
-    "api_id": "",
-    "img": "",
-    "estado": "activo"
-   },
-   {
-    "id": "rbx-1-000-robux",
-    "n": "1,000 Robux",
-    "usd": 11.4324,
-    "mxn": 214.93,
+    "mxn": 185,
     "region": "",
     "api_id": "",
     "img": "",
@@ -15160,19 +15153,10 @@ var CATALOGO_NUEVO = {
    },
    {
     "id": "rbx-2-000-robux",
+    "clave": "rbx_2000",
     "n": "2,000 Robux",
     "usd": 23.15,
-    "mxn": 435.22,
-    "region": "",
-    "api_id": "",
-    "img": "",
-    "estado": "activo"
-   },
-   {
-    "id": "rbx-2-500-robux",
-    "n": "2,500 Robux",
-    "usd": 26.1048,
-    "mxn": 490.77,
+    "mxn": 440,
     "region": "",
     "api_id": "",
     "img": "",
@@ -15180,9 +15164,10 @@ var CATALOGO_NUEVO = {
    },
    {
     "id": "rbx-4-500-robux",
+    "clave": "rbx_4500",
     "n": "4,500 Robux",
     "usd": 48.6973,
-    "mxn": 915.51,
+    "mxn": 945,
     "region": "",
     "api_id": "",
     "img": "",
@@ -15190,9 +15175,10 @@ var CATALOGO_NUEVO = {
    },
    {
     "id": "rbx-10-000-robux",
+    "clave": "rbx_10000",
     "n": "10,000 Robux",
     "usd": 99.7441,
-    "mxn": 1875.19,
+    "mxn": 2009,
     "region": "",
     "api_id": "",
     "img": "",
@@ -15215,7 +15201,7 @@ var CATALOGO_NUEVO = {
     poner(JG_GIFTCARDS, c);
   });
   // Roblox: "Robux PIN" como primera pestaña; las listas que ya tenías (México y LATAM) se conservan
-  JG_GIFTCARDS.forEach(function(g){ if(g.id === 'robux' && g.subcats){ g.n = 'Roblox'; g.fam = 'roblox'; if(!g.subcats.some(function(s){ return s.id === 'pin'; })) g.subcats.unshift(CATALOGO_NUEVO.robux_pin); } });
+  JG_GIFTCARDS.forEach(function(g){ if(g.id === 'robux' && g.subcats){ g.n = 'Roblox'; g.fam = 'roblox'; if(!g.subcats.some(function(s){ return s.id === 'pin'; })) g.subcats.unshift(CATALOGO_NUEVO.robux_pin); g.subcats = [CATALOGO_NUEVO.robux_pin]; /* solo Robux PIN: se quitaron México y LATAM */ } });
 })();
 // Entrega de un producto (texto para la tarjeta y el pedido)
 function _jgEntrega(p, sc){ var e = (p && p.entrega) || (sc && sc.entrega) || ''; return e; }
@@ -18811,6 +18797,17 @@ function ckToast(m, d){ if(typeof showToast === 'function') showToast(m, d || 30
 function ckUUID(){ return (window.crypto && crypto.randomUUID) ? crypto.randomUUID().replace(/-/g, '') : ('cs' + Date.now().toString(36) + Math.random().toString(36).slice(2, 12)); }
 function ckHash32(s){ var h = 5381; for(var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
 
+/* Robux PIN: el código se muestra al cliente (y se queda en Mis Compras) con botón de copiar */
+function ckPinsHtml(i){
+  if(!i || i.grupo !== 'robux' || !i.codigos || !i.codigos.length) return '';
+  return '<div class="ck-pins">' + i.codigos.map(function(c){ return '<div class="ck-pin"><span>Tu código PIN</span><code>' + ckEsc(c) + '</code><button type="button" onclick="ckCopiarPin(this)" data-pin="' + ckEsc(c) + '">Copiar</button></div>'; }).join('') + '<small>Canjéalo en roblox.com/redeem. No lo compartas con nadie.</small></div>';
+}
+function ckCopiarPin(btn){
+  var t = btn.getAttribute('data-pin') || '', ok = function(){ var o = btn.textContent; btn.textContent = '¡Copiado!'; setTimeout(function(){ btn.textContent = o; }, 1600); };
+  try{ if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(ok, function(){ ckCopiarViejo(t, ok); }); return; } }catch(e){}
+  ckCopiarViejo(t, ok);
+}
+function ckCopiarViejo(t, ok){ try{ var a = document.createElement('textarea'); a.value = t; a.style.position = 'fixed'; a.style.opacity = '0'; document.body.appendChild(a); a.select(); document.execCommand('copy'); document.body.removeChild(a); ok(); }catch(e){} }
 function ckApi(action, extra, auth){
   var go = function(h){
     var body = Object.assign({ action: action }, extra || {});
@@ -18890,6 +18887,7 @@ function ckAbrir(clave){
   ckCargarCatalogo(true).then(function(){
     if(CK.offline){ ckCerrar(); ckToast(CK.offMsg, 5000); return; }
     if(!ckProd(clave)){ ckCerrar(); ckToast('Ese producto no está disponible por ahora'); return; }
+    if(ckProd(clave).grupo === 'robux'){ CK.stockT = 0; ckStockCargar(ckRender); return; }
     ckRender();
   }).catch(function(){ ckCerrar(); ckToast('No se pudo cargar el producto. Revisa tu conexión.', 4000); });
 }
@@ -18926,14 +18924,16 @@ function ckRender(){
   if(CK.fase === 'ok'){ ckRenderOk(); return; }
   var p = ckProd(CK.clave); if(!p) return;
   var pu = ckPU(p, CK.q), total = ckTotal(), saldo = ckSaldoAct(), resta = ckR2(saldo - total), falta = resta < 0;
-  var unidad = p.grupo === 'pase' ? 'pase' : 'paquete', unidades = p.grupo === 'pase' ? 'pases' : 'paquetes';
+  var unidad = p.grupo === 'pase' ? 'pase' : 'paquete', unidades = p.grupo === 'pase' ? 'pases' : 'paquetes', rbx = p.grupo === 'robux', agotado = rbx && !!CK.ag[p.clave];
   var h = '<div class="ck-wrap"><div class="ck-card"><button type="button" class="ck-x" onclick="ckCerrar()" aria-label="Cerrar">&times;</button>';
-  h += (CK.clave === 'pase_oferta' ? '<div class="ck-eye">Oferta exclusiva</div>' : '<div class="ck-eye" style="color:#6db3ff">' + (p.grupo === 'pase' ? 'Free Fire · Regalo' : 'Free Fire · Entrega automática') + '</div>');
+  h += (CK.clave === 'pase_oferta' ? '<div class="ck-eye">Oferta exclusiva</div>' : '<div class="ck-eye" style="color:#6db3ff">' + (rbx ? 'Roblox · Código PIN' : (p.grupo === 'pase' ? 'Free Fire · Regalo' : 'Free Fire · Entrega automática')) + '</div>');
   h += '<h2 class="ck-h" id="ck-title">' + ckEsc(p.nombre) + '</h2>';
   h += '<div class="ck-item">' + ckImg(p.img, p.nombre) + '<div class="ck-info"><b>' + ckEsc(p.nombre) + '</b><small>' + ckFmt(pu) + ' c/u</small>' + (pu < p.precio ? '<em>Precio de mayoreo</em>' : '') + '</div>'
     + '<div class="ck-qty"><button type="button" aria-label="Quitar uno" onclick="ckCant(-1)"' + (CK.q <= 1 || CK.busy ? ' disabled' : '') + '>&minus;</button><span>' + CK.q + '</span><button type="button" aria-label="Agregar uno" onclick="ckCant(1)"' + (CK.busy ? ' disabled' : '') + '>+</button></div>'
     + '<div class="ck-sub">' + ckFmt(total) + '</div></div>';
   if(p.mayoreo_min && p.mayoreo_precio) h += '<div class="ck-note" style="text-align:left;margin-top:.5rem">Mayoreo: desde ' + p.mayoreo_min + ' pases a ' + ckFmt(p.mayoreo_precio) + ' c/u.</div>';
+  if(rbx){ h += '<div class="ck-note" style="text-align:left;margin-top:.6rem">' + (agotado ? '<b style="color:#f5b43a">Sin stock por ahora.</b> ' : '') + 'Pagas con tu saldo y recibes tu <b>código PIN</b> aquí mismo y en Mis Compras. No pide usuario ni contraseña de Roblox. Código GLOBAL.</div>'; }
+  else {
   h += '<div class="ck-sec">¿A qué ID(s) lo mandamos?</div>';
   h += '<button type="button" class="ck-opt' + (CK.modo === 'mismo' ? ' sel' : '') + '" role="radio" aria-checked="' + (CK.modo === 'mismo') + '" onclick="ckModo(\'mismo\')"><span class="ck-dot"></span><span><b>Todos al mismo ID</b><small>Todos los ' + unidades + ' van a una sola cuenta.</small></span></button>';
   h += '<button type="button" class="ck-opt' + (CK.modo === 'diferentes' ? ' sel' : '') + '" role="radio" aria-checked="' + (CK.modo === 'diferentes') + '" onclick="ckModo(\'diferentes\')"><span class="ck-dot"></span><span><b>A diferentes IDs</b><small>Pon un ID distinto para cada ' + unidad + '.</small></span></button>';
@@ -18944,6 +18944,7 @@ function ckRender(){
     for(var i = 0; i < CK.q; i++) h += '<label class="ck-lbl" for="ck-id' + i + '">' + (p.grupo === 'pase' ? 'Pase ' : 'Paquete ') + (i + 1) + ' · ID de Free Fire *</label><input class="ck-in" id="ck-id' + i + '" inputmode="numeric" maxlength="15" autocomplete="off" placeholder="Ej: 123456789" value="' + ckEsc(CK.ids[i] || '') + '" oninput="ckIdInput(this,' + i + ')">';
     if(CK.q > 1) h += '<button type="button" class="ck-ver" onclick="ckCopiar1()">Copiar el primero a todos</button>';
   }
+  }
   h += '<div class="ck-sum"><div class="ck-row"><span>' + (p.grupo === 'pase' ? 'Pases' : 'Paquetes') + '</span><b>' + CK.q + '</b></div><div class="ck-row tot"><span>Total a pagar</span><b>' + ckFmt(total) + '</b></div></div>';
   h += '<div class="ck-sec">Método de pago</div>';
   h += '<div class="ck-pay">' + CK_IC.wallet + '<div><b>Saldo de mi cuenta</b><small>Paga tu compra utilizando el saldo disponible en CiberStore.</small></div><span class="ck-dot"></span></div>';
@@ -18953,8 +18954,8 @@ function ckRender(){
     var sinSaldo = CK.errSaldo || falta;
     h += '<div class="ck-err" id="ck-err" role="alert">' + (sinSaldo && !CK.err ? 'Necesitas saldo suficiente para esta compra. Te faltan ' + ckFmt(-resta) + '.' : ckEsc(CK.err)) + (sinSaldo ? '<br><button type="button" class="ck-rec" onclick="ckRecargar()">Recargar saldo</button>' : '') + '</div>';
   }
-  h += '<button type="button" class="ck-buy" id="ck-buy" onclick="ckComprar()"' + (CK.busy ? ' disabled' : '') + '>' + CK_IC.cart + '<span>' + (CK.busy ? 'Procesando tu compra…' : 'Comprar ahora') + '</span></button>';
-  h += '<div class="ck-note">' + (p.entrega === 'auto' ? 'Entrega automática: llega en minutos. ' : 'Entrega por regalo en el juego: hasta 1 día. ') + 'El cobro se valida en el servidor y no se cobra dos veces.</div>';
+  h += '<button type="button" class="ck-buy" id="ck-buy" onclick="ckComprar()"' + (CK.busy || agotado ? ' disabled' : '') + '>' + CK_IC.cart + '<span>' + (CK.busy ? 'Procesando tu compra…' : (agotado ? 'Sin stock' : 'Comprar ahora')) + '</span></button>';
+  h += '<div class="ck-note">' + (rbx ? 'Entrega automática: tu código aparece en segundos. ' : p.entrega === 'auto' ? 'Entrega automática: llega en minutos. ' : 'Entrega por regalo en el juego: hasta 1 día. ') + 'El cobro se valida en el servidor y no se cobra dos veces.</div>';
   h += '</div></div>';
   var ov = ckEl('ck-ov'), sc = ov.scrollTop; ov.innerHTML = h; ov.scrollTop = sc;
 }
@@ -18970,7 +18971,9 @@ function ckComprar(){
   if(CK.busy) return;
   if(typeof authSession === 'undefined' || !authSession){ ckToast('Inicia sesión para comprar'); return; }
   var items = ckItems(), bad = -1;
-  for(var i = 0; i < items.length; i++){ if(!/^\d{5,15}$/.test(items[i].ff_id)){ bad = i; break; } }
+  var _pr = ckProd(CK.clave), _rbx = !!(_pr && _pr.grupo === 'robux');
+  if(_rbx && CK.ag[CK.clave]){ CK.err = 'Este paquete está sin stock por ahora. Intenta más tarde.'; ckRender(); return; }
+  for(var i = 0; i < items.length && !_rbx; i++){ if(!/^\d{5,15}$/.test(items[i].ff_id)){ bad = i; break; } }
   if(bad >= 0){
     CK.err = CK.modo === 'mismo' ? 'Escribe tu ID de Free Fire (solo números, de 5 a 15 dígitos).' : 'Revisa el ID del ' + (ckProd(CK.clave).grupo === 'pase' ? 'pase ' : 'paquete ') + (bad + 1) + ' (solo números, de 5 a 15 dígitos).';
     ckRender(); var el = ckEl(CK.modo === 'mismo' ? 'ck-id' : 'ck-id' + bad); if(el){ el.classList.add('bad'); try{ el.scrollIntoView({ behavior:'smooth', block:'center' }); el.focus(); }catch(e){} } return;
@@ -19015,7 +19018,7 @@ function ckRenderOk(){
   h += '<p>Pedido <b style="color:#6db3ff">' + ckEsc(o.codigo) + '</b> · ' + ckFmt(o.total) + ' pagados con tu saldo</p>';
   h += '<p>Saldo restante: <b style="color:#22c55e">' + ckFmt(ckSaldoAct()) + '</b></p>';
   h += '<div class="ck-uni">' + o.items.map(function(i){ var f = CK_FASE[i.fase] || CK_FASE.recibido;
-    return '<div class="ck-u">' + ckImg(i.img, i.nombre) + '<div><b>' + ckEsc(i.nombre) + '</b><small>ID ' + ckEsc(i.ff_id) + '</small></div><span class="ck-chip ' + f[1] + '">' + f[0] + '</span></div>'; }).join('') + '</div>';
+    return '<div class="ck-u">' + ckImg(i.img, i.nombre) + '<div><b>' + ckEsc(i.nombre) + '</b><small>' + (i.grupo === 'robux' ? 'Código PIN' : 'ID ' + ckEsc(i.ff_id)) + '</small></div><span class="ck-chip ' + f[1] + '">' + f[0] + '</span></div>' + ckPinsHtml(i); }).join('') + '</div>';
   var rem = o.items.filter(function(i){ return i.fase === 'reembolsado'; }).length, ver = o.items.filter(function(i){ return i.fase === 'verificar'; }).length;
   if(rem) h += '<div class="ck-note" style="margin-top:.8rem;color:#f5b43a">↩ ' + rem + ' unidad(es) no se pudieron hacer y se devolvió su importe a tu saldo.' + (function(){ var m = o.items.filter(function(i){ return i.fase === 'reembolsado' && i.error; }).map(function(i){ return i.error; })[0]; return m ? '<br><small style="opacity:.8">Motivo: ' + ckEsc(String(m).slice(0, 220)) + '</small>' : ''; })() + '</div>';
   if(ver) h += '<div class="ck-note" style="margin-top:.5rem;color:#f5b43a">⏳ ' + ver + ' unidad(es) están en verificación con el equipo. No se cobra doble: si no llegan, se te reembolsan.</div>';
@@ -19031,7 +19034,7 @@ function ckRenderOk(){
 function ckStockCargar(cb){
   if(Date.now() - CK.stockT < 60000){ cb && cb(); return; }
   fetch((typeof RECARGA_AUTO_URL !== 'undefined' ? RECARGA_AUTO_URL : '/api/recarga'), { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'stock_regalos' }) }).then(function(r){ return r.json(); }).then(function(j){
-    if(j && j.ok && j.stock){ CK.stockT = Date.now(); (CK.cat || []).forEach(function(p){ if(p.entrega === 'auto') CK.ag[p.clave] = j.stock[p.clave.replace(/^c/, 'cj').replace(/^f/, 'fa')] === 'sin_stock'; }); }
+    if(j && j.ok && j.stock){ CK.stockT = Date.now(); CK.cant = j.cantidad || {}; CK.tot = j.total || {}; CK.rbxStock = j.robux || {}; (CK.cat || []).forEach(function(p){ if(p.grupo === 'robux') var v = CK.rbxStock[p.clave.replace('rbx_', 'rbx')]; CK.ag[p.clave] = !!v && v !== 'ok'; }); (CK.cat || []).forEach(function(p){ if(p.entrega === 'auto' && p.grupo !== 'robux') CK.ag[p.clave] = j.stock[p.clave.replace(/^c/, 'cj').replace(/^f/, 'fa')] === 'sin_stock'; }); }
     cb && cb();
   }).catch(function(){ cb && cb(); });
 }
@@ -19067,20 +19070,33 @@ function rg2Atras(){
   if(RG2.sel){ RG2.sel = null; RG2.abierto = true; rg2Cats(); return; }
   goPage('freefire'); setTimeout(function(){ if(typeof ffIrTienda === 'function') ffIrTienda(); }, 150);
 }
+/* Disponibilidad por producto: cantidad real si el proveedor la informa; si no, solo "En stock" */
+function ckDisp(p, ag){
+  if(p.entrega !== 'auto' || !CK.cant) return '';
+  var k = p.clave.replace(/^c/, 'cj').replace(/^f/, 'fa'), n = CK.cant[k];
+  if(ag) return '';
+  if(n === null || n === undefined) return '<small class="rg2-disp">En stock</small>';
+  return '<small class="rg2-disp">Disponibles: <b>' + Number(n).toLocaleString('es-MX') + '</b></small>';
+}
+function ckDispTotal(){
+  if(!CK.tot || (RG2.sel !== 'caja' && RG2.sel !== 'fragmento')) return '';
+  var t = CK.tot[RG2.sel]; if(t === null || t === undefined) return '';
+  return '<div class="rg2-tot">Total disponible: <b>' + Number(t).toLocaleString('es-MX') + (RG2.sel === 'caja' ? ' cajas' : ' fragmentos') + '</b></div>';
+}
 function ckPintarLista(){
   var c = ckEl('rg2-lista'); if(!c) return;
   var sec = { pase:'Pase Booyah', caja:'Cajas de Fragmentos Evo', fragmento:'Fragmentos de arma Evo' }, vistos = {}, h = '';
   (CK.cat || []).forEach(function(p){
-    if(p.clave === 'pase_oferta') return; /* la oferta exclusiva vive en el Inicio */
+    if(p.clave === 'pase_oferta' || p.grupo === 'robux') return; /* la oferta exclusiva vive en el Inicio; Robux se compra desde Gift cards → Roblox */
     if(RG2.sel && p.grupo !== RG2.sel) return;
     if(!vistos[p.grupo] && !RG2.sel){ vistos[p.grupo] = 1; h += '<div class="rg2-sec">' + sec[p.grupo] + '</div>'; }
     var ag = !!CK.ag[p.clave];
-    h += '<div class="rg2-card' + (ag ? ' ag' : '') + '">' + ckImg(p.img, p.nombre) + '<div class="i"><b>' + ckEsc(p.nombre) + '</b><small>' + ckEsc(p.detalle || '') + '</small><div class="p">' + (ag ? 'Sin stock' : (p.precio == null ? 'Precio no disponible' : ckFmt(p.precio))) + '</div>' + (p.mayoreo_min && !ag ? '<small style="color:#22c55e">Desde ' + p.mayoreo_min + ' pases: ' + ckFmt(p.mayoreo_precio) + ' c/u</small>' : '') + '</div>'
+    h += '<div class="rg2-card' + (ag ? ' ag' : '') + '">' + ckImg(p.img, p.nombre) + '<div class="i"><b>' + ckEsc(p.nombre) + '</b><small>' + ckEsc(p.detalle || '') + '</small><div class="p">' + (ag ? 'Sin stock' : (p.precio == null ? 'Precio no disponible' : ckFmt(p.precio))) + '</div>' + ckDisp(p, ag) + (p.mayoreo_min && !ag ? '<small style="color:#22c55e">Desde ' + p.mayoreo_min + ' pases: ' + ckFmt(p.mayoreo_precio) + ' c/u</small>' : '') + '</div>'
       + '<button type="button" class="rg2-buy" ' + (ag || p.precio == null ? 'disabled' : 'onclick="ckAbrir(\'' + ckEsc(p.clave) + '\')"') + '>Comprar</button></div>';
   });
   if(CK.sinBd) h = '<div class="ck-note" style="margin-bottom:.7rem;color:#ffd08a;border-color:rgba(255,184,77,.4)">Falta ejecutar <b>checkout_saldo.sql</b> en Supabase para poder pagar. Los productos y precios ya son los del servidor.' + (CK.diag ? '<br><small style="opacity:.85">Diagnóstico: ' + ckEsc(CK.diag) + '</small>' : '') + '</div>' + h;
   if(CK.offline) h = '<div class="ck-note" style="margin-bottom:.7rem;color:#ffd08a;border-color:rgba(255,184,77,.4)">' + ckEsc(CK.offMsg) + ' <button type="button" class="ck-ver" onclick="ckListaCargar()">Reintentar</button></div>' + h;
-  c.innerHTML = h || '<div class="ck-note">No hay productos disponibles por ahora.</div>';
+  c.innerHTML = (h ? ckDispTotal() : '') + h || '<div class="ck-note">No hay productos disponibles por ahora.</div>';
 }
 function ckListaCargar(){
   var c = ckEl('rg2-lista'); if(!c) return;
@@ -19337,7 +19353,7 @@ function mc2Hoja(h){ var o = mcEl('mc2-ov'); if(!o) return; if(o.parentNode !== 
 function mc2Cerrar(){ var o = mcEl('mc2-ov'); if(o){ o.classList.remove('on'); o.innerHTML = ''; } }
 function mcDl(a){ return '<dl class="mc2-dl">' + a.filter(function(x){ return x[1] != null && x[1] !== ''; }).map(function(x){ return '<dt>' + x[0] + '</dt><dd>' + x[1] + '</dd>'; }).join('') + '</dl>'; }
 function mcUnidades(o){
-  return '<div class="mc2-sc" style="padding:.5rem">' + o.items.map(function(i){ var f = MC_FASE[i.fase] || MC_FASE.recibido; return '<div class="mc2-mv" style="padding:.4rem .1rem">' + mcThumb({ img:i.img, n:i.nombre, ic:'box' }) + '<span class="mc2-mid"><b style="-webkit-line-clamp:1">' + mcEsc(i.nombre) + '</b><small>ID ' + mcEsc(i.ff_id) + ' · ' + mcFmt(i.precio) + '</small></span><span class="mc2-chip ' + f[1] + '">' + f[0] + '</span></div>'; }).join('') + '</div>';
+  return '<div class="mc2-sc" style="padding:.5rem">' + o.items.map(function(i){ var f = MC_FASE[i.fase] || MC_FASE.recibido; return '<div class="mc2-mv" style="padding:.4rem .1rem">' + mcThumb({ img:i.img, n:i.nombre, ic:'box' }) + '<span class="mc2-mid"><b style="-webkit-line-clamp:1">' + mcEsc(i.nombre) + '</b><small>' + (i.grupo === 'robux' ? 'Código PIN' : 'ID ' + mcEsc(i.ff_id)) + ' · ' + mcFmt(i.precio) + '</small></span><span class="mc2-chip ' + f[1] + '">' + f[0] + '</span></div>' + (typeof ckPinsHtml === 'function' ? ckPinsHtml(i) : ''); }).join('') + '</div>';
 }
 function mc2Detalle(lista, i){
   var o = null, p = null;
@@ -21126,19 +21142,23 @@ function sistemaDonut(R){
   var cls = v >= 99 ? 'ok' : (v >= 95 ? 'aviso' : 'mal');
   return '<div class="es-donut"><svg viewBox="0 0 130 130"><circle cx="65" cy="65" r="52" class="es-d0"/>' + (R.total ? '<circle cx="65" cy="65" r="52" class="es-d1 ' + cls + '" stroke-dasharray="' + (c * (v / 100)).toFixed(1) + ' ' + c.toFixed(1) + '" transform="rotate(-90 65 65)"/>' : '') + '</svg><div><b>' + (R.total ? esPct(R.disponibilidad) : '—') + '</b><small>Disponibilidad</small></div></div>';
 }
-function sistemaInv(nombre, ico, g){
+function sistemaInv(nombre, ico, g, unidad){
   var ESTL = { ok:['ok','EN STOCK'], parcial:['aviso','STOCK PARCIAL'], sin_stock:['error','AGOTADO'], no_disponible:['error','NO APARECE EN EL CATÁLOGO'], no_informado:['sin_datos','DISPONIBILIDAD NO INFORMADA POR EL PROVEEDOR'] };
   if(!g) return '<div class="es-card es-inv"><h4>' + ico + ' ' + esE(nombre) + '</h4><div class="es-nota">No se pudo consultar al proveedor todavía. Si el proveedor no responde, no se muestran cantidades inventadas.</div></div>';
-  var e = ESTL[g.estado] || ['sin_datos', g.estado], pc = g.total ? Math.round(g.disponibles / g.total * 100) : 0;
-  var chips = g.items.map(function(x){
-    var t = x.estado === 'ok' ? '✓' : (x.estado === 'sin_stock' ? '✗' : '?'), c = x.estado === 'ok' ? 'ok' : (x.estado === 'sin_stock' ? 'mal' : 'nd');
-    return '<span class="es-chip ' + c + '">' + t + ' ' + esE(x.nombre) + (x.cantidad != null ? ' · ' + Number(x.cantidad).toLocaleString('es-MX') : '') + (x.estado === 'sin_stock' ? ' · agotado' : (x.estado === 'no_disponible' ? ' · no aparece' : (x.estado === 'no_informado' ? ' · no informado' : ''))) + '</span>';
+  var e = ESTL[g.estado] || ['sin_datos', g.estado], pc = g.total ? Math.round(g.disponibles / g.total * 100) : 0, N = function(n){ return Number(n).toLocaleString('es-MX'); };
+  var filas = g.items.map(function(x){
+    var c = x.estado === 'ok' ? 'ok' : (x.estado === 'sin_stock' ? 'mal' : 'nd');
+    var cant = x.cantidad != null ? '<b>' + N(x.cantidad) + '</b> disp.' : (x.estado === 'sin_stock' ? '<b>0</b> · agotado' : (x.estado === 'ok' ? 'en stock · cantidad no informada' : (x.estado === 'no_disponible' ? 'no aparece' : 'no informado')));
+    return '<div class="es-it ' + c + '"><span>' + (x.estado === 'ok' ? '✓' : (x.estado === 'sin_stock' ? '✗' : '?')) + ' ' + esE(x.nombre) + '</span><span>' + cant + '</span></div>';
   }).join('');
+  var tot;
+  if(g.informadas){
+    tot = '<div class="es-tot"><span>Total disponible</span><b>' + N(g.equivalente) + ' ' + esE(unidad || 'unidades') + '</b></div>'
+      + (g.equivalente_completo ? '' : '<div class="es-nota">Solo ' + g.informadas + ' de ' + g.total + ' presentaciones traen cantidad: el total es lo mínimo que hay.</div>');
+  } else tot = '<div class="es-cant"><span>Cantidad exacta: no informada por el proveedor</span></div>';
   return '<div class="es-card es-inv"><h4>' + ico + ' ' + esE(nombre) + '</h4>' + esPill(e[0], e[1])
     + '<div class="es-meter"><i class="' + e[0] + '" style="width:' + pc + '%"></i></div>'
-    + '<div class="es-nota">' + g.disponibles + ' de ' + g.total + ' presentaciones disponibles</div>'
-    + '<div class="es-cant">' + (g.cantidad != null ? '<b>' + Number(g.cantidad).toLocaleString('es-MX') + '</b> unidades en existencia' : '<span>Cantidad exacta: no informada por el proveedor</span>') + '</div>'
-    + '<div class="es-chips">' + chips + '</div></div>';
+    + '<div class="es-nota">' + g.disponibles + ' de ' + g.total + ' presentaciones disponibles</div>' + tot + '<div class="es-its">' + filas + '</div></div>';
 }
 function sistemaPintar(){
   var s = document.getElementById('adms-sistema'), d = ESIS.d; if(!s || !d) return;
@@ -21166,7 +21186,8 @@ function sistemaPintar(){
     ['⚠️', 'Advertencias del proveedor', C.advertencias, esPct(R.aviso_pct), 'lentitud, stock agotado o saldo bajo']];
   h += '<div class="es-card"><h4>🧮 Resumen de incidencias <small>(24 h)</small></h4>' + cat.map(function(x){ return '<div class="es-row"><span>' + x[0] + ' ' + esE(x[1]) + '<small class="es-nota"> · ' + esE(x[4]) + '</small></span><span><b>' + esE(x[2]) + '</b> <small>' + esE(x[3]) + '</small></span></div>'; }).join('') + '</div>';
   // Inventario
-  h += '<h4 class="es-sec">📦 Inventario del proveedor</h4><div class="es-3">' + sistemaInv('Diamantes', '💎', d.inventario && d.inventario.diamantes) + sistemaInv('Cajas', '📦', d.inventario && d.inventario.cajas) + sistemaInv('Fragmentos', '🔫', d.inventario && d.inventario.fragmentos) + '</div>';
+  h += '<h4 class="es-sec">📦 Inventario del proveedor</h4><div class="es-3">' + sistemaInv('Diamantes', '💎', d.inventario && d.inventario.diamantes) + sistemaInv('Cajas', '📦', d.inventario && d.inventario.cajas, 'cajas') + sistemaInv('Fragmentos', '🔫', d.inventario && d.inventario.fragmentos, 'fragmentos') + '</div>';
+  if(d.inventario && d.inventario.muestra){ var mm = d.inventario.muestra; h += '<details class="es-card es-regs"><summary>🔎 Datos que manda el proveedor <small>(para saber si trae cantidades)</small></summary><div class="es-nota">Estos son los campos de un producto de Cajas/Fragmentos tal como los envía Central One. Si ninguno es una cantidad (stock, available, quantity…), el proveedor solo informa "hay / no hay".</div>' + Object.keys(mm).map(function(k){ return '<div class="es-reg"><b>' + esE(k) + '</b><span>' + esE(String(mm[k])) + '</span></div>'; }).join('') + '</details>'; }
   if(d.saldo){ h += '<div class="es-card es-saldo"><span>💳 Saldo disponible con el proveedor</span><b class="' + (d.saldo.pausa ? 'mal' : '') + '">US$ ' + Number(d.saldo.disponible).toFixed(2) + '</b><small class="es-nota">Mínimo de seguridad US$ ' + Number(d.saldo.umbral).toFixed(2) + (d.saldo.pausa ? ' · compras automáticas en pausa' : '') + '</small></div>'; }
   // APIs
   h += '<h4 class="es-sec">🔌 Estado de APIs</h4><div class="es-card es-apis">' + d.servicios.map(function(x){
@@ -21188,4 +21209,59 @@ function sistemaPintar(){
     + '<div class="es-nota">El servidor solo consulta a los proveedores cuando pasó la frecuencia elegida; abrir varias pestañas o tocar ⟳ de seguido no genera más solicitudes. Para que el historial se llene también cuando nadie tiene el panel abierto, se puede usar un monitor externo gratuito (ver instrucciones).</div></div>';
   h += '</div>';
   s.innerHTML = h;
+}
+/* ═══════════ PANEL ADMIN · PRECIOS DE DIAMANTES ═══════════
+   Cambias el precio de cada paquete aquí; se guarda en la base de datos (vip_precios) y la tienda lo toma al instante
+   (el servidor es quien cobra: el navegador no puede cambiar el monto). Precio único para todos. */
+var PRD = { filas:[], busy:false };
+function prdE(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function prdMXN(n){ return '$' + Number(n || 0).toLocaleString('es-MX', { minimumFractionDigits:2, maximumFractionDigits:2 }); }
+function prdCosto(pkg){ var c = null; try{ RECARGAS_AUTO.forEach(function(r){ if(Number(r.package_id) === Number(pkg) && r.costoUSD) c = r.costoUSD; }); }catch(e){} return c; }
+function prdFH(iso){ if(!iso) return '—'; try{ return new Date(iso).toLocaleString('es-MX', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', hour12:false, timeZone:'America/Mexico_City' }); }catch(e){ return '—'; } }
+function preciosAdmCargar(){
+  var s = document.getElementById('adms-precios'); if(!s) return;
+  s.innerHTML = '<div class="prd-wrap"><div class="prd-nota">Precio único para todos los clientes. Aplica a las compras nuevas; los pedidos anteriores conservan el precio con el que se cobraron.</div><div id="prd-body" class="prd-v">Cargando…</div></div>';
+  vipAdmApi('admin_precios').then(function(r){
+    var b = document.getElementById('prd-body'); if(!b) return;
+    if(!r || !r.ok){ if(r && r.code === 'sesion_invalida'){ return; } b.innerHTML = '<div class="prd-err">' + prdE((r && r.message) || 'No se pudo cargar') + (r && r.code === 'sin_vip' ? '' : '') + '</div>'; return; }
+    PRD.filas = r.precios || [];
+    if(!PRD.filas.length){ b.innerHTML = '<div class="prd-err">No hay paquetes en la base de datos. Ejecuta vip.sql en Supabase.</div>'; return; }
+    var rate = (typeof USD_MXN !== 'undefined' && USD_MXN > 0) ? USD_MXN : 0;
+    b.className = '';
+    b.innerHTML = PRD.filas.map(function(p){
+      var costo = prdCosto(p.package_id), cmx = costo && rate ? costo * rate : null;
+      return '<div class="prd-c" data-pk="' + p.package_id + '"><div class="prd-top"><b>' + prdE(Number(p.diamantes).toLocaleString('es-MX')) + ' 💎</b><small>' + prdE(p.nombre) + ' · ID ' + p.package_id + '</small></div>'
+        + '<div class="prd-row"><label>Precio de venta (MXN)<input id="prd-' + p.package_id + '" type="number" inputmode="decimal" step="0.01" min="0.01" value="' + Number(p.precio_cliente).toFixed(2) + '" oninput="prdMargen(' + p.package_id + ')"></label>'
+        + '<div class="prd-g"><span>Costo proveedor</span><b>' + (costo ? 'US$ ' + Number(costo).toFixed(2) + (cmx ? ' ≈ ' + prdMXN(cmx) : '') : '—') + '</b><span>Ganancia estimada</span><b id="prd-m-' + p.package_id + '" data-c="' + (cmx || '') + '"></b><span>Actualizado</span><b>' + prdE(prdFH(p.actualizada)) + '</b></div></div></div>';
+    }).join('') + '<div class="prd-fl"><button type="button" class="prd-go" id="prd-save" onclick="prdGuardar()">Guardar todos los precios</button></div><div id="prd-msg" class="prd-nota"></div>'
+      + '<div class="prd-nota">La ganancia es una estimación con el tipo de cambio del día; el costo real lo cobra Central One.</div>';
+    PRD.filas.forEach(function(p){ prdMargen(p.package_id); });
+  });
+}
+function prdMargen(pk){
+  var inp = document.getElementById('prd-' + pk), m = document.getElementById('prd-m-' + pk); if(!inp || !m) return;
+  var c = Number(m.getAttribute('data-c')), v = Number(inp.value);
+  if(!(c > 0) || !(v > 0)){ m.textContent = '—'; m.className = ''; return; }
+  var g = v - c; m.textContent = prdMXN(g) + ' (' + Math.round(g / v * 1000) / 10 + '%)'; m.className = g < 0 ? 'prd-mal' : 'prd-bien';
+}
+function prdGuardar(){
+  if(PRD.busy) return;
+  var lista = [], mal = [];
+  PRD.filas.forEach(function(p){ var v = Number((document.getElementById('prd-' + p.package_id) || {}).value); if(!(v > 0)){ mal.push(p.diamantes); return; } if(Math.abs(v - Number(p.precio_cliente)) > 0.004) lista.push({ package_id:p.package_id, precio:Math.round(v * 100) / 100, d:p.diamantes }); });
+  var msg = document.getElementById('prd-msg');
+  if(mal.length){ if(msg) msg.textContent = '✗ Revisa el precio de: ' + mal.join(', ') + ' (debe ser mayor a 0).'; return; }
+  if(!lista.length){ if(msg) msg.textContent = 'No cambiaste ningún precio.'; return; }
+  var neg = lista.filter(function(x){ var m = document.getElementById('prd-m-' + x.package_id); var c = m && Number(m.getAttribute('data-c')); return c > 0 && x.precio < c; });
+  if(neg.length && !confirm('⚠️ Estos precios quedan POR DEBAJO del costo estimado: ' + neg.map(function(x){ return x.d; }).join(', ') + '. ¿Guardar así?')) return;
+  if(!confirm('¿Guardar ' + lista.length + ' precio(s) nuevo(s)? Se aplican de inmediato a las compras nuevas.')) return;
+  PRD.busy = true; var bt = document.getElementById('prd-save'); if(bt) bt.disabled = true;
+  vipAdmApi('admin_precios_guardar', { precios:lista.map(function(x){ return { package_id:x.package_id, precio:x.precio }; }) }).then(function(r){
+    PRD.busy = false; if(bt) bt.disabled = false; msg = document.getElementById('prd-msg');
+    if(r && r.ok){
+      // la tienda de este navegador también toma el precio nuevo
+      try{ lista.forEach(function(x){ RECARGAS_AUTO.forEach(function(a){ if(Number(a.package_id) === Number(x.package_id)){ a.precioMXN = x.precio; a.precio = x.precio; } }); }); }catch(e){}
+      if(typeof showToast === 'function') showToast('Precios guardados', 3000);
+      preciosAdmCargar();
+    } else if(msg){ msg.textContent = '✗ ' + ((r && r.message) || 'No se pudo guardar'); }
+  });
 }
