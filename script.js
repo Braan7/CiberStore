@@ -20796,7 +20796,15 @@ function gananciasCargar(){
 /* ═══════════ VENTA DE CUENTAS ═══════════
    Clientes: ver cuentas, "Me interesa" por WhatsApp, vender (con revisión), editar, marcar vendida, borrar.
    Administrador: pestaña "Cuentas" del panel (aprobar, rechazar, ocultar, vendida, borrar, publicar directo). Servidor: /api/comprar (cuentas_*). */
-var CV = { lista:[], mias:[], cargado:false, fotos:[], editId:null, admin:false, enviando:false };
+var CV = { lista:[], mias:[], cargado:false, fotos:[], slots:[null,null,null,null,null], slot:0, editId:null, admin:false, enviando:false };
+/* Las 3 capturas obligatorias resumen TODA la cuenta; las otras 2 son opcionales */
+var CV_SLOTS = [
+  { t:'1 · Perfil de la cuenta', h:'Pantalla principal: nombre, nivel, rango, diamantes y monedas.' },
+  { t:'2 · Personajes y ropa', h:'Tus personajes, skins de ropa y mascotas.' },
+  { t:'3 · Armas y colección', h:'Skins de armas, vehículos, emotes, pase élite o paquetes.' },
+  { t:'Extra (opcional)', h:'Otra captura que ayude a ver más cosas.' },
+  { t:'Extra (opcional)', h:'Otra captura que ayude a ver más cosas.' }
+];
 var CV_VINC = ['Facebook','Google','Apple','VK','X (Twitter)','Huawei','Sin vincular','Otra'];
 var CV_EST = { revision:'En revisión', publicada:'Publicada', rechazada:'Rechazada', vendida:'Vendida', oculta:'Oculta' };
 function cvE(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
@@ -20956,7 +20964,7 @@ function cvVendida(id){
 }
 
 /* ── Formulario: vender / editar ── */
-function cvVender(adm){ if(!adm && !cvLogin()) return; CV.admin = !!adm; CV.editId = null; CV.fotos = []; cvForm(null); }
+function cvVender(adm){ if(!adm && !cvLogin()) return; CV.admin = !!adm; CV.editId = null; CV.fotos = []; CV.slots = [null,null,null,null,null]; cvForm(null); }
 function cvEditar(id){ var x = CV.mias.filter(function(m){ return m.id === id; })[0]; if(!x) return; CV.admin = false; CV.editId = id; CV.fotos = []; cvForm(x); }
 function cvForm(x){
   var ed = !!x;
@@ -20967,7 +20975,7 @@ function cvForm(x){
     + (CV.admin ? '' : '<label for="cvf-w">Tu WhatsApp (solo lo ve la administración)</label><input type="text" id="cvf-w" inputmode="tel" autocomplete="tel" maxlength="20" placeholder="Ej: 55 1234 5678" value="' + cvE(x ? (x.contacto || '') : '') + '"/><small class="cv-ct" style="text-align:left">Nunca se muestra a los compradores: la administración te escribe cuando alguien se interese.</small>')
     + '<label for="cvf-d">Descripción</label><textarea id="cvf-d" maxlength="1500" placeholder="Nivel, rango, skins, personajes, diamantes, pase élite… Cuanto más detalle, mejor." oninput="cvCont()">' + cvE(x ? x.descripcion : '') + '</textarea><small class="cv-ct" id="cvf-c">0 / 1500</small>'
     + (ed ? '<div class="cv-seg">Al guardar los cambios la cuenta vuelve a revisión. Las fotos no se pueden cambiar: si necesitas otras, borra la cuenta y súbela de nuevo.</div>'
-      : '<label>Fotos (de 1 a 5)</label><div class="cv-fts" id="cvf-f"></div><input type="file" id="cvf-file" accept="image/*" multiple style="display:none" onchange="cvFotos(this)"/>')
+      : '<label>Capturas de la cuenta (' + (CV.admin ? 'mínimo 1' : '3 obligatorias') + ')</label><div class="cv-guia">Resume <b>todo lo que tiene la cuenta en 3 capturas</b> para que el comprador lo vea completo. Usa capturas completas, sin recortar ni editar, y con buena luz.</div><div class="cv-slots" id="cvf-f"></div><input type="file" id="cvf-file" accept="image/*" style="display:none" onchange="cvFotoSlot(this)"/>')
     + (ed || CV.admin ? '' : '<label class="cv-chk"><input type="checkbox" id="cvf-ok"/><span>He leído y acepto el <a href="#" onclick="cvReglamento();return false">reglamento de compra y venta</a>. Confirmo que la cuenta es mía y que puedo venderla, y entiendo que CiberStore la revisa antes de publicarla y puede rechazarla.</span></label>')
     + '<div class="cv-er" id="cvf-e"></div><button type="button" class="cv-go" id="cvf-go" onclick="cvEnviar()">' + (ed ? 'Guardar cambios' : (CV.admin ? 'Publicar ahora' : 'Enviar a revisión')) + '</button></div>');
   cvCont(); if(!ed) cvPintarFotos();
@@ -20975,9 +20983,20 @@ function cvForm(x){
 function cvCont(){ var d = document.getElementById('cvf-d'), c = document.getElementById('cvf-c'); if(d && c) c.textContent = d.value.length + ' / 1500'; }
 function cvPintarFotos(){
   var f = document.getElementById('cvf-f'); if(!f) return;
-  f.innerHTML = CV.fotos.map(function(u, i){ return '<div class="cv-ft"><img src="' + u + '" alt=""/><button type="button" onclick="cvQuitarFoto(' + i + ')">✕</button></div>'; }).join('') + (CV.fotos.length < 5 ? '<button type="button" class="cv-add" onclick="document.getElementById(\'cvf-file\').click()">＋</button>' : '');
+  f.innerHTML = CV_SLOTS.map(function(sl, i){
+    var u = CV.slots[i], req = i < 3 && !CV.admin;
+    return '<div class="cv-slot' + (u ? ' ok' : '') + '" onclick="cvSlotElegir(' + i + ')" role="button" tabindex="0">'
+      + (u ? '<img src="' + u + '" alt=""/>' : '<span class="cv-sl-add">＋</span>')
+      + '<span class="cv-sl-t"><b>' + cvE(sl.t) + (req ? ' *' : '') + '</b><small>' + cvE(sl.h) + '</small></span>'
+      + (u ? '<button type="button" class="cv-sl-x" aria-label="Quitar" onclick="event.stopPropagation();cvQuitarSlot(' + i + ')">✕</button>' : '') + '</div>';
+  }).join('');
 }
-function cvQuitarFoto(i){ CV.fotos.splice(i, 1); cvPintarFotos(); }
+function cvSlotElegir(i){ CV.slot = i; var f = document.getElementById('cvf-file'); if(f) f.click(); }
+function cvQuitarSlot(i){ CV.slots[i] = null; cvPintarFotos(); }
+function cvFotoSlot(inp){
+  var f = inp.files && inp.files[0]; inp.value = ''; cvError(''); if(!f) return; var i = CV.slot;
+  cvComprimir(f).then(function(u){ CV.slots[i] = u; cvPintarFotos(); }, function(){ cvError('No se pudo leer la foto. Usa JPG o PNG.'); });
+}
 function cvError(t){ var e = document.getElementById('cvf-e'); if(e){ e.textContent = t || ''; e.style.display = t ? 'block' : 'none'; } }
 // Reduce cada foto en el teléfono (máx. 1100 px, JPEG) para que suba rápido y pese poco
 function cvComprimir(file){
@@ -20985,7 +21004,7 @@ function cvComprimir(file){
     var url = URL.createObjectURL(file), im = new Image();
     im.onload = function(){
       try{
-        var lado = 1100, w = im.naturalWidth, h = im.naturalHeight, k = Math.min(1, lado / Math.max(w, h)), q = 0.74, out;
+        var lado = 1280, w = im.naturalWidth, h = im.naturalHeight, k = Math.min(1, lado / Math.max(w, h)), q = 0.74, out;
         var cv = document.createElement('canvas'); cv.width = Math.max(1, Math.round(w * k)); cv.height = Math.max(1, Math.round(h * k));
         cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
         out = cv.toDataURL('image/jpeg', q);
@@ -20997,18 +21016,17 @@ function cvComprimir(file){
     im.src = url;
   });
 }
-function cvFotos(inp){
-  var fs = Array.prototype.slice.call(inp.files || []); inp.value = ''; cvError('');
-  var libres = 5 - CV.fotos.length; if(fs.length > libres){ fs = fs.slice(0, libres); cvError('Solo caben 5 fotos.'); }
-  fs.reduce(function(p, f){ return p.then(function(){ return cvComprimir(f).then(function(u){ CV.fotos.push(u); cvPintarFotos(); }, function(){ cvError('No se pudo leer una de las fotos. Usa JPG o PNG.'); }); }); }, Promise.resolve());
-}
 function cvEnviar(){
   if(CV.enviando) return; cvError('');
   var t = document.getElementById('cvf-t').value.trim(), p = Number(document.getElementById('cvf-p').value), v = document.getElementById('cvf-v').value, d = document.getElementById('cvf-d').value.trim(), ed = !!CV.editId;
   if(t.length < 4){ cvError('Escribe un título de al menos 4 letras.'); return; }
   if(!(p > 0)){ cvError('Escribe el precio en pesos mexicanos.'); return; }
   var wl = (document.getElementById('cvf-w') || { value:'' }).value.replace(/\D/g, '').length; if(document.getElementById('cvf-w') && (wl < 10 || wl > 15)){ cvError('Escribe tu número de WhatsApp (10 dígitos, o con lada de tu país).'); return; }
-  if(!ed && !CV.fotos.length){ cvError('Sube al menos 1 foto de la cuenta.'); return; }
+  if(!ed){
+    CV.fotos = CV.slots.filter(Boolean);
+    if(CV.admin){ if(!CV.fotos.length){ cvError('Sube al menos 1 foto de la cuenta.'); return; } }
+    else { for(var q = 0; q < 3; q++){ if(!CV.slots[q]){ cvError('Falta la captura ' + CV_SLOTS[q].t + '. Son 3 obligatorias para que el comprador vea toda la cuenta.'); var sl = document.querySelectorAll('.cv-slot')[q]; if(sl && sl.scrollIntoView) sl.scrollIntoView({behavior:'smooth', block:'center'}); return; } } }
+  }
   var ok = document.getElementById('cvf-ok'); if(ok && !ok.checked){ cvError('Acepta el reglamento y confirma que la cuenta es tuya para continuar.'); return; }
   var btn = document.getElementById('cvf-go'); CV.enviando = true; btn.disabled = true; btn.textContent = ed ? 'Guardando…' : 'Subiendo fotos…';
   var wEl = document.getElementById('cvf-w'), w = wEl ? wEl.value.trim() : '';

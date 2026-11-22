@@ -293,7 +293,7 @@ async function cvBorrarFotos(urls){
 }
 async function cvCrear(owner, b, admin){
   const d = cvDatos(b, !admin); if(d.error) return { ok: false, code: 'datos', message: d.error };
-  const fotos = Array.isArray(b.fotos) ? b.fotos.slice(0, 5) : []; if(!fotos.length) return { ok: false, code: 'fotos', message: 'Sube al menos 1 foto de la cuenta' };
+  const fotos = Array.isArray(b.fotos) ? b.fotos.slice(0, 5) : []; if(fotos.length < (admin ? 1 : 3)) return { ok: false, code: 'fotos', message: admin ? 'Sube al menos 1 foto de la cuenta' : 'Sube las 3 capturas de la cuenta (perfil, personajes y armas/colección)' };
   const r = await rest('cuentas_venta', { method: 'POST', headers: { Prefer: 'return=representation' }, body: J({ user_id: admin ? null : String(owner.id), username: admin ? 'CiberStore' : owner.username, propia: !!admin, titulo: d.titulo, descripcion: d.descripcion || null, precio: d.precio, vinculacion: d.vinculacion, contacto: d.contacto || null, estado: admin ? 'publicada' : 'revision' }) });
   const fila = Array.isArray(r.json) ? r.json[0] : null;
   if(r.status >= 400 || !fila) return { ok: false, code: 'db', message: 'Falta ejecutar cuentas.sql en Supabase' };
