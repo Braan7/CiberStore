@@ -89,7 +89,7 @@ function faseItem(i, ped){
 function armar(o, items, peds){
   const its = items.filter(i => i.orden_id === o.id).map(i => {
     const p = i.pedido_id ? peds[String(i.pedido_id)] : null;
-    return { id: i.id, clave: i.clave, nombre: i.nombre, grupo: i.grupo, img: i.img, entrega: i.entrega, precio: Number(i.precio), ff_id: i.ff_id, estado: i.estado, fase: faseItem(i, p), error: i.error || null, actualizada: i.actualizada, codigos: (i.grupo === 'robux' && i.proveedor && Array.isArray(i.proveedor.codigos) && i.proveedor.codigos.length) ? i.proveedor.codigos : null };
+    return { id: i.id, clave: i.clave, nombre: i.nombre, grupo: i.grupo, img: i.img, entrega: i.entrega, precio: Number(i.precio), ff_id: i.ff_id, estado: i.estado, fase: faseItem(i, p), error: i.error || null, actualizada: i.actualizada, ref: i.ref_rbx || null, codigos: (i.grupo === 'robux' && i.proveedor && Array.isArray(i.proveedor.codigos) && i.proveedor.codigos.length) ? i.proveedor.codigos : null };
   });
   const act = its.filter(i => i.fase !== 'reembolsado'), ent = act.filter(i => i.fase === 'entregado').length;
   let fase = 'recibido';
@@ -110,7 +110,15 @@ async function cargarOrdenes(filtro, extra){
   const ri = await rest('ordenes_saldo_items?orden_id=in.(' + ids + ')&order=id.asc&limit=2000'); const items = Array.isArray(ri.json) ? ri.json : [];
   const pids = Array.from(new Set(items.filter(i => i.pedido_id).map(i => String(i.pedido_id)))).filter(x => /^[0-9a-zA-Z-]{1,64}$/.test(x)), peds = {};
   if(pids.length){ const rp = await rest('pedidos?id=in.(' + pids.join(',') + ')&select=id,estado&limit=2000'); (Array.isArray(rp.json) ? rp.json : []).forEach(p => { peds[String(p.id)] = p; }); }
+  if(items.some(i => i.grupo === 'robux')){   // referencia por venta de Robux: CS-RBX-001, 002… (por orden de compra)
+    const rk = await rest('ordenes_saldo_items?grupo=eq.robux&select=id&order=id.asc&limit=20000'), pos = {};
+    (Array.isArray(rk.json) ? rk.json : []).forEach((x, n) => { pos[x.id] = n + 1; });
+    items.forEach(i => { if(i.grupo === 'robux' && pos[i.id]) i.ref_rbx = 'CS-RBX-' + String(pos[i.id]).padStart(3, '0'); });
+  }
   return { os, items, peds };
+}
+async function refRbx(itemId){
+  try{ const rk = await rest('ordenes_saldo_items?grupo=eq.robux&id=lte.' + Number(itemId) + '&select=id&limit=20000'); const n = Array.isArray(rk.json) ? rk.json.length : 0; return n ? 'CS-RBX-' + String(n).padStart(3, '0') : ''; }catch(e){ return ''; }
 }
 const snapshot = async id => { const x = await cargarOrdenes('id=eq.' + Number(id)); return x.error || !x.os.length ? null : armar(x.os[0], x.items, x.peds); };
 
@@ -405,9 +413,30 @@ module.exports = async function handler(req, res){
             telegram('↩️ <b>OS' + it.orden_id + ' · unidad reembolsada después de marcarse completada</b>\n🎁 ' + esc(it.nombre) + ' → ID ' + esc(it.ff_id) + '\nEl proveedor devolvió el saldo. Por: ' + esc(adm));
             return enviar(res, { ok: true });
           }
+          {   // Robux PIN: si el proveedor SÍ lo entregó, no se reembolsa (se pone el código con "Poner código PIN")
+            const rg = await rest('ordenes_saldo_items?id=eq.' + id + '&select=grupo,proveedor'), g0 = Array.isArray(rg.json) && rg.json[0], opv = g0 && g0.proveedor && g0.proveedor.order_id;
+            if(g0 && g0.grupo === 'robux' && opv && b.forzar !== true){
+              const pr = await llamarProveedor({ action: 'estado', order_id: opv }, req);
+              if(pr && pr.success && pr.status === 'COMPLETED') return enviar(res, { ok: false, code: 'entregada', message: 'Central One SÍ entregó ese Robux (cobró el costo). No lo reembolses: usa "Poner código PIN" con el código que ves en Central One.' });
+            }
+          }
           const r = await rpc('checkout_item_resultado', { p_item: id, p_estado: 'rechazada', p_ref: null, p_error: 'Reembolsada por ' + adm });
           if(r.status >= 400) return enviar(res, { ok: false, code: 'db', message: 'No se pudo reembolsar: ' + msgErr(r) });
           await pedidoEstado(it.pedido_id, 'rechazado', 'Reembolsado a tu saldo');
+          return enviar(res, { ok: true });
+        }
+        if(b.accion === 'codigo'){
+          // Robux PIN que el proveedor entregó pero cuyo código no se pudo leer: el admin lo escribe y el cliente lo ve en Mis Compras
+          if(it.estado === 'reembolsada') return enviar(res, { ok: false, code: 'ya', message: 'Esa unidad ya fue reembolsada: el cliente ya tiene su dinero de vuelta.' });
+          const cod = String(b.codigo || '').trim();
+          if(cod.length < 6 || cod.length > 200 || /\s{2,}/.test(cod)) return enviar(res, { ok: false, code: 'codigo', message: 'Escribe el código completo (6 a 200 caracteres).' });
+          const rg = await rest('ordenes_saldo_items?id=eq.' + id + '&select=grupo,proveedor'), g0 = Array.isArray(rg.json) && rg.json[0];
+          if(!g0 || g0.grupo !== 'robux') return enviar(res, { ok: false, code: 'grupo', message: 'Solo se puede poner código en unidades de Robux PIN.' });
+          const ref2 = Object.assign({}, g0.proveedor || {}, { codigos: [cod], manual: adm });
+          const r = await rpc('checkout_item_resultado', { p_item: id, p_estado: 'completada', p_ref: ref2, p_error: null });
+          if(r.status >= 400) return enviar(res, { ok: false, code: 'db', message: 'No se pudo guardar: ' + msgErr(r) });
+          await pedidoEstado(it.pedido_id, 'completado');
+          telegram('✅ <b>OS' + it.orden_id + ' · código entregado a mano</b>\n🎁 ' + esc(it.nombre) + '\nPor: ' + esc(adm));
           return enviar(res, { ok: true });
         }
         if(b.accion === 'entregada'){
@@ -587,6 +616,7 @@ module.exports = async function handler(req, res){
       if(rc.status >= 400 || !rc.json) return enviar(res, { ok: false, code: 'db', message: 'No se pudo continuar la entrega' });
       const item = rc.json.item;
       if(item){
+        const rfx = /^rbx/.test(String(item.srv || '')) ? await refRbx(item.id) : '';
         const ped = await (async () => { const ri = await rest('ordenes_saldo_items?id=eq.' + item.id + '&select=pedido_id'); return Array.isArray(ri.json) && ri.json[0] ? ri.json[0].pedido_id : null; })();
         const llave = 'cs-os' + oid + '-' + item.id;
         const pr = await llamarProveedor({ action: 'comprar', producto: item.srv, player_id: item.ff_id, client_name: p.username, idempotency_key: llave }, req);
@@ -609,8 +639,8 @@ module.exports = async function handler(req, res){
         } else {
           await pedidoEstado(ped, PEDIDO_EST[est] || 'procesando', est === 'rechazada' ? 'Reembolsado a tu saldo: ' + (err || '') : (est === 'verificar' ? 'En verificación por el equipo' : null));
           if(est === 'rechazada') telegram('↩️ <b>OS' + oid + ' · unidad rechazada y reembolsada</b>\n👤 ' + esc(p.username) + '\n🎁 ' + esc(item.nombre) + ' → ID ' + esc(item.ff_id) + '\n❗ ' + esc(err));
-          if(est === 'verificar' && ref && ref.forma) telegram('🔎 <b>OS' + oid + ' · formato que mandó Central One (sin códigos)</b>\n<code>' + esc(String(ref.forma).slice(0, 900)) + '</code>\nPásaselo a tu desarrollador para que el código se lea solo.');
-          if(est === 'verificar') telegram('🚨 <b>OS' + oid + ' · VERIFICAR a mano</b>\n👤 ' + esc(p.username) + '\n🎁 ' + esc(item.nombre) + ' → ID ' + esc(item.ff_id) + '\n❗ ' + esc(err) + '\n🔑 ' + llave + '\nNo se reembolsó: revisa con el proveedor y resuélvelo en el panel (Órdenes con saldo).');
+          if(est === 'verificar' && ref && ref.forma) telegram('🔎 <b>OS' + oid + ' · formato que mandó Central One (sin códigos)</b>\n<code>' + esc(String(ref.forma).slice(0, 2600)) + '</code>\nPásaselo a tu desarrollador para que el código se lea solo.');
+          if(est === 'verificar') telegram('🚨 <b>OS' + oid + ' · VERIFICAR a mano</b>\n👤 ' + esc(p.username) + '\n🎁 ' + esc(item.nombre) + (rfx ? ' · <b>' + rfx + '</b>' : ' → ID ' + esc(item.ff_id)) + '\n❗ ' + esc(err) + '\n🔑 ' + llave + '\nNo se reembolsó: revisa con el proveedor y resuélvelo en el panel (Órdenes con saldo).');
           if(est === 'enviada' || est === 'completada') telegram('⚡ <b>OS' + oid + ' · entrega automática ' + (est === 'completada' ? '✅ completada' : '⏳ en proceso') + '</b>\n👤 ' + esc(p.username) + '\n🎁 ' + esc(item.nombre) + ' → ID ' + esc(item.ff_id) + (ref && ref.via ? '\n📡 ' + esc(ref.via) : '') + gananciaTxt(item.precio, pr && pr.costo_usd));
         }
       }

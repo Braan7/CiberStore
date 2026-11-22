@@ -242,7 +242,30 @@ function conCodigos(r, o, esRobux){
   if(!esRobux || !r || !r.success || r.status !== 'COMPLETED') return r;
   const c = extraerCodigos(o); r.codigos = c; if(!c.length) r.forma = formaEntrega(o); return r;
 }
-function codigosDe(o, m, forzar){ const esR = !!forzar || /robux|roblox/i.test(JSON.stringify(o.items || [])); if(!esR || !m || m.status !== 'COMPLETED') return {}; const c = extraerCodigos(o); return c.length ? { codigos: c } : { forma: formaEntrega(o) }; }
+// Central One no manda el PIN dentro de la orden: se prueban las rutas habituales para leerlo (se recuerda la que funcione).
+let rutaCodigos = null;
+const RUTAS_COD = ['/orders/{o}/codes', '/orders/{o}/items/{i}/codes', '/orders/{o}/deliveries', '/orders/{o}/delivery', '/orders/{o}/pins', '/orders/{o}/vouchers', '/orders/{o}/cards', '/orders/{o}/credentials', '/orders/{o}/items', '/orders/{o}/items/{i}', '/orders/{o}/fulfillment', '/orders/{o}/redemption', '/orders/{o}?include=codes', '/orders/{o}?expand=items.codes'];
+const conTope = (p, ms) => Promise.race([p, new Promise(r => setTimeout(() => r({ status: 0, json: null }), ms))]);
+async function leerCodigosProveedor(o){
+  const oid = o && o.id, iid = o && o.items && o.items[0] && o.items[0].id; if(!oid) return { codigos: [], sondeo: '' };
+  const rutas = (rutaCodigos ? [rutaCodigos] : RUTAS_COD).filter(x => iid || x.indexOf('{i}') < 0).map(x => x.replace('{o}', oid).replace('{i}', iid || ''));
+  const rs = await Promise.all(rutas.map(r => conTope(co(r).catch(() => ({ status: 0, json: null })), 3500).then(x => ({ r, x }))));
+  const out = [], resumen = [];
+  for(const { r, x } of rs){
+    const cl = x.json && typeof x.json === 'object' ? Object.keys(x.json).slice(0, 6).join(',') : '';
+    resumen.push(r.replace(oid, '{o}').replace(iid || '@@', '{i}') + ' → ' + x.status + (cl ? ' [' + cl + ']' : ''));
+    if(x.status === 200 && x.json){ const c = extraerCodigos({ reference_code: o.reference_code, items: [x.json] }); if(c.length){ c.forEach(k => { if(out.indexOf(k) < 0) out.push(k); }); rutaCodigos = r.replace(oid, '{o}').replace(iid || '@@', '{i}'); } }
+  }
+  return { codigos: out, sondeo: resumen.join('\n') };
+}
+async function conCodigosAsync(r, o, esRobux){
+  r = conCodigos(r, o, esRobux);
+  if(esRobux && r && r.success && r.status === 'COMPLETED' && (!r.codigos || !r.codigos.length)){
+    try{ const x = await leerCodigosProveedor(o); if(x.codigos.length){ r.codigos = x.codigos; delete r.forma; } else r.forma = (r.forma || '') + '\nSONDEO:\n' + x.sondeo; }catch(e){}
+  }
+  return r;
+}
+async function codigosDe(o, m, forzar){ const esR = !!forzar || /robux|roblox/i.test(JSON.stringify(o.items || [])); if(!esR || !m || m.status !== 'COMPLETED') return {}; let c = extraerCodigos(o); if(!c.length){ try{ c = (await leerCodigosProveedor(o)).codigos; }catch(e){} } return c.length ? { codigos: c } : { forma: formaEntrega(o) }; }
 // Igual que elegirExtra(): { item, precio } o { error }. Protege el margen: si el proveedor cobra (en MXN) más de lo que vendes, se bloquea.
 function elegirRegalo(items, k){
   const it = buscarRegalo(items, k); if(!it) return { error: 'No se encontró el producto en el catálogo del proveedor' };
@@ -362,7 +385,7 @@ module.exports = async function handler(req, res){
       const r = await co('/orders/' + id); if(r.status !== 200 || !r.json || !r.json.order) return enviar(res, { success: false, error: 'No encontrado' });
       const o = r.json.order, m = mapearOrden(o);
       if((o.items || []).some(i => i.status === 'refunded')) return enviar(res, { success: true, status: 'REFUNDED', reference: o.reference_code });
-      return enviar(res, m.success ? Object.assign({ success: true, status: m.status, reference: m.reference }, codigosDe(o, m, b.robux)) : (m.code === 'PROVIDER_ERROR' ? { success: true, status: 'PENDING', reference: m.reference, error: m.error } : { success: true, status: 'FAILED', reference: m.reference, error: m.error }));
+      return enviar(res, m.success ? Object.assign({ success: true, status: m.status, reference: m.reference }, await codigosDe(o, m, b.robux)) : (m.code === 'PROVIDER_ERROR' ? { success: true, status: 'PENDING', reference: m.reference, error: m.error } : { success: true, status: 'FAILED', reference: m.reference, error: m.error }));
     }
 
     // ── buscar un pedido por su clave (para resolver unidades "en verificación") ──
@@ -373,7 +396,7 @@ module.exports = async function handler(req, res){
       if(!rv.existente) return enviar(res, { success: true, status: 'NOT_FOUND' });
       const o = rv.existente, m = mapearOrden(o, !!b.regalo);
       if((o.items || []).some(i => i.status === 'refunded')) return enviar(res, { success: true, status: 'REFUNDED', reference: o.reference_code, order_id: o.id });
-      return enviar(res, m.success ? Object.assign({ success: true, status: m.status, reference: m.reference, order_id: o.id, via: m.via }, codigosDe(o, m, b.robux)) : (m.code === 'PROVIDER_ERROR' ? { success: true, status: 'PENDING', reference: m.reference, order_id: o.id, via: 'Central One ' + (o.reference_code || '') } : { success: true, status: 'FAILED', reference: m.reference, order_id: o.id, error: m.error }));
+      return enviar(res, m.success ? Object.assign({ success: true, status: m.status, reference: m.reference, order_id: o.id, via: m.via }, await codigosDe(o, m, b.robux)) : (m.code === 'PROVIDER_ERROR' ? { success: true, status: 'PENDING', reference: m.reference, order_id: o.id, via: 'Central One ' + (o.reference_code || '') } : { success: true, status: 'FAILED', reference: m.reference, order_id: o.id, error: m.error }));
     }
 
     const extra = EXTRA[String(b.producto || '')] ? String(b.producto) : null;
@@ -419,7 +442,7 @@ module.exports = async function handler(req, res){
     // ¿Ya existe este mismo pedido? (reintento tras un corte): se devuelve su estado sin gastar de nuevo ni aplicar fusibles
     const rev = await revisarPedidos(cliente, key);
     if(!rev.ok) return enviar(res, NO_HECHO('No se pudo verificar el límite de gasto', 'ENDPOINT_DISABLED'));
-    if(rev.existente) return enviar(res, conCodigos(Object.assign(mapearOrden(rev.existente, !!(reg || rbx)), { costo_usd: d.precio }), rev.existente, !!rbx));
+    if(rev.existente) return enviar(res, await conCodigosAsync(Object.assign(mapearOrden(rev.existente, !!(reg || rbx)), { costo_usd: d.precio }), rev.existente, !!rbx));
     // Protección de saldo con el proveedor: si queda poco (o no alcanza para este pedido) se pausa y se te avisa por Telegram
     const sp = await A.estado(d.precio);
     if(sp.pausa){ await A.avisarSaldoBajo(sp.saldo, sp.motivo); return enviar(res, NO_HECHO('Recargas en pausa por unos minutos: estamos reponiendo saldo del sistema. Intenta de nuevo en un rato.', 'ENDPOINT_DISABLED')); }
@@ -448,7 +471,7 @@ module.exports = async function handler(req, res){
     try{ await A.despuesDeCompra(); }catch(e){}
     // costo_usd: lo que cobró el proveedor (para el aviso de Telegram con la ganancia)
     const final = mapearOrden(o, !!(reg || rbx)); if(final.success) final.costo_usd = d.precio;
-    return enviar(res, conCodigos(final, o, !!rbx));
+    return enviar(res, await conCodigosAsync(final, o, !!rbx));
   }catch(e){
     const timeout = e && e.name === 'AbortError';
     // Se cortó la espera, pero el pedido pudo haberse creado: se busca por su clave y se devuelve su estado real (así no queda en "verificar" algo que el proveedor sí entregó)

@@ -18820,9 +18820,18 @@ function ckUUID(){ return (window.crypto && crypto.randomUUID) ? crypto.randomUU
 function ckHash32(s){ var h = 5381; for(var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
 
 /* Robux PIN: el código se muestra al cliente (y se queda en Mis Compras) con botón de copiar */
+var CK_WA_RBX = '573158844459', CK_WA_RBX_TXT = '+57 315 884 4459';
 function ckPinsHtml(i){
-  if(!i || i.grupo !== 'robux' || !i.codigos || !i.codigos.length) return '';
-  return '<div class="ck-pins">' + i.codigos.map(function(c){ return '<div class="ck-pin"><span>Tu código PIN</span><code>' + ckEsc(c) + '</code><button type="button" onclick="ckCopiarPin(this)" data-pin="' + ckEsc(c) + '">Copiar</button></div>'; }).join('') + '<small>Canjéalo en roblox.com/redeem. No lo compartas con nadie.</small></div>';
+  if(!i || i.grupo !== 'robux' || i.fase === 'reembolsado') return '';
+  var ref = i.ref || '', cods = (i.codigos && i.codigos.length) ? i.codigos : null;
+  var h = '<div class="ck-pins">' + (ref ? '<div class="ck-ref">Tu número de pedido: <b>' + ckEsc(ref) + '</b></div>' : '');
+  if(cods){
+    h += cods.map(function(c){ return '<div class="ck-pin"><span>Tu código PIN</span><code>' + ckEsc(c) + '</code><button type="button" onclick="ckCopiarPin(this)" data-pin="' + ckEsc(c) + '">Copiar</button></div>'; }).join('');
+    h += '<div class="ck-how"><b>¿Dónde lo canjeo?</b><ol><li>Entra a <a href="https://www.roblox.com/redeem" target="_blank" rel="noopener">roblox.com/redeem</a> e inicia sesión en tu cuenta de Roblox.</li><li>Pega tu código en el recuadro.</li><li>Toca <b>Canjear</b>: tus Robux se acreditan en tu cuenta.</li></ol><small>No compartas tu código con nadie.</small></div>';
+  } else {
+    h += '<div class="ck-how"><b>Tu código está en camino.</b> Si no aparece aquí en unos minutos, escríbenos por WhatsApp al <b>' + CK_WA_RBX_TXT + '</b> con tu número de pedido' + (ref ? ' <b>' + ckEsc(ref) + '</b>' : '') + '.<br><a class="ck-wa" target="_blank" rel="noopener" href="https://wa.me/' + CK_WA_RBX + '?text=' + encodeURIComponent('Hola, mi pedido es ' + (ref || '') + ' y no me llegó mi código de Robux.') + '">Escribir por WhatsApp</a></div>';
+  }
+  return h + '</div>';
 }
 function ckCopiarPin(btn){
   var t = btn.getAttribute('data-pin') || '', ok = function(){ var o = btn.textContent; btn.textContent = '¡Copiado!'; setTimeout(function(){ btn.textContent = o; }, 1600); };
@@ -18954,7 +18963,7 @@ function ckRender(){
     + '<div class="ck-qty"><button type="button" aria-label="Quitar uno" onclick="ckCant(-1)"' + (CK.q <= 1 || CK.busy ? ' disabled' : '') + '>&minus;</button><span>' + CK.q + '</span><button type="button" aria-label="Agregar uno" onclick="ckCant(1)"' + (CK.busy ? ' disabled' : '') + '>+</button></div>'
     + '<div class="ck-sub">' + ckFmt(total) + '</div></div>';
   if(p.mayoreo_min && p.mayoreo_precio) h += '<div class="ck-note" style="text-align:left;margin-top:.5rem">Mayoreo: desde ' + p.mayoreo_min + ' pases a ' + ckFmt(p.mayoreo_precio) + ' c/u.</div>';
-  if(rbx){ h += '<div class="ck-note" style="text-align:left;margin-top:.6rem">' + (agotado ? '<b style="color:#f5b43a">Sin stock por ahora.</b> ' : '') + 'Pagas con tu saldo y recibes tu <b>código PIN</b> aquí mismo y en Mis Compras. No pide usuario ni contraseña de Roblox. Código GLOBAL.</div>'; }
+  if(rbx){ h += '<div class="ck-note" style="text-align:left;margin-top:.6rem">' + (agotado ? '<b style="color:#f5b43a">Sin stock por ahora.</b> ' : '') + 'Pagas con tu saldo y recibes tu <b>código PIN</b> aquí mismo y en Mis Compras. No pide usuario ni contraseña de Roblox. Código GLOBAL. Lo canjeas en roblox.com/redeem. Si no llega automático, escribe al ' + CK_WA_RBX_TXT + ' con tu número de pedido (CS-RBX-…).</div>'; }
   else {
   h += '<div class="ck-sec">¿A qué ID(s) lo mandamos?</div>';
   h += '<button type="button" class="ck-opt' + (CK.modo === 'mismo' ? ' sel' : '') + '" role="radio" aria-checked="' + (CK.modo === 'mismo') + '" onclick="ckModo(\'mismo\')"><span class="ck-dot"></span><span><b>Todos al mismo ID</b><small>Todos los ' + unidades + ' van a una sola cuenta.</small></span></button>';
@@ -19455,9 +19464,15 @@ function osaCargar(){
         + '<div class="dp-g"><span>Producto</span><b>' + osaE(prod) + '</b><span>IDs destino</span><b>' + ids.map(osaE).join(', ') + '</b><span>Método de pago</span><b>Saldo CiberStore</b><span>ID transacción</span><b>' + osaE(o.codigo) + ' · ' + osaE(String(o.idem || '').slice(0, 14)) + '</b><span>Entrega</span><b>' + o.entregadas + ' entregadas · ' + o.pendientes + ' pendientes · ' + o.reembolsadas + ' reembolsadas</b></div>'
         + o.items.map(function(i){ var ver = i.estado === 'verificar';
           return '<div class="dp-g" style="margin:0 0 .35rem;border-top:1px solid rgba(255,255,255,.06);padding-top:.35rem"><span>' + osaE(i.nombre) + ' · ' + osaE(i.ff_id) + '</span><b>' + osaE(OSA_FASE[i.fase] || i.fase) + (i.error ? ' · ' + osaE(i.error) : '') + '</b></div>'
-            + (ver ? '<div class="dp-fl"><button type="button" onclick="osaAccion(' + i.id + ',\'entregada\')">Marcar entregada</button><button type="button" onclick="osaAccion(' + i.id + ',\'reembolsar\')">Reembolsar al saldo</button></div>' : ''); }).join('') + '</div>';
+            + (ver ? '<div class="dp-fl"><button type="button" onclick="osaAccion(' + i.id + ',\'entregada\')">Marcar entregada</button><button type="button" onclick="osaAccion(' + i.id + ',\'reembolsar\')">Reembolsar al saldo</button>' + (i.grupo === 'robux' ? '<button type="button" onclick="osaCodigo(' + i.id + ')">Poner código PIN</button>' : '') + '</div>' : ''); }).join('') + '</div>';
     }).join('');
   });
+}
+function osaCodigo(id){
+  if(OSA.busy) return;
+  var c = prompt('Pega el código PIN que te dio Central One para esta unidad (el cliente lo verá en Mis Compras):'); if(!c) return;
+  OSA.busy = true;
+  osaApi('admin_item', { item_id:id, accion:'codigo', codigo:c }).then(function(r){ OSA.busy = false; if(typeof showToast === 'function') showToast(r && r.ok ? 'Código entregado al cliente' : ((r && r.message) || 'Error'), 3500); osaCargar(); });
 }
 function osaFiltro(f){ OSA.filtro = f; osaCargar(); }
 function osaAccion(id, accion){
