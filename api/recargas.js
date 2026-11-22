@@ -23,7 +23,27 @@ const S = require('./_sesion.js');
 const BUCKET = 'comprobantes';
 const MAX_BYTES = 3200 * 1024;     // Vercel admite ~4.5 MB por petición: las fotos se reducen en el navegador y el PDF puede pesar hasta ~3 MB
 const EXT = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'application/pdf': 'pdf' };
-const MIN = () => { const n = Number(process.env.RECARGA_MIN_MXN); return isFinite(n) && n > 0 ? n : 200; };
+const MIN_USD = () => { const n = Number(process.env.RECARGA_MIN_USD); return isFinite(n) && n > 0 ? n : 5; };
+// Tasas del día (USD → MXN / moneda local). Caché 30 min; si la API falla se usan las últimas conocidas o las de respaldo.
+let _tasas = { t: 0, r: { MXN: Number(process.env.USD_MXN_RESPALDO) || 18.5 } };
+async function tasasUSD(){
+  if(Date.now() - _tasas.t < 30 * 60000) return _tasas.r;
+  try{ const ctrl = new AbortController(), x = setTimeout(() => ctrl.abort(), 5000);
+    const j = await (await fetch('https://open.er-api.com/v6/latest/USD', { signal: ctrl.signal })).json(); clearTimeout(x);
+    if(j && j.rates && j.rates.MXN > 0){ _tasas = { t: Date.now(), r: j.rates }; }
+  }catch(e){ _tasas.t = Date.now() - 25 * 60000; }   // reintenta en 5 min
+  return _tasas.r;
+}
+const r2 = n => Math.round(Number(n) * 100) / 100;
+// Cálculo único (cliente y servidor muestran lo mismo): USD → lo que paga en su moneda (con comisión) y lo que se acredita en MXN
+function cotizar(cu, usd, rates){
+  const mxn = rates.MXN, esMX = !cu.moneda || cu.moneda === 'MXN';
+  const tasa = esMX ? null : (Number(cu.tasa) > 0 ? Number(cu.tasa) : rates[cu.moneda]);
+  if(!(mxn > 0) || (!esMX && !(tasa > 0))) return null;
+  const credito = r2(usd * mxn), com = esMX ? 0 : Number(cu.comision) || 0, pct = esMX ? 0 : Number(cu.comision_pct) || 0;
+  return { usd, credito, moneda: esMX ? 'MXN' : cu.moneda, pagar: esMX ? credito : r2(usd * tasa * (1 + pct / 100) + com), comision: com, comision_pct: pct, tasa: tasa || null, usd_mxn: mxn };
+}
+const MIN = () => { const n = Number(process.env.RECARGA_MIN_MXN); return isFinite(n) && n > 0 ? n : Math.ceil(MIN_USD() * (_tasas.r.MXN || 18.5)); };
 const MAX = () => { const n = Number(process.env.RECARGA_MAX_MXN); return isFinite(n) && n > 0 ? n : 50000; };
 
 function enviar(res, body, status){ res.statusCode = status || 200; res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.setHeader('Cache-Control', 'no-store'); res.end(JSON.stringify(body)); }
@@ -109,7 +129,8 @@ const limpiaTxt = (s, n) => String(s == null ? '' : s).replace(/[\u0000-\u001f\u
 
 // Lo que el cliente ve de una solicitud (nunca la ruta del archivo ni el hash)
 const publica = r => ({ id: r.id, banco: r.banco, monto: Number(r.monto), titular: r.titular, referencia: r.referencia, fecha_transferencia: r.fecha_transferencia,
-  estado: r.estado, motivo_rechazo: r.motivo_rechazo || null, creada: r.creada, resuelta: r.resuelta || null, comprobante_tipo: r.comprobante_tipo });
+  estado: r.estado, motivo_rechazo: r.motivo_rechazo || null, creada: r.creada, resuelta: r.resuelta || null, comprobante_tipo: r.comprobante_tipo,
+  monto_usd: r.monto_usd != null ? Number(r.monto_usd) : null, monto_local: r.monto_local != null ? Number(r.monto_local) : null, moneda: r.moneda || null });
 
 module.exports = async function handler(req, res){
   try{
@@ -132,7 +153,7 @@ module.exports = async function handler(req, res){
       }
       if(a === 'admin_lista'){
         const est = ['pendiente', 'aprobada', 'rechazada'].indexOf(b.estado) >= 0 ? '&estado=eq.' + b.estado : '';
-        const r = await rest('recargas_saldo?select=id,user_id,username,banco,monto,titular,referencia,fecha_transferencia,comprobante_tipo,estado,motivo_rechazo,creada,resuelta,resuelta_por,movimiento_id' + est + '&order=creada.desc&limit=200');
+        const r = await rest('recargas_saldo?select=*' + est + '&order=creada.desc&limit=200');
         if(r.status >= 400) return enviar(res, { ok: false, code: 'db', message: 'Falta ejecutar recargas_saldo.sql en Supabase' });
         const lista = r.json || [], ids = Array.from(new Set(lista.map(x => x.user_id))).filter(x => /^[0-9a-zA-Z-]{1,64}$/.test(x));
         let us = {};
@@ -176,17 +197,30 @@ module.exports = async function handler(req, res){
         return enviar(res, { ok: true, items: r.json || [] });
       }
       if(a === 'admin_cuenta_guardar'){
-        const nombre = limpiaTxt(b.nombre, 40), titular = limpiaTxt(b.titular, 80), clabe = String(b.clabe || '').replace(/\s/g, '');
-        if(nombre.length < 2) return enviar(res, { ok: false, code: 'nombre', message: 'Escribe el nombre del banco' });
-        if(titular.length < 3) return enviar(res, { ok: false, code: 'titular', message: 'Escribe el titular de la cuenta' });
-        if(!/^[0-9]{18}$/.test(clabe)) return enviar(res, { ok: false, code: 'clabe', message: 'La CLABE debe tener 18 dígitos' });
-        const cuerpo = { nombre, titular, clabe, activa: b.activa !== false, orden: Math.max(0, Math.min(999, parseInt(b.orden, 10) || 0)) };
+        const nombre = limpiaTxt(b.nombre, 40), titular = limpiaTxt(b.titular, 80);
+        const moneda = /^[A-Z]{3}$/.test(String(b.moneda || 'MXN').toUpperCase()) ? String(b.moneda || 'MXN').toUpperCase() : 'MXN', esMX = moneda === 'MXN';
+        const construccion = b.construccion === true;
+        let clabe = String(b.clabe || '').replace(/\s/g, ''), detalle = null;
+        if(Array.isArray(b.detalle)) detalle = b.detalle.slice(0, 12).map(d => ({ et: limpiaTxt(d && d.et, 40), val: limpiaTxt(d && d.val, 80), copiar: !!(d && d.copiar) })).filter(d => d.et && d.val);
+        if(nombre.length < 2) return enviar(res, { ok: false, code: 'nombre', message: 'Escribe el nombre del método' });
+        if(!construccion){
+          if(titular.length < 3) return enviar(res, { ok: false, code: 'titular', message: 'Escribe el titular de la cuenta' });
+          if(esMX && !/^[0-9]{18}$/.test(clabe)) return enviar(res, { ok: false, code: 'clabe', message: 'La CLABE debe tener 18 dígitos' });
+          if(!esMX && !(detalle && detalle.length)) return enviar(res, { ok: false, code: 'detalle', message: 'Agrega al menos un dato de pago (Yape, cuenta, alias…)' });
+        }
+        if(!esMX && !clabe) clabe = (detalle && detalle[0] && detalle[0].val) || '-';
+        if(!clabe) clabe = '-';
+        const cuerpo = { nombre, titular: titular || '-', clabe, activa: b.activa !== false, orden: Math.max(0, Math.min(999, parseInt(b.orden, 10) || 0)) };
+        if(b.pais !== undefined || b.moneda !== undefined || b.construccion !== undefined || b.detalle !== undefined){
+          Object.assign(cuerpo, { pais: limpiaTxt(b.pais || (esMX ? 'MX' : ''), 4).toUpperCase() || 'MX', moneda, bandera: limpiaTxt(b.bandera, 8) || null,
+            tasa: Number(b.tasa) > 0 ? Number(b.tasa) : null, comision: Math.max(0, Number(b.comision) || 0), comision_pct: Math.max(0, Math.min(50, Number(b.comision_pct) || 0)), detalle: detalle, nota: limpiaTxt(b.nota, 300) || null, construccion });
+        }
         let r;
         if(b.id){
           if(!UUID.test(String(b.id))) return enviar(res, { ok: false, code: 'id', message: 'Cuenta no válida' });
           r = await rest('cuentas_deposito?id=eq.' + b.id, { method: 'PATCH', headers: { Prefer: 'return=representation' }, body: J(cuerpo) });
         } else r = await rest('cuentas_deposito', { method: 'POST', headers: { Prefer: 'return=representation' }, body: J(cuerpo) });
-        if(r.status >= 400) return enviar(res, { ok: false, code: 'db', message: 'No se pudo guardar la cuenta' });
+        if(r.status >= 400) return enviar(res, { ok: false, code: 'db', message: /column|schema/i.test(String((r.json && r.json.message) || '')) ? 'Falta ejecutar metodos_pago.sql en Supabase' : 'No se pudo guardar la cuenta' });
         await auditar(null, b.id ? 'cuenta_editar' : 'cuenta_crear', adm, { nombre, titular, activa: cuerpo.activa });
         return enviar(res, { ok: true, item: Array.isArray(r.json) ? r.json[0] : null });
       }
@@ -217,12 +251,15 @@ module.exports = async function handler(req, res){
     const uid = String(p.id);
 
     if(a === 'cuentas'){
-      const r = await rest('cuentas_deposito?activa=eq.true&select=id,nombre,titular,clabe&order=orden.asc,created_at.asc');
+      let r = await rest('cuentas_deposito?activa=eq.true&select=id,nombre,titular,clabe,pais,moneda,bandera,tasa,comision,comision_pct,detalle,nota,construccion&order=orden.asc,created_at.asc');
+      if(r.status >= 400) r = await rest('cuentas_deposito?activa=eq.true&select=id,nombre,titular,clabe&order=orden.asc,created_at.asc');   // aún sin metodos_pago.sql
       if(r.status >= 400) return enviar(res, { ok: false, code: 'db', message: 'Falta ejecutar recargas_saldo.sql en Supabase' });
-      return enviar(res, { ok: true, cuentas: r.json || [], min: MIN(), max: MAX() });
+      const rates = await tasasUSD(), minUsd = MIN_USD();
+      const cuentas = (r.json || []).map(c => { const q = c.construccion ? null : cotizar(c, 1, rates); return Object.assign({}, c, { moneda: c.moneda || 'MXN', pais: c.pais || 'MX', construccion: !!c.construccion, tasa_efectiva: q ? q.tasa : null }); });
+      return enviar(res, { ok: true, cuentas, min: MIN(), max: MAX(), min_usd: minUsd, usd_mxn: rates.MXN });
     }
     if(a === 'mis'){
-      const r = await rest('recargas_saldo?user_id=eq.' + encodeURIComponent(uid) + '&select=id,banco,monto,titular,referencia,fecha_transferencia,comprobante_tipo,estado,motivo_rechazo,creada,resuelta&order=creada.desc&limit=50');
+      const r = await rest('recargas_saldo?user_id=eq.' + encodeURIComponent(uid) + '&select=*&order=creada.desc&limit=50');
       if(r.status >= 400) return enviar(res, { ok: false, code: 'db', message: 'Falta ejecutar recargas_saldo.sql en Supabase' });
       return enviar(res, { ok: true, items: (r.json || []).map(publica) });
     }
@@ -238,15 +275,28 @@ module.exports = async function handler(req, res){
       // — validaciones de datos —
       const idem = String(b.idem || '');
       if(!/^[a-zA-Z0-9-]{16,64}$/.test(idem)) return enviar(res, { ok: false, code: 'idem', message: 'Recarga la página e intenta de nuevo' });
-      const ya = await rest('recargas_saldo?idem=eq.' + encodeURIComponent(idem) + '&user_id=eq.' + encodeURIComponent(uid) + '&select=id,banco,monto,titular,referencia,fecha_transferencia,comprobante_tipo,estado,motivo_rechazo,creada,resuelta&limit=1');
+      const ya = await rest('recargas_saldo?idem=eq.' + encodeURIComponent(idem) + '&user_id=eq.' + encodeURIComponent(uid) + '&select=*&limit=1');
       if(Array.isArray(ya.json) && ya.json[0]) return enviar(res, { ok: true, repetida: true, item: publica(ya.json[0]) });   // mismo envío repetido: no se duplica
       if(!UUID.test(String(b.cuenta_id || ''))) return enviar(res, { ok: false, code: 'cuenta', message: 'Elige un método de depósito' });
-      const cu = await rest('cuentas_deposito?id=eq.' + b.cuenta_id + '&activa=eq.true&select=id,nombre&limit=1');
+      let cu = await rest('cuentas_deposito?id=eq.' + b.cuenta_id + '&activa=eq.true&select=id,nombre,moneda,tasa,comision,comision_pct,construccion&limit=1');
+      if(cu.status >= 400) cu = await rest('cuentas_deposito?id=eq.' + b.cuenta_id + '&activa=eq.true&select=id,nombre&limit=1');
       const cuenta = Array.isArray(cu.json) ? cu.json[0] : null;
-      if(!cuenta) return enviar(res, { ok: false, code: 'cuenta', message: 'Ese método de depósito ya no está disponible' });
-      const monto = Math.round(Number(b.monto) * 100) / 100;
-      if(!isFinite(monto) || monto <= 0) return enviar(res, { ok: false, code: 'monto', message: 'Escribe un monto válido' });
-      if(monto < MIN()) return enviar(res, { ok: false, code: 'monto', message: 'El monto mínimo es ' + dinero(MIN()) });
+      if(!cuenta || cuenta.construccion) return enviar(res, { ok: false, code: 'cuenta', message: cuenta ? 'Ese método está en construcción' : 'Ese método de depósito ya no está disponible' });
+      // La cantidad la elige el cliente en USD (mín. 5 USD en TODOS los métodos); el servidor calcula lo que se acredita y lo que debe pagar
+      const rates = await tasasUSD(), usd = r2(b.monto_usd != null ? Number(b.monto_usd) : NaN);
+      const nuevo = b.monto_usd != null || (cuenta.moneda && cuenta.moneda !== 'MXN');
+      let monto, local = null;
+      if(nuevo){
+        if(!isFinite(usd) || usd <= 0) return enviar(res, { ok: false, code: 'monto', message: 'Escribe una cantidad válida en USD' });
+        if(usd < MIN_USD()) return enviar(res, { ok: false, code: 'monto', message: 'El mínimo es de ' + MIN_USD() + ' USD' });
+        const q = cotizar(cuenta, usd, rates);
+        if(!q) return enviar(res, { ok: false, code: 'tasa', message: 'No se pudo calcular el tipo de cambio. Intenta en un momento.' });
+        monto = q.credito; local = q;
+      } else {
+        monto = Math.round(Number(b.monto) * 100) / 100;
+        if(!isFinite(monto) || monto <= 0) return enviar(res, { ok: false, code: 'monto', message: 'Escribe un monto válido' });
+        if(monto < MIN()) return enviar(res, { ok: false, code: 'monto', message: 'El monto mínimo es ' + dinero(MIN()) });
+      }
       if(monto > MAX()) return enviar(res, { ok: false, code: 'monto', message: 'El monto máximo por solicitud es ' + dinero(MAX()) });
       const titular = limpiaTxt(b.titular, 80); if(titular.length < 3) return enviar(res, { ok: false, code: 'titular', message: 'Escribe el nombre del titular que hizo la transferencia' });
       const referencia = limpiaTxt(b.referencia, 40).replace(/[^\w\-./ ]/g, ''); if(referencia.length < 4) return enviar(res, { ok: false, code: 'referencia', message: 'Escribe la referencia o clave de rastreo (mín. 4 caracteres)' });
@@ -274,21 +324,22 @@ module.exports = async function handler(req, res){
       const ruta = uid + '/' + crypto.randomUUID() + '.' + EXT[tipo];
       const up = await db('/storage/v1/object/' + BUCKET + '/' + ruta, { method: 'POST', headers: { 'Content-Type': tipo, 'x-upsert': 'false' }, body: buf });
       if(up.status >= 400) return enviar(res, { ok: false, code: 'storage', message: 'No se pudo guardar el comprobante. ¿Ejecutaste recargas_saldo.sql (crea el almacenamiento "comprobantes")?' });
-      const ins = await rest('recargas_saldo', { method: 'POST', headers: { Prefer: 'return=representation' }, body: J({
+      const ins = await rest('recargas_saldo', { method: 'POST', headers: { Prefer: 'return=representation' }, body: J(Object.assign({
         user_id: uid, username: p.username, cuenta_id: cuenta.id, banco: cuenta.nombre, monto, titular, referencia, referencia_norm: refNorm,
-        fecha_transferencia: fecha.toISOString(), comprobante_path: ruta, comprobante_tipo: tipo, comprobante_hash: hash, idem }) });
+        fecha_transferencia: fecha.toISOString(), comprobante_path: ruta, comprobante_tipo: tipo, comprobante_hash: hash, idem }, local && local.moneda !== 'MXN' ? { monto_usd: local.usd, monto_local: local.pagar, moneda: local.moneda } : (local ? { monto_usd: local.usd } : {}))) });
       if(ins.status >= 400){
         await db('/storage/v1/object/' + BUCKET, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: J({ prefixes: [ruta] }) });
         const msg = String((ins.json && ins.json.message) || '');
-        if(/recargas_saldo_idem_uq/.test(msg)){ const y = await rest('recargas_saldo?idem=eq.' + encodeURIComponent(idem) + '&select=id,banco,monto,titular,referencia,fecha_transferencia,comprobante_tipo,estado,motivo_rechazo,creada,resuelta&limit=1'); if(Array.isArray(y.json) && y.json[0]) return enviar(res, { ok: true, repetida: true, item: publica(y.json[0]) }); }
+        if(/recargas_saldo_idem_uq/.test(msg)){ const y = await rest('recargas_saldo?idem=eq.' + encodeURIComponent(idem) + '&select=*&limit=1'); if(Array.isArray(y.json) && y.json[0]) return enviar(res, { ok: true, repetida: true, item: publica(y.json[0]) }); }
         if(/recargas_saldo_(ref|hash)_uq/.test(msg)) return enviar(res, { ok: false, code: 'duplicada', message: 'Esa referencia o comprobante ya fue registrado en otra solicitud' });
+        if(/monto_usd|monto_local|moneda/.test(msg)) return enviar(res, { ok: false, code: 'db', message: 'Falta ejecutar metodos_pago.sql en Supabase' });
         if(ins.status === 404) return enviar(res, { ok: false, code: 'db', message: 'Falta ejecutar recargas_saldo.sql en Supabase' });
         return enviar(res, { ok: false, code: 'db', message: 'No se pudo registrar la solicitud' });
       }
       const row = Array.isArray(ins.json) ? ins.json[0] : null;
       await auditar(row && row.id, 'solicitar', p.username, { monto, banco: cuenta.nombre, referencia });
       await aviso(uid, 'Solicitud de recarga recibida', 'Recibimos tu solicitud de ' + dinero(monto) + ' (' + cuenta.nombre + '). Está en revisión; te avisaremos cuando se resuelva.');
-      await avisoSolicitud('💳 <b>Nueva solicitud de recarga</b>\n👤 ' + esc(p.username) + '\n💰 ' + esc(dinero(monto)) + ' · ' + esc(cuenta.nombre) + '\n🔑 Ref: ' + esc(referencia) + '\n👥 Titular: ' + esc(titular) + '\n🆔 ' + (row ? row.id : ''), row ? row.id : '', buf, tipo, p.username, cuenta.nombre, dinero(monto), 'Recarga de saldo | ' + cuenta.nombre + ' | Ref: ' + referencia + ' | Titular: ' + titular + ' | Revísala en el panel → Depósitos', req.headers.host);
+      await avisoSolicitud('💳 <b>Nueva solicitud de recarga</b>\n👤 ' + esc(p.username) + '\n💰 ' + esc(dinero(monto)) + (local && local.moneda !== 'MXN' ? ' (' + local.usd + ' USD · pagó ' + local.pagar + ' ' + local.moneda + ')' : '') + ' · ' + esc(cuenta.nombre) + '\n🔑 Ref: ' + esc(referencia) + '\n👥 Titular: ' + esc(titular) + '\n🆔 ' + (row ? row.id : ''), row ? row.id : '', buf, tipo, p.username, cuenta.nombre, dinero(monto), 'Recarga de saldo | ' + cuenta.nombre + ' | Ref: ' + referencia + ' | Titular: ' + titular + ' | Revísala en el panel → Depósitos', req.headers.host);
       return enviar(res, { ok: true, item: row ? publica(row) : null });
     }
     return enviar(res, { ok: false, code: 'accion', message: 'Acción no permitida' }, 400);

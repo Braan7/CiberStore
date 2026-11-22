@@ -18409,7 +18409,7 @@ pfIconos();
 /* ═══════════════ BILLETERA / RECARGA DE SALDO (v5) ═══════════════
    Backend: /api/recargas (solicitudes, comprobantes privados, aprobación atómica en la base).
    El navegador NUNCA acredita saldo: solo manda la solicitud; el saldo lo mueve el servidor cuando el administrador aprueba. */
-var BW = { cuentas:[], min:200, max:50000, mis:null, comp:null, idem:'', env:false, vistos:null, t:null, cargoCuentas:false };
+var BW = { cuentas:[], minUsd:5, usdMxn:0, min:200, max:50000, mis:null, comp:null, idem:'', env:false, vistos:null, t:null, cargoCuentas:false };
 var BW_API = '/api/recargas';
 (function(){ if(typeof PF_ICONS==='undefined') return; var x={
   bank:'<path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/>',
@@ -18420,6 +18420,30 @@ var BW_API = '/api/recargas';
 function bwEl(i){ return document.getElementById(i); }
 function bwEsc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
 function bwMXN(n){ return '$'+Number(n||0).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})+' MXN'; }
+function bwNum(n){ return Number(n||0).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function bwSim(m){ return {PEN:'S/ ',MXN:'$',USD:'US$',ARS:'AR$ '}[m]||''; }
+function bwMoneda(n,m){ return bwSim(m)+bwNum(n)+' '+m; }
+function bwR2(n){ return Math.round(n*100)/100; }
+function bwCuentaSel(){ var id=(bwEl('bw-cuenta')||{}).value, c=null; (BW.cuentas||[]).forEach(function(x){ if(x.id===id) c=x; }); return c; }
+/* Misma cuenta que hace el servidor: USD → lo que paga (con comisión fija) y lo que se acredita en MXN */
+function bwCot(c,usd){
+  if(!c||!(usd>0)||!(BW.usdMxn>0)) return null; var ex=c.moneda&&c.moneda!=='MXN', t=ex?Number(c.tasa_efectiva||c.tasa):0; if(ex&&!(t>0)) return null;
+  var cr=bwR2(usd*BW.usdMxn); return {usd:usd,credito:cr,moneda:ex?c.moneda:'MXN',pagar:ex?bwR2(usd*t*(1+(Number(c.comision_pct)||0)/100)+(Number(c.comision)||0)):cr,comision:ex?(Number(c.comision)||0):0,pct:ex?(Number(c.comision_pct)||0):0,tasa:t};
+}
+function bwCotizar(){
+  var b=bwEl('bw-cot'); if(!b) return; var c=bwCuentaSel(), usd=parseFloat((bwEl('bw-monto')||{}).value), q=bwCot(c,usd);
+  if(!c||!q){ b.style.display='none'; return; }
+  b.style.display='block';
+  b.innerHTML='<div class="bw-kv"><span>Debes pagar</span><b class="bw-pg">'+bwEsc(bwMoneda(q.pagar,q.moneda))+'</b></div>'
+    +((q.comision>0||q.pct>0)?'<div class="bw-kv"><span>Incluye comisión de</span><b>'+(q.pct>0?bwNum(q.pct)+'%':'')+(q.pct>0&&q.comision>0?' + ':'')+(q.comision>0?bwEsc(bwSim(q.moneda)+bwNum(q.comision)):'')+'</b></div>':'')
+    +'<div class="bw-kv"><span>Se acreditan a tu saldo</span><b>≈ '+bwEsc(bwMXN(q.credito))+'</b></div>';
+}
+function bwCopiarDato(i,j,btn){
+  var d=((BW.cuentas[i]||{}).detalle||[])[j]; if(!d) return;
+  var fin=function(){ btn.classList.add('ok'); btn.querySelector('span').textContent='¡Copiado!'; bwToast(d.et+' copiado',2000); setTimeout(function(){ btn.classList.remove('ok'); btn.querySelector('span').textContent='Copiar'; },2200); };
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(d.val).then(fin).catch(function(){ bwToast(d.et+': '+d.val,5000); });
+  else { try{ var t=document.createElement('textarea'); t.value=d.val; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); fin(); }catch(e){ bwToast(d.et+': '+d.val,5000); } }
+}
 function bwFH(iso){ if(!iso) return '—'; try{ var d=new Date(iso); return d.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric',timeZone:'America/Mexico_City'})+' · '+d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'America/Mexico_City'}); }catch(e){ return '—'; } }
 function bwIcons(root){ if(typeof pfIconos==='function') pfIconos(root||bwEl('page-saldo')); }
 function bwToast(m,d){ if(typeof showToast==='function') showToast(m,d||2500); }
@@ -18471,17 +18495,25 @@ function bwCargarCuentas(){
   var box=bwEl('bw-cuentas');
   bwApi('cuentas').then(function(r){
     if(!r||!r.ok){ box.innerHTML='<div class="bw-vacio">'+bwEsc((r&&r.message)||'No se pudieron cargar las cuentas')+'</div>'; return; }
-    BW.cuentas=r.cuentas||[]; BW.min=r.min||200; BW.max=r.max||50000; BW.cargoCuentas=true;
-    var h=bwEl('bw-min'); if(h) h.textContent='Monto mínimo '+bwMXN(BW.min)+'.';
+    BW.cuentas=r.cuentas||[]; BW.min=r.min||200; BW.max=r.max||50000; BW.minUsd=r.min_usd||5; BW.usdMxn=r.usd_mxn||0; BW.cargoCuentas=true;
+    var h=bwEl('bw-min'); if(h) h.textContent='Mínimo '+BW.minUsd+' USD en todos los métodos.';
     if(!BW.cuentas.length){ box.innerHTML='<div class="bw-vacio">Se ocupa una banca. Si alguien tiene una, contacte al +57 315 884 4459.</div>'; }
     else box.innerHTML=BW.cuentas.map(function(c,i){
-      return '<div class="bw-ac"><div class="bw-ac-t"><span class="bw-logo">'+bwEsc(String(c.nombre).charAt(0).toUpperCase())+'</span><b>'+bwEsc(c.nombre)+'</b>'
+      var ex=c.moneda&&c.moneda!=='MXN', logo=c.bandera?bwEsc(c.bandera):bwEsc(String(c.nombre).charAt(0).toUpperCase());
+      if(c.construccion) return '<div class="bw-ac bw-cons"><div class="bw-ac-t"><span class="bw-logo">'+logo+'</span><b>'+bwEsc(c.nombre)+'</b><span class="bw-bd">🚧 En construcción</span></div><p class="bw-cn">Muy pronto. Por ahora usa otro método.</p></div>';
+      if(!ex) return '<div class="bw-ac"><div class="bw-ac-t"><span class="bw-logo">'+logo+'</span><b>'+bwEsc(c.nombre)+'</b>'
         +'<button type="button" class="bw-cp" onclick="bwCopiar('+i+',this)"><i data-i="copy"></i><span>Copiar</span></button></div>'
         +'<div class="bw-ac-d"><span>Titular</span><b>'+bwEsc(c.titular)+'</b><span>CLABE</span><b>'+bwEsc(c.clabe)+'</b></div></div>';
+      var filas=(c.detalle||[]).map(function(d,j){
+        return '<div class="bw-fila"><span>'+bwEsc(d.et)+'</span><b>'+bwEsc(d.val)+'</b>'+(d.copiar?'<button type="button" class="bw-cp bw-cs" onclick="bwCopiarDato('+i+','+j+',this)"><i data-i="copy"></i><span>Copiar</span></button>':'')+'</div>'; }).join('');
+      return '<div class="bw-ac"><div class="bw-ac-t"><span class="bw-logo">'+logo+'</span><b>'+bwEsc(c.nombre)+'</b></div>'+filas
+        +(c.nota?'<div class="bw-imp">'+bwEsc(c.nota)+'</div>':'')
+        +((c.comision>0||c.comision_pct>0)?'<p class="bw-cn">Comisión: <b>+'+(c.comision_pct>0?bwNum(c.comision_pct)+'%':'')+(c.comision_pct>0&&c.comision>0?' y ':'')+(c.comision>0?bwSim(c.moneda)+bwNum(c.comision)+' '+bwEsc(c.moneda):'')+'</b> (se suma sola al total que verás al cotizar).</p>':'')+'</div>';
     }).join('');
     var sel=bwEl('bw-cuenta'), cur=sel.value;
-    sel.innerHTML='<option value="">'+(BW.cuentas.length?'Selecciona un método':'Sin métodos disponibles')+'</option>'+BW.cuentas.map(function(c){ return '<option value="'+bwEsc(c.id)+'">'+bwEsc(c.nombre)+'</option>'; }).join('');
-    if(cur&&BW.cuentas.some(function(c){ return c.id===cur; })) sel.value=cur;
+    sel.innerHTML='<option value="">'+(BW.cuentas.length?'Selecciona un método':'Sin métodos disponibles')+'</option>'+BW.cuentas.map(function(c){ return '<option value="'+bwEsc(c.id)+'"'+(c.construccion?' disabled':'')+'>'+bwEsc(c.nombre)+(c.construccion?' · En construcción':'')+'</option>'; }).join('');
+    if(cur&&BW.cuentas.some(function(c){ return c.id===cur&&!c.construccion; })) sel.value=cur;
+    bwCotizar();
     var btn=bwEl('bw-send'); if(btn) btn.disabled=!BW.cuentas.length;
     bwIcons();
   });
@@ -18543,18 +18575,20 @@ function bwArchivo(file){
 })();
 function bwDatos(){
   var cid=bwEl('bw-cuenta').value, c=null; BW.cuentas.forEach(function(x){ if(x.id===cid) c=x; });
-  var monto=parseFloat(bwEl('bw-monto').value), tit=bwEl('bw-titular').value.replace(/\s+/g,' ').trim(), ref=bwEl('bw-refe').value.replace(/\s+/g,' ').trim(), fv=bwEl('bw-fecha').value, fecha=fv?new Date(fv):null;
+  var usd=parseFloat(bwEl('bw-monto').value), tit=bwEl('bw-titular').value.replace(/\s+/g,' ').trim(), ref=bwEl('bw-refe').value.replace(/\s+/g,' ').trim(), fv=bwEl('bw-fecha').value, fecha=fv?new Date(fv):null;
   if(!c){ return {e:'Elige un método de depósito'}; }
-  if(!isFinite(monto)||monto<=0){ return {e:'Escribe una cantidad válida'}; }
-  if(monto<BW.min){ return {e:'El monto mínimo es '+bwMXN(BW.min)}; }
-  if(monto>BW.max){ return {e:'El monto máximo por solicitud es '+bwMXN(BW.max)}; }
+  if(c.construccion){ return {e:'Ese método está en construcción'}; }
+  if(!isFinite(usd)||usd<=0){ return {e:'Escribe una cantidad válida en USD'}; }
+  if(usd<BW.minUsd){ return {e:'El mínimo es de '+BW.minUsd+' USD'}; }
+  var q=bwCot(c,bwR2(usd)); if(!q){ return {e:'No se pudo calcular el tipo de cambio. Intenta de nuevo en un momento.'}; }
+  if(q.credito>BW.max){ return {e:'El monto máximo por solicitud es '+bwMXN(BW.max)}; }
   if(tit.length<3){ return {e:'Escribe el nombre del titular que hizo la transferencia'}; }
   if(ref.replace(/[^A-Za-z0-9]/g,'').length<4){ return {e:'Escribe la referencia o clave de rastreo (mínimo 4 caracteres)'}; }
   if(!fecha||isNaN(fecha.getTime())){ return {e:'Indica la fecha y hora de la transferencia'}; }
   if(fecha.getTime()>Date.now()+5*60000){ return {e:'La fecha de la transferencia no puede ser futura'}; }
   if(fecha.getTime()<Date.now()-30*86400000){ return {e:'La transferencia es demasiado antigua (máximo 30 días)'}; }
   if(!BW.comp){ return {e:'Sube tu comprobante de pago'}; }
-  return {c:c,monto:Math.round(monto*100)/100,tit:tit,ref:ref,fecha:fecha};
+  return {c:c,usd:bwR2(usd),q:q,monto:q.credito,tit:tit,ref:ref,fecha:fecha};
 }
 function bwHoja(html){ var o=bwEl('bw-ov'); if(!o) return; bwMover(); o.innerHTML='<div class="bw-sheet">'+html+'</div>'; o.classList.add('on'); bwIcons(o); }
 function bwCerrar(){ var o=bwEl('bw-ov'); if(o){ o.classList.remove('on'); o.innerHTML=''; } }
@@ -18562,7 +18596,7 @@ function bwResumen(){
   if(!authSession){ if(typeof showAuthModal==='function') showAuthModal(); return; }
   var d=bwDatos(); if(d.e){ bwErr(d.e); return; } bwErr('');
   bwHoja('<h3>Resumen de tu solicitud <button type="button" onclick="bwCerrar()">✕</button></h3><p class="s">Revisa que todo coincida con tu transferencia.</p>'
-    +kv('Método de depósito',d.c.nombre)+kv('Cuenta destino',d.c.clabe)+kv('Cantidad',bwMXN(d.monto))+kv('Titular de la transferencia',d.tit)+kv('Referencia',d.ref)+kv('Fecha y hora',bwFH(d.fecha.toISOString()))+kv('Comprobante',d.c&&BW.comp.nombre)
+    +kv('Método de depósito',d.c.nombre)+kv('Cuenta destino',d.c.moneda&&d.c.moneda!=='MXN'?((d.c.detalle||[]).filter(function(x){return x.copiar;}).map(function(x){return x.et+' '+x.val;}).join(' · ')||d.c.nombre):d.c.clabe)+kv('Cantidad a recargar',bwNum(d.usd)+' USD')+kv('Debes pagar',bwMoneda(d.q.pagar,d.q.moneda)+((d.q.comision>0||d.q.pct>0)?' (incluye comisión)':''))+kv('Se acreditan a tu saldo','≈ '+bwMXN(d.q.credito))+kv('Titular de la transferencia',d.tit)+kv('Referencia',d.ref)+kv('Fecha y hora',bwFH(d.fecha.toISOString()))+kv('Comprobante',d.c&&BW.comp.nombre)
     +'<div class="bw-err" id="bw-e2" style="display:none"></div>'
     +'<button type="button" class="bw-btn bw-p bw-big" id="bw-conf" onclick="bwEnviar()"><i data-i="send"></i> Confirmar y enviar</button>'
     +'<button type="button" class="bw-btn" onclick="bwCerrar()">Volver a editar</button>'
@@ -18572,10 +18606,10 @@ function bwResumen(){
 function bwEnviar(){
   if(BW.env) return; var d=bwDatos(); if(d.e){ bwCerrar(); bwErr(d.e); return; }
   BW.env=true; var b=bwEl('bw-conf'); if(b){ b.disabled=true; b.textContent='Enviando…'; }
-  bwApi('solicitar',{cuenta_id:d.c.id,monto:d.monto,titular:d.tit,referencia:d.ref,fecha:d.fecha.toISOString(),comprobante:BW.comp.data,idem:BW.idem}).then(function(r){
+  bwApi('solicitar',{cuenta_id:d.c.id,monto_usd:d.usd,titular:d.tit,referencia:d.ref,fecha:d.fecha.toISOString(),comprobante:BW.comp.data,idem:BW.idem}).then(function(r){
     BW.env=false;
     if(!r||!r.ok){ var e=bwEl('bw-e2'); if(b){ b.disabled=false; b.innerHTML='<i data-i="send"></i> Confirmar y enviar'; bwIcons(bwEl('bw-ov')); } if(e){ e.textContent=(r&&r.message)||'No se pudo enviar la solicitud'; e.style.display='block'; } return; }
-    bwNuevoIdem(); bwQuitarComp(); ['bw-monto','bw-titular','bw-refe'].forEach(function(i){ bwEl(i).value=''; }); bwEl('bw-cuenta').value=''; bwFechaAhora(true);
+    bwNuevoIdem(); bwQuitarComp(); ['bw-monto','bw-titular','bw-refe'].forEach(function(i){ bwEl(i).value=''; }); bwEl('bw-cuenta').value=''; bwCotizar(); bwFechaAhora(true);
     bwHoja('<div style="text-align:center;padding:.6rem 0 .2rem"><span class="bw-ib" style="margin:0 auto .7rem;width:56px;height:56px;font-size:1.7rem;background:rgba(37,211,102,.14);color:#25d366"><i data-i="check"></i></span>'
       +'<h3 style="justify-content:center">Solicitud recibida</h3><p class="s">Tu recarga de '+bwMXN(r.item?r.item.monto:d.monto)+' está <b style="color:#ffb84d">pendiente de revisión</b>. Te avisaremos aquí cuando se resuelva.</p></div>'
       +'<button type="button" class="bw-btn bw-p" onclick="bwCerrar();bwIr(\'bw-mis\')">Ver mis recargas</button><button type="button" class="bw-btn" onclick="bwCerrar()">Cerrar</button>');
@@ -18611,7 +18645,7 @@ function bwDetalle(i){
   var x=(BW.mis||[])[i]; if(!x) return;
   function kv(a,b){ return '<div class="bw-kv"><span>'+bwEsc(a)+'</span><b>'+b+'</b></div>'; }
   bwHoja('<h3>Detalle de la recarga <button type="button" onclick="bwCerrar()">✕</button></h3><div style="margin:.2rem 0 .5rem"><span class="bw-st '+x.estado+'">'+BW_EST[x.estado]+'</span></div>'
-    +kv('Cantidad depositada',bwEsc(bwMXN(x.monto)))+kv('Banco utilizado',bwEsc(x.banco))+kv('Referencia',bwEsc(x.referencia))+kv('Titular de la transferencia',bwEsc(x.titular))
+    +kv('Cantidad acreditada',bwEsc(bwMXN(x.monto)))+(x.monto_usd?kv('Cantidad recargada',bwEsc(bwNum(x.monto_usd)+' USD')):'')+(x.monto_local&&x.moneda?kv('Pagaste',bwEsc(bwMoneda(x.monto_local,x.moneda))):'')+kv('Banco utilizado',bwEsc(x.banco))+kv('Referencia',bwEsc(x.referencia))+kv('Titular de la transferencia',bwEsc(x.titular))
     +kv('Fecha de la transferencia',bwFH(x.fecha_transferencia))+kv('Fecha de solicitud',bwFH(x.creada))+kv('Fecha de resolución',x.resuelta?bwFH(x.resuelta):'En revisión')
     +(x.estado==='rechazada'?'<div class="bw-rej"><b>Motivo del rechazo</b>'+bwEsc(x.motivo_rechazo||'Sin motivo indicado')+'</div>':'')
     +(x.estado==='aprobada'?'<p class="bw-note" style="color:#25d366">El saldo ya fue acreditado a tu billetera.</p>':'')
@@ -18628,7 +18662,7 @@ function bwVerComp(i){
   });
 }
 function bwNueva(i){
-  var x=BW.mis[i]; bwCerrar(); var s=bwEl('bw-cuenta'); (BW.cuentas||[]).forEach(function(c){ if(c.nombre===x.banco) s.value=c.id; }); bwEl('bw-monto').value=x.monto; bwIr('bw-form'); }
+  var x=BW.mis[i]; bwCerrar(); var s=bwEl('bw-cuenta'); (BW.cuentas||[]).forEach(function(c){ if(c.nombre===x.banco) s.value=c.id; }); bwEl('bw-monto').value=x.monto_usd||''; bwCotizar(); bwIr('bw-form'); }
 
 /* ── Historial de la billetera ── */
 function bwCargarMovs(){
@@ -18687,7 +18721,7 @@ function depToast(m){ if(typeof showToast==='function') showToast(m,3500); else 
 function depAdmCargar(){
   var s=document.getElementById('adms-depositos'); if(!s) return;
   s.innerHTML='<div class="adm-card-title">💳 Depósitos · recargas de saldo</div>'
-    +'<div class="dp-tabs"><button type="button" data-t="sol" onclick="depTab(\'sol\')">Solicitudes</button><button type="button" data-t="cue" onclick="depTab(\'cue\')">Cuentas bancarias</button><button type="button" data-t="aud" onclick="depTab(\'aud\')">Historial de operaciones</button></div>'
+    +'<div class="dp-tabs"><button type="button" data-t="sol" onclick="depTab(\'sol\')">Solicitudes</button><button type="button" data-t="cue" onclick="depTab(\'cue\')">Métodos de pago</button><button type="button" data-t="aud" onclick="depTab(\'aud\')">Historial de operaciones</button></div>'
     +'<div id="dp-body"></div>';
   depTab(DEP.tab||'sol');
 }
@@ -18767,13 +18801,20 @@ function depCuePintar(){
   var e=DEP.ed, h='<div class="dp-c"><div class="dp-top"><b>'+(e?'Editar cuenta':'Agregar cuenta')+'</b></div>'
    +'<div class="dp-fm"><label>Banco</label><input id="dc-n" maxlength="40" value="'+depEsc(e?e.nombre:'')+'" placeholder="Ej. Klar">'
    +'<label>Titular</label><input id="dc-t" maxlength="80" value="'+depEsc(e?e.titular:'')+'" placeholder="Nombre del titular">'
-   +'<label>CLABE (18 dígitos)</label><input id="dc-c" inputmode="numeric" maxlength="22" value="'+depEsc(e?e.clabe:'')+'" placeholder="000000000000000000">'
+   +'<label>País (código, ej. MX, PE, AR) y moneda (ej. MXN, PEN)</label><div style="display:flex;gap:.5rem"><input id="dc-p" maxlength="4" value="'+depEsc(e&&e.pais?e.pais:'MX')+'" placeholder="PE" style="flex:1"><input id="dc-m" maxlength="3" value="'+depEsc(e&&e.moneda?e.moneda:'MXN')+'" placeholder="PEN" style="flex:1"><input id="dc-b" maxlength="8" value="'+depEsc(e&&e.bandera?e.bandera:'')+'" placeholder="🇵🇪" style="flex:1"></div>'
+   +'<label>CLABE (18 dígitos) — solo para México</label><input id="dc-c" inputmode="numeric" maxlength="22" value="'+depEsc(e&&(!e.moneda||e.moneda==='MXN')?e.clabe:'')+'" placeholder="000000000000000000">'
+   +'<label>Datos de pago (uno por línea: Etiqueta: valor; agrega * al final si se puede copiar)</label><textarea id="dc-d" rows="4" placeholder="Yape: 996431336*&#10;BCP: 19106409557098*">'+depEsc(e&&e.detalle?e.detalle.map(function(d){ return d.et+': '+d.val+(d.copiar?'*':''); }).join('\n'):'')+'</textarea>'
+   +'<label>Comisión fija en moneda local (ya se suma al total)</label><input id="dc-k" type="number" min="0" step="0.01" value="'+depEsc(e&&e.comision!=null?e.comision:0)+'">'
+   +'<label>Comisión en % (ej. 7.1 = 7.1% extra sobre el monto)</label><input id="dc-kp" type="number" min="0" max="50" step="0.01" value="'+depEsc(e&&e.comision_pct!=null?e.comision_pct:0)+'">'
+   +'<label>Tipo de cambio por 1 USD (vacío = el del día)</label><input id="dc-x" type="number" min="0" step="0.0001" value="'+depEsc(e&&e.tasa?e.tasa:'')+'" placeholder="Ej. 3.50">'
+   +'<label>Nota importante para el cliente</label><input id="dc-no" maxlength="300" value="'+depEsc(e&&e.nota?e.nota:'')+'" placeholder="Ej. En concepto colocar: …">'
+   +'<label class="dp-ck"><input id="dc-q" type="checkbox" '+(e&&e.construccion?'checked':'')+'> En construcción (se ve, pero nadie puede usarlo)</label>'
    +'<label>Orden</label><input id="dc-o" type="number" min="0" max="999" value="'+depEsc(e?e.orden:(DEP.cuentas.length+1))+'">'
    +'<label class="dp-ck"><input id="dc-a" type="checkbox" '+(!e||e.activa?'checked':'')+'> Activa (visible para los clientes)</label>'
    +'<div class="dp-ac"><button type="button" class="ok" onclick="depCueGuardar()">'+(e?'Guardar cambios':'Agregar cuenta')+'</button>'+(e?'<button type="button" onclick="DEP.ed=null;depCuePintar()">Cancelar</button>':'')+'</div></div></div>';
   h+=DEP.cuentas.map(function(c,i){
     return '<div class="dp-c"><div class="dp-top"><div><b>'+depEsc(c.nombre)+'</b><small>'+depEsc(c.titular)+'</small></div><span class="dp-st '+(c.activa?'aprobada':'rechazada')+'">'+(c.activa?'Activa':'Desactivada')+'</span></div>'
-     +'<div class="dp-g"><span>CLABE</span><b>'+depEsc(c.clabe)+'</b><span>Orden</span><b>'+depEsc(c.orden)+'</b></div>'
+     +'<div class="dp-g"><span>'+(c.moneda&&c.moneda!=='MXN'?'Moneda':'CLABE')+'</span><b>'+depEsc(c.moneda&&c.moneda!=='MXN'?(c.moneda+(c.comision>0?' · comisión +'+c.comision:'')+(c.comision_pct>0?' · +'+c.comision_pct+'%':'')+(c.construccion?' · EN CONSTRUCCIÓN':'')):c.clabe)+'</b><span>Orden</span><b>'+depEsc(c.orden)+'</b></div>'
      +'<div class="dp-ac"><button type="button" onclick="depCueEditar('+i+')">✎ Editar</button><button type="button" onclick="depCueToggle('+i+')">'+(c.activa?'Desactivar':'Activar')+'</button><button type="button" class="no" onclick="depCueBorrar('+i+')">🗑 Eliminar</button></div></div>';
   }).join('');
   if(!DEP.cuentas.length) h+='<div class="dp-v">No hay cuentas. Los clientes verán "Buscamos banca" hasta que agregues una activa.</div>';
@@ -18781,11 +18822,13 @@ function depCuePintar(){
 }
 function depCueEditar(i){ DEP.ed=DEP.cuentas[i]; depCuePintar(); try{ document.getElementById('dc-n').scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){} }
 function depCueGuardar(){
-  var d={nombre:document.getElementById('dc-n').value,titular:document.getElementById('dc-t').value,clabe:document.getElementById('dc-c').value,orden:document.getElementById('dc-o').value,activa:document.getElementById('dc-a').checked};
+  var g=function(i){ return document.getElementById(i); };
+  var det=g('dc-d').value.split('\n').map(function(l){ l=l.trim(); if(!l) return null; var cp=/\*$/.test(l); l=l.replace(/\*$/,'').trim(); var k=l.indexOf(':'); if(k<1) return null; return {et:l.slice(0,k).trim(),val:l.slice(k+1).trim(),copiar:cp}; }).filter(Boolean);
+  var d={nombre:g('dc-n').value,titular:g('dc-t').value,clabe:g('dc-c').value,orden:g('dc-o').value,activa:g('dc-a').checked,pais:g('dc-p').value,moneda:g('dc-m').value,bandera:g('dc-b').value,detalle:det,comision:g('dc-k').value,comision_pct:g('dc-kp').value,tasa:g('dc-x').value,nota:g('dc-no').value,construccion:g('dc-q').checked};
   if(DEP.ed) d.id=DEP.ed.id;
   depApi('admin_cuenta_guardar',d).then(function(r){ if(!r||!r.ok){ depToast((r&&r.message)||'No se pudo guardar'); return; } depToast('Cuenta guardada. Ya se ve en la Billetera.'); DEP.ed=null; depCueCargar(); });
 }
-function depCueToggle(i){ var c=DEP.cuentas[i]; depApi('admin_cuenta_guardar',{id:c.id,nombre:c.nombre,titular:c.titular,clabe:c.clabe,orden:c.orden,activa:!c.activa}).then(function(r){ if(!r||!r.ok){ depToast((r&&r.message)||'No se pudo cambiar'); return; } depCueCargar(); }); }
+function depCueToggle(i){ var c=DEP.cuentas[i]; depApi('admin_cuenta_guardar',Object.assign({id:c.id,nombre:c.nombre,titular:c.titular,clabe:c.clabe,orden:c.orden,activa:!c.activa},c.pais!==undefined?{pais:c.pais,moneda:c.moneda,bandera:c.bandera,detalle:c.detalle||[],comision:c.comision,comision_pct:c.comision_pct,tasa:c.tasa,nota:c.nota,construccion:!!c.construccion}:{})).then(function(r){ if(!r||!r.ok){ depToast((r&&r.message)||'No se pudo cambiar'); return; } depCueCargar(); }); }
 function depCueBorrar(i){ var c=DEP.cuentas[i]; if(!confirm('¿Eliminar la cuenta '+c.nombre+'?\nLas solicitudes ya hechas conservan su banco.')) return; depApi('admin_cuenta_borrar',{id:c.id}).then(function(r){ if(!r||!r.ok){ depToast((r&&r.message)||'No se pudo eliminar'); return; } depToast('Cuenta eliminada'); depCueCargar(); }); }
 /* — Historial de operaciones — */
 function depAudCargar(){
