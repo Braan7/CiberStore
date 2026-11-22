@@ -3258,9 +3258,8 @@ document.addEventListener('DOMContentLoaded', function(){
     var loginVis=document.getElementById('auth-login')&&document.getElementById('auth-login').style.display!=='none';
     var regVis=document.getElementById('auth-register')&&document.getElementById('auth-register').style.display!=='none';
     var admVis=document.getElementById('auth-admin')&&document.getElementById('auth-admin').style.display!=='none';
-    if(loginVis) doLogin();
-    else if(regVis) doRegister();
-    else if(admVis) doAdminLogin();
+    if(loginVis||regVis) return; /* los formularios Auth 2.0 envían con Enter por sí solos */
+    if(admVis) doAdminLogin();
   });
   /* Render all sections after SB integration loads */
   setTimeout(function(){
@@ -15932,7 +15931,7 @@ function csVerificarVersion(forzar){
     if(b && b !== CS_BUILD){
       /* Anti-bucle: si ya se intentó actualizar a esta misma versión 2 veces y la página sigue igual (archivos publicados que no coinciden), se deja de insistir */
       var n = 0; try{ n = Number(sessionStorage.getItem('cs_reload_' + b)) || 0; }catch(e){}
-      if(n >= 2) return false;
+      if(n >= 1) return false;   /* ya se intentó una vez: no se vuelve a mostrar el aviso para esta versión */
       csMarcarViejo(b); return true;
     }
     return false;
@@ -15970,8 +15969,8 @@ function csMarcarViejo(nuevo){
 (function(){ try{ if(/[?&]cs_v=/.test(location.search)){ var q = location.search.replace(/([?&])cs_v=[^&]*&?/g, '$1').replace(/[?&]$/, ''); history.replaceState(null, '', location.pathname + q + location.hash); } }catch(e){} })();
 // Cuándo revisar: al abrir, cada minuto, al volver a la pestaña, al recuperar internet y al volver con el botón "atrás"
 setTimeout(function(){ csVerificarVersion(true); }, 4000);
-setInterval(function(){ if(document.visibilityState === 'visible') csVerificarVersion(); }, 60000);
-document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible') csVerificarVersion(); });
+setInterval(function(){ if(document.visibilityState === 'visible') csVerificarVersion(); }, 180000);
+document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible' && Date.now() - _csUltimo > 120000) csVerificarVersion(); });
 window.addEventListener('pageshow', function(e){ if(e.persisted) csVerificarVersion(true); });
 window.addEventListener('online', function(){ csVerificarVersion(true); });
 // Antes de cualquier compra se vuelve a revisar (sin frenar la compra si no hay red)
@@ -21408,3 +21407,129 @@ function prdGuardar(){
     } else if(msg){ msg.textContent = '✗ ' + ((r && r.message) || 'No se pudo guardar'); }
   });
 }
+
+/* ===== AUTH 2.0 (login / registro) ===== */
+var AU_PAISES=[
+['México','🇲🇽','52',10],['Estados Unidos','🇺🇸','1',10],['Canadá','🇨🇦','1',10],['Colombia','🇨🇴','57',10],['Perú','🇵🇪','51',9],['Argentina','🇦🇷','54',10],['Ecuador','🇪🇨','593',9],['Chile','🇨🇱','56',9],['Brasil','🇧🇷','55',11],['Venezuela','🇻🇪','58',10],['Bolivia','🇧🇴','591',8],['Paraguay','🇵🇾','595',9],['Uruguay','🇺🇾','598',8],['Guatemala','🇬🇹','502',8],['El Salvador','🇸🇻','503',8],['Honduras','🇭🇳','504',8],['Nicaragua','🇳🇮','505',8],['Costa Rica','🇨🇷','506',8],['Panamá','🇵🇦','507',8],['República Dominicana','🇩🇴','1',10],['Puerto Rico','🇵🇷','1',10],['Cuba','🇨🇺','53',8],['España','🇪🇸','34',9],['Francia','🇫🇷','33',9],['Italia','🇮🇹','39',10],['Alemania','🇩🇪','49',11],['Reino Unido','🇬🇧','44',10],['Portugal','🇵🇹','351',9]
+];
+window.AU_LARGO={};AU_PAISES.forEach(function(p){if(!window.AU_LARGO[p[2]])window.AU_LARGO[p[2]]=p[3];});
+var AU={busy:false,pais:0,hl:-1,vis:[]};
+function $a(i){return document.getElementById(i);}
+function auErr(f,msg){var w=$a('f-'+f),e=$a('fe-'+f);if(!w)return;if(msg){w.classList.add('bad');w.classList.remove('good');if(e)e.textContent=msg;}else{w.classList.remove('bad');if(e)e.textContent='';}}
+function auOk(f){var w=$a('f-'+f);if(w){w.classList.remove('bad');w.classList.add('good');}}
+function auLimpiarErr(){['login-user','login-pass','reg-user','reg-nombre','reg-wa','reg-pass','reg-pass2','reg-ref','reg-terms'].forEach(function(f){auErr(f,'');var w=$a('f-'+f);if(w)w.classList.remove('good');});['login-err','reg-err','reg-ok'].forEach(function(i){var e=$a(i);if(e)e.style.display='none';});}
+function auEye(id,btn){var i=$a(id);if(!i)return;var show=i.type==='password';i.type=show?'text':'password';btn.setAttribute('aria-pressed',show?'true':'false');btn.setAttribute('aria-label',show?'Ocultar contraseña':'Mostrar contraseña');}
+function auBusy(btn,on){AU.busy=on;if(!btn)return;btn.disabled=on;btn.classList.toggle('load',on);}
+function auSexo(v,btn){var h=$a('reg-sexo');var on=btn.getAttribute('aria-pressed')==='true';document.querySelectorAll('#auth-register .au-seg button').forEach(function(b){b.setAttribute('aria-pressed','false');});if(on){h.value='';}else{h.value=v;btn.setAttribute('aria-pressed','true');}}
+/* pestañas */
+authTab=function(tab){
+  AU.busy=false;
+  ['auth-login','auth-register','auth-admin'].forEach(function(id){var el=$a(id);if(el)el.style.display='none';});
+  var panel=$a('auth-'+tab);if(panel)panel.style.display='block';
+  ['login','register'].forEach(function(t){var b=$a('atab-'+t);if(!b)return;var on=(t===tab);b.classList.toggle('on',on);b.setAttribute('aria-selected',on?'true':'false');});
+  var d=$a('au-done');if(d)d.hidden=true;var fr=$a('au-form-reg');if(fr)fr.style.display='';
+  auLimpiarErr();auPaisCerrar();
+  ['btn-do-login','btn-do-reg'].forEach(function(i){var b=$a(i);if(b){b.disabled=false;b.classList.remove('load');}});
+  var inp=$a(tab==='login'?'login-user':tab==='register'?'reg-user':'adm-auth-email');
+  if(inp&&window.innerWidth>720)setTimeout(function(){try{inp.focus();}catch(e){}},30);
+};
+/* login */
+function auLogin(ev){
+  if(ev&&ev.preventDefault)ev.preventDefault();
+  if(AU.busy)return false;
+  var u=$a('login-user').value.trim(),p=$a('login-pass').value,bad=false;
+  auErr('login-user','');auErr('login-pass','');$a('login-err').style.display='none';
+  if(!u){auErr('login-user','Ingresa tu usuario');bad=true;}
+  if(!p){auErr('login-pass','Ingresa tu contraseña');bad=true;}
+  if(bad)return false;
+  var btn=$a('btn-do-login');auBusy(btn,true);
+  var r;try{r=doLogin();}catch(e){r=null;showAuthMsg('login-err','Error inesperado. Intenta de nuevo.');}
+  Promise.resolve(r).then(function(){},function(){}).then(function(){
+    var m=$a('auth-modal');if(m&&m.style.display==='none'){auBusy(btn,false);$a('login-pass').value='';return;}
+    var bl=false;try{bl=!!isBlocked(u.toLowerCase());}catch(e){}
+    AU.busy=false;btn.classList.remove('load');if(!bl)btn.disabled=false;
+  });
+  return false;
+}
+function auForgot(){
+  var u=$a('login-user').value.trim();
+  var t='Hola, olvidé mi contraseña de CiberStore'+(u?'. Mi usuario es: '+u:'')+'. ¿Me ayudan a recuperarla?';
+  var w=window.open('https://wa.me/573158844459?text='+encodeURIComponent(t),'_blank','noopener');
+  if(!w){var e=$a('login-err');if(e){e.setAttribute('data-k','info');e.textContent='Escríbenos por WhatsApp al +57 315 884 4459 para recuperar tu cuenta.';e.style.display='block';}}
+}
+function auGuest(){doGuest();}
+/* registro */
+function auLargo(){var l=$a('reg-lada').value;return window.AU_LARGO[l]||null;}
+function auWA(){var raw=$a('reg-whatsapp').value.replace(/\D/g,''),l=$a('reg-lada').value;if(raw.charAt(0)==='0')raw=raw.slice(1);if(raw.indexOf(l)===0&&raw.length>(auLargo()||10))raw=raw.slice(l.length);return raw;}
+function auPreview(){var raw=auWA(),pv=$a('reg-wa-preview');if(raw.length>=7){$a('reg-wa-full').textContent='+'+$a('reg-lada').value+' '+raw;pv.style.display='block';}else pv.style.display='none';}
+function auVal(f){
+  var v;
+  if(f==='reg-user'){v=$a('reg-user').value.trim().toLowerCase();if(v.length<3)return'El usuario debe tener al menos 3 caracteres';if(!/^[a-z0-9_]+$/.test(v))return'Solo letras, números y guion bajo';}
+  else if(f==='reg-nombre'){v=$a('reg-nombre').value.trim();if(v.length<2)return'Ingresa tu nombre completo';}
+  else if(f==='reg-wa'){var raw=auWA(),L=auLargo();if(!raw)return'Ingresa tu número de WhatsApp';if(L&&raw.length!==L)return'El número debe tener '+L+' dígitos para este país';if(!L&&(raw.length<7||raw.length>12))return'Número de WhatsApp inválido';if(/^(\d)\1+$/.test(raw))return'Ese número no es válido';}
+  else if(f==='reg-pass'){v=$a('reg-pass').value;if(v.length<6)return'Mínimo 6 caracteres';}
+  else if(f==='reg-pass2'){if($a('reg-pass2').value!==$a('reg-pass').value||!$a('reg-pass2').value)return'Las contraseñas no coinciden';}
+  else if(f==='reg-terms'){if(!$a('reg-terms').checked)return'Debes aceptar los términos y condiciones';}
+  return'';
+}
+function auRegister(ev){
+  if(ev&&ev.preventDefault)ev.preventDefault();
+  if(AU.busy)return false;
+  var first=null;
+  ['reg-user','reg-nombre','reg-wa','reg-pass','reg-pass2','reg-terms'].forEach(function(f){var m=auVal(f);auErr(f,m);if(m&&!first)first=f;});
+  ['reg-err','reg-ok'].forEach(function(i){$a(i).style.display='none';});
+  if(first){var el=$a(first==='reg-wa'?'reg-whatsapp':first);if(el&&el.focus)try{el.focus();}catch(e){}return false;}
+  var btn=$a('btn-do-reg');auBusy(btn,true);
+  var refc=($a('reg-ref').value||'').trim().toUpperCase();
+  var chk=Promise.resolve(true);
+  if(refc){chk=sb.get('profiles','ref_code=eq.'+encodeURIComponent(refc)+'&select=id').then(function(r){if(!r||!r.length){auErr('reg-ref','Ese código de referido no existe');auRef(true);return false;}auErr('reg-ref','');window.__auRef=refc;return true;}).catch(function(){window.__auRef=refc;return true;});}
+  else window.__auRef='';
+  chk.then(function(ok){
+    if(!ok){auBusy(btn,false);return;}
+    var r;try{r=doRegister();}catch(e){showAuthMsg('reg-err','Error inesperado. Intenta de nuevo.');}
+    return Promise.resolve(r).then(function(){},function(){}).then(function(){
+      var okEl=$a('reg-ok');
+      if(okEl&&okEl.style.display!=='none'&&/creada/i.test(okEl.textContent)){
+        $a('reg-ok').style.display='none';$a('au-form-reg').style.display='none';$a('au-done').hidden=false;
+        setTimeout(function(){auBusy(btn,false);},1500);
+      }else{okEl.style.display='none';auBusy(btn,false);}
+    });
+  });
+  return false;
+}
+function auRef(forzar){var b=$a('au-reft'),bx=$a('au-refbox');var abrir=forzar===true?true:bx.hidden;bx.hidden=!abrir;b.setAttribute('aria-expanded',abrir?'true':'false');if(abrir&&forzar!==true)setTimeout(function(){$a('reg-ref').focus();},20);}
+/* selector de país */
+function auPaisRender(q){
+  q=(q||'').trim().toLowerCase().replace(/^\+/,'');var l=$a('au-list');l.innerHTML='';AU.vis=[];
+  var norm=function(s){return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');};
+  AU_PAISES.forEach(function(p,i){if(!q||norm(p[0]).indexOf(norm(q))>-1||p[2].indexOf(q)===0)AU.vis.push(i);});
+  if(!AU.vis.length){l.innerHTML='<div class="au-vac">Sin resultados</div>';return;}
+  AU.vis.forEach(function(i,k){var p=AU_PAISES[i],b=document.createElement('button');b.type='button';b.className='au-it';b.setAttribute('role','option');b.setAttribute('aria-selected',i===AU.pais?'true':'false');
+    b.innerHTML='<span class="au-fl"></span><span class="n"></span><span class="d"></span>';b.children[0].textContent=p[1];b.children[1].textContent=p[0];b.children[2].textContent='+'+p[2];
+    b.onclick=function(){auPaisElegir(i);};l.appendChild(b);});
+}
+function auPaisToggle(){var pop=$a('au-pop');if(pop.hidden){pop.hidden=false;$a('au-cc').setAttribute('aria-expanded','true');$a('au-q').value='';auPaisRender('');AU.hl=-1;if(window.innerWidth>720)setTimeout(function(){$a('au-q').focus();},20);var s=pop.querySelector('[aria-selected="true"]');if(s)s.scrollIntoView({block:'nearest'});}else auPaisCerrar();}
+function auPaisCerrar(){var pop=$a('au-pop');if(pop&&!pop.hidden){pop.hidden=true;$a('au-cc').setAttribute('aria-expanded','false');}}
+function auPaisFiltrar(){auPaisRender($a('au-q').value);AU.hl=-1;}
+function auPaisElegir(i){AU.pais=i;var p=AU_PAISES[i];$a('au-cc-fl').textContent=p[1];$a('au-cc-d').textContent='+'+p[2];$a('reg-lada').value=p[2];auPaisCerrar();auPreview();var f=$a('f-reg-wa');if(f.classList.contains('bad'))auErr('reg-wa',auVal('reg-wa'));$a('reg-whatsapp').placeholder='Ej: '+(p[3]===10?'5512345678':p[3]===9?'912345678':p[3]===8?'51234567':'11987654321');$a('reg-whatsapp').focus();}
+function auPaisTecla(e){var its=document.querySelectorAll('#au-list .au-it');if(e.key==='Escape'){auPaisCerrar();$a('au-cc').focus();e.stopPropagation();return;}
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(!its.length)return;AU.hl=(AU.hl+(e.key==='ArrowDown'?1:-1)+its.length)%its.length;its.forEach(function(x,k){x.classList.toggle('hl',k===AU.hl);});its[AU.hl].scrollIntoView({block:'nearest'});}
+  else if(e.key==='Enter'){e.preventDefault();e.stopPropagation();var k=AU.hl>=0?AU.hl:0;if(AU.vis.length)auPaisElegir(AU.vis[k]);}}
+/* términos */
+function auSheet(t){var s=$a('au-sheet'),b=$a('au-sheet-b');$a('au-sheet-t').textContent='Términos y condiciones';b.innerHTML='';
+  var src=document.getElementById('page-terminos');
+  if(src){var c=src.cloneNode(true);c.removeAttribute('id');c.className='';c.querySelectorAll('[id]').forEach(function(x){x.removeAttribute('id');});c.querySelectorAll('.ptitle,.psub,button,a').forEach(function(x){x.remove();});c.style.cssText='display:block';b.appendChild(c);}
+  else b.textContent='Al usar CiberStore aceptas nuestros términos y la política de reembolso.';
+  s.hidden=false;var bk=s.querySelector('.au-back');if(bk)bk.focus();}
+function auSheetCerrar(){$a('au-sheet').hidden=true;}
+document.addEventListener('DOMContentLoaded',function(){
+  var w=$a('reg-whatsapp');if(w)w.addEventListener('input',function(){w.value=w.value.replace(/[^\d\s\-()]/g,'');auPreview();if($a('f-reg-wa').classList.contains('bad'))auErr('reg-wa',auVal('reg-wa'));});
+  var blur={'reg-user':'reg-user','reg-nombre':'reg-nombre','reg-pass':'reg-pass','reg-pass2':'reg-pass2'};
+  Object.keys(blur).forEach(function(k){var e=$a(k);if(!e)return;e.addEventListener('blur',function(){if(e.value||$a('f-'+k).classList.contains('bad')){var m=auVal(k);if(m)auErr(k,m);else{auErr(k,'');if(e.value)auOk(k);}}});e.addEventListener('input',function(){if($a('f-'+k).classList.contains('bad')){var m=auVal(k);if(!m)auErr(k,'');}if(k==='reg-pass'&&$a('reg-pass2').value&&$a('f-reg-pass2').classList.contains('bad')&&!auVal('reg-pass2'))auErr('reg-pass2','');});});
+  var t=$a('reg-terms');if(t)t.addEventListener('change',function(){if(t.checked)auErr('reg-terms','');});
+  ['login-user','login-pass'].forEach(function(k){var e=$a(k);if(e)e.addEventListener('input',function(){auErr(k,'');$a('login-err').style.display='none';});});
+  var ru=$a('reg-user');if(ru)ru.addEventListener('input',function(){ru.value=ru.value.toLowerCase().replace(/[^a-z0-9_]/g,'');});
+  document.addEventListener('mousedown',function(e){var p=$a('au-pop');if(p&&!p.hidden&&!e.target.closest('#au-wa'))auPaisCerrar();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'){var s=$a('au-sheet');if(s&&!s.hidden){auSheetCerrar();return;}auPaisCerrar();}},true);
+  var rem=$a('login-remember');
+});

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta name="cs-build" content="293f6ec9d1">
-<script>var CS_BUILD="293f6ec9d1";</script>
+<meta name="cs-build" content="1214e0d55d">
+<script>var CS_BUILD="1214e0d55d";</script>
 <meta charset="UTF-8"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -7205,102 +7205,139 @@ select.ap-inp{flex:0 1 auto}
 
 <!-- AUTH MODAL -->
 <div id="auth-modal" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(7,9,15,.97);align-items:center;justify-content:center;padding:1rem">
-  <div style="background:#0b0b0b;border:1px solid rgba(27,135,245,.3);border-radius:16px;width:min(420px,96%);max-height:90vh;overflow-y:auto">
+  <div class="au" id="au-card" role="dialog" aria-modal="true" aria-labelledby="au-brand">
+    <div class="au-brand" id="au-brand" aria-label="CiberStore"><span>CIBER</span><b>STORE</b></div>
 
-    <!-- Tabs -->
-    <div style="display:flex;border-bottom:1px solid rgba(255,255,255,.08)">
-      <button id="atab-login" onclick="authTab('login')" style="flex:1;padding:.85rem;background:none;border:none;border-bottom:2px solid #1b87f5;color:#1b87f5;font-family:'Barlow',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer">Iniciar sesion</button>
-      <button id="atab-register" onclick="authTab('register')" style="flex:1;padding:.85rem;background:none;border:none;border-bottom:2px solid transparent;color:#5a6580;font-family:'Barlow',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer">Registrarse</button>
+    <div class="au-tabs" role="tablist" aria-label="Acceso">
+      <button type="button" id="atab-login" class="au-tab on" role="tab" aria-selected="true" aria-controls="auth-login" onclick="authTab('login')">Iniciar sesión</button>
+      <button type="button" id="atab-register" class="au-tab" role="tab" aria-selected="false" aria-controls="auth-register" onclick="authTab('register')">Registrarse</button>
     </div>
 
     <!-- LOGIN -->
-    <div id="auth-login" style="padding:1.5rem">
-    <form onsubmit="doLogin(); return false;" autocomplete="on">
-      <div style="text-align:center;margin-bottom:1.25rem">
-        <div style="font-family:Saira,sans-serif;font-size:1.6rem;font-weight:900;letter-spacing:3px"><span style="color:#ffffff">CIBER</span><span style="color:#1b87f5">STORE</span></div>
-      </div>
-      <p style="color:#8892b0;font-size:.82rem;text-align:center;margin-bottom:1rem">Inicia sesion para acceder a todos los servicios</p>
-      <div style="display:flex;align-items:center;gap:.6rem;background:rgba(27,135,245,.08);border:1px solid rgba(27,135,245,.28);border-radius:11px;padding:.7rem .85rem;margin-bottom:1.25rem">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1b87f5" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M12 11c0 3-1 5-1 5m5-6.5c0 3.5-1 6.5-1 6.5M7 13c0-.5 0-1 .1-1.5M12 7a5 5 0 0 1 5 5M4.5 10a8 8 0 0 1 13-2.5M9 4.5a8 8 0 0 1 6.5.3M8 20c-1.5-2-2-4-2-6a6 6 0 0 1 .2-1.5"/></svg>
-        <div style="font-size:.73rem;color:#c9d1e0;line-height:1.5"><b style="color:#1b87f5">Guarda tu contrasena</b> cuando el telefono te lo pregunte, y la proxima vez entra con tu <b style="color:#fff">huella</b>.</div>
-      </div>
-      <div id="login-err" style="background:rgba(255,80,80,.12);border:1px solid rgba(255,80,80,.3);color:#ff6b6b;border-radius:6px;padding:.52rem .78rem;font-size:.78rem;margin-bottom:.78rem;display:none"></div>
-      <label style="display:block;font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#5a6580;margin-bottom:.25rem">Usuario</label>
-      <input id="login-user" type="text" placeholder="Tu nombre de usuario" autocomplete="username" style="width:100%;background:#17181b;border:1px solid rgba(27,135,245,.2);color:#ffffff;border-radius:5px;padding:.52rem .78rem;font-family:'Barlow',sans-serif;font-size:.86rem;margin-bottom:.78rem;box-sizing:border-box"/>
-      <label style="display:block;font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#5a6580;margin-bottom:.25rem">Contrase&ntilde;a</label>
-      <div style="position:relative;margin-bottom:.78rem">
-        <input id="login-pass" type="password" placeholder="Tu contrasena" autocomplete="current-password" style="width:100%;background:#17181b;border:1px solid rgba(27,135,245,.2);color:#ffffff;border-radius:5px;padding:.52rem 2.5rem .52rem .78rem;font-family:'Barlow',sans-serif;font-size:.86rem;box-sizing:border-box"/>
-        <button type="button" onclick="togglePass('login-pass','eye-login')" style="position:absolute;right:.6rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#5a6580;font-size:1rem;padding:.2rem;line-height:1" id="eye-login">&#128065;</button>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem">
-        <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;font-size:.78rem;color:#5a6580">
-          <input type="checkbox" id="login-remember" style="accent-color:#1b87f5;width:14px;height:14px;cursor:pointer"/>
-          Recordarme
-        </label>
-        <div id="login-attempts-info" style="font-size:.68rem;color:#ff6b6b;display:none"></div>
-      </div>
-      <button type="submit" id="btn-do-login" style="width:100%;padding:.76rem;border:none;border-radius:6px;font-family:'Barlow',sans-serif;font-weight:800;font-size:.83rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;background:linear-gradient(90deg,#128c3e,#25d366);color:#fff">&#128274; Entrar a CiberStore</button>
-      <button type="button" onclick="doGuest()" style="width:100%;padding:.55rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:#8892b0;border-radius:6px;font-family:'Barlow',sans-serif;font-weight:700;font-size:.78rem;cursor:pointer;margin-top:.45rem">&#128100; Continuar como invitado</button>
-      <p style="text-align:center;font-size:.78rem;color:#5a6580;margin-top:1rem">No tienes cuenta? <a onclick="authTab('register')" style="color:#1b87f5;cursor:pointer;font-weight:700">Registrate gratis</a></p>
-    </form>
+    <div id="auth-login" class="au-pane" role="tabpanel">
+      <form id="au-form-login" novalidate autocomplete="on" onsubmit="return auLogin(event)">
+        <h1 class="au-h">Bienvenido de nuevo</h1>
+        <p class="au-p">Accede a tu cuenta y continúa disfrutando de nuestros servicios</p>
+        <div id="login-err" class="au-bn" role="alert" style="display:none"></div>
+
+        <div class="au-f" id="f-login-user">
+          <label class="au-lab" for="login-user">Usuario</label>
+          <div class="au-in"><svg class="au-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c.9-3.6 3.9-5.4 7.5-5.4s6.6 1.8 7.5 5.4"/></svg>
+            <input id="login-user" type="text" placeholder="Tu usuario" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="40"></div>
+          <div class="au-fe" id="fe-login-user" role="alert"></div>
+        </div>
+
+        <div class="au-f" id="f-login-pass">
+          <label class="au-lab" for="login-pass">Contraseña</label>
+          <div class="au-in"><svg class="au-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="9.5" rx="2.2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>
+            <input id="login-pass" type="password" placeholder="Tu contraseña" autocomplete="current-password" maxlength="100">
+            <button type="button" class="au-eye" id="eye-login" aria-label="Mostrar contraseña" aria-pressed="false" onclick="auEye('login-pass',this)">
+              <svg class="e-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg>
+              <svg class="e-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 3.5l17 17"/><path d="M10.2 6a9.6 9.6 0 0 1 1.8-.5c6 0 9.5 6.5 9.5 6.5a16 16 0 0 1-2.9 3.7M6.6 7.3A15.6 15.6 0 0 0 2.5 12S6 18.5 12 18.5c1.6 0 3-.4 4.3-1"/><path d="M9.9 10a2.8 2.8 0 0 0 4 3.9"/></svg>
+            </button></div>
+          <div class="au-fe" id="fe-login-pass" role="alert"></div>
+        </div>
+
+        <div class="au-row">
+          <label class="au-ck"><input type="checkbox" id="login-remember"><span class="au-box" aria-hidden="true"></span><span>Recordarme</span></label>
+          <button type="button" class="au-link" onclick="auForgot()">¿Olvidaste tu contraseña?</button>
+        </div>
+        <div id="login-attempts-info" class="au-att" style="display:none"></div>
+
+        <button type="submit" id="btn-do-login" class="au-btn au-pri"><span class="au-bt">Iniciar sesión</span><span class="au-spin" aria-hidden="true"></span></button>
+        <button type="button" class="au-btn au-sec" id="au-guest" onclick="auGuest()">Continuar como invitado</button>
+        <p class="au-foot">¿No tienes cuenta? <button type="button" class="au-link" onclick="authTab('register')">Regístrate gratis</button></p>
+      </form>
     </div>
 
-    <!-- REGISTER -->
-    <div id="auth-register" style="padding:1.5rem;display:none">
-      <div style="text-align:center;margin-bottom:1.25rem">
-        <div style="font-family:Saira,sans-serif;font-size:1.6rem;font-weight:900;letter-spacing:3px"><span style="color:#ffffff">CIBER</span><span style="color:#1b87f5">STORE</span></div>
-      </div>
-      <p style="color:#8892b0;font-size:.82rem;text-align:center;margin-bottom:1.25rem">Crea tu cuenta gratis en segundos</p>
-      <div id="reg-err" style="background:rgba(255,80,80,.12);border:1px solid rgba(255,80,80,.3);color:#ff6b6b;border-radius:6px;padding:.52rem .78rem;font-size:.78rem;margin-bottom:.78rem;display:none"></div>
-      <div id="reg-ok"  style="background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.25);color:#00e676;border-radius:6px;padding:.52rem .78rem;font-size:.78rem;margin-bottom:.78rem;display:none"></div>
-      <label style="display:block;font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#5a6580;margin-bottom:.25rem">Usuario</label>
-      <input id="reg-user" type="text" placeholder="Ej: roberto123" autocomplete="username" style="width:100%;background:#17181b;border:1px solid rgba(27,135,245,.2);color:#fff;border-radius:5px;padding:.52rem .78rem;font-family:'Barlow',sans-serif;font-size:.86rem;margin-bottom:.78rem;box-sizing:border-box"/>
-      <label style="display:block;font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#5a6580;margin-bottom:.25rem">Nombre completo</label>
-      <input id="reg-nombre" type="text" placeholder="Ej: Roberto Gomez" style="width:100%;background:#17181b;border:1px solid rgba(27,135,245,.2);color:#fff;border-radius:5px;padding:.52rem .78rem;font-family:'Barlow',sans-serif;font-size:.86rem;margin-bottom:.78rem;box-sizing:border-box"/>
-      <label style="display:block;font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#5a6580;margin-bottom:.25rem">Sexo</label>
-      <div style="display:flex;gap:.4rem;margin-bottom:.78rem">
-        <button type="button" onclick="_regSetSexo('mujer',this)" class="reg-sexo-btn" data-sexo="mujer" style="flex:1;background:#17181b;border:1px solid rgba(27,135,245,.2);color:#9aa3b0;border-radius:5px;padding:.52rem;font-family:'Barlow',sans-serif;font-size:.8rem;cursor:pointer">Mujer</button>
-        <button type="button" onclick="_regSetSexo('hombre',this)" class="reg-sexo-btn" data-sexo="hombre" style="flex:1;background:#17181b;border:1px solid rgba(27,135,245,.2);color:#9aa3b0;border-radius:5px;padding:.52rem;font-family:'Barlow',sans-serif;font-size:.8rem;cursor:pointer">Hombre</button>
-        <button type="button" onclick="_regSetSexo('otro',this)" class="reg-sexo-btn" data-sexo="otro" style="flex:1;background:#17181b;border:1px solid rgba(27,135,245,.2);color:#9aa3b0;border-radius:5px;padding:.52rem;font-family:'Barlow',sans-serif;font-size:.8rem;cursor:pointer">Otro</button>
-      </div>
-      <input type="hidden" id="reg-sexo" value=""/>
-      <label style="display:block;font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#5a6580;margin-bottom:.25rem">WhatsApp</label>
-      <div style="display:flex;gap:.4rem;margin-bottom:.78rem">
-        <select id="reg-lada" style="background:#17181b;border:1px solid rgba(27,135,245,.2);color:#fff;border-radius:5px;padding:.52rem .5rem;font-family:'Barlow',sans-serif;font-size:.82rem;flex-shrink:0;cursor:pointer;width:120px">
-          <option value="52">&#51545a;&#127485; +52 MX</option>
-          <option value="1">&#127482;&#127480; +1 USA</option>
-          <option value="57">&#4c4f54;&#52555a; +57 COL</option>
-          <option value="593">&#4d5055;&#4c4f54; +593 ECU</option>
-          <option value="51">&#52555b;&#4d5055; +51 PER</option>
-          <option value="56">&#4c4f54;&#515459; +56 CHI</option>
-          <option value="54">&#4b4e53;&#53565b; +54 ARG</option>
-          <option value="55">&#4c4f54;&#53565b; +55 BRA</option>
-          <option value="58">&#127483;&#4d5055; +58 VEN</option>
-          <option value="502">&#4d5056;&#127481; +502 GTM</option>
-          <option value="503">&#127480;&#127483; +503 SLV</option>
-          <option value="504">&#4d5156;&#51555a; +504 HON</option>
-          <option value="505">&#51555a;&#505358; +505 NIC</option>
-          <option value="506">&#4c4f54;&#53565b; +506 CRI</option>
-          <option value="507">&#52555b;&#4b4e53; +507 PAN</option>
-          <option value="34">&#4d5055;&#127480; +34 ESP</option>
-        </select>
-        <input id="reg-whatsapp" type="tel" placeholder="Ej: 5512345678" style="flex:1;background:#17181b;border:1px solid rgba(27,135,245,.2);color:#fff;border-radius:5px;padding:.52rem .78rem;font-family:'Barlow',sans-serif;font-size:.86rem;box-sizing:border-box"/>
-      </div>
-      <div id="reg-wa-preview" style="font-size:.7rem;color:var(--muted);margin-top:-.6rem;margin-bottom:.75rem;display:none">Numero completo: <span id="reg-wa-full" style="color:#00e676;font-weight:700"></span></div>
-      <label style="display:block;font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#5a6580;margin-bottom:.25rem">Contrase&ntilde;a</label>
-      <div style="position:relative;margin-bottom:.78rem">
-        <input id="reg-pass" type="password" placeholder="Minimo 6 caracteres" autocomplete="new-password" style="width:100%;background:#17181b;border:1px solid rgba(27,135,245,.2);color:#fff;border-radius:5px;padding:.52rem 2.5rem .52rem .78rem;font-family:'Barlow',sans-serif;font-size:.86rem;box-sizing:border-box"/>
-        <button type="button" onclick="togglePass('reg-pass','eye-reg')" style="position:absolute;right:.6rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#5a6580;font-size:1rem;padding:.2rem;line-height:1" id="eye-reg">&#128065;</button>
-      </div>
-      <label style="display:block;font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#5a6580;margin-bottom:.25rem">Confirmar contrasena</label>
-      <div style="position:relative;margin-bottom:.78rem">
-        <input id="reg-pass2" type="password" placeholder="Repite tu contrasena" autocomplete="new-password" style="width:100%;background:#17181b;border:1px solid rgba(27,135,245,.2);color:#fff;border-radius:5px;padding:.52rem 2.5rem .52rem .78rem;font-family:'Barlow',sans-serif;font-size:.86rem;box-sizing:border-box"/>
-        <button type="button" onclick="togglePass('reg-pass2','eye-reg2')" style="position:absolute;right:.6rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#5a6580;font-size:1rem;padding:.2rem;line-height:1" id="eye-reg2">&#128065;</button>
-      </div>
-      <label style="display:block;font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#5a6580;margin-bottom:.25rem">Codigo de referido <span style="color:rgba(255,255,255,.3);font-weight:400">(opcional)</span></label>
-      <input id="reg-ref" type="text" placeholder="Ej: CIBE1234" style="width:100%;background:#17181b;border:1px solid rgba(255,208,0,.2);color:#fff;border-radius:5px;padding:.52rem .78rem;font-family:'Barlow',sans-serif;font-size:.86rem;margin-bottom:.78rem;box-sizing:border-box;text-transform:uppercase"/>
-      <button onclick="doRegister()" style="width:100%;padding:.76rem;border:none;border-radius:6px;font-family:'Barlow',sans-serif;font-weight:800;font-size:.83rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;background:linear-gradient(90deg,#0055cc,#1b87f5);color:#fff;margin-top:.32rem">&#10003; Crear cuenta</button>
-      <p style="text-align:center;font-size:.78rem;color:#5a6580;margin-top:1rem">Ya tienes cuenta? <a onclick="authTab('login')" style="color:#1b87f5;cursor:pointer;font-weight:700">Inicia sesion</a></p>
+    <!-- REGISTRO -->
+    <div id="auth-register" class="au-pane" role="tabpanel" style="display:none">
+      <form id="au-form-reg" novalidate autocomplete="on" onsubmit="return auRegister(event)">
+        <h1 class="au-h">Crea tu cuenta</h1>
+        <p class="au-p">Regístrate gratis en menos de un minuto</p>
+        <div id="reg-err" class="au-bn" role="alert" style="display:none"></div>
+        <div id="reg-ok" class="au-bn au-bok" role="status" style="display:none"></div>
+
+        <div class="au-f" id="f-reg-user">
+          <label class="au-lab" for="reg-user">Usuario</label>
+          <div class="au-in"><svg class="au-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c.9-3.6 3.9-5.4 7.5-5.4s6.6 1.8 7.5 5.4"/></svg>
+            <input id="reg-user" type="text" placeholder="Ej: roberto123" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="20"></div>
+          <div class="au-fh">Letras, números y guion bajo (mínimo 3)</div>
+          <div class="au-fe" id="fe-reg-user" role="alert"></div>
+        </div>
+
+        <div class="au-f" id="f-reg-nombre">
+          <label class="au-lab" for="reg-nombre">Nombre completo</label>
+          <div class="au-in"><svg class="au-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2.2"/><circle cx="9" cy="11" r="1.9"/><path d="M6.3 16c.5-1.6 1.6-2.4 2.7-2.4s2.2.8 2.7 2.4M14 10h4M14 13.5h3"/></svg>
+            <input id="reg-nombre" type="text" placeholder="Ej: Roberto Gómez" autocomplete="name" maxlength="60"></div>
+          <div class="au-fe" id="fe-reg-nombre" role="alert"></div>
+        </div>
+
+        <div class="au-f">
+          <span class="au-lab">Sexo <em>(opcional)</em></span>
+          <div class="au-seg" role="group" aria-label="Sexo">
+            <button type="button" class="reg-sexo-btn" data-sexo="mujer" aria-pressed="false" onclick="auSexo('mujer',this)">Mujer</button>
+            <button type="button" class="reg-sexo-btn" data-sexo="hombre" aria-pressed="false" onclick="auSexo('hombre',this)">Hombre</button>
+            <button type="button" class="reg-sexo-btn" data-sexo="otro" aria-pressed="false" onclick="auSexo('otro',this)">Otro</button>
+          </div>
+          <input type="hidden" id="reg-sexo" value="">
+        </div>
+
+        <div class="au-f" id="f-reg-wa">
+          <label class="au-lab" for="reg-whatsapp">WhatsApp</label>
+          <div class="au-wa" id="au-wa">
+            <button type="button" class="au-cc" id="au-cc" aria-haspopup="listbox" aria-expanded="false" aria-label="Elegir país" onclick="auPaisToggle()"><span class="au-fl" id="au-cc-fl">🇲🇽</span><span class="au-cd" id="au-cc-d">+52</span><svg class="au-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+            <div class="au-in au-num"><input id="reg-whatsapp" type="tel" inputmode="numeric" placeholder="Ej: 5512345678" autocomplete="tel-national" maxlength="16"></div>
+            <input type="hidden" id="reg-lada" value="52">
+            <div class="au-pop" id="au-pop" role="listbox" aria-label="Países" hidden>
+              <div class="au-srch"><svg class="au-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.2"/><path d="M20 20l-4.2-4.2"/></svg><input id="au-q" type="search" placeholder="Buscar país o código" autocomplete="off" oninput="auPaisFiltrar()" onkeydown="auPaisTecla(event)"></div>
+              <div class="au-list" id="au-list"></div>
+            </div>
+          </div>
+          <div class="au-fh" id="reg-wa-preview" style="display:none">Número completo: <b id="reg-wa-full"></b></div>
+          <div class="au-fe" id="fe-reg-wa" role="alert"></div>
+        </div>
+
+        <div class="au-f" id="f-reg-pass">
+          <label class="au-lab" for="reg-pass">Contraseña</label>
+          <div class="au-in"><svg class="au-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="9.5" rx="2.2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>
+            <input id="reg-pass" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password" maxlength="100">
+            <button type="button" class="au-eye" id="eye-reg" aria-label="Mostrar contraseña" aria-pressed="false" onclick="auEye('reg-pass',this)">
+              <svg class="e-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg>
+              <svg class="e-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 3.5l17 17"/><path d="M10.2 6a9.6 9.6 0 0 1 1.8-.5c6 0 9.5 6.5 9.5 6.5a16 16 0 0 1-2.9 3.7M6.6 7.3A15.6 15.6 0 0 0 2.5 12S6 18.5 12 18.5c1.6 0 3-.4 4.3-1"/><path d="M9.9 10a2.8 2.8 0 0 0 4 3.9"/></svg>
+            </button></div>
+          <div class="au-fe" id="fe-reg-pass" role="alert"></div>
+        </div>
+
+        <div class="au-f" id="f-reg-pass2">
+          <label class="au-lab" for="reg-pass2">Confirmar contraseña</label>
+          <div class="au-in"><svg class="au-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="9.5" rx="2.2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>
+            <input id="reg-pass2" type="password" placeholder="Repite tu contraseña" autocomplete="new-password" maxlength="100">
+            <button type="button" class="au-eye" id="eye-reg2" aria-label="Mostrar confirmación" aria-pressed="false" onclick="auEye('reg-pass2',this)">
+              <svg class="e-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg>
+              <svg class="e-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 3.5l17 17"/><path d="M10.2 6a9.6 9.6 0 0 1 1.8-.5c6 0 9.5 6.5 9.5 6.5a16 16 0 0 1-2.9 3.7M6.6 7.3A15.6 15.6 0 0 0 2.5 12S6 18.5 12 18.5c1.6 0 3-.4 4.3-1"/><path d="M9.9 10a2.8 2.8 0 0 0 4 3.9"/></svg>
+            </button></div>
+          <div class="au-fe" id="fe-reg-pass2" role="alert"></div>
+        </div>
+
+        <div class="au-f" id="f-reg-ref">
+          <button type="button" class="au-link au-reft" id="au-reft" aria-expanded="false" aria-controls="au-refbox" onclick="auRef()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>¿Tienes un código de referido?</span></button>
+          <div id="au-refbox" hidden>
+            <div class="au-in"><svg class="au-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h16v4H4zM12 9v11M5 13v6h14v-6M8 9a2.5 2.5 0 1 1 4-2c0 1.2-.7 2-1.8 2M16 9a2.5 2.5 0 1 0-4-2"/></svg>
+              <input id="reg-ref" type="text" placeholder="Ej: ABCD1234" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="20"></div>
+            <div class="au-fe" id="fe-reg-ref" role="alert"></div>
+          </div>
+        </div>
+
+        <div class="au-f" id="f-reg-terms">
+          <label class="au-ck"><input type="checkbox" id="reg-terms"><span class="au-box" aria-hidden="true"></span><span>Acepto los <button type="button" class="au-link" onclick="auSheet('terms')">términos y condiciones</button></span></label>
+          <div class="au-fe" id="fe-reg-terms" role="alert"></div>
+        </div>
+
+        <button type="submit" id="btn-do-reg" class="au-btn au-pri"><span class="au-bt">Crear cuenta</span><span class="au-spin" aria-hidden="true"></span></button>
+        <p class="au-foot">¿Ya tienes cuenta? <button type="button" class="au-link" onclick="authTab('login')">Inicia sesión</button></p>
+      </form>
+      <div class="au-done" id="au-done" hidden><span class="au-okc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><h2>¡Cuenta creada!</h2><p>Te estamos dando acceso a CiberStore…</p></div>
     </div>
 
     <!-- ADMIN LOGIN (hidden) -->
@@ -7319,6 +7356,11 @@ select.ap-inp{flex:0 1 auto}
     <div id="adm-auth-dash" style="display:none"></div>
 
   </div>
+  <div class="au-sheet" id="au-sheet" hidden role="dialog" aria-modal="true" aria-labelledby="au-sheet-t">
+    <div class="au-sh-h"><button type="button" class="au-back" onclick="auSheetCerrar()" aria-label="Volver"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><b id="au-sheet-t"></b></div>
+    <div class="au-sh-b" id="au-sheet-b"></div>
+  </div>
+
 </div>
 
 <div class="page" id="page-ranking">
@@ -9429,6 +9471,14 @@ html body:not(.light-mode) .hm-chat .hm-ico svg{width:30px;height:30px;stroke-wi
 #page-saldo #bw-s1 .bw-btn,#page-saldo #bw-datos .bw-btn,#page-saldo #bw-paso2>.bw-btn{margin-top:.7rem}
 #page-saldo .bw-btn:disabled{opacity:.45}
 
+/* Banners pequeños */
+#page-saldo .bw-mb{flex-direction:row;align-items:center;gap:.75rem;padding:.55rem .7rem;min-height:0}
+#page-saldo .bw-ban{width:auto;max-width:132px;height:auto;max-height:58px;flex:0 0 auto;object-fit:contain;border-radius:10px}
+#page-saldo .bw-mt{flex:1;min-width:0;padding:0}
+#page-saldo .bw-chosen{flex-direction:row;align-items:center;justify-content:space-between;gap:.75rem}
+#page-saldo .bw-chosen .bw-ban{max-height:52px;max-width:150px}
+#page-saldo .bw-chosen button{align-self:center}
+
 /* ═══ CHECKOUT CON SALDO (v5): Pase Booyah, Cajas y Fragmentos ═══ */
 .ck-ov{position:fixed;left:0;right:0;bottom:0;top:0;z-index:1250;display:none;background:#05080e;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;font-family:"Barlow","Segoe UI",system-ui,sans-serif;color:#eaf0ff}
 .ck-ov.on{display:block}
@@ -10283,10 +10333,21 @@ body.light-mode .cv-ri b{color:#0f172a}
 #adms-precios .prd-go:disabled{opacity:.5}
 @media(min-width:700px){#adms-precios .prd-row{flex-direction:row;align-items:flex-end}#adms-precios .prd-row label{width:240px}#adms-precios .prd-g{flex:1}}
 
+
+/* ===== AUTH 2.0 ===== */
+html body #auth-modal{z-index:1200!important}html body #auth-modal{background:#0B0D11!important;padding:16px!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important}html body #auth-modal>.au{margin:auto!important}html body #auth-modal .au{--bg:#0B0D11;--cd:#15191F;--fd:#202630;--bl:#1685F8;--tx:#E8EDF5;--sc:#929BAA;--bd:rgba(255,255,255,.10);--er:#FF6B6B;--ok:#2ECC8F;
+  position:relative!important;width:min(460px,100%)!important;box-sizing:border-box!important;background:var(--cd)!important;border:1px solid var(--bd)!important;border-radius:16px!important;
+  padding:28px 28px 24px!important;color:var(--tx)!important;font-family:Inter,Manrope,'Barlow',system-ui,sans-serif!important;max-height:none!important;overflow:visible!important;box-shadow:0 20px 50px rgba(0,0,0,.45)!important}html body #auth-modal .au *{box-sizing:border-box!important;font-family:inherit!important}html body #auth-modal .au button{-webkit-tap-highlight-color:transparent!important}html body #auth-modal .au-brand{text-align:center!important;font-size:1.35rem!important;letter-spacing:.14em!important;font-weight:800!important;margin-bottom:18px!important;color:var(--tx)!important}html body #auth-modal .au-brand b{color:var(--bl)!important;font-weight:800!important}html body #auth-modal .au-tabs{display:grid!important;grid-template-columns:1fr 1fr!important;gap:4px!important;background:var(--bg)!important;border:1px solid var(--bd)!important;border-radius:12px!important;padding:4px!important;margin-bottom:22px!important}html body #auth-modal .au-tab{border:0!important;background:transparent!important;color:var(--sc)!important;font-weight:600!important;font-size:.88rem!important;padding:10px 8px!important;border-radius:9px!important;cursor:pointer!important;transition:background .18s,color .18s!important;flex:none!important}html body #auth-modal .au-tab.on{background:var(--fd)!important;color:var(--tx)!important;box-shadow:inset 0 0 0 1px var(--bd)!important}html body #auth-modal .au-tab:focus-visible,html body #auth-modal .au-btn:focus-visible,html body #auth-modal .au-link:focus-visible,html body #auth-modal .au-eye:focus-visible,html body #auth-modal .au-cc:focus-visible,html body #auth-modal .au-seg button:focus-visible{outline:2px solid var(--bl)!important;outline-offset:2px!important}html body #auth-modal .au-pane{animation:auIn .18s ease}
+@keyframes auIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}html body #auth-modal .au-h{font-size:1.45rem!important;line-height:1.25!important;font-weight:700!important;margin:0 0 6px!important;color:var(--tx)!important;letter-spacing:-.01em!important}html body #auth-modal .au-p{margin:0 0 20px!important;color:var(--sc)!important;font-size:.9rem!important;line-height:1.45!important}html body #auth-modal .au-bn{border-radius:10px!important;padding:10px 12px!important;font-size:.84rem!important;line-height:1.4!important;margin:0 0 14px!important;background:rgba(255,107,107,.10)!important;border:1px solid rgba(255,107,107,.35)!important;color:var(--er)!important}html body #auth-modal .au-bn[data-k="ok"],html body #auth-modal .au-bok{background:rgba(46,204,143,.10)!important;border-color:rgba(46,204,143,.35)!important;color:var(--ok)!important}html body #auth-modal .au-bn[data-k="info"]{background:rgba(22,133,248,.10)!important;border-color:rgba(22,133,248,.35)!important;color:#7DB8FA!important}html body #auth-modal .au-f{margin-bottom:14px!important}html body #auth-modal .au-lab{display:block!important;font-size:.8rem!important;font-weight:600!important;color:var(--sc)!important;margin:0 0 6px!important}html body #auth-modal .au-lab em{font-style:normal!important;font-weight:400!important;opacity:.8!important}html body #auth-modal .au-in{position:relative!important;display:flex!important;align-items:center!important;background:var(--fd)!important;border:1px solid var(--bd)!important;border-radius:12px!important;height:48px!important;transition:border-color .18s,box-shadow .18s!important}html body #auth-modal .au-in:focus-within{border-color:var(--bl)!important;box-shadow:0 0 0 3px rgba(22,133,248,.18)!important}html body #auth-modal .au-f.bad .au-in,html body #auth-modal .au-f.bad .au-cc{border-color:var(--er)!important}html body #auth-modal .au-f.good .au-in{border-color:rgba(46,204,143,.55)!important}html body #auth-modal .au-ic{width:18px!important;height:18px!important;flex:none!important;margin-left:14px!important;stroke:var(--sc)!important;fill:none!important;stroke-width:1.7!important;stroke-linecap:round!important;stroke-linejoin:round!important}html body #auth-modal .au .au-in input{flex:1!important;min-width:0!important;height:100%!important;background:transparent!important;border:0!important;outline:0!important;box-shadow:none!important;color:var(--tx)!important;font-size:16px!important;padding:0 12px!important;margin:0!important;width:auto!important;border-radius:0!important}html body #auth-modal .au .au-in input::placeholder{color:#6b7587!important}html body #auth-modal .au .au-in input:-webkit-autofill{-webkit-text-fill-color:var(--tx)!important;-webkit-box-shadow:0 0 0 40px var(--fd) inset!important}html body #auth-modal .au-eye{flex:none!important;width:44px!important;height:100%!important;background:transparent!important;border:0!important;cursor:pointer!important;display:grid!important;place-items:center!important;border-radius:0 12px 12px 0!important;padding:0!important}html body #auth-modal .au-eye svg{width:20px!important;height:20px!important;stroke:var(--sc)!important;fill:none!important;stroke-width:1.7!important;stroke-linecap:round!important;stroke-linejoin:round!important}html body #auth-modal .au-eye .e-off{display:none!important}html body #auth-modal .au-eye[aria-pressed="true"] .e-off{display:block!important}html body #auth-modal .au-eye[aria-pressed="true"] .e-on{display:none!important}html body #auth-modal .au-eye:hover svg{stroke:var(--tx)!important}html body #auth-modal .au-fe{display:none!important;color:var(--er)!important;font-size:.78rem!important;margin-top:6px!important;line-height:1.35!important}html body #auth-modal .au-f.bad .au-fe{display:block!important}html body #auth-modal .au-fh{color:var(--sc)!important;font-size:.76rem!important;margin-top:6px!important}html body #auth-modal .au-fh b{color:var(--tx)!important;font-weight:600!important}html body #auth-modal .au-row{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;margin:2px 0 18px!important;flex-wrap:wrap!important}html body #auth-modal .au-att{font-size:.78rem!important;color:var(--sc)!important;margin:-8px 0 12px!important}html body #auth-modal .au-link{background:none!important;border:0!important;padding:0!important;color:var(--bl)!important;font-size:.84rem!important;font-weight:600!important;cursor:pointer!important;text-decoration:none!important;display:inline!important}html body #auth-modal .au-link:hover{text-decoration:underline!important}html body #auth-modal .au-ck{display:flex!important;align-items:center!important;gap:10px!important;cursor:pointer!important;color:var(--tx)!important;font-size:.85rem!important;user-select:none!important;line-height:1.35!important}html body #auth-modal .au-ck input{position:absolute!important;opacity:0!important;width:0!important;height:0!important}html body #auth-modal .au-box{flex:none!important;width:20px!important;height:20px!important;border-radius:6px!important;border:1.5px solid rgba(255,255,255,.28)!important;background:var(--fd)!important;display:grid!important;place-items:center!important;transition:background .15s,border-color .15s!important}html body #auth-modal .au-box:after{content:""!important;width:9px!important;height:5px!important;border-left:2px solid #fff!important;border-bottom:2px solid #fff!important;transform:rotate(-45deg) scale(0)!important;margin-top:-2px!important;transition:transform .15s!important}html body #auth-modal .au-ck input:checked+.au-box{background:var(--bl)!important;border-color:var(--bl)!important}html body #auth-modal .au-ck input:checked+.au-box:after{transform:rotate(-45deg) scale(1)!important}html body #auth-modal .au-ck input:focus-visible+.au-box{outline:2px solid var(--bl)!important;outline-offset:2px!important}html body #auth-modal .au-f.bad .au-box{border-color:var(--er)!important}html body #auth-modal .au button.au-btn{font-family:inherit!important;width:100%!important;height:50px!important;border-radius:12px!important;font-size:.92rem!important;font-weight:700!important;letter-spacing:.04em!important;text-transform:uppercase!important;cursor:pointer!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:10px!important;transition:background .18s,transform .1s,opacity .18s!important;margin:0!important}html body #auth-modal .au button.au-btn.au-pri,html body #auth-modal .au button.au-btn.au-pri .au-bt{-webkit-text-fill-color:#fff!important;text-shadow:none!important}
+html body #auth-modal .au button.au-btn.au-pri{box-shadow:none!important;background:var(--bl)!important;border:0!important;color:#fff!important}html body #auth-modal .au button.au-btn.au-pri:hover{background:#2c93fa!important}html body #auth-modal .au button.au-btn:active{transform:scale(.99)!important}html body #auth-modal .au button.au-btn.au-sec{box-shadow:none!important;font-family:inherit!important;background:transparent!important;border:1px solid var(--bd)!important;color:var(--tx)!important;margin-top:10px!important;text-transform:none!important;letter-spacing:0!important;font-weight:600!important}html body #auth-modal .au button.au-btn.au-sec:hover{background:rgba(255,255,255,.04)!important}html body #auth-modal .au button.au-btn[disabled]{opacity:.55!important;cursor:not-allowed!important}html body #auth-modal .au-spin{display:none!important;width:18px!important;height:18px!important;border-radius:50%!important;border:2px solid rgba(255,255,255,.35)!important;border-top-color:#fff!important;animation:auSp .7s linear infinite}html body #auth-modal .au-btn.load .au-spin{display:block!important}
+@keyframes auSp{to{transform:rotate(360deg)}}html body #auth-modal .au-foot{text-align:center!important;color:var(--sc)!important;font-size:.86rem!important;margin:18px 0 0!important}html body #auth-modal .au-seg{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:8px!important}html body #auth-modal .au-seg button{height:42px!important;border-radius:10px!important;background:var(--fd)!important;border:1px solid var(--bd)!important;color:var(--sc)!important;font-size:.85rem!important;font-weight:600!important;cursor:pointer!important;padding:0!important;transition:border-color .15s,color .15s,background .15s!important}html body #auth-modal .au-seg button[aria-pressed="true"]{border-color:var(--bl)!important;color:var(--tx)!important;background:rgba(22,133,248,.14)!important}html body #auth-modal .au-wa{position:relative!important;display:flex!important;gap:8px!important}html body #auth-modal .au-cc{flex:none!important;display:flex!important;align-items:center!important;gap:6px!important;height:48px!important;padding:0 10px!important;background:var(--fd)!important;border:1px solid var(--bd)!important;border-radius:12px!important;color:var(--tx)!important;cursor:pointer!important;font-size:.9rem!important;font-weight:600!important;transition:border-color .18s!important}html body #auth-modal .au-cc:hover,html body #auth-modal .au-cc[aria-expanded="true"]{border-color:var(--bl)!important}html body #auth-modal .au-fl{font-size:1.2rem!important;line-height:1!important}html body #auth-modal .au-chev{width:14px!important;height:14px!important;stroke:var(--sc)!important;fill:none!important;stroke-width:2!important;stroke-linecap:round!important;stroke-linejoin:round!important;transition:transform .18s!important}html body #auth-modal .au-cc[aria-expanded="true"] .au-chev{transform:rotate(180deg)!important}html body #auth-modal .au-num{flex:1!important;min-width:0!important}html body #auth-modal .au-num input{padding-left:14px!important}html body #auth-modal .au-pop{position:absolute!important;left:0!important;right:0!important;top:calc(100% + 6px)!important;z-index:5!important;background:var(--cd)!important;border:1px solid var(--bd)!important;border-radius:12px!important;box-shadow:0 14px 34px rgba(0,0,0,.55)!important;overflow:hidden!important;animation:auIn .15s ease}html body #auth-modal .au-pop[hidden]{display:none!important}html body #auth-modal .au-srch{display:flex!important;align-items:center!important;border-bottom:1px solid var(--bd)!important;height:46px!important;background:var(--fd)!important}html body #auth-modal .au-srch input{flex:1!important;min-width:0!important;background:transparent!important;border:0!important;outline:0!important;color:var(--tx)!important;font-size:16px!important;padding:0 12px!important;height:100%!important}html body #auth-modal .au-list{max-height:232px!important;overflow-y:auto!important;overscroll-behavior:contain!important}html body #auth-modal .au-it{display:flex!important;align-items:center!important;gap:10px!important;width:100%!important;padding:11px 14px!important;background:transparent!important;border:0!important;color:var(--tx)!important;cursor:pointer!important;text-align:left!important;font-size:.88rem!important}html body #auth-modal .au-it:hover,html body #auth-modal .au-it.hl{background:rgba(22,133,248,.14)!important}html body #auth-modal .au-it[aria-selected="true"]{background:rgba(22,133,248,.22)!important}html body #auth-modal .au-it .n{flex:1!important;min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}html body #auth-modal .au-it .d{color:var(--sc)!important;font-weight:600!important}html body #auth-modal .au-vac{padding:16px!important;text-align:center!important;color:var(--sc)!important;font-size:.84rem!important}html body #auth-modal .au-reft{display:inline-flex!important;align-items:center!important;gap:6px!important}html body #auth-modal .au-reft svg{width:14px!important;height:14px!important;stroke:currentColor!important;fill:none!important;stroke-width:2!important;stroke-linecap:round!important;transition:transform .18s!important}html body #auth-modal .au-reft[aria-expanded="true"] svg{transform:rotate(45deg)!important}html body #auth-modal #au-refbox{margin-top:10px!important}html body #auth-modal #au-refbox[hidden]{display:none!important}html body #auth-modal .au-done{text-align:center!important;padding:26px 6px!important}html body #auth-modal .au-done[hidden]{display:none!important}html body #auth-modal .au-okc{width:60px!important;height:60px!important;border-radius:50%!important;background:rgba(46,204,143,.14)!important;border:1px solid rgba(46,204,143,.4)!important;display:grid!important;place-items:center!important;margin:0 auto 14px!important}html body #auth-modal .au-okc svg{width:30px!important;height:30px!important;stroke:var(--ok)!important;fill:none!important;stroke-width:2.4!important;stroke-linecap:round!important;stroke-linejoin:round!important}html body #auth-modal .au-done h2{margin:0 0 6px!important;font-size:1.25rem!important}html body #auth-modal .au-done p{margin:0!important;color:var(--sc)!important;font-size:.88rem!important}html body .au-sheet{position:fixed!important;inset:0!important;z-index:950!important;background:var(--bg,#0B0D11)!important;display:flex!important;flex-direction:column!important;font-family:Inter,Manrope,sans-serif!important;color:#E8EDF5!important}html body .au-sheet[hidden]{display:none!important}html body #auth-modal .au-sh-h{display:flex!important;align-items:center!important;gap:8px!important;padding:12px 14px!important;border-bottom:1px solid rgba(255,255,255,.1)!important;background:#15191F!important}html body #auth-modal .au-back{width:40px!important;height:40px!important;border-radius:10px!important;border:0!important;background:transparent!important;cursor:pointer!important;display:grid!important;place-items:center!important}html body #auth-modal .au-back svg{width:22px!important;height:22px!important;stroke:#E8EDF5!important;fill:none!important;stroke-width:2!important;stroke-linecap:round!important;stroke-linejoin:round!important}html body #auth-modal .au-sh-b{flex:1!important;overflow-y:auto!important;padding:20px 18px!important;max-width:640px!important;width:100%!important;margin:0 auto!important;font-size:.92rem!important;line-height:1.6!important;color:#C9D1DE!important}html body #auth-modal .au-sh-b h3{color:#E8EDF5!important;font-size:1rem!important;margin:18px 0 6px!important}html body #auth-admin,html body #adm-auth-dash{color:#E8EDF5!important}
+@media(max-width:520px){html body #auth-modal .au{padding:22px 18px 20px!important;border-radius:14px!important}html body #auth-modal .au-h{font-size:1.3rem!important}html body #auth-modal .au-cc{padding:0 8px!important}}
+@media(prefers-reduced-motion:reduce){html body #auth-modal .au *,html body #auth-modal .au{animation:none!important;transition:none!important}}
+
 </style>
-<script src="supabase.js?v=293f6ec9d1"></script>
-<script src="supabase_integration.js?v=293f6ec9d1"></script>
-<script src="script.js?v=293f6ec9d1"></script>
+<script src="supabase.js?v=1214e0d55d"></script>
+<script src="supabase_integration.js?v=1214e0d55d"></script>
+<script src="script.js?v=1214e0d55d"></script>
 
 <!-- BARRA DE NAVEGACION INFERIOR -->
 

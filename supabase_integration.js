@@ -44,6 +44,7 @@ function tgNotifyRegister(profile){
       + '\u2696\uFE0F Sexo: ' + (profile.sexo ? (profile.sexo.charAt(0).toUpperCase() + profile.sexo.slice(1)) : '-') + '\n'
       + '\uD83D\uDCF1 WhatsApp: +' + (profile.whatsapp || '-') + '\n'
       + '\uD83C\uDF1F Ref: ' + (profile.ref_code || '-') + '\n'
+      + (window.__auRef ? ('\uD83C\uDF81 Referido por: ' + window.__auRef + '\n') : '')
       + '\uD83D\uDCC5 ' + fecha + ' \u00B7 \uD83D\uDD52 ' + hora + '\n'
       + linea;
     tgSend(msg);
@@ -209,7 +210,6 @@ function doRegister(){
   if(!username || username.length < 3)     { showAuthMsg('reg-err', 'Usuario muy corto (min 3)'); return; }
   if(!/^[a-z0-9_]+$/.test(username))       { showAuthMsg('reg-err', 'Solo letras, numeros y _'); return; }
   if(!nombre || nombre.length < 2)          { showAuthMsg('reg-err', 'Ingresa tu nombre'); return; }
-  if(!sexo)                                 { showAuthMsg('reg-err', 'Selecciona tu sexo'); return; }
 
   // ── VALIDACION DE WHATSAPP POR PAIS ──
   // Longitud correcta del numero local (sin lada) segun el pais
@@ -217,7 +217,7 @@ function doRegister(){
     '52':10, '1':10, '57':10, '593':9, '51':9, '56':9, '54':10, '55':11,
     '58':10, '502':8, '503':8, '504':8, '505':8, '506':8, '507':8, '34':9
   };
-  var largoEsperado = largoPorLada[lada] || null;
+  var largoEsperado = (window.AU_LARGO && window.AU_LARGO[lada]) || largoPorLada[lada] || null;
 
   if(!waRaw){ showAuthMsg('reg-err', 'Ingresa tu numero de WhatsApp'); return; }
   if(largoEsperado && waRaw.length !== largoEsperado){
@@ -240,7 +240,7 @@ function doRegister(){
   var rc = 'REF-';
   for(var i = 0; i < 6; i++) rc += chars[Math.floor(Math.random() * chars.length)];
 
-  sbGetByUsername(username).then(function(existing){
+  return sbGetByUsername(username).then(function(existing){
     if(existing){
       showAuthMsg('reg-err', 'Ese nombre de usuario ya existe');
       if(ok) ok.style.display = 'none';
@@ -257,7 +257,7 @@ function doRegister(){
         username:      username,
         nombre:        nombre,
         whatsapp:      whatsapp,
-        sexo:          sexo,
+        sexo:          sexo || null,
         password_hash: hashPass(pass),
         role:          'user',
         saldo:         0,
@@ -411,7 +411,7 @@ function doLogin(){
 
   showAuthMsg('login-err','Verificando...', false, 'rgba(0,170,255,.7)');
 
-  sbGetByUsernameWithCache(username).then(function(u){
+  return sbGetByUsernameWithCache(username).then(function(u){
     if(err) err.style.display='none';
     if(!u){
       recordFailedAttempt(username);
@@ -492,7 +492,9 @@ function showAuthMsg(id, msg, isOk, color){
   var el = document.getElementById(id);
   if(!el) return;
   el.textContent = msg;
-  el.style.color = color || (isOk ? '#00e676' : '#ff6b6b');
+  var k = isOk ? 'ok' : 'err';
+  if(color){ if(String(color).indexOf('0,230,118') > -1) k = 'ok'; else if(String(color).indexOf('0,170,255') > -1) k = 'info'; }
+  el.setAttribute('data-k', k);
   el.style.display = 'block';
 }
 
