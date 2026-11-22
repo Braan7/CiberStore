@@ -18435,9 +18435,8 @@ function bwCot(c,usd){
 function bwHora(){ if(!BW.hora) return ''; try{ return new Date(BW.hora).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',hour12:true}); }catch(e){ return ''; } }
 function bwCotizar(){
   var b=bwEl('bw-cot'); if(!b) return; var c=bwCuentaSel(), usd=parseFloat((bwEl('bw-monto')||{}).value), q=bwCot(c,usd);
-  var dt=bwEl('bw-datos'), p2=bwEl('bw-paso2'), listo=!!(c&&q&&usd>=BW.minUsd);
-  if(dt){ if(listo){ var k=c.id+'|'+q.pagar; if(dt.getAttribute('data-k')!==k){ dt.innerHTML=bwDatosPago(c); dt.setAttribute('data-k',k); bwIcons(dt); } dt.style.display='block'; } else { dt.style.display='none'; dt.removeAttribute('data-k'); } }
-  if(p2) p2.style.display=listo?'block':'none';
+  var n1=bwEl('bw-n1'); if(n1) n1.disabled=!(c&&q&&usd>=BW.minUsd);
+  if(BW.paso>1&&!(c&&q&&usd>=BW.minUsd)){ bwPaso(1); return; }
   if(!c||!q){ b.style.display='none'; return; }
   b.style.display='block';
   var ex=q.moneda!=='MXN', usdm=q.moneda==='USD', mon=function(n){ return bwEsc(bwSim(q.moneda)+bwNum(n)); };
@@ -18450,19 +18449,36 @@ function bwCotizar(){
 }
 function bwElegir(id){
   var c=null; (BW.cuentas||[]).forEach(function(x){ if(x.id===id) c=x; }); if(!c||c.construccion) return;
-  BW.sel=id; bwEl('bw-cuenta').value=id; bwEl('bw-pick').style.display='none'; bwEl('bw-f').style.display='block';
-  var logo=c.logo?'<img alt="" src="'+bwEsc(c.logo)+'">':(c.bandera?bwEsc(c.bandera):bwEsc(String(c.nombre).charAt(0).toUpperCase()));
-  bwEl('bw-chosen').innerHTML='<span class="bw-logo">'+logo+'</span><b>'+bwEsc(c.nombre)+'</b><button type="button" onclick="bwCambiar()">Cambiar</button>';
-  var bs=document.querySelectorAll('#bw-cuentas .bw-mc'); for(var i=0;i<bs.length;i++) bs[i].classList.toggle('on',(BW.cuentas[i]||{}).id===id);
+  BW.sel=id; BW.paso=1; bwEl('bw-cuenta').value=id; bwEl('bw-metodos').style.display='none'; bwEl('bw-form').style.display='block'; bwEl('bw-f').style.display='block';
+  var logo=c.logo?'<img class="bw-ban" alt="'+bwEsc(c.nombre)+'" src="'+bwEsc(c.logo)+'">':'<span class="bw-logo">'+(c.bandera?bwEsc(c.bandera):bwEsc(String(c.nombre).charAt(0).toUpperCase()))+'</span><b>'+bwEsc(c.nombre)+'</b>';
+  bwEl('bw-chosen').innerHTML=logo+'<button type="button" onclick="bwCambiar()">Cambiar</button>';
+  bwEl('bw-monto').value=''; bwPaso(1);
+}
+function bwCambiar(){
+  BW.sel=''; BW.paso=1; bwEl('bw-cuenta').value=''; bwEl('bw-f').style.display='none'; bwEl('bw-form').style.display='none'; bwEl('bw-metodos').style.display='block';
+  var bs=document.querySelectorAll('#bw-cuentas .bw-mc'); for(var i=0;i<bs.length;i++) bs[i].classList.remove('on');
+  try{ bwEl('bw-metodos').scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
+}
+/* Pasos: 1 Monto → 2 Pago → 3 Comprobante */
+function bwListo(){ var c=bwCuentaSel(), usd=parseFloat((bwEl('bw-monto')||{}).value), q=bwCot(c,usd); return !!(c&&q&&usd>=BW.minUsd); }
+function bwPaso(n){
+  var c=bwCuentaSel(); if(!c) return;
+  if(n>1&&!bwListo()){ n=1; bwToast('Escribe al menos '+BW.minUsd+' USD',2200); }
+  BW.paso=n; bwEl('bw-s1').style.display=n===1?'block':'none';
+  var dt=bwEl('bw-datos'); if(n===2){ var q=bwCot(c,bwR2(parseFloat(bwEl('bw-monto').value))); dt.innerHTML=bwDatosPago(c,q); bwIcons(dt); } dt.style.display=n===2?'block':'none';
+  bwEl('bw-paso2').style.display=n===3?'block':'none';
+  var nm=['Monto','Pago','Comprobante'], pr=bwEl('bw-prog'); pr.innerHTML=nm.map(function(x,i){ return '<span class="'+(i+1===n?'on':(i+1<n?'ok':''))+'"><i>'+(i+1<n?'✓':(i+1))+'</i>'+x+'</span>'; }).join('');
   bwCotizar(); try{ bwEl('bw-form').scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
 }
-function bwCambiar(){ BW.sel=''; bwEl('bw-cuenta').value=''; bwEl('bw-f').style.display='none'; bwEl('bw-pick').style.display='block'; var bs=document.querySelectorAll('#bw-cuentas .bw-mc'); for(var i=0;i<bs.length;i++) bs[i].classList.remove('on'); bwCotizar(); try{ bwEl('bw-metodos').scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){} }
 /* Datos para pagar: solo del método elegido */
-function bwDatosPago(c){
+function bwDatosPago(c,q){
   var i=BW.cuentas.indexOf(c), ex=c.moneda&&c.moneda!=='MXN';
   var filas=ex?(c.detalle||[]).map(function(d,j){ return '<div class="bw-fila"><span>'+bwEsc(d.et)+'</span><b>'+bwEsc(d.val)+'</b>'+(d.copiar?'<button type="button" class="bw-cp bw-cs" onclick="bwCopiarDato('+i+','+j+',this)"><i data-i="copy"></i><span>Copiar</span></button>':'')+'</div>'; }).join('')
     :'<div class="bw-fila"><span>Titular</span><b>'+bwEsc(c.titular)+'</b></div><div class="bw-fila"><span>CLABE</span><b>'+bwEsc(c.clabe)+'</b><button type="button" class="bw-cp bw-cs" onclick="bwCopiar('+i+',this)"><i data-i="copy"></i><span>Copiar</span></button></div>';
-  return '<div class="bw-paso"><span>1</span><b>Haz tu pago con estos datos</b></div><div class="bw-ac">'+filas+(c.nota?'<div class="bw-imp">'+bwEsc(c.nota)+'</div>':'')+'</div>';
+  return '<div class="bw-paso"><span>2</span><b>Haz tu pago con estos datos</b></div>'
+    +(q?'<div class="bw-env">Envía exactamente <b>'+bwEsc(bwMoneda(q.pagar,q.moneda))+'</b><small>Se acreditan ≈ '+bwEsc(bwMXN(q.credito))+'</small></div>':'')
+    +'<div class="bw-ac">'+filas+(c.nota?'<div class="bw-imp">'+bwEsc(c.nota)+'</div>':'')+'</div>'
+    +'<button type="button" class="bw-btn bw-p bw-big" onclick="bwPaso(3)">Ya pagué, subir comprobante</button><button type="button" class="bw-btn" onclick="bwPaso(1)">← Atrás</button>';
 }
 function bwCopiarDato(i,j,btn){
   var d=((BW.cuentas[i]||{}).detalle||[])[j]; if(!d) return;
@@ -18491,7 +18507,7 @@ function bwNuevoIdem(){ var a=new Uint8Array(16); try{ crypto.getRandomValues(a)
 function bwInit(){
   bwIcons(); bwMover();
   var ok=!!authSession; bwEl('bw-login').style.display=ok?'none':'block';
-  ['bw-metodos','bw-form','bw-mis','bw-hist'].forEach(function(i){ bwEl(i).style.display=ok?'block':'none'; });
+  ['bw-metodos','bw-form','bw-mis','bw-hist'].forEach(function(i){ var on=ok&&(i==='bw-form'?!!BW.sel:i==='bw-metodos'?!BW.sel:true); bwEl(i).style.display=on?'block':'none'; });
   bwPintarSaldo();
   if(!ok) return;
   if(!BW.idem) bwNuevoIdem();
@@ -18512,6 +18528,7 @@ function bwRefrescar(){
   p.then(function(){ bwPintarSaldo(); bwCargarMis(false,true); bwCargarMovs(); }).then(function(){ setTimeout(function(){ if(b){ b.classList.remove('gira'); b.disabled=false; } },500); },function(){ if(b){ b.classList.remove('gira'); b.disabled=false; } });
 }
 function bwIr(id,btn){
+  if(id==='bw-metodos'&&BW.sel){ bwCambiar(); }
   var e=bwEl(id); if(e&&e.scrollIntoView) e.scrollIntoView({behavior:'smooth',block:'start'});
   var bs=document.querySelectorAll('#page-saldo .bw-nav button'); for(var i=0;i<bs.length;i++) bs[i].classList.toggle('on',bs[i]===btn);
 }
@@ -18525,13 +18542,15 @@ function bwCargarCuentas(){
     var h=bwEl('bw-min'); if(h) h.textContent='Mínimo '+BW.minUsd+' USD en todos los métodos.';
     if(!BW.cuentas.length){ box.innerHTML='<div class="bw-vacio">Se ocupa una banca. Si alguien tiene una, contacte al +57 315 884 4459.</div>'; }
     else box.innerHTML=BW.cuentas.map(function(c){
-      var ex=c.moneda&&c.moneda!=='MXN', logo=c.logo?'<img alt="" src="'+bwEsc(c.logo)+'">':(c.bandera?bwEsc(c.bandera):bwEsc(String(c.nombre).charAt(0).toUpperCase()));
+      var ex=c.moneda&&c.moneda!=='MXN', ico=c.bandera?bwEsc(c.bandera):bwEsc(String(c.nombre).charAt(0).toUpperCase());
       var sub=c.construccion?'🚧 En construcción':(ex?bwEsc(c.moneda)+((c.comision_pct>0||c.comision>0)?' · comisión '+(c.comision_pct>0?bwNum(c.comision_pct)+'%':'')+(c.comision_pct>0&&c.comision>0?' + ':'')+(c.comision>0?bwSim(c.moneda)+bwNum(c.comision):''):' · sin comisión'):'Transferencia bancaria · MXN');
-      return '<button type="button" class="bw-mc'+(BW.sel===c.id?' on':'')+'" '+(c.construccion?'disabled':'onclick="bwElegir(\''+bwEsc(c.id)+'\')"')+'><span class="bw-logo">'+logo+'</span><div><b>'+bwEsc(c.nombre)+'</b><small>'+sub+'</small></div>'+(c.construccion?'':'<span class="bw-go">›</span>')+'</button>';
+      var at=(c.construccion?'disabled':'onclick="bwElegir(\''+bwEsc(c.id)+'\')"');
+      if(c.logo) return '<button type="button" class="bw-mc bw-mb'+(c.construccion?' off':'')+'" '+at+'><img class="bw-ban" alt="'+bwEsc(c.nombre)+'" loading="lazy" src="'+bwEsc(c.logo)+'"><span class="bw-mt"><span class="bw-ms"><b>'+bwEsc(c.nombre)+'</b><small>'+sub+'</small></span></span>'+(c.construccion?'':'<span class="bw-go">›</span>')+'</button>';
+      return '<button type="button" class="bw-mc" '+at+'><span class="bw-logo">'+ico+'</span><div><b>'+bwEsc(c.nombre)+'</b><small>'+sub+'</small></div>'+(c.construccion?'':'<span class="bw-go">›</span>')+'</button>';
     }).join('');
     var sel=bwEl('bw-cuenta'), cur=sel.value;
     sel.innerHTML='<option value="">'+(BW.cuentas.length?'Selecciona un método':'Sin métodos disponibles')+'</option>'+BW.cuentas.map(function(c){ return '<option value="'+bwEsc(c.id)+'"'+(c.construccion?' disabled':'')+'>'+bwEsc(c.nombre)+(c.construccion?' · En construcción':'')+'</option>'; }).join('');
-    if(cur&&BW.cuentas.some(function(c){ return c.id===cur&&!c.construccion; })) sel.value=cur; else { sel.value=''; BW.sel=''; bwEl('bw-f').style.display='none'; bwEl('bw-pick').style.display='block'; }
+    if(cur&&BW.cuentas.some(function(c){ return c.id===cur&&!c.construccion; })) sel.value=cur; else if(BW.sel){ bwCambiar(); }
     bwCotizar();
     var btn=bwEl('bw-send'); if(btn) btn.disabled=!BW.cuentas.length;
     bwIcons();
@@ -18718,7 +18737,7 @@ function bwCargarMovs(){
       });
     };
   }
-  setInterval(function(){ var p=bwEl('page-saldo'); if(p&&p.classList.contains('active')&&authSession&&!document.hidden&&!BW.env) bwCargarCuentas(); },180000);
+  setInterval(function(){ var p=bwEl('page-saldo'); if(p&&p.classList.contains('active')&&authSession&&!document.hidden&&!BW.env&&!(BW.paso>1)) bwCargarCuentas(); },180000);
   document.addEventListener('DOMContentLoaded',function(){ try{ bwMover(); bwIcons(); }catch(e){} });
   bwIcons();
 })();

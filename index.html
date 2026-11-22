@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta name="cs-build" content="1a8ea5e161">
-<script>var CS_BUILD="1a8ea5e161";</script>
+<meta name="cs-build" content="293f6ec9d1">
+<script>var CS_BUILD="293f6ec9d1";</script>
 <meta charset="UTF-8"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -5416,19 +5416,23 @@ select.ap-inp{flex:0 1 auto}
       <div id="bw-cuentas"><div class="bw-vacio">Cargando cuentas…</div></div>
     </section>
 
-    <section class="bw-card" id="bw-form">
+    <section class="bw-card" id="bw-form" style="display:none">
       <div class="bw-ch"><span class="bw-ib"><i data-i="up"></i></span><div><b>Solicitar recarga</b><small>Completa el formulario y sube tu comprobante.</small></div></div>
-      <div class="bw-vacio" id="bw-pick">Primero elige un método de pago arriba.</div>
+      <div class="bw-vacio" id="bw-pick" style="display:none">Primero elige un método de pago arriba.</div>
       <div id="bw-f" style="display:none">
         <div class="bw-chosen" id="bw-chosen"></div>
+        <div class="bw-prog" id="bw-prog"></div>
+        <div id="bw-s1">
         <div class="bw-fld bw-sel" style="display:none"><i data-i="bank"></i><select id="bw-cuenta" onchange="bwCotizar()"><option value="">Selecciona un método</option></select><i data-i="down" class="bw-chev"></i></div>
         <label for="bw-monto">Cantidad a recargar (USD)</label>
         <div class="bw-fld"><span class="bw-pre">US$</span><input id="bw-monto" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Ej. 10" autocomplete="off" oninput="bwCotizar()"></div>
         <div class="bw-hint" id="bw-min"></div>
         <div class="bw-cot" id="bw-cot" style="display:none"></div>
+        <button type="button" class="bw-btn bw-p bw-big" id="bw-n1" onclick="bwPaso(2)" disabled>Continuar</button>
+        </div>
         <div id="bw-datos" style="display:none"></div>
         <div id="bw-paso2" style="display:none">
-        <div class="bw-paso"><span>2</span><b>Ya pagué: sube tu comprobante</b></div>
+        <div class="bw-paso"><span>3</span><b>Sube tu comprobante</b></div>
         <label for="bw-titular">Titular de la transferencia</label>
         <div class="bw-fld"><i data-i="user"></i><input id="bw-titular" type="text" maxlength="80" placeholder="Nombre completo del titular" autocomplete="off"></div>
         <label for="bw-refe">Referencia / clave de rastreo</label>
@@ -5443,6 +5447,7 @@ select.ap-inp{flex:0 1 auto}
         <div class="bw-prev" id="bw-prev" style="display:none"></div>
         <div class="bw-err" id="bw-err" style="display:none"></div>
         <button type="button" class="bw-btn bw-p bw-big" id="bw-send" onclick="bwResumen()"><i data-i="send"></i> Solicitar recarga</button>
+        <button type="button" class="bw-btn" onclick="bwPaso(2)">← Atrás</button>
         <p class="bw-note">Revisaremos tu comprobante y acreditaremos el saldo en cuanto se apruebe. Te avisaremos aquí mismo, sin WhatsApp.</p>
         </div>
       </div>
@@ -9401,6 +9406,29 @@ html body:not(.light-mode) .hm-chat .hm-ico svg{width:30px;height:30px;stroke-wi
 #page-saldo .bw-paso b{font-size:1.02rem}
 #page-saldo #bw-datos .bw-ac{margin-top:.9rem}
 
+#page-saldo .bw-mb{flex-direction:column;align-items:stretch;gap:.5rem;padding:.55rem}
+#page-saldo .bw-mb.off{opacity:.5}
+#page-saldo .bw-ban{display:block;width:100%;max-height:190px;object-fit:contain;border-radius:12px}
+#page-saldo .bw-mt{display:flex;align-items:center;gap:.5rem;padding:0 .3rem .2rem}
+#page-saldo .bw-mt b{flex:1;font-size:.98rem}
+#page-saldo .bw-ms{flex:1;min-width:0}
+#page-saldo .bw-ms b{display:block}
+#page-saldo .bw-chosen{flex-direction:column;align-items:stretch}
+#page-saldo .bw-chosen .bw-ban{max-height:150px}
+#page-saldo .bw-chosen button{align-self:flex-end}
+#page-saldo .bw-prog{display:flex;gap:.4rem;margin:.5rem 0 1rem}
+#page-saldo .bw-prog span{flex:1;display:flex;flex-direction:column;align-items:center;gap:.3rem;font-size:.76rem;color:#8b93a3;border-top:3px solid rgba(255,255,255,.12);padding-top:.45rem}
+#page-saldo .bw-prog span i{font-style:normal;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.8rem}
+#page-saldo .bw-prog span.on{color:#fff;border-top-color:#1b87f5}
+#page-saldo .bw-prog span.on i{background:#1b87f5;color:#fff}
+#page-saldo .bw-prog span.ok{border-top-color:#25d366;color:#25d366}
+#page-saldo .bw-prog span.ok i{background:#25d366;color:#04230f}
+#page-saldo .bw-env{margin:.5rem 0;padding:.8rem;border-radius:13px;background:rgba(27,135,245,.1);border:1px solid rgba(27,135,245,.35);text-align:center;font-size:.95rem}
+#page-saldo .bw-env b{display:block;font-size:1.5rem;color:#7cc0ff;margin:.1rem 0}
+#page-saldo .bw-env small{color:#8b93a3}
+#page-saldo #bw-s1 .bw-btn,#page-saldo #bw-datos .bw-btn,#page-saldo #bw-paso2>.bw-btn{margin-top:.7rem}
+#page-saldo .bw-btn:disabled{opacity:.45}
+
 /* ═══ CHECKOUT CON SALDO (v5): Pase Booyah, Cajas y Fragmentos ═══ */
 .ck-ov{position:fixed;left:0;right:0;bottom:0;top:0;z-index:1250;display:none;background:#05080e;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;font-family:"Barlow","Segoe UI",system-ui,sans-serif;color:#eaf0ff}
 .ck-ov.on{display:block}
@@ -10256,9 +10284,9 @@ body.light-mode .cv-ri b{color:#0f172a}
 @media(min-width:700px){#adms-precios .prd-row{flex-direction:row;align-items:flex-end}#adms-precios .prd-row label{width:240px}#adms-precios .prd-g{flex:1}}
 
 </style>
-<script src="supabase.js?v=1a8ea5e161"></script>
-<script src="supabase_integration.js?v=1a8ea5e161"></script>
-<script src="script.js?v=1a8ea5e161"></script>
+<script src="supabase.js?v=293f6ec9d1"></script>
+<script src="supabase_integration.js?v=293f6ec9d1"></script>
+<script src="script.js?v=293f6ec9d1"></script>
 
 <!-- BARRA DE NAVEGACION INFERIOR -->
 
