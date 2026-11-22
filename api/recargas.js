@@ -24,15 +24,37 @@ const BUCKET = 'comprobantes';
 const MAX_BYTES = 3200 * 1024;     // Vercel admite ~4.5 MB por petición: las fotos se reducen en el navegador y el PDF puede pesar hasta ~3 MB
 const EXT = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'application/pdf': 'pdf' };
 const MIN_USD = () => { const n = Number(process.env.RECARGA_MIN_USD); return isFinite(n) && n > 0 ? n : 5; };
-// Tasas del día (USD → MXN / moneda local). Caché 30 min; si la API falla se usan las últimas conocidas o las de respaldo.
-let _tasas = { t: 0, r: { MXN: Number(process.env.USD_MXN_RESPALDO) || 18.5 } };
-async function tasasUSD(){
-  if(Date.now() - _tasas.t < 30 * 60000) return _tasas.r;
-  try{ const ctrl = new AbortController(), x = setTimeout(() => ctrl.abort(), 5000);
-    const j = await (await fetch('https://open.er-api.com/v6/latest/USD', { signal: ctrl.signal })).json(); clearTimeout(x);
-    if(j && j.rates && j.rates.MXN > 0){ _tasas = { t: Date.now(), r: j.rates }; }
-  }catch(e){ _tasas.t = Date.now() - 25 * 60000; }   // reintenta en 5 min
-  return _tasas.r;
+// Tipo de cambio USD → moneda. Fuente principal: cotización de mercado casi en vivo (Yahoo Finance, sin llave; caché 5 min).
+// Respaldo 1: open.er-api.com · Respaldo 2: currency-api (jsDelivr). Ambos se actualizan cada día. Si todo falla se usa la última tasa buena (máx. 12 h).
+const _tc = new Map();            // MONEDA → { v, t, fuente }
+let _tabla = { t: 0, r: null, fuente: '' };
+async function getJSON(url, ms){ const ctrl = new AbortController(), x = setTimeout(() => ctrl.abort(), ms || 4000); try{ const r = await fetch(url, { signal: ctrl.signal, headers: { 'User-Agent': 'Mozilla/5.0 CiberStore' } }); if(r.status >= 400) return null; return await r.json(); }catch(e){ return null; } finally { clearTimeout(x); } }
+async function tablaDiaria(){
+  if(_tabla.r && Date.now() - _tabla.t < 30 * 60000) return _tabla;
+  let j = await getJSON('https://open.er-api.com/v6/latest/USD');
+  if(j && j.rates && j.rates.MXN > 0){ _tabla = { t: Date.now(), r: j.rates, fuente: 'open.er-api.com' }; return _tabla; }
+  j = await getJSON('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json');
+  if(j && j.usd && j.usd.mxn > 0){ const r = {}; Object.keys(j.usd).forEach(k => { r[k.toUpperCase()] = j.usd[k]; }); _tabla = { t: Date.now(), r, fuente: 'currency-api' }; return _tabla; }
+  return _tabla;
+}
+async function tasaUSD(cur){
+  cur = String(cur || '').toUpperCase(); if(cur === 'USD') return { v: 1, t: Date.now(), fuente: '-' };
+  const c = _tc.get(cur); if(c && Date.now() - c.t < 5 * 60000) return c;
+  const y = await getJSON('https://query1.finance.yahoo.com/v8/finance/chart/USD' + cur + '=X?interval=1m&range=1d');
+  const m = y && y.chart && y.chart.result && y.chart.result[0] && y.chart.result[0].meta;
+  if(m && m.regularMarketPrice > 0){ const o = { v: Number(m.regularMarketPrice), t: Date.now(), hora: m.regularMarketTime ? m.regularMarketTime * 1000 : Date.now(), fuente: 'mercado' }; _tc.set(cur, o); return o; }
+  const d = await tablaDiaria();
+  if(d.r && d.r[cur] > 0){ const o = { v: Number(d.r[cur]), t: Date.now() - 24 * 60000, hora: d.t, fuente: d.fuente }; _tc.set(cur, o); return o; }
+  if(c && Date.now() - c.t < 12 * 3600000) return c;   // última buena
+  return null;
+}
+// rates = { MXN, [moneda…], _info:{ hora, fuente } } para las monedas pedidas
+async function tasasUSD(monedas){
+  const out = {}, lista = Array.from(new Set(['MXN'].concat((monedas || []).filter(m => m && m !== 'MXN').map(m => String(m).toUpperCase())))); let hora = 0, fuente = 'mercado';
+  for(const m of lista){ const o = await tasaUSD(m); if(o){ out[m] = o.v; if(!hora || (o.hora || o.t) < hora) hora = o.hora || o.t; if(o.fuente !== 'mercado') fuente = o.fuente; } }
+  if(!(out.MXN > 0)) out.MXN = Number(process.env.USD_MXN_RESPALDO) || 18.5;   // último recurso
+  Object.defineProperty(out, '_info', { value: { hora: hora || Date.now(), fuente }, enumerable: false });
+  return out;
 }
 const r2 = n => Math.round(Number(n) * 100) / 100;
 // Cálculo único (cliente y servidor muestran lo mismo): USD → lo que paga en su moneda (con comisión) y lo que se acredita en MXN
@@ -40,10 +62,12 @@ function cotizar(cu, usd, rates){
   const mxn = rates.MXN, esMX = !cu.moneda || cu.moneda === 'MXN';
   const tasa = esMX ? null : (Number(cu.tasa) > 0 ? Number(cu.tasa) : rates[cu.moneda]);
   if(!(mxn > 0) || (!esMX && !(tasa > 0))) return null;
-  const credito = r2(usd * mxn), com = esMX ? 0 : Number(cu.comision) || 0, pct = esMX ? 0 : Number(cu.comision_pct) || 0;
-  return { usd, credito, moneda: esMX ? 'MXN' : cu.moneda, pagar: esMX ? credito : r2(usd * tasa * (1 + pct / 100) + com), comision: com, comision_pct: pct, tasa: tasa || null, usd_mxn: mxn };
+  const credito = r2(usd * mxn);
+  if(esMX) return { usd, credito, moneda: 'MXN', base: credito, comision: 0, comision_pct: 0, pagar: credito, tasa: null, usd_mxn: mxn };
+  const base = r2(usd * tasa), pct = Number(cu.comision_pct) || 0, fija = Number(cu.comision) || 0, comision = r2(base * pct / 100 + fija);
+  return { usd, credito, moneda: cu.moneda, base, comision, comision_pct: pct, comision_fija: fija, pagar: r2(base + comision), tasa, usd_mxn: mxn };
 }
-const MIN = () => { const n = Number(process.env.RECARGA_MIN_MXN); return isFinite(n) && n > 0 ? n : Math.ceil(MIN_USD() * (_tasas.r.MXN || 18.5)); };
+const MIN = () => { const n = Number(process.env.RECARGA_MIN_MXN); return isFinite(n) && n > 0 ? n : Math.ceil(MIN_USD() * ((_tc.get('MXN') || {}).v || 18.5)); };
 const MAX = () => { const n = Number(process.env.RECARGA_MAX_MXN); return isFinite(n) && n > 0 ? n : 50000; };
 
 function enviar(res, body, status){ res.statusCode = status || 200; res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.setHeader('Cache-Control', 'no-store'); res.end(JSON.stringify(body)); }
@@ -254,9 +278,9 @@ module.exports = async function handler(req, res){
       let r = await rest('cuentas_deposito?activa=eq.true&select=id,nombre,titular,clabe,pais,moneda,bandera,tasa,comision,comision_pct,detalle,nota,construccion&order=orden.asc,created_at.asc');
       if(r.status >= 400) r = await rest('cuentas_deposito?activa=eq.true&select=id,nombre,titular,clabe&order=orden.asc,created_at.asc');   // aún sin metodos_pago.sql
       if(r.status >= 400) return enviar(res, { ok: false, code: 'db', message: 'Falta ejecutar recargas_saldo.sql en Supabase' });
-      const rates = await tasasUSD(), minUsd = MIN_USD();
+      const rates = await tasasUSD((r.json || []).map(c => c.moneda)), minUsd = MIN_USD();
       const cuentas = (r.json || []).map(c => { const q = c.construccion ? null : cotizar(c, 1, rates); return Object.assign({}, c, { moneda: c.moneda || 'MXN', pais: c.pais || 'MX', construccion: !!c.construccion, tasa_efectiva: q ? q.tasa : null }); });
-      return enviar(res, { ok: true, cuentas, min: MIN(), max: MAX(), min_usd: minUsd, usd_mxn: rates.MXN });
+      return enviar(res, { ok: true, cuentas, min: MIN(), max: MAX(), min_usd: minUsd, usd_mxn: rates.MXN, tasas_hora: rates._info.hora, tasas_fuente: rates._info.fuente });
     }
     if(a === 'mis'){
       const r = await rest('recargas_saldo?user_id=eq.' + encodeURIComponent(uid) + '&select=*&order=creada.desc&limit=50');
@@ -283,7 +307,7 @@ module.exports = async function handler(req, res){
       const cuenta = Array.isArray(cu.json) ? cu.json[0] : null;
       if(!cuenta || cuenta.construccion) return enviar(res, { ok: false, code: 'cuenta', message: cuenta ? 'Ese método está en construcción' : 'Ese método de depósito ya no está disponible' });
       // La cantidad la elige el cliente en USD (mín. 5 USD en TODOS los métodos); el servidor calcula lo que se acredita y lo que debe pagar
-      const rates = await tasasUSD(), usd = r2(b.monto_usd != null ? Number(b.monto_usd) : NaN);
+      const rates = await tasasUSD([cuenta.moneda]), usd = r2(b.monto_usd != null ? Number(b.monto_usd) : NaN);
       const nuevo = b.monto_usd != null || (cuenta.moneda && cuenta.moneda !== 'MXN');
       let monto, local = null;
       if(nuevo){

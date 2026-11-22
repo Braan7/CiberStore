@@ -18428,15 +18428,22 @@ function bwCuentaSel(){ var id=(bwEl('bw-cuenta')||{}).value, c=null; (BW.cuenta
 /* Misma cuenta que hace el servidor: USD → lo que paga (con comisión fija) y lo que se acredita en MXN */
 function bwCot(c,usd){
   if(!c||!(usd>0)||!(BW.usdMxn>0)) return null; var ex=c.moneda&&c.moneda!=='MXN', t=ex?Number(c.tasa_efectiva||c.tasa):0; if(ex&&!(t>0)) return null;
-  var cr=bwR2(usd*BW.usdMxn); return {usd:usd,credito:cr,moneda:ex?c.moneda:'MXN',pagar:ex?bwR2(usd*t*(1+(Number(c.comision_pct)||0)/100)+(Number(c.comision)||0)):cr,comision:ex?(Number(c.comision)||0):0,pct:ex?(Number(c.comision_pct)||0):0,tasa:t};
+  var cr=bwR2(usd*BW.usdMxn); if(!ex) return {usd:usd,credito:cr,moneda:'MXN',base:cr,pagar:cr,comision:0,pct:0,fija:0,tasa:0};
+  var base=bwR2(usd*t), pct=Number(c.comision_pct)||0, fija=Number(c.comision)||0, com=bwR2(base*pct/100+fija);
+  return {usd:usd,credito:cr,moneda:c.moneda,base:base,comision:com,pct:pct,fija:fija,pagar:bwR2(base+com),tasa:t};
 }
+function bwHora(){ if(!BW.hora) return ''; try{ return new Date(BW.hora).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',hour12:true}); }catch(e){ return ''; } }
 function bwCotizar(){
   var b=bwEl('bw-cot'); if(!b) return; var c=bwCuentaSel(), usd=parseFloat((bwEl('bw-monto')||{}).value), q=bwCot(c,usd);
   if(!c||!q){ b.style.display='none'; return; }
   b.style.display='block';
-  b.innerHTML='<div class="bw-kv"><span>Debes pagar</span><b class="bw-pg">'+bwEsc(bwMoneda(q.pagar,q.moneda))+'</b></div>'
-    +((q.comision>0||q.pct>0)?'<div class="bw-kv"><span>Incluye comisión de</span><b>'+(q.pct>0?bwNum(q.pct)+'%':'')+(q.pct>0&&q.comision>0?' + ':'')+(q.comision>0?bwEsc(bwSim(q.moneda)+bwNum(q.comision)):'')+'</b></div>':'')
-    +'<div class="bw-kv"><span>Se acreditan a tu saldo</span><b>≈ '+bwEsc(bwMXN(q.credito))+'</b></div>';
+  var ex=q.moneda!=='MXN', mon=function(n){ return bwEsc(bwSim(q.moneda)+bwNum(n)); };
+  b.innerHTML=(ex?'<div class="bw-kv"><span>Tipo de cambio</span><b>1 USD = '+bwEsc(bwNum(q.tasa))+' '+bwEsc(q.moneda)+'</b></div>'
+      +'<div class="bw-kv"><span>'+bwEsc(bwNum(q.usd))+' USD equivalen a</span><b>'+mon(q.base)+'</b></div>'
+      +'<div class="bw-kv"><span>+ Comisión'+(q.pct>0?' ('+bwEsc(bwNum(q.pct))+'%)':'')+'</span><b>'+mon(q.comision)+'</b></div>':'')
+    +'<div class="bw-kv bw-tot"><span>'+(ex?'Total a enviar':'Debes pagar')+'</span><b class="bw-pg">'+bwEsc(bwMoneda(q.pagar,q.moneda))+'</b></div>'
+    +'<div class="bw-kv bw-acr"><span>Se acreditan a tu saldo</span><b>'+bwEsc(bwMXN(q.credito))+'</b></div>'
+    +(ex?'<p class="bw-cn">La comisión es del servicio y no se acredita. Cotización de las '+bwEsc(bwHora())+' (se actualiza sola).</p>':'');
 }
 function bwCopiarDato(i,j,btn){
   var d=((BW.cuentas[i]||{}).detalle||[])[j]; if(!d) return;
@@ -18495,7 +18502,7 @@ function bwCargarCuentas(){
   var box=bwEl('bw-cuentas');
   bwApi('cuentas').then(function(r){
     if(!r||!r.ok){ box.innerHTML='<div class="bw-vacio">'+bwEsc((r&&r.message)||'No se pudieron cargar las cuentas')+'</div>'; return; }
-    BW.cuentas=r.cuentas||[]; BW.min=r.min||200; BW.max=r.max||50000; BW.minUsd=r.min_usd||5; BW.usdMxn=r.usd_mxn||0; BW.cargoCuentas=true;
+    BW.cuentas=r.cuentas||[]; BW.min=r.min||200; BW.max=r.max||50000; BW.minUsd=r.min_usd||5; BW.usdMxn=r.usd_mxn||0; BW.hora=r.tasas_hora||Date.now(); BW.cargoCuentas=true;
     var h=bwEl('bw-min'); if(h) h.textContent='Mínimo '+BW.minUsd+' USD en todos los métodos.';
     if(!BW.cuentas.length){ box.innerHTML='<div class="bw-vacio">Se ocupa una banca. Si alguien tiene una, contacte al +57 315 884 4459.</div>'; }
     else box.innerHTML=BW.cuentas.map(function(c,i){
@@ -18596,7 +18603,7 @@ function bwResumen(){
   if(!authSession){ if(typeof showAuthModal==='function') showAuthModal(); return; }
   var d=bwDatos(); if(d.e){ bwErr(d.e); return; } bwErr('');
   bwHoja('<h3>Resumen de tu solicitud <button type="button" onclick="bwCerrar()">✕</button></h3><p class="s">Revisa que todo coincida con tu transferencia.</p>'
-    +kv('Método de depósito',d.c.nombre)+kv('Cuenta destino',d.c.moneda&&d.c.moneda!=='MXN'?((d.c.detalle||[]).filter(function(x){return x.copiar;}).map(function(x){return x.et+' '+x.val;}).join(' · ')||d.c.nombre):d.c.clabe)+kv('Cantidad a recargar',bwNum(d.usd)+' USD')+kv('Debes pagar',bwMoneda(d.q.pagar,d.q.moneda)+((d.q.comision>0||d.q.pct>0)?' (incluye comisión)':''))+kv('Se acreditan a tu saldo','≈ '+bwMXN(d.q.credito))+kv('Titular de la transferencia',d.tit)+kv('Referencia',d.ref)+kv('Fecha y hora',bwFH(d.fecha.toISOString()))+kv('Comprobante',d.c&&BW.comp.nombre)
+    +kv('Método de depósito',d.c.nombre)+kv('Cuenta destino',d.c.moneda&&d.c.moneda!=='MXN'?((d.c.detalle||[]).filter(function(x){return x.copiar;}).map(function(x){return x.et+' '+x.val;}).join(' · ')||d.c.nombre):d.c.clabe)+kv('Cantidad a recargar',bwNum(d.usd)+' USD')+(d.q.moneda!=='MXN'?kv('Tipo de cambio','1 USD = '+bwNum(d.q.tasa)+' '+d.q.moneda)+kv('Equivale a',bwMoneda(d.q.base,d.q.moneda))+kv('Comisión',bwMoneda(d.q.comision,d.q.moneda)):'')+kv('Total a enviar',bwMoneda(d.q.pagar,d.q.moneda))+kv('Se acreditan a tu saldo','≈ '+bwMXN(d.q.credito))+kv('Titular de la transferencia',d.tit)+kv('Referencia',d.ref)+kv('Fecha y hora',bwFH(d.fecha.toISOString()))+kv('Comprobante',d.c&&BW.comp.nombre)
     +'<div class="bw-err" id="bw-e2" style="display:none"></div>'
     +'<button type="button" class="bw-btn bw-p bw-big" id="bw-conf" onclick="bwEnviar()"><i data-i="send"></i> Confirmar y enviar</button>'
     +'<button type="button" class="bw-btn" onclick="bwCerrar()">Volver a editar</button>'
@@ -18699,6 +18706,7 @@ function bwCargarMovs(){
       });
     };
   }
+  setInterval(function(){ var p=bwEl('page-saldo'); if(p&&p.classList.contains('active')&&authSession&&!document.hidden&&!BW.env) bwCargarCuentas(); },180000);
   document.addEventListener('DOMContentLoaded',function(){ try{ bwMover(); bwIcons(); }catch(e){} });
   bwIcons();
 })();
