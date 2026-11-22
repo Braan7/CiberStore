@@ -180,7 +180,7 @@ var LIKES = [
 var SERVICES = [
   // ── Videojuegos ──
   { nombre:'Free Fire', categoria:'videojuegos', descripcion:'Diamantes, pases y mas', tipoRecarga:'Diamantes', icono:'\uD83D\uDD25', imagen:'img/freefire-hero.png', estado:'disponible', ruta:'freefire' },
-  { nombre:'Craftland', categoria:'videojuegos', descripcion:'Nick color &middot; entrega automatica', tipoRecarga:'Nick', icono:'\uD83C\uDFA8', imagen:'', estado:'disponible', ruta:'craftland' },
+  { nombre:'Craftland', categoria:'videojuegos', descripcion:'Nick color &middot; entrega en 2 a 3 dias', tipoRecarga:'Nick', icono:'\uD83C\uDFA8', imagen:'', estado:'disponible', ruta:'craftland' },
   { nombre:'PUBG', categoria:'videojuegos', descripcion:'Monedas G para PC (Steam) &middot; Mobile en construccion', tipoRecarga:'Monedas', icono:'\uD83E\uDE96', imagen:'img/pubg-hero.png', estado:'disponible', ruta:'pubg' },
   { nombre:'COD Mobile', categoria:'videojuegos', descripcion:'CP y paquetes de batalla', tipoRecarga:'CP', icono:'\u2694\uFE0F', imagen:'img/codm.jpg', estado:'buscando_proveedor', ruta:null },
   { nombre:'Roblox', categoria:'videojuegos', descripcion:'Robux y contenido digital', tipoRecarga:'Robux', icono:'\uD83D\uDFE9', imagen:'img/roblox.jpg', estado:'proximamente', ruta:null },
@@ -11309,6 +11309,7 @@ function _copiarBioLink(){
 // ═══════════ LIKES 2K (paquetes grandes, entrega en la manana) ═══════════
 // Precios: [likes, USD, MXN, COP, ARS, EUR]
 var LIKES2K_PAQUETES = [
+  { likes:'2K', mxn:120, usd:6, cop:'6.000', ars:'8.160', eur:'6,56', dias:'1 DIA', cotizar:false },
   { likes:'4K', mxn:230, usd:12, cop:'11.500', ars:'15.640', eur:'12,57', dias:'2 DIAS', cotizar:false },
   { likes:'10K', mxn:590, usd:31, cop:'29.500', ars:'40.120', eur:'32,24', dias:'5 DIAS', cotizar:false },
   { likes:'20K', mxn:1190, usd:63, cop:'59.500', ars:'80.920', eur:'65,03', dias:'10 DIAS', cotizar:false },
@@ -21540,6 +21541,7 @@ function clEsc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, functio
 function clM(n){ return (typeof fmt === 'function') ? fmt(n) : ('$' + Number(n).toFixed(2)); }
 function clN(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
 function clPreparar(){
+  try{ svPrecioCL(); }catch(e){}
   var i = document.getElementById('cl-id');
   if(i && !i.value){ try{ var l = (typeof uxUltima === 'function') ? uxUltima() : null; if(l && l.cl) i.value = l.cl; }catch(e){} }
 }
@@ -21562,7 +21564,7 @@ function clPintar(){
   var res = document.getElementById('cl-res'); if(!res) return;
   res.innerHTML = '<div class="d50-who"><span>👤</span><div><b>' + clEsc(CL.nick || 'Perfil encontrado') + '</b><small>ID ' + clEsc(CL.id) + (CL.seg != null ? ' · ' + clN(CL.seg) + ' seguidores' : '') + '</small></div></div>'
     + '<div class="cl-box"><b style="color:#fff">Nick color · Craftland</b><div class="cl-pr"><span>Precio</span><b>' + clM(CL.precio) + '</b></div>'
-    + (CL.disp ? '<button type="button" class="d50-go" onclick="clComprar()">Comprar con saldo</button>' : '<div class="cl-no">' + clEsc(CL.motivo || 'Sin stock por ahora.') + ' No se te cobra nada.</div><button type="button" class="d50-go" disabled>No disponible</button>') + '</div>';
+    + (CL.disp ? '<div class="sv-note" style="margin-bottom:.8rem"><span class="ic">⏳</span><div>La entrega tarda <b>de 2 a 3 días</b>.</div></div><button type="button" class="d50-go" onclick="clComprar()">Comprar con saldo</button>' : '<div class="cl-no">' + clEsc(CL.motivo || 'Sin stock por ahora.') + ' No se te cobra nada.</div><button type="button" class="d50-go" disabled>No disponible</button>') + '</div>';
 }
 function clSheet(h){ var o = document.getElementById('cl-ov'); if(!o) return; if(o.parentNode !== document.body) document.body.appendChild(o); o.innerHTML = '<div class="d50-sheet">' + h + '</div>'; o.classList.add('on'); }
 function clCerrar(){ var o = document.getElementById('cl-ov'); if(o){ o.classList.remove('on'); o.innerHTML = ''; } CL.vivo = false; }
@@ -21571,7 +21573,7 @@ function clComprar(){
   clSheet('<h3>Confirmar compra<button type="button" onclick="clCerrar()" aria-label="Cerrar">✕</button></h3>'
     + '<div class="d50-sum"><div class="d50-big">Nick color</div><div class="d50-bs" style="color:#d8a8ff">Craftland</div></div>'
     + '<dl class="d50-dl"><dt>ID de Craftland</dt><dd>' + clEsc(CL.id) + '</dd>' + (CL.nick ? '<dt>Jugador</dt><dd>' + clEsc(CL.nick) + '</dd>' : '') + '<dt>Paquete</dt><dd>Nivel 6 · +60,150 seguidores</dd><dt>Precio</dt><dd>' + clM(CL.precio) + '</dd><dt>Tu saldo</dt><dd>' + clM(saldo) + '</dd></dl>'
-    + '<div class="d50-note">Revisa bien tu ID: el pedido se hace <b>a ese perfil</b>. Si el proveedor no lo puede completar, se te devuelve el saldo automáticamente.</div>'
+    + '<div class="d50-note">⏳ <b>Entrega de 2 a 3 días.</b> Revisa bien tu ID: el pedido se hace <b>a ese perfil</b>. Si el proveedor no lo puede completar, se te devuelve el saldo automáticamente.</div>'
     + '<div id="cl-err"></div>'
     + (falta ? '<button type="button" class="d50-go" onclick="clCerrar();goPage(\'saldo\')">Recargar saldo</button>' : '<button type="button" class="d50-go" id="cl-ok" onclick="clPagar()">Pagar ' + clM(CL.precio) + '</button>'));
 }
@@ -21631,11 +21633,13 @@ function clSeguimiento(o){
   window.goPage = function(id){ var r = o.apply(this, arguments); if(id === 'craftland') clPreparar(); return r; };
 })();
 /* ═══ Likes automáticos con saldo (1 crédito = 1 like; devuelve lo no enviado) + recibo en imagen ═══ */
-var LKA = { id:'', nick:'', likes:null, unit:0.06, max:2000, cant:2000, disp:true, motivo:'', busy:false, idem:{}, res:null };
+var LKA = { id:'', nick:'', likes:null, unit:0.00275, p2000:5.5, max:2000, cant:2000, disp:true, motivo:'', busy:false, idem:{}, res:null };
 function lkaEsc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 function lkaM(n){ return (typeof fmt === 'function') ? fmt(n) : ('$' + Number(n).toFixed(2)); }
 function lkaN(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
 function lkaTotal(c){ return Math.round(c * LKA.unit * 100) / 100; }
+function lkaPrecioTxt(){ var e = document.getElementById('lk-p2000'); if(e) e.textContent = lkaM(LKA.p2000); }
+function lkaWA(ev){ if(ev) ev.preventDefault(); var n = (typeof WA !== 'undefined') ? WA : ''; window.open('https://wa.me/' + n + '?text=' + encodeURIComponent('Hola! Quiero comprar likes de Free Fire en cantidad.'), '_blank'); }
 function lkaConsultar(){
   if(typeof authSession === 'undefined' || !authSession){ if(typeof showToast === 'function') showToast('Inicia sesión para continuar'); if(typeof showAuthModal === 'function') setTimeout(showAuthModal, 500); return; }
   var id = ((document.getElementById('l2k-id') || {}).value || '').replace(/\D/g, '');
@@ -21646,8 +21650,8 @@ function lkaConsultar(){
   ckApi('likes_check', { ff_id: id }, true).then(function(j){
     LKA.busy = false; btn.disabled = false; btn.textContent = 'Consultar ID';
     if(!j || !j.ok){ res.innerHTML = '<div class="d50-msg ko">' + lkaEsc((j && j.message) || 'No se pudo consultar. Intenta de nuevo.') + '</div>'; return; }
-    LKA.id = j.ff_id; LKA.nick = j.nick || ''; LKA.likes = j.likes; LKA.unit = Number(j.precio_unit) || 0.06; LKA.max = Number(j.max_cant) || 2000;
-    LKA.disp = !!j.disponible; LKA.motivo = j.motivo || ''; if(LKA.cant > LKA.max) LKA.cant = Math.max(1, LKA.max); if(!LKA.cant) LKA.cant = Math.min(2000, LKA.max) || 1;
+    LKA.id = j.ff_id; LKA.nick = j.nick || ''; LKA.likes = j.likes; LKA.unit = Number(j.precio_unit) || 0.00275; if(j.precio_2000) LKA.p2000 = Number(j.precio_2000); lkaPrecioTxt(); LKA.max = Number(j.max_cant) || 2000;
+    LKA.disp = !!j.disponible; LKA.motivo = j.motivo || ''; if(LKA.cant > LKA.max) LKA.cant = Math.max(10, LKA.max); if(!LKA.cant) LKA.cant = Math.min(2000, LKA.max) || 10;
     try{ if(typeof ckSyncSaldo === 'function') ckSyncSaldo(j.saldo); }catch(e){}
     lkaPintar();
   }).catch(function(){ LKA.busy = false; btn.disabled = false; btn.textContent = 'Consultar ID'; res.innerHTML = '<div class="d50-msg ko">Sin conexión. Intenta de nuevo.</div>'; });
@@ -21658,8 +21662,8 @@ function lkaPintar(){
   res.innerHTML = '<div class="d50-who lka-box"><span>👤</span><div><b>' + lkaEsc(LKA.nick || 'Jugador encontrado') + '</b><small>ID ' + lkaEsc(LKA.id) + (LKA.likes != null ? ' · ' + lkaN(LKA.likes) + ' likes actuales' : '') + '</small></div></div>'
     + (LKA.disp
       ? '<div class="lka-chips">' + chips.map(function(v){ return '<button type="button" class="lka-chip' + (LKA.cant === v ? ' on' : '') + '" onclick="lkaSet(' + v + ')">' + lkaN(v) + '</button>'; }).join('') + '</div>'
-        + '<input class="lka-in" id="lka-c" type="text" inputmode="numeric" maxlength="4" value="' + LKA.cant + '" oninput="lkaSet(this.value,1)" aria-label="Cantidad de likes (1 a ' + LKA.max + ')"/>'
-        + '<div style="font-size:.68rem;color:#6b7280;margin-top:.3rem">Personaliza de 1 a ' + lkaN(LKA.max) + ' likes</div>'
+        + '<input class="lka-in" id="lka-c" type="text" inputmode="numeric" maxlength="4" value="' + LKA.cant + '" oninput="lkaSet(this.value,1)" aria-label="Cantidad de likes (10 a ' + LKA.max + ')"/>'
+        + '<div style="font-size:.68rem;color:#6b7280;margin-top:.3rem">Personaliza de 10 a ' + lkaN(LKA.max) + ' likes</div>'
         + '<div class="lka-pr"><span>Total (<span id="lka-n">' + lkaN(LKA.cant) + '</span> likes)</span><b id="lka-t">' + lkaM(lkaTotal(LKA.cant)) + '</b></div>'
         + '<button type="button" class="d50-go" id="lka-go" onclick="lkaConfirmar()">Enviar likes con saldo</button>'
       : '<div class="d50-msg ko" style="margin-top:.7rem">' + lkaEsc(LKA.motivo || 'No disponible por ahora.') + ' No se te cobra nada.</div>');
@@ -21673,7 +21677,7 @@ function lkaSet(v, typed){
 function lkaSheet(h){ var o = document.getElementById('lka-ov'); if(!o) return; if(o.parentNode !== document.body) document.body.appendChild(o); o.innerHTML = '<div class="d50-sheet">' + h + '</div>'; o.classList.add('on'); }
 function lkaCerrar(){ if(LKA.busy) return; var o = document.getElementById('lka-ov'); if(o){ o.classList.remove('on'); o.innerHTML = ''; } }
 function lkaConfirmar(){
-  var n = LKA.cant; if(!(n >= 1 && n <= 2000)){ if(typeof showToast === 'function') showToast('Cantidad de 1 a 2,000'); return; }
+  var n = LKA.cant; if(!(n >= 10 && n <= 2000)){ if(typeof showToast === 'function') showToast('Cantidad de 10 a 2,000'); return; }
   var saldo = (authSession && Number(authSession.saldo)) || 0, tot = lkaTotal(n), falta = saldo < tot;
   lkaSheet('<h3>Confirmar envío<button type="button" onclick="lkaCerrar()" aria-label="Cerrar">✕</button></h3>'
     + '<div class="d50-sum"><div class="d50-big">' + lkaN(n) + ' likes</div><div class="d50-bs" style="color:#ffb84d">Entrega automática</div></div>'
@@ -21752,3 +21756,37 @@ function lkaCompartir(){
     else lkaDescargar();
   });
 }
+
+/* ═══ Stock visible (público) y detalle para el administrador — Craftland y Likes ═══ */
+var SV = { d:null, t:0, busy:false };
+function svN(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+function svPill(id, cls, txt){ var e = document.getElementById(id); if(!e) return; e.className = 'sv-pill sv-stock ' + cls; var s = e.querySelector('span'); if(s) s.textContent = txt; }
+function svPintar(){
+  var d = SV.d; if(!d) return;
+  var l = d.likes || {}, c = d.craftland || {};
+  if(!l.ok) svPill('lk-stock', '', 'Stock no disponible'); else if(l.restantes == null) svPill('lk-stock', l.disponible === false ? 'out' : 'ok', l.disponible === false ? 'Sin stock por ahora' : 'Disponible');
+  else svPill('lk-stock', l.restantes <= 0 ? 'out' : l.restantes < 5000 ? 'low' : 'ok', l.restantes <= 0 ? 'Sin stock por ahora' : 'Stock: ' + svN(l.restantes) + ' likes');
+  if(!c.ok) svPill('cl-stock', '', 'Stock no disponible'); else if(c.disponible === false) svPill('cl-stock', 'out', 'Sin stock por ahora');
+  else if(c.unidades == null) svPill('cl-stock', 'ok', 'Disponible'); else svPill('cl-stock', c.unidades <= 3 ? 'low' : 'ok', 'Stock: ' + svN(c.unidades) + (c.unidades === 1 ? ' paquete' : ' paquetes'));
+  if(d.precio_likes_2000){ try{ LKA.p2000 = Number(d.precio_likes_2000); lkaPrecioTxt(); }catch(e){} }
+  if(d.precio_craftland){ try{ CL.precio = Number(d.precio_craftland); svPrecioCL(); }catch(e){} }
+  var dt = d.detalle, ah = document.getElementById('lk-adm'), ac = document.getElementById('cl-adm');
+  if(ah){ if(dt){ ah.style.display = ''; ah.textContent = '👁 Solo admin · créditos del proveedor de likes: ' + (dt.likes && dt.likes.ok ? svN(dt.likes.restantes) : 'sin datos'); } else ah.style.display = 'none'; }
+  if(ac){ if(dt){ var k = dt.craftland || {}; ac.style.display = ''; ac.textContent = '👁 Solo admin · saldo del proveedor: ' + (k.saldo_cents != null ? '$' + (k.saldo_cents / 100).toFixed(2) : 'sin datos') + ' · paquete: ' + (k.precio_cents != null ? '$' + (k.precio_cents / 100).toFixed(2) : '—') + ' · servidor: ' + (k.servidor === true ? 'con stock' : k.servidor === false ? 'sin stock' : 'sin dato'); } else ac.style.display = 'none'; }
+}
+function svPrecioCL(){ var e = document.getElementById('cl-precio'); if(e && typeof fmt === 'function') e.textContent = fmt(CL.precio); }
+function svRefrescar(){
+  svPrecioCL(); try{ lkaPrecioTxt(); }catch(e){}
+  if(SV.d) svPintar();
+  if(SV.busy || Date.now() - SV.t < 30000) return; SV.busy = true;
+  var tok = ''; try{ if(typeof csAdminSesionToken === 'function') tok = csAdminSesionToken() || ''; }catch(e){}
+  var body = tok ? { action:'admin_stock', token:tok } : { action:'stock_servicios' };
+  fetch('/api/comprar', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) })
+    .then(function(r){ return r.json(); })
+    .then(function(j){ SV.busy = false; if(j && j.ok){ SV.d = j; SV.t = Date.now(); svPintar(); } else if(tok && j && j.code === 'sesion_invalida'){ SV.t = 0; } })
+    .catch(function(){ SV.busy = false; });
+}
+(function(){
+  if(typeof goPage === 'function'){ var o = goPage; window.goPage = function(id){ var r = o.apply(this, arguments); if(id === 'craftland' || id === 'likes2k') setTimeout(svRefrescar, 60); return r; }; }
+  if(typeof changeCurrency === 'function'){ var cc = changeCurrency; window.changeCurrency = function(c){ var r = cc.apply(this, arguments); setTimeout(function(){ svPrecioCL(); try{ lkaPrecioTxt(); var x = document.getElementById('lka-res'); if(x && LKA.id && x.innerHTML.indexOf('lka-c') > -1){ var cv = document.getElementById('lka-c'); lkaSet(cv ? cv.value : LKA.cant, 1); } }catch(e){} }, 30); return r; }; }
+})();

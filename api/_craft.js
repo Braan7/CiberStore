@@ -115,4 +115,17 @@ async function proxy(b){
   if(b.action === 'comprar') return comprar(b);
   return { success: false, code: 'ENDPOINT_DISABLED', error: 'Acción desconocida' };
 }
-module.exports = { jugador, disponible, comprar, estado, proxy, idOk };
+
+// Stock para mostrar (público y admin): unidades = cuántos paquetes alcanza a entregar el saldo del proveedor
+async function stockInfo(){
+  if(!process.env.CRAFT_API_KEY) return { ok: false, code: 'sin_configurar' };
+  let r, bl; try{ [r, bl] = await Promise.all([http('/api/v1/stock', null, 7000), http('/api/v1/balance', null, 7000)]); }catch(e){ return { ok: false, code: 'proveedor' }; }
+  if(r.status !== 200 && bl.status !== 200) return { ok: false, code: 'proveedor' };
+  const o = r.status === 200 ? cuerpo(r.json) : {}, b = bl.status === 200 && bl.json ? bl.json : {};
+  const saldo = Number(b.balance_cents), precio = Number(b.precio_centavos);
+  const unidades = isFinite(saldo) && isFinite(precio) && precio > 0 ? Math.max(0, Math.floor(saldo / precio)) : null;
+  let can = o.can_order; if(can === undefined) can = o.canOrder; if(can === undefined && o.available === false) can = false;
+  const disponible = can === false ? false : (unidades === 0 ? false : true);
+  return { ok: true, disponible, unidades: disponible ? unidades : 0, servidor: o.available === undefined ? null : o.available, saldo_cents: isFinite(saldo) ? saldo : null, precio_cents: isFinite(precio) ? precio : null };
+}
+module.exports = { stockInfo, jugador, disponible, comprar, estado, proxy, idOk };

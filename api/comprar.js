@@ -76,7 +76,7 @@ function errorSql(msg){
   if(/maximo_automaticas/.test(msg)) return { code: 'maximo', message: 'Máximo 5 paquetes de entrega automática por pedido. Haz otro pedido para el resto.' };
   if(/cantidad_maxima/.test(msg)) return { code: 'maximo', message: 'Superaste la cantidad máxima por pedido de ese producto.' };
   if(/ordenes_saldo_items_d50_uni/.test(msg)) return { code: 'd50_ya', message: 'Ya hay un pedido de ese paquete al 50% para ese ID. Cada paquete se usa una sola vez por cuenta.' };
-  if(/cantidad_invalida/.test(msg)) return { code: 'cantidad', message: 'La cantidad debe ser de 1 a 2,000 likes.' };
+  if(/cantidad_invalida/.test(msg)) return { code: 'cantidad', message: 'La cantidad debe ser de 10 a 2,000 likes.' };
   if(/cuenta_suspendida/.test(msg)) return { code: 'suspendida', message: 'Tu cuenta está suspendida. Contacta a soporte.' };
   if(/idem_ajena|idem_invalida|items_invalidos/.test(msg)) return { code: 'solicitud', message: 'Solicitud inválida. Recarga la página e inténtalo de nuevo.' };
   return null;
@@ -332,6 +332,23 @@ module.exports = async function handler(req, res){
     }
     if(limite('g|' + ip, 400, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Demasiadas solicitudes, espera un momento' }, 429);
 
+    const lkPrecioPub = async () => { try{ const k = await leerCatalogo(); const x = (k.productos || []).find(y => y.clave === 'likes_auto'); return x ? Number(x.precio) : null; }catch(e){ return null; } };
+    const clPrecioPub = async () => { try{ const k = await leerCatalogo(); const x = (k.productos || []).find(y => y.clave === 'cl_nick'); return x ? Number(x.precio) : null; }catch(e){ return null; } };
+    // ── Stock visible (público): likes y Craftland. Con sesión de admin devuelve además el detalle del proveedor ──
+    if(a === 'stock_servicios' || a === 'admin_stock'){
+      const adm = a === 'admin_stock';
+      if(adm && !S.verificar(b.token)) return enviar(res, { ok: false, code: 'sesion_invalida', message: 'Tu sesión del panel venció. Entra de nuevo.' }, 401);
+      if(!adm && limite('stk|' + ip, 40, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Espera un momento.' }, 429);
+      if(!global.__stk || Date.now() - global.__stk.t > (adm ? 8000 : 45000) || global.__stk.adm !== adm){
+        const [lk, cf] = await Promise.all([LK.creditos().catch(() => ({ ok: false })), CRAFT.stockInfo().catch(() => ({ ok: false }))]);
+        global.__stk = { t: Date.now(), adm, v: { ok: true,
+          likes: { ok: !!lk.ok, restantes: lk.ok ? lk.restantes : null, disponible: lk.ok ? (lk.restantes == null ? true : lk.restantes > 0) : null },
+          craftland: { ok: !!cf.ok, disponible: cf.ok ? cf.disponible : null, unidades: cf.ok ? cf.unidades : null },
+          precio_likes_2000: await lkPrecioPub(), precio_craftland: await clPrecioPub(),
+          detalle: adm ? { likes: lk, craftland: cf } : undefined, ts: Date.now() } };
+      }
+      return enviar(res, global.__stk.v);
+    }
     // ═════════════ ADMINISTRADOR ═════════════
     if(a.slice(0, 6) === 'admin_'){
       const d = S.verificar(b.token);
@@ -539,7 +556,7 @@ module.exports = async function handler(req, res){
     if(a === 'likes_check' || a === 'likes_enviar' || a === 'likes_estado' || a === 'likes_mis'){
       const lkPub = l => l ? { id: l.id, codigo: 'LK' + l.id, ff_id: l.ff_id, cantidad: l.cantidad, enviados: l.enviados, devuelto: Number(l.devuelto), total: Number(l.total), estado: l.estado, nick: l.nick || '', antes: l.antes, despues: l.despues, recibo: l.recibo || null, fecha: l.cerrada || l.creada, detalle: l.estado === 'verificar' ? 'En verificación con el equipo. Si no se envió, se te devuelve el saldo.' : (l.estado === 'rechazada' ? (l.detalle || '') : '') } : null;
       const lkAl = (r, cuando) => { if(r && (r.alerta || r.sinCreditos)) AL.avisarFalla('likes', '🔴 LIKES: ' + (r.alerta || 'proveedor sin créditos'), 'El proveedor de likes ' + (r.alerta || 'no tiene créditos para enviar') + (cuando ? ' (' + cuando + ')' : '') + '. Revisa LIKES_API_KEY en Vercel o recarga créditos con el proveedor. Mientras tanto nadie puede enviar likes automáticos.', 30 * 60000).catch(() => {}); };
-      const lkPrecio = async () => { const k = await leerCatalogo(); const x = (k.productos || []).find(y => y.clave === 'likes_auto'); return x ? Number(x.precio) : null; };
+      const lkPrecio = async () => { const k = await leerCatalogo(); const x = (k.productos || []).find(y => y.clave === 'likes_auto'); return x ? Number(x.precio) / 2000 : null; };   // el catálogo guarda el precio de cada 2,000 likes
       const lkCerrar = (l, enviados, estado, o) => rpc('likes_auto_cerrar', { p_id: l, p_enviados: enviados, p_estado: estado || null, p_nick: (o && o.nick) || null, p_antes: (o && o.antes != null) ? o.antes : null, p_despues: (o && o.despues != null) ? o.despues : null, p_log: (o && o.log_id != null) ? o.log_id : null, p_recibo: (o && o.recibo) || null, p_detalle: (o && o.detalle) || null });
       const lkLeer = async id => { const r = await rest('likes_auto?id=eq.' + Number(id) + '&user_id=eq.' + encodeURIComponent(uid) + '&limit=1'); return Array.isArray(r.json) && r.json[0] ? r.json[0] : null; };
       // Cierra un pedido a partir de lo que el proveedor registró en su historial (o lo manda a verificar si no se puede saber)
@@ -573,14 +590,14 @@ module.exports = async function handler(req, res){
         lkAl(j, 'consulta'); lkAl(cr, 'consulta');
         if(!j.ok) return enviar(res, { ok: false, code: j.code, message: j.message }, j.code === 'NOT_FOUND' ? 404 : j.code === 'id' ? 400 : 503);
         const max = cr.ok && cr.restantes != null ? Math.max(0, Math.min(2000, cr.restantes)) : 2000;
-        return enviar(res, { ok: true, ff_id: idF, nick: j.nick, likes: j.likes, region: j.region, precio_unit: precio, max_cant: max, disponible: cr.ok ? max > 0 : false, motivo: cr.ok ? (max > 0 ? null : 'Sin créditos por ahora. Intenta más tarde.') : cr.message, saldo: Number(p.saldo) || 0 });
+        return enviar(res, { ok: true, ff_id: idF, nick: j.nick, likes: j.likes, region: j.region, precio_unit: precio, precio_2000: Math.round(precio * 2000 * 100) / 100, max_cant: max, disponible: cr.ok ? max > 0 : false, motivo: cr.ok ? (max > 0 ? null : 'Sin créditos por ahora. Intenta más tarde.') : cr.message, saldo: Number(p.saldo) || 0 });
       }
 
       // ───────── likes_enviar ─────────
       if(p.banned) return enviar(res, { ok: false, code: 'suspendida', message: 'Tu cuenta está suspendida. Contacta a soporte.' });
       const cant = Number(b.cantidad), idem = String(b.idem || '');
       if(!LK.idOk(idF)) return enviar(res, { ok: false, code: 'id', message: 'Revisa tu ID de Free Fire (solo números, de 5 a 15 dígitos).' });
-      if(!LK.intOk(cant)) return enviar(res, { ok: false, code: 'cantidad', message: 'La cantidad debe ser de 1 a 2,000 likes.' });
+      if(!LK.intOk(cant)) return enviar(res, { ok: false, code: 'cantidad', message: 'La cantidad debe ser de 10 a 2,000 likes.' });
       if(!/^[A-Za-z0-9_-]{8,100}$/.test(idem)) return enviar(res, { ok: false, code: 'solicitud', message: 'Solicitud inválida. Recarga la página.' });
       const prev = await rest('likes_auto?idem=eq.' + encodeURIComponent(idem) + '&user_id=eq.' + encodeURIComponent(uid) + '&limit=1');
       if(Array.isArray(prev.json) && prev.json[0]){   // reintento del mismo pedido: nunca se vuelve a enviar ni a cobrar
