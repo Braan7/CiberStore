@@ -180,6 +180,7 @@ var LIKES = [
 var SERVICES = [
   // ── Videojuegos ──
   { nombre:'Free Fire', categoria:'videojuegos', descripcion:'Diamantes, pases y mas', tipoRecarga:'Diamantes', icono:'\uD83D\uDD25', imagen:'img/freefire-hero.png', estado:'disponible', ruta:'freefire' },
+  { nombre:'Craftland', categoria:'videojuegos', descripcion:'Nick color &middot; entrega automatica', tipoRecarga:'Nick', icono:'\uD83C\uDFA8', imagen:'', estado:'disponible', ruta:'craftland' },
   { nombre:'PUBG', categoria:'videojuegos', descripcion:'Monedas G para PC (Steam) &middot; Mobile en construccion', tipoRecarga:'Monedas', icono:'\uD83E\uDE96', imagen:'img/pubg-hero.png', estado:'disponible', ruta:'pubg' },
   { nombre:'COD Mobile', categoria:'videojuegos', descripcion:'CP y paquetes de batalla', tipoRecarga:'CP', icono:'\u2694\uFE0F', imagen:'img/codm.jpg', estado:'buscando_proveedor', ruta:null },
   { nombre:'Roblox', categoria:'videojuegos', descripcion:'Robux y contenido digital', tipoRecarga:'Robux', icono:'\uD83D\uDFE9', imagen:'img/roblox.jpg', estado:'proximamente', ruta:null },
@@ -8048,7 +8049,7 @@ function renderServiciosHome(){
 
   // Destacados: PUBG Mobile, COD Mobile, Roblox (Free Fire ya tiene su propio hero arriba, no se duplica aqui)
   // Destacados: Free Fire primero (imagen real, catalogo disponible), luego PUBG, COD, Roblox
-  var nombresDestacados = ['Free Fire','PUBG','COD Mobile','Roblox'];
+  var nombresDestacados = ['Free Fire','Craftland','PUBG','COD Mobile','Roblox'];
   var destacados = nombresDestacados.map(function(n){ return juegos.find(function(s){ return s.nombre===n; }); }).filter(Boolean);
   var resto = juegos.filter(function(s){ return nombresDestacados.indexOf(s.nombre) === -1; });
 
@@ -11308,7 +11309,6 @@ function _copiarBioLink(){
 // ═══════════ LIKES 2K (paquetes grandes, entrega en la manana) ═══════════
 // Precios: [likes, USD, MXN, COP, ARS, EUR]
 var LIKES2K_PAQUETES = [
-  { likes:'2K', mxn:120, usd:6, cop:'6.000', ars:'8.160', eur:'6,56', dias:'1 DIA', cotizar:false },
   { likes:'4K', mxn:230, usd:12, cop:'11.500', ars:'15.640', eur:'12,57', dias:'2 DIAS', cotizar:false },
   { likes:'10K', mxn:590, usd:31, cop:'29.500', ars:'40.120', eur:'32,24', dias:'5 DIAS', cotizar:false },
   { likes:'20K', mxn:1190, usd:63, cop:'59.500', ars:'80.920', eur:'65,03', dias:'10 DIAS', cotizar:false },
@@ -21533,3 +21533,222 @@ document.addEventListener('DOMContentLoaded',function(){
   document.addEventListener('keydown',function(e){if(e.key==='Escape'){var s=$a('au-sheet');if(s&&!s.hidden){auSheetCerrar();return;}auPaisCerrar();}},true);
   var rem=$a('login-remember');
 });
+
+/* ═══ Craftland · Nick color (compra con saldo, entrega automática por el servidor) ═══ */
+var CL = { id:'', nick:'', seg:null, precio:220, disp:true, motivo:'', busy:false, idem:{} };
+function clEsc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function clM(n){ return (typeof fmt === 'function') ? fmt(n) : ('$' + Number(n).toFixed(2)); }
+function clN(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+function clPreparar(){
+  var i = document.getElementById('cl-id');
+  if(i && !i.value){ try{ var l = (typeof uxUltima === 'function') ? uxUltima() : null; if(l && l.cl) i.value = l.cl; }catch(e){} }
+}
+function clConsultar(){
+  if(typeof authSession === 'undefined' || !authSession){ if(typeof showToast === 'function') showToast('Inicia sesión para continuar'); if(typeof showAuthModal === 'function') setTimeout(showAuthModal, 500); return; }
+  var id = ((document.getElementById('cl-id') || {}).value || '').replace(/\D/g, '');
+  var res = document.getElementById('cl-res'), btn = document.getElementById('cl-btn');
+  if(!/^\d{5,15}$/.test(id)){ res.innerHTML = '<div class="d50-msg ko">Escribe un ID de Craftland válido (solo números, de 5 a 15 dígitos).</div>'; return; }
+  if(CL.busy) return; CL.busy = true; if(btn){ btn.disabled = true; btn.innerHTML = '<span class="rc-spin"></span> Consultando…'; }
+  res.innerHTML = '<div class="d50-msg">Consultando tu perfil…</div>';
+  ckApi('cl_check', { ff_id: id }, true).then(function(j){
+    CL.busy = false; if(btn){ btn.disabled = false; btn.textContent = 'Consultar ID'; }
+    if(!j || !j.ok){ res.innerHTML = '<div class="d50-msg ko">' + clEsc((j && j.message) || 'No se pudo consultar. Intenta de nuevo.') + '</div>'; return; }
+    CL.id = j.ff_id; CL.nick = j.nick || ''; CL.seg = j.seguidores; CL.precio = Number(j.precio) || 220; CL.disp = !!j.disponible; CL.motivo = j.motivo || '';
+    try{ if(typeof ckSyncSaldo === 'function') ckSyncSaldo(j.saldo); }catch(e){}
+    clPintar();
+  }).catch(function(){ CL.busy = false; if(btn){ btn.disabled = false; btn.textContent = 'Consultar ID'; } res.innerHTML = '<div class="d50-msg ko">Sin conexión. Intenta de nuevo.</div>'; });
+}
+function clPintar(){
+  var res = document.getElementById('cl-res'); if(!res) return;
+  res.innerHTML = '<div class="d50-who"><span>👤</span><div><b>' + clEsc(CL.nick || 'Perfil encontrado') + '</b><small>ID ' + clEsc(CL.id) + (CL.seg != null ? ' · ' + clN(CL.seg) + ' seguidores' : '') + '</small></div></div>'
+    + '<div class="cl-box"><b style="color:#fff">Nick color · Craftland</b><div class="cl-pr"><span>Precio</span><b>' + clM(CL.precio) + '</b></div>'
+    + (CL.disp ? '<button type="button" class="d50-go" onclick="clComprar()">Comprar con saldo</button>' : '<div class="cl-no">' + clEsc(CL.motivo || 'Sin stock por ahora.') + ' No se te cobra nada.</div><button type="button" class="d50-go" disabled>No disponible</button>') + '</div>';
+}
+function clSheet(h){ var o = document.getElementById('cl-ov'); if(!o) return; if(o.parentNode !== document.body) document.body.appendChild(o); o.innerHTML = '<div class="d50-sheet">' + h + '</div>'; o.classList.add('on'); }
+function clCerrar(){ var o = document.getElementById('cl-ov'); if(o){ o.classList.remove('on'); o.innerHTML = ''; } CL.vivo = false; }
+function clComprar(){
+  var saldo = (authSession && Number(authSession.saldo)) || 0, falta = saldo < CL.precio;
+  clSheet('<h3>Confirmar compra<button type="button" onclick="clCerrar()" aria-label="Cerrar">✕</button></h3>'
+    + '<div class="d50-sum"><div class="d50-big">Nick color</div><div class="d50-bs" style="color:#d8a8ff">Craftland</div></div>'
+    + '<dl class="d50-dl"><dt>ID de Craftland</dt><dd>' + clEsc(CL.id) + '</dd>' + (CL.nick ? '<dt>Jugador</dt><dd>' + clEsc(CL.nick) + '</dd>' : '') + '<dt>Paquete</dt><dd>Nivel 6 · +60,150 seguidores</dd><dt>Precio</dt><dd>' + clM(CL.precio) + '</dd><dt>Tu saldo</dt><dd>' + clM(saldo) + '</dd></dl>'
+    + '<div class="d50-note">Revisa bien tu ID: el pedido se hace <b>a ese perfil</b>. Si el proveedor no lo puede completar, se te devuelve el saldo automáticamente.</div>'
+    + '<div id="cl-err"></div>'
+    + (falta ? '<button type="button" class="d50-go" onclick="clCerrar();goPage(\'saldo\')">Recargar saldo</button>' : '<button type="button" class="d50-go" id="cl-ok" onclick="clPagar()">Pagar ' + clM(CL.precio) + '</button>'));
+}
+function clPagar(){
+  if(CL.busy) return;
+  var k = CL.id; if(!CL.idem[k]) CL.idem[k] = 'cl-' + (typeof ckUUID === 'function' ? ckUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2, 10));
+  var b = document.getElementById('cl-ok'), er = document.getElementById('cl-err'); CL.busy = true; if(b){ b.disabled = true; b.innerHTML = '<span class="rc-spin"></span> Procesando…'; }
+  ckApi('pagar', { items: [{ clave: 'cl_nick', ff_id: CL.id }], idem: CL.idem[k] }, true).then(function(j){
+    CL.busy = false;
+    if(!j || !j.ok){
+      if(b){ b.disabled = false; b.textContent = 'Pagar ' + clM(CL.precio); }
+      if(er) er.innerHTML = '<div class="d50-msg ko">' + clEsc((j && j.message) || 'No se pudo completar. No se te cobró.') + '</div>';
+      if(j && j.code === 'saldo_insuficiente'){ try{ ckSyncSaldo(Number(j.saldo) || 0); }catch(e){} }
+      return;
+    }
+    delete CL.idem[k];
+    try{ ckSyncSaldo(Number(j.saldo)); }catch(e){} try{ if(typeof refreshUserBalance === 'function') refreshUserBalance(); }catch(e){}
+    try{ var l = (typeof uxUltima === 'function') ? uxUltima() : null; localStorage.setItem('cs_cl_last', CL.id); }catch(e){}
+    CL.oid = j.orden && j.orden.id; CL.saldoFin = j.saldo; CL.vivo = true;
+    clSeguimiento(j.orden);
+    if(j.orden && j.orden.por_entregar > 0) clEntregar(j.orden.id, 0); else if(j.orden) clRefrescar(j.orden.id, 0);
+    try{ if(typeof mc2Refrescar === 'function') mc2Refrescar(); }catch(e){}
+  }).catch(function(){
+    CL.busy = false; if(b){ b.disabled = false; b.textContent = 'Pagar ' + clM(CL.precio); }
+    if(er) er.innerHTML = '<div class="d50-msg ko">Sin conexión. Si se descontó saldo aparecerá en Mis compras; puedes pulsar Pagar otra vez: no se cobra dos veces.</div>';
+  });
+}
+/* el servidor entrega UNA unidad por llamada */
+function clEntregar(oid, n){
+  if(n > 4 || !CL.vivo) return;
+  ckApi('entregar', { orden_id: oid }, true).then(function(j){
+    if(j && j.ok && j.orden){ clSeguimiento(j.orden); if(j.siguiente) return clEntregar(oid, n + 1); clRefrescar(oid, 0); }
+  }).catch(function(){ setTimeout(function(){ clEntregar(oid, n + 1); }, 2500); });
+}
+/* si el proveedor lo dejó "en proceso", se vuelve a preguntar cada pocos segundos (sigue también en Mis compras) */
+function clRefrescar(oid, n){
+  if(n > 20 || !CL.vivo) return;
+  var it = CL.ult && CL.ult.items && CL.ult.items[0]; if(it && /entregado|reembolsado|verificar|error/.test(it.fase)) return;
+  setTimeout(function(){
+    if(!CL.vivo) return;
+    ckApi('refrescar', { orden_id: oid }, true).then(function(j){ if(j && j.ok && j.orden){ clSeguimiento(j.orden); } clRefrescar(oid, n + 1); }).catch(function(){ clRefrescar(oid, n + 1); });
+  }, 6000);
+}
+function clSeguimiento(o){
+  if(!o) return; CL.ult = o; var it = (o.items || [])[0] || {}, f = it.fase || 'recibido';
+  var t = { recibido:['Pedido recibido…','' ], preparando:['Preparando tu pedido…',''], en_proceso:['En proceso: el proveedor lo está enviando…',''], entregado:['¡Entregado! Revisa tu perfil en Craftland.','ok'], reembolsado:['No se pudo completar: se devolvió tu saldo.','ko'], verificar:['En verificación con el equipo. Si no llega, se te reembolsa.',''], error:['Hubo un problema. Revisa Mis compras.','ko'] }[f] || ['Procesando…',''];
+  var fin = /entregado|reembolsado|verificar|error/.test(f);
+  clSheet('<div class="d50-okk"><div class="d50-chk">' + (f === 'entregado' ? '✓' : f === 'reembolsado' ? '↩' : '⏳') + '</div><h3 style="justify-content:center">' + (f === 'entregado' ? '¡Listo!' : f === 'reembolsado' ? 'Pedido devuelto' : '¡Pedido recibido!') + '</h3>'
+    + '<p>Nick color · ID <b>' + clEsc(CL.id) + '</b></p>'
+    + '<div class="cl-est ' + t[1] + '"><i></i><span>' + t[0] + '</span></div>'
+    + '<p class="d50-sub">Saldo: <b>' + clM(typeof ckSaldoAct === 'function' ? ckSaldoAct() : CL.saldoFin) + '</b>. ' + (fin ? '' : 'Puedes cerrar esta ventana; el avance sigue en Mis compras.') + '</p>'
+    + '<button type="button" class="d50-go" onclick="clCerrar();goPage(\'miscompras\')">Ver en Mis compras</button><button type="button" class="d50-ghost" onclick="clCerrar()">Cerrar</button></div>');
+}
+(function(){
+  if(typeof goPage !== 'function') return;
+  var o = goPage;
+  window.goPage = function(id){ var r = o.apply(this, arguments); if(id === 'craftland') clPreparar(); return r; };
+})();
+/* ═══ Likes automáticos con saldo (1 crédito = 1 like; devuelve lo no enviado) + recibo en imagen ═══ */
+var LKA = { id:'', nick:'', likes:null, unit:0.06, max:2000, cant:2000, disp:true, motivo:'', busy:false, idem:{}, res:null };
+function lkaEsc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function lkaM(n){ return (typeof fmt === 'function') ? fmt(n) : ('$' + Number(n).toFixed(2)); }
+function lkaN(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+function lkaTotal(c){ return Math.round(c * LKA.unit * 100) / 100; }
+function lkaConsultar(){
+  if(typeof authSession === 'undefined' || !authSession){ if(typeof showToast === 'function') showToast('Inicia sesión para continuar'); if(typeof showAuthModal === 'function') setTimeout(showAuthModal, 500); return; }
+  var id = ((document.getElementById('l2k-id') || {}).value || '').replace(/\D/g, '');
+  var res = document.getElementById('lka-res'), btn = document.getElementById('lka-chk');
+  if(!/^\d{5,15}$/.test(id)){ res.innerHTML = '<div class="d50-msg ko">Escribe tu ID de Free Fire (solo números, de 5 a 15 dígitos).</div>'; return; }
+  if(LKA.busy) return; LKA.busy = true; btn.disabled = true; btn.innerHTML = '<span class="rc-spin"></span> Consultando…';
+  res.innerHTML = '';
+  ckApi('likes_check', { ff_id: id }, true).then(function(j){
+    LKA.busy = false; btn.disabled = false; btn.textContent = 'Consultar ID';
+    if(!j || !j.ok){ res.innerHTML = '<div class="d50-msg ko">' + lkaEsc((j && j.message) || 'No se pudo consultar. Intenta de nuevo.') + '</div>'; return; }
+    LKA.id = j.ff_id; LKA.nick = j.nick || ''; LKA.likes = j.likes; LKA.unit = Number(j.precio_unit) || 0.06; LKA.max = Number(j.max_cant) || 2000;
+    LKA.disp = !!j.disponible; LKA.motivo = j.motivo || ''; if(LKA.cant > LKA.max) LKA.cant = Math.max(1, LKA.max); if(!LKA.cant) LKA.cant = Math.min(2000, LKA.max) || 1;
+    try{ if(typeof ckSyncSaldo === 'function') ckSyncSaldo(j.saldo); }catch(e){}
+    lkaPintar();
+  }).catch(function(){ LKA.busy = false; btn.disabled = false; btn.textContent = 'Consultar ID'; res.innerHTML = '<div class="d50-msg ko">Sin conexión. Intenta de nuevo.</div>'; });
+}
+function lkaPintar(){
+  var res = document.getElementById('lka-res'); if(!res) return;
+  var chips = [500, 1000, 2000].filter(function(v){ return v <= LKA.max; });
+  res.innerHTML = '<div class="d50-who lka-box"><span>👤</span><div><b>' + lkaEsc(LKA.nick || 'Jugador encontrado') + '</b><small>ID ' + lkaEsc(LKA.id) + (LKA.likes != null ? ' · ' + lkaN(LKA.likes) + ' likes actuales' : '') + '</small></div></div>'
+    + (LKA.disp
+      ? '<div class="lka-chips">' + chips.map(function(v){ return '<button type="button" class="lka-chip' + (LKA.cant === v ? ' on' : '') + '" onclick="lkaSet(' + v + ')">' + lkaN(v) + '</button>'; }).join('') + '</div>'
+        + '<input class="lka-in" id="lka-c" type="text" inputmode="numeric" maxlength="4" value="' + LKA.cant + '" oninput="lkaSet(this.value,1)" aria-label="Cantidad de likes (1 a ' + LKA.max + ')"/>'
+        + '<div style="font-size:.68rem;color:#6b7280;margin-top:.3rem">Personaliza de 1 a ' + lkaN(LKA.max) + ' likes</div>'
+        + '<div class="lka-pr"><span>Total (<span id="lka-n">' + lkaN(LKA.cant) + '</span> likes)</span><b id="lka-t">' + lkaM(lkaTotal(LKA.cant)) + '</b></div>'
+        + '<button type="button" class="d50-go" id="lka-go" onclick="lkaConfirmar()">Enviar likes con saldo</button>'
+      : '<div class="d50-msg ko" style="margin-top:.7rem">' + lkaEsc(LKA.motivo || 'No disponible por ahora.') + ' No se te cobra nada.</div>');
+}
+function lkaSet(v, typed){
+  var n = parseInt(String(v).replace(/\D/g, ''), 10) || 0; if(n > LKA.max) n = LKA.max; LKA.cant = n;
+  var i = document.getElementById('lka-c'); if(i && !typed) i.value = n; else if(i && typed && String(n) !== i.value && n) i.value = n;
+  var t = document.getElementById('lka-t'), c = document.getElementById('lka-n'); if(t) t.textContent = lkaM(lkaTotal(n)); if(c) c.textContent = lkaN(n);
+  var chips = document.querySelectorAll('#lka-res .lka-chip'); for(var k = 0; k < chips.length; k++){ chips[k].classList.toggle('on', chips[k].textContent.replace(/,/g, '') === String(n)); }
+}
+function lkaSheet(h){ var o = document.getElementById('lka-ov'); if(!o) return; if(o.parentNode !== document.body) document.body.appendChild(o); o.innerHTML = '<div class="d50-sheet">' + h + '</div>'; o.classList.add('on'); }
+function lkaCerrar(){ if(LKA.busy) return; var o = document.getElementById('lka-ov'); if(o){ o.classList.remove('on'); o.innerHTML = ''; } }
+function lkaConfirmar(){
+  var n = LKA.cant; if(!(n >= 1 && n <= 2000)){ if(typeof showToast === 'function') showToast('Cantidad de 1 a 2,000'); return; }
+  var saldo = (authSession && Number(authSession.saldo)) || 0, tot = lkaTotal(n), falta = saldo < tot;
+  lkaSheet('<h3>Confirmar envío<button type="button" onclick="lkaCerrar()" aria-label="Cerrar">✕</button></h3>'
+    + '<div class="d50-sum"><div class="d50-big">' + lkaN(n) + ' likes</div><div class="d50-bs" style="color:#ffb84d">Entrega automática</div></div>'
+    + '<dl class="d50-dl"><dt>ID de Free Fire</dt><dd>' + lkaEsc(LKA.id) + '</dd>' + (LKA.nick ? '<dt>Jugador</dt><dd>' + lkaEsc(LKA.nick) + '</dd>' : '') + '<dt>Total</dt><dd>' + lkaM(tot) + '</dd><dt>Tu saldo</dt><dd>' + lkaM(saldo) + '</dd></dl>'
+    + '<div class="d50-note">Revisa bien tu ID. Si se envían menos likes de los pedidos, <b>se te devuelve automáticamente</b> el saldo de los que faltaron.</div><div id="lka-err"></div>'
+    + (falta ? '<button type="button" class="d50-go" onclick="lkaCerrar();goPage(\'saldo\')">Recargar saldo</button>' : '<button type="button" class="d50-go" id="lka-ok" onclick="lkaPagar()">Enviar ahora · ' + lkaM(tot) + '</button>'));
+}
+function lkaPagar(){
+  if(LKA.busy) return;
+  var k = LKA.id + '|' + LKA.cant; if(!LKA.idem[k]) LKA.idem[k] = 'lk-' + (typeof ckUUID === 'function' ? ckUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2, 10));
+  var b = document.getElementById('lka-ok'), er = document.getElementById('lka-err'); LKA.busy = true;
+  if(b){ b.disabled = true; b.innerHTML = '<span class="rc-spin"></span> Enviando likes… no cierres'; }
+  ckApi('likes_enviar', { ff_id: LKA.id, cantidad: LKA.cant, idem: LKA.idem[k] }, true).then(function(j){
+    LKA.busy = false;
+    if(!j || !j.ok){
+      if(b){ b.disabled = false; b.textContent = 'Enviar ahora · ' + lkaM(lkaTotal(LKA.cant)); }
+      if(er) er.innerHTML = '<div class="d50-msg ko">' + lkaEsc((j && j.message) || 'No se pudo completar. No se te cobró.') + '</div>';
+      if(j && j.code === 'saldo_insuficiente'){ try{ ckSyncSaldo(Number(j.saldo) || 0); }catch(e){} }
+      return;
+    }
+    delete LKA.idem[k];
+    if(j.saldo != null){ try{ ckSyncSaldo(Number(j.saldo)); }catch(e){} } try{ if(typeof refreshUserBalance === 'function') refreshUserBalance(); }catch(e){}
+    try{ localStorage.setItem('cs_lk_last', LKA.id); }catch(e){}
+    LKA.res = j.resultado; lkaResultado();
+  }).catch(function(){
+    LKA.busy = false; if(b){ b.disabled = false; b.textContent = 'Reintentar (no se cobra doble)'; }
+    if(er) er.innerHTML = '<div class="d50-msg ko">Se cortó la conexión. Pulsa reintentar: si ya se envió, no se cobra otra vez.</div>';
+  });
+}
+function lkaResultado(){
+  var r = LKA.res; if(!r) return;
+  var est = r.estado, ok = est === 'completada' || est === 'parcial';
+  var tit = est === 'completada' ? '✅ Likes enviados' : est === 'parcial' ? '⚠️ Envío parcial' : est === 'verificar' ? '⏳ En verificación' : '↩️ No se envió';
+  var info = est === 'verificar' ? '<div class="d50-note">' + lkaEsc(r.detalle || 'Estamos confirmando el envío.') + '</div><button type="button" class="d50-go" onclick="lkaReverificar(' + r.id + ')">Actualizar estado</button>'
+    : est === 'rechazada' ? '<div class="d50-note">' + lkaEsc(r.detalle || 'El proveedor no pudo enviarlos.') + ' Se te devolvió todo tu saldo.</div>'
+    : '<canvas id="lka-cv" style="display:none"></canvas><img id="lka-im" class="lka-img" alt="Recibo del envío"/>'
+      + '<div class="lka-row"><button type="button" class="d50-go" onclick="lkaDescargar()">⬇️ Descargar imagen</button><button type="button" class="d50-go lka-sec" onclick="lkaCompartir()">Compartir</button></div>'
+      + (est === 'parcial' ? '<div class="d50-note" style="margin-top:.7rem">Se enviaron <b>' + lkaN(r.enviados) + '</b> de ' + lkaN(r.cantidad) + '. Te devolvimos <b>' + lkaM(r.devuelto) + '</b> por los que faltaron.</div>' : '');
+  lkaSheet('<h3>' + tit + '<button type="button" onclick="lkaCerrar()" aria-label="Cerrar">✕</button></h3>' + info);
+  if(ok) lkaDibujar(r);
+}
+function lkaReverificar(id){
+  var o = document.querySelector('#lka-ov .d50-go'); if(o){ o.disabled = true; o.innerHTML = '<span class="rc-spin"></span> Consultando…'; }
+  ckApi('likes_estado', { id: id }, true).then(function(j){ if(j && j.ok && j.resultado){ LKA.res = j.resultado; try{ if(typeof refreshUserBalance === 'function') refreshUserBalance(); }catch(e){} lkaResultado(); } else if(o){ o.disabled = false; o.textContent = 'Actualizar estado'; } }).catch(function(){ if(o){ o.disabled = false; o.textContent = 'Actualizar estado'; } });
+}
+function lkaRR(c, x, y, w, h, r){ c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+function lkaDibujar(r){
+  var cv = document.getElementById('lka-cv'); if(!cv) return;
+  var W = 720, H = 1000; cv.width = W; cv.height = H; var c = cv.getContext('2d');
+  var g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#0b1020'); g.addColorStop(1, '#141a2e'); c.fillStyle = g; c.fillRect(0, 0, W, H);
+  c.fillStyle = 'rgba(255,180,60,.10)'; c.beginPath(); c.arc(W - 60, 80, 220, 0, 7); c.fill();
+  c.textAlign = 'center'; c.fillStyle = '#ffb84d'; c.font = '700 34px Inter,Arial,sans-serif'; c.fillText('CIBERSTORE', W / 2, 90);
+  c.fillStyle = '#8b93a3'; c.font = '500 24px Inter,Arial,sans-serif'; c.fillText('Recibo de likes automáticos', W / 2, 128);
+  c.fillStyle = r.estado === 'completada' ? '#25d366' : '#ffb84d'; c.font = '800 120px Inter,Arial,sans-serif'; c.fillText(lkaN(r.enviados), W / 2, 290);
+  c.fillStyle = '#fff'; c.font = '700 34px Inter,Arial,sans-serif'; c.fillText('LIKES ENVIADOS', W / 2, 340);
+  c.fillStyle = r.estado === 'completada' ? 'rgba(37,211,102,.18)' : 'rgba(255,180,60,.18)'; lkaRR(c, W / 2 - 140, 366, 280, 48, 24); c.fill();
+  c.fillStyle = r.estado === 'completada' ? '#25d366' : '#ffb84d'; c.font = '700 24px Inter,Arial,sans-serif'; c.fillText(r.estado === 'completada' ? '✔ COMPLETADO' : '✔ PARCIAL · ' + lkaN(r.enviados) + '/' + lkaN(r.cantidad), W / 2, 399);
+  var filas = [['Jugador', r.nick || '—'], ['ID de Free Fire', r.ff_id], ['Likes pedidos', lkaN(r.cantidad)], ['Likes enviados', lkaN(r.enviados)]];
+  if(r.antes != null && r.despues != null) filas.push(['Likes antes → después', lkaN(r.antes) + ' → ' + lkaN(r.despues)]);
+  filas.push(['Cobrado', lkaM(Number(r.total) - Number(r.devuelto))]);
+  if(Number(r.devuelto) > 0) filas.push(['Devuelto a tu saldo', lkaM(r.devuelto)]);
+  filas.push(['Pedido', r.codigo], ['Fecha', new Date(r.fecha || Date.now()).toLocaleString('es-MX')]);
+  var y = 452; c.textAlign = 'left';
+  filas.forEach(function(f){ c.fillStyle = '#8b93a3'; c.font = '500 25px Inter,Arial,sans-serif'; c.textAlign = 'left'; c.fillText(f[0], 60, y); c.fillStyle = '#fff'; c.font = '700 26px Inter,Arial,sans-serif'; c.textAlign = 'right'; var t = String(f[1]); while(c.measureText(t).width > 380 && t.length > 4) t = t.slice(0, -2); c.fillText(t, W - 60, y); c.strokeStyle = 'rgba(255,255,255,.08)'; c.beginPath(); c.moveTo(60, y + 18); c.lineTo(W - 60, y + 18); c.stroke(); y += 52; });
+  c.textAlign = 'center'; c.fillStyle = '#6b7280'; c.font = '500 22px Inter,Arial,sans-serif'; c.fillText('ciberstore.lat', W / 2, H - 36);
+  var im = document.getElementById('lka-im'); if(im) im.src = cv.toDataURL('image/png');
+}
+function lkaBlob(cb){ var cv = document.getElementById('lka-cv'); if(!cv) return; if(cv.toBlob) cv.toBlob(cb, 'image/png'); }
+function lkaDescargar(){
+  lkaBlob(function(bl){ if(!bl) return; var u = URL.createObjectURL(bl), a = document.createElement('a'); a.href = u; a.download = 'ciberstore-likes-' + ((LKA.res && LKA.res.codigo) || 'recibo') + '.png'; document.body.appendChild(a); a.click(); setTimeout(function(){ a.remove(); URL.revokeObjectURL(u); }, 1500); });
+}
+function lkaCompartir(){
+  lkaBlob(function(bl){
+    if(!bl) return; var f; try{ f = new File([bl], 'recibo-likes.png', { type: 'image/png' }); }catch(e){}
+    if(f && navigator.canShare && navigator.canShare({ files: [f] }) && navigator.share){ navigator.share({ files: [f], title: 'Recibo CiberStore' }).catch(function(){}); }
+    else lkaDescargar();
+  });
+}

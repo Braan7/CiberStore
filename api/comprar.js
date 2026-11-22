@@ -21,6 +21,8 @@ const crypto = require('crypto');
 const S = require('./_sesion.js');
 const AL = require('./_alerta.js');
 const E = require('./_estado.js');
+const LK = require('./_likes.js');   // Likes automáticos (llave: LIKES_API_KEY)
+const CRAFT = require('./_craft.js');   // Craftland · Nick color (llave: CRAFT_API_KEY)
 
 function enviar(res, body, status){ res.statusCode = status || 200; res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.setHeader('Cache-Control', 'no-store'); res.end(JSON.stringify(body)); }
 function ipDe(req){ return String((req.headers['x-forwarded-for'] || (req.socket && req.socket.remoteAddress) || 'x')).split(',')[0].trim(); }
@@ -74,6 +76,7 @@ function errorSql(msg){
   if(/maximo_automaticas/.test(msg)) return { code: 'maximo', message: 'Máximo 5 paquetes de entrega automática por pedido. Haz otro pedido para el resto.' };
   if(/cantidad_maxima/.test(msg)) return { code: 'maximo', message: 'Superaste la cantidad máxima por pedido de ese producto.' };
   if(/ordenes_saldo_items_d50_uni/.test(msg)) return { code: 'd50_ya', message: 'Ya hay un pedido de ese paquete al 50% para ese ID. Cada paquete se usa una sola vez por cuenta.' };
+  if(/cantidad_invalida/.test(msg)) return { code: 'cantidad', message: 'La cantidad debe ser de 1 a 2,000 likes.' };
   if(/cuenta_suspendida/.test(msg)) return { code: 'suspendida', message: 'Tu cuenta está suspendida. Contacta a soporte.' };
   if(/idem_ajena|idem_invalida|items_invalidos/.test(msg)) return { code: 'solicitud', message: 'Solicitud inválida. Recarga la página e inténtalo de nuevo.' };
   return null;
@@ -124,6 +127,8 @@ const snapshot = async id => { const x = await cargarOrdenes('id=eq.' + Number(i
 
 // Llama a la entrega automática (api/recarga.js) EN el servidor: la llave de Central One nunca sale de ahí
 function llamarProveedor(body, req){
+  // Craftland (Lunexis) usa otro proveedor: sus productos empiezan con cl_ y sus pedidos se guardan como CL-<código>
+  if(body && (body.craftland === true || /^cl_/.test(String(body.producto || '')) || (body.action === 'estado' && /^CL-/.test(String(body.order_id || ''))))) return CRAFT.proxy(body).catch(() => ({ success: false, code: 'PROVIDER_ERROR', error: 'Error al contactar al proveedor' })).then(r => { if(r && r.alerta) AL.avisarFalla('craft', '🔴 CRAFTLAND: ' + r.alerta, 'El proveedor de Nick color (Craftland) ' + r.alerta + '. Revisa CRAFT_API_KEY en Vercel o el saldo en el panel del proveedor. Mientras tanto nadie puede comprar Nick color.', 30 * 60000).catch(() => {}); return r; });
   return new Promise(resolve => {
     let h; try{ h = require('./recarga.js'); }catch(e){ return resolve({ success: false, code: 'ENDPOINT_DISABLED', error: 'Recargas automáticas no disponibles' }); }
     const r2 = { statusCode: 200, setHeader(){}, end(t){ try{ resolve(JSON.parse(t)); }catch(e){ resolve({ success: false, code: 'PROVIDER_ERROR', error: 'Respuesta inválida' }); } } };
@@ -456,7 +461,7 @@ module.exports = async function handler(req, res){
     // El catálogo (precios) es público: se puede ver antes de iniciar sesión. El saldo solo si la sesión es válida.
     if(a === 'catalogo' && (!u || !h)){
       const k = await leerCatalogo();
-      return enviar(res, { ok: true, sin_bd: k.sin_bd, diag: k.diag || null, productos: k.productos.filter(x => x.grupo !== 'd50'), saldo: null });
+      return enviar(res, { ok: true, sin_bd: k.sin_bd, diag: k.diag || null, productos: k.productos.filter(x => x.grupo !== 'd50' && x.grupo !== 'craftland' && x.grupo !== 'likes'), saldo: null });
     }
     // ── Venta de cuentas: lo público se ve sin iniciar sesión ──
     if(a === 'cuentas_lista'){
@@ -529,9 +534,101 @@ module.exports = async function handler(req, res){
       return enviar(res, { ok: false, code: 'accion', message: 'Acción desconocida' });
     }
 
+
+    // ═════════ LIKES AUTOMÁTICOS (1 crédito = 1 like; si el proveedor envía menos, se devuelve lo que faltó) ═════════
+    if(a === 'likes_check' || a === 'likes_enviar' || a === 'likes_estado' || a === 'likes_mis'){
+      const lkPub = l => l ? { id: l.id, codigo: 'LK' + l.id, ff_id: l.ff_id, cantidad: l.cantidad, enviados: l.enviados, devuelto: Number(l.devuelto), total: Number(l.total), estado: l.estado, nick: l.nick || '', antes: l.antes, despues: l.despues, recibo: l.recibo || null, fecha: l.cerrada || l.creada, detalle: l.estado === 'verificar' ? 'En verificación con el equipo. Si no se envió, se te devuelve el saldo.' : (l.estado === 'rechazada' ? (l.detalle || '') : '') } : null;
+      const lkAl = (r, cuando) => { if(r && (r.alerta || r.sinCreditos)) AL.avisarFalla('likes', '🔴 LIKES: ' + (r.alerta || 'proveedor sin créditos'), 'El proveedor de likes ' + (r.alerta || 'no tiene créditos para enviar') + (cuando ? ' (' + cuando + ')' : '') + '. Revisa LIKES_API_KEY en Vercel o recarga créditos con el proveedor. Mientras tanto nadie puede enviar likes automáticos.', 30 * 60000).catch(() => {}); };
+      const lkPrecio = async () => { const k = await leerCatalogo(); const x = (k.productos || []).find(y => y.clave === 'likes_auto'); return x ? Number(x.precio) : null; };
+      const lkCerrar = (l, enviados, estado, o) => rpc('likes_auto_cerrar', { p_id: l, p_enviados: enviados, p_estado: estado || null, p_nick: (o && o.nick) || null, p_antes: (o && o.antes != null) ? o.antes : null, p_despues: (o && o.despues != null) ? o.despues : null, p_log: (o && o.log_id != null) ? o.log_id : null, p_recibo: (o && o.recibo) || null, p_detalle: (o && o.detalle) || null });
+      const lkLeer = async id => { const r = await rest('likes_auto?id=eq.' + Number(id) + '&user_id=eq.' + encodeURIComponent(uid) + '&limit=1'); return Array.isArray(r.json) && r.json[0] ? r.json[0] : null; };
+      // Cierra un pedido a partir de lo que el proveedor registró en su historial (o lo manda a verificar si no se puede saber)
+      const lkResolver = async (l, forzarReembolso) => {
+        const bl = await LK.buscarEnLog(l.ff_id, Date.parse(l.creada));
+        if(bl.error) return lkCerrar(l.id, 0, 'verificar', { detalle: 'No se pudo confirmar con el proveedor' });
+        if(bl.encontrado) return lkCerrar(l.id, bl.enviados, null, { nick: bl.nick, log_id: bl.log_id });
+        if(forzarReembolso) return lkCerrar(l.id, 0, 'rechazada', { detalle: 'El proveedor no registró el envío' });
+        return lkCerrar(l.id, 0, 'verificar', { detalle: 'El proveedor no confirmó el envío' });
+      };
+
+      if(a === 'likes_mis'){
+        const r = await rest('likes_auto?user_id=eq.' + encodeURIComponent(uid) + '&order=id.desc&limit=10');
+        return enviar(res, { ok: true, items: (Array.isArray(r.json) ? r.json : []).map(lkPub), sin_tabla: r.status >= 400 });
+      }
+      if(a === 'likes_estado'){
+        if(limite('lke|' + uid, 30, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Espera un momento.' }, 429);
+        let l = await lkLeer(b.id); if(!l) return enviar(res, { ok: false, code: 'no_existe', message: 'No encontramos ese envío.' }, 404);
+        if(l.estado === 'verificar' || (l.estado === 'procesando' && Date.now() - Date.parse(l.creada) > 180000)){
+          await lkResolver(l, l.estado === 'procesando' && Date.now() - Date.parse(l.creada) > 180000); l = await lkLeer(b.id);
+        }
+        return enviar(res, { ok: true, resultado: lkPub(l), saldo: null });
+      }
+      const precio = await lkPrecio();
+      if(!(precio > 0)) return enviar(res, { ok: false, code: 'sin_catalogo', message: 'Este servicio aún no está activado. Falta ejecutar likes_auto.sql en Supabase.' });
+      const idF = String(b.ff_id || '').replace(/\D/g, '');
+
+      if(a === 'likes_check'){
+        if(limite('lkc|' + uid, 20, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Demasiadas consultas, espera un momento.' }, 429);
+        const [j, cr] = await Promise.all([LK.jugador(idF), LK.creditos()]);
+        lkAl(j, 'consulta'); lkAl(cr, 'consulta');
+        if(!j.ok) return enviar(res, { ok: false, code: j.code, message: j.message }, j.code === 'NOT_FOUND' ? 404 : j.code === 'id' ? 400 : 503);
+        const max = cr.ok && cr.restantes != null ? Math.max(0, Math.min(2000, cr.restantes)) : 2000;
+        return enviar(res, { ok: true, ff_id: idF, nick: j.nick, likes: j.likes, region: j.region, precio_unit: precio, max_cant: max, disponible: cr.ok ? max > 0 : false, motivo: cr.ok ? (max > 0 ? null : 'Sin créditos por ahora. Intenta más tarde.') : cr.message, saldo: Number(p.saldo) || 0 });
+      }
+
+      // ───────── likes_enviar ─────────
+      if(p.banned) return enviar(res, { ok: false, code: 'suspendida', message: 'Tu cuenta está suspendida. Contacta a soporte.' });
+      const cant = Number(b.cantidad), idem = String(b.idem || '');
+      if(!LK.idOk(idF)) return enviar(res, { ok: false, code: 'id', message: 'Revisa tu ID de Free Fire (solo números, de 5 a 15 dígitos).' });
+      if(!LK.intOk(cant)) return enviar(res, { ok: false, code: 'cantidad', message: 'La cantidad debe ser de 1 a 2,000 likes.' });
+      if(!/^[A-Za-z0-9_-]{8,100}$/.test(idem)) return enviar(res, { ok: false, code: 'solicitud', message: 'Solicitud inválida. Recarga la página.' });
+      const prev = await rest('likes_auto?idem=eq.' + encodeURIComponent(idem) + '&user_id=eq.' + encodeURIComponent(uid) + '&limit=1');
+      if(Array.isArray(prev.json) && prev.json[0]){   // reintento del mismo pedido: nunca se vuelve a enviar ni a cobrar
+        return enviar(res, { ok: true, repetida: true, resultado: lkPub(prev.json[0]), saldo: Number(p.saldo) || 0 });
+      }
+      if(limite('lk|' + uid, 20, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Espera un momento antes de otro envío.' }, 429);
+      // antes de cobrar: que el ID exista y que el proveedor tenga créditos (así no se cobra algo que no se puede enviar)
+      const [j, cr] = await Promise.all([LK.jugador(idF), LK.creditos()]);
+      lkAl(j, 'envío'); lkAl(cr, 'envío');
+      if(!j.ok) return enviar(res, { ok: false, code: j.code, message: j.message }, j.code === 'NOT_FOUND' ? 404 : 503);
+      if(!cr.ok) return enviar(res, { ok: false, code: cr.code, message: cr.message }, 503);
+      if(cr.restantes != null && cr.restantes < cant){ if(cr.restantes <= 0) lkAl({ sinCreditos: true }, 'envío'); return enviar(res, { ok: false, code: 'sin_creditos', message: cr.restantes <= 0 ? 'Servicio sin créditos por ahora. Intenta más tarde: no se te cobró.' : 'Por ahora solo se pueden enviar hasta ' + cr.restantes + ' likes. Baja la cantidad. No se te cobró.' }); }
+      const pg = await rpc('likes_auto_pagar', { p_user: uid, p_idem: idem, p_ff: idF, p_cant: cant, p_unit: precio });
+      if(pg.status >= 400 || !pg.json || !pg.json.ok){
+        const e = errorSql(msgErr(pg)); if(e) return enviar(res, Object.assign({ ok: false }, e));
+        if(/likes_auto_pagar|does not exist|relation|schema cache|permission denied/.test(msgErr(pg))) return enviar(res, { ok: false, code: 'db', message: 'Falta ejecutar likes_auto.sql en Supabase.' });
+        return enviar(res, { ok: false, code: 'db', message: 'No se pudo procesar el pago. No se te cobró. Intenta de nuevo.' });
+      }
+      const lid = pg.json.id; const ini = Date.now();
+      if(pg.json.repetida){ const l0 = await lkLeer(lid); return enviar(res, { ok: true, repetida: true, resultado: lkPub(l0), saldo: Number(pg.json.saldo) }); }
+      let rr = await LK.enviar(idF, cant), cierre;
+      if(rr.ok) cierre = await lkCerrar(lid, rr.enviados, null, rr);
+      else if(rr.definitivo){ lkAl(rr, 'envío'); cierre = await lkCerrar(lid, 0, 'rechazada', { detalle: rr.detalle }); }
+      else { await new Promise(r2 => setTimeout(r2, 3000)); const l1 = await lkLeer(lid); cierre = await lkResolver(Object.assign({}, l1, { creada: new Date(ini).toISOString() }), false); }
+      const lf = await lkLeer(lid), pub = lkPub(lf);
+      const sal = cierre && cierre.json && cierre.json.saldo != null ? Number(cierre.json.saldo) : null;
+      if(lf && lf.estado === 'verificar') telegram('🚨 <b>LIKES LK' + lid + ' · VERIFICAR a mano</b>\n👤 ' + esc(p.username) + ' → ID ' + esc(idF) + ' · pidió ' + cant + '\n❗ ' + esc((rr && rr.detalle) || 'sin confirmar') + '\nNo se reembolsó: revisa el historial del proveedor. El cliente puede reabrirlo y se reintenta confirmar solo.');
+      else if(lf && (lf.estado === 'completada' || lf.estado === 'parcial')) telegram('🔥 <b>LIKES AUTOMÁTICOS · LK' + lid + '</b>\n👤 ' + esc(p.username) + ' → ID ' + esc(idF) + ' (' + esc(lf.nick || '') + ')\n📤 Enviados: ' + lf.enviados + ' de ' + lf.cantidad + (lf.estado === 'parcial' ? ' (devueltos ' + dinero(lf.devuelto) + ')' : '') + '\n💰 Cobrado: ' + dinero(Number(lf.total) - Number(lf.devuelto)));
+      else if(lf && lf.estado === 'rechazada') telegram('↩️ <b>LIKES LK' + lid + ' · rechazado y reembolsado</b>\n👤 ' + esc(p.username) + ' → ID ' + esc(idF) + '\n❗ ' + esc(lf.detalle || ''));
+      const se = sal != null ? sal : (await (async () => { const rp = await rest('profiles?id=eq.' + encodeURIComponent(uid) + '&select=saldo'); return Array.isArray(rp.json) && rp.json[0] ? Number(rp.json[0].saldo) : null; })());
+      return enviar(res, { ok: true, resultado: pub, saldo: se });
+    }
+
     if(a === 'catalogo'){
       const k = await leerCatalogo();
-      return enviar(res, { ok: true, sin_bd: k.sin_bd, diag: k.diag || null, productos: k.productos.filter(x => x.grupo !== 'd50'), saldo: Number(p.saldo) || 0 });
+      return enviar(res, { ok: true, sin_bd: k.sin_bd, diag: k.diag || null, productos: k.productos.filter(x => x.grupo !== 'd50' && x.grupo !== 'craftland' && x.grupo !== 'likes'), saldo: Number(p.saldo) || 0 });
+    }
+
+    // ───────── Craftland · Nick color: consulta el ID antes de comprar ─────────
+    if(a === 'cl_check'){
+      if(limite('cl|' + uid, 20, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Demasiadas consultas, espera un momento.' }, 429);
+      const id = String(b.ff_id || '').replace(/\D/g, '');
+      const k = await leerCatalogo(); const prod = (k.productos || []).find(x => x.clave === 'cl_nick');
+      if(!prod) return enviar(res, { ok: false, code: 'sin_catalogo', message: 'Este servicio aún no está activado. Falta ejecutar craftland.sql en Supabase.' });
+      const [j, dsp] = await Promise.all([CRAFT.jugador(id), CRAFT.disponible()]);
+      if(j.alerta) AL.avisarFalla('craft', '🔴 CRAFTLAND: ' + j.alerta, 'Revisa CRAFT_API_KEY en Vercel.', 30 * 60000).catch(() => {});
+      if(!j.ok) return enviar(res, { ok: false, code: j.code, message: j.message }, j.code === 'NOT_FOUND' ? 404 : j.code === 'id' ? 400 : 503);
+      return enviar(res, { ok: true, ff_id: id, nick: j.nick, seguidores: j.seguidores, disponible: !!dsp.ok, motivo: dsp.ok ? null : dsp.message, precio: Number(prod.precio), nombre: prod.nombre, saldo: Number(p.saldo) || 0 });
     }
 
     // ───────── diamantes al 50%: qué paquetes le quedan a un ID ─────────
@@ -572,6 +669,19 @@ module.exports = async function handler(req, res){
           const chk = await checkD50(x.ff_id, true);
           if(!chk.ok) return enviar(res, { ok: false, code: chk.code, message: chk.message }, chk.code === 'NOT_FOUND' ? 404 : 503);
           if(!chk.eligible[n]) return enviar(res, { ok: false, code: 'd50_usado', message: 'Esa cuenta ya usó el descuento del paquete de ' + n.toLocaleString('en-US') + ' diamantes. Elige otro paquete.' }, 409);
+        }
+      }
+      // Nick color (Craftland): se compra solo, de a uno, y solo si el proveedor tiene stock (así no se cobra algo que no se puede entregar)
+      const cl = lim.filter(x => /^cl_/.test(x.clave));
+      if(cl.length){
+        if(cl.length !== lim.length || cl.length !== 1) return enviar(res, { ok: false, code: 'solicitud', message: 'El Nick color se pide de uno en uno, sin otros productos.' });
+        if(!CRAFT.idOk(cl[0].ff_id)) return enviar(res, { ok: false, code: 'id', message: 'Revisa tu ID de Craftland (solo números, de 5 a 15 dígitos).' });
+        const rep = await rest('ordenes_saldo?idem=eq.' + encodeURIComponent(idem) + '&select=id&limit=1');
+        if(!(Array.isArray(rep.json) && rep.json.length)){   // un reintento de un pedido ya hecho no se vuelve a validar
+          if(limite('clp|' + uid, 20, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Espera un momento antes de otro pedido.' }, 429);
+          const dsp = await CRAFT.disponible();
+          if(dsp.alerta) AL.avisarFalla('craft', '🔴 CRAFTLAND: ' + dsp.alerta, 'Revisa CRAFT_API_KEY en Vercel.', 30 * 60000).catch(() => {});
+          if(!dsp.ok) return enviar(res, { ok: false, code: dsp.code, message: dsp.message }, 503);
         }
       }
       if(limite('p|' + uid, 25, 3600000)) return enviar(res, { ok: false, code: 'limite', message: 'Hiciste muchas compras seguidas. Espera un poco.' }, 429);
@@ -619,7 +729,10 @@ module.exports = async function handler(req, res){
         const rfx = /^rbx/.test(String(item.srv || '')) ? await refRbx(item.id) : '';
         const ped = await (async () => { const ri = await rest('ordenes_saldo_items?id=eq.' + item.id + '&select=pedido_id'); return Array.isArray(ri.json) && ri.json[0] ? ri.json[0].pedido_id : null; })();
         const llave = 'cs-os' + oid + '-' + item.id;
-        const pr = await llamarProveedor({ action: 'comprar', producto: item.srv, player_id: item.ff_id, client_name: p.username, idempotency_key: llave }, req);
+        // Craftland no tiene llave de idempotencia: si un intento anterior se cortó, NO se vuelve a pedir (podría duplicarse): se manda a verificar a mano
+        let intentosCl = 1; if(/^cl_/.test(String(item.srv || ''))){ const ri2 = await rest('ordenes_saldo_items?id=eq.' + item.id + '&select=intentos'); intentosCl = Number(Array.isArray(ri2.json) && ri2.json[0] ? ri2.json[0].intentos : 1) || 1; }
+        const pr = intentosCl > 1 ? { success: false, code: 'PROVIDER_ERROR', error: 'Un intento anterior se cortó: revisa en el panel de Craftland si el pedido del ID ' + item.ff_id + ' ya existe antes de repetirlo (reembolsa si no existe)' }
+          : await llamarProveedor({ action: 'comprar', producto: item.srv, player_id: item.ff_id, client_name: p.username, idempotency_key: llave }, req);
         let est, err = null, ref = null;
         if(pr && pr.success && pr.status === 'COMPLETED'){ est = 'completada'; ref = { order_id: pr.order_id || null, reference: pr.reference || null, via: pr.via || null };
           if(/^rbx/.test(String(item.srv || ''))){
@@ -657,7 +770,7 @@ module.exports = async function handler(req, res){
       let consultadas = 0, cambios = 0;
       for(const i of its){
         let oidp = i.proveedor && i.proveedor.order_id;
-        if(!oidp && i.estado === 'verificar'){
+        if(!oidp && i.estado === 'verificar' && i.grupo !== 'craftland'){
           // Unidad "en verificación" (se cortó la espera): se busca el pedido en el proveedor por su clave
           const bu = await llamarProveedor({ action: 'buscar', client_name: p.username, idempotency_key: 'cs-os' + oid + '-' + i.id, regalo: true, robux: i.grupo === 'robux' }, req); consultadas++;
           if(bu && bu.success && bu.status === 'COMPLETED' && i.grupo === 'robux' && !(Array.isArray(bu.codigos) && bu.codigos.length)){ continue; }
@@ -666,7 +779,7 @@ module.exports = async function handler(req, res){
           continue;   // si no se encuentra o figura fallido, se queda en verificación para revisarlo a mano (no se reembolsa solo)
         }
         if(!oidp) continue; consultadas++;
-        const pr = await llamarProveedor({ action: 'estado', order_id: oidp, robux: i.grupo === 'robux' }, req);
+        const pr = await llamarProveedor({ action: 'estado', order_id: oidp, robux: i.grupo === 'robux', craftland: i.grupo === 'craftland' }, req);
         if(pr && pr.success && pr.status === 'COMPLETED'){
           if(i.grupo === 'robux' && !(Array.isArray(pr.codigos) && pr.codigos.length)) continue;   // sin código leído no se marca entregada: se queda para revisar
           await rpc('checkout_item_resultado', { p_item: i.id, p_estado: 'completada', p_ref: (i.grupo === 'robux' ? Object.assign({}, i.proveedor || {}, { codigos: pr.codigos }) : null), p_error: null }); await pedidoEstado(i.pedido_id, 'completado'); cambios++; }

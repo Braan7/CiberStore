@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta name="cs-build" content="1214e0d55d">
-<script>var CS_BUILD="1214e0d55d";</script>
+<meta name="cs-build" content="46b089ae70">
+<script>var CS_BUILD="46b089ae70";</script>
 <meta charset="UTF-8"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -6285,7 +6285,7 @@ select.ap-inp{flex:0 1 auto}
     <!-- Aviso de entrega -->
     <div style="display:flex;align-items:flex-start;gap:.7rem;background:rgba(255,180,60,.06);border:1px solid rgba(255,180,60,.25);border-radius:14px;padding:1rem 1.1rem;margin-bottom:1.4rem">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffb84d" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:.1rem"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-      <div style="font-size:.8rem;color:#c9d1e0;line-height:1.5">Los likes se entregan en las <b style="color:#ffb84d">mananas (8am a 11am)</b> todos los dias, cada 24hrs.</div>
+      <div style="font-size:.8rem;color:#c9d1e0;line-height:1.5"><b style="color:#25d366">Automaticos:</b> se envian al instante con tu saldo. Los paquetes grandes (4K en adelante) se entregan en las <b style="color:#ffb84d">mananas (8am a 11am)</b>, cada 24hrs.</div>
     </div>
 
     <!-- Selector de ID -->
@@ -6293,6 +6293,15 @@ select.ap-inp{flex:0 1 auto}
       <label style="font-size:.72rem;color:#6b7280;letter-spacing:1px;display:block;margin-bottom:.5rem">TU ID DE FREE FIRE</label>
       <input id="l2k-id" type="text" placeholder="Ej: 273968086" style="width:100%;box-sizing:border-box;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);color:#fff;border-radius:12px;padding:.9rem 1rem;font-family:Barlow,sans-serif;font-size:1rem;outline:none"/>
     </div>
+
+    <!-- LIKES AUTOMÁTICOS (con saldo, entrega inmediata) -->
+    <div id="lka" class="lka">
+      <div class="lka-h"><b>⚡ Likes automáticos</b><span>Entrega inmediata</span></div>
+      <p class="lka-p">Escribe tu ID arriba, elige cuántos likes y se envían al instante con tu saldo. <b>1 crédito = 1 like.</b> Si se envían menos de los pedidos, te devolvemos la diferencia.</p>
+      <button type="button" class="d50-go" id="lka-chk" onclick="lkaConsultar()">Consultar ID</button>
+      <div id="lka-res"></div>
+    </div>
+    <div class="d50-ov" id="lka-ov" onclick="if(event.target===this)lkaCerrar()"></div>
 
     <!-- Tabla de paquetes -->
     <div style="font-size:.72rem;color:#6b7280;letter-spacing:1.2px;margin-bottom:.75rem;font-weight:600">ELIGE TU PAQUETE</div>
@@ -6933,6 +6942,24 @@ select.ap-inp{flex:0 1 auto}
     <div id="cv-v-mias" style="display:none"></div>
   </div>
 </div>
+<div class="page" id="page-craftland">
+  <div class="ph"><div class="stag">Craftland</div><h2 class="ptitle">Nick <span>color</span></h2><p class="psub">Paquete Craftland nivel 6: suma +60,150 seguidores a tu perfil y desbloquea los ítems exclusivos del nivel (avatar, banner y nombre de color). Escribe tu ID, revisa tu perfil y compra con tu saldo.</p></div>
+  <div class="cl-pg">
+    <div class="cl-hero">
+      <div class="cl-ey">ENTREGA AUTOMÁTICA</div>
+      <div class="cl-h">Nick color · Craftland</div>
+      <div class="cl-chips"><span>👥 +60,150 seguidores</span><span>⚡ Pedido automático</span><span>🔎 Seguimiento en vivo</span><span>↩️ Reembolso si no se completa</span></div>
+    </div>
+    <label class="flabel" for="cl-id">Tu ID de Craftland *</label>
+    <div class="d50-row cl-row">
+      <input class="finput" id="cl-id" type="text" inputmode="numeric" enterkeyhint="go" placeholder="Ej: 123456789" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" onkeydown="if(event.key==='Enter')clConsultar()"/>
+      <button type="button" id="cl-btn" class="d50-go" onclick="clConsultar()">Consultar ID</button>
+    </div>
+    <div id="cl-res"></div>
+  </div>
+  <div class="d50-ov" id="cl-ov" onclick="if(event.target===this)clCerrar()"></div>
+</div>
+
 <div class="page" id="page-cajas">
   <div class="ph">
     <div class="stag">Nuevo &middot; Mejorado</div>
@@ -10344,10 +10371,47 @@ html body #auth-modal .au button.au-btn.au-pri{box-shadow:none!important;backgro
 @media(max-width:520px){html body #auth-modal .au{padding:22px 18px 20px!important;border-radius:14px!important}html body #auth-modal .au-h{font-size:1.3rem!important}html body #auth-modal .au-cc{padding:0 8px!important}}
 @media(prefers-reduced-motion:reduce){html body #auth-modal .au *,html body #auth-modal .au{animation:none!important;transition:none!important}}
 
+
+/* ═══ Craftland · Nick color ═══ */
+.cl-pg{max-width:560px}
+.cl-hero{border-radius:16px;padding:1rem 1.05rem;margin-bottom:1rem;background:linear-gradient(135deg,rgba(168,85,247,.16),rgba(236,72,153,.1) 55%,rgba(245,158,11,.1));border:1px solid rgba(190,120,255,.32)}
+.cl-ey{font-size:.64rem;font-weight:800;letter-spacing:1.6px;color:#d8a8ff}
+.cl-h{font-family:Saira,Barlow,sans-serif;font-weight:900;font-size:1.4rem;color:#fff;margin:.15rem 0 .55rem}
+body.light-mode .cl-h{color:#0f172a}
+.cl-chips{display:flex;flex-wrap:wrap;gap:.4rem}
+.cl-chips span{font-size:.72rem;color:#d6dbe6;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);padding:.28rem .6rem;border-radius:99px}
+.cl-row{display:flex;gap:.5rem;align-items:stretch;margin-bottom:.8rem}
+.cl-row .finput{flex:1;margin:0}
+.cl-row .d50-go{width:auto;flex:none;padding:.7rem 1rem;white-space:nowrap}
+.cl-box{border-radius:16px;padding:.95rem 1rem;background:rgba(255,255,255,.03);border:1px solid rgba(190,120,255,.28)}
+.cl-pr{display:flex;align-items:baseline;justify-content:space-between;margin:.75rem 0 .7rem}
+.cl-pr span{font-size:.78rem;color:#9aa4b2}
+.cl-pr b{font-family:Saira,Barlow,sans-serif;font-size:1.7rem;color:#4ade80;font-weight:900}
+.cl-no{font-size:.8rem;color:#f5b43a;margin:.4rem 0 .7rem}
+.cl-est{display:flex;align-items:center;gap:.6rem;padding:.7rem .85rem;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);margin:.6rem 0;font-size:.85rem;color:#e5e9f0}
+.cl-est i{width:10px;height:10px;border-radius:50%;background:#f5b43a;flex:none;animation:clp 1.2s ease-in-out infinite}
+.cl-est.ok i{background:#22c55e;animation:none}.cl-est.ko i{background:#ef4444;animation:none}
+@keyframes clp{50%{opacity:.35}}
+
+.lka{background:rgba(255,180,60,.05);border:1px solid rgba(255,180,60,.28);border-radius:16px;padding:1.1rem;margin-bottom:1.3rem}
+.lka-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;color:#fff;font-size:1rem}
+.lka-h span{font-size:.68rem;color:#25d366;border:1px solid rgba(37,211,102,.4);border-radius:20px;padding:.15rem .55rem}
+.lka-p{font-size:.78rem;color:#c9d1e0;line-height:1.5;margin:0 0 .8rem}
+.lka-box{margin-top:.9rem}
+.lka-chips{display:flex;flex-wrap:wrap;gap:.4rem;margin:.5rem 0}
+.lka-chip{flex:1;min-width:64px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:#fff;border-radius:10px;padding:.55rem .3rem;font-family:Barlow,sans-serif;font-weight:700;font-size:.85rem;cursor:pointer}
+.lka-chip.on{border-color:#ffb84d;background:rgba(255,180,60,.15);color:#ffb84d}
+.lka-in{width:100%;box-sizing:border-box;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);color:#fff;border-radius:12px;padding:.8rem 1rem;font-family:Barlow,sans-serif;font-size:1rem;outline:none}
+.lka-pr{display:flex;justify-content:space-between;align-items:center;margin:.7rem 0;font-size:.85rem;color:#8b93a3}
+.lka-pr b{font-size:1.2rem;color:#25d366}
+.lka-img{display:block;width:100%;height:auto;border-radius:14px;margin:.2rem 0 .8rem;border:1px solid rgba(255,255,255,.1)}
+.lka-row{display:flex;gap:.5rem}.lka-row .d50-go{flex:1}
+.lka-sec{background:rgba(255,255,255,.08)!important}
+
 </style>
-<script src="supabase.js?v=1214e0d55d"></script>
-<script src="supabase_integration.js?v=1214e0d55d"></script>
-<script src="script.js?v=1214e0d55d"></script>
+<script src="supabase.js?v=46b089ae70"></script>
+<script src="supabase_integration.js?v=46b089ae70"></script>
+<script src="script.js?v=46b089ae70"></script>
 
 <!-- BARRA DE NAVEGACION INFERIOR -->
 
