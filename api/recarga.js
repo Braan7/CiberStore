@@ -194,7 +194,7 @@ function stockRegalos(items){
   return out;
 }
 // ── Robux PIN (solo GLOBAL): código que se entrega al cliente al pagar con saldo. [robux, precio de venta MXN] ──
-const ROBUX = { rbx800:[800, 185], rbx2000:[2000, 440], rbx4500:[4500, 945], rbx10000:[10000, 2009] };
+const ROBUX = { rbx800:[800, 185], rbx1000:[1000, 215], rbx2000:[2000, 440], rbx2500:[2500, 495], rbx4500:[4500, 945], rbx10000:[10000, 2009] };
 function buscarRobux(items, k){
   let fijo = {}; try{ fijo = JSON.parse(process.env.CO_MAP || '{}'); }catch(e){}
   if(fijo[k]) return items.find(x => x.product_id === fijo[k]) || null;

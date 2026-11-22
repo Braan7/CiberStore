@@ -15152,11 +15152,33 @@ var CATALOGO_NUEVO = {
     "estado": "activo"
    },
    {
+    "id": "rbx-1-000-robux",
+    "clave": "rbx_1000",
+    "n": "1,000 Robux",
+    "usd": 9.8068,
+    "mxn": 215,
+    "region": "",
+    "api_id": "",
+    "img": "",
+    "estado": "activo"
+   },
+   {
     "id": "rbx-2-000-robux",
     "clave": "rbx_2000",
     "n": "2,000 Robux",
     "usd": 23.15,
     "mxn": 440,
+    "region": "",
+    "api_id": "",
+    "img": "",
+    "estado": "activo"
+   },
+   {
+    "id": "rbx-2-500-robux",
+    "clave": "rbx_2500",
+    "n": "2,500 Robux",
+    "usd": 24.8598,
+    "mxn": 495,
     "region": "",
     "api_id": "",
     "img": "",
