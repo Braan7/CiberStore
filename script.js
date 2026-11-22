@@ -21633,7 +21633,7 @@ function clSeguimiento(o){
   window.goPage = function(id){ var r = o.apply(this, arguments); if(id === 'craftland') clPreparar(); return r; };
 })();
 /* ═══ Likes automáticos con saldo (1 crédito = 1 like; devuelve lo no enviado) + recibo en imagen ═══ */
-var LKA = { id:'', nick:'', likes:null, unit:0.00275, p2000:5.5, max:2000, cant:2000, disp:true, motivo:'', busy:false, idem:{}, res:null };
+var LKA = { id:'', nick:'', likes:null, unit:0.0525, p2000:105, max:2000, cant:2000, disp:true, motivo:'', busy:false, idem:{}, res:null };
 function lkaEsc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 function lkaM(n){ return (typeof fmt === 'function') ? fmt(n) : ('$' + Number(n).toFixed(2)); }
 function lkaN(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
@@ -21650,8 +21650,8 @@ function lkaConsultar(){
   ckApi('likes_check', { ff_id: id }, true).then(function(j){
     LKA.busy = false; btn.disabled = false; btn.textContent = 'Consultar ID';
     if(!j || !j.ok){ res.innerHTML = '<div class="d50-msg ko">' + lkaEsc((j && j.message) || 'No se pudo consultar. Intenta de nuevo.') + '</div>'; return; }
-    LKA.id = j.ff_id; LKA.nick = j.nick || ''; LKA.likes = j.likes; LKA.unit = Number(j.precio_unit) || 0.00275; if(j.precio_2000) LKA.p2000 = Number(j.precio_2000); lkaPrecioTxt(); LKA.max = Number(j.max_cant) || 2000;
-    LKA.disp = !!j.disponible; LKA.motivo = j.motivo || ''; if(LKA.cant > LKA.max) LKA.cant = Math.max(10, LKA.max); if(!LKA.cant) LKA.cant = Math.min(2000, LKA.max) || 10;
+    LKA.id = j.ff_id; LKA.nick = j.nick || ''; LKA.likes = j.likes; LKA.unit = Number(j.precio_unit) || 0.0525; if(j.precio_2000) LKA.p2000 = Number(j.precio_2000); lkaPrecioTxt(); LKA.max = Number(j.max_cant) || 2000;
+    LKA.disp = !!j.disponible; LKA.motivo = j.motivo || ''; if(LKA.cant > LKA.max) LKA.cant = Math.max(1, LKA.max); if(!LKA.cant) LKA.cant = Math.min(2000, LKA.max) || 1;
     try{ if(typeof ckSyncSaldo === 'function') ckSyncSaldo(j.saldo); }catch(e){}
     lkaPintar();
   }).catch(function(){ LKA.busy = false; btn.disabled = false; btn.textContent = 'Consultar ID'; res.innerHTML = '<div class="d50-msg ko">Sin conexión. Intenta de nuevo.</div>'; });
@@ -21662,8 +21662,8 @@ function lkaPintar(){
   res.innerHTML = '<div class="d50-who lka-box"><span>👤</span><div><b>' + lkaEsc(LKA.nick || 'Jugador encontrado') + '</b><small>ID ' + lkaEsc(LKA.id) + (LKA.likes != null ? ' · ' + lkaN(LKA.likes) + ' likes actuales' : '') + '</small></div></div>'
     + (LKA.disp
       ? '<div class="lka-chips">' + chips.map(function(v){ return '<button type="button" class="lka-chip' + (LKA.cant === v ? ' on' : '') + '" onclick="lkaSet(' + v + ')">' + lkaN(v) + '</button>'; }).join('') + '</div>'
-        + '<input class="lka-in" id="lka-c" type="text" inputmode="numeric" maxlength="4" value="' + LKA.cant + '" oninput="lkaSet(this.value,1)" aria-label="Cantidad de likes (10 a ' + LKA.max + ')"/>'
-        + '<div style="font-size:.68rem;color:#6b7280;margin-top:.3rem">Personaliza de 10 a ' + lkaN(LKA.max) + ' likes</div>'
+        + '<input class="lka-in" id="lka-c" type="text" inputmode="numeric" maxlength="4" value="' + LKA.cant + '" oninput="lkaSet(this.value,1)" aria-label="Cantidad de likes (1 a ' + LKA.max + ')"/>'
+        + '<div style="font-size:.68rem;color:#6b7280;margin-top:.3rem">Personaliza de 1 a ' + lkaN(LKA.max) + ' likes</div>'
         + '<div class="lka-pr"><span>Total (<span id="lka-n">' + lkaN(LKA.cant) + '</span> likes)</span><b id="lka-t">' + lkaM(lkaTotal(LKA.cant)) + '</b></div>'
         + '<button type="button" class="d50-go" id="lka-go" onclick="lkaConfirmar()">Enviar likes con saldo</button>'
       : '<div class="d50-msg ko" style="margin-top:.7rem">' + lkaEsc(LKA.motivo || 'No disponible por ahora.') + ' No se te cobra nada.</div>');
@@ -21677,7 +21677,7 @@ function lkaSet(v, typed){
 function lkaSheet(h){ var o = document.getElementById('lka-ov'); if(!o) return; if(o.parentNode !== document.body) document.body.appendChild(o); o.innerHTML = '<div class="d50-sheet">' + h + '</div>'; o.classList.add('on'); }
 function lkaCerrar(){ if(LKA.busy) return; var o = document.getElementById('lka-ov'); if(o){ o.classList.remove('on'); o.innerHTML = ''; } }
 function lkaConfirmar(){
-  var n = LKA.cant; if(!(n >= 10 && n <= 2000)){ if(typeof showToast === 'function') showToast('Cantidad de 10 a 2,000'); return; }
+  var n = LKA.cant; if(!(n >= 1 && n <= 2000)){ if(typeof showToast === 'function') showToast('Cantidad de 1 a 2,000'); return; }
   var saldo = (authSession && Number(authSession.saldo)) || 0, tot = lkaTotal(n), falta = saldo < tot;
   lkaSheet('<h3>Confirmar envío<button type="button" onclick="lkaCerrar()" aria-label="Cerrar">✕</button></h3>'
     + '<div class="d50-sum"><div class="d50-big">' + lkaN(n) + ' likes</div><div class="d50-bs" style="color:#ffb84d">Entrega automática</div></div>'

@@ -76,7 +76,7 @@ function errorSql(msg){
   if(/maximo_automaticas/.test(msg)) return { code: 'maximo', message: 'Máximo 5 paquetes de entrega automática por pedido. Haz otro pedido para el resto.' };
   if(/cantidad_maxima/.test(msg)) return { code: 'maximo', message: 'Superaste la cantidad máxima por pedido de ese producto.' };
   if(/ordenes_saldo_items_d50_uni/.test(msg)) return { code: 'd50_ya', message: 'Ya hay un pedido de ese paquete al 50% para ese ID. Cada paquete se usa una sola vez por cuenta.' };
-  if(/cantidad_invalida/.test(msg)) return { code: 'cantidad', message: 'La cantidad debe ser de 10 a 2,000 likes.' };
+  if(/cantidad_invalida/.test(msg)) return { code: 'cantidad', message: 'La cantidad debe ser de 1 a 2,000 likes.' };
   if(/cuenta_suspendida/.test(msg)) return { code: 'suspendida', message: 'Tu cuenta está suspendida. Contacta a soporte.' };
   if(/idem_ajena|idem_invalida|items_invalidos/.test(msg)) return { code: 'solicitud', message: 'Solicitud inválida. Recarga la página e inténtalo de nuevo.' };
   return null;
@@ -597,7 +597,7 @@ module.exports = async function handler(req, res){
       if(p.banned) return enviar(res, { ok: false, code: 'suspendida', message: 'Tu cuenta está suspendida. Contacta a soporte.' });
       const cant = Number(b.cantidad), idem = String(b.idem || '');
       if(!LK.idOk(idF)) return enviar(res, { ok: false, code: 'id', message: 'Revisa tu ID de Free Fire (solo números, de 5 a 15 dígitos).' });
-      if(!LK.intOk(cant)) return enviar(res, { ok: false, code: 'cantidad', message: 'La cantidad debe ser de 10 a 2,000 likes.' });
+      if(!LK.intOk(cant)) return enviar(res, { ok: false, code: 'cantidad', message: 'La cantidad debe ser de 1 a 2,000 likes.' });
       if(!/^[A-Za-z0-9_-]{8,100}$/.test(idem)) return enviar(res, { ok: false, code: 'solicitud', message: 'Solicitud inválida. Recarga la página.' });
       const prev = await rest('likes_auto?idem=eq.' + encodeURIComponent(idem) + '&user_id=eq.' + encodeURIComponent(uid) + '&limit=1');
       if(Array.isArray(prev.json) && prev.json[0]){   // reintento del mismo pedido: nunca se vuelve a enviar ni a cobrar

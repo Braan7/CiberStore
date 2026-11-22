@@ -19,7 +19,7 @@ async function http(path, opts, ms){
 }
 const errMsg = r => String((r.json && (r.json.error || r.json.message)) || r.text || '').slice(0, 200);
 const idOk = id => /^\d{5,15}$/.test(String(id || ''));
-const intOk = n => Number.isInteger(n) && n >= 10 && n <= 2000;
+const intOk = n => Number.isInteger(n) && n >= 1 && n <= 2000;
 
 // Jugador (nick, likes actuales) + créditos del proveedor
 async function jugador(id){
