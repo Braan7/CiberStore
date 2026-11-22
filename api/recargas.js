@@ -236,7 +236,7 @@ module.exports = async function handler(req, res){
         if(!clabe) clabe = '-';
         const cuerpo = { nombre, titular: titular || '-', clabe, activa: b.activa !== false, orden: Math.max(0, Math.min(999, parseInt(b.orden, 10) || 0)) };
         if(b.pais !== undefined || b.moneda !== undefined || b.construccion !== undefined || b.detalle !== undefined){
-          Object.assign(cuerpo, { pais: limpiaTxt(b.pais || (esMX ? 'MX' : ''), 4).toUpperCase() || 'MX', moneda, bandera: limpiaTxt(b.bandera, 8) || null,
+          Object.assign(cuerpo, { pais: limpiaTxt(b.pais || (esMX ? 'MX' : ''), 4).toUpperCase() || 'MX', moneda, bandera: limpiaTxt(b.bandera, 8) || null, logo: /^(\/[\w\-./]{1,150}|https:\/\/[^\s"'<>]{1,250})$/.test(String(b.logo || '').trim()) ? String(b.logo).trim() : null,
             tasa: Number(b.tasa) > 0 ? Number(b.tasa) : null, comision: Math.max(0, Number(b.comision) || 0), comision_pct: Math.max(0, Math.min(50, Number(b.comision_pct) || 0)), detalle: detalle, nota: limpiaTxt(b.nota, 300) || null, construccion });
         }
         let r;
@@ -275,7 +275,7 @@ module.exports = async function handler(req, res){
     const uid = String(p.id);
 
     if(a === 'cuentas'){
-      let r = await rest('cuentas_deposito?activa=eq.true&select=id,nombre,titular,clabe,pais,moneda,bandera,tasa,comision,comision_pct,detalle,nota,construccion&order=orden.asc,created_at.asc');
+      let r = await rest('cuentas_deposito?activa=eq.true&select=id,nombre,titular,clabe,pais,moneda,bandera,logo,tasa,comision,comision_pct,detalle,nota,construccion&order=orden.asc,created_at.asc');
       if(r.status >= 400) r = await rest('cuentas_deposito?activa=eq.true&select=id,nombre,titular,clabe&order=orden.asc,created_at.asc');   // aún sin metodos_pago.sql
       if(r.status >= 400) return enviar(res, { ok: false, code: 'db', message: 'Falta ejecutar recargas_saldo.sql en Supabase' });
       const rates = await tasasUSD((r.json || []).map(c => c.moneda)), minUsd = MIN_USD();
