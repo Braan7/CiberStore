@@ -18893,7 +18893,18 @@ setTimeout(function(){ try{ if(typeof csAdminSesionToken==='function'&&csAdminSe
    {clave, ID de Free Fire}: el precio, el total y el saldo los calcula y valida el servidor (/api/comprar + checkout_pagar).
    Reutiliza: authSession, fmt, pfHash, saveSession, _refreshSaldoUI, goPage, showToast, COMPRAR_RECARGA_URL. */
 var CK_API = '/api/comprar';
-var CK = { cat:null, catT:0, clave:null, q:1, modo:'mismo', idU:'', ids:[], busy:false, base:null, err:'', errSaldo:false, nick:'', nickId:'', fase:'form', orden:null, saldo:null, ag:{}, stockT:0 };
+var CK = { cat:null, catT:0, clave:null, q:1, modo:'mismo', idU:'', ids:[], busy:false, base:null, err:'', errSaldo:false, nick:'', nickId:'', fase:'form', orden:null, saldo:null, ag:{}, stockT:0, msg:'', pst:null, pstT:0 };
+var CK_MSG_DEF = 'Gracias por comprar en ciberstore.lat, vuelve pronto.';
+function ckPaseAuto(p){ return !!p && p.grupo === 'pase' && p.entrega === 'auto'; }
+function ckMsgLen(v){ return Array.from(String(v || '')).length; }
+function ckMsgInput(el){ var a = Array.from(el.value); if(a.length > 130){ el.value = a.slice(0, 130).join(''); a = Array.from(el.value); } CK.msg = el.value; var c = ckEl('ck-msgc'); if(c) c.textContent = a.length + '/130'; }
+function ckMsgLimpio(){ return Array.from(String(CK.msg || '').replace(/[\u0000-\u001f\u007f]+/g, ' ').replace(/\s+/g, ' ').trim()).slice(0, 130).join(''); }
+/* stock del Pase automático (proveedor): unidades = saldo de la billetera ÷ costo por envío */
+function ckPaseStock(cb){
+  if(CK.pst && Date.now() - CK.pstT < 20000){ cb && cb(); return; }
+  fetch('/api/comprar', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'stock_servicios' }) }).then(function(r){ return r.json(); }).then(function(j){ if(j && j.ok && j.pase){ CK.pst = j.pase; CK.pstT = Date.now(); } cb && cb(); }).catch(function(){ cb && cb(); });
+}
+function ckPaseAgotado(p){ return ckPaseAuto(p) && !!CK.pst && CK.pst.ok && CK.pst.unidades != null && CK.pst.unidades < 1; }
 var CK_IC = {
   wallet:'<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14a4 4 0 014-4h26v8"/><path d="M6 14v24a4 4 0 004 4h30a2 2 0 002-2v-8"/><path d="M42 20H33a6 6 0 000 12h9z"/><circle cx="34" cy="26" r="1.2" fill="currentColor"/></svg>',
   cart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.6 12.4a1 1 0 001 .8h8.8a1 1 0 001-.8L20 7H6"/></svg>',
@@ -19000,7 +19011,7 @@ window.addEventListener('resize', ckPosicion);
 function ckAbrir(clave){
   if(typeof authSession === 'undefined' || !authSession){ ckToast('Inicia sesión para comprar'); if(typeof showAuthModal === 'function') setTimeout(showAuthModal, 500); return; }
   try{ window.scrollTo(0, 0); }catch(e){}
-  CK.clave = clave; CK.q = 1; CK.modo = 'mismo'; CK.idU = ''; CK.ids = []; CK.err = ''; CK.errSaldo = false; CK.nick = ''; CK.nickId = ''; CK.fase = 'form'; CK.orden = null; CK.busy = false; CK.base = ckUUID();
+  CK.clave = clave; CK.q = 1; CK.modo = 'mismo'; CK.idU = ''; CK.ids = []; CK.err = ''; CK.errSaldo = false; CK.nick = ''; CK.nickId = ''; CK.fase = 'form'; CK.orden = null; CK.busy = false; CK.base = ckUUID(); CK.msg = '';
   var ov = ckOverlay(); ov.innerHTML = '<div class="ck-wrap"><div class="ck-card"><div class="ck-note">Cargando…</div></div></div>';
   ov.classList.add('on'); ckPosicion();
   document.documentElement.classList.add('cs-sin-nav', 'ck-abierto');
@@ -19008,6 +19019,7 @@ function ckAbrir(clave){
     if(CK.offline){ ckCerrar(); ckToast(CK.offMsg, 5000); return; }
     if(!ckProd(clave)){ ckCerrar(); ckToast('Ese producto no está disponible por ahora'); return; }
     if(ckProd(clave).grupo === 'robux'){ CK.stockT = 0; ckStockCargar(ckRender); return; }
+    if(ckPaseAuto(ckProd(clave))){ CK.pstT = 0; ckPaseStock(ckRender); }
     ckRender();
   }).catch(function(){ ckCerrar(); ckToast('No se pudo cargar el producto. Revisa tu conexión.', 4000); });
 }
@@ -19044,7 +19056,7 @@ function ckRender(){
   if(CK.fase === 'ok'){ ckRenderOk(); return; }
   var p = ckProd(CK.clave); if(!p) return;
   var pu = ckPU(p, CK.q), total = ckTotal(), saldo = ckSaldoAct(), resta = ckR2(saldo - total), falta = resta < 0;
-  var unidad = p.grupo === 'pase' ? 'pase' : 'paquete', unidades = p.grupo === 'pase' ? 'pases' : 'paquetes', rbx = p.grupo === 'robux', agotado = rbx && !!CK.ag[p.clave];
+  var unidad = p.grupo === 'pase' ? 'pase' : 'paquete', unidades = p.grupo === 'pase' ? 'pases' : 'paquetes', rbx = p.grupo === 'robux', agotado = (rbx && !!CK.ag[p.clave]) || ckPaseAgotado(p);
   var h = '<div class="ck-wrap"><div class="ck-card"><button type="button" class="ck-x" onclick="ckCerrar()" aria-label="Cerrar">&times;</button>';
   h += (CK.clave === 'pase_oferta' ? '<div class="ck-eye">Oferta exclusiva</div>' : '<div class="ck-eye" style="color:#6db3ff">' + (rbx ? 'Roblox · Código PIN' : (p.grupo === 'pase' ? 'Free Fire · Regalo' : 'Free Fire · Entrega automática')) + '</div>');
   h += '<h2 class="ck-h" id="ck-title">' + ckEsc(p.nombre) + '</h2>';
@@ -19064,6 +19076,13 @@ function ckRender(){
     for(var i = 0; i < CK.q; i++) h += '<label class="ck-lbl" for="ck-id' + i + '">' + (p.grupo === 'pase' ? 'Pase ' : 'Paquete ') + (i + 1) + ' · ID de Free Fire *</label><input class="ck-in" id="ck-id' + i + '" inputmode="numeric" maxlength="15" autocomplete="off" placeholder="Ej: 123456789" value="' + ckEsc(CK.ids[i] || '') + '" oninput="ckIdInput(this,' + i + ')">';
     if(CK.q > 1) h += '<button type="button" class="ck-ver" onclick="ckCopiar1()">Copiar el primero a todos</button>';
   }
+  }
+  if(ckPaseAuto(p)){
+    var pu = CK.pst && CK.pst.ok && CK.pst.unidades != null ? CK.pst.unidades : null;
+    h += '<div class="ck-sec">Mensaje para el jugador</div>';
+    h += '<div class="ck-msg"><textarea class="ck-in" id="ck-msg" rows="3" maxlength="260" autocomplete="off" placeholder="' + ckEsc(CK_MSG_DEF) + '" oninput="ckMsgInput(this)">' + ckEsc(CK.msg) + '</textarea><div class="ck-msgf"><span>Opcional. Lo verá quien reciba el pase. Puedes usar puntos, comillas y emojis.</span><b id="ck-msgc">' + ckMsgLen(CK.msg) + '/130</b></div>';
+    h += '<div class="ck-msgd">Si lo dejas vacío se envía: “' + ckEsc(CK_MSG_DEF) + '”</div></div>';
+    if(pu !== null) h += '<div class="ck-stk' + (pu < 1 ? ' no' : '') + '">' + (pu < 1 ? 'Pases agotados por ahora' : 'Pases disponibles: <b>' + pu + '</b>') + '</div>';
   }
   h += '<div class="ck-sum"><div class="ck-row"><span>' + (p.grupo === 'pase' ? 'Pases' : 'Paquetes') + '</span><b>' + CK.q + '</b></div><div class="ck-row tot"><span>Total a pagar</span><b>' + ckFmt(total) + '</b></div></div>';
   h += '<div class="ck-sec">Método de pago</div>';
@@ -19098,11 +19117,13 @@ function ckComprar(){
     CK.err = CK.modo === 'mismo' ? 'Escribe tu ID de Free Fire (solo números, de 5 a 15 dígitos).' : 'Revisa el ID del ' + (ckProd(CK.clave).grupo === 'pase' ? 'pase ' : 'paquete ') + (bad + 1) + ' (solo números, de 5 a 15 dígitos).';
     ckRender(); var el = ckEl(CK.modo === 'mismo' ? 'ck-id' : 'ck-id' + bad); if(el){ el.classList.add('bad'); try{ el.scrollIntoView({ behavior:'smooth', block:'center' }); el.focus(); }catch(e){} } return;
   }
+  if(ckPaseAuto(_pr)){ if(ckPaseAgotado(_pr)){ CK.err = 'Los pases están agotados por ahora. Intenta más tarde: no se te cobró.'; ckRender(); return; } if(CK.pst && CK.pst.ok && CK.pst.unidades != null && CK.q > CK.pst.unidades){ CK.err = 'Solo hay ' + CK.pst.unidades + ' pases disponibles ahora. Baja la cantidad.'; ckRender(); return; } }
   var total = ckTotal(); CK.err = ''; CK.errSaldo = false;
   /* la idempotencia depende del contenido: reintentar el MISMO pedido nunca cobra dos veces; otro pedido, otra clave */
-  var idem = 'ck' + CK.base + ckHash32(JSON.stringify(items));
+  var _msg = ckPaseAuto(_pr) ? ckMsgLimpio() : '';
+  var idem = 'ck' + CK.base + ckHash32(JSON.stringify(items) + '|' + _msg);
   CK.busy = true; ckRender();
-  ckApi('pagar', { items: items, idem: idem }, true).then(function(j){
+  ckApi('pagar', ckPaseAuto(_pr) ? { items: items, idem: idem, mensaje: _msg } : { items: items, idem: idem }, true).then(function(j){
     CK.busy = false;
     if(!j || !j.ok){
       if(j && j.code === 'credenciales'){ CK.err = 'Tu sesión venció. Inicia sesión de nuevo.'; }

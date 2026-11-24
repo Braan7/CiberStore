@@ -22,6 +22,7 @@ const S = require('./_sesion.js');
 const AL = require('./_alerta.js');
 const E = require('./_estado.js');
 const LK = require('./_likes.js');   // Likes automáticos (llave: LIKES_API_KEY)
+const LJ = require('./_lojaff.js');   // Lojaff: envío automático del Pase Booyah
 const AV1 = require('./_api_v1.js');   // API de revendedores (/api/v1/*)
 const CRAFT = require('./_craft.js');   // Craftland · Nick color (llave: CRAFT_API_KEY)
 
@@ -128,6 +129,8 @@ const snapshot = async id => { const x = await cargarOrdenes('id=eq.' + Number(i
 
 // Llama a la entrega automática (api/recarga.js) EN el servidor: la llave de Central One nunca sale de ahí
 function llamarProveedor(body, req){
+  // Lojaff (Pase Booyah): su producto es lj_pase; el proveedor no tiene idempotencia ni consulta de estado
+  if(body && /^lj_/.test(String(body.producto || ''))) return LJ.proxy(body).catch(() => ({ success: false, code: 'PROVIDER_ERROR', error: 'Error al contactar a Lojaff' }));
   // Craftland (Lunexis) usa otro proveedor: sus productos empiezan con cl_ y sus pedidos se guardan como CL-<código>
   if(body && (body.craftland === true || /^cl_/.test(String(body.producto || '')) || (body.action === 'estado' && /^CL-/.test(String(body.order_id || ''))))) return CRAFT.proxy(body).catch(() => ({ success: false, code: 'PROVIDER_ERROR', error: 'Error al contactar al proveedor' })).then(r => { if(r && r.alerta) AL.avisarFalla('craft', '🔴 CRAFTLAND: ' + r.alerta, 'El proveedor de Nick color (Craftland) ' + r.alerta + '. Revisa CRAFT_API_KEY en Vercel o el saldo en el panel del proveedor. Mientras tanto nadie puede comprar Nick color.', 30 * 60000).catch(() => {}); return r; });
   return new Promise(resolve => {
@@ -350,12 +353,13 @@ module.exports = async function handler(req, res){
       if(adm && !S.verificar(b.token)) return enviar(res, { ok: false, code: 'sesion_invalida', message: 'Tu sesión del panel venció. Entra de nuevo.' }, 401);
       if(!adm && limite('stk|' + ip, 40, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Espera un momento.' }, 429);
       if(!global.__stk || Date.now() - global.__stk.t > (adm ? 8000 : 45000) || global.__stk.adm !== adm){
-        const [lk, cf] = await Promise.all([LK.creditos().catch(() => ({ ok: false })), CRAFT.stockInfo().catch(() => ({ ok: false }))]);
+        const [lk, cf, pj] = await Promise.all([LK.creditos().catch(() => ({ ok: false })), CRAFT.stockInfo().catch(() => ({ ok: false })), LJ.saldo().catch(() => ({ ok: false }))]);
         global.__stk = { t: Date.now(), adm, v: { ok: true,
           likes: { ok: !!lk.ok, restantes: lk.ok ? lk.restantes : null, disponible: lk.ok ? (lk.restantes == null ? true : lk.restantes > 0) : null },
           craftland: { ok: !!cf.ok, disponible: cf.ok ? cf.disponible : null, unidades: cf.ok ? cf.unidades : null },
+          pase: { ok: !!pj.ok, unidades: pj.ok ? pj.unidades : null, disponible: pj.ok && pj.unidades != null ? pj.unidades > 0 : null },
           precio_likes_2000: await lkPrecioPub(), precio_craftland: await clPrecioPub(),
-          detalle: adm ? { likes: lk, craftland: cf } : undefined, ts: Date.now() } };
+          detalle: adm ? { likes: lk, craftland: cf, pase: pj } : undefined, ts: Date.now() } };
       }
       return enviar(res, global.__stk.v);
     }
@@ -718,6 +722,21 @@ module.exports = async function handler(req, res){
           if(!dsp.ok) return enviar(res, { ok: false, code: dsp.code, message: dsp.message }, 503);
         }
       }
+      // Pase Booyah automático (Lojaff): mensaje personalizado + stock según la billetera del proveedor (así no se cobra algo que no se puede enviar)
+      {
+        const kc = await leerCatalogo().catch(() => ({ productos: [] })), esPase = x => { const c = (kc.productos || []).find(y => y.clave === x.clave); return !!c && c.grupo === 'pase' && c.entrega === 'auto'; };
+        const ps = lim.filter(esPase);
+        if(ps.length){
+          const msj = LJ.limpiarMensaje(b.mensaje);
+          lim.forEach(x => { if(esPase(x)) x.mensaje = msj; });
+          const rep = await rest('ordenes_saldo?idem=eq.' + encodeURIComponent(idem) + '&select=id&limit=1');
+          if(!(Array.isArray(rep.json) && rep.json.length)){   // un reintento de un pedido ya hecho no se vuelve a validar
+            const sd = await LJ.saldo();
+            if(!sd.ok) return enviar(res, { ok: false, code: 'proveedor', message: sd.code === 'sin_configurar' ? 'El envío automático del pase aún no está activado.' : 'No pudimos comprobar el stock de pases. Intenta en unos minutos: no se te cobró.' }, 503);
+            if(sd.unidades != null && sd.unidades < ps.length) return enviar(res, { ok: false, code: 'sin_stock', message: sd.unidades < 1 ? 'Los pases están agotados por ahora. Intenta más tarde: no se te cobró.' : 'Solo hay ' + sd.unidades + ' pases disponibles ahora. Baja la cantidad: no se te cobró.' }, 409);
+          }
+        }
+      }
       if(limite('p|' + uid, 25, 3600000)) return enviar(res, { ok: false, code: 'limite', message: 'Hiciste muchas compras seguidas. Espera un poco.' }, 429);
       const r = await rpc('checkout_pagar', { p_user: uid, p_idem: idem, p_items: lim });
       if(r.status >= 400 || !r.json || !r.json.ok){
@@ -764,9 +783,13 @@ module.exports = async function handler(req, res){
         const ped = await (async () => { const ri = await rest('ordenes_saldo_items?id=eq.' + item.id + '&select=pedido_id'); return Array.isArray(ri.json) && ri.json[0] ? ri.json[0].pedido_id : null; })();
         const llave = 'cs-os' + oid + '-' + item.id;
         // Craftland no tiene llave de idempotencia: si un intento anterior se cortó, NO se vuelve a pedir (podría duplicarse): se manda a verificar a mano
-        let intentosCl = 1; if(/^cl_/.test(String(item.srv || ''))){ const ri2 = await rest('ordenes_saldo_items?id=eq.' + item.id + '&select=intentos'); intentosCl = Number(Array.isArray(ri2.json) && ri2.json[0] ? ri2.json[0].intentos : 1) || 1; }
-        const pr = intentosCl > 1 ? { success: false, code: 'PROVIDER_ERROR', error: 'Un intento anterior se cortó: revisa en el panel de Craftland si el pedido del ID ' + item.ff_id + ' ya existe antes de repetirlo (reembolsa si no existe)' }
-          : await llamarProveedor({ action: 'comprar', producto: item.srv, player_id: item.ff_id, client_name: p.username, idempotency_key: llave }, req);
+        let intentosCl = 1; if(/^(cl|lj)_/.test(String(item.srv || ''))){ const ri2 = await rest('ordenes_saldo_items?id=eq.' + item.id + '&select=intentos'); intentosCl = Number(Array.isArray(ri2.json) && ri2.json[0] ? ri2.json[0].intentos : 1) || 1; }
+        const pr = intentosCl > 1 ? { success: false, code: 'PROVIDER_ERROR', error: 'Un intento anterior se cortó: revisa en el panel del proveedor (' + (/^lj_/.test(String(item.srv || '')) ? 'Lojaff' : 'Craftland') + ') si el pedido del ID ' + item.ff_id + ' ya existe antes de repetirlo (reembolsa si no existe)' }
+          : await llamarProveedor({ action: 'comprar', producto: item.srv, player_id: item.ff_id, client_name: p.username, idempotency_key: llave, mensaje: /^lj_/.test(String(item.srv || '')) ? await (async () => { try{ const rm = await rest('ordenes_saldo_items?id=eq.' + item.id + '&select=mensaje'); return Array.isArray(rm.json) && rm.json[0] ? rm.json[0].mensaje || '' : ''; }catch(e){ return ''; } })() : undefined }, req);
+        if(/^lj_/.test(String(item.srv || ''))){   // avisos del proveedor del Pase: llave mala, billetera vacía o saldo bajo
+          if(pr && (pr.http === 401 || pr.http === 402)){ global.__ljAv = global.__ljAv || {}; if(!global.__ljAv[pr.http] || Date.now() - global.__ljAv[pr.http] > 600000){ global.__ljAv[pr.http] = Date.now(); telegram('🚨 <b>LOJAFF · ' + (pr.http === 401 ? 'llave API inválida' : 'SIN SALDO en la billetera') + '</b>\nLos pases se están reembolsando a los clientes. ' + (pr.http === 402 ? 'Recarga tu billetera en lojaff.com.' : 'Revisa LOJAFF_API_KEY en Vercel.') + '\n❗ ' + esc(pr.error || '')); } }
+          else if(pr && pr.success && pr.saldo_restante != null && pr.saldo_restante < Math.max(20, (Number(pr.debitado) || 0) * 6) && (!global.__ljBajo || Date.now() - global.__ljBajo > 6 * 3600000)){ global.__ljBajo = Date.now(); telegram('⚠️ <b>LOJAFF · saldo bajo</b>\nTe quedan ' + pr.saldo_restante + ' en tu billetera de lojaff.com. Recarga antes de que se acabe.'); }
+        }
         let est, err = null, ref = null;
         if(pr && pr.success && pr.status === 'COMPLETED'){ est = 'completada'; ref = { order_id: pr.order_id || null, reference: pr.reference || null, via: pr.via || null };
           if(/^rbx/.test(String(item.srv || ''))){
