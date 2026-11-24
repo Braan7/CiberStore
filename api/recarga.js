@@ -355,7 +355,17 @@ module.exports = async function handler(req, res){
       if(limite(ip, 'd', 60)) return enviar(res, { ok: true, disponible: true, verificado: false });
       const e = await A.estado(0);
       if(e.verificado && e.pausa) await A.avisarSaldoBajo(e.saldo, e.motivo); else if(e.verificado) await A.avisarRecuperado(e.saldo);
-      return enviar(res, { ok: true, disponible: !e.pausa, motivo: e.pausa ? 'saldo' : null, verificado: e.verificado });
+      // Por paquete: cada recarga de diamantes solo se ofrece si el saldo del proveedor alcanza para su costo (no se devuelve el saldo ni los costos, solo sí/no)
+      let paquetes = null;
+      if(e.verificado && !e.pausa && e.saldo !== null){
+        paquetes = {}; let items = null; try{ const c = await catalogo(); if(c.ok) items = c.items; }catch(_){}
+        Object.keys(PAQUETES).forEach(d => {
+          let costo = PAQUETES[d].ref, sinStock = false;
+          if(items){ const r = detectar(items, Number(d)); if(r.precio > 0) costo = r.precio; else if(/sin stock/i.test(r.error || '')) sinStock = true; }
+          paquetes[d] = !sinStock && e.saldo >= costo;
+        });
+      }
+      return enviar(res, { ok: true, disponible: !e.pausa, motivo: e.pausa ? 'saldo' : null, verificado: e.verificado, paquetes });
     }
     // ── estado del servicio para la página pública "Estado" (solo sí/no y milisegundos; no devuelve saldos ni costos) ──
     if(b.action === 'salud'){
@@ -445,7 +455,7 @@ module.exports = async function handler(req, res){
     if(rev.existente) return enviar(res, await conCodigosAsync(Object.assign(mapearOrden(rev.existente, !!(reg || rbx)), { costo_usd: d.precio }), rev.existente, !!rbx));
     // Protección de saldo con el proveedor: si queda poco (o no alcanza para este pedido) se pausa y se te avisa por Telegram
     const sp = await A.estado(d.precio);
-    if(sp.pausa){ await A.avisarSaldoBajo(sp.saldo, sp.motivo); return enviar(res, NO_HECHO('Recargas en pausa por unos minutos: estamos reponiendo saldo del sistema. Intenta de nuevo en un rato.', 'ENDPOINT_DISABLED')); }
+    if(sp.pausa){ await A.avisarSaldoBajo(sp.saldo, sp.motivo); return enviar(res, NO_HECHO(sp.motivo === 'no_alcanza' ? 'Esta recarga no está disponible por ahora. Escríbenos por WhatsApp para activarla o pedirla manual.' : 'Recargas en pausa por unos minutos: estamos reponiendo saldo del sistema. Intenta de nuevo en un rato.', 'ENDPOINT_DISABLED')); }
     if(LIM_DIA > 0 && rev.total + d.precio > LIM_DIA) return enviar(res, NO_HECHO('Recargas automáticas en pausa por hoy. Intenta más tarde o contacta al administrador', 'ENDPOINT_DISABLED'));
     if(LIM_USER_H > 0 && rev.delUsuario >= LIM_USER_H) return enviar(res, NO_HECHO('Alcanzaste el límite de recargas por hora. Intenta más tarde', 'ENDPOINT_DISABLED'));
 

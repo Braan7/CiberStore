@@ -15653,7 +15653,7 @@ function provRevisar(forzar){
   var h = {'Content-Type':'application/json'}; if(typeof CS_BUILD !== 'undefined') h['X-CS-Build'] = CS_BUILD;
   _provBusy = fetch(RECARGA_AUTO_URL, {method:'POST', headers:h, body:JSON.stringify({action:'disponibilidad'})})
     .then(function(r){ return r.json(); })
-    .then(function(j){ _provT = Date.now(); if(j && j.ok !== false && typeof j.disponible === 'boolean') _provFijar(!j.disponible, j.motivo); return _provPausa; })
+    .then(function(j){ _provT = Date.now(); if(j && j.ok !== false && typeof j.disponible === 'boolean'){ try{ dpSet(j.paquetes); }catch(e){} _provFijar(!j.disponible, j.motivo); } return _provPausa; })
     .catch(function(){ return _provPausa; })      // si no se puede consultar NO se bloquea: el servidor igual protege al comprar
     .then(function(v){ _provBusy = null; return v; });
   return _provBusy;
@@ -21789,4 +21789,55 @@ function svRefrescar(){
 (function(){
   if(typeof goPage === 'function'){ var o = goPage; window.goPage = function(id){ var r = o.apply(this, arguments); if(id === 'craftland' || id === 'likes2k') setTimeout(svRefrescar, 60); return r; }; }
   if(typeof changeCurrency === 'function'){ var cc = changeCurrency; window.changeCurrency = function(c){ var r = cc.apply(this, arguments); setTimeout(function(){ svPrecioCL(); try{ lkaPrecioTxt(); var x = document.getElementById('lka-res'); if(x && LKA.id && x.innerHTML.indexOf('lka-c') > -1){ var cv = document.getElementById('lka-c'); lkaSet(cv ? cv.value : LKA.cant, 1); } }catch(e){} }, 30); return r; }; }
+})();
+/* ═══ Diamantes: las recargas que el saldo del proveedor no alcanza a cubrir se marcan "No disponible" (y se ofrece pedirlas por WhatsApp) ═══ */
+var DP_PKG = { 351:110, 348:341, 350:572, 347:1166, 346:2398, 349:6160 };
+var DP = { map: null };
+function dpEsc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function dpSet(m){
+  var n = (m && typeof m === 'object') ? m : null, a = JSON.stringify(DP.map), b = JSON.stringify(n); DP.map = n;
+  if(a !== b){ try{ if(document.getElementById('diam-grid') && typeof renderDiamCatalogo === 'function') renderDiamCatalogo(); }catch(e){} }
+}
+function dpBloq(p){
+  if(!p || !DP.map || typeof CO_AUTO_ACTIVO === 'undefined' || !CO_AUTO_ACTIVO) return false;
+  var d = DP_PKG[p.package_id]; return d != null && DP.map[d] === false;
+}
+function dpProd(i){ try{ return _getDiamProductos(_diamTipoActual)[i]; }catch(e){ return null; } }
+function dpCerrar(){ var o = document.getElementById('dp-ov'); if(o) o.remove(); }
+function dpAviso(i){
+  var p = typeof i === 'object' ? i : dpProd(i); if(!p) return;
+  var n = String(p.diamantes).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  var u = (typeof authSession !== 'undefined' && authSession && authSession.username) ? ' Mi usuario: ' + authSession.username + '.' : '';
+  var msg = 'Hola CiberStore, quiero la recarga de ' + n + ' diamantes, pero aparece como NO DISPONIBLE. ¿Me la pueden activar o hacérmela manual?' + u;
+  var wa = (typeof WA !== 'undefined' && WA) ? 'https://wa.me/' + String(WA).replace(/\D/g, '') + '?text=' + encodeURIComponent(msg) : '';
+  dpCerrar(); var o = document.createElement('div'); o.id = 'dp-ov'; o.className = 'dp-ov'; o.onclick = function(e){ if(e.target === o) dpCerrar(); };
+  o.innerHTML = '<div class="dp-box" role="dialog" aria-modal="true"><div class="dp-ico">⛔</div><h3>Recarga no disponible</h3>'
+    + '<p>La recarga de <b>' + dpEsc(n) + ' diamantes</b> no está disponible por ahora: el sistema automático no tiene saldo suficiente para procesarla.</p>'
+    + '<p>Si la quieres, escríbele a soporte: te la <b>activamos</b> o te la hacemos <b>manual</b>.</p>'
+    + (wa ? '<a class="dp-wa" href="' + dpEsc(wa) + '" target="_blank" rel="noopener noreferrer">💬 Escribir a soporte por WhatsApp</a>' : '')
+    + '<button type="button" class="dp-x" onclick="dpCerrar()">Entendido</button></div>';
+  document.body.appendChild(o);
+}
+(function(){
+  var rd = window.renderDiamCatalogo;
+  if(typeof rd === 'function') window.renderDiamCatalogo = function(){
+    var r = rd.apply(this, arguments);
+    try{
+      var grid = document.getElementById('diam-grid'); if(!grid) return r;
+      var prods = _getDiamProductos(_diamTipoActual), cards = grid.querySelectorAll('.rc-card'), hay = false;
+      for(var i = 0; i < cards.length; i++){
+        var p = prods[i]; if(!dpBloq(p)) continue; hay = true;
+        cards[i].classList.add('dp-lock'); cards[i].setAttribute('onclick', 'dpAviso(' + i + ')'); cards[i].setAttribute('aria-disabled', 'true');
+        var t = document.createElement('div'); t.className = 'dp-tag'; t.textContent = 'NO DISPONIBLE'; cards[i].appendChild(t);
+        var b = cards[i].querySelector('.rc-btn'); if(b){ b.textContent = 'No disponible'; b.removeAttribute('disabled'); }
+      }
+      var nt = document.getElementById('dp-note'); if(nt) nt.remove();
+      if(hay){ nt = document.createElement('div'); nt.id = 'dp-note'; nt.className = 'dp-note'; nt.innerHTML = '⚠️ Algunas recargas están <b>no disponibles por ahora</b>. Toca una para pedir que te la activemos por WhatsApp.'; grid.parentNode.insertBefore(nt, grid); }
+    }catch(e){}
+    return r;
+  };
+  var ad = window.abrirDiamDetalle;
+  if(typeof ad === 'function') window.abrirDiamDetalle = function(i){ var p = dpProd(i); if(dpBloq(p)){ dpAviso(p); return; } return ad.apply(this, arguments); };
+  var cd = window.confirmarDiamCompra;
+  if(typeof cd === 'function') window.confirmarDiamCompra = function(){ if(dpBloq(window._diamSeleccionado)){ dpAviso(window._diamSeleccionado); return; } return cd.apply(this, arguments); };
 })();
