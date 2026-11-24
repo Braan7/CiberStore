@@ -22,6 +22,7 @@ const S = require('./_sesion.js');
 const AL = require('./_alerta.js');
 const E = require('./_estado.js');
 const LK = require('./_likes.js');   // Likes automáticos (llave: LIKES_API_KEY)
+const AV1 = require('./_api_v1.js');   // API de revendedores (/api/v1/*)
 const CRAFT = require('./_craft.js');   // Craftland · Nick color (llave: CRAFT_API_KEY)
 
 function enviar(res, body, status){ res.statusCode = status || 200; res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.setHeader('Cache-Control', 'no-store'); res.end(JSON.stringify(body)); }
@@ -315,6 +316,15 @@ async function cvCrear(owner, b, admin){
 
 module.exports = async function handler(req, res){
   try{
+    // API de revendedores: /api/v1/balance · /products · /orders (vercel.json reescribe /api/v1/* a este archivo con ?v1=ruta)
+    {
+      let pv = null; try{ const uu = new URL(String(req.url || ''), 'http://x'); pv = uu.searchParams.get('v1'); if(pv === null && /^\/api\/v1(\/|$)/.test(uu.pathname)) pv = uu.pathname.replace(/^\/api\/v1\/?/, ''); }catch(e){}
+      if(pv !== null){
+        const ctx = { rest, rpc, enviar, limite, telegram, esc, llamarProveedor, leerCatalogo, msgErr, errorSql, ip: ipDe(req) };
+        if(!cfg().url || !cfg().key) return enviar(res, { ok: false, code: 'db', message: 'Servicio no disponible por ahora.' }, 503);
+        return AV1.manejar(ctx, req, res, String(pv).split('?')[0].split('/').filter(Boolean));
+      }
+    }
     // Pulso externo opcional (UptimeRobot / cron-job.org) para que el historial del Estado del Sistema se llene aunque nadie abra el panel.
     // Solo funciona si pones ESTADO_CRON_KEY en Vercel y la llamas con ?estado_cron=ESA_LLAVE. Respeta la frecuencia configurada.
     if(req.method === 'GET'){
@@ -354,6 +364,7 @@ module.exports = async function handler(req, res){
       const d = S.verificar(b.token);
       if(!d) return enviar(res, { ok: false, code: 'sesion_invalida', message: 'Tu sesión del panel venció. Entra de nuevo.' }, 401);
       const adm = String(d.u || 'admin').slice(0, 80);
+      if(/^admin_api_(lista|crear|renovar|revocar)$/.test(a)) return AV1.admin({ rest, enviar, res, telegram, esc }, a, b, adm);
       if(a === 'admin_cuentas'){
         const e = CV_ESTADOS.includes(b.estado) ? '&estado=eq.' + b.estado : '';
         const r = await rest('cuentas_venta?id=gt.0' + e + '&select=id,username,propia,titulo,descripcion,precio,vinculacion,contacto,fotos,estado,motivo,creada&order=creada.desc&limit=200');
@@ -634,6 +645,12 @@ module.exports = async function handler(req, res){
     if(a === 'catalogo'){
       const k = await leerCatalogo();
       return enviar(res, { ok: true, sin_bd: k.sin_bd, diag: k.diag || null, productos: k.productos.filter(x => x.grupo !== 'd50' && x.grupo !== 'craftland' && x.grupo !== 'likes'), saldo: Number(p.saldo) || 0 });
+    }
+
+    // ───────── API de revendedores: llaves del cliente ─────────
+    if(a === 'api_llaves' || a === 'api_llave_crear' || a === 'api_llave_revocar'){
+      if(p.banned) return enviar(res, { ok: false, code: 'suspendida', message: 'Tu cuenta está suspendida. Contacta a soporte.' });
+      return AV1.llaves({ rest, enviar, limite, res }, a, b, uid);
     }
 
     // ───────── Craftland · Nick color: consulta el ID antes de comprar ─────────
