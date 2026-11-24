@@ -28,6 +28,12 @@
       ]
     }
   ],
+  "rewrites": [
+    {
+      "source": "/api/v1/:path*",
+      "destination": "/api/comprar?v1=:path*"
+    }
+  ],
   "functions": {
     "api/comprar.js": {
       "maxDuration": 60
