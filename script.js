@@ -21389,7 +21389,7 @@ function preciosAdmCargar(){
   s.innerHTML = '<div class="prd-wrap"><div class="prd-nota">Precio único para todos los clientes. Aplica a las compras nuevas; los pedidos anteriores conservan el precio con el que se cobraron.</div><div id="prd-body" class="prd-v">Cargando…</div></div>';
   vipAdmApi('admin_precios').then(function(r){
     var b = document.getElementById('prd-body'); if(!b) return;
-    if(!r || !r.ok){ if(r && r.code === 'sesion_invalida'){ return; } b.innerHTML = '<div class="prd-err">' + prdE((r && r.message) || 'No se pudo cargar') + (r && r.code === 'sin_vip' ? '' : '') + '</div>'; return; }
+    if(!r || !r.ok){ if(r && r.code === 'sesion_invalida'){ return; } b.innerHTML = '<div class="prd-err">' + prdE((r && r.message) || 'No se pudo cargar') + (r && r.code === 'accion' ? '<br><small>Falta subir el api/vip.js actualizado a GitHub (y correr vip.sql en Supabase).</small>' : '') + '</div>'; return; }
     PRD.filas = r.precios || [];
     if(!PRD.filas.length){ b.innerHTML = '<div class="prd-err">No hay paquetes en la base de datos. Ejecuta vip.sql en Supabase.</div>'; return; }
     var rate = (typeof USD_MXN !== 'undefined' && USD_MXN > 0) ? USD_MXN : 0;

@@ -104,6 +104,25 @@ module.exports = async function handler(req, res){
         if(r.status >= 400) return falla(r);
         return enviar(res, { ok: true });
       }
+      // Precios de diamantes (precio único: Cliente = VIP). Pestaña "Precios de diamantes" del panel.
+      if(a === 'admin_precios'){
+        const pr = await rest('vip_precios?select=package_id,diamantes,nombre,precio_cliente,precio_vip,activo,orden,actualizada&order=orden.asc');
+        if(pr.status >= 400 || !Array.isArray(pr.json)) return falla(pr);
+        return enviar(res, { ok: true, precios: pr.json });
+      }
+      if(a === 'admin_precios_guardar'){
+        if(limite('pg|' + adm, 30, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Demasiados cambios seguidos, espera un momento' }, 429);
+        const lista = Array.isArray(b.precios) ? b.precios.slice(0, 20) : [];
+        if(!lista.length) return enviar(res, { ok: false, code: 'valor', message: 'No hay precios para guardar' });
+        for(const x of lista){ const n = Number(x && x.precio), pk = Math.floor(Number(x && x.package_id)); if(!(pk > 0) || !(n > 0) || n > 100000) return enviar(res, { ok: false, code: 'valor', message: 'Cada precio debe ser un número mayor a 0 (y menor a 100,000)' }); }
+        let guardados = 0;
+        for(const x of lista){
+          const r = await rpc('vip_admin_precio', { p_package: Math.floor(Number(x.package_id)), p_cliente: Number(x.precio), p_vip: Number(x.precio), p_actor: adm });
+          if(r.status >= 400) return enviar(res, { ok: false, code: 'db', guardados, message: 'Se guardaron ' + guardados + '. Falló el paquete ' + x.package_id + ': ' + (msgErr(r) || 'error') });
+          guardados++;
+        }
+        return enviar(res, { ok: true, guardados });
+      }
       if(a === 'admin_precio'){
         const r = await rpc('vip_admin_precio', { p_package: Math.floor(Number(b.package_id)), p_cliente: Number(b.cliente), p_vip: Number(b.vip), p_actor: adm });
         if(r.status >= 400) return falla(r);
