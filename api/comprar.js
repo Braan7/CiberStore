@@ -405,6 +405,36 @@ module.exports = async function handler(req, res){
         if(limite('es|' + adm, 60, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Demasiadas consultas, espera un momento' }, 429);
         return enviar(res, await E.estado({ rest, db }, { forzar: b.forzar === true }));
       }
+      if(a === 'admin_catalogo'){
+        const r = await rest('catalogo_checkout?order=orden.asc&select=clave,nombre,grupo,precio,mayoreo_min,mayoreo_precio,max_cant,detalle,entrega,srv,activo,orden');
+        if(r.status >= 400 || !Array.isArray(r.json)) return enviar(res, { ok: false, code: 'db', message: 'No se pudo leer el catálogo (¿corriste checkout_saldo.sql?)' });
+        return enviar(res, { ok: true, productos: r.json.map(x => Object.assign({}, x, { precio: Number(x.precio), mayoreo_precio: x.mayoreo_precio == null ? null : Number(x.mayoreo_precio) })) });
+      }
+      if(a === 'admin_catalogo_guardar'){
+        if(limite('cg|' + adm, 60, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Espera un momento' }, 429);
+        const clave = String(b.clave || '');
+        if(!/^[a-z0-9_]{1,40}$/i.test(clave)) return enviar(res, { ok: false, code: 'solicitud', message: 'Producto inválido' });
+        const num = (v, min, max, ent) => { const n = Number(v); return (isFinite(n) && n >= min && n <= max && (!ent || Number.isInteger(n))) ? (ent ? n : Math.round(n * 100) / 100) : null; };
+        const p = {};
+        if(b.precio !== undefined){ const n = num(b.precio, 0.01, 100000); if(n == null) return enviar(res, { ok: false, code: 'solicitud', message: 'Precio inválido (debe ser mayor a 0)' }); p.precio = n; }
+        if(b.mayoreo_min !== undefined || b.mayoreo_precio !== undefined){
+          const mm = (b.mayoreo_min === null || b.mayoreo_min === '') ? null : num(b.mayoreo_min, 2, 1000, true), mp = (b.mayoreo_precio === null || b.mayoreo_precio === '') ? null : num(b.mayoreo_precio, 0.01, 100000);
+          if((mm == null) !== (mp == null)) return enviar(res, { ok: false, code: 'solicitud', message: 'Mayoreo: llena cantidad mínima y precio, o deja ambos vacíos' });
+          if(mm != null && p.precio != null && mp >= p.precio) return enviar(res, { ok: false, code: 'solicitud', message: 'El precio de mayoreo debe ser menor al normal' });
+          p.mayoreo_min = mm; p.mayoreo_precio = mp;
+        }
+        if(b.max_cant !== undefined){ const n = num(b.max_cant, 1, 99, true); if(n == null) return enviar(res, { ok: false, code: 'solicitud', message: 'Máximo por compra: 1 a 99' }); p.max_cant = n; }
+        if(b.nombre !== undefined){ const t = String(b.nombre).replace(/<[^>]*>/g, '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 80); if(!t) return enviar(res, { ok: false, code: 'solicitud', message: 'Nombre vacío' }); p.nombre = t; }
+        if(b.detalle !== undefined) p.detalle = String(b.detalle).replace(/<[^>]*>/g, '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 200) || null;
+        if(b.activo !== undefined) p.activo = b.activo === true || b.activo === 'true';
+        if(b.orden !== undefined){ const n = num(b.orden, 0, 9999, true); if(n == null) return enviar(res, { ok: false, code: 'solicitud', message: 'Orden inválido' }); p.orden = n; }
+        if(!Object.keys(p).length) return enviar(res, { ok: false, code: 'solicitud', message: 'Nada que guardar' });
+        const r = await rest('catalogo_checkout?clave=eq.' + encodeURIComponent(clave), { method: 'PATCH', headers: { Prefer: 'return=representation' }, body: J(p) });
+        if(r.status >= 400) return enviar(res, { ok: false, code: 'db', message: 'No se pudo guardar' + (msgErr(r) ? ': ' + msgErr(r).slice(0, 140) : '') });
+        if(!Array.isArray(r.json) || !r.json.length) return enviar(res, { ok: false, code: 'no_existe', message: 'No existe ese producto' });
+        try{ delete global.__stk; }catch(e){}
+        return enviar(res, { ok: true, producto: r.json[0] });
+      }
       if(a === 'admin_estado_config') return enviar(res, await E.configurar({ rest, db }, b));
       if(a === 'admin_ordenes'){
         const est = ['pagada', 'entregando', 'verificar', 'parcial', 'reembolsada'].indexOf(b.estado) >= 0 ? '&estado=eq.' + b.estado : '';

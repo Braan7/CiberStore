@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta name="cs-build" content="33ae435e39">
-<script>var CS_BUILD="33ae435e39";</script>
+<meta name="cs-build" content="bd2c76dff8">
+<script>var CS_BUILD="bd2c76dff8";</script>
 <meta charset="UTF-8"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -7980,6 +7980,7 @@ print(d.get("order", {}).get("status") or d["code"])</pre>
       <button class="adm-nav-btn" id="admn-depositos" onclick="admFullTab('depositos')"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/></svg> Dep&oacute;sitos <span class="crta-badge" id="dep-badge"></span></button>
       <button class="adm-nav-btn" id="admn-ganancias" onclick="admFullTab('ganancias')">&#x1F4B0; Ganancias</button>
       <button class="adm-nav-btn" id="admn-cuentas" onclick="admFullTab('cuentas')">&#x1F3AE; Cuentas <span class="crta-badge" id="cva-badge"></span></button>
+      <button class="adm-nav-btn" id="admn-productos" onclick="admFullTab('productos')">&#x1F3F7;&#xFE0F; Productos y precios</button>
       <button class="adm-nav-btn" id="admn-precios" onclick="admFullTab('precios')">&#x1F48E; Precios de diamantes</button>
       <button class="adm-nav-btn" id="admn-sistema" onclick="admFullTab('sistema')">&#x1F5A5;&#xFE0F; Estado del Sistema</button>
       <button class="adm-nav-btn" id="admn-apirev" onclick="admFullTab('apirev')">&#x1F50C; API revendedores</button>
@@ -8463,6 +8464,8 @@ print(d.get("order", {}).get("status") or d["code"])</pre>
 <div class="adm-section" id="adms-ganancias"></div>
 
 <div class="adm-section" id="adms-cuentas"></div>
+
+<div class="adm-section" id="adms-productos"></div>
 
 <div class="adm-section" id="adms-precios"></div>
 
@@ -10666,10 +10669,32 @@ body.light-mode .arv-ul{color:#334155}
 #adms-apirev .dp-g{display:grid;grid-template-columns:auto 1fr;gap:.25rem .9rem;font-size:.8rem}#adms-apirev .dp-g span{color:#8b93a3}#adms-apirev .dp-g b{color:#e6e9f0;text-align:right}
 #adms-apirev .dp-v,#adms-apirev .dp-err{padding:.8rem;color:#8b93a3;font-size:.85rem}#adms-apirev .dp-err{color:#ffb0b0}
 
+#adms-productos .cta-nota{color:#9aa3b5;font-size:.78rem;line-height:1.5;margin:0 0 .9rem}
+#adms-productos .cta-gt{font-weight:800;color:#ffd24a;font-size:.8rem;letter-spacing:.04em;text-transform:uppercase;margin:1rem 0 .5rem}
+#adms-productos .cta-c{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:.85rem;margin-bottom:.7rem;min-width:0}
+#adms-productos .cta-c.off{opacity:.62}
+#adms-productos .cta-top{display:flex;justify-content:space-between;gap:.6rem;align-items:flex-start;margin-bottom:.6rem}
+#adms-productos .cta-top b{display:block;color:#fff}#adms-productos .cta-top small{color:#8b93a3;font-size:.72rem}
+#adms-productos .cta-sw{display:flex;align-items:center;gap:.35rem;font-size:.74rem;color:#cfd5e2;white-space:nowrap}
+#adms-productos .cta-gr{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin-bottom:.55rem}
+#adms-productos label{display:block;font-size:.7rem;color:#9aa3b5;min-width:0}
+#adms-productos .cta-w{margin-bottom:.55rem}
+#adms-productos input[type=text],#adms-productos input[type=number]{display:block;width:100%;box-sizing:border-box;margin-top:.2rem;padding:.5rem .6rem;border-radius:9px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.25);color:#fff;font-size:.88rem}
+#adms-productos .cta-ft{display:flex;align-items:flex-end;gap:.7rem;justify-content:space-between}
+#adms-productos .cta-o{width:90px}
+#adms-productos .cta-go{padding:.6rem 1.3rem;border-radius:10px;border:0;font-weight:800;background:linear-gradient(135deg,#ffd24a,#f08a00);color:#3b1f00;cursor:pointer}
+#adms-productos .cta-msg{font-size:.75rem;margin-top:.45rem;min-height:1em;color:#9aa3b5}#adms-productos .cta-msg.ok{color:#4ade80}#adms-productos .cta-msg.bad,#adms-productos .cta-err{color:#ff8fa3}
+#adms-productos .cta-v{color:#9aa3b5;padding:1rem 0}
+#adms-chatadm .cca-vac{border-color:rgba(255,90,120,.45)!important;color:#ff8fa3!important}
+
+.adm-stk{display:inline-flex;flex:0 0 auto;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))}.adm-stk svg{display:block}
+.adm-nav-btn .adm-stk{margin-right:.1rem}
+.adm-card-title.adm-tit-stk{display:flex;align-items:center;gap:.6rem}
+
 </style>
-<script src="supabase.js?v=33ae435e39"></script>
-<script src="supabase_integration.js?v=33ae435e39"></script>
-<script src="script.js?v=33ae435e39"></script>
+<script src="supabase.js?v=bd2c76dff8"></script>
+<script src="supabase_integration.js?v=bd2c76dff8"></script>
+<script src="script.js?v=bd2c76dff8"></script>
 
 <!-- BARRA DE NAVEGACION INFERIOR -->
 

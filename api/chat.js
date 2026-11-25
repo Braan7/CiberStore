@@ -96,6 +96,12 @@ module.exports = async function handler(req, res){
         const tipo = b.tipo === 'suspension' ? 'suspension' : 'silencio', min = Number(b.minutos);
         return enviar(res, await rpc('chat_sancionar', { p_username: String(b.username || '').slice(0, 60), p_tipo: tipo, p_minutos: (isFinite(min) && min > 0) ? Math.floor(min) : null, p_motivo: String(b.motivo || '').slice(0, 200) || null, p_admin: d.u }));
       }
+      if(a === 'admin_vaciar'){
+        if(limite(ip, 'v', 5, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Espera un momento' }, 429);
+        const j = await rpc('chat_vaciar', { p_admin: d.u });
+        if(j && j.ok === false && /chat_vaciar|does not exist|schema cache/.test(String(j.message || ''))) return enviar(res, { ok: false, code: 'db', message: 'Falta ejecutar chat_vaciar.sql en Supabase' });
+        return enviar(res, j);
+      }
       if(a === 'admin_levantar') return enviar(res, await rpc('chat_levantar', { p_username: String(b.username || '').slice(0, 60), p_admin: d.u }));
       if(a === 'admin_sanciones'){ const j = await rpc('chat_sanciones_lista', {}); return enviar(res, Array.isArray(j) ? { ok: true, data: j } : j); }
       if(a === 'admin_auditoria'){ const j = await rpc('chat_auditoria_lista', { p_limite: Math.max(1, Math.min(500, Number(b.limite) || 100)) }); return enviar(res, Array.isArray(j) ? { ok: true, data: j } : j); }

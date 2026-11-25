@@ -3477,7 +3477,7 @@ function admToggleNav(force){
 }
 
 function admFullTab(tab){
-  var tabs=['stats','users','pedidos','saldos','top','puntos','codigos','chat','resenas','soporte','inactivos','seguridad','recargas','depositos','precios','sistema','cuentas','ganancias','apirev','osaldo','vip','prime','catalogo','premios','chatadm','config'];
+  var tabs=['stats','users','pedidos','saldos','top','puntos','codigos','chat','resenas','soporte','inactivos','seguridad','recargas','depositos','precios','productos','sistema','cuentas','ganancias','apirev','osaldo','vip','prime','catalogo','premios','chatadm','config'];
   tabs.forEach(function(t){
     var btn=document.getElementById('admn-'+t);
     var sec=document.getElementById('adms-'+t);
@@ -3507,6 +3507,7 @@ function admFullTab(tab){
   if(tab==='cuentas') cuentasAdmCargar();
   if(tab==='sistema') sistemaCargar(false);
   if(tab==='precios') preciosAdmCargar();
+  if(tab==='productos') ctaCargar();
   if(tab==='vip') vipAdmCargar();
   if(tab==='prime') primeAdmCargar();
   // Cerrar el drawer al elegir una opción en móvil
@@ -17465,7 +17466,7 @@ function ccaHtmlBase(){
     + '<div class="cca-card"><div class="cca-h">📢 Anuncio oficial</div><p class="cat-nota">Se muestra destacado a todos los usuarios del chat. Se publica con tu usuario de administrador.</p>'
     + '<textarea id="cca-anun" class="cca-inp" rows="3" maxlength="500" placeholder="Escribe el comunicado…"></textarea><div class="cca-fila"><button type="button" class="cat-btn" onclick="ccaAnuncio()">📢 Publicar anuncio</button></div></div>'
     + '<div class="cca-card"><div class="cca-h">🔒 Usuarios sancionados</div><div id="cca-sanc"><div class="rk-vacio">Cargando…</div></div></div>'
-    + '<div class="cca-card"><div class="cca-h">💬 Conversaciones <button type="button" class="cat-btn cca-mini" onclick="ccaCargarMsgs()">Actualizar</button></div><div id="cca-msgs"><div class="rk-vacio">Cargando…</div></div></div>'
+    + '<div class="cca-card"><div class="cca-h">💬 Conversaciones <button type="button" class="cat-btn cca-mini" onclick="ccaCargarMsgs()">Actualizar</button> <button type="button" class="cat-btn cca-mini cca-rj cca-vac" onclick="ccaVaciar()">🗑️ Vaciar todo el chat</button></div><div id="cca-msgs"><div class="rk-vacio">Cargando…</div></div></div>'
     + '<div class="cca-card"><div class="cca-h">📜 Registro de moderación</div><button type="button" class="cat-btn" onclick="ccaAuditoria()">Ver últimas acciones</button><div id="cca-audit"></div></div>';
 }
 function ccaRender(){
@@ -21932,3 +21933,110 @@ function apaCopiar(){ var e = document.getElementById('apa-llave'); if(!e) retur
   if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function(){ if(typeof showToast === 'function') showToast('Llave copiada'); }).catch(sel); else sel(); }
 function apaRenovar(id, dias){ apaApi('admin_api_renovar', { id:id, dias:dias }).then(function(r){ if(!r || !r.ok){ alert((r && r.message) || 'No se pudo renovar'); return; } apaCargar(); }); }
 function apaRevocar(id){ if(!confirm('¿Revocar esta llave? Dejará de funcionar de inmediato.')) return; apaApi('admin_api_revocar', { id:id }).then(function(){ apaCargar(); }); }
+/* ═══ PANEL ADMIN · PRODUCTOS Y PRECIOS: edita precio, mayoreo, límite, nombre, descripción, orden y activo/oculto de todo el catálogo con saldo (pase, cajas, fragmentos, diamantes 50 %, Robux, Craftland, likes…) ═══ */
+var CTA = { items:[], busy:{} };
+function ctaApi(action, extra){
+  var tok = (typeof csAdminSesionToken === 'function') ? csAdminSesionToken() : '';
+  if(!tok) return Promise.resolve({ ok:false, message:'Entra de nuevo al panel.' });
+  var body = { action:action, token:tok }; for(var k in (extra || {})) body[k] = extra[k];
+  return fetch('/api/comprar', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) })
+    .then(function(r){ return r.json().catch(function(){ return { ok:false, message:'Respuesta inválida (' + r.status + ')' }; }); })
+    .catch(function(){ return { ok:false, message:'Sin conexión' }; });
+}
+function ctaE(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+var CTA_G = { pase:'Pase Booyah', caja:'Cajas de fragmentos', fragmento:'Fragmentos de arma', d50:'Diamantes al 50 %', robux:'Robux', craftland:'Craftland', likes:'Likes' };
+function ctaCargar(){
+  var s = document.getElementById('adms-productos'); if(!s) return;
+  if(!document.getElementById('cta-body')) s.innerHTML = '<div class="adm-card-title">Productos y precios</div><div class="cta-nota">Cambia el precio de cualquier producto de la tienda con saldo. Aplica a las compras nuevas; los pedidos anteriores conservan su precio. Los diamantes normales se editan en la pestaña “Precios de diamantes”.</div><div id="cta-body" class="cta-v">Cargando…</div>';
+  ctaApi('admin_catalogo').then(function(r){
+    var b = document.getElementById('cta-body'); if(!b) return;
+    if(!r || !r.ok){ b.innerHTML = '<div class="cta-err">' + ctaE((r && r.message) || 'No se pudo cargar') + '</div>'; return; }
+    CTA.items = r.productos || [];
+    if(!CTA.items.length){ b.innerHTML = '<div class="cta-v">No hay productos en el catálogo.</div>'; return; }
+    var gr = {}, orden = []; CTA.items.forEach(function(p){ if(!gr[p.grupo]){ gr[p.grupo] = []; orden.push(p.grupo); } gr[p.grupo].push(p); });
+    b.className = '';
+    b.innerHTML = orden.map(function(g){
+      return '<div class="cta-gt">' + ctaE(CTA_G[g] || g) + '</div>' + gr[g].map(ctaCard).join('');
+    }).join('');
+  });
+}
+function ctaCard(p){
+  var k = ctaE(p.clave), may = p.mayoreo_min != null;
+  return '<div class="cta-c' + (p.activo ? '' : ' off') + '" id="cta-' + k + '"><div class="cta-top"><div><b>' + ctaE(p.nombre) + '</b><small>' + k + ' · ' + (p.entrega === 'auto' ? 'entrega automática' : 'entrega manual') + '</small></div>'
+    + '<label class="cta-sw"><input type="checkbox" id="cta-a-' + k + '"' + (p.activo ? ' checked' : '') + '><span>' + (p.activo ? 'Visible' : 'Oculto') + '</span></label></div>'
+    + '<div class="cta-gr"><label>Precio (MXN)<input id="cta-p-' + k + '" type="number" inputmode="decimal" step="0.01" min="0.01" value="' + Number(p.precio).toFixed(2) + '"></label>'
+    + '<label>Máx. por compra<input id="cta-m-' + k + '" type="number" inputmode="numeric" min="1" max="99" value="' + Number(p.max_cant) + '"></label>'
+    + '<label>Mayoreo desde (cant.)<input id="cta-mm-' + k + '" type="number" inputmode="numeric" min="2" placeholder="sin mayoreo" value="' + (may ? p.mayoreo_min : '') + '"></label>'
+    + '<label>Precio mayoreo<input id="cta-mp-' + k + '" type="number" inputmode="decimal" step="0.01" min="0.01" placeholder="sin mayoreo" value="' + (may && p.mayoreo_precio != null ? Number(p.mayoreo_precio).toFixed(2) : '') + '"></label></div>'
+    + '<label class="cta-w">Nombre<input id="cta-n-' + k + '" type="text" maxlength="80" value="' + ctaE(p.nombre) + '"></label>'
+    + '<label class="cta-w">Descripción<input id="cta-d-' + k + '" type="text" maxlength="200" value="' + ctaE(p.detalle || '') + '"></label>'
+    + '<div class="cta-ft"><label class="cta-o">Orden<input id="cta-o-' + k + '" type="number" inputmode="numeric" min="0" value="' + Number(p.orden) + '"></label><button type="button" class="cta-go" onclick="ctaGuardar(\'' + k + '\')">Guardar</button></div><div class="cta-msg" id="cta-r-' + k + '"></div></div>';
+}
+function ctaV(id){ var e = document.getElementById(id); return e ? e.value : ''; }
+function ctaGuardar(k){
+  if(CTA.busy[k]) return;
+  var msg = document.getElementById('cta-r-' + k), pr = Number(ctaV('cta-p-' + k));
+  if(!(pr > 0)){ if(msg){ msg.className = 'cta-msg bad'; msg.textContent = '✗ El precio debe ser mayor a 0.'; } return; }
+  var mm = ctaV('cta-mm-' + k).trim(), mp = ctaV('cta-mp-' + k).trim();
+  if((mm === '') !== (mp === '')){ if(msg){ msg.className = 'cta-msg bad'; msg.textContent = '✗ Mayoreo: llena cantidad y precio, o deja ambos vacíos.'; } return; }
+  if(mp !== '' && Number(mp) >= pr){ if(msg){ msg.className = 'cta-msg bad'; msg.textContent = '✗ El precio de mayoreo debe ser menor al normal.'; } return; }
+  var a = document.getElementById('cta-a-' + k), activo = !!(a && a.checked);
+  var old = CTA.items.filter(function(x){ return x.clave === k; })[0];
+  if(old && activo && Math.abs(pr - Number(old.precio)) / Number(old.precio) > 0.5 && !confirm('El precio cambia más de 50 % (de $' + Number(old.precio).toFixed(2) + ' a $' + pr.toFixed(2) + '). ¿Seguro?')) return;
+  CTA.busy[k] = true; if(msg){ msg.className = 'cta-msg'; msg.textContent = 'Guardando…'; }
+  ctaApi('admin_catalogo_guardar', { clave:k, precio:pr, max_cant:Number(ctaV('cta-m-' + k)), mayoreo_min: mm === '' ? null : Number(mm), mayoreo_precio: mp === '' ? null : Number(mp), nombre:ctaV('cta-n-' + k), detalle:ctaV('cta-d-' + k), orden:Number(ctaV('cta-o-' + k)) || 0, activo:activo }).then(function(r){
+    CTA.busy[k] = false; var m = document.getElementById('cta-r-' + k); if(!m) return;
+    if(r && r.ok){ m.className = 'cta-msg ok'; m.textContent = '✓ Guardado'; for(var i = 0; i < CTA.items.length; i++) if(CTA.items[i].clave === k) CTA.items[i] = Object.assign({}, CTA.items[i], r.producto, { precio:Number(r.producto.precio) }); var c = document.getElementById('cta-' + k); if(c) c.classList.toggle('off', !activo); var sp = c && c.querySelector('.cta-sw span'); if(sp) sp.textContent = activo ? 'Visible' : 'Oculto'; }
+    else { m.className = 'cta-msg bad'; m.textContent = '✗ ' + ((r && r.message) || 'No se pudo guardar'); }
+  });
+}
+
+/* ═══ PANEL ADMIN · Vaciar todo el chat (borra los mensajes para todos; el original queda en el registro de moderación) ═══ */
+function ccaVaciar(){
+  if(!confirm('¿Borrar TODOS los mensajes del chat para todos los usuarios? No se puede deshacer.')) return;
+  if(!confirm('Última confirmación: se vaciará todo el chat ahora mismo.')) return;
+  ccAdminLlamar({action:'admin_vaciar'}).then(function(r){
+    if(r && r.ok){
+      try{ Array.from(CC.msgs.keys()).forEach(function(id){ ccQuitar(id); }); }catch(e){}
+      ccaMsg('Chat vaciado (' + (r.borrados || 0) + ' mensajes)', true); ccaCargarMsgs();
+    } else ccaMsg((r && r.message) || 'No se pudo vaciar el chat');
+  });
+}
+
+/* ═══ STICKERS SVG en todo el panel admin: cada pestaña del menú y cada título de sección lleva su sticker (borde blanco, degradado) ═══ */
+(function(){
+  var P = { gem:'M7 4h10l4 5-9 11L3 9zM3 9h18', chart:'M5 19v-8M12 19V5M19 19v-9', user:'M12 4.5a3.5 3.5 0 100 7 3.5 3.5 0 000-7zM5 20c0-4 3-6 7-6s7 2 7 6', chat:'M4 5h16v11H9l-5 4z', shield:'M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z',
+    gear:'M12 9a3 3 0 100 6 3 3 0 000-6zM12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1', box:'M4 8l8-4 8 4v9l-8 4-8-4zM4 8l8 4 8-4M12 12v9',
+    key:'M8 8.5a3.5 3.5 0 100 7 3.5 3.5 0 000-7zM11.5 12H21M17 12v3M20 12v2.5', receipt:'M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6', star:'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z',
+    bolt:'M13 3L5 14h6l-1 7 8-11h-6z', wallet:'M4 7h15v12H4zM4 7l12-3v3M15 13h4', head:'M5 14v-2a7 7 0 0114 0v2M5 14h3v5H5zM16 14h3v5h-3z', heart:'M12 20s-8-5-8-11a4.5 4.5 0 018-2.5A4.5 4.5 0 0120 9c0 6-8 11-8 11z',
+    plug:'M9 3v5M15 3v5M6 8h12v4a6 6 0 01-12 0zM12 18v3', trophy:'M7 4h10v6a5 5 0 01-10 0zM7 6H4v2a3 3 0 003 3M17 6h3v2a3 3 0 01-3 3M12 15v4M8 20h8', crown:'M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z',
+    gift:'M4 10h16v10H4zM3 7h18v3H3zM12 7v13', tag:'M3 12V4h8l10 10-8 8zM7.5 8.5h.01', code:'M9 7l-5 5 5 5M15 7l5 5-5 5', coin:'M12 4a8 8 0 100 16 8 8 0 000-16zM12 8v8M14.5 9.8c0-1.3-5-1.3-5 .7s5 1 5 3-5 2-5 .6', clock:'M12 4a8 8 0 100 16 8 8 0 000-16zM12 8v4l3 2', pad:'M6 9h12a3 3 0 013 3v3a2.5 2.5 0 01-4.3 1.8L15 15H9l-1.7 1.8A2.5 2.5 0 013 15v-3a3 3 0 013-3zM8 11v3M6.5 12.5h3' };
+  var T = { stats:'chart', pedidos:'box', depositos:'wallet', ganancias:'coin', cuentas:'pad', precios:'gem', productos:'tag', sistema:'gear', apirev:'plug', osaldo:'receipt', vip:'crown', prime:'crown', recargas:'bolt', catalogo:'tag', premios:'gift', chatadm:'chat', chat:'chat', saldos:'wallet', top:'trophy', users:'user', inactivos:'clock', puntos:'star', codigos:'code', resenas:'star', soporte:'head', seguridad:'shield', config:'gear', dash:'chart', codes:'key' };
+  var C = [['#ffd24a','#f08a00'],['#4aa3ff','#1b5fd0'],['#b266ff','#6a2fd6'],['#4ade80','#16a34a'],['#ff7a9c','#e11d48'],['#2dd4bf','#0e8f86'],['#ff9f43','#e0560f'],['#7c8cff','#4338ca']];
+  var n = 0;
+  function stk(tab, px){
+    var g = P[T[tab]] || P.star, h = 0, i; for(i = 0; i < tab.length; i++) h += tab.charCodeAt(i);
+    var c = C[h % C.length], id = 'as' + (++n);
+    return '<span class="adm-stk" aria-hidden="true" style="width:' + px + 'px;height:' + px + 'px"><svg viewBox="0 0 40 40" width="' + px + '" height="' + px + '"><defs><linearGradient id="' + id + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="' + c[0] + '"/><stop offset="1" stop-color="' + c[1] + '"/></linearGradient></defs>'
+      + '<g transform="rotate(-6 20 20)"><rect x="4" y="4" width="32" height="32" rx="10" fill="url(#' + id + ')" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/><path d="M8 11q12-6 24 0" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-linecap="round"/>'
+      + '<g transform="translate(8 8) scale(1)"><path d="' + g + '" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="translate(0 0)"/></g></g></svg></span>';
+  }
+  function sinEmoji(node){ if(node && node.nodeType === 3) node.nodeValue = node.nodeValue.replace(/^[^A-Za-z0-9À-ɏ]+/, ''); }
+  function decorar(){
+    var bs = document.querySelectorAll('.adm-nav-btn[id^="admn-"]'), i;
+    for(i = 0; i < bs.length; i++){
+      var b = bs[i]; if(b.getAttribute('data-stk')) continue; b.setAttribute('data-stk', '1');
+      var ic = b.querySelector('svg.ico'); if(ic) ic.parentNode.removeChild(ic); else { var t = b.firstChild; while(t && t.nodeType !== 3) t = t.nextSibling; sinEmoji(t); }
+      b.insertAdjacentHTML('afterbegin', stk(b.id.slice(5), 24));
+    }
+    var ts = document.querySelectorAll('.adm-section .adm-card-title');
+    for(i = 0; i < ts.length; i++){
+      var el = ts[i]; if(el.querySelector('.adm-stk')) continue;
+      var sec = el.closest('.adm-section'), tab = sec ? sec.id.replace(/^adms-/, '') : 'x', tn = el.firstChild; sinEmoji(tn);
+      el.insertAdjacentHTML('afterbegin', stk(tab, 30)); el.classList.add('adm-tit-stk');
+    }
+  }
+  var tm = null; function prog(){ if(tm) return; tm = setTimeout(function(){ tm = null; try{ decorar(); }catch(e){} }, 120); }
+  function ini(){ decorar(); try{ new MutationObserver(prog).observe(document.body, { childList:true, subtree:true }); }catch(e){} }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ini); else ini();
+})();
