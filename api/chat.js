@@ -99,7 +99,7 @@ module.exports = async function handler(req, res){
       if(a === 'admin_vaciar'){
         if(limite(ip, 'v', 5, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Espera un momento' }, 429);
         const j = await rpc('chat_vaciar', { p_admin: d.u });
-        if(j && j.ok === false && /chat_vaciar|does not exist|schema cache/.test(String(j.message || ''))) return enviar(res, { ok: false, code: 'db', message: 'Falta ejecutar chat_vaciar.sql en Supabase' });
+        if(j && j.ok === false && /chat_vaciar|does not exist|schema cache/.test(String(j.message || ''))) return enviar(res, { ok: false, code: 'db', message: 'No se pudo vaciar: ' + String(j.message).slice(0, 140) + ' · Ejecuta chat_vaciar.sql y luego: notify pgrst, \'reload schema\';' });
         return enviar(res, j);
       }
       if(a === 'admin_levantar') return enviar(res, await rpc('chat_levantar', { p_username: String(b.username || '').slice(0, 60), p_admin: d.u }));
