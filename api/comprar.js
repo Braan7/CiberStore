@@ -715,8 +715,8 @@ module.exports = async function handler(req, res){
 
     // ═════════ LIKES 2K con CRÉDITOS (aparte del saldo; los agrega el admin tras el pago por WhatsApp) ═════════
     if(a === 'lc_mi' || a === 'lc_check' || a === 'lc_enviar' || a === 'lc_estado'){
-      const PROV = ['lunexis', 'likesystem'], NOMP = { lunexis: 'Servidor 1', likesystem: 'Servidor 2' };
-      const lcPub = e => e ? { id: e.id, codigo: 'LC' + e.id, ff_id: e.ff_id, cantidad: e.cantidad, enviados: e.enviados, devueltos: e.devueltos, estado: e.estado, prov: e.prov, servidor: NOMP[e.prov] || '', nick: e.nick || '', antes: e.antes, despues: e.despues, fecha: e.cerrada || e.creada, detalle: e.estado === 'verificar' ? 'En verificación con el equipo. Si no se envió, se te devuelven los créditos.' : (e.estado === 'rechazada' ? (e.detalle || '') : '') } : null;
+      const PROV = ['lunexis', 'likesystem'], NOMP = { lunexis: 'Servidor 1 · LX', likesystem: 'Servidor 2 · LS' };
+      const lcPub = e => e ? { id: e.id, codigo: 'LC' + e.id, ff_id: e.ff_id, cantidad: e.cantidad, enviados: e.enviados, devueltos: e.devueltos, estado: e.estado, servidor: NOMP[e.prov] || '', nick: e.nick || '', antes: e.antes, despues: e.despues, fecha: e.cerrada || e.creada, detalle: e.estado === 'verificar' ? 'En verificación con el equipo. Si no se envió, se te devuelven los créditos.' : (e.estado === 'rechazada' ? (e.detalle || '') : '') } : null;
       const lcAl = (r, prov, cuando) => { if(r && (r.alerta || r.sinCreditos)) AL.avisarFalla('lc_' + prov, '🔴 LIKES 2K (' + NOMP[prov] + '): ' + (r.alerta || 'proveedor sin créditos'), 'El proveedor ' + NOMP[prov] + ' ' + (r.alerta || 'no tiene créditos para enviar') + (cuando ? ' (' + cuando + ')' : '') + '. Revisa su llave en Vercel o recarga con el proveedor.', 30 * 60000).catch(() => {}); };
       const lcLeer = async id => { const r = await rest('likes_cred_envio?id=eq.' + Number(id) + '&user_id=eq.' + encodeURIComponent(uid) + '&limit=1'); return Array.isArray(r.json) && r.json[0] ? r.json[0] : null; };
       const lcCerrar = (id, enviados, estado, o) => rpc('lc_cerrar', { p_id: id, p_enviados: enviados, p_estado: estado || null, p_nick: (o && o.nick) || null, p_antes: (o && o.antes != null) ? o.antes : null, p_despues: (o && o.despues != null) ? o.despues : null, p_log: (o && o.log_id != null) ? o.log_id : null, p_recibo: (o && o.recibo) || null, p_detalle: (o && o.detalle) || null });
@@ -730,7 +730,7 @@ module.exports = async function handler(req, res){
       };
       if(a === 'lc_mi'){
         const [c, r] = await Promise.all([lcCreditos(), rest('likes_cred_envio?user_id=eq.' + encodeURIComponent(uid) + '&order=id.desc&limit=10')]);
-        return enviar(res, { ok: true, creditos: c.n, sin_tabla: c.sin_tabla || r.status >= 400, items: (Array.isArray(r.json) ? r.json : []).map(lcPub), servidores: PROV.map(k => ({ k, nombre: NOMP[k], activo: LK.por(k).configurado() })) });
+        return enviar(res, { ok: true, creditos: c.n, sin_tabla: c.sin_tabla || r.status >= 400, items: (Array.isArray(r.json) ? r.json : []).map(lcPub), servidores: PROV.map(k => ({ k: k === 'lunexis' ? 'lx' : 'ls', nombre: NOMP[k], activo: LK.por(k).configurado() })) });
       }
       if(a === 'lc_estado'){
         if(limite('lce|' + uid, 30, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Espera un momento.' }, 429);
@@ -739,7 +739,7 @@ module.exports = async function handler(req, res){
         const c = await lcCreditos();
         return enviar(res, { ok: true, resultado: lcPub(e), creditos: c.n });
       }
-      const prov = PROV.indexOf(String(b.prov)) >= 0 ? String(b.prov) : 'lunexis', P = LK.por(prov);
+      const ALIAS = { lx: 'lunexis', ls: 'likesystem' }, prov = ALIAS[String(b.prov)] || 'lunexis', P = LK.por(prov);
       const idF = String(b.ff_id || '').replace(/\D/g, '');
       if(!P.configurado()) return enviar(res, { ok: false, code: 'sin_configurar', message: NOMP[prov] + ' aún no está activado. Elige el otro servidor.' });
       if(a === 'lc_check'){
@@ -748,7 +748,7 @@ module.exports = async function handler(req, res){
         lcAl(j, prov, 'consulta'); lcAl(cr, prov, 'consulta');
         if(!j.ok) return enviar(res, { ok: false, code: j.code, message: j.message }, j.code === 'NOT_FOUND' ? 404 : j.code === 'id' ? 400 : 503);
         const tope = cr.ok && cr.restantes != null ? Math.max(0, Math.min(2000, cr.restantes)) : 2000;
-        return enviar(res, { ok: true, ff_id: idF, nick: j.nick, likes: j.likes, region: j.region, prov, servidor: NOMP[prov], max_prov: tope, disponible: cr.ok ? tope > 0 : false, motivo: cr.ok ? (tope > 0 ? null : 'Este servidor está sin cupo por ahora. Prueba con el otro.') : cr.message, creditos: c.n });
+        return enviar(res, { ok: true, ff_id: idF, nick: j.nick, likes: j.likes, region: j.region, servidor: NOMP[prov], max_prov: tope, disponible: cr.ok ? tope > 0 : false, motivo: cr.ok ? (tope > 0 ? null : 'Este servidor está sin cupo por ahora. Prueba con el otro.') : cr.message, creditos: c.n });
       }
       // ───────── lc_enviar ─────────
       if(p.banned) return enviar(res, { ok: false, code: 'suspendida', message: 'Tu cuenta está suspendida. Contacta a soporte.' });

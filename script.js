@@ -22069,8 +22069,8 @@ function hnBody(){ var h = document.getElementById('page-home'); document.body.c
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hnBody); else hnBody();
   setTimeout(hnBody, 400); setTimeout(hnBody, 1500);
 })();
-/* ═══ Likes 2K con CRÉDITOS (aparte del saldo): el cliente pide créditos por WhatsApp, el admin se los agrega, y envía con Servidor 1 (Lunexis) o 2 (LikeSystem) ═══ */
-var LCR = { id:'', nick:'', likes:null, prov:'lunexis', srv:[{k:'lunexis',nombre:'Servidor 1',activo:true},{k:'likesystem',nombre:'Servidor 2',activo:true}], cred:null, cant:2000, max:2000, disp:true, motivo:'', busy:false, idem:{}, res:null };
+/* ═══ Likes 2K con CRÉDITOS (aparte del saldo): el cliente pide créditos por WhatsApp, el admin se los agrega, y envía con el Servidor 1 (LX) o el 2 (LS) ═══ */
+var LCR = { id:'', nick:'', likes:null, prov:'lx', srv:[{k:'lx',nombre:'Servidor 1 · LX',activo:true},{k:'ls',nombre:'Servidor 2 · LS',activo:true}], cred:null, cant:2000, max:2000, disp:true, motivo:'', busy:false, idem:{}, res:null };
 function lcrE(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 function lcrN(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
 function lcrLogin(){ if(typeof authSession === 'undefined' || !authSession){ if(typeof showToast === 'function') showToast('Inicia sesión para continuar'); if(typeof showAuthModal === 'function') setTimeout(showAuthModal, 500); return false; } return true; }
@@ -22082,7 +22082,7 @@ function lcrWA(){
 function lcrPintarCred(){ var e = document.getElementById('lcr-bal'); if(e) e.textContent = LCR.cred == null ? '—' : lcrN(LCR.cred); }
 function lcrPintarSrv(){
   var e = document.getElementById('lcr-srv'); if(!e) return;
-  e.innerHTML = LCR.srv.map(function(s){ return '<button type="button" class="lcr-sb' + (LCR.prov === s.k ? ' on' : '') + '"' + (s.activo ? '' : ' disabled') + ' onclick="lcrProv(\'' + s.k + '\')"><b>' + lcrE(s.nombre) + '</b><small>' + (s.activo ? (s.k === 'lunexis' ? 'Lunexis' : 'LikeSystem') : 'Próximamente') + '</small></button>'; }).join('');
+  e.innerHTML = LCR.srv.map(function(s){ return '<button type="button" class="lcr-sb' + (LCR.prov === s.k ? ' on' : '') + '"' + (s.activo ? '' : ' disabled') + ' onclick="lcrProv(\'' + s.k + '\')"><b>' + lcrE(s.nombre) + '</b><small>' + (s.activo ? 'Disponible' : 'Próximamente') + '</small></button>'; }).join('');
 }
 function lcrProv(k){ if(LCR.busy) return; LCR.prov = k; lcrPintarSrv(); if(LCR.id) lcrConsultar(); }
 function lcrCargar(){
