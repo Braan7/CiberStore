@@ -177,7 +177,7 @@ function elegirExtra(items, clave){
 
 
 // ── Regalos vía correo: solo CONSULTA de stock (la tienda lo usa para mostrar "Sin stock" y no cobrar lo que no se puede entregar) ──
-const REGALOS = { cj1:['caja',1,2.95], cj5:['caja',5,14.50], cj10:['caja',10,29.30], cj50:['caja',50,145.70], fa10:['arma',10,6.40], fa50:['arma',50,31.70], fa100:['arma',100,62.80], fa500:['arma',500,297.40] };   // [tipo, cantidad, precio de venta MXN]
+const REGALOS = { cj1:['caja',1,3.00], cj5:['caja',5,14.98], cj10:['caja',10,29.96], cj50:['caja',50,149.76], fa10:['arma',10,7.10], fa50:['arma',50,35.50], fa100:['arma',100,71.00], fa500:['arma',500,355.00] };   // [tipo, cantidad, precio de venta MXN]
 function buscarRegalo(items, k){
   let fijo = {}; try{ fijo = JSON.parse(process.env.CO_MAP || '{}'); }catch(e){}
   const tipo = REGALOS[k][0], n = REGALOS[k][1];

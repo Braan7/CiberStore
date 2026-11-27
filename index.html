@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta name="cs-build" content="6bea077de2">
-<script>var CS_BUILD="6bea077de2";</script>
+<meta name="cs-build" content="64ae444fb8">
+<script>var CS_BUILD="64ae444fb8";</script>
 <meta charset="UTF-8"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -4418,6 +4418,57 @@ select.ap-inp{flex:0 1 auto}
   <span class="ticker-item"><span class="ticker-dot"></span>alguien activo <strong>Likes Supreme</strong> <span class="ago">hace 33 min</span></span>
 </div></div>
 <div class="page active" id="page-home">
+<!-- INICIO PARA VISITANTES (sin sesión). Con sesión iniciada se muestra el panel de siempre. -->
+<div id="ld-root" class="ld">
+<div class="ld-bar"><div class="ld-links"><a href="#" onclick="ldIr('ld-servicios');return false">Servicios</a><a href="#" onclick="ldIr('ld-productos');return false">Más productos</a><a href="#" onclick="ldIr('ld-ventajas');return false">¿Por qué CIBERSTORE?</a></div>
+<div class="ld-acc"><button type="button" class="ld-login" onclick="ldCuenta('login')">Iniciar sesión</button><button type="button" class="ld-signup" onclick="ldCuenta('register')">Crear cuenta</button></div></div>
+<section class="ld-hero">
+<div>
+<div class="ld-eyebrow"><span class="ld-dot"></span> TU TIENDA DE SERVICIOS DIGITALES</div>
+<h1>Todo lo que buscas,<br><span>en un solo lugar.</span></h1>
+<p class="ld-lead">Potencia tu experiencia en Free Fire y descubre más productos digitales. Encuentra likes, diamantes, fragmentos, cajas, pases y mucho más, en una tienda hecha para ti.</p>
+<div class="ld-actions"><button type="button" class="ld-cta" onclick="ldIr('ld-servicios')">Explorar servicios&nbsp; →</button><button type="button" class="ld-sec" onclick="ldIr('ld-productos')">Ver productos</button></div>
+<div class="ld-trust"><span>✦ <b>Catálogo digital</b></span><span>◉ <b>Atención por WhatsApp</b></span><span>✓ <b>Pedidos desde tu cuenta</b></span></div>
+</div>
+<div class="ld-visual"><div class="ld-glow"></div>
+<div class="ld-showcase">
+<div class="ld-showtop"><span>✦ CIBERSTORE / CATÁLOGO</span><span class="ld-live">● DISPONIBLE</span></div>
+<div class="ld-featured"><div class="ld-fbg"><img src="img/freefire-hero.png" alt="" loading="lazy" onerror="this.remove()"></div><div class="ld-ftxt"><div class="ld-mini">SERVICIO DESTACADO</div><h2>LIKES 220</h2><p>Servicio de likes para tu perfil de Free Fire</p></div></div>
+<div class="ld-mockstats"><div><strong>220</strong><small>LIKES</small></div><div><strong>2K</strong><small>LIKES PREMIUM</small></div><div><strong>FF</strong><small>FREE FIRE</small></div></div>
+<div class="ld-minirow"><div class="ld-miniitem"><span class="ld-mi"><img src="img/diam-310.png" alt="" loading="lazy" onerror="this.remove()"></span><span>Diamantes<b>Recargas</b></span></div><div class="ld-miniitem"><span class="ld-mi"><img src="img/caja-fragmentos.png" alt="" loading="lazy" onerror="this.remove()"></span><span>Pases y cajas<b>Productos FF</b></span></div></div>
+</div>
+<div class="ld-floating ld-one">⚡ <strong>LIKES 2000</strong><br>Servicio premium</div><div class="ld-floating ld-two">💎 <strong>FREE FIRE</strong><br>Diamantes y más</div>
+</div>
+</section>
+<section class="ld-section" id="ld-servicios">
+<div class="ld-head"><div><div class="ld-kicker">NUESTROS SERVICIOS</div><h2>Lo que puedes encontrar</h2></div><p>Servicios para Free Fire y productos digitales. Elige una categoría y descubre las opciones disponibles.</p></div>
+<div class="ld-services">
+<article class="ld-service" onclick="ldGo('likes2k')"><span class="ld-pill">POPULAR</span><div class="ld-sicon"><span>♡</span></div><h3>Likes 220</h3><p>Servicio de likes para tu perfil de Free Fire.</p><a href="#" onclick="return false">Ver servicio&nbsp; →</a></article>
+<article class="ld-service" onclick="ldGo('likes2k')"><span class="ld-pill">PREMIUM</span><div class="ld-sicon"><span>✧</span></div><h3>Likes 2000</h3><p>Una opción premium para quienes buscan más likes.</p><a href="#" onclick="return false">Ver servicio&nbsp; →</a></article>
+<article class="ld-service" onclick="ldGo('diamantes')"><div class="ld-sicon"><span>💎</span><img src="img/diam-520.png" alt="Diamantes" loading="lazy" onerror="this.remove()"></div><h3>Diamantes</h3><p>Consulta las recargas y paquetes de diamantes disponibles.</p><a href="#" onclick="return false">Ver diamantes&nbsp; →</a></article>
+<article class="ld-service" onclick="ldGo('regalos','fragmento')"><div class="ld-sicon"><span>🧩</span><img src="img/fragmento-universal.png" alt="Fragmentos" loading="lazy" onerror="this.remove()"></div><h3>Fragmentos</h3><p>Encuentra fragmentos y artículos para tu cuenta.</p><a href="#" onclick="return false">Ver productos&nbsp; →</a></article>
+<article class="ld-service" onclick="ldGo('regalos','caja')"><div class="ld-sicon"><span>🎁</span><img src="img/caja-fragmentos.png" alt="Cajas" loading="lazy" onerror="this.remove()"></div><h3>Cajas</h3><p>Productos y cajas para complementar tu experiencia.</p><a href="#" onclick="return false">Ver cajas&nbsp; →</a></article>
+<article class="ld-service" onclick="ldGo('regalos','pase')"><div class="ld-sicon"><span>🎟️</span><img src="img/pase-booyah.png" alt="Pases" loading="lazy" onerror="this.remove()"></div><h3>Pases</h3><p>Consulta los pases disponibles y sus opciones.</p><a href="#" onclick="return false">Ver pases&nbsp; →</a></article>
+</div></section>
+<section class="ld-section" id="ld-productos">
+<div class="ld-head"><div><div class="ld-kicker">DESCUBRE MÁS</div><h2>Más productos digitales</h2></div><p>Además de Free Fire, explora otras categorías que iremos incorporando a CIBERSTORE.</p></div>
+<div class="ld-cats">
+<article class="ld-prod" onclick="ldGo('giftcards')"><div class="ld-art ld-cover"><span>🟩</span><img src="img/roblox.jpg" alt="Roblox" loading="lazy" onerror="this.remove()"></div><h3>Roblox</h3><p>Robux y tarjetas de regalo.</p><span class="ld-more">EXPLORAR →</span></article>
+<article class="ld-prod" onclick="ldGo('giftcards')"><div class="ld-art ld-cover"><span>🎮</span><img src="img/juegos/fortnite.webp" alt="Gift Cards" loading="lazy" onerror="this.remove()"></div><h3>Gift Cards</h3><p>Tarjetas digitales y saldo.</p><span class="ld-more">EXPLORAR →</span></article>
+<article class="ld-prod" onclick="ldGo('giftcards')"><div class="ld-art ld-cover"><span>🎬</span><img src="img/juegos/discord.webp" alt="Entretenimiento" loading="lazy" onerror="this.remove()"></div><h3>Entretenimiento</h3><p>Productos y membresías digitales.</p><span class="ld-more">EXPLORAR →</span></article>
+<article class="ld-prod" onclick="ldGo('soporte')"><div class="ld-art"><span>✨</span></div><h3>Otros productos</h3><p>Nuevos servicios y novedades.</p><span class="ld-more">EXPLORAR →</span></article>
+</div></section>
+<section class="ld-section" id="ld-ventajas">
+<div class="ld-head"><div><div class="ld-kicker">COMPRA CON CONFIANZA</div><h2>Una tienda simple y directa</h2></div></div>
+<div class="ld-why">
+<article><div class="ld-ico">▦</div><b>Todo organizado</b><p>Encuentra los servicios por categoría sin perder tiempo.</p></article>
+<article><div class="ld-ico">◉</div><b>Atención cercana</b><p>Consulta tus dudas y recibe ayuda mediante WhatsApp.</p></article>
+<article><div class="ld-ico">↗</div><b>Tu cuenta, tus pedidos</b><p>Accede a tu espacio para revisar compras y servicios.</p></article>
+</div></section>
+<section class="ld-banner"><div><h2>¿Listo para comenzar?</h2><p>Entra a tu cuenta o crea una nueva para explorar CIBERSTORE.</p></div><div class="ld-actions"><button type="button" class="ld-cta" onclick="ldCuenta('login')">Iniciar sesión</button><button type="button" class="ld-sec" onclick="ldCuenta('register')">Crear cuenta</button></div></section>
+<footer class="ld-foot"><span><strong>CIBERSTORE</strong> · Tu tienda de servicios digitales.</span><span>© 2026 CIBERSTORE · <a data-cs-wa href="https://wa.me/573158844459" target="_blank" rel="noopener">Atención por WhatsApp</a></span></footer>
+</div>
+
   <div class="hm-wrap">
     <!-- Saludo y saldo (ids conservados: home-hola, home-fecha, home-saldo, home-saldo-alt) -->
     <div class="hm-hi"><div class="hm-hola" id="home-hola">Hola</div><div class="hm-fecha" id="home-fecha">&nbsp;</div></div>
@@ -10691,10 +10742,72 @@ body.light-mode .arv-ul{color:#334155}
 .adm-nav-btn .adm-stk{margin-right:.1rem}
 .adm-card-title.adm-tit-stk{display:flex;align-items:center;gap:.6rem}
 
+
+/* ═══ INICIO PARA VISITANTES (landing) ═══ */
+#page-home.ld-guest .hm-wrap{display:none!important}
+#page-home:not(.ld-guest) #ld-root{display:none}
+#ld-root{--ld-blue:#168cff;--ld-line:#24364b;--ld-muted:#9aaabd;max-width:1160px;margin:0 auto;padding:0 18px 10px;color:#f4f8ff;font:15px/1.55 Inter,system-ui,"Segoe UI",sans-serif;position:relative}
+#ld-root *{box-sizing:border-box}
+#ld-root h1,#ld-root h2,#ld-root h3,#ld-root p{margin:0}
+.ld-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #1d2b3d}
+.ld-links{display:flex;gap:22px;color:#b2c0d1;font-size:13px;font-weight:650;flex-wrap:wrap}.ld-links a{color:inherit;text-decoration:none}.ld-links a:hover{color:#fff}
+.ld-acc{display:flex;gap:9px}
+.ld-login,.ld-signup,.ld-cta,.ld-sec{font:inherit;cursor:pointer;border-radius:12px;font-weight:900;font-size:12px}
+.ld-login{border:1px solid #2b3b50;background:transparent;color:#eaf2fc;padding:10px 14px}
+.ld-signup,.ld-cta{border:0;background:linear-gradient(110deg,#168fff,#086de0);color:#fff;padding:11px 18px;box-shadow:0 8px 25px #0878df33}
+.ld-cta{padding:14px 22px}.ld-sec{border:1px solid #31445b;background:#111b29;color:#edf5ff;padding:13px 20px;font-weight:850}
+.ld-hero{padding:48px 0 40px;display:grid;grid-template-columns:1.08fr .92fr;gap:38px;align-items:center}
+.ld-eyebrow{display:inline-flex;align-items:center;gap:8px;border:1px solid #24517a;background:#0d2033;color:#75c5ff;border-radius:30px;padding:7px 12px;font-size:10px;font-weight:900;letter-spacing:1.2px}
+.ld-dot{width:7px;height:7px;border-radius:50%;background:#26d785;box-shadow:0 0 12px #26d785}
+.ld-hero h1{font-size:clamp(36px,5.2vw,62px);line-height:1.03;letter-spacing:-2.4px;margin:20px 0 16px;font-weight:950}
+.ld-hero h1 span{background:linear-gradient(90deg,#4bb8ff,#168cff 55%,#7b8dff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ld-lead{max-width:540px;color:#a9b8ca;font-size:15.5px;line-height:1.75;margin-bottom:24px!important}
+.ld-actions{display:flex;gap:12px;flex-wrap:wrap}
+.ld-trust{display:flex;gap:20px;flex-wrap:wrap;margin-top:26px;color:#8fa2b8;font-size:11px}.ld-trust b{color:#dceaff}
+.ld-visual{position:relative;min-height:380px;display:grid;place-items:center}
+.ld-glow{position:absolute;width:300px;height:300px;border-radius:50%;background:#087ce8;filter:blur(100px);opacity:.22}
+.ld-showcase{position:relative;width:min(100%,440px);border:1px solid #2d4d6e;border-radius:25px;padding:20px;background:linear-gradient(145deg,#14253a,#0c1522 70%);box-shadow:0 30px 90px #0008,inset 0 1px #ffffff12;transform:rotate(1deg)}
+.ld-showtop{display:flex;align-items:center;justify-content:space-between;color:#9db0c7;font-size:11px}.ld-live{color:#37df98;font-weight:900}
+.ld-featured{position:relative;overflow:hidden;margin-top:16px;border:1px solid #2b4a69;border-radius:18px;background:linear-gradient(115deg,#10243a,#102d4c);min-height:130px}
+.ld-fbg{position:absolute;inset:0}.ld-fbg img{width:100%;height:100%;object-fit:cover;object-position:center;opacity:.4}
+.ld-fbg:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#0d1d30f2 18%,#0d1d3099 60%,transparent)}
+.ld-ftxt{position:relative;padding:19px}.ld-mini{font-size:10px;color:#78caff;font-weight:900;letter-spacing:1px}.ld-featured h2{font-size:26px;margin:7px 0 2px!important}.ld-featured p{color:#b6c7da;font-size:12px}
+.ld-mockstats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:12px}.ld-mockstats div{border:1px solid #283b51;background:#0c1725;border-radius:12px;padding:12px}.ld-mockstats strong{display:block;font-size:18px}.ld-mockstats small{color:#91a5bb;font-size:9px}
+.ld-minirow{display:flex;gap:10px;margin-top:12px}.ld-miniitem{flex:1;display:flex;align-items:center;gap:9px;border:1px solid #283b51;background:#0e1a29;border-radius:12px;padding:9px 11px;font-size:11px;min-width:0}.ld-miniitem b{display:block;font-size:12px;margin-top:2px}
+.ld-mi{flex:0 0 40px;width:40px;height:40px;border-radius:10px;background:radial-gradient(circle at 50% 25%,#1b4770,#102033 75%);display:grid;place-items:center;overflow:hidden}.ld-mi img{width:100%;height:100%;object-fit:contain;padding:3px}
+.ld-floating{position:absolute;border:1px solid #31577b;background:#10243a;border-radius:14px;padding:11px 14px;box-shadow:0 15px 35px #0007;font-size:11px;font-weight:850}.ld-one{right:-7px;top:50px}.ld-two{left:-12px;bottom:-16px}.ld-floating strong{color:#55c1ff}
+.ld-section{padding:34px 0}.ld-head{display:flex;justify-content:space-between;align-items:flex-end;gap:15px;margin-bottom:18px}
+.ld-kicker{color:#60baff;font-size:10px;font-weight:950;letter-spacing:1.5px}.ld-section h2{font-size:26px;letter-spacing:-.7px;margin-top:5px!important}.ld-head p{color:#9aaabd;font-size:12px;max-width:390px}
+.ld-services{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.ld-service{position:relative;overflow:hidden;cursor:pointer;border:1px solid #263b52;border-radius:18px;background:linear-gradient(145deg,#121f2e,#0d1521);padding:20px;min-height:185px;transition:.2s}
+.ld-service:hover,.ld-prod:hover{transform:translateY(-4px);border-color:#278ee9;box-shadow:0 15px 35px #0004}
+.ld-service:after{content:"";position:absolute;width:140px;height:140px;border-radius:50%;right:-60px;top:-70px;background:#168cff1c;filter:blur(8px);pointer-events:none}
+.ld-sicon{position:relative;width:56px;height:56px;border-radius:15px;background:radial-gradient(circle at 50% 20%,#1b4770,#123252 75%);border:1px solid #28577e;display:grid;place-items:center;font-size:25px;margin-bottom:15px;overflow:hidden}
+.ld-sicon img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:5px;background:#123252}
+.ld-service h3{font-size:17px;margin-bottom:5px!important}.ld-service p{color:#9aacc0;font-size:12px;max-width:280px}
+.ld-service a{display:inline-block;margin-top:14px;color:#66bdff;font-size:11px;font-weight:900;text-decoration:none}
+.ld-pill{position:absolute;right:15px;top:16px;border:1px solid #31516e;border-radius:20px;padding:4px 8px;color:#80caff;font-size:9px;font-weight:900;z-index:1}
+.ld-cats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.ld-prod{cursor:pointer;border:1px solid #26384d;border-radius:16px;background:#101a27;padding:15px;transition:.2s}
+.ld-art{position:relative;height:104px;border-radius:12px;display:grid;place-items:center;font-size:42px;background:radial-gradient(circle at 50% 20%,#1b4770,#102033 70%);margin-bottom:12px;overflow:hidden}
+.ld-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
+.ld-prod h3{font-size:14px;margin-bottom:3px!important}.ld-prod p{font-size:11px;color:#95a8bd}.ld-more{display:block;color:#5bb8ff;font-size:10px;font-weight:900;margin-top:12px}
+.ld-why{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.ld-why article{border:1px solid #26384d;background:#0f1926;border-radius:15px;padding:19px}.ld-why b{display:block;margin:8px 0 4px}.ld-why p{color:#95a8bd;font-size:11px}.ld-ico{font-size:22px;color:#62baff}
+.ld-banner{margin:26px 0 34px;border:1px solid #24527b;border-radius:20px;padding:24px;background:linear-gradient(110deg,#10243a,#0e1a29);display:flex;align-items:center;justify-content:space-between;gap:20px}.ld-banner h2{font-size:22px;margin-bottom:5px!important}.ld-banner p{font-size:12px;color:#a0b2c6}
+.ld-foot{border-top:1px solid #1f3043;padding:24px 0 30px;color:#7f91a6;font-size:11px;display:flex;justify-content:space-between;gap:20px}.ld-foot strong{color:#eaf3ff}.ld-foot a{color:#8fc6ff;text-decoration:none}
+@media(max-width:850px){.ld-hero{gap:20px}.ld-services{grid-template-columns:repeat(2,1fr)}.ld-cats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:620px){#ld-root{padding:0 14px 6px}.ld-bar{flex-wrap:wrap}.ld-links{display:none}.ld-acc{width:100%}.ld-acc button{flex:1}.ld-hero{padding:30px 0 22px;grid-template-columns:1fr;gap:6px}.ld-hero h1{font-size:40px;letter-spacing:-1.6px}.ld-lead{font-size:14px}.ld-visual{min-height:330px;margin-top:8px}.ld-showcase{width:94%}.ld-one{right:0}.ld-two{left:0}.ld-section{padding:26px 0}.ld-head{display:block}.ld-head p{margin-top:7px}.ld-section h2{font-size:22px}.ld-services{grid-template-columns:1fr}.ld-service{min-height:160px}.ld-cats{gap:9px}.ld-prod{padding:10px}.ld-art{height:84px;font-size:34px}.ld-prod h3{font-size:12px}.ld-prod p{font-size:10px}.ld-why{grid-template-columns:1fr}.ld-banner{display:block;padding:20px;margin:22px 0 30px}.ld-banner .ld-actions{margin-top:14px}.ld-foot{display:block}.ld-foot span{display:block;margin:5px 0}.ld-minirow{flex-direction:column}}
+/* modo claro */
+body.light-mode #ld-root{color:#0f1b2d}
+body.light-mode #ld-root .ld-hero h1,body.light-mode #ld-root .ld-section h2,body.light-mode #ld-root .ld-service h3,body.light-mode #ld-root .ld-prod h3,body.light-mode #ld-root .ld-banner h2,body.light-mode #ld-root .ld-why b,body.light-mode .ld-foot strong,body.light-mode .ld-trust b{color:#0f1b2d}
+body.light-mode .ld-lead,body.light-mode .ld-head p,body.light-mode .ld-service p,body.light-mode .ld-prod p,body.light-mode .ld-why p,body.light-mode .ld-banner p,body.light-mode .ld-links{color:#4b5d73}
+body.light-mode .ld-service,body.light-mode .ld-prod,body.light-mode .ld-why article,body.light-mode .ld-banner{background:#fff;border-color:#d5e0ee}
+body.light-mode .ld-sec,body.light-mode .ld-login{background:#fff;color:#0f1b2d;border-color:#c5d3e4}
+
 </style>
-<script src="supabase.js?v=6bea077de2"></script>
-<script src="supabase_integration.js?v=6bea077de2"></script>
-<script src="script.js?v=6bea077de2"></script>
+<script src="supabase.js?v=64ae444fb8"></script>
+<script src="supabase_integration.js?v=64ae444fb8"></script>
+<script src="script.js?v=64ae444fb8"></script>
 
 <!-- BARRA DE NAVEGACION INFERIOR -->
 

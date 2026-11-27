@@ -17728,8 +17728,8 @@ function ntCerrar(){ NT.abierto = false; var sh = document.getElementById('nt-sh
 var RG = {
   PASE: 23, PASE_MAY: 20, PASE_MAY_MIN: 10,
   // paquetes del proveedor (precio de venta en MXN por paquete)
-  PAQ: { c1:{t:'Caja de Fragmentos Evo',p:2.95}, c5:{t:'5 Cajas de Fragmentos Evo',p:14.50}, c10:{t:'10 Cajas de Fragmentos Evo',p:29.30}, c50:{t:'50 Cajas de Fragmentos Evo',p:145.70},
-         f10:{t:'10 Fragmentos de arma Evo',p:6.40}, f50:{t:'50 Fragmentos de arma Evo',p:31.70}, f100:{t:'100 Fragmentos de arma Evo',p:62.80}, f500:{t:'500 Fragmentos de arma Evo',p:297.40} },
+  PAQ: { c1:{t:'Caja de Fragmentos Evo',p:3.00}, c5:{t:'5 Cajas de Fragmentos Evo',p:14.98}, c10:{t:'10 Cajas de Fragmentos Evo',p:29.96}, c50:{t:'50 Cajas de Fragmentos Evo',p:149.76},
+         f10:{t:'10 Fragmentos de arma Evo',p:7.10}, f50:{t:'50 Fragmentos de arma Evo',p:35.50}, f100:{t:'100 Fragmentos de arma Evo',p:71.00}, f500:{t:'500 Fragmentos de arma Evo',p:355.00} },
   cant: { pase:0, c1:0, c5:0, c10:0, c50:0, f10:0, f50:0, f100:0, f500:0 }, busy: false, idOk: null, nick: ''
 };
 function rgR2(n){ return Math.round(n * 100) / 100; }
@@ -18954,14 +18954,14 @@ function ckApi(action, extra, auth){
 var CK_RESPALDO = [
   { clave:'pase_oferta', nombre:'Pase Booyah', grupo:'pase', precio:22, mayoreo_min:null, mayoreo_precio:null, max_cant:30, img:'img/pase-booyah.png', detalle:'Oferta exclusiva · entrega por regalo (hasta 1 día)', entrega:'manual' },
   { clave:'pase', nombre:'Pase Booyah', grupo:'pase', precio:23, mayoreo_min:10, mayoreo_precio:20, max_cant:99, img:'img/pase-booyah.png', detalle:'Mayoreo: desde 10 pases a $20 c/u · entrega por regalo', entrega:'manual' },
-  { clave:'c1', nombre:'Caja de Fragmentos Evo', grupo:'caja', precio:2.95, max_cant:5, img:'img/caja-fragmentos.png', detalle:'LATAM · entrega automática', entrega:'auto' },
-  { clave:'c5', nombre:'5 Cajas de Fragmentos Evo', grupo:'caja', precio:14.50, max_cant:5, img:'img/caja-fragmentos.png', detalle:'LATAM · entrega automática', entrega:'auto' },
-  { clave:'c10', nombre:'10 Cajas de Fragmentos Evo', grupo:'caja', precio:29.30, max_cant:5, img:'img/caja-fragmentos.png', detalle:'LATAM · entrega automática', entrega:'auto' },
-  { clave:'c50', nombre:'50 Cajas de Fragmentos Evo', grupo:'caja', precio:145.70, max_cant:5, img:'img/caja-fragmentos.png', detalle:'LATAM · entrega automática', entrega:'auto' },
-  { clave:'f10', nombre:'10 Fragmentos de arma Evo', grupo:'fragmento', precio:6.40, max_cant:5, img:'img/fragmento-universal.png', detalle:'LATAM · entrega automática', entrega:'auto' },
-  { clave:'f50', nombre:'50 Fragmentos de arma Evo', grupo:'fragmento', precio:31.70, max_cant:5, img:'img/fragmento-universal.png', detalle:'LATAM · entrega automática', entrega:'auto' },
-  { clave:'f100', nombre:'100 Fragmentos de arma Evo', grupo:'fragmento', precio:62.80, max_cant:5, img:'img/fragmento-universal.png', detalle:'LATAM · entrega automática', entrega:'auto' },
-  { clave:'f500', nombre:'500 Fragmentos de arma Evo', grupo:'fragmento', precio:297.40, max_cant:5, img:'img/fragmento-universal.png', detalle:'LATAM · entrega automática', entrega:'auto' }
+  { clave:'c1', nombre:'Caja de Fragmentos Evo', grupo:'caja', precio:3.00, max_cant:5, img:'img/caja-fragmentos.png', detalle:'LATAM · entrega automática', entrega:'auto' },
+  { clave:'c5', nombre:'5 Cajas de Fragmentos Evo', grupo:'caja', precio:14.98, max_cant:5, img:'img/caja-fragmentos.png', detalle:'LATAM · entrega automática', entrega:'auto' },
+  { clave:'c10', nombre:'10 Cajas de Fragmentos Evo', grupo:'caja', precio:29.96, max_cant:5, img:'img/caja-fragmentos.png', detalle:'LATAM · entrega automática', entrega:'auto' },
+  { clave:'c50', nombre:'50 Cajas de Fragmentos Evo', grupo:'caja', precio:149.76, max_cant:5, img:'img/caja-fragmentos.png', detalle:'LATAM · entrega automática', entrega:'auto' },
+  { clave:'f10', nombre:'10 Fragmentos de arma Evo', grupo:'fragmento', precio:7.10, max_cant:5, img:'img/fragmento-universal.png', detalle:'LATAM · entrega automática', entrega:'auto' },
+  { clave:'f50', nombre:'50 Fragmentos de arma Evo', grupo:'fragmento', precio:35.50, max_cant:5, img:'img/fragmento-universal.png', detalle:'LATAM · entrega automática', entrega:'auto' },
+  { clave:'f100', nombre:'100 Fragmentos de arma Evo', grupo:'fragmento', precio:71.00, max_cant:5, img:'img/fragmento-universal.png', detalle:'LATAM · entrega automática', entrega:'auto' },
+  { clave:'f500', nombre:'500 Fragmentos de arma Evo', grupo:'fragmento', precio:355.00, max_cant:5, img:'img/fragmento-universal.png', detalle:'LATAM · entrega automática', entrega:'auto' }
 ];
 function ckCargarCatalogo(force){
   if(!force && CK.cat && !CK.offline && Date.now() - CK.catT < 60000) return Promise.resolve(CK.cat);
@@ -22039,4 +22039,23 @@ function ccaVaciar(){
   var tm = null; function prog(){ if(tm) return; tm = setTimeout(function(){ tm = null; try{ decorar(); }catch(e){} }, 120); }
   function ini(){ decorar(); try{ new MutationObserver(prog).observe(document.body, { childList:true, subtree:true }); }catch(e){} }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ini); else ini();
+})();
+/* ═══ INICIO PARA VISITANTES: se muestra solo sin sesión; conecta login/registro y cada tarjeta con su sección real ═══ */
+function ldAplicar(){
+  var h = document.getElementById('page-home'); if(!h) return;
+  var guest = (typeof authSession === 'undefined') || !authSession;
+  h.classList.toggle('ld-guest', !!guest);
+}
+function ldCuenta(tab){ if(typeof showAuthModal === 'function'){ showAuthModal(); if(typeof authTab === 'function') authTab(tab); } }
+function ldIr(id){ var e = document.getElementById(id); if(e && e.scrollIntoView) e.scrollIntoView({ behavior:'smooth', block:'start' }); }
+function ldGo(pagina, sub){
+  if(typeof goPage !== 'function') return;
+  goPage(pagina);
+  if(sub) setTimeout(function(){ if(typeof rg2Abrir === 'function') rg2Abrir(sub); }, 200);
+}
+(function(){
+  if(typeof updateAuthUI === 'function'){ var _u = updateAuthUI; updateAuthUI = function(){ var r = _u.apply(this, arguments); try{ ldAplicar(); }catch(e){} return r; }; window.updateAuthUI = updateAuthUI; }
+  if(typeof goPage === 'function'){ var _g = goPage; goPage = function(){ var r = _g.apply(this, arguments); try{ ldAplicar(); }catch(e){} return r; }; window.goPage = goPage; }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ldAplicar); else ldAplicar();
+  setTimeout(ldAplicar, 400); setTimeout(ldAplicar, 1500);
 })();

@@ -1158,7 +1158,8 @@ function exportCSV(){
         setTimeout(showModal, 100);
       }
     };
-    setTimeout(showModal, 150);
+    /* Visitantes: ya no se abre el login solo; ven el Inicio (landing). Se abre con sus botones o al intentar comprar. */
+    window.__csMostrarLogin = showModal;
   }
 })();
 
