@@ -405,6 +405,43 @@ module.exports = async function handler(req, res){
         if(limite('es|' + adm, 60, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Demasiadas consultas, espera un momento' }, 429);
         return enviar(res, await E.estado({ rest, db }, { forzar: b.forzar === true }));
       }
+      // ───────── Likes 2K con créditos: admin ─────────
+      if(a === 'admin_lc_buscar'){
+        if(limite('lcb|' + adm, 60, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Espera un momento' }, 429);
+        const q = String(b.q || '').replace(/[^\w.\-@ ñÑáéíóúÁÉÍÓÚ]/g, '').trim().slice(0, 40);
+        let us = [];
+        if(q){
+          const r = await rest('profiles?or=(username.ilike.*' + encodeURIComponent(q) + '*,nombre.ilike.*' + encodeURIComponent(q) + '*)&select=id,username,nombre,whatsapp&limit=30');
+          us = Array.isArray(r.json) ? r.json : [];
+        } else {
+          const r = await rest('likes_cred?creditos=gt.0&order=creditos.desc&limit=30');
+          if(r.status >= 400) return enviar(res, { ok: false, code: 'db', message: 'Falta ejecutar likes_creditos.sql en Supabase.' });
+          const ids = (Array.isArray(r.json) ? r.json : []).map(x => x.user_id);
+          if(ids.length){ const r2 = await rest('profiles?id=in.(' + ids.map(encodeURIComponent).join(',') + ')&select=id,username,nombre,whatsapp'); us = Array.isArray(r2.json) ? r2.json : []; }
+        }
+        const cred = {};
+        if(us.length){ const rc = await rest('likes_cred?user_id=in.(' + us.map(x => encodeURIComponent(x.id)).join(',') + ')'); if(rc.status >= 400) return enviar(res, { ok: false, code: 'db', message: 'Falta ejecutar likes_creditos.sql en Supabase.' }); (Array.isArray(rc.json) ? rc.json : []).forEach(x => { cred[x.user_id] = x.creditos; }); }
+        return enviar(res, { ok: true, usuarios: us.map(x => ({ id: x.id, username: x.username, nombre: x.nombre || '', whatsapp: x.whatsapp || '', creditos: cred[x.id] || 0 })).sort((m, n) => n.creditos - m.creditos) });
+      }
+      if(a === 'admin_lc_ajustar'){
+        if(limite('lca|' + adm, 60, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Espera un momento' }, 429);
+        const delta = Math.trunc(Number(b.delta));
+        if(!Number.isInteger(delta) || delta === 0 || Math.abs(delta) > 1000000) return enviar(res, { ok: false, code: 'solicitud', message: 'Escribe una cantidad de créditos distinta de 0 (puedes usar negativo para quitar).' });
+        const r = await rpc('lc_admin_ajustar', { p_user: String(b.user_id || ''), p_delta: delta, p_nota: String(b.nota || '').replace(/[<>]/g, '').slice(0, 200), p_actor: adm });
+        if(r.status >= 400 || !r.json || !r.json.ok){
+          const m = msgErr(r);
+          if(/usuario_no_existe/.test(m)) return enviar(res, { ok: false, code: 'usuario', message: 'Ese usuario no existe.' });
+          if(/creditos_insuficientes/.test(m)) return enviar(res, { ok: false, code: 'creditos', message: 'No se puede: el cliente solo tiene ' + ((m.match(/creditos_insuficientes:(\d+)/) || [])[1] || 0) + ' créditos.' });
+          if(/lc_admin_ajustar|does not exist|relation|schema cache/.test(m)) return enviar(res, { ok: false, code: 'db', message: 'Falta ejecutar likes_creditos.sql en Supabase.' });
+          return enviar(res, { ok: false, code: 'db', message: 'No se pudo guardar: ' + (m || 'error') });
+        }
+        return enviar(res, { ok: true, username: r.json.username, antes: r.json.antes, creditos: r.json.creditos });
+      }
+      if(a === 'admin_lc_historial'){
+        const uidh = encodeURIComponent(String(b.user_id || ''));
+        const [m, e] = await Promise.all([rest('likes_cred_mov?user_id=eq.' + uidh + '&order=id.desc&limit=30'), rest('likes_cred_envio?user_id=eq.' + uidh + '&order=id.desc&limit=15')]);
+        return enviar(res, { ok: true, movimientos: Array.isArray(m.json) ? m.json : [], envios: Array.isArray(e.json) ? e.json : [] });
+      }
       if(a === 'admin_catalogo'){
         const r = await rest('catalogo_checkout?order=orden.asc&select=clave,nombre,grupo,precio,mayoreo_min,mayoreo_precio,max_cant,detalle,entrega,srv,activo,orden');
         if(r.status >= 400 || !Array.isArray(r.json)) return enviar(res, { ok: false, code: 'db', message: 'No se pudo leer el catálogo (¿corriste checkout_saldo.sql?)' });
@@ -674,6 +711,81 @@ module.exports = async function handler(req, res){
       else if(lf && lf.estado === 'rechazada') telegram('↩️ <b>LIKES LK' + lid + ' · rechazado y reembolsado</b>\n👤 ' + esc(p.username) + ' → ID ' + esc(idF) + '\n❗ ' + esc(lf.detalle || ''));
       const se = sal != null ? sal : (await (async () => { const rp = await rest('profiles?id=eq.' + encodeURIComponent(uid) + '&select=saldo'); return Array.isArray(rp.json) && rp.json[0] ? Number(rp.json[0].saldo) : null; })());
       return enviar(res, { ok: true, resultado: pub, saldo: se });
+    }
+
+    // ═════════ LIKES 2K con CRÉDITOS (aparte del saldo; los agrega el admin tras el pago por WhatsApp) ═════════
+    if(a === 'lc_mi' || a === 'lc_check' || a === 'lc_enviar' || a === 'lc_estado'){
+      const PROV = ['lunexis', 'likesystem'], NOMP = { lunexis: 'Servidor 1', likesystem: 'Servidor 2' };
+      const lcPub = e => e ? { id: e.id, codigo: 'LC' + e.id, ff_id: e.ff_id, cantidad: e.cantidad, enviados: e.enviados, devueltos: e.devueltos, estado: e.estado, prov: e.prov, servidor: NOMP[e.prov] || '', nick: e.nick || '', antes: e.antes, despues: e.despues, fecha: e.cerrada || e.creada, detalle: e.estado === 'verificar' ? 'En verificación con el equipo. Si no se envió, se te devuelven los créditos.' : (e.estado === 'rechazada' ? (e.detalle || '') : '') } : null;
+      const lcAl = (r, prov, cuando) => { if(r && (r.alerta || r.sinCreditos)) AL.avisarFalla('lc_' + prov, '🔴 LIKES 2K (' + NOMP[prov] + '): ' + (r.alerta || 'proveedor sin créditos'), 'El proveedor ' + NOMP[prov] + ' ' + (r.alerta || 'no tiene créditos para enviar') + (cuando ? ' (' + cuando + ')' : '') + '. Revisa su llave en Vercel o recarga con el proveedor.', 30 * 60000).catch(() => {}); };
+      const lcLeer = async id => { const r = await rest('likes_cred_envio?id=eq.' + Number(id) + '&user_id=eq.' + encodeURIComponent(uid) + '&limit=1'); return Array.isArray(r.json) && r.json[0] ? r.json[0] : null; };
+      const lcCerrar = (id, enviados, estado, o) => rpc('lc_cerrar', { p_id: id, p_enviados: enviados, p_estado: estado || null, p_nick: (o && o.nick) || null, p_antes: (o && o.antes != null) ? o.antes : null, p_despues: (o && o.despues != null) ? o.despues : null, p_log: (o && o.log_id != null) ? o.log_id : null, p_recibo: (o && o.recibo) || null, p_detalle: (o && o.detalle) || null });
+      const lcCreditos = async () => { const r = await rest('likes_cred?user_id=eq.' + encodeURIComponent(uid) + '&limit=1'); return { sin_tabla: r.status >= 400, n: Array.isArray(r.json) && r.json[0] ? Number(r.json[0].creditos) : 0 }; };
+      const lcResolver = async (e, forzar) => {
+        const P = LK.por(e.prov), bl = await P.buscarEnLog(e.ff_id, Date.parse(e.creada));
+        if(bl.error) return lcCerrar(e.id, 0, 'verificar', { detalle: 'No se pudo confirmar con el proveedor' });
+        if(bl.encontrado) return lcCerrar(e.id, bl.enviados, null, { nick: bl.nick, log_id: bl.log_id });
+        if(forzar) return lcCerrar(e.id, 0, 'rechazada', { detalle: 'El proveedor no registró el envío' });
+        return lcCerrar(e.id, 0, 'verificar', { detalle: 'El proveedor no confirmó el envío' });
+      };
+      if(a === 'lc_mi'){
+        const [c, r] = await Promise.all([lcCreditos(), rest('likes_cred_envio?user_id=eq.' + encodeURIComponent(uid) + '&order=id.desc&limit=10')]);
+        return enviar(res, { ok: true, creditos: c.n, sin_tabla: c.sin_tabla || r.status >= 400, items: (Array.isArray(r.json) ? r.json : []).map(lcPub), servidores: PROV.map(k => ({ k, nombre: NOMP[k], activo: LK.por(k).configurado() })) });
+      }
+      if(a === 'lc_estado'){
+        if(limite('lce|' + uid, 30, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Espera un momento.' }, 429);
+        let e = await lcLeer(b.id); if(!e) return enviar(res, { ok: false, code: 'no_existe', message: 'No encontramos ese envío.' }, 404);
+        if(e.estado === 'verificar' || (e.estado === 'procesando' && Date.now() - Date.parse(e.creada) > 180000)){ await lcResolver(e, e.estado === 'procesando' && Date.now() - Date.parse(e.creada) > 180000); e = await lcLeer(b.id); }
+        const c = await lcCreditos();
+        return enviar(res, { ok: true, resultado: lcPub(e), creditos: c.n });
+      }
+      const prov = PROV.indexOf(String(b.prov)) >= 0 ? String(b.prov) : 'lunexis', P = LK.por(prov);
+      const idF = String(b.ff_id || '').replace(/\D/g, '');
+      if(!P.configurado()) return enviar(res, { ok: false, code: 'sin_configurar', message: NOMP[prov] + ' aún no está activado. Elige el otro servidor.' });
+      if(a === 'lc_check'){
+        if(limite('lcc|' + uid, 20, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Demasiadas consultas, espera un momento.' }, 429);
+        const [j, cr, c] = await Promise.all([P.jugador(idF), P.creditos(), lcCreditos()]);
+        lcAl(j, prov, 'consulta'); lcAl(cr, prov, 'consulta');
+        if(!j.ok) return enviar(res, { ok: false, code: j.code, message: j.message }, j.code === 'NOT_FOUND' ? 404 : j.code === 'id' ? 400 : 503);
+        const tope = cr.ok && cr.restantes != null ? Math.max(0, Math.min(2000, cr.restantes)) : 2000;
+        return enviar(res, { ok: true, ff_id: idF, nick: j.nick, likes: j.likes, region: j.region, prov, servidor: NOMP[prov], max_prov: tope, disponible: cr.ok ? tope > 0 : false, motivo: cr.ok ? (tope > 0 ? null : 'Este servidor está sin cupo por ahora. Prueba con el otro.') : cr.message, creditos: c.n });
+      }
+      // ───────── lc_enviar ─────────
+      if(p.banned) return enviar(res, { ok: false, code: 'suspendida', message: 'Tu cuenta está suspendida. Contacta a soporte.' });
+      const cant = Number(b.cantidad), idem = String(b.idem || '');
+      if(!P.idOk(idF)) return enviar(res, { ok: false, code: 'id', message: 'Revisa tu ID de Free Fire (solo números, de 5 a 15 dígitos).' });
+      if(!P.intOk(cant)) return enviar(res, { ok: false, code: 'cantidad', message: 'La cantidad debe ser de 1 a 2,000 likes.' });
+      if(!/^[A-Za-z0-9_-]{8,100}$/.test(idem)) return enviar(res, { ok: false, code: 'solicitud', message: 'Solicitud inválida. Recarga la página.' });
+      const prev = await rest('likes_cred_envio?idem=eq.' + encodeURIComponent(idem) + '&user_id=eq.' + encodeURIComponent(uid) + '&limit=1');
+      if(Array.isArray(prev.json) && prev.json[0]){ const c0 = await lcCreditos(); return enviar(res, { ok: true, repetida: true, resultado: lcPub(prev.json[0]), creditos: c0.n }); }
+      if(limite('lc|' + uid, 20, 60000)) return enviar(res, { ok: false, code: 'limite', message: 'Espera un momento antes de otro envío.' }, 429);
+      const c1 = await lcCreditos();
+      if(c1.sin_tabla) return enviar(res, { ok: false, code: 'db', message: 'Falta ejecutar likes_creditos.sql en Supabase.' });
+      if(c1.n < cant) return enviar(res, { ok: false, code: 'creditos', message: 'Te faltan créditos: tienes ' + c1.n + ' y pediste ' + cant + '.', creditos: c1.n });
+      const [j, cr] = await Promise.all([P.jugador(idF), P.creditos()]);
+      lcAl(j, prov, 'envío'); lcAl(cr, prov, 'envío');
+      if(!j.ok) return enviar(res, { ok: false, code: j.code, message: j.message }, j.code === 'NOT_FOUND' ? 404 : 503);
+      if(!cr.ok) return enviar(res, { ok: false, code: cr.code, message: cr.message }, 503);
+      if(cr.restantes != null && cr.restantes < cant){ if(cr.restantes <= 0) lcAl({ sinCreditos: true }, prov, 'envío'); return enviar(res, { ok: false, code: 'sin_creditos', message: cr.restantes <= 0 ? NOMP[prov] + ' está sin cupo por ahora. Prueba con el otro servidor: no se descontó nada.' : NOMP[prov] + ' solo puede enviar hasta ' + cr.restantes + ' ahora. Baja la cantidad o usa el otro servidor. No se descontó nada.' }); }
+      const pg = await rpc('lc_pagar', { p_user: uid, p_idem: idem, p_ff: idF, p_cant: cant, p_prov: prov });
+      if(pg.status >= 400 || !pg.json || !pg.json.ok){
+        const m = msgErr(pg);
+        if(/creditos_insuficientes/.test(m)) return enviar(res, { ok: false, code: 'creditos', message: 'Te faltan créditos.', creditos: Number((m.match(/creditos_insuficientes:(\d+)/) || [])[1] || 0) });
+        if(/cuenta_suspendida/.test(m)) return enviar(res, { ok: false, code: 'suspendida', message: 'Tu cuenta está suspendida. Contacta a soporte.' });
+        if(/lc_pagar|does not exist|relation|schema cache|permission denied/.test(m)) return enviar(res, { ok: false, code: 'db', message: 'Falta ejecutar likes_creditos.sql en Supabase.' });
+        return enviar(res, { ok: false, code: 'db', message: 'No se pudo procesar. No se descontaron créditos. Intenta de nuevo.' });
+      }
+      const eid = pg.json.id, ini = Date.now();
+      if(pg.json.repetida){ const e0 = await lcLeer(eid); return enviar(res, { ok: true, repetida: true, resultado: lcPub(e0), creditos: Number(pg.json.creditos) }); }
+      const rr = await P.enviar(idF, cant); let cierre;
+      if(rr.ok) cierre = await lcCerrar(eid, rr.enviados, null, rr);
+      else if(rr.definitivo){ lcAl(rr, prov, 'envío'); cierre = await lcCerrar(eid, 0, 'rechazada', { detalle: rr.detalle }); }
+      else { await new Promise(r2 => setTimeout(r2, 3000)); const e1 = await lcLeer(eid); cierre = await lcResolver(Object.assign({}, e1, { creada: new Date(ini).toISOString() }), false); }
+      const ef = await lcLeer(eid), cn = cierre && cierre.json && cierre.json.creditos != null ? Number(cierre.json.creditos) : (await lcCreditos()).n;
+      if(ef && ef.estado === 'verificar') telegram('🚨 <b>LIKES 2K LC' + eid + ' · VERIFICAR a mano</b>\n👤 ' + esc(p.username) + ' → ID ' + esc(idF) + ' · ' + NOMP[prov] + ' · pidió ' + cant + '\n❗ ' + esc((rr && rr.detalle) || 'sin confirmar') + '\nNo se reembolsó: revisa el historial del proveedor. El cliente puede reabrirlo y se reintenta confirmar solo.');
+      else if(ef && (ef.estado === 'completada' || ef.estado === 'parcial')) telegram('🔥 <b>LIKES 2K · LC' + eid + '</b> (' + NOMP[prov] + ')\n👤 ' + esc(p.username) + ' → ID ' + esc(idF) + ' (' + esc(ef.nick || '') + ')\n📤 Enviados: ' + ef.enviados + ' de ' + ef.cantidad + (ef.estado === 'parcial' ? ' (devueltos ' + ef.devueltos + ' créditos)' : '') + '\n🎟️ Créditos restantes del cliente: ' + cn);
+      else if(ef && ef.estado === 'rechazada') telegram('↩️ <b>LIKES 2K LC' + eid + ' · rechazado y devuelto</b> (' + NOMP[prov] + ')\n👤 ' + esc(p.username) + ' → ID ' + esc(idF) + '\n❗ ' + esc(ef.detalle || ''));
+      return enviar(res, { ok: true, resultado: lcPub(ef), creditos: cn });
     }
 
     if(a === 'catalogo'){

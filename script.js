@@ -3477,7 +3477,7 @@ function admToggleNav(force){
 }
 
 function admFullTab(tab){
-  var tabs=['stats','users','pedidos','saldos','top','puntos','codigos','chat','resenas','soporte','inactivos','seguridad','recargas','depositos','precios','productos','sistema','cuentas','ganancias','apirev','osaldo','vip','prime','catalogo','premios','chatadm','config'];
+  var tabs=['stats','users','pedidos','saldos','top','puntos','codigos','chat','resenas','soporte','inactivos','seguridad','recargas','depositos','precios','productos','likescred','sistema','cuentas','ganancias','apirev','osaldo','vip','prime','catalogo','premios','chatadm','config'];
   tabs.forEach(function(t){
     var btn=document.getElementById('admn-'+t);
     var sec=document.getElementById('adms-'+t);
@@ -3508,6 +3508,7 @@ function admFullTab(tab){
   if(tab==='sistema') sistemaCargar(false);
   if(tab==='precios') preciosAdmCargar();
   if(tab==='productos') ctaCargar();
+  if(tab==='likescred') lcaCargar();
   if(tab==='vip') vipAdmCargar();
   if(tab==='prime') primeAdmCargar();
   // Cerrar el drawer al elegir una opción en móvil
@@ -22059,3 +22060,178 @@ function ldGo(pagina, sub){
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ldAplicar); else ldAplicar();
   setTimeout(ldAplicar, 400); setTimeout(ldAplicar, 1500);
 })();
+/* Inicio: sin hamburguesa ni buscador; helpers del nuevo Inicio */
+function hnIr(id){ var e = document.getElementById(id); if(e && e.scrollIntoView) e.scrollIntoView({ behavior:'smooth', block:'start' }); }
+function hnGo(pagina, sub){ ldGo(pagina, sub); }
+function hnBody(){ var h = document.getElementById('page-home'); document.body.classList.toggle('cs-inicio', !!(h && h.classList.contains('active'))); }
+(function(){
+  if(typeof goPage === 'function'){ var _g2 = goPage; goPage = function(){ var r = _g2.apply(this, arguments); try{ hnBody(); }catch(e){} return r; }; window.goPage = goPage; }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hnBody); else hnBody();
+  setTimeout(hnBody, 400); setTimeout(hnBody, 1500);
+})();
+/* ═══ Likes 2K con CRÉDITOS (aparte del saldo): el cliente pide créditos por WhatsApp, el admin se los agrega, y envía con Servidor 1 (Lunexis) o 2 (LikeSystem) ═══ */
+var LCR = { id:'', nick:'', likes:null, prov:'lunexis', srv:[{k:'lunexis',nombre:'Servidor 1',activo:true},{k:'likesystem',nombre:'Servidor 2',activo:true}], cred:null, cant:2000, max:2000, disp:true, motivo:'', busy:false, idem:{}, res:null };
+function lcrE(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function lcrN(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+function lcrLogin(){ if(typeof authSession === 'undefined' || !authSession){ if(typeof showToast === 'function') showToast('Inicia sesión para continuar'); if(typeof showAuthModal === 'function') setTimeout(showAuthModal, 500); return false; } return true; }
+function lcrWA(){
+  if(!lcrLogin()) return;
+  var n = (typeof WA !== 'undefined') ? WA : '';
+  window.open('https://wa.me/' + String(n).replace(/\D/g, '') + '?text=' + encodeURIComponent('Hola! Quiero comprar créditos de Likes 2K (2,000 créditos = $3 USD).\nMi usuario en CiberStore es: ' + authSession.username), '_blank', 'noopener');
+}
+function lcrPintarCred(){ var e = document.getElementById('lcr-bal'); if(e) e.textContent = LCR.cred == null ? '—' : lcrN(LCR.cred); }
+function lcrPintarSrv(){
+  var e = document.getElementById('lcr-srv'); if(!e) return;
+  e.innerHTML = LCR.srv.map(function(s){ return '<button type="button" class="lcr-sb' + (LCR.prov === s.k ? ' on' : '') + '"' + (s.activo ? '' : ' disabled') + ' onclick="lcrProv(\'' + s.k + '\')"><b>' + lcrE(s.nombre) + '</b><small>' + (s.activo ? (s.k === 'lunexis' ? 'Lunexis' : 'LikeSystem') : 'Próximamente') + '</small></button>'; }).join('');
+}
+function lcrProv(k){ if(LCR.busy) return; LCR.prov = k; lcrPintarSrv(); if(LCR.id) lcrConsultar(); }
+function lcrCargar(){
+  if(typeof authSession === 'undefined' || !authSession){ var h0 = document.getElementById('lcr-his'); if(h0) h0.textContent = 'Inicia sesión para ver tus créditos.'; LCR.cred = null; lcrPintarCred(); lcrPintarSrv(); return; }
+  ckApi('lc_mi', {}, true).then(function(j){
+    var h = document.getElementById('lcr-his');
+    if(!j || !j.ok){ if(h) h.textContent = (j && j.message) || 'No se pudo cargar.'; return; }
+    LCR.cred = Number(j.creditos) || 0; if(j.servidores && j.servidores.length){ LCR.srv = j.servidores.map(function(s){ return { k:s.k, nombre:s.nombre, activo:!!s.activo }; }); var ac = LCR.srv.filter(function(s){ return s.k === LCR.prov && s.activo; })[0]; if(!ac){ var o = LCR.srv.filter(function(s){ return s.activo; })[0]; if(o) LCR.prov = o.k; } }
+    lcrPintarCred(); lcrPintarSrv();
+    if(!h) return;
+    if(j.sin_tabla){ h.textContent = 'Este servicio aún no está activado.'; return; }
+    h.innerHTML = (j.items || []).length ? j.items.map(function(r){
+      var ok = r.estado === 'completada' || r.estado === 'parcial', cl = ok ? 'ok' : r.estado === 'rechazada' ? 'ko' : 'wa';
+      var tx = r.estado === 'completada' ? '✅ ' + lcrN(r.enviados) + ' enviados' : r.estado === 'parcial' ? '⚠️ ' + lcrN(r.enviados) + '/' + lcrN(r.cantidad) : r.estado === 'verificar' ? '⏳ Verificando' : r.estado === 'rechazada' ? '↩️ Devuelto' : '⏳ Procesando';
+      return '<div class="lcr-it"><div><b>ID ' + lcrE(r.ff_id) + (r.nick ? ' · ' + lcrE(r.nick) : '') + '</b><small>' + lcrE(r.servidor || '') + ' · ' + new Date(r.fecha).toLocaleString('es-MX') + '</small></div><span class="lcr-st ' + cl + '"' + (r.estado === 'verificar' ? ' onclick="lcrReverificar(' + r.id + ')" style="cursor:pointer"' : '') + '>' + tx + '</span></div>';
+    }).join('') : 'Aún no has enviado likes con créditos.';
+  });
+}
+function lcrConsultar(){
+  if(!lcrLogin()) return;
+  var id = ((document.getElementById('lcr-id') || {}).value || '').replace(/\D/g, '');
+  var res = document.getElementById('lcr-res'), btn = document.getElementById('lcr-chk');
+  if(!/^\d{5,15}$/.test(id)){ res.innerHTML = '<div class="d50-msg ko">Escribe tu ID de Free Fire (solo números, de 5 a 15 dígitos).</div>'; return; }
+  if(LCR.busy) return; LCR.busy = true; btn.disabled = true; btn.innerHTML = '<span class="rc-spin"></span> Consultando…'; res.innerHTML = '';
+  ckApi('lc_check', { ff_id:id, prov:LCR.prov }, true).then(function(j){
+    LCR.busy = false; btn.disabled = false; btn.textContent = 'Consultar ID';
+    if(!j || !j.ok){ res.innerHTML = '<div class="d50-msg ko">' + lcrE((j && j.message) || 'No se pudo consultar. Intenta de nuevo.') + '</div>'; return; }
+    LCR.id = j.ff_id; LCR.nick = j.nick || ''; LCR.likes = j.likes; LCR.cred = Number(j.creditos) || 0; lcrPintarCred();
+    LCR.disp = !!j.disponible; LCR.motivo = j.motivo || ''; LCR.max = Math.max(0, Math.min(2000, Number(j.max_prov) || 0, LCR.cred));
+    if(LCR.cant > LCR.max) LCR.cant = LCR.max; if(!LCR.cant) LCR.cant = LCR.max;
+    lcrPintar();
+  }).catch(function(){ LCR.busy = false; btn.disabled = false; btn.textContent = 'Consultar ID'; res.innerHTML = '<div class="d50-msg ko">Sin conexión. Intenta de nuevo.</div>'; });
+}
+function lcrPintar(){
+  var res = document.getElementById('lcr-res'); if(!res) return;
+  var head = '<div class="d50-who lka-box"><span>👤</span><div><b>' + lcrE(LCR.nick || 'Jugador encontrado') + '</b><small>ID ' + lcrE(LCR.id) + (LCR.likes != null ? ' · ' + lcrN(LCR.likes) + ' likes actuales' : '') + '</small></div></div>';
+  if(!LCR.disp) { res.innerHTML = head + '<div class="d50-msg ko" style="margin-top:.7rem">' + lcrE(LCR.motivo || 'No disponible por ahora.') + ' No se descuentan créditos.</div>'; return; }
+  if(LCR.cred <= 0){ res.innerHTML = head + '<div class="d50-msg ko" style="margin-top:.7rem">No tienes créditos. Pídelos por WhatsApp con el botón de arriba.</div>'; return; }
+  var chips = [500, 1000, 2000].filter(function(v){ return v <= LCR.max; });
+  res.innerHTML = head + '<div class="lka-chips">' + chips.map(function(v){ return '<button type="button" class="lka-chip' + (LCR.cant === v ? ' on' : '') + '" onclick="lcrSet(' + v + ')">' + lcrN(v) + '</button>'; }).join('') + '</div>'
+    + '<input class="lka-in" id="lcr-c" type="text" inputmode="numeric" maxlength="4" value="' + LCR.cant + '" oninput="lcrSet(this.value,1)" aria-label="Cantidad de likes"/>'
+    + '<div style="font-size:.68rem;color:#6b7280;margin-top:.3rem">De 1 a ' + lcrN(LCR.max) + ' likes (tienes ' + lcrN(LCR.cred) + ' créditos)</div>'
+    + '<div class="lka-pr"><span>Se usarán</span><b><span id="lcr-n">' + lcrN(LCR.cant) + '</span> créditos</b></div>'
+    + '<button type="button" class="d50-go" onclick="lcrConfirmar()">Enviar likes</button>';
+}
+function lcrSet(v, typed){
+  var n = parseInt(String(v).replace(/\D/g, ''), 10) || 0; if(n > LCR.max) n = LCR.max; LCR.cant = n;
+  var i = document.getElementById('lcr-c'); if(i && !typed) i.value = n; else if(i && typed && n && String(n) !== i.value) i.value = n;
+  var c = document.getElementById('lcr-n'); if(c) c.textContent = lcrN(n);
+  var ch = document.querySelectorAll('#lcr-res .lka-chip'); for(var k = 0; k < ch.length; k++) ch[k].classList.toggle('on', ch[k].textContent.replace(/,/g, '') === String(n));
+}
+function lcrSheet(h){ var o = document.getElementById('lcr-ov'); if(!o) return; if(o.parentNode !== document.body) document.body.appendChild(o); o.innerHTML = '<div class="d50-sheet">' + h + '</div>'; o.classList.add('on'); }
+function lcrCerrar(){ if(LCR.busy) return; var o = document.getElementById('lcr-ov'); if(o){ o.classList.remove('on'); o.innerHTML = ''; } }
+function lcrNombreSrv(){ var s = LCR.srv.filter(function(x){ return x.k === LCR.prov; })[0]; return s ? s.nombre : 'Servidor'; }
+function lcrHoraMx(){ try{ return parseInt(new Intl.DateTimeFormat('en-US', { timeZone:'America/Mexico_City', hour:'numeric', hour12:false }).format(new Date()), 10) % 24; }catch(e){ return -1; } }
+function lcrConfirmar(){
+  var n = LCR.cant; if(!(n >= 1 && n <= 2000 && n <= LCR.cred)){ if(typeof showToast === 'function') showToast('Cantidad de 1 a ' + Math.min(2000, LCR.cred)); return; }
+  var h = lcrHoraMx(), lejos = !(h === 3 || h === 4 || h === 5);
+  lcrSheet('<h3>Confirmar envío<button type="button" onclick="lcrCerrar()" aria-label="Cerrar">✕</button></h3>'
+    + '<div class="d50-sum"><div class="d50-big">' + lcrN(n) + ' likes</div><div class="d50-bs" style="color:#72cfff">' + lcrE(lcrNombreSrv()) + '</div></div>'
+    + '<dl class="d50-dl"><dt>ID de Free Fire</dt><dd>' + lcrE(LCR.id) + '</dd>' + (LCR.nick ? '<dt>Jugador</dt><dd>' + lcrE(LCR.nick) + '</dd>' : '') + '<dt>Créditos a usar</dt><dd>' + lcrN(n) + '</dd><dt>Te quedarán</dt><dd>' + lcrN(LCR.cred - n) + '</dd></dl>'
+    + (lejos ? '<div class="d50-note">🕓 Te recomendamos enviarlos <b>a las 4:00 AM (hora de México)</b>: a esa hora entran más estables. Puedes enviar ahora si prefieres.</div>' : '')
+    + '<div class="d50-note">Revisa bien tu ID. Si se envían menos likes de los pedidos, <b>se te devuelven los créditos</b> que faltaron.</div><div id="lcr-err"></div>'
+    + '<button type="button" class="d50-go" id="lcr-ok" onclick="lcrPagar()">Enviar ahora · ' + lcrN(n) + ' créditos</button>');
+}
+function lcrPagar(){
+  if(LCR.busy) return;
+  var k = LCR.id + '|' + LCR.cant + '|' + LCR.prov; if(!LCR.idem[k]) LCR.idem[k] = 'lc-' + (typeof ckUUID === 'function' ? ckUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2, 10));
+  var b = document.getElementById('lcr-ok'), er = document.getElementById('lcr-err'); LCR.busy = true;
+  if(b){ b.disabled = true; b.innerHTML = '<span class="rc-spin"></span> Enviando likes… no cierres'; }
+  ckApi('lc_enviar', { ff_id:LCR.id, cantidad:LCR.cant, prov:LCR.prov, idem:LCR.idem[k] }, true).then(function(j){
+    LCR.busy = false;
+    if(!j || !j.ok){
+      if(b){ b.disabled = false; b.textContent = 'Enviar ahora · ' + lcrN(LCR.cant) + ' créditos'; }
+      if(er) er.innerHTML = '<div class="d50-msg ko">' + lcrE((j && j.message) || 'No se pudo completar. No se descontaron créditos.') + '</div>';
+      if(j && j.creditos != null){ LCR.cred = Number(j.creditos); lcrPintarCred(); }
+      return;
+    }
+    delete LCR.idem[k]; if(j.creditos != null){ LCR.cred = Number(j.creditos); lcrPintarCred(); }
+    LCR.res = j.resultado; lcrResultado(); lcrCargar();
+  }).catch(function(){ LCR.busy = false; if(b){ b.disabled = false; b.textContent = 'Reintentar (no se descuenta doble)'; } if(er) er.innerHTML = '<div class="d50-msg ko">Se cortó la conexión. Pulsa reintentar: si ya se envió, no se descuenta otra vez.</div>'; });
+}
+function lcrResultado(){
+  var r = LCR.res; if(!r) return; var est = r.estado;
+  var tit = est === 'completada' ? '✅ Likes enviados' : est === 'parcial' ? '⚠️ Envío parcial' : est === 'verificar' ? '⏳ En verificación' : '↩️ No se envió';
+  var cu = '<div class="d50-sum"><div class="d50-big">' + lcrN(r.enviados) + ' / ' + lcrN(r.cantidad) + '</div><div class="d50-bs" style="color:#72cfff">likes enviados · ' + lcrE(r.servidor || '') + '</div></div>';
+  var info = est === 'verificar' ? '<div class="d50-note">' + lcrE(r.detalle || 'Estamos confirmando el envío.') + '</div><button type="button" class="d50-go" onclick="lcrReverificar(' + r.id + ')">Actualizar estado</button>'
+    : est === 'rechazada' ? '<div class="d50-note">' + lcrE(r.detalle || 'El proveedor no pudo enviarlos.') + ' Se te devolvieron todos tus créditos.</div>'
+    : '<dl class="d50-dl"><dt>Jugador</dt><dd>' + lcrE(r.nick || '—') + '</dd><dt>ID</dt><dd>' + lcrE(r.ff_id) + '</dd>' + (r.antes != null && r.despues != null ? '<dt>Likes antes → después</dt><dd>' + lcrN(r.antes) + ' → ' + lcrN(r.despues) + '</dd>' : '') + '<dt>Pedido</dt><dd>' + lcrE(r.codigo) + '</dd></dl>' + (est === 'parcial' ? '<div class="d50-note">Te devolvimos <b>' + lcrN(r.devueltos) + '</b> créditos por los que faltaron.</div>' : '');
+  lcrSheet('<h3>' + tit + '<button type="button" onclick="lcrCerrar()" aria-label="Cerrar">✕</button></h3>' + (est === 'verificar' ? '' : cu) + info);
+}
+function lcrReverificar(id){
+  ckApi('lc_estado', { id:id }, true).then(function(j){ if(j && j.ok && j.resultado){ LCR.res = j.resultado; if(j.creditos != null){ LCR.cred = Number(j.creditos); lcrPintarCred(); } lcrResultado(); lcrCargar(); } });
+}
+if(typeof goPage === 'function'){ (function(){ var o = goPage; window.goPage = goPage = function(id){ var r = o.apply(this, arguments); if(id === 'likescred') setTimeout(lcrCargar, 80); return r; }; })(); }
+
+/* ═══ PANEL ADMIN · CRÉDITOS DE LIKES (Likes 2K): busca un cliente, suma o resta créditos tras confirmar su pago por WhatsApp ═══ */
+var LCA = { sel:null, busy:false };
+function lcaApi(action, extra){
+  var tok = (typeof csAdminSesionToken === 'function') ? csAdminSesionToken() : '';
+  if(!tok) return Promise.resolve({ ok:false, message:'Entra de nuevo al panel.' });
+  var body = { action:action, token:tok }; for(var k in (extra || {})) body[k] = extra[k];
+  return fetch('/api/comprar', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) })
+    .then(function(r){ return r.json().catch(function(){ return { ok:false, message:'Respuesta inválida (' + r.status + ')' }; }); }).catch(function(){ return { ok:false, message:'Sin conexión' }; });
+}
+function lcaE(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function lcaN(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+function lcaCargar(){
+  var s = document.getElementById('adms-likescred'); if(!s) return;
+  if(!document.getElementById('lca-lista')) s.innerHTML = '<div class="adm-card-title">Créditos de likes (Likes 2K)</div><div class="cta-nota">Cuando un cliente te pague por WhatsApp, búscalo por su usuario y súmale los créditos (2,000 = $3 USD). 1 crédito = 1 like. Para quitar créditos usa un número negativo.</div>'
+    + '<div class="lca-bus"><input id="lca-q" type="text" maxlength="40" placeholder="Usuario o nombre del cliente" onkeydown="if(event.key===\'Enter\')lcaBuscar()"><button type="button" class="cta-go" onclick="lcaBuscar()">Buscar</button></div>'
+    + '<div id="lca-lista" class="cta-v">Cargando…</div><div id="lca-det"></div>';
+  lcaBuscar(true);
+}
+function lcaBuscar(inicial){
+  var q = (document.getElementById('lca-q') || {}).value || '', l = document.getElementById('lca-lista'); if(!l) return;
+  l.innerHTML = 'Buscando…';
+  lcaApi('admin_lc_buscar', { q:q.trim() }).then(function(r){
+    if(!r || !r.ok){ l.innerHTML = '<div class="cta-err">' + lcaE((r && r.message) || 'No se pudo buscar') + '</div>'; return; }
+    if(!r.usuarios.length){ l.innerHTML = '<div class="cta-v">' + (q.trim() ? 'No se encontró ningún cliente.' : 'Nadie tiene créditos todavía. Busca un cliente para agregarle.') + '</div>'; return; }
+    l.className = ''; l.innerHTML = (q.trim() ? '' : '<div class="cta-gt">Clientes con créditos</div>') + r.usuarios.map(function(u){
+      return '<div class="cta-c lca-u"><div class="cta-top"><div><b>' + lcaE(u.username) + '</b><small>' + lcaE(u.nombre || '') + (u.whatsapp ? ' · ' + lcaE(u.whatsapp) : '') + '</small></div><div class="lca-cr"><b>' + lcaN(u.creditos) + '</b><small>créditos</small></div></div>'
+        + '<div class="cta-ft"><button type="button" class="cta-go" data-id="' + lcaE(u.id) + '" data-u="' + lcaE(u.username) + '" data-c="' + u.creditos + '" onclick="lcaAbrir(this)">Agregar / quitar</button></div></div>';
+    }).join('');
+  });
+}
+function lcaAbrir(btn){
+  LCA.sel = { id:btn.getAttribute('data-id'), u:btn.getAttribute('data-u'), c:Number(btn.getAttribute('data-c')) };
+  var d = document.getElementById('lca-det'); if(!d) return;
+  d.innerHTML = '<div class="cta-c lca-f" id="lca-f"><div class="cta-top"><div><b>' + lcaE(LCA.sel.u) + '</b><small>Tiene ' + lcaN(LCA.sel.c) + ' créditos</small></div><button type="button" class="lca-x" onclick="document.getElementById(\'lca-det\').innerHTML=\'\'">✕</button></div>'
+    + '<div class="lca-chips"><button type="button" onclick="lcaSet(2000)">+2,000</button><button type="button" onclick="lcaSet(4000)">+4,000</button><button type="button" onclick="lcaSet(10000)">+10,000</button></div>'
+    + '<div class="cta-gr"><label>Créditos (+ suma, − resta)<input id="lca-d" type="number" inputmode="numeric" step="1" placeholder="Ej: 2000"></label><label>Nota (opcional)<input id="lca-n" type="text" maxlength="120" placeholder="Ej: pago $3 USD"></label></div>'
+    + '<div class="cta-ft"><span></span><button type="button" class="cta-go" onclick="lcaGuardar()">Aplicar</button></div><div class="cta-msg" id="lca-m"></div><div id="lca-h" class="lca-h"></div></div>';
+  d.scrollIntoView && d.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  lcaApi('admin_lc_historial', { user_id:LCA.sel.id }).then(function(r){
+    var h = document.getElementById('lca-h'); if(!h || !r || !r.ok) return;
+    h.innerHTML = (r.movimientos || []).length ? '<div class="cta-gt">Últimos movimientos</div>' + r.movimientos.slice(0, 12).map(function(m){ return '<div class="lca-mv"><span>' + (m.delta > 0 ? '+' : '') + lcaN(m.delta) + ' · ' + lcaE(m.tipo === 'ajuste_admin' ? 'Admin' : m.tipo === 'envio' ? 'Envío' : 'Reembolso') + (m.nota ? ' · ' + lcaE(m.nota) : '') + '</span><small>' + new Date(m.creada).toLocaleString('es-MX') + '</small></div>'; }).join('') : '';
+  });
+}
+function lcaSet(n){ var i = document.getElementById('lca-d'); if(i) i.value = n; }
+function lcaGuardar(){
+  if(LCA.busy || !LCA.sel) return;
+  var m = document.getElementById('lca-m'), dl = parseInt((document.getElementById('lca-d') || {}).value, 10);
+  if(!dl){ if(m){ m.className = 'cta-msg bad'; m.textContent = '✗ Escribe una cantidad distinta de 0.'; } return; }
+  if(!confirm((dl > 0 ? 'Agregar ' : 'Quitar ') + lcaN(Math.abs(dl)) + ' créditos a ' + LCA.sel.u + '?')) return;
+  LCA.busy = true; if(m){ m.className = 'cta-msg'; m.textContent = 'Guardando…'; }
+  lcaApi('admin_lc_ajustar', { user_id:LCA.sel.id, delta:dl, nota:(document.getElementById('lca-n') || {}).value || '' }).then(function(r){
+    LCA.busy = false; var mm = document.getElementById('lca-m'); if(!mm) return;
+    if(r && r.ok){ mm.className = 'cta-msg ok'; mm.textContent = '✓ Listo: ' + r.username + ' ahora tiene ' + lcaN(r.creditos) + ' créditos.'; LCA.sel.c = r.creditos; lcaBuscar(); setTimeout(function(){ var b = document.querySelector('#lca-f .cta-top small'); if(b) b.textContent = 'Tiene ' + lcaN(r.creditos) + ' créditos'; }, 50); }
+    else { mm.className = 'cta-msg bad'; mm.textContent = '✗ ' + ((r && r.message) || 'No se pudo guardar'); }
+  });
+}

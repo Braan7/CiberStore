@@ -6,12 +6,13 @@
 // Empieza con "_": no cuenta como función de Vercel (límite Hobby).
 // ═════════════════════════════════════════════════════════════════
 'use strict';
-const BASE = () => String(process.env.LIKES_BASE || 'https://lunexislikes.squareweb.app').replace(/\/+$/, '');
+function crear(baseEnv, baseDef, keyEnv){
+const BASE = () => String(process.env[baseEnv] || baseDef).replace(/\/+$/, '');
 async function http(path, opts, ms){
   opts = opts || {}; const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), ms || 12000);
   try{
     const r = await fetch(BASE() + path, { method: opts.method || 'GET', signal: ctrl.signal,
-      headers: Object.assign({ 'X-Api-Key': process.env.LIKES_API_KEY || '', Accept: 'application/json' }, opts.body ? { 'Content-Type': 'application/json' } : {}),
+      headers: Object.assign({ 'X-Api-Key': process.env[keyEnv] || '', Accept: 'application/json' }, opts.body ? { 'Content-Type': 'application/json' } : {}),
       body: opts.body ? JSON.stringify(opts.body) : undefined });
     let j = null; const txt = await r.text(); try{ j = JSON.parse(txt); }catch(e){}
     return { status: r.status, json: j, text: txt.slice(0, 300) };
@@ -23,7 +24,7 @@ const intOk = n => Number.isInteger(n) && n >= 1 && n <= 2000;
 
 // Jugador (nick, likes actuales) + créditos del proveedor
 async function jugador(id){
-  if(!process.env.LIKES_API_KEY) return { ok: false, code: 'sin_configurar', message: 'Este servicio aún no está activado.' };
+  if(!process.env[keyEnv]) return { ok: false, code: 'sin_configurar', message: 'Este servicio aún no está activado.' };
   if(!idOk(id)) return { ok: false, code: 'id', message: 'Escribe un ID de Free Fire válido (solo números).' };
   let r; try{ r = await http('/api/player/' + encodeURIComponent(id), null, 10000); }catch(e){ return { ok: false, code: 'proveedor', message: 'No se pudo consultar el ID. Intenta de nuevo.' }; }
   if(r.status === 401 || r.status === 403) return { ok: false, code: 'llave', alerta: 'rechazó la llave o la cuenta (' + r.status + ')', message: 'Servicio en mantenimiento. Intenta más tarde.' };
@@ -34,7 +35,7 @@ async function jugador(id){
   return { ok: true, nick: String(b.nickname || b.nick || '').slice(0, 40), region: b.region || null, likes: Number.isFinite(Number(b.liked)) ? Number(b.liked) : null };
 }
 async function creditos(){
-  if(!process.env.LIKES_API_KEY) return { ok: false, code: 'sin_configurar', message: 'Este servicio aún no está activado.' };
+  if(!process.env[keyEnv]) return { ok: false, code: 'sin_configurar', message: 'Este servicio aún no está activado.' };
   let r; try{ r = await http('/api/balance', null, 8000); }catch(e){ return { ok: false, code: 'proveedor', message: 'El proveedor no responde. Intenta en unos minutos.' }; }
   if(r.status === 401 || r.status === 403) return { ok: false, code: 'llave', alerta: 'rechazó la llave o la cuenta (' + r.status + ')', message: 'Servicio en mantenimiento. Intenta más tarde.' };
   if(r.status === 503) return { ok: false, code: 'proveedor', message: 'Servicio en mantenimiento. Intenta más tarde.' };
@@ -51,7 +52,7 @@ async function enviar(id, cantidad){
     return { ok: true, enviados: Math.max(0, Math.min(cantidad, Math.floor(n))), nick: j.player_nickname || '', log_id: Number.isFinite(Number(j.log_id)) ? Number(j.log_id) : null, antes: Number.isFinite(Number(j.liked_before)) ? Number(j.liked_before) : null, despues: Number.isFinite(Number(j.liked_after)) ? Number(j.liked_after) : null, recibo: j.receipt_url || null, restantes: Number.isFinite(Number(j.remaining)) ? Number(j.remaining) : null };
   }
   if(r.status === 401 || r.status === 403) return { definitivo: true, alerta: 'rechazó la llave o la cuenta (' + r.status + ')', detalle: 'Proveedor no disponible' };
-  if(r.status === 400) return { definitivo: true, sinCreditos: /cr[eé]dito/i.test(errMsg(r)), detalle: errMsg(r) || 'El proveedor rechazó el envío' };
+  if(r.status === 400) return { definitivo: true, sinCreditos: /cr[eé]dito|saldo|insuficien/i.test(errMsg(r)), detalle: errMsg(r) || 'El proveedor rechazó el envío' };
   if(r.status === 429 || r.status === 503) return { definitivo: true, detalle: r.status === 503 ? 'Servicio en mantenimiento' : 'El proveedor está saturado' };
   return { ambiguo: true, detalle: 'Respuesta dudosa del proveedor (' + r.status + ')' };
 }
@@ -63,4 +64,9 @@ async function buscarEnLog(id, desde){
   if(!hit) return { error: false, encontrado: false };
   return { error: false, encontrado: true, enviados: hit.status === 'success' ? Math.max(0, Number(hit.likes_sent) || 0) : 0, nick: hit.nickname || '', log_id: Number.isFinite(Number(hit.log_id)) ? Number(hit.log_id) : null };
 }
-module.exports = { jugador, creditos, enviar, buscarEnLog, idOk, intOk };
+return { jugador, creditos, enviar, buscarEnLog, idOk, intOk, configurado: () => !!process.env[keyEnv] };
+}
+// Servidor 1 (Lunexis, LIKES_API_KEY) = comportamiento de siempre · Servidor 2 (LikeSystem, LIKESYSTEM_API_KEY, opcional LIKESYSTEM_BASE)
+const LUNEXIS = crear('LIKES_BASE', 'https://lunexislikes.squareweb.app', 'LIKES_API_KEY');
+const LIKESYSTEM = crear('LIKESYSTEM_BASE', 'https://likesystem.squareweb.app', 'LIKESYSTEM_API_KEY');
+module.exports = Object.assign({}, LUNEXIS, { lunexis: LUNEXIS, likesystem: LIKESYSTEM, por: n => n === 'likesystem' ? LIKESYSTEM : LUNEXIS });
