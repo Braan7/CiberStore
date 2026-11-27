@@ -22049,14 +22049,17 @@ function ldAplicar(){
 }
 function ldCuenta(tab){ if(typeof showAuthModal === 'function'){ showAuthModal(); if(typeof authTab === 'function') authTab(tab); } }
 function ldIr(id){ var e = document.getElementById(id); if(e && e.scrollIntoView) e.scrollIntoView({ behavior:'smooth', block:'start' }); }
+function ldInvitado(){ return (typeof authSession === 'undefined') || !authSession; }
+function ldPedirRegistro(){ try{ if(typeof showToast === 'function') showToast('Regístrate gratis para continuar'); }catch(e){} ldCuenta('register'); }
 function ldGo(pagina, sub){
   if(typeof goPage !== 'function') return;
+  if(ldInvitado()){ ldPedirRegistro(); return; }
   goPage(pagina);
   if(sub) setTimeout(function(){ if(typeof rg2Abrir === 'function') rg2Abrir(sub); }, 200);
 }
 (function(){
   if(typeof updateAuthUI === 'function'){ var _u = updateAuthUI; updateAuthUI = function(){ var r = _u.apply(this, arguments); try{ ldAplicar(); }catch(e){} return r; }; window.updateAuthUI = updateAuthUI; }
-  if(typeof goPage === 'function'){ var _g = goPage; goPage = function(){ var r = _g.apply(this, arguments); try{ ldAplicar(); }catch(e){} return r; }; window.goPage = goPage; }
+  if(typeof goPage === 'function'){ var _g = goPage; goPage = function(id){ if(ldInvitado() && ['home','terminos','sobre','faq'].indexOf(id) < 0){ ldPedirRegistro(); return; } var r = _g.apply(this, arguments); try{ ldAplicar(); }catch(e){} return r; }; window.goPage = goPage; }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ldAplicar); else ldAplicar();
   setTimeout(ldAplicar, 400); setTimeout(ldAplicar, 1500);
 })();
